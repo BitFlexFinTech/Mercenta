@@ -1248,6 +1248,486 @@
       "spec": "e2e/design-system.spec.ts",
       "test": "(no horizontal overflow)",
       "expects": "The Design System surface has no horizontal overflow at each target viewport."
+    },
+    {
+      "id": "oa-acquisition-pipeline-happy",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — acquisition pipeline — brand to CRM",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/acquisition-pipeline.spec.ts",
+      "test": "1. Real BI brand → ICP → approval → simulated send → response → opportunity → CRM",
+      "expects": "A real Brand-Intelligence brand runs the whole acquisition journey — ICP qualification, approval, a SIMULATED outreach send, a response, an opportunity and a CRM relationship — end to end."
+    },
+    {
+      "id": "oa-acquisition-relationship-canonical-messages",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — acquisition — relationship recorded where it is read",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/acquisition-pipeline.spec.ts",
+      "test": "1b. The relationship is visible in the CRM and in the ONE canonical Messages thread",
+      "expects": "The acquisition relationship is visible both in the CRM record and in the ONE canonical Messages thread — the surface reads the canonical record, not a copy."
+    },
+    {
+      "id": "oa-acquisition-reject-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — acquisition — rejection is a real distinct outcome",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/acquisition-pipeline.spec.ts",
+      "test": "2. REJECT is a real, distinct approval outcome on a second real brand",
+      "expects": "REJECT is a real, distinct approval outcome on a second real brand — it is recorded and never silently treated as approved."
+    },
+    {
+      "id": "oa-acquisition-tenant-isolation",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — acquisition — a brand tenant cannot see acquisition",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/acquisition-pipeline.spec.ts",
+      "test": "3. Tenant isolation — a brand session has no acquisition surface and no prospect thread",
+      "expects": "A brand tenant session has NO acquisition surface and no prospect thread — cross-tenant acquisition data is refused by construction."
+    },
+    {
+      "id": "oa-commercial-model-selection-honoured",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial model — onboarding offers both and honours the choice",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-model.spec.ts",
+      "test": "1. onboarding offers both models and honours the recorded selection",
+      "expects": "Onboarding offers BOTH commercial models and honours the recorded selection — an undeclared model is never defaulted."
+    },
+    {
+      "id": "oa-commercial-model-change-audited",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial model — a change needs an actor and a reason",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-model.spec.ts",
+      "test": "2. Super Admin records a model change with a reason, and it is audited",
+      "expects": "Only a Super Admin may change the commercial relationship, every change carries a reason, and the change produces an audit record."
+    },
+    {
+      "id": "oa-commercial-model-brand-readonly",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial model — the brand sees only its own terms",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-model.spec.ts",
+      "test": "3. the brand sees its own relationship read-only",
+      "expects": "The brand sees its OWN commercial relationship read-only, with the separation from the channel compliance documents stated; it never sees another brand terms."
+    },
+    {
+      "id": "oa-commercial-readiness-canonical-products",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — every canonical product with owner and next step",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "1. the Control Centre Commercial section shows every canonical product",
+      "expects": "The Founder Control Centre Commercial section shows every canonical product with its route, owner, deadline and next step."
+    },
+    {
+      "id": "oa-commercial-readiness-explains-why",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — opening a product explains WHY",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "2. opening a product explains WHY — the evaluated conditions, the missing information and the canonical work item",
+      "expects": "Opening a product explains WHY: the evaluated conditions, the missing information and the canonical work item behind the status."
+    },
+    {
+      "id": "oa-commercial-readiness-rbac-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — a brand never reaches the Control Centre",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "3. RBAC — a brand session never reaches the Founder Control Centre or its commercial data",
+      "expects": "A brand session NEVER reaches the Founder Control Centre or its commercial data — the role restriction fails closed."
+    },
+    {
+      "id": "oa-commercial-readiness-brand-scope",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — a brand sees only its own products",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "4. the brand sees ONLY its own products, explained in plain language with a guide",
+      "expects": "A brand sees ONLY its own products, explained in plain language with a guide — no other tenant products appear."
+    },
+    {
+      "id": "oa-commercial-readiness-idempotent",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — a repeat action is idempotent",
+      "actor": "brand_admin",
+      "type": "persistence",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "5. a REAL brand action changes the product status, a repeat does not, and the journey reaches ready",
+      "expects": "A REAL brand action advances the product status; repeating it does NOT double-advance, and the journey reaches ready — the transition is idempotent."
+    },
+    {
+      "id": "oa-commercial-readiness-next-stage",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — commercial readiness — a clear product states its next stage",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "test": "6. a product with no outstanding action says so, and its next step is the declared next stage",
+      "expects": "A product with no outstanding action says so and names the declared next stage — an empty state is honest, never blank."
+    },
+    {
+      "id": "oa-conversion-gate-honeypot-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — a bot submission is refused and nothing recorded",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "1. a filled honeypot is refused and NOTHING is recorded",
+      "expects": "A submission that fills the honeypot control is REFUSED and NOTHING is recorded — a bot can never create an application."
+    },
+    {
+      "id": "oa-conversion-gate-too-fast-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — a too-fast submission is refused",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "2. a submission faster than the declared minimum is refused",
+      "expects": "A submission completed faster than the declared minimum time is refused — the timing rule is enforced at the boundary."
+    },
+    {
+      "id": "oa-conversion-gate-field-refusals",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — invalid answers refused per field",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "3. invalid answers produce per-field, announced refusals",
+      "expects": "Invalid answers produce per-field, announced refusals — each field names its own error and the refusal is read aloud."
+    },
+    {
+      "id": "oa-conversion-gate-missing-phone-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — the compulsory phone is required",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "3b. a MISSING phone number is refused under the phone control (it is compulsory)",
+      "expects": "A MISSING phone number is refused under the phone control — the compulsory field cannot be skipped."
+    },
+    {
+      "id": "oa-conversion-gate-duplicate-once",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — a duplicate application is recorded once",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "4. the same application is recorded ONCE, and the second attempt is told so",
+      "expects": "The same application is recorded ONCE; a second identical attempt does not create a duplicate and is told so."
+    },
+    {
+      "id": "oa-conversion-gate-provider-hang",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — conversion gate — submission never waits for a hanging third party",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "test": "5. submission never waits for the third-party link check (the hosts hang)",
+      "expects": "Submission NEVER waits for the third-party link check — a hanging provider cannot block the applicant (degraded provider fails soft)."
+    },
+    {
+      "id": "oa-handoff-happy",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding hand-off — qualified opportunity to operational brand",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding-handoff.spec.ts",
+      "test": "1. Qualified opportunity → tenant identity → ordered steps → operational brand",
+      "expects": "A qualified opportunity becomes a tenant identity, ordered onboarding steps and an operational brand — the hand-off is one continuous, canonical path."
+    },
+    {
+      "id": "oa-handoff-relationship-visible",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding hand-off — recorded in the Brand CRM relationship",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding-handoff.spec.ts",
+      "test": "2. The hand-off is visible in the Brand CRM relationship record",
+      "expects": "The hand-off is visible in the Brand CRM relationship record — the same identity, not a second competing record."
+    },
+    {
+      "id": "oa-handoff-tenant-isolation",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding hand-off — a brand tenant has no acquisition surface",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/onboarding-handoff.spec.ts",
+      "test": "3. A brand tenant session has no acquisition/onboarding surface",
+      "expects": "A brand tenant session has NO acquisition/onboarding surface — the operator-only path is refused to a tenant."
+    },
+    {
+      "id": "oa-workflow-operational",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding workflow — admin drives onboarding to OPERATIONAL",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding-workflow.spec.ts",
+      "test": "1. Admin operates an acquisition-origin onboarding to OPERATIONAL in the pipeline",
+      "expects": "An admin operates an acquisition-origin onboarding to OPERATIONAL in the pipeline — acceptance, ordered steps and the operational end state."
+    },
+    {
+      "id": "oa-workflow-derived-pipeline",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding workflow — the pipeline is derived, never seeded",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding-workflow.spec.ts",
+      "test": "2. The pipeline is derived (0 when empty) and brand sessions cannot reach it",
+      "expects": "The onboarding pipeline is DERIVED (it reports 0 when empty, never a seeded number) and a brand session cannot reach it."
+    },
+    {
+      "id": "oa-workflow-manual-creation",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding workflow — manual creation to canonical record",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding-workflow.spec.ts",
+      "test": "3. Manual creation → canonical record → the brand tenant can enter its portal",
+      "expects": "A manual creation produces the canonical onboarding record and the brand tenant can then actually enter its portal."
+    },
+    {
+      "id": "oa-wizard-step1",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — step 1 on a fresh brand",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "1. Fresh brand starts onboarding with step 1 visible",
+      "expects": "A fresh brand starts the onboarding wizard with step 1 (Brand Profile) visible and Continue available."
+    },
+    {
+      "id": "oa-wizard-recommendation-financed",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — the default recommendation steers to Financed",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "2. Track recommendation (default) steers to Financed",
+      "expects": "The default answers produce a System recommendation of the Financed track — the steer is shown, not hidden."
+    },
+    {
+      "id": "oa-wizard-working-capital-direct",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — working capital steers to Brand-direct",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "steers to Brand-direct supply",
+      "expects": "Declaring working capital present steers the recommendation to Brand-direct supply — a different input yields the other declared track."
+    },
+    {
+      "id": "oa-wizard-track-options",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — both tracks are always offered",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "4. Step-4 cards expose both track options",
+      "expects": "Step 4 exposes BOTH fulfilment-track cards — the recommendation is advice, and the brand can choose either."
+    },
+    {
+      "id": "oa-wizard-legal-agreements",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — the mandatory legal agreements are exposed",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "5. Walking to step 5 exposes the mandatory legal agreements",
+      "expects": "Step 5 exposes the mandatory legal agreements (logistics and chargeback) — the compliance documents are a gate on the wizard."
+    },
+    {
+      "id": "oa-wizard-admin-override",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding wizard — admin override with a logged reason",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "test": "6. Admin can override a track with a logged reason",
+      "expects": "An admin can OVERRIDE the fulfilment track, and the override requires a logged reason — an operator intervention is attributed."
+    },
+    {
+      "id": "oa-discovery-ranked",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — opportunity discovery — vertical rollup and ranked list",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/opportunity-discovery.spec.ts",
+      "test": "1. it renders inside Brand Intelligence with the vertical rollup and a ranked list",
+      "expects": "Opportunity discovery renders inside Brand Intelligence with a vertical rollup and a ranked list of opportunities."
+    },
+    {
+      "id": "oa-discovery-drilldown-filter",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — opportunity discovery — drill-down and filtering",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/opportunity-discovery.spec.ts",
+      "test": "2. clicking an opportunity opens its drill-down, and filtering narrows the list",
+      "expects": "Clicking an opportunity opens its drill-down, and filtering narrows the list — a metric opens to its detail."
+    },
+    {
+      "id": "oa-discovery-potential-only",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — opportunity discovery — potential only, no claimed evidence",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/opportunity-discovery.spec.ts",
+      "test": "3. the sports opportunity is POTENTIAL only and claims no ASIN evidence",
+      "expects": "The sports opportunity is POTENTIAL only and claims no channel/ASIN evidence it does not hold — an unsupported claim is refused."
+    },
+    {
+      "id": "oa-ack-guidance-brand-tour",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding ack — the brand guidance teaches the OWNER rule",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "1. the brand tour step and the KB article it links to teach the OWNER’s rule",
+      "expects": "The brand tour step and the knowledge-base article it links to both teach the OWNER declared rule — the guidance READS the owner, it does not restate it."
+    },
+    {
+      "id": "oa-ack-guidance-wizard",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding ack — the wizard guidance step states the OWNER rule",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "2. the wizard’s operational-guidance step states the OWNER’s rule",
+      "expects": "The onboarding wizard operational-guidance step states the OWNER declared rule, read from the single owner."
+    },
+    {
+      "id": "oa-ack-guidance-admin-preview",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding ack — the admin preview shows the OWNER rule, never a copy",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "3. the admin tour-management preview shows the OWNER’s rule (never a copy)",
+      "expects": "The admin tour-management preview shows the OWNER rule and is never a second copy — the single-source-of-truth rule holds across surfaces."
+    },
+    {
+      "id": "oa-ack-pipeline-link-canonical",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — onboarding ack — the pipeline states the canonical link for every record",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "4. the admin onboarding pipeline states the LINK for every record it shows",
+      "expects": "The admin onboarding pipeline states the canonical LINK for every record it shows — each row points at its one source of truth."
+    },
+    {
+      "id": "oa-uk-market-fit-cta",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — the primary CTA and a header login utility",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "1. the homepage carries the primary CTA and Partner Login stays a header utility action",
+      "expects": "The homepage carries the primary assessment CTA and Partner Login stays a header utility action, not a competing primary action."
+    },
+    {
+      "id": "oa-uk-market-fit-progressive-steps",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — the four progressive steps render",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "2. the CTA opens the assessment and the four progressive steps render",
+      "expects": "The CTA opens the assessment and its four progressive steps render — the visitor is led, not confronted with one long form."
+    },
+    {
+      "id": "oa-uk-market-fit-validation-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — an incomplete submission is blocked",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "3. required validation blocks an incomplete submission and names the fields",
+      "expects": "Required validation blocks an incomplete submission and names the missing fields — an incomplete answer set cannot reach a result."
+    },
+    {
+      "id": "oa-uk-market-fit-result-shape",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — the result with sections, indicators and a simulation label",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "4. progressive collection reaches the result with 8 sections, 3 indicators and a simulation label",
+      "expects": "Progressive collection reaches the result with 8 sections, 3 indicators and a simulation label — the projection is labelled as simulated."
+    },
+    {
+      "id": "oa-uk-market-fit-no-promise",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — no prohibited promise, honest disclaimer",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "5. the result carries no prohibited promise and shows the honest disclaimer",
+      "expects": "The result carries NO prohibited promise (no guaranteed purchase orders) and shows the honest disclaimer."
+    },
+    {
+      "id": "oa-uk-market-fit-one-next-step",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — one next step and an audited review request",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "6. the result offers ONE next step and an audited review request",
+      "expects": "The result offers ONE next step and an audited review request — the visitor is not given a menu of competing calls to action."
+    },
+    {
+      "id": "oa-uk-market-fit-deterministic",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — a re-run is deterministic",
+      "actor": "public_visitor",
+      "type": "persistence",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "7. a re-run produces the same deterministic result (reset/repeatability)",
+      "expects": "Re-running the same assessment produces the SAME deterministic result — repeatability holds on reset."
+    },
+    {
+      "id": "oa-uk-market-fit-red-lines",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — the rendered result publishes no red-line claim",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "8. the rendered result publishes no red-line claim (read from its owner) and no internal plumbing",
+      "expects": "The rendered result publishes NO red-line claim (read from its owner) and no internal plumbing — outward copy never leaks internal detail."
+    },
+    {
+      "id": "oa-uk-market-fit-founder-feed",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — a qualified assessment feeds acquisition",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "9. a Super Admin sees the assessment and can feed a qualified one into acquisition",
+      "expects": "A Super Admin sees the assessment and can feed a qualified one into acquisition — the public lead becomes an acquisition opportunity."
+    },
+    {
+      "id": "oa-uk-market-fit-rbac-refusal",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding & acquisition — uk market fit — a brand never reaches the Control Centre",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "test": "10. RBAC: a brand session never reaches the Control Centre",
+      "expects": "A brand session NEVER reaches the Control Centre — the market-fit operator view is refused to a tenant."
     }
   ]
 }

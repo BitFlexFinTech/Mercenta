@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 126 · **Capabilities:** 8
+**Scenarios:** 174 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -29,7 +29,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | finance | 7 |
 | founder | 5 |
 | integrations | 3 |
-| onboarding_acquisition | 10 |
+| onboarding_acquisition | 58 |
 | operations | 7 |
 | platform | 68 |
 
@@ -37,6 +37,54 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 
 | id | capability | actor | type | spec | proved by (test) |
 |---|---|---|---|---|---|
+| oa-ack-guidance-admin-preview | onboarding_acquisition | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `3. the admin tour-management preview shows the OWNER’s rule (never a copy)` |
+| oa-ack-guidance-brand-tour | onboarding_acquisition | brand_user | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `1. the brand tour step and the KB article it links to teach the OWNER’s rule` |
+| oa-ack-guidance-wizard | onboarding_acquisition | brand_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `2. the wizard’s operational-guidance step states the OWNER’s rule` |
+| oa-ack-pipeline-link-canonical | onboarding_acquisition | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `4. the admin onboarding pipeline states the LINK for every record it shows` |
+| oa-acquisition-pipeline-happy | onboarding_acquisition | mercenta_admin | happy | `e2e/acquisition-pipeline.spec.ts` | `1. Real BI brand → ICP → approval → simulated send → response → opportunity → CRM` |
+| oa-acquisition-reject-refusal | onboarding_acquisition | mercenta_admin | refusal | `e2e/acquisition-pipeline.spec.ts` | `2. REJECT is a real, distinct approval outcome on a second real brand` |
+| oa-acquisition-relationship-canonical-messages | onboarding_acquisition | mercenta_admin | happy | `e2e/acquisition-pipeline.spec.ts` | `1b. The relationship is visible in the CRM and in the ONE canonical Messages thread` |
+| oa-acquisition-tenant-isolation | onboarding_acquisition | brand_user | refusal | `e2e/acquisition-pipeline.spec.ts` | `3. Tenant isolation — a brand session has no acquisition surface and no prospect thread` |
+| oa-commercial-model-brand-readonly | onboarding_acquisition | brand_admin | happy | `e2e/commercial-model.spec.ts` | `3. the brand sees its own relationship read-only` |
+| oa-commercial-model-change-audited | onboarding_acquisition | super_admin | happy | `e2e/commercial-model.spec.ts` | `2. Super Admin records a model change with a reason, and it is audited` |
+| oa-commercial-model-selection-honoured | onboarding_acquisition | super_admin | happy | `e2e/commercial-model.spec.ts` | `1. onboarding offers both models and honours the recorded selection` |
+| oa-commercial-readiness-brand-scope | onboarding_acquisition | brand_user | happy | `e2e/commercial-readiness.spec.ts` | `4. the brand sees ONLY its own products, explained in plain language with a guide` |
+| oa-commercial-readiness-canonical-products | onboarding_acquisition | super_admin | happy | `e2e/commercial-readiness.spec.ts` | `1. the Control Centre Commercial section shows every canonical product` |
+| oa-commercial-readiness-explains-why | onboarding_acquisition | super_admin | happy | `e2e/commercial-readiness.spec.ts` | `2. opening a product explains WHY — the evaluated conditions, the missing information and the canonical work item` |
+| oa-commercial-readiness-idempotent | onboarding_acquisition | brand_admin | persistence | `e2e/commercial-readiness.spec.ts` | `5. a REAL brand action changes the product status, a repeat does not, and the journey reaches ready` |
+| oa-commercial-readiness-next-stage | onboarding_acquisition | super_admin | happy | `e2e/commercial-readiness.spec.ts` | `6. a product with no outstanding action says so, and its next step is the declared next stage` |
+| oa-commercial-readiness-rbac-refusal | onboarding_acquisition | brand_user | refusal | `e2e/commercial-readiness.spec.ts` | `3. RBAC — a brand session never reaches the Founder Control Centre or its commercial data` |
+| oa-conversion-gate-duplicate-once | onboarding_acquisition | public_visitor | refusal | `e2e/conversion-gate.spec.ts` | `4. the same application is recorded ONCE, and the second attempt is told so` |
+| oa-conversion-gate-field-refusals | onboarding_acquisition | public_visitor | refusal | `e2e/conversion-gate.spec.ts` | `3. invalid answers produce per-field, announced refusals` |
+| oa-conversion-gate-honeypot-refusal | onboarding_acquisition | public_visitor | refusal | `e2e/conversion-gate.spec.ts` | `1. a filled honeypot is refused and NOTHING is recorded` |
+| oa-conversion-gate-missing-phone-refusal | onboarding_acquisition | public_visitor | refusal | `e2e/conversion-gate.spec.ts` | `3b. a MISSING phone number is refused under the phone control (it is compulsory)` |
+| oa-conversion-gate-provider-hang | onboarding_acquisition | public_visitor | happy | `e2e/conversion-gate.spec.ts` | `5. submission never waits for the third-party link check (the hosts hang)` |
+| oa-conversion-gate-too-fast-refusal | onboarding_acquisition | public_visitor | refusal | `e2e/conversion-gate.spec.ts` | `2. a submission faster than the declared minimum is refused` |
+| oa-discovery-drilldown-filter | onboarding_acquisition | mercenta_admin | happy | `e2e/opportunity-discovery.spec.ts` | `2. clicking an opportunity opens its drill-down, and filtering narrows the list` |
+| oa-discovery-potential-only | onboarding_acquisition | mercenta_admin | happy | `e2e/opportunity-discovery.spec.ts` | `3. the sports opportunity is POTENTIAL only and claims no ASIN evidence` |
+| oa-discovery-ranked | onboarding_acquisition | mercenta_admin | happy | `e2e/opportunity-discovery.spec.ts` | `1. it renders inside Brand Intelligence with the vertical rollup and a ranked list` |
+| oa-handoff-happy | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-handoff.spec.ts` | `1. Qualified opportunity → tenant identity → ordered steps → operational brand` |
+| oa-handoff-relationship-visible | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-handoff.spec.ts` | `2. The hand-off is visible in the Brand CRM relationship record` |
+| oa-handoff-tenant-isolation | onboarding_acquisition | brand_user | refusal | `e2e/onboarding-handoff.spec.ts` | `3. A brand tenant session has no acquisition/onboarding surface` |
+| oa-uk-market-fit-cta | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `1. the homepage carries the primary CTA and Partner Login stays a header utility action` |
+| oa-uk-market-fit-deterministic | onboarding_acquisition | public_visitor | persistence | `e2e/uk-market-fit.spec.ts` | `7. a re-run produces the same deterministic result (reset/repeatability)` |
+| oa-uk-market-fit-founder-feed | onboarding_acquisition | super_admin | happy | `e2e/uk-market-fit.spec.ts` | `9. a Super Admin sees the assessment and can feed a qualified one into acquisition` |
+| oa-uk-market-fit-no-promise | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `5. the result carries no prohibited promise and shows the honest disclaimer` |
+| oa-uk-market-fit-one-next-step | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `6. the result offers ONE next step and an audited review request` |
+| oa-uk-market-fit-progressive-steps | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `2. the CTA opens the assessment and the four progressive steps render` |
+| oa-uk-market-fit-rbac-refusal | onboarding_acquisition | brand_user | refusal | `e2e/uk-market-fit.spec.ts` | `10. RBAC: a brand session never reaches the Control Centre` |
+| oa-uk-market-fit-red-lines | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `8. the rendered result publishes no red-line claim (read from its owner) and no internal plumbing` |
+| oa-uk-market-fit-result-shape | onboarding_acquisition | public_visitor | happy | `e2e/uk-market-fit.spec.ts` | `4. progressive collection reaches the result with 8 sections, 3 indicators and a simulation label` |
+| oa-uk-market-fit-validation-refusal | onboarding_acquisition | public_visitor | refusal | `e2e/uk-market-fit.spec.ts` | `3. required validation blocks an incomplete submission and names the fields` |
+| oa-wizard-admin-override | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding.spec.ts` | `6. Admin can override a track with a logged reason` |
+| oa-wizard-legal-agreements | onboarding_acquisition | brand_admin | happy | `e2e/onboarding.spec.ts` | `5. Walking to step 5 exposes the mandatory legal agreements` |
+| oa-wizard-recommendation-financed | onboarding_acquisition | brand_admin | happy | `e2e/onboarding.spec.ts` | `2. Track recommendation (default) steers to Financed` |
+| oa-wizard-step1 | onboarding_acquisition | brand_admin | happy | `e2e/onboarding.spec.ts` | `1. Fresh brand starts onboarding with step 1 visible` |
+| oa-wizard-track-options | onboarding_acquisition | brand_admin | happy | `e2e/onboarding.spec.ts` | `4. Step-4 cards expose both track options` |
+| oa-wizard-working-capital-direct | onboarding_acquisition | brand_admin | happy | `e2e/onboarding.spec.ts` | `steers to Brand-direct supply` |
+| oa-workflow-derived-pipeline | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `2. The pipeline is derived (0 when empty) and brand sessions cannot reach it` |
+| oa-workflow-manual-creation | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `3. Manual creation → canonical record → the brand tenant can enter its portal` |
+| oa-workflow-operational | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `1. Admin operates an acquisition-origin onboarding to OPERATIONAL in the pipeline` |
 | pf-access-gate-admin-sees-application | platform | mercenta_admin | happy | `e2e/access-gate.spec.ts` | `4. Admin sees application` |
 | pf-access-gate-approved-into-onboarding | platform | super_admin | happy | `e2e/access-gate.spec.ts` | `6. Admin approves a partner application` |
 | pf-access-gate-entry | platform | public_visitor | happy | `e2e/access-gate.spec.ts` | `1. Login page shows Partner Login and Request Partner Access` |

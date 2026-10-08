@@ -108,14 +108,19 @@ if (c) {
 
   /* ── 6b. traceability: a scenario that names its proving TEST must find it ──
    *
-   * §BATCH 1 — the enumeration must be traceable to individual test cases, not
-   * merely to a file. A scenario MAY declare `test` (a substring of the
+   * §E2E-1 (§BATCH 1) — the enumeration must be traceable to individual test cases,
+   * not merely to a file. A scenario MAY declare `test` (a substring of the
    * Playwright test title that proves it); when it does, that title must be
    * present in the named spec, so a scenario cannot claim coverage that the
    * spec does not actually contain. Every platform-foundation scenario (`pf-*`)
    * MUST declare it, so the Batch 1 enumeration is pinned to real tests.
+   *
+   * §E2E-2 — the SAME obligation is extended to the onboarding & acquisition
+   * domain (`oa-*`), so each enumerated scenario in that domain is pinned to the
+   * real test that proves it. A self-check below asserts the prefix set covers
+   * BOTH enumerated domains and never the auto-seeded `spec-*` rows.
    */
-  const SCENARIO_TEST_REQUIRED = /^pf-/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -125,9 +130,16 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every platform-foundation scenario (pf-*) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
+  );
+  /* §E2E-2 — self-check: the enumeration prefix set itself must be what we think it
+   * is, so a future rename cannot silently drop a whole domain's traceability. */
+  test(
+    'the traceable-prefix set covers both enumerated domains (pf- and oa-)',
+    SCENARIO_TEST_REQUIRED.test('pf-x') && SCENARIO_TEST_REQUIRED.test('oa-x') && !SCENARIO_TEST_REQUIRED.test('spec-x'),
+    String(SCENARIO_TEST_REQUIRED)
   );
 
   /* ── 7. the generated doc matches the owner ──────────────────────────────── */
