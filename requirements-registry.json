@@ -371,11 +371,11 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 by scripts/reconcile-credential-vault-registry.cjs after the §CREDENTIAL VAULT (T-7 / D16-05) increment (discovered-credential-vault not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-08 after the credential-vault increment (discovered-credential-vault not_started -> built) AND the redesign-legacy-page-shell-backlog staleness repair (not_started -> removed). Snapshot only.",
       "built_and_tested": 337,
       "built": 169,
-      "not_started": 13,
-      "removed": 4,
+      "not_started": 12,
+      "removed": 5,
       "deferred": 9,
       "blocked": 7,
       "complete": 1
@@ -5336,12 +5336,13 @@
     },
     {
       "id": "redesign-legacy-page-shell-backlog",
-      "description": "REMAINING — LEGACY PAGE SHELL BACKLOG (NOT started for these files). 14 files still declare the pre-workspace `p-6 ... max-w-[1400px] mx-auto` container and are named in the gate so the debt is explicit and can only shrink: AdminShell (a fallback wrapper), admin CarrierMonitor / ContractsAdminPanel / FulfillmentTrack / MarketingHub / MonitoringDashboard / RetailPipeline, brand BrandAdvertising / BrandTeamMessages / ListingAnalyzer / MercentaSocial / OnboardingSummary, carrier BakLogistics / CarrierDashboard. Honest status: NOT started — no UI claim is made for them. §P9 (2026-09-23) — THREE of the named files no longer exist at all (`admin/CarrierMonitor.tsx`, `carrier/BakLogistics.tsx`, `carrier/CarrierDashboard.tsx` are DELETED with the carrier surface, programme decision 4), so the remaining debt is the 11 non-carrier surfaces.",
+      "description": "SUPERSEDED (repaired 2026-10-08) — the legacy page-shell backlog NO LONGER EXISTS. All 14 surfaces that carried the pre-workspace `p-6 ... max-w-[1400px] mx-auto` container were migrated onto `WorkspaceFrame` + `WorkspaceHeader` by `redesign-legacy-shell-retired`, and the gate now reports a ZERO backlog. (Three originally-named files were DELETED with the carrier surface under programme decision 4.) Kept as a `removed` historical record so completed work is never falsely listed as remaining. OLD description: \"REMAINING — LEGACY PAGE SHELL BACKLOG (NOT started for these files). 14 files still declare the pre-workspace `p-6 ... max-w-[1400px] mx-auto` container and are named in the gate so the debt is explicit and can only shrink: AdminShell (a fallback wrapper), admin CarrierMonitor / ContractsAdminPanel / FulfillmentTrack / MarketingHub / MonitoringDashboard / RetailPipeline, brand BrandAdvertising / BrandTeamMessages / ListingAnalyzer / MercentaSocial / OnboardingSummary, carrier BakLogistics / CarrierDashboard. Honest status: NOT started — no UI claim is made for them. §P9 (2026-09-23) — THREE of the named files no longer exist at all (`admin/CarrierMonitor.tsx`, `carrier/BakLogistics.tsx`, `carrier/CarrierDashboard.tsx` are DELETED with the carrier surface, programme decision 4), so the remaining debt is the 11 non-carrier surfaces.\"",
       "source": "Complete Platform Redesign — remaining surfaces pass (2026-09-21 session 3)",
-      "status": "not_started",
-      "evidence": "scripts/validate-workspace-shell.mjs LEGACY_SHELL_BACKLOG (printed as \"Legacy page-shell backlog: 14 file(s) remaining\") — SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0). — SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0).",
-      "last_verified": "2026-09-21",
-      "superseded_by": "redesign-legacy-shell-retired"
+      "status": "removed",
+      "evidence": "SUPERSEDED by `redesign-legacy-shell-retired` (built_and_tested). `grep -rn \"max-w-[1400px]\" src/` returns no code occurrence and `scripts/validate-workspace-shell.mjs` prints \"Legacy page-shell backlog: 0 file(s) remaining\". OLD status: \"not_started\". OLD evidence: \"scripts/validate-workspace-shell.mjs LEGACY_SHELL_BACKLOG (printed as \\\"Legacy page-shell backlog: 14 file(s) remaining\\\") — SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0). — SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0).\".",
+      "last_verified": "2026-10-08",
+      "superseded_by": "redesign-legacy-shell-retired",
+      "_audit_note": "§reconciliation (2026-10-08) — STATUS REPAIRED not_started -> removed. The row ALREADY carried superseded_by=redesign-legacy-shell-retired and its own evidence said SUPERSEDED (twice), yet it was still listed as not_started — i.e. completed work falsely shown as remaining. Fixed at source."
     },
     {
       "id": "redesign-float-launcher-collision",

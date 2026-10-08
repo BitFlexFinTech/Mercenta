@@ -60,6 +60,23 @@ note and the roadmap section contradicted each other. The E2E programme is there
 | 3 | after 2 | **The E2E COVERAGE PROGRAMME (E2E-2 onward)** — PAUSED, not deleted. Resume at the next domain (onboarding+acquisition · PO+documents · shipment+logistics+Delta+returns · finance · compliance · operations · integrations · founder). | PAUSED (E2E-0, E2E-1 done) |
 | 4 | last | **The legacy UI-redesign backlog** — cosmetic / consistency only | NOT STARTED |
 
+**§0b UPDATE (2026-10-08, session 111) — ORDER ITEM 2'S BUILDABLE ROWS ARE EXHAUSTED; ITEM 3 IS NEXT.** The
+Founder said "continue where you left off". Every remaining `not_started` row was audited and NONE of them is a
+buildable backlog item: `batch-4-zod-validation` is a false gap whose own `_audit_note` says the zod layer was
+REMOVED as obsolete (three later session logs call it a "false gap" — the two sources DISAGREE and the disagreement
+is recorded for the Founder, NOT resolved silently); `workstreamBD-seed-expansion-deferred` is owner-DEFERRED (no
+invented brands); `phase0-extension-scheduler-activation`, the SLA half of
+`discovered-acquisition-revenue-floor-and-sla`, `discovered-representation-authority-record` and
+`uiux-wave3-visual-regression-gate` each need a **Founder DECISION**; `s0-discovered-pagination-and-error-boundary-coverage-gap`
+belongs to the PAUSED E2E programme; `uiux-wave3-part2..5` are order item 4; and `discovered-micro-typography-and-shim-debt`'s
+two open halves are BOTH already investigated (the shim file must NOT be deleted — its own row records ≈215 live call
+sites in the NEW design system). **Therefore the immediate next work is ORDER ITEM 3 — the E2E coverage programme,
+resumed at E2E-2 — unless the Founder first settles one of the decision-blocked rows.** Also reconciled this session:
+one inherited uncommitted registry edit (`redesign-legacy-page-shell-backlog` `not_started` → `removed`), the duplicate
+`PLAIN SUMMARY` line in `HANDOFF.md`, and the stale `BATCH n`/`S n`-only NEXT-TASK token vocabulary in
+`scripts/validate-resume-state.mjs` (now also accepts the renamed `E2E-n`, mutation-proved). No credential required.
+
+
 **Why this order.** Phase 15 is the gate that must pass before real public launch — the highest business value and
 the smallest, bounded job — and it is what was recorded as "next" before the E2E programme jumped ahead. The E2E
 coverage programme is large and open-ended, and is best finished on a settled product; it then strengthens the launch

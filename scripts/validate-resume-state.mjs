@@ -28,6 +28,15 @@
 //   4. The two files AGREE on the task in `NEXT TASK`: the first batch/stage
 //      token named by each must be the SAME token. This is what catches a state
 //      file that has drifted a session behind the handoff.
+//
+//      §REPOINTED (2026-10-08) — NOT weakened. The token vocabulary used to be
+//      `BATCH n` / `S n` ONLY. The 2026-10-04 rename (operating-model §2) moved
+//      the E2E coverage programme OFF the "Batch" label onto its own label
+//      `E2E-n`, so a resume state correctly saying "resume at E2E-2" could NOT
+//      satisfy the old regex at all and a session was forced to invent a
+//      `BATCH`/`S` token to pass. The regex now accepts `BATCH n`, `S n` AND
+//      `E2E-n`, while STILL requiring BOTH files to name the SAME token. The
+//      widened vocabulary is proved able to work by the self-check below.
 //   5. `EXACT NEXT STARTING POINT` in `PROJECT_STATUS.md` names real files — the
 //      backticked paths in it must exist on disk. A resume state pointing a new
 //      session at a file that does not exist is the same class of defect as the
@@ -122,7 +131,7 @@ for (const field of FIELDS) {
 /** The first `BATCH n[a-z]?` / `S<n>` token named by a NEXT TASK line, or ''. */
 const firstTaskToken = (text) => {
   const value = fieldValue(text, 'NEXT TASK');
-  const m = value.match(/\b(?:BATCH|S)\s?\d+[a-z]?\b/i);
+  const m = value.match(/\b(?:BATCH|E2E|S)\s?-?\d+[a-z]?\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -133,6 +142,13 @@ test(
   'both files agree on the SAME next task token (the mirror has not drifted a session behind)',
   statusToken !== '' && statusToken === handoffToken,
   `PROJECT_STATUS="${statusToken}" vs HANDOFF="${handoffToken}"`
+);
+test(
+  'the next-task token vocabulary accepts BATCH n, S n AND the renamed E2E-n label (self-check)',
+  firstTaskToken('NEXT TASK: BATCH 2 — x') === 'BATCH 2' &&
+    firstTaskToken('NEXT TASK: S12 — x') === 'S12' &&
+    firstTaskToken('NEXT TASK: resume at E2E-2 — x') === 'E2E-2' &&
+    firstTaskToken('NEXT TASK: nothing to see here') === '',
 );
 
 /* ── 5. The starting point names real files ──────────────────────────────── */
