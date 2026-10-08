@@ -3758,6 +3758,196 @@
       "spec": "e2e/workstream-b-intelligence.spec.ts",
       "test": "4. Internal notes editor saves via the canonical store with an audited lifecycle event",
       "expects": "The internal notes editor saves through the canonical store (with a confirmation), the change appears on the prospect timeline as an audited event, and re-opening Notes re-reads the live store."
+    },
+    {
+      "id": "in-hub-tiles-derived",
+      "capability": "integrations",
+      "journey": "integrations — Integration Settings hub — overview tiles are derived from the rendered provider modes",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "test": "1. overview tiles are derived from the rendered provider modes",
+      "expects": "The Hub’s overview tiles are DERIVED from the same provider modes the cards render: the seven modes partition every provider exactly once, the counts sum to the total, and each card count agrees mode-by-mode — a tile can never lie about a card."
+    },
+    {
+      "id": "in-hub-filter-by-tile",
+      "capability": "integrations",
+      "journey": "integrations — Integration Settings hub — filtering by a tile shows only matching providers",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "test": "2. filtering by a tile shows only matching providers, count for count",
+      "expects": "Clicking a mode tile filters the list to exactly that many matching providers (or the honest empty state), the tile reads pressed, and clearing the filter restores the full list."
+    },
+    {
+      "id": "in-hub-search-truthful-count",
+      "capability": "integrations",
+      "journey": "integrations — Integration Settings hub — search reports the true visible/total count",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "test": "3. search filters providers and reports the true visible/total count",
+      "expects": "Search narrows to the matching providers and states the real “N of M providers shown”; both registered Amazon providers appear for “Amazon”, a name-specific query narrows to one, and a no-match query shows the honest empty state with “0 of M”."
+    },
+    {
+      "id": "in-hub-category-grouping",
+      "capability": "integrations",
+      "journey": "integrations — Integration Settings hub — providers are grouped under their canonical category headings",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "test": "4. providers are grouped under their canonical category headings",
+      "expects": "Providers are grouped under the canonical category headings (Commerce, Finance, Logistics, Compliance, Communications, Marketing, AI & Research, Data, Infrastructure), and the one Infrastructure provider (Google) is present because the registry genuinely uses the category."
+    },
+    {
+      "id": "in-hub-no-page-errors",
+      "capability": "integrations",
+      "journey": "integrations — Integration Settings hub — operating the Hub raises no page errors",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "test": "5. no page errors while operating the Hub",
+      "expects": "Filtering, clearing and searching the Hub (including finding Stripe) raise no page errors."
+    },
+    {
+      "id": "in-google-setup-honest",
+      "capability": "integrations",
+      "journey": "integrations — Google setup — the wizard renders the account, the no-password policy and the honest un-run state",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/google-setup.spec.ts",
+      "test": "1. it renders the personal account, the no-password policy and the honest un-run state",
+      "expects": "The Google setup wizard names the founder’s personal account, states plainly that it never asks for the Google password, shows the connection state as “none” and is honest that nothing has been created yet."
+    },
+    {
+      "id": "in-google-setup-run-simulated",
+      "capability": "integrations",
+      "journey": "integrations — Google setup — running the setup executes the plan and labels it SIMULATED",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/google-setup.spec.ts",
+      "test": "2. running the setup executes the whole plan and labels it SIMULATED",
+      "expects": "Running the workspace setup executes all 22 planned items (folders, master sheets, templates, capability tests) with a per-item outcome, reports 22/22 and 4/4, and is labelled simulation — a simulated run can never look live."
+    },
+    {
+      "id": "in-google-setup-bad-client-id",
+      "capability": "integrations",
+      "journey": "integrations — Google setup — an implausible OAuth client id is refused before any window opens",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/google-setup.spec.ts",
+      "test": "3. an implausible OAuth client id is refused before any Google window opens",
+      "expects": "An implausible OAuth client id is REFUSED with a clear message and NO Google window opens; the connection state stays “none”."
+    },
+    {
+      "id": "in-social-provisioned-automatically",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — an approved brand reaches it and is provisioned automatically",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "1. approved brand reaches Mercenta Social and is provisioned automatically",
+      "expects": "An approved brand reaches Mercenta Social with a derived workspace id (msoc-…), provisioned automatically (or reused), and the application frame appears ONLY once a real handoff URL was obtained."
+    },
+    {
+      "id": "in-social-branded-identity",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — the customer-facing identity is Mercenta Social, with no engine name and no sign-up",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "2. customer-facing identity is Mercenta Social — no engine name, no sign-up",
+      "expects": "The brand surface carries the Mercenta Social identity (“included with your Mercenta partnership”) and never names the underlying engine, shows a sign-up/subscribe/upgrade/checkout prompt, or exposes an affiliate link."
+    },
+    {
+      "id": "in-social-module-surface-drilldown",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — the full module surface is present and each module drills down",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "3. the FULL module surface is present and each module drills down",
+      "expects": "All eight modules (calendar, agents, analytics, media, plugs, third-party, settings, launches) are present as real buttons, each drills into a detail panel, and no channel is shown as connected."
+    },
+    {
+      "id": "in-social-reload-no-duplicate",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — a browser reload cannot duplicate the workspace",
+      "actor": "brand_user",
+      "type": "persistence",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "4. a browser reload cannot duplicate the workspace (identity is derived, not stored)",
+      "expects": "After a hard reload the SAME derived workspace id is present (or re-entering resolves it) — identity is derived from the tenant, never stored, so no second workspace is provisioned."
+    },
+    {
+      "id": "in-social-relogin-no-duplicate",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — logging out and back in does not provision a second workspace",
+      "actor": "brand_user",
+      "type": "persistence",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "5. logout + re-login does NOT provision a second workspace",
+      "expects": "Switching to another brand and back returns the SAME workspace id for the first brand — logging out and back in never provisions a second workspace."
+    },
+    {
+      "id": "in-social-tenant-separate-workspaces",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — two brands receive separate workspaces and cannot see each other",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "6. two brands receive SEPARATE workspaces and cannot see each other",
+      "expects": "Two brands receive DIFFERENT workspace ids and neither brand’s surface leaks the other’s workspace identity — the id is derived from the tenant."
+    },
+    {
+      "id": "in-social-unapproved-brand-denied",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — an unapproved brand cannot reach Mercenta Social",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "7. an unapproved brand cannot reach Mercenta Social",
+      "expects": "A brand whose partnership is not approved never receives the Social nav item or surface — entitlement fails closed."
+    },
+    {
+      "id": "in-social-simulation-zero-calls",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — simulation stays simulation, with zero external provider/engine calls",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "8. simulation stays simulation — zero external provider/engine calls",
+      "expects": "Operating the workspace makes ZERO external provider/engine calls and the engine state is honestly reported as Connected or Simulation."
+    },
+    {
+      "id": "in-social-launch-handoff-or-truth",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — opening the workspace either hands off to the engine or reports the truth",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "10. opening the workspace either hands off to the real engine or reports the truth",
+      "expects": "With a handoff URL the brand surface renders the engine frame and records the workspace linked; with NO engine URL it never claims a live engine — the launch control stays disabled with the reason stated and the deterministic simulation studio is offered instead."
+    },
+    {
+      "id": "in-social-simulation-studio",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — the simulation studio runs the engine workflow deterministically with no live call",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "11. the simulation studio runs the engine workflow deterministically, with no live call",
+      "expects": "The simulation studio connects a channel (simulated), queues a post, runs the queue (QUEUE → PUBLISHED with an unmistakably simulated release id “sim-rel-”), the analytics agree with the queue, and no provider/engine host is contacted."
+    },
+    {
+      "id": "in-social-admin-control-centre",
+      "capability": "integrations",
+      "journey": "integrations — Mercenta Social — the admin control centre reports the verified engine, mode and findings",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "test": "9. admin control centre reports the verified engine, mode and findings",
+      "expects": "The operator’s Social Media control centre reports the verified engine identity (v1.47.0), its mode (Simulation/Connected), the workspace count and the recorded findings (engine operational; branded hostname has no DNS)."
     }
   ]
 }

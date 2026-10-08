@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 377 · **Capabilities:** 8
+**Scenarios:** 396 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -28,7 +28,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | commerce_logistics | 142 |
 | finance | 32 |
 | founder | 5 |
-| integrations | 3 |
+| integrations | 22 |
 | onboarding_acquisition | 58 |
 | operations | 57 |
 | platform | 77 |
@@ -77,6 +77,25 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | fi-xero-financial-summary | finance | super_admin | happy | `e2e/xero.spec.ts` | `3. Financial Summary section renders` |
 | fi-xero-not-connected | finance | super_admin | happy | `e2e/xero.spec.ts` | `1. Accounting tab shows "Not Connected" state` |
 | fi-xero-summary-placeholder | finance | super_admin | happy | `e2e/xero.spec.ts` | `4. Summary shows placeholder when not connected` |
+| in-google-setup-bad-client-id | integrations | super_admin | refusal | `e2e/google-setup.spec.ts` | `3. an implausible OAuth client id is refused before any Google window opens` |
+| in-google-setup-honest | integrations | super_admin | happy | `e2e/google-setup.spec.ts` | `1. it renders the personal account, the no-password policy and the honest un-run state` |
+| in-google-setup-run-simulated | integrations | super_admin | happy | `e2e/google-setup.spec.ts` | `2. running the setup executes the whole plan and labels it SIMULATED` |
+| in-hub-category-grouping | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `4. providers are grouped under their canonical category headings` |
+| in-hub-filter-by-tile | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `2. filtering by a tile shows only matching providers, count for count` |
+| in-hub-no-page-errors | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `5. no page errors while operating the Hub` |
+| in-hub-search-truthful-count | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `3. search filters providers and reports the true visible/total count` |
+| in-hub-tiles-derived | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `1. overview tiles are derived from the rendered provider modes` |
+| in-social-admin-control-centre | integrations | super_admin | happy | `e2e/embedded-social.spec.ts` | `9. admin control centre reports the verified engine, mode and findings` |
+| in-social-branded-identity | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `2. customer-facing identity is Mercenta Social — no engine name, no sign-up` |
+| in-social-launch-handoff-or-truth | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `10. opening the workspace either hands off to the real engine or reports the truth` |
+| in-social-module-surface-drilldown | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `3. the FULL module surface is present and each module drills down` |
+| in-social-provisioned-automatically | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `1. approved brand reaches Mercenta Social and is provisioned automatically` |
+| in-social-reload-no-duplicate | integrations | brand_user | persistence | `e2e/embedded-social.spec.ts` | `4. a browser reload cannot duplicate the workspace (identity is derived, not stored)` |
+| in-social-relogin-no-duplicate | integrations | brand_user | persistence | `e2e/embedded-social.spec.ts` | `5. logout + re-login does NOT provision a second workspace` |
+| in-social-simulation-studio | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `11. the simulation studio runs the engine workflow deterministically, with no live call` |
+| in-social-simulation-zero-calls | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `8. simulation stays simulation — zero external provider/engine calls` |
+| in-social-tenant-separate-workspaces | integrations | brand_user | refusal | `e2e/embedded-social.spec.ts` | `6. two brands receive SEPARATE workspaces and cannot see each other` |
+| in-social-unapproved-brand-denied | integrations | brand_user | refusal | `e2e/embedded-social.spec.ts` | `7. an unapproved brand cannot reach Mercenta Social` |
 | oa-ack-guidance-admin-preview | onboarding_acquisition | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `3. the admin tour-management preview shows the OWNER’s rule (never a copy)` |
 | oa-ack-guidance-brand-tour | onboarding_acquisition | brand_user | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `1. the brand tour step and the KB article it links to teach the OWNER’s rule` |
 | oa-ack-guidance-wizard | onboarding_acquisition | brand_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `2. the wizard’s operational-guidance step states the OWNER’s rule` |

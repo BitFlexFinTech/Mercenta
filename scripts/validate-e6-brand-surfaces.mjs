@@ -2344,6 +2344,17 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
    * declared here rather than left unexplained.
    */
   'e2e/record-drawer.spec.ts',
+  /**
+   * §E2E-8 (2026-10-08) — the integrations enumeration exposed a PRE-EXISTING
+   * flaky assertion in `e2e/embedded-social.spec.ts`: tests 4 and 5 read the
+   * Social workspace id IMMEDIATELY after a brand switch (no wait), and the poll
+   * budget was only 10s, so either could sample the mid-switch tenant under the
+   * suite's normal parallel load (observed: tests 5 and 6 failing intermittently
+   * at 8 workers). The fix is AT SOURCE — the assertions now go through the
+   * spec's existing wait helper and the budget is 30s; NO assertion was changed
+   * or removed. Declared here rather than left unexplained.
+   */
+  'e2e/embedded-social.spec.ts',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   /**

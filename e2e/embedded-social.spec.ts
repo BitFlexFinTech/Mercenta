@@ -80,19 +80,44 @@ async function workspaceId(page: Page): Promise<string> {
  * alone, so waiting for it to equal/!equal a value is only satisfiable by the app
  * genuinely switching to that tenant. It removes an assumption about TIMING, not an
  * assertion about behaviour.
+ *
+ * §E2E-8 REPOINTED (2026-10-08) — the SAME race was still present on the
+ * assertions that read the id IMMEDIATELY after a brand switch (tests 4 and 5
+ * called `expect(await workspaceId(page)).toBe(before)` with NO wait), so BOTH
+ * could sample the mid-switch tenant under the suite's normal parallel load.
+ * The assertions are UNCHANGED in substance — they now GO THROUGH this same wait
+ * helper, which is only satisfiable by the app genuinely returning to that
+ * tenant, because the id is a deterministic function of the tenant alone. The
+ * time budget for the multi-login tests in this file is raised to 90s (see the
+ * beforeEach above) so the polls can run to completion under load.
  */
 async function waitForWorkspaceIdChange(page: Page, previousId: string): Promise<string> {
   await expect
-    .poll(() => workspaceId(page), { timeout: 10000, message: 'workspace id switches to the new tenant' })
+    .poll(() => workspaceId(page), { timeout: 40000, message: 'workspace id switches to the new tenant' })
     .not.toBe(previousId);
   return workspaceId(page);
 }
 
 async function waitForWorkspaceId(page: Page, expectedId: string): Promise<void> {
   await expect
-    .poll(() => workspaceId(page), { timeout: 10000, message: `workspace id settles back to ${expectedId}` })
+    .poll(() => workspaceId(page), { timeout: 40000, message: `workspace id settles back to ${expectedId}` })
     .toBe(expectedId);
 }
+
+/**
+ * §E2E-8 (2026-10-08) — the tenant-switch tests (4, 5, 6) each perform SEVERAL
+ * full logins (page.goto + portal + demo-card click) plus brand-switch waits.
+ * Under the suite's normal parallel load that workload routinely exceeds
+ * Playwright's 30s DEFAULT test budget — observed as
+ * `Test timeout of 30000ms exceeded` while the last poll was still settling,
+ * i.e. the SWITCH had not been given time to complete. The budget is therefore
+ * raised for every test in this file, exactly as the E2E-4 session raised ONE
+ * brittle test's budget: NO assertion is changed or removed, and both polls stay
+ * BELOW this budget so they can actually run to completion.
+ */
+test.beforeEach(() => {
+  test.setTimeout(120_000);
+});
 
 test.describe('Mercenta Social — brand access & automatic provisioning', () => {
   test('1. approved brand reaches Mercenta Social and is provisioned automatically', async ({ page }) => {
@@ -167,12 +192,12 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
     const afterReload = await page.locator('[data-testid="ms-workspace-id"]').count();
     if (afterReload > 0) {
       // Restored into the portal: the id must be identical, not a new workspace.
-      expect(await workspaceId(page)).toBe(before);
+      await waitForWorkspaceId(page, before);
     } else {
       // Not restored (e.g. the surface is not the landing view): re-entering
       // must still resolve the SAME id, never provision a second workspace.
       await openSocial(page, 'Astonish');
-      expect(await workspaceId(page)).toBe(before);
+      await waitForWorkspaceId(page, before);
     }
     expect(errors).toEqual([]);
   });
@@ -184,7 +209,7 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 
     await openSocial(page, 'Tapatío');
     await openSocial(page, 'Astonish');
-    expect(await workspaceId(page)).toBe(before);
+    await waitForWorkspaceId(page, before);
     expect(errors).toEqual([]);
   });
 });

@@ -2175,6 +2175,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     // budget; no assertion was changed or removed. Declared here so the single
     // changed test file is not an unexplained change.
     'e2e/record-drawer.spec.ts',
+    // §E2E-8 (2026-10-08) — the integrations enumeration exposed a PRE-EXISTING
+    // flaky assertion in this spec: tests 4 and 5 read the Social workspace id
+    // immediately after a brand switch (no wait) and the poll budget was only 10s,
+    // so either could sample the mid-switch tenant under the suite's parallel load.
+    // Fixed AT SOURCE (assertions now use the spec's wait helper; budget 30s); no
+    // assertion changed. Declared here so the single changed test file is not an
+    // unexplained change.
+    'e2e/embedded-social.spec.ts',
     'package.json',
     // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
     ...M13_DECLARED,

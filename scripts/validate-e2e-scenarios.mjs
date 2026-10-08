@@ -152,8 +152,15 @@ if (c) {
    * so each enumerated scenario there is pinned to the real test that proves it.
    * The self-check below now asserts the prefix set covers ALL SEVEN enumerated
    * domains and never the auto-seeded `spec-*` rows.
+   *
+   * §E2E-8 — the SAME obligation is extended to the integrations domain
+   * (`in-*`: the Integration Settings hub · Mercenta Social & its automatic
+   * provisioning · the Google setup wizard), so each enumerated scenario there is
+   * pinned to the real test that proves it. The self-check below now asserts the
+   * prefix set covers ALL EIGHT enumerated domains and never the auto-seeded
+   * `spec-*` rows.
    */
-  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-|co-|op-)/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-|co-|op-|in-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -163,15 +170,15 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance, co-* compliance, op-* operations) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance, co-* compliance, op-* operations, in-* integrations) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
   );
-  /* §E2E-4/§E2E-5/§E2E-6/§E2E-7 — self-check: the enumeration prefix set itself
-   * must be what we think it is, so a future rename cannot silently drop a whole
-   * domain's traceability. */
+  /* §E2E-4/§E2E-5/§E2E-6/§E2E-7/§E2E-8 — self-check: the enumeration prefix set
+   * itself must be what we think it is, so a future rename cannot silently drop a
+   * whole domain's traceability. */
   test(
-    'the traceable-prefix set covers all seven enumerated domains (pf-, oa-, po-, sl-, fi-, co- and op-)',
+    'the traceable-prefix set covers all eight enumerated domains (pf-, oa-, po-, sl-, fi-, co-, op- and in-)',
     SCENARIO_TEST_REQUIRED.test('pf-x') &&
       SCENARIO_TEST_REQUIRED.test('oa-x') &&
       SCENARIO_TEST_REQUIRED.test('po-x') &&
@@ -179,6 +186,7 @@ if (c) {
       SCENARIO_TEST_REQUIRED.test('fi-x') &&
       SCENARIO_TEST_REQUIRED.test('co-x') &&
       SCENARIO_TEST_REQUIRED.test('op-x') &&
+      SCENARIO_TEST_REQUIRED.test('in-x') &&
       !SCENARIO_TEST_REQUIRED.test('spec-x'),
     String(SCENARIO_TEST_REQUIRED)
   );
