@@ -7,8 +7,9 @@ import {
 } from '@/lib/contracts';
 import { buildDistributionAgreement } from '@/lib/agreement';
 import { Badge, Button, Card } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
-import { Download, FileText, Eye, X } from 'lucide-react';
+import { Download, Eye, X } from 'lucide-react';
 
 function UrgencyBadge({ renewalDate, now }: { renewalDate: string; now: string }) {
   const urgency = renewalUrgency(renewalDate, now);
@@ -67,18 +68,12 @@ export function BrandContractView() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-[1100px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass/15 flex items-center justify-center">
-          <FileText className="w-5 h-5 text-brass" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Contracts</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Your distribution agreements — status, renewal dates and signed copies
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4" testId="brand-contracts">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · COMPLIANCE"
+        title="Contracts"
+        description="Your distribution agreements — status, renewal dates and signed copies"
+      />
 
       {contracts.length === 0 && (
         <Card className="p-8 text-center">
@@ -177,6 +172,6 @@ export function BrandContractView() {
         Commercial rates shown are placeholders pending sign-off. Signed copies are
         also available through the e-signature provider once live-wired.
       </p>
-    </div>
+    </WorkspaceFrame>
   );
 }

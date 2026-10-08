@@ -21,6 +21,7 @@ import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { generateDefaultProductImages } from '@/lib/amazon/productImageValidator';
 import { CsvCatalogImport } from '@/components/shared/CsvCatalogImport';
+import { ProductThumb } from '@/components/shared/ProductThumb';
 
 export function ProductCatalog() {
   const { products, addProduct, gateDocs, brandProfile, session } = useApp();
@@ -277,9 +278,7 @@ export function ProductCatalog() {
               primary: true,
               render: (p) => (
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl w-8 h-8 flex items-center justify-center bg-ink-900 rounded-lg">
-                    {p.image}
-                  </span>
+                  <ProductThumb product={p} size={32} className="rounded-lg" />
                   <span className="text-sm font-medium text-white">{p.name}</span>
                 </div>
               ),

@@ -87,25 +87,46 @@ test.describe('Redesign surfaces — responsive verification (admin)', () => {
 });
 
 test.describe('Redesign surfaces — responsive verification (brand)', () => {
+  // §Wave-3 Part 3 — EVERY brand view declared in BrandShell's nav
+  // (BRAND_SECTIONS → BRAND_VIEW_IDS), so "render every brand surface" is not
+  // silently a curated subset. Labels are the nav's own accessible names.
   for (const [label, navName] of [
-    ['brand-dashboard', null],
+    ['brand-dashboard', null], // default view = overview
     ['brand-purchase-orders', 'Purchase Orders'],
-    ['brand-product-catalog', 'Product Catalog'],
-    ['brand-compliance', 'UK Compliance'],
-    ['brand-reports', 'Reports'],
-    ['brand-analytics', 'Analytics'],
-    ['brand-settings', 'Settings'],
     ['brand-logistics', 'Logistics Hub'],
+    ['brand-returns', 'Returns'],
+    ['brand-work', 'Tasks & Deadlines'],
+    ['brand-calendar', 'Calendar'],
+    ['brand-product-catalog', 'Product Catalog'],
+    ['brand-inventory', 'Inventory'],
+    ['brand-commercial-readiness', 'Commercial Readiness'],
+    ['brand-onboarding-legal', 'Onboarding & Legal'],
+    ['brand-compliance', 'UK Compliance'],
+    ['brand-contracts', 'Contracts'],
+    ['brand-analytics', 'Analytics'],
+    ['brand-market-intel', 'Market Intel'],
+    ['brand-reports', 'Reports'],
+    ['brand-documents-account', 'Documents & Account'],
+    ['brand-support-cases', 'Support & Cases'],
+    ['brand-support-team', 'Support & Team'],
+    ['brand-social', 'Mercenta Social'],
+    ['brand-settings', 'Settings'],
   ] as const) {
     test(`${label} holds at every target width`, async ({ page }) => {
+      // §Stage-18 smoke-render — an uncaught runtime error on render (a
+      // Rules-of-Hooks violation, an undefined read) passes typecheck and build
+      // and only fails at actual render time; capture it here.
+      const pageErrors: string[] = [];
+      page.on('pageerror', (e) => pageErrors.push(e.message));
       await loginAs(page, 'Tapatío', 1500);
       await page.getByTestId('brand-dashboard-loaded').waitFor({ state: 'attached', timeout: 12000 });
       if (navName) {
         await page.locator('nav[aria-label="Primary"]').getByRole('button', { name: navName }).first().click();
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(1200);
       }
       const h1 = page.locator('h1');
-      await expect(h1.first()).toBeVisible();
+      await expect(h1.first(), `${label} renders a surface heading`).toBeVisible();
+      expect(pageErrors, `${label} rendered without a runtime error`).toEqual([]);
       for (const { w, h } of WIDTHS) {
         await page.setViewportSize({ width: w, height: h });
         await assertNoOverflow(page, label, w);
@@ -115,4 +136,37 @@ test.describe('Redesign surfaces — responsive verification (brand)', () => {
       }
     });
   }
+
+  /**
+   * §Wave-3 Part 3 defect gate — the catalogue "Product" cell must render the
+   * product IMAGE, never paint the raw image value as text. The seeded demo
+   * products carry a `picsum.photos` URL in `product.image`; rendering that value
+   * as cell text overflowed its thumbnail box as garbled overlapping text. The
+   * single owner is `src/components/shared/ProductThumb.tsx`, which renders an
+   * `<img>` for a URL/data-URI and a glyph/text otherwise. This spec fails if the
+   * raw URL is ever painted as cell text again.
+   */
+  test('brand product catalogue renders thumbnails as images, never a raw URL as text', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await loginAs(page, 'Tapatío', 1500);
+    await page.getByTestId('brand-dashboard-loaded').waitFor({ state: 'attached', timeout: 12000 });
+    await page.locator('nav[aria-label="Primary"]').getByRole('button', { name: 'Product Catalog' }).first().click();
+    await page.waitForTimeout(1000);
+
+    const table = page.locator('table[data-table="product-catalogue"]');
+    await expect(table).toBeVisible();
+
+    // Every row's Product cell shows a real <img> whose src is a URL/data-URI.
+    const imgSrcs = await table
+      .locator('tbody tr td:first-child img')
+      .evaluateAll((els) => els.map((e) => (e as HTMLImageElement).getAttribute('src') ?? ''));
+    expect(imgSrcs.length, 'catalogue rows render a product thumbnail <img>').toBeGreaterThan(0);
+    for (const src of imgSrcs) {
+      expect(src, 'thumbnail src is a real URL/data-URI').toMatch(/^(https?:\/\/|data:image\/)/i);
+    }
+
+    // And no catalogue cell paints a URL as literal text (the defect).
+    const bodyText = await table.locator('tbody').innerText();
+    expect(bodyText, 'no catalogue cell paints a raw URL as text').not.toMatch(/https?:\/\//i);
+  });
 });

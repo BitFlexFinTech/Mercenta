@@ -2775,6 +2775,19 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/integrations/resolveCredentialVault.ts',
     'scripts/validate-credential-vault.mjs',
     'scripts/reconcile-credential-vault-registry.cjs',
+    /**
+     * §WAVE 3 PART 3 (2026-10-08) — THE BRAND-SURFACE PASS (order item 4). Same
+     * mechanism as every set above: a changed source/test file outside EVERY
+     * declared set is refused. The pass renders every brand view and fixes
+     * render-only defects at their owner — a product-image thumbnail primitive,
+     * and two surfaces brought onto the canonical workspace frame/header.
+     * Declared in scripts/validate-e6-brand-surfaces.mjs §UIUX_WAVE3_PART3_SCOPE.
+     */
+    'src/components/shared/ProductThumb.tsx',
+    'src/components/brand/ProductCatalog.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/brand/BrandContractView.tsx',
+    'src/components/brand/BrandSelfService.tsx',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

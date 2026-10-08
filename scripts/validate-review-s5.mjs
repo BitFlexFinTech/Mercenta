@@ -39,8 +39,20 @@ try {
         createElement(brandMod.BrandContractView)))
   );
   test('brand cards show Open document action', brandHtml.includes('Open document'));
+  /**
+   * §Wave-3-Part-3 DEFECT FIX — this assertion used to pass for the WRONG reason.
+   * `/v\d/` was matching a digit inside the lucide header icon's SVG path data
+   * (`…v1…`), NOT the contract's own version — so it could not fail if the
+   * contract type/version text genuinely disappeared, and it fired FALSELY the
+   * moment the unrelated header icon was removed. React SSR also splits
+   * `{type} — v{version}` into separate text nodes joined by `<!-- -->`, so the
+   * rendered string is `distribution agreement<!-- --> — v<!-- -->1`. Strip those
+   * separators, then assert the contract card's real type + version text — so the
+   * test now fails if the card stops rendering them.
+   */
+  const brandText = brandHtml.replace(/<!--\s*-->/g, '');
   test('brand view lists contract types and versions',
-    /distribution agreement/.test(brandHtml) && /v\d/.test(brandHtml));
+    /distribution agreement\s+—\s+v\d/.test(brandText));
 
   // ── Admin viewer: View buttons present per row ──
 

@@ -5,8 +5,9 @@ import { requestProfileChange, demoProfileChangeRequests } from '@/data/api';
 import { assertBrandScope, scopedBrandId } from '@/lib/auth/rbac';
 import { useApp } from '@/context/GlobalStateContext';
 import { Badge, Button, Card, Input } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
-import { Download, FileText, Landmark, ScrollText } from 'lucide-react';
+import { Download, FileText, Landmark } from 'lucide-react';
 
 const CHANGE_FIELDS = [
   'businessName',
@@ -111,18 +112,12 @@ export function BrandSelfService() {
   const myRequests = demoProfileChangeRequests.filter((r) => r.brandId === brandId);
 
   return (
-    <div className="p-6 space-y-4 max-w-[1100px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center">
-          <ScrollText className="w-5 h-5 text-brass-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Documents & Account</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Your contracts, remittance statements and approved account changes
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4" testId="brand-documents-account">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · ACCOUNT"
+        title="Documents & Account"
+        description="Your contracts, remittance statements and approved account changes"
+      />
 
       <Card title="Document Library">
         <div className="px-1 pb-2 space-y-1.5">
@@ -243,6 +238,6 @@ export function BrandSelfService() {
 
         </div>
       </Card>
-    </div>
+    </WorkspaceFrame>
   );
 }

@@ -52,6 +52,7 @@ import {
   type CarrierEligibility,
 } from '@/lib/shipping/carrierEligibility';
 import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
+import { ProductThumb } from '@/components/shared/ProductThumb';
 import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
 /**
  * §P6 — "Documents for this PO": the document pack surface. It renders the pack
@@ -549,17 +550,7 @@ function ShipmentTrackingTimeline({
                 key={p.id}
                 className="flex items-center gap-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2"
               >
-                {p.productImages?.[0]?.url || p.image ? (
-                  <img
-                    src={p.productImages?.[0]?.url || p.image || ''}
-                    alt={p.name}
-                    className="h-10 w-10 rounded-ds-sm bg-white/[0.06] object-cover"
-                  />
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-ds-sm bg-white/[0.06]">
-                    <Package className="h-5 w-5 text-zinc-500" />
-                  </span>
-                )}
+                <ProductThumb product={p} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-ds-body font-medium text-zinc-200">{p.name}</div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-zinc-500">

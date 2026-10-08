@@ -3696,6 +3696,32 @@ const UIUX_REDESIGN_SCOPE = new Set([
 ]);
 
 /**
+ * §UI/UX WAVE 3 PART 3 (2026-10-08) — THE BRAND-SURFACE PASS (order item 4).
+ *
+ * The pass RENDERS every brand view in a real Chromium (20 views, derived from
+ * BrandShell's own nav) and fixes render-only defects AT THEIR OWNER. It is
+ * presentation-only: no business logic, data model, permission or integration
+ * changes. Declared here in the same naming/allowing mechanism as every phase
+ * above; the E6 F6 test still refuses a changed SOURCE file outside EVERY set.
+ *
+ *  · `ProductThumb.tsx` — NEW single owner for rendering a product's image (the
+ *    Product Catalog previously painted `product.image` — a URL — as literal
+ *    text; LogisticsHub duplicated the same logic).
+ *  · `ProductCatalog.tsx` — its Product cell now uses that owner.
+ *  · `LogisticsHub.tsx` — its product row now uses the same owner (no duplicate).
+ *  · `BrandContractView.tsx` / `BrandSelfService.tsx` — brought onto the canonical
+ *    `WorkspaceFrame`/`WorkspaceHeader`, so each renders the surface's ONE `h1`
+ *    and its `data-workspace-frame` like every other brand surface.
+ */
+const UIUX_WAVE3_PART3_SCOPE = new Set([
+  'src/components/shared/ProductThumb.tsx',
+  'src/components/brand/ProductCatalog.tsx',
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/brand/BrandContractView.tsx',
+  'src/components/brand/BrandSelfService.tsx',
+]);
+
+/**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
  * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
  * sprint required declares its files here, exactly like every phase before it.
@@ -4073,7 +4099,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §CREDENTIAL VAULT — the vault's declared surface (see above). */
           CREDENTIAL_VAULT_SCOPE.has(p) ||
-          [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §WAVE 3 PART 3 — the brand-surface pass's declared surface (see above). */
+          UIUX_WAVE3_PART3_SCOPE.has(p) ||
+          [...UIUX_WAVE3_PART3_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

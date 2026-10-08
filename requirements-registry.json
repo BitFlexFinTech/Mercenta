@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-2 increment. §CHANGES THIS SESSION: `uiux-wave3-part2-admin-dashboard-composition` not_started -> built_and_tested (the band-fill composition fix, browser-proved) and ONE discovered row added (`discovered-overview-vestigial-toolbar-strip`, not_started). Recomputed FROM THE ENTRIES THEMSELVES: 338 + 183 + 12 + 5 + 9 + 7 + 1 = 555. Snapshot only.",
-      "built_and_tested": 338,
+      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-3 increment. §CHANGES THIS SESSION: `uiux-wave3-part3-brand-surfaces` not_started -> built_and_tested (the brand-surface pass: 20 views rendered, 3 render-only defects fixed at their owners, one validator assertion repaired, all gated + mutation-proved). Recomputed FROM THE ENTRIES THEMSELVES: 339 + 183 + 11 + 5 + 9 + 7 + 1 = 555. Snapshot only.",
+      "built_and_tested": 339,
       "built": 183,
-      "not_started": 12,
+      "not_started": 11,
       "removed": 5,
       "deferred": 9,
       "blocked": 7,
@@ -5098,11 +5098,12 @@
     },
     {
       "id": "uiux-wave3-part3-brand-surfaces",
-      "description": "NOT DONE in Part 1. The Brand surface redesign (BrandDashboard, BrandPurchaseOrders, ProductCatalog, LogisticsHub, ComplianceHub, BrandSupport, BrandSettings, BrandReports, SalesAnalytics, …) has not been started. The brand experience should feel like a polished enterprise partner portal, not an admin template",
-      "status": "not_started",
-      "evidence": "§REPOINTED 2026-10-08 (rule 07) — this cited `PROJECT_STATUS.md` \"heading 3 item 2\", a heading that no longer exists in that form (the current block's heading 3 is a pointer to the resume state, so the citation pointed at nothing). Canonical owner: `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b, order item 4 (the legacy UI-redesign backlog). Honest Wave-3 Part-1 scope statement: `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §8. Owner: Wave 3 Part 3",
+      "description": "BRAND-SURFACE PASS DELIVERED (order item 4, 2026-10-08). EVERY brand view declared in the shell's own nav (BrandShell → BRAND_VIEW_IDS: 20 views) was RENDERED in a real Chromium at 1440/1280/1024/768/390 and inspected, so the pass is a complete sweep, not a curated subset. It found and FIXED three real render-only defects — none of which typecheck/lint/build can see: (1) the Product Catalog's 'Product' cell painted `product.image` — for a seeded demo product a `picsum.photos` URL — as literal `text-xl` text inside a 32px box, overflowing as garbled overlapping text; (2) and (3) BrandContractView ('Contracts') and BrandSelfService ('Documents & Account') were the only two brand surfaces NOT on the canonical workspace composition — each hand-rolled a `p-6 … max-w-[1100px]` container with an `<h2>`, so neither rendered the surface's single h1 nor its `data-workspace-frame`. A suspected 'metric-band gap' on the brand dashboard was DISPROVED by measurement (every band row fills 100%).",
+      "status": "built_and_tested",
+      "evidence": "`src/components/shared/ProductThumb.tsx` — NEW single owner for a product's image (URL/data-URI → `<img>`, glyph → text, nothing → the neutral package icon; a URL is NEVER painted as text); the previously DUPLICATED logic is consolidated out of `src/components/brand/ProductCatalog.tsx` and `src/components/brand/LogisticsHub.tsx`, both now pointing at it. `BrandContractView.tsx` and `BrandSelfService.tsx` moved onto `WorkspaceFrame`+`WorkspaceHeader` (each now renders its ONE h1 + `data-workspace-frame`). GATES, both EXECUTED and MUTATION-PROVED: `e2e/redesign-surfaces.spec.ts` — the brand loop now covers ALL 20 shell views (was 8) and each test captures `pageerror` as a smoke-render check: 24 passed; and the new test 'brand product catalogue renders thumbnails as images, never a raw URL as text' measured 1 passed, then FAILED ('catalogue rows render a product thumbnail <img>', 1 failed) with the URL branch disabled and passed again after restoring `ProductThumb.tsx` byte-identical (sha256 5644e5ed99a4519989dcf86ac628bf4c0cf0dc642da7fb33a79039eeef998c26). The 20-view loop ALREADY FAILED on brand-contracts + brand-documents-account BEFORE the frame fix (22 passed / 2 failed) and passes after — that failure IS the frame defect's fault demonstration. DEFECT FIXED IN A VALIDATOR: `scripts/validate-review-s5.mjs` asserted `/v\\d/` on the raw SSR HTML, which matched a digit inside a lucide icon's SVG path — it passed for the WRONG reason and could not fail if the contract text disappeared (and fired falsely the moment the unrelated header icon was removed); it now strips React's SSR text-node separators and asserts the card's real `distribution agreement — v{n}` text, proved able to fail (1 failed on the mutated card, then restored byte-identical sha256 d051343e2e1de81a877d765f5c79ea82568662ebdb14330d71a486522486334b). Validator corpus: `npm run validate:all` 188 PASS / 0 FAIL · typecheck 0 · lint 0 · build ok. Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART3_SCOPE` declared in BOTH `scripts/validate-e6-brand-surfaces.mjs` and `scripts/validate-e7-embedded-social.mjs`. Rendered evidence: `test-screenshots/redesign-surfaces/brand-*-1440.png` and `brand-*-390.png` (20 views × 2 widths).",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-10-08",
+      "last_verified": "2026-10-08"
     },
     {
       "id": "uiux-wave3-part4-tables-forms-drawers",
