@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 174 · **Capabilities:** 8
+**Scenarios:** 220 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -25,7 +25,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | Capability | Scenarios |
 |---|---|
 | brands_marketing | 3 |
-| commerce_logistics | 23 |
+| commerce_logistics | 69 |
 | finance | 7 |
 | founder | 5 |
 | integrations | 3 |
@@ -116,6 +116,52 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | pf-tenant-messages-scoped | platform | brand_user | refusal | `e2e/multi-tenant.spec.ts` | `Brand A cannot see Brand B messages` |
 | pf-tenant-payout-ledger-scoped | platform | brand_user | refusal | `e2e/multi-tenant.spec.ts` | `payout ledger is tenant-scoped` |
 | pf-tenant-pos-scoped | platform | brand_user | refusal | `e2e/multi-tenant.spec.ts` | `Brand A cannot see Brand B POs` |
+| po-ack-duty-completeness | commerce_logistics | brand_user | happy | `e2e/po-ack-duties.spec.ts` | `2. the panel states the completeness rule, and the verdict is real data` |
+| po-ack-duty-omitted-lines-conditional | commerce_logistics | brand_user | happy | `e2e/po-ack-duties.spec.ts` | `3. the omitted-lines notice appears ONLY when the record carries that fact` |
+| po-ack-duty-on-hold | commerce_logistics | brand_user | happy | `e2e/po-ack-duties.spec.ts` | `1. the panel states the channel’s on-hold duty, or says it is unverified` |
+| po-ack-duty-submission-recorded | commerce_logistics | brand_user | happy | `e2e/po-ack-duties.spec.ts` | `4. a submission through the real surface is recorded and the rules survive it` |
+| po-ack-price-above-refused | commerce_logistics | brand_user | refusal | `e2e/ack-invoice-price.spec.ts` | `1. a price ABOVE the order price is refused with the channel rule` |
+| po-ack-price-lower-accepted | commerce_logistics | brand_user | happy | `e2e/ack-invoice-price.spec.ts` | `2. a LOWER acknowledged price is accepted, warned, and shown on the order` |
+| po-admin-ack-decided-no-dead-accept | commerce_logistics | mercenta_admin | refusal | `e2e/po-admin-ack-surface.spec.ts` | `3. a decided order states the owner’s reason and offers no dead acceptance` |
+| po-admin-ack-detail-window-classification | commerce_logistics | mercenta_admin | happy | `e2e/po-admin-ack-surface.spec.ts` | `2. the detail is the owner’s window, its classification, and the acceptance it permits` |
+| po-admin-ack-list-window-owner | commerce_logistics | mercenta_admin | happy | `e2e/po-admin-ack-surface.spec.ts` | `1. the list and its record preview present the window from its owner` |
+| po-brand-ack-amend-in-window | commerce_logistics | brand_user | happy | `e2e/po-brand-ack-surface.spec.ts` | `4. an acknowledged order can be AMENDED inside the update window` |
+| po-brand-ack-closing-both-options | commerce_logistics | brand_user | happy | `e2e/po-brand-ack-surface.spec.ts` | `3. the closing window offers BOTH the brand’s own decision and Mercenta’s draft` |
+| po-brand-ack-panel-window | commerce_logistics | brand_user | happy | `e2e/po-brand-ack-surface.spec.ts` | `2. the acknowledgement panel states the window the decision is made inside` |
+| po-brand-ack-window-owner | commerce_logistics | brand_user | happy | `e2e/po-brand-ack-surface.spec.ts` | `1. the window is presented from its owner — due/urgent, never overdue or NaN` |
+| po-doc-carrier-label-downloads | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `10. the carrier label dialogue DOWNLOADS the label it renders (owner D3)` |
+| po-doc-download-real-files | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `9. a ready document and the whole pack DOWNLOAD as real files beside Open/Print` |
+| po-doc-freight-collect-no-arn | commerce_logistics | mercenta_admin | refusal | `e2e/po-documents.spec.ts` | `5. a Freight Collect lane shows the documented chain, and never fabricates an ARN` |
+| po-doc-hub-queue-open-pack | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `7. the accepted PO is in the Hub queue and opens its pack without selecting a consignment` |
+| po-doc-one-renderer | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `6. the pack opens the EXISTING carrier-label dialogue (one renderer per artefact)` |
+| po-doc-pack-on-hub | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `1. the pack appears on the Logistics Hub for an accepted PO, and names the PO declared FC` |
+| po-doc-queue-badge-notification | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `4. the nav badge and the notification centre carry the document download queue` |
+| po-doc-queue-count-same-rule | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `8. the queue count is the SAME rule the nav badge counts` |
+| po-doc-readiness-honest | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `2. readiness is honest: SSCC labels ready, the waybill NOT (with its reason)` |
+| po-doc-sscc-labels | commerce_logistics | mercenta_admin | happy | `e2e/po-documents.spec.ts` | `3. the SSCC carton labels open with one 18-digit identifier per carton` |
+| po-ingest-channel-read-entry | commerce_logistics | mercenta_admin | happy | `e2e/channel-po-ingestion.spec.ts` | `1. the create action is gone and the channel read is the entry point` |
+| po-ingest-filed-opens-record | commerce_logistics | mercenta_admin | happy | `e2e/channel-po-ingestion.spec.ts` | `5. a filed channel PO opens its real record` |
+| po-ingest-reread-idempotent | commerce_logistics | mercenta_admin | persistence | `e2e/channel-po-ingestion.spec.ts` | `4. a re-read files nothing new (the guard is on by default)` |
+| po-ingest-routable-filed-out-of-catalogue-refused | commerce_logistics | mercenta_admin | refusal | `e2e/channel-po-ingestion.spec.ts` | `3. routable POs are filed against the brand; the out-of-catalogue PO is REFUSED with its reason` |
+| po-ingest-simulated-provenance | commerce_logistics | mercenta_admin | happy | `e2e/channel-po-ingestion.spec.ts` | `2. the read states its simulated provenance and its outcome counts` |
+| po-lifecycle-accept-all | commerce_logistics | brand_user | happy | `e2e/po-lifecycle.spec.ts` | `1. Accept all lines -> status updates, window appears` |
+| po-lifecycle-backorder-keeps-open | commerce_logistics | brand_user | happy | `e2e/po-lifecycle.spec.ts` | `3. Backorder line -> scheduled ship date keeps the PO open` |
+| po-lifecycle-over-ack-blocked | commerce_logistics | brand_user | refusal | `e2e/po-lifecycle.spec.ts` | `5. Ack qty exceeds ordered qty -> blocked` |
+| po-lifecycle-partial-ack | commerce_logistics | brand_user | happy | `e2e/po-lifecycle.spec.ts` | `4. Partial ack: accept one line, reject the other` |
+| po-lifecycle-reject-line-reason | commerce_logistics | brand_user | refusal | `e2e/po-lifecycle.spec.ts` | `2. Reject a line with a reason code` |
+| po-lifecycle-window-truthful | commerce_logistics | brand_user | boundary | `e2e/po-lifecycle.spec.ts` | `6. the 24-hour window is rendered truthfully — no open PO is falsely overdue` |
+| po-notify-brand-reminders | commerce_logistics | brand_user | happy | `e2e/po-notification-fanout.spec.ts` | `2. the brand sees the reminders Mercenta actually sent it` |
+| po-notify-fanout-founder | commerce_logistics | super_admin | happy | `e2e/po-notification-fanout.spec.ts` | `1. the founder runs the fan-out and reads what was delivered, refused and drafted` |
+| po-onbehalf-console-override-attributed | commerce_logistics | mercenta_admin | happy | `e2e/po-onbehalf.spec.ts` | `3. Mercenta’s console sees the SAME draft and records an attributed override` |
+| po-onbehalf-draft-approved | commerce_logistics | brand_user | happy | `e2e/po-onbehalf.spec.ts` | `1. the brand reads Mercenta’s draft for the on-behalf PO and approves it` |
+| po-onbehalf-not-offered-mid-window | commerce_logistics | brand_user | refusal | `e2e/po-onbehalf.spec.ts` | `2. the draft is NOT offered for a purchase order still in the middle of its window` |
+| po-onboard-admin-pipeline-link | commerce_logistics | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `4. the admin onboarding pipeline states the LINK for every record it shows` |
+| po-onboard-admin-tour-preview-owner-rule | commerce_logistics | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `3. the admin tour-management preview shows the OWNER’s rule (never a copy)` |
+| po-onboard-tour-kb-owner-rule | commerce_logistics | brand_user | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `1. the brand tour step and the KB article it links to teach the OWNER’s rule` |
+| po-onboard-wizard-guidance-owner-rule | commerce_logistics | brand_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `2. the wizard’s operational-guidance step states the OWNER’s rule` |
+| po-revision-brand-notified | commerce_logistics | brand_user | happy | `e2e/po-revision-surfaces.spec.ts` | `3. the brand is told the channel changed its order, and what changed` |
+| po-revision-console-change-list | commerce_logistics | mercenta_admin | happy | `e2e/po-revision-surfaces.spec.ts` | `2. the console shows every recorded revision with its change list` |
+| po-revision-refused-until-read | commerce_logistics | mercenta_admin | refusal | `e2e/po-revision-surfaces.spec.ts` | `1. the simulated change is refused until the channel has been read` |
 | spec-access-gate | platform | mixed | happy | `e2e/access-gate.spec.ts` | — |
 | spec-accessibility | platform | mixed | happy | `e2e/accessibility.spec.ts` | — |
 | spec-ack-invoice-price | commerce_logistics | mixed | happy | `e2e/ack-invoice-price.spec.ts` | — |

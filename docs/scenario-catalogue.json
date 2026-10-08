@@ -1728,6 +1728,466 @@
       "spec": "e2e/uk-market-fit.spec.ts",
       "test": "10. RBAC: a brand session never reaches the Control Centre",
       "expects": "A brand session NEVER reaches the Control Centre — the market-fit operator view is refused to a tenant."
+    },
+    {
+      "id": "po-doc-pack-on-hub",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the pack is assembled for an accepted PO",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "1. the pack appears on the Logistics Hub for an accepted PO, and names the PO declared FC",
+      "expects": "The document pack appears on the Logistics Hub for an accepted PO and names that PO's declared fulfilment centre — it is built from the order, not copied."
+    },
+    {
+      "id": "po-doc-readiness-honest",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — readiness is honest per artefact",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "2. readiness is honest: SSCC labels ready, the waybill NOT (with its reason)",
+      "expects": "Document readiness is honest per artefact: the SSCC labels read ready while the waybill reads NOT ready with its reason shown."
+    },
+    {
+      "id": "po-doc-sscc-labels",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the SSCC carton labels are real identifiers",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "3. the SSCC carton labels open with one 18-digit identifier per carton",
+      "expects": "The SSCC carton labels open with exactly one 18-digit serialised identifier per carton — the identifier is real and correctly shaped."
+    },
+    {
+      "id": "po-doc-queue-badge-notification",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the download queue is carried by the badge and the notification centre",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "4. the nav badge and the notification centre carry the document download queue",
+      "expects": "The navigation badge and the notification centre both carry the document download queue — the operator can see outstanding pack work from either surface."
+    },
+    {
+      "id": "po-doc-freight-collect-no-arn",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — a Freight Collect lane never fabricates an ARN",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "5. a Freight Collect lane shows the documented chain, and never fabricates an ARN",
+      "expects": "A Freight Collect lane shows the documented chain and NEVER fabricates an ARN — a value it does not hold is refused rather than invented."
+    },
+    {
+      "id": "po-doc-one-renderer",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — one renderer per artefact",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "6. the pack opens the EXISTING carrier-label dialogue (one renderer per artefact)",
+      "expects": "The pack opens the EXISTING carrier-label dialogue — there is ONE renderer per artefact, never a second copy."
+    },
+    {
+      "id": "po-doc-hub-queue-open-pack",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the Hub queue opens the pack directly",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "7. the accepted PO is in the Hub queue and opens its pack without selecting a consignment",
+      "expects": "An accepted PO is in the Hub download queue and opens its pack without first selecting a consignment."
+    },
+    {
+      "id": "po-doc-queue-count-same-rule",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the queue count is the same rule the badge counts",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "8. the queue count is the SAME rule the nav badge counts",
+      "expects": "The Hub queue count is computed by the SAME rule the navigation badge counts — the two can never disagree."
+    },
+    {
+      "id": "po-doc-download-real-files",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — a document downloads as a real file",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "9. a ready document and the whole pack DOWNLOAD as real files beside Open/Print",
+      "expects": "A ready document and the whole pack DOWNLOAD as real files alongside Open/Print — the control performs the action it implies."
+    },
+    {
+      "id": "po-doc-carrier-label-downloads",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — document pack — the carrier label dialogue downloads the label it renders",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "test": "10. the carrier label dialogue DOWNLOADS the label it renders (owner D3)",
+      "expects": "The carrier label dialogue DOWNLOADS the very label it renders — the rendered artefact and the downloaded file come from one owner."
+    },
+    {
+      "id": "po-lifecycle-accept-all",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — accept-all updates status and opens the window",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "1. Accept all lines -> status updates, window appears",
+      "expects": "Accepting all lines updates the order status and opens its acknowledgement and ship window."
+    },
+    {
+      "id": "po-lifecycle-reject-line-reason",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — a line rejection needs a reason code",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "2. Reject a line with a reason code",
+      "expects": "A line can be rejected, and the rejection carries a reason code — a reasonless rejection is not permitted."
+    },
+    {
+      "id": "po-lifecycle-backorder-keeps-open",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — a backorder keeps the order open",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "3. Backorder line -> scheduled ship date keeps the PO open",
+      "expects": "A backordered line keeps the purchase order OPEN via its scheduled ship date rather than closing it."
+    },
+    {
+      "id": "po-lifecycle-partial-ack",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — a partial acknowledgement is allowed",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "4. Partial ack: accept one line, reject the other",
+      "expects": "A partial acknowledgement is allowed — one line accepted and one rejected on the same order."
+    },
+    {
+      "id": "po-lifecycle-over-ack-blocked",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — over-acknowledging is blocked",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "5. Ack qty exceeds ordered qty -> blocked",
+      "expects": "Acknowledging MORE than the ordered quantity is BLOCKED — a brand can never over-commit against the channel order."
+    },
+    {
+      "id": "po-lifecycle-window-truthful",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — lifecycle — the 24-hour window is rendered truthfully",
+      "actor": "brand_user",
+      "type": "boundary",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "test": "6. the 24-hour window is rendered truthfully — no open PO is falsely overdue",
+      "expects": "The 24-hour acknowledgement window is rendered truthfully — no open PO is ever falsely shown as overdue."
+    },
+    {
+      "id": "po-ingest-channel-read-entry",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — channel ingestion — the channel read replaces manual creation",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "test": "1. the create action is gone and the channel read is the entry point",
+      "expects": "There is NO \"Create PO\" action: the channel read is the sole entry point — Mercenta reads channel orders, it does not invent them."
+    },
+    {
+      "id": "po-ingest-simulated-provenance",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — channel ingestion — the read states its simulated provenance",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "test": "2. the read states its simulated provenance and its outcome counts",
+      "expects": "The channel read states its SIMULATED provenance and its real outcome counts — simulated data is never presented as a live channel event."
+    },
+    {
+      "id": "po-ingest-routable-filed-out-of-catalogue-refused",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — channel ingestion — routable orders are filed; out-of-catalogue is refused",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "test": "3. routable POs are filed against the brand; the out-of-catalogue PO is REFUSED with its reason",
+      "expects": "Routable channel POs are filed against the correct brand; an out-of-catalogue PO is REFUSED with its stated reason."
+    },
+    {
+      "id": "po-ingest-reread-idempotent",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — channel ingestion — a re-read files nothing new",
+      "actor": "mercenta_admin",
+      "type": "persistence",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "test": "4. a re-read files nothing new (the guard is on by default)",
+      "expects": "Re-reading the same channel feed files NOTHING new — the duplicate guard is on by default, so double-filing is impossible."
+    },
+    {
+      "id": "po-ingest-filed-opens-record",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — channel ingestion — a filed channel order opens its real record",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "test": "5. a filed channel PO opens its real record",
+      "expects": "A filed channel PO opens its REAL record — the ingested order is a genuine, navigable entity."
+    },
+    {
+      "id": "po-ack-duty-on-hold",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledgement duties — the on-hold duty is stated or marked unverified",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-ack-duties.spec.ts",
+      "test": "1. the panel states the channel’s on-hold duty, or says it is unverified",
+      "expects": "The acknowledgement panel states the channel's on-hold duty, or says it is unverified — it never claims a rule it cannot verify."
+    },
+    {
+      "id": "po-ack-duty-completeness",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledgement duties — the completeness rule is stated with real data",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-ack-duties.spec.ts",
+      "test": "2. the panel states the completeness rule, and the verdict is real data",
+      "expects": "The panel states the completeness rule and its verdict is REAL data drawn from the record."
+    },
+    {
+      "id": "po-ack-duty-omitted-lines-conditional",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledgement duties — the omitted-lines notice is conditional",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-ack-duties.spec.ts",
+      "test": "3. the omitted-lines notice appears ONLY when the record carries that fact",
+      "expects": "The omitted-lines notice appears ONLY when the record genuinely carries that fact — no unconditional warning."
+    },
+    {
+      "id": "po-ack-duty-submission-recorded",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledgement duties — a real submission is recorded and the rules survive",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-ack-duties.spec.ts",
+      "test": "4. a submission through the real surface is recorded and the rules survive it",
+      "expects": "A submission through the real surface is RECORDED and the acknowledgement rules still hold afterwards."
+    },
+    {
+      "id": "po-admin-ack-list-window-owner",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — admin acknowledgement — the list presents the window from its owner",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-admin-ack-surface.spec.ts",
+      "test": "1. the list and its record preview present the window from its owner",
+      "expects": "The admin list and its record preview present the acknowledgement window read from its ONE owner, not a copy."
+    },
+    {
+      "id": "po-admin-ack-detail-window-classification",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — admin acknowledgement — the detail shows window, classification and permitted acceptance",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-admin-ack-surface.spec.ts",
+      "test": "2. the detail is the owner’s window, its classification, and the acceptance it permits",
+      "expects": "The detail shows the owner's window, its classification and the acceptance it permits — all from the single source."
+    },
+    {
+      "id": "po-admin-ack-decided-no-dead-accept",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — admin acknowledgement — a decided order offers no dead acceptance",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/po-admin-ack-surface.spec.ts",
+      "test": "3. a decided order states the owner’s reason and offers no dead acceptance",
+      "expects": "A decided order states the owner's reason and offers NO dead acceptance control — a no-op button is refused by construction."
+    },
+    {
+      "id": "po-brand-ack-window-owner",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — brand acknowledgement — the window is presented from its owner",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-brand-ack-surface.spec.ts",
+      "test": "1. the window is presented from its owner — due/urgent, never overdue or NaN",
+      "expects": "The brand acknowledgement window is presented from its owner as due/urgent — NEVER overdue and never a NaN."
+    },
+    {
+      "id": "po-brand-ack-panel-window",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — brand acknowledgement — the panel states the window the decision is made inside",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-brand-ack-surface.spec.ts",
+      "test": "2. the acknowledgement panel states the window the decision is made inside",
+      "expects": "The acknowledgement panel states the window the brand's decision is being made inside."
+    },
+    {
+      "id": "po-brand-ack-closing-both-options",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — brand acknowledgement — a closing window offers both the brand decision and Mercenta draft",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-brand-ack-surface.spec.ts",
+      "test": "3. the closing window offers BOTH the brand’s own decision and Mercenta’s draft",
+      "expects": "A closing window offers BOTH the brand's own decision and Mercenta's on-behalf draft — the brand is never left with a single forced path."
+    },
+    {
+      "id": "po-brand-ack-amend-in-window",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — brand acknowledgement — an acknowledged order can be amended",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-brand-ack-surface.spec.ts",
+      "test": "4. an acknowledged order can be AMENDED inside the update window",
+      "expects": "An acknowledged order can be AMENDED inside the update window — the decision is revisable while the window is open."
+    },
+    {
+      "id": "po-notify-fanout-founder",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — notification fan-out — the founder runs the fan-out and reads its real outcome",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/po-notification-fanout.spec.ts",
+      "test": "1. the founder runs the fan-out and reads what was delivered, refused and drafted",
+      "expects": "The founder runs the acknowledgement fan-out and reads what was delivered, refused and drafted — the outcome is real, not assumed."
+    },
+    {
+      "id": "po-notify-brand-reminders",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — notification fan-out — a brand sees the reminders actually sent to it",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-notification-fanout.spec.ts",
+      "test": "2. the brand sees the reminders Mercenta actually sent it",
+      "expects": "The brand sees the acknowledgment reminders Mercenta ACTUALLY sent it — sent messages, not a fabricated log."
+    },
+    {
+      "id": "po-onbehalf-draft-approved",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — on-behalf draft — a brand approves Mercenta's on-behalf draft",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-onbehalf.spec.ts",
+      "test": "1. the brand reads Mercenta’s draft for the on-behalf PO and approves it",
+      "expects": "The brand reads Mercenta's draft for the on-behalf PO and approves it — the draft is a proposal the brand owns."
+    },
+    {
+      "id": "po-onbehalf-not-offered-mid-window",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — on-behalf draft — the draft is not offered mid-window",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/po-onbehalf.spec.ts",
+      "test": "2. the draft is NOT offered for a purchase order still in the middle of its window",
+      "expects": "The on-behalf draft is NOT offered for an order still in the middle of its response window — the brand's own window is respected."
+    },
+    {
+      "id": "po-onbehalf-console-override-attributed",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — on-behalf draft — Mercenta's override is attributed",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-onbehalf.spec.ts",
+      "test": "3. Mercenta’s console sees the SAME draft and records an attributed override",
+      "expects": "Mercenta's console sees the SAME draft and an override is recorded with its actor attribution."
+    },
+    {
+      "id": "po-onboard-tour-kb-owner-rule",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — onboarding surfaces — the tour and KB teach the owner's rule",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "1. the brand tour step and the KB article it links to teach the OWNER’s rule",
+      "expects": "The brand tour step and the KB article it links to both teach the OWNER's acknowledgement rule — never a re-typed copy."
+    },
+    {
+      "id": "po-onboard-wizard-guidance-owner-rule",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — onboarding surfaces — the wizard guidance states the owner's rule",
+      "actor": "brand_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "2. the wizard’s operational-guidance step states the OWNER’s rule",
+      "expects": "The onboarding wizard's operational-guidance step states the OWNER's rule — the rule is read, not duplicated."
+    },
+    {
+      "id": "po-onboard-admin-tour-preview-owner-rule",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — onboarding surfaces — the admin tour preview shows the owner's rule",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "3. the admin tour-management preview shows the OWNER’s rule (never a copy)",
+      "expects": "The admin tour-management preview shows the OWNER's rule, never a copy — a rule edit propagates everywhere."
+    },
+    {
+      "id": "po-onboard-admin-pipeline-link",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — onboarding surfaces — the pipeline states the link for every record",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "test": "4. the admin onboarding pipeline states the LINK for every record it shows",
+      "expects": "The admin onboarding pipeline states the LINK for every record it shows — each acknowledgment surface is reachable from the pipeline."
+    },
+    {
+      "id": "po-revision-refused-until-read",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — order revision — a change is refused until the channel is read",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/po-revision-surfaces.spec.ts",
+      "test": "1. the simulated change is refused until the channel has been read",
+      "expects": "A simulated channel change is REFUSED until the channel has first been read — a revision cannot precede the order it revises."
+    },
+    {
+      "id": "po-revision-console-change-list",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — order revision — the console shows every revision with its change list",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/po-revision-surfaces.spec.ts",
+      "test": "2. the console shows every recorded revision with its change list",
+      "expects": "The console shows EVERY recorded revision with its change list — the full revision history is preserved, never overwritten."
+    },
+    {
+      "id": "po-revision-brand-notified",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — order revision — the brand is told what the channel changed",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/po-revision-surfaces.spec.ts",
+      "test": "3. the brand is told the channel changed its order, and what changed",
+      "expects": "The brand is told that the channel changed its order AND what changed — the revision reaches the tenant it affects."
+    },
+    {
+      "id": "po-ack-price-above-refused",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledged price — a price above the order price is refused",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/ack-invoice-price.spec.ts",
+      "test": "1. a price ABOVE the order price is refused with the channel rule",
+      "expects": "An acknowledged price ABOVE the order price is REFUSED with the channel rule stated — a brand cannot raise the price above the order."
+    },
+    {
+      "id": "po-ack-price-lower-accepted",
+      "capability": "commerce_logistics",
+      "journey": "purchase order & documents — acknowledged price — a lower price is accepted, warned and shown",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/ack-invoice-price.spec.ts",
+      "test": "2. a LOWER acknowledged price is accepted, warned, and shown on the order",
+      "expects": "A LOWER acknowledged price is accepted, warned about, and shown on the order — the reduced price is visible, not hidden."
     }
   ]
 }

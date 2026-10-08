@@ -117,10 +117,14 @@ if (c) {
    *
    * §E2E-2 — the SAME obligation is extended to the onboarding & acquisition
    * domain (`oa-*`), so each enumerated scenario in that domain is pinned to the
+   * real test that proves it.
+   *
+   * §E2E-3 — the SAME obligation is extended to the purchase-order & documents
+   * domain (`po-*`), so each enumerated scenario in that domain is pinned to the
    * real test that proves it. A self-check below asserts the prefix set covers
-   * BOTH enumerated domains and never the auto-seeded `spec-*` rows.
+   * ALL THREE enumerated domains and never the auto-seeded `spec-*` rows.
    */
-  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-)/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -130,15 +134,18 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
   );
-  /* §E2E-2 — self-check: the enumeration prefix set itself must be what we think it
+  /* §E2E-3 — self-check: the enumeration prefix set itself must be what we think it
    * is, so a future rename cannot silently drop a whole domain's traceability. */
   test(
-    'the traceable-prefix set covers both enumerated domains (pf- and oa-)',
-    SCENARIO_TEST_REQUIRED.test('pf-x') && SCENARIO_TEST_REQUIRED.test('oa-x') && !SCENARIO_TEST_REQUIRED.test('spec-x'),
+    'the traceable-prefix set covers all three enumerated domains (pf-, oa- and po-)',
+    SCENARIO_TEST_REQUIRED.test('pf-x') &&
+      SCENARIO_TEST_REQUIRED.test('oa-x') &&
+      SCENARIO_TEST_REQUIRED.test('po-x') &&
+      !SCENARIO_TEST_REQUIRED.test('spec-x'),
     String(SCENARIO_TEST_REQUIRED)
   );
 

@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 541,
+    "total_entries": 542,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the E2E-2 increment (e2e-coverage-onboarding-acquisition-domain added as built). Previously: the credential-vault increment (discovered-credential-vault not_started -> built) AND the redesign-legacy-page-shell-backlog staleness repair (not_started -> removed). Snapshot only.",
+      "_note": "Recomputed 2026-10-08 after the E2E-3 increment (e2e-coverage-purchase-order-documents-domain added as built). Previously: the E2E-2 increment (e2e-coverage-onboarding-acquisition-domain added as built). Snapshot only.",
       "built_and_tested": 337,
-      "built": 170,
+      "built": 171,
       "not_started": 12,
       "removed": 5,
       "deferred": 9,
@@ -6247,6 +6247,15 @@
       "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-2 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
       "status": "built",
       "evidence": "`docs/scenario-catalogue.json` 126 -> 174 scenarios (48 `oa-*` onboarding & acquisition, all traceable to a test; `onboarding_acquisition` 10 -> 58). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (was 15/15; 174 scenarios · 79 traceable · 8 capabilities). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string => 2 failures; (B) a narrowed prefix set `/^pf-/` => 1 failure (the self-check), exit 1; (C) an `oa-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 590656211bee2ac00f518b01524268c02290bed48707631205a2ac80e87c9b19; gate sha256 c9297af6f9544c9d0e506027bfb935e4b587c90862684800046a8447f5d721a5). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0; lint 0; build ✓. BROWSER LEG: the ten domain specs in real Chromium = 48 passed / 0 failed. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-purchase-order-documents-domain",
+      "description": "E2E-3 (2026-10-08) — E2E COVERAGE, THE PURCHASE-ORDER & DOCUMENTS DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the purchase-order & documents domain: 46 `po-*` scenarios added (174 -> 220 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 46 span eleven specs — PO document pack (10) · PO lifecycle (6) · channel PO ingestion (5) · acknowledgement duties (4) · admin acknowledgement surface (3) · brand acknowledgement surface (4) · notification fan-out (2) · on-behalf draft (3) · acknowledgement onboarding surfaces (4) · channel-issued order revision (3) · acknowledged price (2). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `po-*` scenario, like every `pf-*` and `oa-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to exactly `pf-` + `oa-` + `po-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-3 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 174 -> 220 scenarios (46 `po-*` purchase order & documents, all traceable to a test; `commerce_logistics` 15 -> 61). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (220 scenarios · 125 traceable · 8 capabilities). MUTATION-PROVED (see the session report). `npm run validate:all` PASS / 0 FAIL; typecheck 0; build ✓. BROWSER LEG: the eleven domain specs in real Chromium = 46 passed / 0 failed. Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     },
