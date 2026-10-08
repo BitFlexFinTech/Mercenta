@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 311 · **Capabilities:** 8
+**Scenarios:** 327 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -25,18 +25,33 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | Capability | Scenarios |
 |---|---|
 | brands_marketing | 3 |
-| commerce_logistics | 135 |
+| commerce_logistics | 142 |
 | finance | 32 |
 | founder | 5 |
 | integrations | 3 |
 | onboarding_acquisition | 58 |
 | operations | 7 |
-| platform | 68 |
+| platform | 77 |
 
 ## Scenarios
 
 | id | capability | actor | type | spec | proved by (test) |
 |---|---|---|---|---|---|
+| co-admin-approvals-rows | commerce_logistics | mercenta_admin | happy | `e2e/compliance-gate.spec.ts` | `4. Admin Compliance Approvals renders doc rows` |
+| co-admin-compliance-page | platform | mercenta_admin | happy | `e2e/legal-agreements.spec.ts` | `3. Admin Compliance page renders` |
+| co-agreements-admin-crm-tab | platform | mercenta_admin | happy | `e2e/legal-agreements.spec.ts` | `2. Admin CRM shows agreement section tab` |
+| co-agreements-continue-gated | platform | brand_user | happy | `e2e/legal-agreements.spec.ts` | `1. Brand sees agreement sections and Continue disabled until both accepted` |
+| co-brand-upload-reflects-immediately | commerce_logistics | brand_user | happy | `e2e/compliance-gate.spec.ts` | `5. brand document Upload reflects immediately (no reload, no approval)` |
+| co-docverif-automated-verdict | platform | mercenta_admin | happy | `e2e/document-verification.spec.ts` | `1. automated verification records a real verdict (simulated provider)` |
+| co-docverif-conditional-label | platform | brand_user | happy | `e2e/document-verification.spec.ts` | `6. the conditional category requirement is labelled as conditional` |
+| co-docverif-manual-approval | platform | mercenta_admin | happy | `e2e/document-verification.spec.ts` | `3. a manual approval still names the operator and the manual method` |
+| co-docverif-manual-rejection | platform | mercenta_admin | happy | `e2e/document-verification.spec.ts` | `2. manual rejection is recorded with the operator as the verifier` |
+| co-docverif-rejected-reason-replace | platform | brand_user | happy | `e2e/document-verification.spec.ts` | `5. a rejected document shows its failure reason and a Replace action` |
+| co-docverif-submission-not-approved | platform | brand_user | happy | `e2e/document-verification.spec.ts` | `4. a submission becomes "under review" and is never auto-approved` |
+| co-gate-blocked-zero-docs | commerce_logistics | brand_user | refusal | `e2e/compliance-gate.spec.ts` | `1. 0/4 docs -> catalog blocked` |
+| co-gate-cleared-enables-catalog | commerce_logistics | brand_user | happy | `e2e/compliance-gate.spec.ts` | `3. 4/4 docs + signed/active contract -> catalog enabled` |
+| co-gate-tenant-blocked-document-state | commerce_logistics | brand_user | refusal | `e2e/compliance-gate.spec.ts` | `2. a tenant blocked by its document state cannot use the catalog` |
+| co-sim-providers-zero-network | commerce_logistics | super_admin | happy | `e2e/compliance-sim.spec.ts` | `Companies House verify + HMRC sync/file run with zero network calls` |
 | fi-billing-invoice-fee-commissions | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `1. Invoice: monthly fee + commissions` |
 | fi-billing-remittance-net | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `2. Remittance: gross - commission - deductions = net` |
 | fi-billing-shipping-margin | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `4. Shipping margin: carrier cost vs. marked-up price` |
@@ -190,6 +205,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | sl-appointment-eta-coverage-detail | commerce_logistics | brand_user | happy | `e2e/delivery-appointment.spec.ts` | `2. the ETA-coverage tile opens the detail, and every consignment names a documented state` |
 | sl-appointment-inspector-window-verdict | commerce_logistics | brand_user | happy | `e2e/delivery-appointment.spec.ts` | `1. the consignment inspector shows the appointment and the window verdict` |
 | sl-appointment-window-rule-stated | commerce_logistics | brand_user | refusal | `e2e/delivery-appointment.spec.ts` | `3. the window rule is always stated — inside the window, or a refusal with a reason` |
+| sl-carrier-console-dhl-milestone | commerce_logistics | mercenta_admin | happy | `e2e/compliance-sim.spec.ts` | `DHL status button advances the shipment milestone (simulated)` |
 | sl-delta-escalation-fails-closed | commerce_logistics | mercenta_admin | refusal | `e2e/supply-route-escalation.spec.ts` | `5. the decision FAILS CLOSED — human review, no 3PL recommended` |
 | sl-delta-no-false-live-claim | commerce_logistics | mercenta_admin | refusal | `e2e/supply-route-escalation.spec.ts` | `7. the panel makes no false live claim` |
 | sl-delta-no-horizontal-overflow | commerce_logistics | mercenta_admin | responsive | `e2e/supply-route-escalation.spec.ts` | `8. no horizontal overflow at desktop and mobile widths` |

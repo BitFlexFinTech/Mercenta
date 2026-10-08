@@ -138,8 +138,15 @@ if (c) {
    * enumerated scenario there is pinned to the real test that proves it. The
    * self-check below now asserts the prefix set covers ALL FIVE enumerated
    * domains and never the auto-seeded `spec-*` rows.
+   *
+   * §E2E-6 — the SAME obligation is extended to the compliance domain
+   * (`co-*`: the compliance gate · the compliance simulation (Companies
+   * House/HMRC) · document verification · legal agreements), so each enumerated
+   * scenario there is pinned to the real test that proves it. The self-check
+   * below now asserts the prefix set covers ALL SIX enumerated domains and never
+   * the auto-seeded `spec-*` rows.
    */
-  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-)/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-|co-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -149,20 +156,21 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance, co-* compliance) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
   );
-  /* §E2E-4/§E2E-5 — self-check: the enumeration prefix set itself must be what we
-   * think it is, so a future rename cannot silently drop a whole domain's
+  /* §E2E-4/§E2E-5/§E2E-6 — self-check: the enumeration prefix set itself must be
+   * what we think it is, so a future rename cannot silently drop a whole domain's
    * traceability. */
   test(
-    'the traceable-prefix set covers all five enumerated domains (pf-, oa-, po-, sl- and fi-)',
+    'the traceable-prefix set covers all six enumerated domains (pf-, oa-, po-, sl-, fi- and co-)',
     SCENARIO_TEST_REQUIRED.test('pf-x') &&
       SCENARIO_TEST_REQUIRED.test('oa-x') &&
       SCENARIO_TEST_REQUIRED.test('po-x') &&
       SCENARIO_TEST_REQUIRED.test('sl-x') &&
       SCENARIO_TEST_REQUIRED.test('fi-x') &&
+      SCENARIO_TEST_REQUIRED.test('co-x') &&
       !SCENARIO_TEST_REQUIRED.test('spec-x'),
     String(SCENARIO_TEST_REQUIRED)
   );

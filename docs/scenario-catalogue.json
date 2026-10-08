@@ -3098,6 +3098,166 @@
       "spec": "e2e/xero.spec.ts",
       "test": "5. Connection status or credentials control present",
       "expects": "A connection status or a credentials control is present on the surface — the provider is always operable or honestly reported as not connected."
+    },
+    {
+      "id": "co-gate-blocked-zero-docs",
+      "capability": "commerce_logistics",
+      "journey": "compliance — the gate — a tenant with no approved documents has its catalogue locked",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "test": "1. 0/4 docs -> catalog blocked",
+      "expects": "A tenant whose required documents are not approved sees 'Catalog Locked' (disabled) and 'Catalog Sync Disabled', with each blocking document named; no cleared-tenant control leaks and the compliance gate card reports the same state."
+    },
+    {
+      "id": "co-gate-tenant-blocked-document-state",
+      "capability": "commerce_logistics",
+      "journey": "compliance — the gate — a tenant blocked by its document state cannot use the catalogue",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "test": "2. a tenant blocked by its document state cannot use the catalog",
+      "expects": "The gate blocks the catalogue on the DOCUMENT state alone — including the category document — for the blocked tenant."
+    },
+    {
+      "id": "co-gate-cleared-enables-catalog",
+      "capability": "commerce_logistics",
+      "journey": "compliance — the gate — a fully cleared tenant gets an enabled catalogue action",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "test": "3. 4/4 docs + signed/active contract -> catalog enabled",
+      "expects": "A tenant with all required documents approved sees an enabled 'Add New Product' action and no 'Catalog Locked' control — the cleared path is proven against real tenants."
+    },
+    {
+      "id": "co-admin-approvals-rows",
+      "capability": "commerce_logistics",
+      "journey": "compliance — admin approvals — the Compliance Approvals surface renders document rows",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "test": "4. Admin Compliance Approvals renders doc rows",
+      "expects": "The operator's Compliance Approvals surface renders document rows carrying their status (approved / missing)."
+    },
+    {
+      "id": "co-brand-upload-reflects-immediately",
+      "capability": "commerce_logistics",
+      "journey": "compliance — brand upload — an upload reflects immediately and is never an approval",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "test": "5. brand document Upload reflects immediately (no reload, no approval)",
+      "expects": "A brand Upload moves the row's OWN badge to 'under review' with no reload, and the gate still blocks with the same count of non-approved documents — an upload is never an approval."
+    },
+    {
+      "id": "co-sim-providers-zero-network",
+      "capability": "commerce_logistics",
+      "journey": "compliance — simulation — Companies House verify and HMRC VAT filing run simulated with zero network calls",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/compliance-sim.spec.ts",
+      "test": "Companies House verify + HMRC sync/file run with zero network calls",
+      "expects": "The Super-Admin Compliance panel states Companies House and HMRC as simulation, a Verify (simulated) action produces a verified record, a VAT Sync + File produces filing history, and NO external provider call is made."
+    },
+    {
+      "id": "co-docverif-automated-verdict",
+      "capability": "platform",
+      "journey": "compliance — document verification — automated verification records a real verdict",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "1. automated verification records a real verdict (simulated provider)",
+      "expects": "Running automated verification records its verdict from the provider result, shown as 'Automated verification' with the simulated/failed outcome — it can only appear if the seam produced one."
+    },
+    {
+      "id": "co-docverif-manual-rejection",
+      "capability": "platform",
+      "journey": "compliance — document verification — a manual rejection names the operator as verifier",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "2. manual rejection is recorded with the operator as the verifier",
+      "expects": "A manual rejection records 'Manual verification' with the operator named as the verifier and a failed result."
+    },
+    {
+      "id": "co-docverif-manual-approval",
+      "capability": "platform",
+      "journey": "compliance — document verification — a manual approval names the operator and the method",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "3. a manual approval still names the operator and the manual method",
+      "expects": "A manual approval records 'Manual verification' naming the operator, so a manual pass is distinguishable from an automated one."
+    },
+    {
+      "id": "co-docverif-submission-not-approved",
+      "capability": "platform",
+      "journey": "compliance — document verification — a brand submission is under review and never auto-approved",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "4. a submission becomes \"under review\" and is never auto-approved",
+      "expects": "A brand submission moves the document to 'under review' and the requirement stays blocked — submission is never auto-approval."
+    },
+    {
+      "id": "co-docverif-rejected-reason-replace",
+      "capability": "platform",
+      "journey": "compliance — document verification — a rejected document shows its reason and a Replace action",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "5. a rejected document shows its failure reason and a Replace action",
+      "expects": "A rejected document shows its failure reason and a Replace action; replacing supersedes the rejected version and re-submits (still blocked)."
+    },
+    {
+      "id": "co-docverif-conditional-label",
+      "capability": "platform",
+      "journey": "compliance — document verification — a conditional category requirement is labelled conditional",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "test": "6. the conditional category requirement is labelled as conditional",
+      "expects": "A conditional category requirement is labelled 'conditional', so a brand is never told a conditional document is unconditionally required."
+    },
+    {
+      "id": "co-agreements-continue-gated",
+      "capability": "platform",
+      "journey": "compliance — legal agreements — onboarding step 5 gates Continue until both agreements are accepted",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/legal-agreements.spec.ts",
+      "test": "1. Brand sees agreement sections and Continue disabled until both accepted",
+      "expects": "Onboarding step 5 shows the Logistics SLAs and Chargeback Remediation sections; Continue stays disabled until BOTH are accepted, then becomes enabled."
+    },
+    {
+      "id": "co-agreements-admin-crm-tab",
+      "capability": "platform",
+      "journey": "compliance — legal agreements — the admin CRM shows the agreement section tab",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/legal-agreements.spec.ts",
+      "test": "2. Admin CRM shows agreement section tab",
+      "expects": "The admin Brand CRM shows an Agreements tab rendering both sections (Logistics SLAs, Chargeback Indemnity) for a real brand."
+    },
+    {
+      "id": "co-admin-compliance-page",
+      "capability": "platform",
+      "journey": "compliance — admin — the Compliance Approvals page renders",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/legal-agreements.spec.ts",
+      "test": "3. Admin Compliance page renders",
+      "expects": "The operator's Compliance Approvals page renders document status cells (approved / missing)."
+    },
+    {
+      "id": "sl-carrier-console-dhl-milestone",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier console — a DHL status request advances the shipment milestone",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/compliance-sim.spec.ts",
+      "test": "DHL status button advances the shipment milestone (simulated)",
+      "expects": "On the operator's Logistics Hub, the Carrier API console's 'DHL status → next milestone' control advances the shipment milestone through the simulation and shows the transition — a carrier never logs in, so the control belongs to the surface operating the carrier account."
     }
   ]
 }

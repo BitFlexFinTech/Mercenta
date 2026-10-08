@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 547,
+    "total_entries": 549,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6382,6 +6382,24 @@
       "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-5 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
       "status": "built",
       "evidence": "`docs/scenario-catalogue.json` 286 -> 311 scenarios (25 `fi-*` finance, all traceable to a test; `finance` 7 -> 32). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (311 scenarios · 216 traceable · 8 capabilities; was 16/16 at 286). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in an `fi-*` scenario => 2 failures, exit 1; (B) the prefix set narrowed with `fi-` dropped => 1 failure (the self-check), exit 1; (C) an `fi-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 7f8a6db83eb7cb3913e122c613d3612b3d1a4bdc10e4cba2d6879ab6ce9d409e; gate sha256 b37e44d8bea72302b630e1851b54a67abe6110fb509fbe6bfee43858fe31668a). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — every in-domain spec in real Chromium = 30 passed / 0 failed / 0 skipped (the seven finance specs: billing 4 · brand payouts 4 · deductions 6 · disputes 5 · invoicing 3 · operating costs 3 · Xero 5), covering all 25 scenario declarations. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-compliance-domain",
+      "description": "E2E-6 (2026-10-08) — E2E COVERAGE, THE COMPLIANCE DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the compliance domain: 15 `co-*` scenarios added (286 -> 311 was E2E-5; this row adds the 15 compliance rows of the 311 -> 327 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 15 span FOUR specs — the compliance gate (5) · the compliance simulation, Companies House/HMRC (1) · document verification (6) · legal agreements (3). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `co-*` scenario, like every `pf-*`/`oa-*`/`po-*`/`sl-*`/`fi-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to exactly `pf-` + `oa-` + `po-` + `sl-` + `fi-` + `co-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary is EVIDENCE-BASED: the specs whose SUBJECT is compliance (the gate, the documents that gate the catalogue, the agreements, and the compliance simulation), matching the app own navigation (AdminShell section Compliance -> Compliance Approvals; BrandShell section Compliance -> UK Compliance) — `compliance-sim.spec.ts` second describe is a CARRIER/DHL milestone (logistics, not compliance) and is enumerated under the logistics domain instead (see `e2e4-logistics-coverage-gap-dhl-carrier-console`). No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-6 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 311 -> 327 scenarios (15 `co-*` compliance, all traceable to a test; `commerce_logistics` 135 -> 142, `platform` 68 -> 77, incl. the +1 `sl-*` gap fix). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (327 scenarios · 232 traceable · 8 capabilities). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in a `co-*` scenario => 2 failures, exit 1; (B) the prefix set narrowed with `co-` dropped => 1 failure (the self-check), exit 1; (C) a `co-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 4a58a3bd85235513a2788522bcdb97aa304cde6a9e4490d7ed32edc7fe8e27f5; gate sha256 b51fadebe5b1266cba4642ea5fd105d3750643d2d826891111f2ae4e13b2f8f1). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — the four compliance specs in real Chromium = 16 passed / 0 failed / 0 skipped (compliance gate 5 · compliance simulation 2 · document verification 6 · legal agreements 3), covering all 15 co-* declarations plus the +1 logistics gap fix. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e4-logistics-coverage-gap-dhl-carrier-console",
+      "description": "E2E-6 (2026-10-08) — COVERAGE GAP FIXED AT SOURCE (rule 07). While enumerating the compliance domain this session, `e2e/compliance-sim.spec.ts` was found to hold a SECOND describe whose subject is the CARRIER console — a DHL milestone control on the operator Logistics Hub — i.e. a logistics test, not compliance. The E2E-4 shipment/logistics enumeration (`sl-*`) did not name it (its 66 scenarios never included it), so that single in-domain test was an un-enumerated coverage gap: only the auto-seeded `spec-compliance-sim` row named the spec. FIXED AT SOURCE rather than recorded: it is now enumerated as `sl-carrier-console-dhl-milestone`, taking the shipment/logistics enumeration 66 -> 67. No application runtime change.",
+      "source": "Discovered during E2E-6 while defining the compliance domain boundary; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
+      "status": "built",
+      "evidence": "New scenario `sl-carrier-console-dhl-milestone` (`docs/scenario-catalogue.json`, `sl-*` 66 -> 67), pinned to the real test `DHL status button advances the shipment milestone (simulated)` in `e2e/compliance-sim.spec.ts`. The gate (16/16) now requires its proving test as it does for every `sl-*` scenario, and the browser leg ran it green (16 passed / 0 failed across the four specs). Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     }
