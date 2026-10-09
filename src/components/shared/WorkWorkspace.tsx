@@ -500,7 +500,7 @@ export function WorkWorkspace({
               </span>
             )}
             <Input
-              label=""
+              ariaLabel="Search work"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search work…"

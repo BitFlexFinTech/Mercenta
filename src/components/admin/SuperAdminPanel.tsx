@@ -433,6 +433,7 @@ export function SuperAdminPanel() {
                   min="0"
                   max="1"
                   value={cfg.markupValue * 100}
+                  aria-label={`Markup percentage for ${cfg.label}`}
                   onChange={(e) => {
                     const val = Number(e.target.value) / 100;
                     updateCarrierMarkup(cfg.id, { markupValue: val });

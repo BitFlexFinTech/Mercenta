@@ -170,3 +170,118 @@ test.describe('Redesign surfaces — responsive verification (brand)', () => {
     expect(bodyText, 'no catalogue cell paints a raw URL as text').not.toMatch(/https?:\/\//i);
   });
 });
+
+/**
+ * §Wave-3 Part 4 gate — the SEARCH / FILTER / SORT table primitive
+ * (`src/components/shared/DataTable.tsx`), which renders its two admin surfaces.
+ *
+ * It used to render its OWN table markup: no `scope="col"`, no caption, no
+ * `data-table` hook, no mobile strategy (its 6–7 column table pushed the content
+ * region sideways at ≤768px) and a toolbar whose search and filter controls had
+ * NO accessible name. It now renders through the ONE canonical `DataTable`.
+ *
+ * MUTATION PROOF: restoring the old table markup fails the mobile half (a
+ * `<table>` reappears at 390px and the content region scrolls sideways);
+ * removing the toolbar's accessible names fails the control half.
+ */
+test.describe('Redesign surfaces — the search/filter/sort table primitive', () => {
+  const SURFACES = [
+    { nav: 'Global Catalog', hook: 'global-catalogue' },
+    { nav: 'Contract Cycle', hook: 'contract-cycle' },
+  ] as const;
+
+  for (const s of SURFACES) {
+    test(`${s.nav}: labelled cards below md, ONE canonical table above it, named controls`, async ({
+      page,
+    }) => {
+      // ── Mobile (390): the canonical labelled card list, never a sideways table.
+      await page.setViewportSize({ width: 390, height: 844 });
+      await loginAs(page, 'Super Admin — Tadii', 1400);
+      await page.getByTestId('dashboard-loaded').waitFor({ timeout: 12000 });
+      const toggle = page.getByTestId('app-menu-toggle');
+      if (await toggle.isVisible().catch(() => false)) {
+        await toggle.click();
+        await page.waitForTimeout(360);
+      }
+      await page.locator(`nav[aria-label="Primary"] button:has-text("${s.nav}")`).first().click();
+      await page.waitForTimeout(1000);
+
+      await expect(
+        page.locator(`table[data-table="${s.hook}"]`),
+        `${s.nav} renders labelled cards (not a table) below md`
+      ).toHaveCount(0);
+
+      const contentOverflow = await page.evaluate(() => {
+        const main = document.querySelector('main');
+        return main ? main.scrollWidth - main.clientWidth : 0;
+      });
+      expect(
+        contentOverflow,
+        `${s.nav} @390px: the content region must not scroll sideways`
+      ).toBeLessThanOrEqual(1);
+
+      const unnamed = await page.evaluate(() => {
+        const name = (el: Element) => {
+          const label = el.getAttribute('aria-label');
+          if (label && label.trim()) return label;
+          const labelledBy = el.getAttribute('aria-labelledby');
+          if (labelledBy) return labelledBy;
+          const id = el.getAttribute('id');
+          if (id && document.querySelector(`label[for="${CSS.escape(id)}"]`)) return id;
+          return el.closest('label')?.textContent ?? '';
+        };
+        return Array.from(document.querySelectorAll('input, select, textarea'))
+          .filter((el) => (el as HTMLElement).offsetParent !== null)
+          .filter((el) => !String(name(el)).trim()).length;
+      });
+      expect(unnamed, `${s.nav}: every visible control has an accessible name`).toBe(0);
+
+      // ── Desktop (1440): the ONE canonical semantic table.
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.waitForTimeout(700);
+      const table = page.locator(`table[data-table="${s.hook}"]`);
+      await expect(table).toBeVisible();
+      const heads = await table.locator('thead th').count();
+      const scoped = await table.locator('thead th[scope="col"]').count();
+      expect(heads, `${s.nav}: the table renders column headers`).toBeGreaterThan(0);
+      expect(scoped, `${s.nav}: every column header carries scope="col"`).toBe(heads);
+      await expect(table.locator('caption')).toHaveCount(1);
+    });
+  }
+});
+
+/**
+ * §Wave-3 Part 4 gate — the Helpdesk FILTER chip rows are not clipped.
+ *
+ * Both chip rows were single-line `flex` rows inside a `p-0 overflow-hidden` card,
+ * so at 768px the priority chips (All/Urgent/High/Medium/Low) measured 19px wider
+ * than the card and the last chip was cut off — invisible and unreachable, which no
+ * typecheck, build or document-level overflow check can see.
+ *
+ * MUTATION PROOF: removing `flex-wrap` from those rows fails the measurement (19 > 1).
+ */
+test('Helpdesk filter chip rows wrap instead of being clipped', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await loginAs(page, 'Super Admin — Tadii', 1400);
+  await page.getByTestId('dashboard-loaded').waitFor({ timeout: 12000 });
+  const toggle = page.getByTestId('app-menu-toggle');
+  if (await toggle.isVisible().catch(() => false)) {
+    await toggle.click();
+    await page.waitForTimeout(360);
+  }
+  await page.locator('nav[aria-label="Primary"] button:has-text("Helpdesk")').first().click();
+  await page.waitForTimeout(1000);
+
+  const overflows = await page.evaluate(() => {
+    const chipRows = Array.from(document.querySelectorAll('main div.flex')).filter((el) =>
+      /^(All|Open|Pending|Resolved)(All|Urgent|High|Medium|Low)/.test(
+        (el.textContent ?? '').replace(/\s+/g, '')
+      )
+    );
+    return chipRows.map((el) => Math.max(el.scrollWidth - el.clientWidth, 0));
+  });
+
+  expect(overflows.length, 'the Helpdesk filter chip rows render').toBeGreaterThan(0);
+  expect(Math.max(...overflows), 'no filter chip row overflows its card').toBeLessThanOrEqual(1);
+});
+

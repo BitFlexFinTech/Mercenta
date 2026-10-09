@@ -3722,6 +3722,54 @@ const UIUX_WAVE3_PART3_SCOPE = new Set([
 ]);
 
 /**
+ * §WAVE 3 PART 4 — THE TABLES / FORMS / FILTERS / DRAWERS PASS (2026-10-08).
+ *
+ * Order item 4 continues. The pass RENDERS the surfaces that carry the canonical
+ * table, form, filter and drawer primitives in a real Chromium and fixes
+ * render-only defects AT THEIR OWNERS. It is presentation + accessibility only:
+ * no business logic, data model, permission or integration change.
+ *
+ *  · `src/components/shared/DataTable.tsx` — CONSOLIDATED. It rendered its own
+ *    `<table>`; it is now the search/filter/sort/pagination LAYER over the ONE
+ *    canonical `DataTable`, so its two surfaces gained `scope="col"`, a caption,
+ *    the `data-table` hook, the below-`md` card list and named toolbar controls.
+ *  · `src/components/ui.tsx` — `Select`/`Textarea` labels were not ASSOCIATED with
+ *    their controls (no `htmlFor`/`id`); `Input` derived its id from the label text
+ *    alone (collisions); the `DataTable` column gained `className`; `Breadcrumb`
+ *    can now truncate instead of overflowing the app bar.
+ *  · `src/components/shared/workspace.tsx` — `RecordDrawer` now really is modal
+ *    (its tab cycle stays inside the panel).
+ *  · `src/components/layout/Header.tsx` — the mobile app bar fits: the context zone
+ *    may shrink and the exit control's LABEL is hidden below `sm` (the control is
+ *    not), so no header control is pushed off screen.
+ *  · `src/components/brand/BrandInventory.tsx` — the product cell renders through
+ *    the ONE owner `ProductThumb` instead of painting a raw image URL as text.
+ *  · `src/components/brand/BrandPurchaseOrders.tsx` — the row's action cluster wraps.
+ *  · The remaining files add the accessible NAME to a form control that had none
+ *    (a placeholder is not a name): `CatalogManagerAdmin`, `ContractsAdminPanel`,
+ *    `AdminAuditLog`, `BrandCRM`, `HelpdeskDashboard`, `SuperAdminPanel`,
+ *    `WorkWorkspace`, `BrandReturns`, `BrandSettings`, `BrandTeamMessages`.
+ */
+const UIUX_WAVE3_PART4_SCOPE = new Set([
+  'src/components/shared/DataTable.tsx',
+  'src/components/ui.tsx',
+  'src/components/shared/workspace.tsx',
+  'src/components/layout/Header.tsx',
+  'src/components/admin/CatalogManagerAdmin.tsx',
+  'src/components/admin/ContractsAdminPanel.tsx',
+  'src/components/admin/AdminAuditLog.tsx',
+  'src/components/admin/BrandCRM.tsx',
+  'src/components/admin/HelpdeskDashboard.tsx',
+  'src/components/admin/SuperAdminPanel.tsx',
+  'src/components/shared/WorkWorkspace.tsx',
+  'src/components/brand/BrandInventory.tsx',
+  'src/components/brand/BrandReturns.tsx',
+  'src/components/brand/BrandSettings.tsx',
+  'src/components/brand/BrandTeamMessages.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+]);
+
+/**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
  * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
  * sprint required declares its files here, exactly like every phase before it.
@@ -4102,7 +4150,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §WAVE 3 PART 3 — the brand-surface pass's declared surface (see above). */
           UIUX_WAVE3_PART3_SCOPE.has(p) ||
-          [...UIUX_WAVE3_PART3_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...UIUX_WAVE3_PART3_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §WAVE 3 PART 4 — the tables/forms/filters/drawers pass (see above). */
+          UIUX_WAVE3_PART4_SCOPE.has(p) ||
+          [...UIUX_WAVE3_PART4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

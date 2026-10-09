@@ -165,6 +165,7 @@ export function BrandCRM() {
               value={brandQuery}
               onChange={function(e) { setBrandQuery(e.target.value); }}
               placeholder="Search brands"
+              aria-label="Search brands"
               data-testid="crm-search"
               className="w-48 bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white"
             />

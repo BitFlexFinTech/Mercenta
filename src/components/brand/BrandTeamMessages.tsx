@@ -104,8 +104,8 @@ export function BrandTeamMessages() {
               </div>
               <div className="p-3 border-t border-white/[0.06] bg-ink-900">
                 <div className="flex items-center gap-2">
-                  <input type="text" value={supportDraft} onChange={(e) => setSupportDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSupportSend(); } }} placeholder="Message Mercenta support..." className="flex-1 bg-ink-850 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
-                  <button onClick={handleSupportSend} disabled={!supportDraft.trim()} className="w-8 h-8 rounded-lg bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center flex-shrink-0">
+                  <input type="text" value={supportDraft} onChange={(e) => setSupportDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSupportSend(); } }} placeholder="Message Mercenta support..." aria-label="Message Mercenta support" className="flex-1 bg-ink-850 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                  <button onClick={handleSupportSend} disabled={!supportDraft.trim()} aria-label="Send support message" className="w-8 h-8 rounded-lg bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center flex-shrink-0">
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -135,8 +135,8 @@ export function BrandTeamMessages() {
               </div>
               <div className="p-3 border-t border-white/[0.06] bg-ink-900">
                 <div className="flex items-center gap-2">
-                  <input type="text" value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleNoteSend(); } }} placeholder="Add a note for your team..." className="flex-1 bg-ink-850 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
-                  <button onClick={handleNoteSend} disabled={!noteDraft.trim()} className="w-8 h-8 rounded-lg bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center flex-shrink-0">
+                  <input type="text" value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleNoteSend(); } }} placeholder="Add a note for your team..." aria-label="Add a note for your team" className="flex-1 bg-ink-850 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                  <button onClick={handleNoteSend} disabled={!noteDraft.trim()} aria-label="Send note" className="w-8 h-8 rounded-lg bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center flex-shrink-0">
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 </div>

@@ -262,4 +262,41 @@ test.describe('P8 — inventory + the channel identifier', () => {
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);
   });
+
+/**
+ * §Wave-3 Part 4 gate — the inventory list shows a product's PICTURE, never the raw
+ * image value as text. The product cell painted `product.image` — for a seeded demo
+ * product that is a `https://picsum.photos/…` URL — as literal text inside a 32px
+ * box, which overflowed 147px at 390px as garbled overlapping text. It renders
+ * through the ONE owner (`ProductThumb`) now, as the catalogue already does.
+ *
+ * MUTATION PROOF: reverting the cell to `{p?.image ?? '📦'}` fails the text
+ * assertion on both viewports.
+ */
+test('5. the inventory list renders thumbnails, never a raw image URL as text', async ({ page }) => {
+  await loginAs(page, 'Astonish', 1500);
+  await openInventory(page);
+
+  // Desktop — the semantic table carries no URL as text.
+  const table = page.locator('table[data-table="brand-inventory"]');
+  await expect(table).toBeVisible({ timeout: 8000 });
+  expect(await table.locator('tbody').innerText(), 'no table cell paints a URL').not.toMatch(
+    /https?:\/\//i
+  );
+
+  // Mobile — the canonical card list is where the defect was visible.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(800);
+  await expect(page.locator('main ul li').first()).toBeVisible();
+  expect(await page.locator('main').innerText(), 'no card paints a URL').not.toMatch(/https?:\/\//i);
+
+  const thumbSrcs = await page
+    .locator('main ul li img')
+    .evaluateAll((els) => els.map((e) => (e as HTMLImageElement).getAttribute('src') ?? ''));
+  expect(thumbSrcs.length, 'the card list renders product thumbnails').toBeGreaterThan(0);
+  for (const src of thumbSrcs) {
+    expect(src, 'a thumbnail src is a real URL/data-URI').toMatch(/^(https?:\/\/|data:image\/)/i);
+  }
+});
+
 });

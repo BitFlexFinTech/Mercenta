@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 555,
+    "total_entries": 556,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -293,7 +293,8 @@
         "uiux-wave3-theme-alpha-shims-removal",
         "uiux-wave3-visual-regression-gate",
         "discovered-public-footer-tmp1-orphan",
-        "discovered-adminshell-chunk-size"
+        "discovered-adminshell-chunk-size",
+        "discovered-support-team-mobile-pane-overflow"
       ],
       "built_and_tested": 5,
       "built": 2,
@@ -371,8 +372,8 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-3 increment. §CHANGES THIS SESSION: `uiux-wave3-part3-brand-surfaces` not_started -> built_and_tested (the brand-surface pass: 20 views rendered, 3 render-only defects fixed at their owners, one validator assertion repaired, all gated + mutation-proved). Recomputed FROM THE ENTRIES THEMSELVES: 339 + 183 + 11 + 5 + 9 + 7 + 1 = 555. Snapshot only.",
-      "built_and_tested": 339,
+      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-4 increment. §CHANGES THIS SESSION: `uiux-wave3-part4-tables-forms-drawers` not_started -> built_and_tested (the tables/forms/filters/drawers pass: the second table primitive CONSOLIDATED onto the canonical one, the form primitives' labels associated, the drawer made truly modal, the mobile app bar freed, ten unnamed controls named, and the render-only defects fixed at their owners — all gated and mutation-proved); and ONE new row `discovered-support-team-mobile-pane-overflow` (found by measurement; a UX decision, not a mechanical fix). Recomputed FROM THE ENTRIES THEMSELVES: 340 + 183 + 11 + 5 + 9 + 7 + 1 = 556. Snapshot only.",
+      "built_and_tested": 340,
       "built": 183,
       "not_started": 11,
       "removed": 5,
@@ -5107,11 +5108,20 @@
     },
     {
       "id": "uiux-wave3-part4-tables-forms-drawers",
-      "description": "NOT DONE in Part 1. Page-level tables / forms / filters / drawers (`DataTable`, `workspace.tsx` `Queue`, `RecordDrawer`) have not been redesigned. Open-source candidates were evaluated and deliberately NOT adopted: TanStack Table / AG Grid are REFERENCE only, because the repo already has a canonical `DataTable` + `Queue` with Playwright contracts on both and replacing them is a separate larger decision",
-      "status": "not_started",
-      "evidence": "§REPOINTED 2026-10-08 (rule 07) — this cited `PROJECT_STATUS.md` \"heading 3 item 3\", a heading that no longer exists in that form (the current block's heading 3 is a pointer to the resume state). Canonical owner: `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b, order item 4 (the legacy UI-redesign backlog). Honest Wave-3 Part-1 scope statement: `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §5 and §8. Owner: Wave 3 Part 4",
+      "description": "DELIVERED (order item 4 continues, 2026-10-08). The tables / forms / filters / drawers pass was executed as ONE bounded sweep: the surfaces carrying the canonical `DataTable`, the search/filter/sort table primitive, the form primitives and `RecordDrawer` were RENDERED in a real Chromium at 1440/768/390 and MEASURED, which found defects that typecheck, lint and build cannot see. FIXED AT THEIR OWNERS: (1) `src/components/shared/DataTable.tsx` rendered its OWN `<table>` — a second presentation owner with no `scope=\"col\"`, no caption, no `data-table` hook, no mobile strategy and a toolbar whose search/filter controls had NO accessible name; it is now the search/filter/sort/pagination LAYER over the ONE canonical `DataTable`, so its two surfaces (Global Catalog, Contract Cycle) gained every canonical contract including the labelled card list below `md` (measured: at 390 the table forced 205–309px of sideways page scroll; now 0). Every capability is kept — sorting became keyboard-accessible instead of a mouse-only `<th>` click. (2) `Select` and `Textarea` rendered a `<label>` with no `htmlFor` and a control with no `id`, so EVERY select and textarea in the platform was unnamed to assistive technology; `Input` derived its id from the label text alone, so two inputs sharing a label produced the same id (fixed with `useId` ids). (3) `RecordDrawer` declared `role=\"dialog\"` + `aria-modal=\"true\"` but never contained focus — the audit measured six Tab presses moving focus onto the shell's nav filter BEHIND the open drawer. (4) The app bar pushed its notification and profile controls off a 390px viewport (content measured 580px; the shell root clips its overflow, so they were UNREACHABLE) — the context zone may shrink, the breadcrumb truncates, and the exit control's label is hidden below `sm`. (5) `BrandInventory` painted the raw `product.image` URL as literal text in a 32px box (the same defect Part 3 fixed in the Product catalog) — it now renders through the ONE owner `ProductThumb`. (6) The brand PO row's action cluster could not wrap (240px wider than the content region at 390). (7) The Helpdesk filter chip rows were clipped by their card at 768px (the last priority chip was cut off). (8) Ten surfaces had form controls with no accessible name (a placeholder is not a name).",
+      "status": "built_and_tested",
+      "evidence": "GATES, ALL EXECUTED HERE AND ALL MUTATION-PROVED (break → FAIL → restore byte-identical, hashes recorded): `e2e/record-drawer.spec.ts` test 11 (the drawer's tab cycle stays inside the panel — 1 failed when the cycle was disabled, restored sha256 ae8f6e7b4e6c7f56eea03c7bac74d9e7871e2e47b7b1d7c82274cd610b4e2e5a); `e2e/redesign-surfaces.spec.ts` — the table-primitive gate for Global Catalog + Contract Cycle (cards below md, no sideways content region, every visible control named, `scope` on every header + a caption at 1440) and the Helpdesk filter-chip gate (19px overflow with `flex-wrap` removed; title-bar names removed made it 2 failed) — restored sha256 2f220fc589e9a96f29dcfeb195356ea9972818b77efc14116d0fc350e3b2d322; `e2e/design-system.spec.ts` (every form control reachable by its label — 1 failed with Select's `htmlFor` removed, restored sha256 5b3a8f83c07d819012022c2566ebdff7e9ace852f57e6a541b24bc7c47717a64); `e2e/app-shell.spec.ts` (no app-bar control outside a 390px viewport — 1 failed with `flex-shrink-0` restored, sha256 58a4c6a7393375a81dd4eec786f190b2efe67358b5966a45f7500c0b8dbe295b); `e2e/inventory.spec.ts` test 5 (no raw image URL painted as text — 1 failed with the old cell restored, sha256 021c135caab2466140ac10c337b3aabedf2cb87c1a52d301728622cdf404a164); the Helpdesk chip gate (19px, restored sha256 350ea167841b99af6982e64d1b24156ca14d4fe4b64cf93b26649b0f2f7c1727). Browser legs re-run green: `e2e/app-shell.spec.ts` **24 passed** (including the two narrow viewports my own breadcrumb change honestly broke first — fixed, then 24 passed on re-run). Validators: `npm run validate:all` **188 PASS / 0 FAIL** after REPOINTING `scripts/validate-stage19.mjs`, whose literal `toggleSort` token pinned the retired implementation — repointed to the current canonical contract with the old one recorded inline (§Wave-3 Part 4 REPOINTED, not weakened). Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART4_SCOPE` in `validate-e6-brand-surfaces.mjs` + the mirror declaration in `validate-e7-embedded-social.mjs` (16 source files + the 5 gate specs). NOTE: TanStack Table / AG Grid remain REFERENCE ONLY — this pass consolidated Mercenta's own two table primitives; it did not adopt a dependency.",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-10-08",
+      "last_verified": "2026-10-08"
+    },
+    {
+      "id": "discovered-support-team-mobile-pane-overflow",
+      "description": "DISCOVERED 2026-10-08 by MEASURING the brand surfaces for order item 4 (Wave 3 Part 4). The brand 'Support & Team' surface (BrandTeamMessages) is a two-pane chat layout (`div.flex-1 flex gap-4 min-h-0` at line 80: the support chat beside the team pane). At 390px both panes side by side need ~86–102px more than the content region, so the surface must be scrolled SIDEWAYS at mobile widths. NOT FIXED THIS SESSION and NOT parked (rule 07): every candidate fix is a UX DECISION about what an operator must see first on a phone, not a mechanical class change, and this surface sits outside the wave's declared primitives (`DataTable`, `Queue`, `RecordDrawer`): (a) stack the two panes below `md` (chat first, context pane below); (b) hide the second pane below `md` behind an explicit toggle in the pane header; or (c) accept the sideways scroll and state it. The nav drawer is NOT involved (this is page content). Exact next action: pick (a), (b) or (c); the row then proceeds as ordinary work. Owner: Wave 3 Part 5 (the states/surface pass) or an operator decision.",
+      "status": "not_started",
+      "evidence": "MEASURED this session in a real Chromium at 390x844: `div.flex-1 flex gap-4 min-h-0` reports `scrollWidth - clientWidth = 102` and its pane parent reports 86, with nothing pushing the DOCUMENT wider (the shell's `main` is the horizontal scroll container that absorbs it, which is why every existing document-level overflow assertion passed).",
+      "source": "Order item 4 (the legacy UI-redesign backlog, `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b) — the Wave 3 Part 4 rendered audit",
+      "last_updated": "2026-10-08"
     },
     {
       "id": "uiux-wave3-part5-state-redesign",

@@ -20,6 +20,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { Badge, Button, Card, Checkbox, DataTable, Input, Select } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
+import { ProductThumb } from '@/components/shared/ProductThumb';
 import { cn } from '@/utils/cn';
 import { PackageSearch } from 'lucide-react';
 import type { InventoryMovementType, InventoryUom } from '@/types';
@@ -259,9 +260,14 @@ export function BrandInventory() {
                 const p = products.find((x) => x.sku === r.sku);
                 return (
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xl w-8 h-8 flex items-center justify-center bg-ink-900 rounded-lg">
-                      {p?.image ?? '📦'}
-                    </span>
+                    {/* §Wave-3 Part 4 — the raw `image` value was painted as TEXT
+                        here (a `picsum.photos` URL for a seeded product), so a
+                        ~45-character URL overflowed this 32px box as garbled
+                        overlapping text. It renders through the ONE owner
+                        (`ProductThumb`, §Wave-3 Part 3) like every other surface,
+                        so a URL becomes an <img> and a missing image becomes the
+                        neutral icon — never text. */}
+                    <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-lg" />
                     <div>
                       <div className="text-sm font-medium text-white">{p?.name ?? r.sku}</div>
                       <div className={cn(MONO, 'text-zinc-500')}>{r.sku}</div>

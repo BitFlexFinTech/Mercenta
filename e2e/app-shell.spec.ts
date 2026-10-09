@@ -359,4 +359,46 @@ test.describe('App Shell — responsive viewports', () => {
     await page.screenshot({ path: `${SHOTS}/desktop-admin-active-crm.png` });
   });
 });
+
+/**
+ * §Wave-3 Part 4 gate — the app bar FITS a 390px viewport.
+ *
+ * The context zone was unshrinkable (`flex-shrink-0` around a long breadcrumb), so
+ * the header's content measured 580px inside a 390px viewport; because the shell
+ * root clips its overflow, the notification and profile controls were pushed off
+ * screen and were UNREACHABLE at every mobile width — no spec noticed, because the
+ * document itself never overflowed.
+ *
+ * MUTATION PROOF: restoring `flex-shrink-0` on the context zone fails the
+ * `widestRight` assertion (580 > 390).
+ */
+test('app bar fits a mobile viewport: no header control is pushed off screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginAs(page, 'Super Admin — Tadii');
+
+  const header = page.locator('header').first();
+  await expect(header).toBeVisible({ timeout: 8000 });
+
+  const fit = await header.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const widestRight = Array.from(el.querySelectorAll<HTMLElement>('button, a, img, nav, span, div'))
+      .map((child) => child.getBoundingClientRect().right)
+      .reduce((a, b) => Math.max(a, b), box.left);
+    return {
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+      widestRight: Math.round(widestRight),
+      viewport: window.innerWidth,
+    };
+  });
+
+  expect(fit.scrollWidth, 'the app bar does not overflow its own box').toBeLessThanOrEqual(
+    fit.clientWidth + 1
+  );
+  expect(
+    fit.widestRight,
+    'no app-bar control (notifications, profile, exit) is pushed outside the viewport'
+  ).toBeLessThanOrEqual(fit.viewport + 1);
+});
+
 });

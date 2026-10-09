@@ -2788,6 +2788,36 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/components/brand/LogisticsHub.tsx',
     'src/components/brand/BrandContractView.tsx',
     'src/components/brand/BrandSelfService.tsx',
+    /**
+     * §WAVE 3 PART 4 (2026-10-08) — THE TABLES / FORMS / FILTERS / DRAWERS PASS
+     * (order item 4 continues). Same mechanism as every set above: a changed
+     * source/test file outside EVERY declared set is refused. The pass renders the
+     * surfaces carrying the canonical table/form/filter/drawer primitives and fixes
+     * render-only defects at their owners, so both the fixed sources AND the gates
+     * that prove them are declared here. Declared in
+     * `scripts/validate-e6-brand-surfaces.mjs` §UIUX_WAVE3_PART4_SCOPE.
+     */
+    'src/components/shared/DataTable.tsx',
+    'src/components/ui.tsx',
+    'src/components/shared/workspace.tsx',
+    'src/components/layout/Header.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/admin/ContractsAdminPanel.tsx',
+    'src/components/admin/AdminAuditLog.tsx',
+    'src/components/admin/BrandCRM.tsx',
+    'src/components/admin/HelpdeskDashboard.tsx',
+    'src/components/admin/SuperAdminPanel.tsx',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/components/brand/BrandInventory.tsx',
+    'src/components/brand/BrandReturns.tsx',
+    'src/components/brand/BrandSettings.tsx',
+    'src/components/brand/BrandTeamMessages.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'e2e/record-drawer.spec.ts',
+    'e2e/redesign-surfaces.spec.ts',
+    'e2e/design-system.spec.ts',
+    'e2e/app-shell.spec.ts',
+    'e2e/inventory.spec.ts',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

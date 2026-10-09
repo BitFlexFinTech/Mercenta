@@ -678,7 +678,13 @@ export function BrandPurchaseOrders() {
                     </div>
                   )}
                   </button>
-                <div className="flex items-center gap-3">
+                {/* §Wave-3 Part 4 — the action cluster may WRAP. It held its
+                    controls (acknowledgment chip, Preview, shipping documents)
+                    on one unshrinkable line, so at 390px it measured 240px wider
+                    than the content region and the page had to be scrolled
+                    sideways to reach a control. Wrapping changes nothing above the
+                    width where everything already fits. */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   {po.status === 'rejected' && (
                     <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 max-w-[220px] truncate">
                       {po.rejectionReason}
@@ -1594,6 +1600,7 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Say what Mercenta may do (your own words)"
+            aria-label="What Mercenta may do on your behalf, in your own words"
             className="min-w-[16rem] flex-1 rounded border border-white/[0.08] bg-ink-900 px-2 py-1 text-ds-micro text-white"
             data-testid={`po-on-behalf-note-${po.poNumber}`}
           />

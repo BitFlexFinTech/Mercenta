@@ -167,7 +167,7 @@ export function AdminAuditLog() {
         toolbar={
           <div className="flex flex-wrap items-center gap-2">
             <Input
-              label=""
+              ariaLabel="Search audit records"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search actor, action, brand, entity, reason…"

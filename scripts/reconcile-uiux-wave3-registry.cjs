@@ -134,10 +134,32 @@ for (const [id, description, status, evidence] of DISCOVERED) {
 
 const preserved = [];
 const replacedIds = new Set();
+/**
+ * §Wave-3 Part 4 (2026-10-08) — DEFECT FIXED AT SOURCE. The `DISCOVERED` templates
+ * are the 2026-09-20 "not done yet" statements for parts 2–5. Parts 2, 3 and 4 were
+ * each DELIVERED later and their live rows were rewritten by hand, but the templates
+ * here were never updated — so re-running this script would have SILENTLY REVERTED
+ * three delivered rows to "NOT DONE in Part 1", which is exactly the drift
+ * rule 07 forbids. A row that has since progressed past its template's status is
+ * therefore left AS IT IS: this script may create a discovered row, but it never
+ * un-delivers one.
+ */
+const liveById = new Map(entries.map((e) => [e.id, e]));
+let heldLive = 0;
 for (const e of entries) {
   if (owned.has(e.id)) {
+    const live = liveById.get(e.id);
+    const template = owned.get(e.id);
+    if (live && live.status !== template.status && template.status === 'not_started') {
+      preserved.push(live);
+      // Marked as handled so `appended` below cannot add the template a SECOND
+      // time (which Guard 1 would then refuse as a duplicate id).
+      replacedIds.add(e.id);
+      heldLive++;
+      continue;
+    }
     replacedIds.add(e.id);
-    preserved.push(owned.get(e.id));
+    preserved.push(template);
   } else {
     preserved.push(e);
   }

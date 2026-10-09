@@ -132,3 +132,54 @@ test.describe('Design System Showcase — responsive screenshots', () => {
     });
   }
 });
+
+/**
+ * §Wave-3 Part 4 gate — the FORM primitives are LABELLED.
+ *
+ * `Select` and `Textarea` rendered a `<label>` with no `htmlFor` and a control with
+ * no `id`, so the visible label was purely decorative: the control was UNNAMED to
+ * assistive technology, clicking the label did not focus it, and `getByLabel` could
+ * not find it. The Wave-3 Part 4 audit measured unnamed controls on the admin
+ * Marketing surface, the admin Helpdesk surface, brand Settings, brand Support and
+ * brand Returns as a result. `Input` derived its id from the label TEXT alone, so
+ * two inputs sharing a label ("Country") produced the same id.
+ *
+ * MUTATION PROOF: removing `htmlFor`/`id` from `Select` fails the first three
+ * assertions (getByLabel finds 0); removing them from `Textarea` fails the third.
+ */
+test('every form control on the showcase is reachable by its label', async ({ page }) => {
+  await openShowcase(page);
+  await page.getByRole('button', { name: 'Skeleton on' }).click();
+
+  // The label/control ASSOCIATION — exactly what was broken.
+  await expect(page.getByLabel('Business name')).toHaveCount(1);
+  await expect(page.getByLabel('Payout currency')).toHaveCount(1);
+  await expect(page.getByLabel('Notes')).toHaveCount(1);
+
+  const report = await page.evaluate(() => {
+    const name = (el: Element) => {
+      const aria = el.getAttribute('aria-label');
+      if (aria && aria.trim()) return aria;
+      const by = el.getAttribute('aria-labelledby');
+      if (by && document.getElementById(by)) return by;
+      const id = el.getAttribute('id');
+      if (id) {
+        const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+        if (label?.textContent?.trim()) return label.textContent;
+      }
+      return el.closest('label')?.textContent ?? '';
+    };
+    const controls = Array.from(
+      document.querySelectorAll('input:not([type=hidden]), select, textarea')
+    ).filter((el) => (el as HTMLElement).offsetParent !== null);
+    return {
+      total: controls.length,
+      unnamed: controls
+        .filter((el) => !String(name(el)).trim())
+        .map((el) => el.tagName.toLowerCase()),
+    };
+  });
+
+  expect(report.total, 'the showcase renders the form primitives').toBeGreaterThanOrEqual(4);
+  expect(report.unnamed, 'no visible form control is unnamed').toEqual([]);
+});

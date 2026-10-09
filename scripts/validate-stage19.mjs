@@ -53,8 +53,29 @@ test('deductions.category is constrained at the DATABASE boundary (026)',
 test('dispute mutations exist in data layer', api.includes('export function disputeDeduction'));
 
 const dt = read('src/components/shared/DataTable.tsx');
-test('DataTable primitive: search+sort+pagination present',
-  dt.includes('Search') && dt.includes('toggleSort') && dt.includes('pageRows'));
+/**
+ * §Wave-3 Part 4 (2026-10-08) — REPOINTED, not weakened.
+ *
+ * The previous contract was the literal token set `Search` + `toggleSort` +
+ * `pageRows`. The primitive was then CONSOLIDATED: it no longer renders its own
+ * `<table>` (it renders through the ONE canonical `DataTable`, which is what gives
+ * its two surfaces `scope="col"`, a caption, the `data-table` hook and the labelled
+ * card list below `md`), and sorting became a LABELLED control instead of a
+ * mouse-only `<th>` click — so `toggleSort` legitimately no longer exists.
+ *
+ * The INTENT is unchanged: search, filtering, sorting and pagination must all be
+ * present in this primitive. The assertion now pins the CURRENT canonical contract
+ * for each of the four capabilities AND the delegation to the canonical table.
+ */
+test('DataTable primitive: search+filter+sort+pagination present, rendered through the canonical table',
+  dt.includes('Search') &&
+    dt.includes('setQuery') &&
+    dt.includes('filters.map((f) => {') &&
+    dt.includes('f.match(r, sel)') &&
+    dt.includes('setSortKey') &&
+    dt.includes('sortDir') &&
+    dt.includes('pageRows') &&
+    dt.includes('CanonicalDataTable'));
 const cat = read('src/components/admin/CatalogManagerAdmin.tsx');
 const contracts = read('src/components/admin/ContractsAdminPanel.tsx');
 const compliance = read('src/components/admin/ComplianceApprovals.tsx');

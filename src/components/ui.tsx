@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 interface CardProps {
@@ -189,7 +189,19 @@ export function Input({
   dataTestid,
   ariaLabel,
 }: InputProps) {
-  const inputId = id || (label ? `input-${label.toLowerCase().replace(/\W+/g, '-')}` : undefined);
+  /**
+   * §Wave-3 Part 4 (2026-10-08) — the derived id now carries a `useId` suffix.
+   * It was `${label}`-derived, so two inputs sharing a visible label ("Email",
+   * "Country") both rendered the SAME id, which is invalid HTML and makes the
+   * `<label for>` association ambiguous for assistive technology. The explicit
+   * `id` prop still wins, so no caller's id contract changes.
+   */
+  const uid = useId();
+  const inputId =
+    id ||
+    (label
+      ? `input-${label.toLowerCase().replace(/\W+/g, '-')}-${uid.replace(/:/g, '')}`
+      : undefined);
   const describedBy =
     [helper ? `${inputId}-helper` : null, error ? `${inputId}-error` : null].filter(Boolean).join(' ') ||
     undefined;
@@ -234,6 +246,10 @@ interface SelectProps {
   options: { value: string; label: string }[];
   required?: boolean;
   className?: string;
+  /** §Wave-3 Part 4 — explicit id, otherwise a unique one is generated. */
+  id?: string;
+  /** Accessible name for a select rendered WITHOUT a visible label. */
+  ariaLabel?: string;
 }
 
 export function Select({
@@ -243,17 +259,33 @@ export function Select({
   options,
   required,
   className,
+  id,
+  ariaLabel,
 }: SelectProps) {
+  /**
+   * §Wave-3 Part 4 (2026-10-08) — the label is now ASSOCIATED with its control.
+   *
+   * Before: the `<label>` had no `htmlFor` and the `<select>` had no `id`, so the
+   * visible label was decorative — a screen reader announced an unnamed combobox,
+   * clicking the label did not focus the control, and the Wave-3 Part 4 audit
+   * measured exactly that on every surface using this primitive. `useId` guarantees
+   * a unique id per instance (two selects can share a label such as "Country").
+   */
+  const uid = useId();
+  const selectId = id ?? (label ? `select-${label.toLowerCase().replace(/\W+/g, '-')}-${uid.replace(/:/g, '')}` : undefined);
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+        <label htmlFor={selectId} className="block text-xs font-medium text-zinc-400 mb-1.5">
           {label} {required && <span className="text-crimson-accent">*</span>}
         </label>
       )}
       <select
+        id={selectId}
         value={value}
         onChange={onChange}
+        aria-label={ariaLabel}
+        aria-required={required || undefined}
         className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
@@ -273,6 +305,10 @@ interface TextareaProps {
   placeholder?: string;
   rows?: number;
   className?: string;
+  /** §Wave-3 Part 4 — explicit id, otherwise a unique one is generated. */
+  id?: string;
+  /** Accessible name for a textarea rendered WITHOUT a visible label. */
+  ariaLabel?: string;
 }
 
 export function Textarea({
@@ -282,19 +318,32 @@ export function Textarea({
   placeholder,
   rows = 4,
   className,
+  id,
+  ariaLabel,
 }: TextareaProps) {
+  /**
+   * §Wave-3 Part 4 (2026-10-08) — the label is now ASSOCIATED with its control,
+   * for the same reason as `Select` above: the `<label>` had no `htmlFor` and the
+   * `<textarea>` had no `id`, so every textarea in the platform was unnamed to
+   * assistive technology (the audit measured this on the admin Marketing surface,
+   * the brand Support surface and elsewhere).
+   */
+  const uid = useId();
+  const areaId = id ?? (label ? `textarea-${label.toLowerCase().replace(/\W+/g, '-')}-${uid.replace(/:/g, '')}` : undefined);
   return (
     <div className={className}>
       {label && (
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+        <label htmlFor={areaId} className="block text-xs font-medium text-zinc-400 mb-1.5">
           {label}
         </label>
       )}
       <textarea
+        id={areaId}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
+        aria-label={ariaLabel}
         className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
       />
     </div>
@@ -457,15 +506,23 @@ export function Tabs({
 }
 
 export function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
+  /**
+   * §Wave-3 Part 4 (2026-10-08) — the trail can now be SHORT (ellipsised) instead
+   * of pushing its row wider than the screen. The app bar's context zone rendered
+   * a long trail ("Operations / Work Management") as an unshrinkable block, which
+   * pushed the notification and profile controls off a 390px viewport and — because
+   * the shell root clips its overflow — made them unreachable. Nothing about the
+   * crumbs' TEXT changes; they simply use the space available.
+   */
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-zinc-500">
+    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs text-zinc-500">
       {items.map((it, i) => (
-        <span key={it.label} className="flex items-center gap-1.5">
+        <span key={it.label} className="flex min-w-0 items-center gap-1.5">
           {i > 0 && <span aria-hidden="true">/</span>}
           {it.href ? (
-            <a href={it.href} className="hover:text-brass-300">{it.label}</a>
+            <a href={it.href} className="truncate hover:text-brass-300">{it.label}</a>
           ) : (
-            <span className="text-zinc-300" aria-current="page">{it.label}</span>
+            <span className="truncate text-zinc-300" aria-current="page">{it.label}</span>
           )}
         </span>
       ))}
@@ -655,6 +712,15 @@ export interface DataTableColumn<T> {
   primary?: boolean;
   /** Hide this column below the given breakpoint (keep it at/above it). */
   hideBelow?: 'sm' | 'md' | 'lg';
+  /**
+   * §Wave-3 Part 4 — extra classes for this column's header AND cells, so a
+   * caller can express per-column presentation (e.g. `text-right` for money) that
+   * `align` alone cannot. The search/filter/sort layer in
+   * `src/components/shared/DataTable.tsx` passes its own `className` through here,
+   * which is what keeps that column contract intact now that it renders through
+   * this one owner.
+   */
+  className?: string;
 }
 
 /**
@@ -796,7 +862,7 @@ export function DataTable<T>({
                   <th
                     key={c.key}
                     scope="col"
-                    className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c))}
+                    className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c), c.className)}
                   >
                     {c.label}
                   </th>
@@ -816,7 +882,7 @@ export function DataTable<T>({
                   className={cn('border-b border-white/[0.04] hover:bg-white/[0.02]', onRowClick && 'cursor-pointer', rowClassName?.(r))}
                 >
                   {columns.map((c) => (
-                    <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c))}>
+                    <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c), c.className)}>
                       {cell(c, r)}
                     </td>
                   ))}

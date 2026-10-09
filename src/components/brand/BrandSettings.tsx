@@ -168,6 +168,7 @@ function BankSection({ brandId }: { brandId: string }) {
               value={requested[key] ?? ''}
               onChange={(e) => updateField(key, e.target.value)}
               placeholder="New value..."
+              aria-label={`New value for ${label}`}
               className="w-28 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-0.5 text-ds-micro text-zinc-300"
             />
           </div>

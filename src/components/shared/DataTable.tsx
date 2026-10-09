@@ -1,12 +1,27 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { cn } from '@/utils/cn';
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { DataTable as CanonicalDataTable } from '@/components/ui';
 
 /**
- * §Stage-19.2 — THE data-list primitive: search, filter, column sort,
- * pagination. Every admin/brand data list renders through this so real-volume
- * usability is structural, not per-screen heroics.
+ * §Stage-19.2 — the SEARCH / FILTER / SORT / PAGINATION layer over a data list.
+ *
+ * §Wave-3 Part 4 (2026-10-08) — CONSOLIDATED, not duplicated. This module used to
+ * render its OWN `<table>` markup, which meant two owners of one presentation and
+ * a second table missing every canonical contract the 24 surfaces using
+ * `@/components/ui` → `DataTable` already had: no `scope="col"`, no `<caption>`,
+ * no `data-table` hook, no empty/loading state and — the defect the Wave-3 Part 4
+ * audit measured — NO mobile strategy, so at ≤768px its 6–7 column table widened
+ * the whole content region and the page had to be scrolled sideways to read a row,
+ * while every other table on the platform rendered labelled cards.
+ *
+ * It now keeps ONLY what it uniquely owns — query, filters, sort, pagination —
+ * and renders through the canonical `DataTable`, so both of its surfaces
+ * (`CatalogManagerAdmin`, `ContractsAdminPanel`) gained the canonical semantics,
+ * the below-`md` labelled-card list, and the empty/loading/error states. No
+ * capability was removed: search, filter, sort and pagination all still work, and
+ * sorting is now keyboard- and screen-reader-reachable (it used to be a
+ * mouse-only click on a `<th>`).
  */
 
 export interface DataTableColumn<T> {
@@ -16,6 +31,7 @@ export interface DataTableColumn<T> {
   value: (row: T) => string | number;
   /** Optional custom cell rendering. */
   render?: (row: T) => ReactNode;
+  /** Appended to the header and cell classes (e.g. `text-right` for money). */
   className?: string;
 }
 
@@ -38,12 +54,30 @@ interface Props<T extends { id: string }> {
   emptyMessage?: string;
   /** §Batch-23 — Click-to-detail support. */
   onRowClick?: (row: T) => void;
+  /** Stable hook for the semantic `<table>` (`data-table="…"`). */
+  dataTable?: string;
+  /** The table's accessible name (rendered as a `sr-only` caption). */
+  caption?: string;
 }
 
-function useTableState<T extends { id: string }>({ rows, columns, rowsId = (r) => r.id, searchText, filters = [], pageSizeDefault = 10, emptyMessage = 'No records.' }: Props<T>) {
+const CONTROL =
+  'bg-ink-900 border border-white/[0.08] rounded-md text-xs text-zinc-300 focus:outline-none focus:border-brass-500/40';
+
+export function DataTable<T extends { id: string }>({
+  rows,
+  columns,
+  rowsId = (r) => r.id,
+  searchText,
+  filters = [],
+  pageSizeDefault = 10,
+  emptyMessage = 'No records.',
+  onRowClick,
+  dataTable,
+  caption = 'Data table',
+}: Props<T>) {
   const [query, setQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
-  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState('');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [pageSize, setPageSize] = useState(pageSizeDefault);
   const [page, setPage] = useState(0);
@@ -62,7 +96,6 @@ function useTableState<T extends { id: string }>({ rows, columns, rowsId = (r) =
   }, [rows, query, activeFilters, searchText, filters]);
 
   const sorted = useMemo(() => {
-    if (!sortKey) return filtered;
     const col = columns.find((c) => c.key === sortKey);
     if (!col) return filtered;
     return [...filtered].sort((a, b) => {
@@ -80,60 +113,58 @@ function useTableState<T extends { id: string }>({ rows, columns, rowsId = (r) =
   const safePage = Math.min(page, pageCount - 1);
   const pageRows = sorted.slice(safePage * pageSize, safePage * pageSize + pageSize);
 
-  function toggleSort(key: string) {
-    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else {
-      setSortKey(key);
-      setSortDir('asc');
-    }
-    setPage(0);
-  }
+  /** The canonical presentation owns label/align/primary; this layer owns order. */
+  const canonicalColumns = columns.map((c, i) => ({
+    key: c.key,
+    label: c.header,
+    className: c.className,
+    align: /text-right/.test(c.className ?? '') ? ('right' as const) : undefined,
+    primary: i === 0,
+    render: (r: T) => (c.render ? c.render(r) : String(c.value(r))),
+  }));
 
-  return {
-    rowsId, emptyMessage, query, setQuery, filters, activeFilters,
-    setActiveFilters, sorted, pageRows, pageCount, safePage, setPage,
-    pageSize, setPageSize, toggleSort, sortKey, sortDir, searchText,
-  };
-}
-
-export function DataTable<T extends { id: string }>(props: Props<T>) {
-  const t = useTableState(props);
-  const hasToolbar = Boolean(t.searchText || t.filters.length > 0);
+  const hasToolbar = Boolean(searchText || filters.length > 0);
 
   return (
     <div className="space-y-3">
-      {/* Toolbar: search + filters */}
+      {/* Toolbar: search + filters + sort. Every control carries an accessible
+          name — a placeholder is NOT one, and this toolbar previously had none. */}
       {hasToolbar && (
         <div className="flex flex-wrap items-center gap-2">
-          {t.searchText && (
+          {searchText && (
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-zinc-600 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <Search
+                className="w-3.5 h-3.5 text-zinc-600 absolute left-2.5 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+              />
               <input
-                value={t.query}
+                value={query}
                 onChange={(e) => {
-                  t.setQuery(e.target.value);
-                  t.setPage(0);
+                  setQuery(e.target.value);
+                  setPage(0);
                 }}
                 placeholder="Search…"
-                className="bg-ink-900 border border-white/[0.08] rounded-md pl-8 pr-3 py-1.5 text-xs text-white w-52 focus:outline-none focus:border-brass-500/40"
+                aria-label={`Search ${caption}`}
+                className={`${CONTROL} pl-8 pr-3 py-1.5 text-white w-52`}
               />
             </div>
           )}
-          {t.filters.map((f) => {
+          {filters.map((f) => {
             const options =
               f.explicitOptions ??
-              Array.from(new Set(props.rows.map((r) => (f.option ? f.option(r) : ''))))
+              Array.from(new Set(rows.map((r) => (f.option ? f.option(r) : ''))))
                 .filter(Boolean)
                 .sort();
             return (
               <select
                 key={f.key}
-                value={t.activeFilters[f.key] ?? 'all'}
+                value={activeFilters[f.key] ?? 'all'}
                 onChange={(e) => {
-                  t.setActiveFilters((prev) => ({ ...prev, [f.key]: e.target.value }));
-                  t.setPage(0);
+                  setActiveFilters((prev) => ({ ...prev, [f.key]: e.target.value }));
+                  setPage(0);
                 }}
-                className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
+                aria-label={`Filter by ${f.label}`}
+                className={`${CONTROL} px-2 py-1.5 cursor-pointer`}
               >
                 <option value="all">{f.label}: all</option>
                 {options.map((o) => (
@@ -144,68 +175,65 @@ export function DataTable<T extends { id: string }>(props: Props<T>) {
               </select>
             );
           })}
+          <div className="flex items-center gap-1.5">
+            <ArrowUpDown className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
+            <select
+              value={sortKey}
+              onChange={(e) => {
+                setSortKey(e.target.value);
+                setPage(0);
+              }}
+              aria-label="Sort by column"
+              className={`${CONTROL} px-2 py-1.5 cursor-pointer`}
+            >
+              <option value="">Sort: default order</option>
+              {columns.map((c) => (
+                <option key={c.key} value={c.key}>
+                  Sort: {c.header}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={!sortKey}
+              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
+              className="rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300 hover:text-white disabled:opacity-40 transition-ds duration-ds-fast"
+            >
+              {sortDir === 'asc' ? 'Asc' : 'Desc'}
+            </button>
+          </div>
           <span className="ml-auto text-ds-micro text-zinc-600">
-            {t.sorted.length} record{t.sorted.length === 1 ? '' : 's'}
+            {sorted.length} record{sorted.length === 1 ? '' : 's'}
           </span>
         </div>
       )}
 
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-            {props.columns.map((c) => (
-              <th
-                key={c.key}
-                className={cn(
-                  'text-left font-medium px-4 py-2.5 cursor-pointer select-none hover:text-zinc-300',
-                  c.className
-                )}
-                onClick={() => t.toggleSort(c.key)}
-              >
-                <span className="inline-flex items-center gap-1">
-                  {c.header}
-                  {t.sortKey === c.key &&
-                    (t.sortDir === 'asc' ? (
-                      <ArrowUp className="w-3 h-3" />
-                    ) : (
-                      <ArrowDown className="w-3 h-3" />
-                    ))}
-                </span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/[0.04]">
-          {t.pageRows.map((row) => (
-            <tr key={t.rowsId(row)} className={cn('text-zinc-300', props.onRowClick ? 'cursor-pointer hover:bg-white/[0.02]' : '')} onClick={props.onRowClick ? function() { props.onRowClick!(row); } : undefined}>
-              {props.columns.map((c) => (
-                <td key={c.key} className={cn('px-4 py-2.5', c.className)}>
-                  {c.render ? c.render(row) : String(c.value(row))}
-                </td>
-              ))}
-            </tr>
-          ))}
-          {t.pageRows.length === 0 && (
-            <tr>
-              <td colSpan={props.columns.length} className="text-center text-xs text-zinc-600 py-8">
-                {t.emptyMessage}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      {/* §Wave-3 Part 4 — the ONE canonical presentation: `scope="col"` headers,
+          a `sr-only` caption, the `data-table` hook, and the labelled card list
+          below `md` (so a narrow screen never has to scroll sideways). */}
+      <CanonicalDataTable<T>
+        columns={canonicalColumns}
+        rows={pageRows}
+        rowKey={rowsId}
+        onRowClick={onRowClick}
+        emptyMessage={emptyMessage}
+        caption={caption}
+        dataTable={dataTable}
+      />
 
       {/* Pagination */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center gap-2 text-ds-label text-zinc-500">
           <span>Rows</span>
           <select
-            value={t.pageSize}
+            value={pageSize}
             onChange={(e) => {
-              t.setPageSize(Number(e.target.value));
-              t.setPage(0);
+              setPageSize(Number(e.target.value));
+              setPage(0);
             }}
-            className="bg-ink-900 border border-white/[0.08] rounded-md px-1.5 py-1 text-xs text-zinc-300"
+            aria-label="Rows per page"
+            className={`${CONTROL} px-1.5 py-1`}
           >
             {[10, 25, 50].map((n) => (
               <option key={n} value={n}>
@@ -216,27 +244,28 @@ export function DataTable<T extends { id: string }>(props: Props<T>) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            disabled={t.safePage === 0}
-            onClick={() => t.setPage(t.safePage - 1)}
+            type="button"
+            disabled={safePage === 0}
+            onClick={() => setPage(safePage - 1)}
             className="p-1 rounded-md text-zinc-500 hover:text-white disabled:opacity-30"
             aria-label="Previous page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
           <span className="text-ds-label text-zinc-400 font-mono">
-            {t.safePage + 1} / {t.pageCount}
+            {safePage + 1} / {pageCount}
           </span>
           <button
-            disabled={t.safePage >= t.pageCount - 1}
-            onClick={() => t.setPage(t.safePage + 1)}
+            type="button"
+            disabled={safePage >= pageCount - 1}
+            onClick={() => setPage(safePage + 1)}
             className="p-1 rounded-md text-zinc-500 hover:text-white disabled:opacity-30"
             aria-label="Next page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>
     </div>
   );
 }
-

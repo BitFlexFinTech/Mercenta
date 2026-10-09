@@ -127,6 +127,7 @@ export function BrandReturns() {
             <input
               type="text"
               placeholder="Search by PO, product, or reason…"
+              aria-label="Search returns by PO, product or reason"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"

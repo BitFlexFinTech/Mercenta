@@ -320,3 +320,41 @@ test.describe('Migrated surfaces — responsive + no horizontal overflow', () =>
     await expect(page.getByTestId('brand-po-record-drawer')).toHaveCount(0);
   });
 });
+
+/**
+ * §Wave-3 Part 4 gate — the drawer is REALLY modal. `aria-modal="true"` promises
+ * assistive technology that everything outside the panel is inert, but focus was
+ * never contained: the audit measured six Tab presses moving focus onto the shell's
+ * nav filter BEHIND the open drawer. This test fails if the tab cycle ever opens
+ * again. Mutation proof: with the tab cycle removed it fails (focus leaves the
+ * dialog); with it restored it passes.
+ */
+test('11. the open drawer keeps keyboard focus inside itself', async ({ page }) => {
+  await loginAs(page, 'Mercenta Admin Hub', 1100);
+  await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
+  await page.waitForTimeout(900);
+
+  await page.locator('[data-testid^="po-preview-"]').first().click();
+  await expect(page.getByTestId('po-record-drawer')).toBeVisible({ timeout: 8000 });
+
+  const focusInside = () =>
+    page.evaluate(() => {
+      const drawer = document.querySelector('[data-testid="po-record-drawer"]');
+      const active = document.activeElement;
+      return Boolean(drawer && active && drawer.contains(active));
+    });
+
+  expect(await focusInside(), 'focus moves into the drawer on open').toBe(true);
+  for (let i = 0; i < 10; i++) {
+    await page.keyboard.press('Tab');
+    expect(await focusInside(), `focus left the dialog after ${i + 1} Tab(s)`).toBe(true);
+  }
+  for (let i = 0; i < 10; i++) {
+    await page.keyboard.press('Shift+Tab');
+    expect(await focusInside(), `focus left the dialog after ${i + 1} Shift+Tab(s)`).toBe(true);
+  }
+
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('po-record-drawer')).toHaveCount(0);
+});
+

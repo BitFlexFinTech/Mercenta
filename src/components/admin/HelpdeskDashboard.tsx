@@ -346,9 +346,14 @@ return (
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tickets…"
+                aria-label="Search tickets"
                 className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
-            <div className="flex gap-1 text-ds-micro">
+            {/* §Wave-3 Part 4 — the filter chip rows WRAP. They were single-line
+                `flex` rows inside a `p-0 overflow-hidden` card, so at 768px the
+                priority chips (All/Urgent/High/Medium/Low) measured 19px wider than
+                the card and the last chip was clipped and unreachable. */}
+            <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'open', 'pending', 'resolved'] as const).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={'px-2 py-1 rounded-md ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
@@ -356,7 +361,7 @@ return (
                 </button>
               ))}
             </div>
-            <div className="flex gap-1 text-ds-micro">
+            <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'urgent', 'high', 'medium', 'low'] as const).map((p) => (
                 <button key={p} onClick={() => setPriorityFilter(p)}
                   className={'px-2 py-1 rounded-md ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>

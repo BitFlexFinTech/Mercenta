@@ -127,7 +127,7 @@ export function Header({
         capability is NOT lost — the profile menu carries a correctly-labelled
         "Sign Out". No browser spec referenced it (grep: e2e/*.spec.ts).
       */}
-      <div className="flex min-w-0 flex-shrink-0 items-center gap-2.5">
+      <div className="flex min-w-0 flex-shrink items-center gap-2.5">
         <button
           type="button"
           ref={toggleRef}
@@ -168,7 +168,13 @@ export function Header({
           className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-micro font-medium uppercase tracking-[0.14em] text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-zinc-300"
         >
           <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-          Exit to site
+          {/* §Wave-3 Part 4 — the LABEL is hidden below `sm`, the control is not.
+              At 390px the app bar had no room for both this label and the surface
+              breadcrumb, so the breadcrumb collapsed to zero width and the
+              notification/profile controls were pushed off screen. The icon, the
+              title and the action are unchanged, so the route back to the public
+              site is still reachable — and at `sm` and above nothing changes. */}
+          <span className="hidden sm:inline">Exit to site</span>
         </button>
       </div>
 

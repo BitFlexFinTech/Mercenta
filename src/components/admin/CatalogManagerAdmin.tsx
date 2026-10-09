@@ -535,6 +535,8 @@ export function CatalogManagerAdmin() {
             searchText={function(p) { return p.name + ' ' + p.sku + ' ' + brandName(p.brandId) + ' ' + brandCategory(p.brandId); }}
             onRowClick={function(p) { setSelectedProduct(p); }}
             emptyMessage={categoryFilter !== 'all' ? 'No products in this category.' : 'No products match the current filters.'}
+            dataTable="global-catalogue"
+            caption="Global catalogue"
           />
         </WorkspaceSection>
       </WorkspaceGrid>

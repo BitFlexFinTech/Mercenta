@@ -172,6 +172,8 @@ export function ContractsAdminPanel() {
             },
           ]}
           emptyMessage="No contracts match."
+          dataTable="contract-cycle"
+          caption="Contract cycle"
         />
       </Card>
 

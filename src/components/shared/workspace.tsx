@@ -876,10 +876,23 @@ export function ActivityFeed({
 
 /* ── RECORD (OVERLAY) ──────────────────────────────────────────────────── */
 
+/** §Wave-3 Part 4 — the drawer panel's focusable set, used by the tab cycle below. */
+const DRAWER_FOCUSABLE =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 /**
  * Record drawer — the QUEUE → PREVIEW → RECORD step. Escape closes, focus moves
- * into the panel on open and returns to the invoking element on close, and the
- * panel is a labelled modal dialog for assistive technology.
+ * into the panel on open, STAYS there while it is open, and returns to the
+ * invoking element on close; the panel is a labelled modal dialog for assistive
+ * technology.
+ *
+ * §Wave-3 Part 4 (2026-10-08) — the panel now really is modal. It has always
+ * declared `role="dialog"` + `aria-modal="true"`, which promises assistive
+ * technology that the rest of the page is inert — but focus was never contained:
+ * the audit measured six Tab presses moving focus out of the open drawer and onto
+ * the shell's nav filter BEHIND it, so a keyboard user could tab into hidden
+ * controls and lose the record they were reviewing. The tab cycle is now closed
+ * inside the panel (and pulled back in if focus ever lands outside it).
  */
 export function RecordDrawer({
   open,
@@ -902,8 +915,29 @@ export function RecordDrawer({
   useEffect(() => {
     if (!open) return;
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !panel) return;
+      const items = Array.from(panel.querySelectorAll<HTMLElement>(DRAWER_FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null || el === document.activeElement
+      );
+      const first = items[0] ?? panel;
+      const last = items[items.length - 1] ?? panel;
+      const active = document.activeElement as HTMLElement | null;
+      const inside = active ? panel.contains(active) : false;
+      if (e.shiftKey) {
+        if (!inside || active === first || active === panel) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (!inside || active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
     panelRef.current?.focus();
