@@ -16,7 +16,7 @@
  * operator actually sees.
  */
 import { useMemo, useState } from 'react';
-import { Badge, Select, StatusBadge, type StatusTone } from '@/components/ui';
+import { Badge, LoadingState, Select, StatusBadge, type StatusTone } from '@/components/ui';
 import { RecordFieldList } from '@/components/shared/workspace';
 import {
   ROUTE_DERIVATION_BASIS,
@@ -51,6 +51,14 @@ export interface SupplyRouteEscalationPanelProps {
    * default is `null` — the engine then fails closed to human review.
    */
   poFrequencyPerMonth?: number | null;
+  /**
+   * §Wave 3 Part 5 — the caller's consignments are still resolving. Without
+   * this, an empty list it has not finished loading was reported as "No
+   * consignment is in scope, so there is no route to assess." — a false
+   * statement about the operator's shipments (measured by
+   * `e2e/state-coverage.spec.ts` against a slow data source).
+   */
+  loading?: boolean;
 }
 
 const DECISION_PRESENTATION: Record<LogisticsRouteDecision, { label: string; tone: StatusTone }> = {
@@ -62,6 +70,7 @@ const DECISION_PRESENTATION: Record<LogisticsRouteDecision, { label: string; ton
 export function SupplyRouteEscalationPanel({
   consignments,
   poFrequencyPerMonth = null,
+  loading = false,
 }: SupplyRouteEscalationPanelProps) {
   const { modes } = useIntegrations();
   const partner = getFulfillmentPartner(DECLARED_3PL_PARTNER);
@@ -126,7 +135,9 @@ export function SupplyRouteEscalationPanel({
         <p className="mt-1 text-ds-micro leading-relaxed text-zinc-500">{thresholds.basis}</p>
       </div>
 
-      {!selected || !evaluated ? (
+      {loading ? (
+        <LoadingState rows={2} label="Loading the consignments in scope…" />
+      ) : !selected || !evaluated ? (
         <p className="text-ds-label text-zinc-500" data-testid="supply-route-empty">
           No consignment is in scope, so there is no route to assess.
         </p>

@@ -637,6 +637,49 @@ export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden="true" className={cn('animate-pulse rounded-md bg-white/[0.06]', className)} />;
 }
 
+/**
+ * §WAVE 3 PART 5 — the canonical REGION LOADING state.
+ *
+ * One owner for "this region's data is still resolving", exactly as
+ * `EmptyState` is the one owner for "this region has no data". It exists
+ * because a data-backed surface that has no loading state does not merely look
+ * unfinished: while its query is still resolving it believes its array is empty
+ * and tells the operator so — "No purchase orders for this brand yet", a queue
+ * value of £0, a 0% confirmation rate. That is a FALSE statement about the
+ * operator's business, and it is what this owner prevents (Wave 3 Part 5,
+ * measured in a real browser: 13 surfaces did exactly this).
+ *
+ * `DataTable` already rendered this shape inline; it now renders THROUGH this
+ * owner, so there is exactly one implementation of it. Announced to assistive
+ * technology (`role="status"` + `aria-busy`) because "the data is still
+ * arriving" is information an operator needs.
+ */
+export function LoadingState({
+  rows = 3,
+  label = 'Loading…',
+  className,
+}: {
+  /** Number of skeleton bars; match the region's rough height. */
+  rows?: number;
+  label?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn('space-y-2 p-4', className)}
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      data-testid="loading-state"
+    >
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: rows }, (_, i) => (
+        <Skeleton key={i} className="h-9 w-full" />
+      ))}
+    </div>
+  );
+}
+
 export function PageHeader({
   title,
   description,
@@ -787,13 +830,9 @@ export function DataTable<T>({
     return <EmptyState title="Error loading data" description={errorMessage} action={errorAction} />;
   }
   if (loading) {
-    return (
-      <div className="space-y-2 p-4" aria-busy="true">
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-        <Skeleton className="h-9 w-full" />
-      </div>
-    );
+    /* §Wave 3 Part 5 — one owner for the loading region (`LoadingState`); this
+       primitive used to render its own copy of the same three skeleton bars. */
+    return <LoadingState rows={3} />;
   }
   if (rows.length === 0) {
     return <EmptyState title={emptyMessage ?? 'No data to display'} action={emptyAction} />;

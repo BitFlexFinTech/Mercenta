@@ -13,7 +13,7 @@ import {
   complianceDocStatusPresentation,
   documentVerificationStatusPresentation,
 } from '@/lib/statusPresentation';
-import { Badge, Button, Card, EmptyState, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, LoadingState, StatusBadge } from '@/components/ui';
 /**
  * §UI/UX Wave 2 completion — the compliance queue is migrated onto the same
  * workspace architecture as Operations Overview (frame → header → toolbar →
@@ -36,8 +36,16 @@ import type { ComplianceDocument } from '@/types';
 
 export function ComplianceApprovals() {
   const docsQuery = useComplianceDocuments();
-  const brandsList = useBrands().data?.data ?? [];
-  const productsList = useProducts().data?.data ?? [];
+  const brandsQuery = useBrands();
+  const productsQuery = useProducts();
+  const brandsList = brandsQuery.data?.data ?? [];
+  const productsList = productsQuery.data?.data ?? [];
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG. These reads used to destructure `.data`
+   * only, so while they resolved the queue announced "No compliance documents on
+   * file" (browser-measured with a slow data source).
+   */
+  const compliancePending = docsQuery.isPending || brandsQuery.isPending || productsQuery.isPending;
   const [docs, setDocs] = useState<ComplianceDocument[]>(docsQuery.data?.data ?? []);
   useEffect(function() { if (docsQuery.data) setDocs(docsQuery.data.data); }, [docsQuery.data]);
   const [expandedBrandId, setExpandedBrandId] = useState<string | null>(null);
@@ -236,7 +244,16 @@ export function ComplianceApprovals() {
         description="Every document Mercenta holds, grouped by brand. Preview a document without leaving the queue, then act."
       >
       {/* §Phase D — honest empty state: never a blank screen. */}
-      {brandMap.size === 0 && (
+      {/* §Wave 3 Part 5 — and never a FALSE empty state: while the document,
+          brand or product query is still resolving, the queue states "No
+          compliance documents on file" about a brand that may simply not have
+          loaded yet (measured in a real browser). */}
+      {compliancePending && (
+        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+          <LoadingState rows={4} label="Loading compliance documents…" />
+        </Card>
+      )}
+      {!compliancePending && brandMap.size === 0 && (
         <Card className="p-2 bg-ink-850 border-white/[0.06]">
           <EmptyState
             title={reviewFilter === 'all' ? 'No compliance documents on file' : 'No documents match this filter'}
@@ -245,7 +262,7 @@ export function ComplianceApprovals() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from(brandMap.entries()).map(function([brandId, brandDocs]) {
+      {!compliancePending && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from(brandMap.entries()).map(function([brandId, brandDocs]) {
         const brand = brandsList.find(function(b) { return b.id === brandId; });
         const brandName = brand?.profile.businessName ?? brandId;
         const total = brandDocs.length;
@@ -270,7 +287,7 @@ export function ComplianceApprovals() {
             <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-ds-micro" data-state={'doc-preview-' + d.id} onClick={function() { setDrawerId(d.id); }}>Preview</Button><Button variant="ghost" className="text-ds-micro" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-ds-micro text-emerald-300" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-ds-micro text-red-300" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
           </div>);})}<p className="text-ds-micro text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);
-      })}</div>
+      })}</div>}
       </WorkspaceSection>
 
       {/* ── QUEUE → PREVIEW → FULL DOCUMENT ────────────────────────────────

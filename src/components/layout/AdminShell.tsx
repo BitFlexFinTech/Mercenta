@@ -6,6 +6,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
+import { LoadingState } from '@/components/ui';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
@@ -397,13 +398,11 @@ export default function AdminShell() {
 function AdminViewFallback() {
   return (
     <WorkspaceFrame className="space-y-4">
-      <div
-        className="flex items-center justify-center rounded-ds-lg border border-white/5 bg-ink-850 p-10"
-        role="status"
-        aria-live="polite"
-        data-testid="admin-view-loading"
-      >
-        <span className="text-sm text-zinc-500">Loading…</span>
+      {/* §Wave 3 Part 5 — ONE owner for the loading region (`LoadingState`),
+          which announces itself to assistive technology. This fallback used to
+          be a bare "Loading…" word. */}
+      <div className="rounded-ds-lg border border-white/5 bg-ink-850" data-testid="admin-view-loading">
+        <LoadingState rows={3} label="Loading view…" />
       </div>
     </WorkspaceFrame>
   );

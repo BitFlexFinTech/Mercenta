@@ -3770,6 +3770,74 @@ const UIUX_WAVE3_PART4_SCOPE = new Set([
 ]);
 
 /**
+ * §WAVE 3 PART 5 — THE STATE PASS (2026-10-08).
+ *
+ * Order item 4 continues. The pass RENDERS every data-backed surface in a real
+ * Chromium with the application's OWN data source made slow, and fixes — at
+ * their owners — the surfaces that told the operator they had no data while the
+ * data was still loading. Presentation + accessibility only: no business logic,
+ * data model, permission or integration change.
+ *
+ *   · `src/components/ui.tsx` — NEW canonical owner `LoadingState` (the state
+ *     pair `EmptyState` already had); `DataTable` now renders its loading region
+ *     through it instead of its own copy.
+ *   · `src/components/shared/workspace.tsx` — `MetricBand`'s loading bars use
+ *     the canonical `Skeleton` and the band announces its loading state.
+ *   · `src/components/shared/DataTable.tsx` — the search/filter layer now
+ *     FORWARDS `loading`/`errorMessage`/`errorAction` to the canonical table
+ *     (its two surfaces rely on it) and never prints "0 records" while loading.
+ *   · `src/components/shared/logistics/LogisticsMapCanvas.tsx` — a `loading`
+ *     prop, so an empty model it has not finished loading is not reported as
+ *     "No consignment matches the current filters."
+ *   · The shells and fallbacks (`App.tsx`, `AdminShell`, `BrandShell`,
+ *     `BrandIntelligencePanel`, `Home.tsx`) — every hand-rolled "Loading…" label
+ *     replaced by the ONE canonical owner (the public routes' five inline
+ *     Suspense fallbacks became one shared constant).
+ *   · The thirteen surfaces the sweep measured now gate their empty/zero branch
+ *     on the query's pending state and render the canonical loading state:
+ *     `BrandPurchaseOrders`, `BrandContractView`, `BrandSelfService`,
+ *     `BrandReports`, `SalesAnalytics`, `ComplianceHub`, `LogisticsHub`,
+ *     `BrandAdvertising`, `CatalogManagerAdmin`, `ContractsAdminPanel`,
+ *     `FulfillmentTrack`, `RetailPipeline`, `ComplianceApprovals`,
+ *     `MessagesHub`, `HelpdeskDashboard`, plus `BrandCRM` and `LogisticsControl`
+ *     (found by the new gate itself).
+ *   · `scripts/validate-state-coverage.mjs` + `e2e/state-coverage.spec.ts` — THE
+ *     GATES: the render-level contract for every declared view, and the browser
+ *     proof against a slow data source.
+ */
+const UIUX_WAVE3_PART5_SCOPE = new Set([
+  'src/components/ui.tsx',
+  'src/components/shared/workspace.tsx',
+  'src/components/shared/DataTable.tsx',
+  'src/components/shared/logistics/LogisticsMapCanvas.tsx',
+  'src/components/shared/logistics/SupplyRouteEscalationPanel.tsx',
+  'src/App.tsx',
+  'src/components/layout/AdminShell.tsx',
+  'src/components/layout/BrandShell.tsx',
+  'src/components/admin/BrandIntelligencePanel.tsx',
+  'src/components/marketing/Home.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/brand/BrandContractView.tsx',
+  'src/components/brand/BrandSelfService.tsx',
+  'src/components/brand/BrandReports.tsx',
+  'src/components/brand/SalesAnalytics.tsx',
+  'src/components/brand/ComplianceHub.tsx',
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/brand/BrandAdvertising.tsx',
+  'src/components/admin/CatalogManagerAdmin.tsx',
+  'src/components/admin/ContractsAdminPanel.tsx',
+  'src/components/admin/FulfillmentTrack.tsx',
+  'src/components/admin/RetailPipeline.tsx',
+  'src/components/admin/ComplianceApprovals.tsx',
+  'src/components/admin/MessagesHub.tsx',
+  'src/components/admin/HelpdeskDashboard.tsx',
+  'src/components/admin/BrandCRM.tsx',
+  'src/components/admin/LogisticsControl.tsx',
+  'scripts/validate-state-coverage.mjs',
+  'e2e/state-coverage.spec.ts',
+]);
+
+/**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
  * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
  * sprint required declares its files here, exactly like every phase before it.
@@ -4153,7 +4221,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...UIUX_WAVE3_PART3_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §WAVE 3 PART 4 — the tables/forms/filters/drawers pass (see above). */
           UIUX_WAVE3_PART4_SCOPE.has(p) ||
-          [...UIUX_WAVE3_PART4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...UIUX_WAVE3_PART4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §WAVE 3 PART 5 — the state pass (see above). */
+          UIUX_WAVE3_PART5_SCOPE.has(p) ||
+          [...UIUX_WAVE3_PART5_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

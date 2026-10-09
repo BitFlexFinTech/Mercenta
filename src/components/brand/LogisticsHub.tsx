@@ -28,7 +28,7 @@
  *     come from the canonical status → stage map.
  */
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
-import { Badge, Button, Input, StatusBadge } from '@/components/ui';
+import { Badge, Button, Input, LoadingState, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
@@ -649,6 +649,15 @@ export function LogisticsHub() {
   const { session, products } = useApp();
   const shipmentsQuery = useShipmentsAll();
   const posQuery = usePurchaseOrders();
+  /**
+   * §Wave 3 Part 5 — THE ONE LOADING FLAG for the logistics picture. While a
+   * query resolves its `.data` is undefined, so the consignment list is [] and
+   * this surface used to state "No consignment matches the current filters."
+   * BOTH in the list and as the map's overlay — a false claim about the
+   * operator's shipments (measured in a real browser with a slow data source;
+   * the message was painted during load and gone once the data arrived).
+   */
+  const logisticsPending = shipmentsQuery.isPending || posQuery.isPending;
   const { modes, integrations } = useIntegrations();
 
   const [query, setQuery] = useState('');
@@ -1675,6 +1684,7 @@ export function LogisticsHub() {
             visibleIds={visibleIds}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            loading={logisticsPending}
             className="h-[280px] sm:h-[360px] lg:h-[440px]"
           />
           {model.schematic.length > 0 && (
@@ -1699,7 +1709,9 @@ export function LogisticsHub() {
             />
           }
         >
-          {visibleLegs.length === 0 ? (
+          {logisticsPending ? (
+            <LoadingState rows={4} label="Loading your consignments…" />
+          ) : visibleLegs.length === 0 ? (
             <p
               className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-6 text-center text-ds-body text-zinc-500"
               data-testid="logistics-list-empty"

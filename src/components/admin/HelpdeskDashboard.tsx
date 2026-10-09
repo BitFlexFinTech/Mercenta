@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useMessages } from '@/data/queries';
 import { logMessage } from '@/data/api';
-import { Badge, Button, Card, Input, Select, StatusBadge, type StatusTone } from '@/components/ui';
+import { Badge, Button, Card, Input, LoadingState, Select, StatusBadge, type StatusTone } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import type { Ticket, TicketStatus, TicketPriority } from '@/types';
@@ -54,6 +54,12 @@ export function HelpdeskDashboard() {
   const { actingStaff, staff } = useApp();
   const brandsQuery = useBrands();
   const messagesQuery = useMessages();
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG for the helpdesk queue and the open
+   * ticket. "No messages yet." was painted on a ticket whose messages were still
+   * resolving (measured in a real browser with a slow data source).
+   */
+  const helpdeskPending = brandsQuery.isPending || messagesQuery.isPending;
   const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
   const allMessages = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>('tkt-001');
@@ -432,7 +438,10 @@ return (
                 })()}
               </div>
               <div className="max-h-[300px] overflow-y-auto space-y-2 pr-1">
-                {ticketMessages.length === 0 && <p className="text-xs text-zinc-600 py-4">No messages yet.</p>}
+                {/* §Wave 3 Part 5 — "No messages yet." was shown on a selected
+                    ticket whose messages were still resolving. */}
+                {helpdeskPending && <LoadingState rows={3} label="Loading ticket messages…" />}
+                {!helpdeskPending && ticketMessages.length === 0 && <p className="text-xs text-zinc-600 py-4">No messages yet.</p>}
                 {ticketMessages.map((m: any) => (
                   <div key={m.id} className={'flex ' + (m.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
                     <div className={'max-w-[80%] rounded-xl px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-white/[0.04] text-zinc-300')}>

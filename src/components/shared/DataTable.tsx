@@ -58,6 +58,16 @@ interface Props<T extends { id: string }> {
   dataTable?: string;
   /** The table's accessible name (rendered as a `sr-only` caption). */
   caption?: string;
+  /**
+   * §Wave 3 Part 5 — forwarded to the canonical `DataTable`, whose loading and
+   * error regions it owns. The layer documented that its two surfaces "gained
+   * the canonical … empty/loading/error states" but never actually forwarded
+   * them, so `CatalogManagerAdmin`/`ContractsAdminPanel` still declared
+   * themselves empty while their queries were resolving.
+   */
+  loading?: boolean;
+  errorMessage?: string;
+  errorAction?: ReactNode;
 }
 
 const CONTROL =
@@ -74,6 +84,9 @@ export function DataTable<T extends { id: string }>({
   onRowClick,
   dataTable,
   caption = 'Data table',
+  loading,
+  errorMessage,
+  errorAction,
 }: Props<T>) {
   const [query, setQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
@@ -204,7 +217,7 @@ export function DataTable<T extends { id: string }>({
             </button>
           </div>
           <span className="ml-auto text-ds-micro text-zinc-600">
-            {sorted.length} record{sorted.length === 1 ? '' : 's'}
+            {loading ? 'Loading…' : `${sorted.length} record${sorted.length === 1 ? '' : 's'}`}
           </span>
         </div>
       )}
@@ -220,6 +233,9 @@ export function DataTable<T extends { id: string }>({
         emptyMessage={emptyMessage}
         caption={caption}
         dataTable={dataTable}
+        loading={loading}
+        errorMessage={errorMessage}
+        errorAction={errorAction}
       />
 
       {/* Pagination */}

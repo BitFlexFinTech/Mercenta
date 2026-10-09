@@ -535,6 +535,10 @@ export function CatalogManagerAdmin() {
             searchText={function(p) { return p.name + ' ' + p.sku + ' ' + brandName(p.brandId) + ' ' + brandCategory(p.brandId); }}
             onRowClick={function(p) { setSelectedProduct(p); }}
             emptyMessage={categoryFilter !== 'all' ? 'No products in this category.' : 'No products match the current filters.'}
+            /* §Wave 3 Part 5 — the table owns the loading region, so the
+               catalogue cannot declare itself empty while the product and brand
+               queries are still resolving (browser-measured defect). */
+            loading={productsQuery.isPending || brandsQuery.isPending || submissionsQuery.isPending}
             dataTable="global-catalogue"
             caption="Global catalogue"
           />

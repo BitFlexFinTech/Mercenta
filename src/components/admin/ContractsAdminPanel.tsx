@@ -172,6 +172,9 @@ export function ContractsAdminPanel() {
             },
           ]}
           emptyMessage="No contracts match."
+          /* §Wave 3 Part 5 — the table owns the loading region now, so the surface
+             cannot declare "No contracts match." while its queries still resolve. */
+          loading={contractsQuery.isPending || brandsQuery.isPending}
           dataTable="contract-cycle"
           caption="Contract cycle"
         />

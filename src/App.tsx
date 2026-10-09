@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { AppProvider, useApp } from '@/context/GlobalStateContext';
 import { useCanonicalQuerySync } from '@/data/queries';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { LoadingState } from '@/components/ui';
 import { RouteMetadata } from '@/components/shared/RouteMetadata';
 
 const HomeShell = lazy(() => import('@/components/layout/HomeShell'));
@@ -13,7 +14,8 @@ const AdminShell = lazy(() => import('@/components/layout/AdminShell'));
 
 const FALLBACK = (
   <div className="flex items-center justify-center min-h-screen bg-ink-900">
-    <div className="text-zinc-500 text-sm">Loading...</div>
+    {/* §Wave 3 Part 5 — the app root's loading state is the canonical owner too. */}
+    <LoadingState className="w-full max-w-md" rows={3} label="Loading Mercenta…" />
   </div>
 );
 

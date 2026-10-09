@@ -7,7 +7,7 @@ import { useCanonicalStoreVersion, usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { inventorySummaryForBrand } from '@/lib/inventory/inventoryLifecycle';
 import { downloadCsv } from '@/lib/csv';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, LoadingState } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
@@ -91,6 +91,27 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
     { label: 'Net PPM', value: '\u00a3' + netPPM.toLocaleString(), icon: DollarSign, trend: 'Per 1000 units shipped', trendUp: netPPM > 500 },
   ];
   const poStatuses = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'] as const;
+
+  /* §Wave 3 Part 5 — while the purchase-order query resolves, `.data` is
+     undefined so `pos` is [] and this surface rendered its EMPTY report: "No
+     accepted activity in the selected period yet.", "No purchase orders yet for
+     Astonish in the selected period." and a board of zeroed metrics. Measured in
+     a real browser with a slow data source: those strings were painted during
+     load and gone once the 5 seeded orders arrived. */
+  if (poQuery.isPending) {
+    return (
+      <WorkspaceFrame className="space-y-4" busy>
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · REPORTING"
+          title="Reports"
+          description={`Loading performance metrics for ${brandProfile.businessName || 'your brand'}.`}
+        />
+        <Card title="Reports">
+          <LoadingState rows={5} label="Loading your performance metrics…" />
+        </Card>
+      </WorkspaceFrame>
+    );
+  }
 
   if (pos.length === 0) {
     return (

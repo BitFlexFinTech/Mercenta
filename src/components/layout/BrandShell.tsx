@@ -12,6 +12,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { LoadingState } from '@/components/ui';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
 import { LiveChatWidget } from '@/components/shared/LiveChatWidget';
@@ -140,13 +141,9 @@ const BRAND_VIEW_IDS: readonly string[] = BRAND_SECTIONS.flatMap((s) =>
  */
 function BrandViewFallback() {
   return (
-    <div
-      className="flex items-center justify-center rounded-ds-lg border border-white/5 bg-ink-850 p-10"
-      role="status"
-      aria-live="polite"
-      data-testid="brand-view-loading"
-    >
-      <span className="text-sm text-zinc-500">Loading…</span>
+    <div className="rounded-ds-lg border border-white/5 bg-ink-850" data-testid="brand-view-loading">
+      {/* §Wave 3 Part 5 — ONE owner for the loading region (`LoadingState`). */}
+      <LoadingState rows={3} label="Loading view…" />
     </div>
   );
 }

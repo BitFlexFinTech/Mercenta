@@ -46,10 +46,22 @@ function ChangeRequestReview({ brandId }: { brandId: string }) {
 export function BrandCRM() {
   const brandsQuery = useBrands();
   const contractsQuery = useContracts();
-  const poQuery = { data: usePOsHook().data?.data ?? [] };
-  const complianceDocs = useCompDocsHook().data?.data ?? [];
+  const posHook = usePOsHook();
+  const compDocsHook = useCompDocsHook();
+  const poQuery = { data: posHook.data?.data ?? [] };
+  const complianceDocs = compDocsHook.data?.data ?? [];
   const brandAgreementsQuery = useBrandAgreements();
   const brands = brandsQuery.data?.data ?? [];
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG. Every read here destructured `.data`
+   * only, so while the queries resolved the band asserted "0 / No active
+   * contract" about a brand book it had not loaded yet (measured by
+   * `validate-state-coverage.mjs`: the pending render differed from the seeded
+   * one and carried no loading state).
+   */
+  const crmPending =
+    brandsQuery.isPending || contractsQuery.isPending || posHook.isPending ||
+    compDocsHook.isPending || brandAgreementsQuery.isPending;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState('');
@@ -181,7 +193,7 @@ export function BrandCRM() {
         }
       />
 
-      <MetricBand items={metrics} columns={4} />
+      <MetricBand items={metrics} columns={4} loading={crmPending} />
 
       {/* §Phase C — pre-onboarding acquisition relationships (same canonical context) */}
       <AcquisitionRelationships />

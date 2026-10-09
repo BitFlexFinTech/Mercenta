@@ -4388,6 +4388,15 @@
       "spec": "e2e/investor-demo.spec.ts",
       "test": "the investor demo surface runs with no horizontal overflow",
       "expects": "The investor demo surface runs with no horizontal page overflow at each required viewport (375x812 · 768x1024 · 1440x900), the controls remain reachable and the final stage is present at width."
+    },
+    {
+      "id": "spec-state-coverage",
+      "capability": "platform",
+      "journey": "state coverage",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/state-coverage.spec.ts",
+      "expects": "The state coverage journey renders and behaves as its spec asserts: no data-backed surface tells the operator it has no data while the data is still loading."
     }
   ]
 }

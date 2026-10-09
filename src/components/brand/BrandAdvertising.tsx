@@ -18,7 +18,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useAdSpendBudgets, useAdCampaigns, useAdSpendRecommendations } from '@/data/queries';
 import { reviewAdSpendRecommendation } from '@/data/api';
 import { scopedBrandId } from '@/lib/auth/rbac';
-import { Badge, Button, Card, DataTable, Input } from '@/components/ui';
+import { Badge, Button, Card, DataTable, Input, LoadingState, Skeleton } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { AdCampaign, AdSpendRecommendation } from '@/types';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
@@ -45,9 +45,17 @@ export function BrandAdvertising() {
   const tenantId = scopedBrandId(session);
   const brandName = brandProfile?.businessName ?? (tenantId ?? 'Your brand');
 
-  const { data: adData } = useAdSpendBudgets();
-  const { data: campaignsData } = useAdCampaigns();
-  const { data: recsData } = useAdSpendRecommendations();
+  const { data: adData, isPending: adsPending } = useAdSpendBudgets();
+  const { data: campaignsData, isPending: campaignsPending } = useAdCampaigns();
+  const { data: recsData, isPending: recsPending } = useAdSpendRecommendations();
+  /**
+   * §Wave 3 Part 5 — THE ONE LOADING FLAG. Before this, the six KPI tiles
+   * asserted £0.00 budget / £0.00 spend / 0.0% utilisation and the campaign
+   * panel declared "No campaigns are set up for your brand yet." while the ad
+   * queries were still resolving (measured in a real browser with a slow data
+   * source: the message was painted during load and gone once loaded).
+   */
+  const adsLoading = adsPending || campaignsPending || recsPending;
 
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   const [amendingRec, setAmendingRec] = useState<string | null>(null);
@@ -159,19 +167,28 @@ return (
       {error && <p className="text-ds-label text-rose-400" data-testid="ba-error">{error}</p>}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {kpis.map((t) => (
-          <Card key={t.label} className="p-4">
-            <div className="flex items-center gap-2 text-ds-micro uppercase tracking-wide text-zinc-500 mb-2">
-              {t.icon}
-              {t.label}
-            </div>
-            <div className="text-xl font-semibold text-white">{t.value}</div>
-          </Card>
-        ))}
+        {adsLoading
+          ? Array.from({ length: 6 }, (_, i) => (
+              <Card key={i} className="p-4" data-state="loading">
+                <Skeleton className="mb-2 h-2.5 w-20" />
+                <Skeleton className="h-6 w-24" />
+              </Card>
+            ))
+          : kpis.map((t) => (
+              <Card key={t.label} className="p-4">
+                <div className="flex items-center gap-2 text-ds-micro uppercase tracking-wide text-zinc-500 mb-2">
+                  {t.icon}
+                  {t.label}
+                </div>
+                <div className="text-xl font-semibold text-white">{t.value}</div>
+              </Card>
+            ))}
       </div>
 
       <Card className="p-0" title="Campaigns" subtitle="Click a campaign row for its detail.">
-        {campaigns.length === 0 ? (
+        {adsLoading ? (
+          <LoadingState rows={4} label="Loading campaigns…" />
+        ) : campaigns.length === 0 ? (
           <p className="text-xs text-zinc-500 px-3 py-3" data-testid="ba-no-campaigns">No campaigns are set up for your brand yet.</p>
         ) : (
           <DataTable<AdCampaign>
@@ -185,7 +202,6 @@ return (
             ]}
             rows={campaigns}
             rowKey={(c) => c.id}
-            loading={false}
             emptyMessage="No campaign rows."
             dataTable="brand-ad-campaigns"
             onRowClick={(c) => setSelectedCampaign(c.id)}
@@ -222,7 +238,11 @@ return (
         <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
           <TrendingUp className="w-4 h-4 text-brass-400" /> Recommended monthly advertising budget
         </h3>
-        {recommendations.length === 0 ? (
+        {adsLoading ? (
+          <Card className="p-4">
+            <LoadingState rows={2} label="Loading your budget recommendation…" />
+          </Card>
+        ) : recommendations.length === 0 ? (
           <Card className="p-4">
             <p className="text-xs text-zinc-500">Mercenta has not prepared a budget recommendation for you yet.</p>
           </Card>

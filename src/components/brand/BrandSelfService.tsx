@@ -4,7 +4,7 @@ import { generateRemittanceStatement } from '@/lib/billing/remittance';
 import { requestProfileChange, demoProfileChangeRequests } from '@/data/api';
 import { assertBrandScope, scopedBrandId } from '@/lib/auth/rbac';
 import { useApp } from '@/context/GlobalStateContext';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, LoadingState } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { Download, FileText, Landmark } from 'lucide-react';
@@ -121,10 +121,15 @@ export function BrandSelfService() {
 
       <Card title="Document Library">
         <div className="px-1 pb-2 space-y-1.5">
-          {signed.length === 0 && (
+          {/* §Wave 3 Part 5 — "No signed contract yet." was shown while the
+              contracts query was still resolving (measured in a real browser). */}
+          {contractsQuery.isPending && (
+            <LoadingState rows={2} label="Loading your signed documents…" />
+          )}
+          {!contractsQuery.isPending && signed.length === 0 && (
             <p className="text-ds-label text-zinc-600">No signed contract yet.</p>
           )}
-          {signed.map((c) => (
+          {!contractsQuery.isPending && signed.map((c) => (
             <div key={c.id} className="flex items-center justify-between border-b border-white/[0.04] py-1.5">
               <span className="flex items-center gap-2 text-ds-label text-zinc-300">
                 <FileText className="w-3.5 h-3.5 text-zinc-500" />

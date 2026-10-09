@@ -1,6 +1,6 @@
 /* Brand Intel panel — canonical store-backed universe + lifecycle controls. */
 import { useState, useMemo, useEffect } from 'react';
-import { Card, Badge, Input, Button } from '@/components/ui';
+import { Card, Badge, Input, Button, LoadingState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { createBrandIntelligenceClient } from '@/lib/intelligence/brandIntelligenceClient';
 import { ProspectDetailPanel } from './ProspectDetailPanel';
@@ -43,7 +43,7 @@ const runDiscovery=async()=>{if(running)return;sRunning(true);sMsg('');try{const
 const changesByRun=(id:string)=>getChanges().filter((c:any)=>c.runId===id);
 const handleRequalify=(id:string,brand:string)=>{if(requalifyProspect(id,'Requalified by operator')){sMsg(`${brand} requalified.`);}refresh();};
 const dqPros=pros.filter((p:any)=>p.disqualified);
-if(load)return<WorkspaceFrame className="space-y-4"><p className="text-sm text-zinc-500">Loading...</p></WorkspaceFrame>;
+if(load)return<WorkspaceFrame className="space-y-4"><LoadingState rows={3} label="Loading brand intelligence…" /></WorkspaceFrame>;
 /* §Sprint 2 — the same five KPIs the panel already computed, now a workspace
    metric band whose tiles DRILL DOWN into the existing table filters. */
 const metrics: MetricTileData[] = [

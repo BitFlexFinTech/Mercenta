@@ -81,7 +81,7 @@ import {
 import { processPendingChannelInstructions } from '@/lib/commerce/proxyProcessor';
 import type { ChannelInstruction, PurchaseOrder } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
-import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, LoadingState, StatusBadge } from '@/components/ui';
 import {
   ackDeadlinePresentation,
   ackStatusPresentation,
@@ -335,6 +335,15 @@ export function BrandPurchaseOrders() {
   const viewingBrandId_ = tenantId ?? brands[0]?.id ?? null;
   const allPOs = poQuery.data?.data ?? [];
   const pos = allPOs.filter((p) => p.brandId === viewingBrandId_);
+  /**
+   * §Wave 3 Part 5 — THE ONE LOADING FLAG for this surface. While a query is
+   * resolving its `data` is undefined, so `pos` is [] — and every empty/zero
+   * branch below used to fire on a lie ("No purchase orders for this brand
+   * yet.", "Showing 0 of 0", "Queue value £0"). Measured in a real browser with
+   * a slow data source: those exact strings were painted during load and
+   * replaced by 5 orders and £55,832 when the data arrived.
+   */
+  const pendingPOs = poQuery.isPending || brandsQuery.isPending;
   const filteredPos = pos
     .filter((p) => statusFilter === 'all' || p.status === statusFilter)
     .filter(
@@ -479,6 +488,11 @@ export function BrandPurchaseOrders() {
         title="Purchase Orders"
         description="Review, accept or reject purchase orders from the UK retail network"
         meta={
+          <>{pendingPOs ? (
+            <span className="text-ds-label text-zinc-500" role="status" aria-live="polite">
+              Loading your order queue…
+            </span>
+          ) : (
           <>
             <span className="text-ds-label text-zinc-500">
               Showing <span className="font-mono text-zinc-300">{filteredPos.length}</span> of{' '}
@@ -491,6 +505,7 @@ export function BrandPurchaseOrders() {
               </span>
             </span>
           </>
+          )}</>
         }
         toolbar={
           <div className="flex flex-wrap items-center gap-2">
@@ -555,6 +570,9 @@ export function BrandPurchaseOrders() {
           contract asserts. */}
       <MetricBand
         columns={4}
+        /* §Wave 3 Part 5 — the band shows the canonical loading state while the
+           queries resolve, instead of four tiles asserting 0 orders and £0. */
+        loading={pendingPOs}
         items={[
           {
             id: 'brand-po-total',
@@ -602,7 +620,16 @@ export function BrandPurchaseOrders() {
 
       {/* PO list */}
       <div className="mt-3 space-y-3">
-        {filteredPos.map((po) => {
+        {/* §Wave 3 Part 5 — while the query resolves, this list must not claim
+            the brand has no orders. Measured defect: it showed "Showing 0 of 0",
+            "Queue value £0" and "No purchase orders for this brand yet." during
+            load and, once loaded, 5 orders and £55,832. */}
+        {pendingPOs ? (
+          <Card>
+            <LoadingState rows={5} label="Loading purchase orders…" />
+          </Card>
+        ) : null}
+        {!pendingPOs && filteredPos.map((po) => {
           const canAct = actionable(po);
           /**
            * §BATCH 2b (`AV-006`) — AN AMENDMENT CONTROL, offered exactly when the
@@ -1322,7 +1349,7 @@ export function BrandPurchaseOrders() {
             </div>
           );
         })}
-        {filteredPos.length === 0 && (
+        {!pendingPOs && filteredPos.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-xs text-zinc-600">No purchase orders for this brand yet.</p>
           </Card>

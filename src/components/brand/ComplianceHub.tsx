@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
-import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, LoadingState, StatusBadge } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { complianceDocStatusPresentation } from '@/lib/statusPresentation';
@@ -160,14 +160,19 @@ export function ComplianceHub() {
           Generated from your purchase-order data and product master. Review each
           pre-filled document and confirm — no manual form-filling required.
         </p>
-        {docBundles.length === 0 && (
+        {/* §Wave 3 Part 5 — and it must not claim the brand has no accepted
+            orders while those orders are still resolving. */}
+        {posQuery.isPending && (
+          <LoadingState rows={3} label="Loading documentation for your accepted orders…" />
+        )}
+        {!posQuery.isPending && docBundles.length === 0 && (
           <p className="text-xs text-zinc-600 px-1 py-2">
             No accepted purchase orders yet — documents are generated automatically
             once a PO is accepted.
           </p>
         )}
         <div className="space-y-4">
-          {docBundles.map(({ po, brandName, docs }) => (
+          {!posQuery.isPending && docBundles.map(({ po, brandName, docs }) => (
             <div key={po.id} className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <div>

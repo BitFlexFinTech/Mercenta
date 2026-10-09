@@ -9,7 +9,21 @@ import {
   type HomeIconName,
 } from '@/config/homepageContent';
 import { cn } from '@/utils/cn';
+import { LoadingState } from '@/components/ui';
 import { PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
+
+/**
+ * §Wave 3 Part 5 — ONE owner for the public routes' Suspense loading state.
+ * Five inline copies used to spell the same placeholder five times ("Loading..."
+ * as a bare word, with no loading indicator and no announcement to assistive
+ * technology); they now render the canonical `LoadingState`.
+ */
+const SUSPENSE_FALLBACK = (
+  <div className="flex min-h-screen items-center justify-center bg-ink p-6">
+    <LoadingState className="w-full max-w-md" rows={2} label="Loading this page…" />
+  </div>
+);
+
 import { resolveRoute } from '@/lib/seo/publicRoutes';
 import { applyRouteMetadata, metadataForPublicPage } from '@/lib/seo/routeMetadata';
 import { PrivacyPolicy } from '@/components/marketing/PrivacyPolicy';
@@ -119,28 +133,28 @@ function renderPublicPageBody(
   if (page === 'privacy') return <PrivacyPolicy onNavigate={onNavigate} onOpenPortal={openPortal} />;
   if (page === 'terms') return <TermsOfService onNavigate={onNavigate} onOpenPortal={openPortal} />;
   if (page === 'how-it-works') return (
-    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+    <Suspense fallback={SUSPENSE_FALLBACK}>
       <HowItWorks onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
   if (page === 'uk-market-access') return (
-    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+    <Suspense fallback={SUSPENSE_FALLBACK}>
       <UKMarketAccess onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
   if (page === 'for-brands') return (
-    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+    <Suspense fallback={SUSPENSE_FALLBACK}>
       <ForBrands onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
   if (page === 'faq') return (
-    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+    <Suspense fallback={SUSPENSE_FALLBACK}>
       <FAQ onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
   // §Phase 1 — Explore UK Market Fit (the public pre-audit surface).
   if (page === 'explore-uk-market-fit') return (
-    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+    <Suspense fallback={SUSPENSE_FALLBACK}>
       <ExploreUkMarketFit onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );

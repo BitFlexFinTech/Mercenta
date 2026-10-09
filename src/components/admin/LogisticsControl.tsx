@@ -121,6 +121,13 @@ export function LogisticsControl({
   // the same pattern as the shipments query above.
   const poQuery = usePurchaseOrders();
   const pos = useMemo(() => poQuery.data?.data ?? [], [poQuery.data]);
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG. While these queries resolved, the band
+   * asserted 0 in-transit / "No delays" / "No exceptions" and the list said
+   * "No consignment matches the current filters." — a false statement about the
+   * operator's shipments (measured by `validate-state-coverage.mjs`).
+   */
+  const logisticsPending = shipmentsQuery.isPending || brandsQuery.isPending || poQuery.isPending;
 
   const brandName = (id: string) =>
     brands.find((b) => b.id === id)?.profile.businessName ?? id;
@@ -447,7 +454,7 @@ export function LogisticsControl({
 
       <DemoBanner />
 
-      <MetricBand items={metrics} columns={4} />
+      <MetricBand items={metrics} columns={4} loading={logisticsPending} />
 
       <WorkspaceGrid
         rail={
@@ -559,6 +566,7 @@ export function LogisticsControl({
           visibleIds={mapVisibleIds}
           selectedId={selectedShipmentId}
           onSelect={setSelectedShipmentId}
+          loading={logisticsPending}
           testId="admin-logistics-map"
           className="h-[280px] sm:h-[360px] lg:h-[420px]"
         />
@@ -600,6 +608,7 @@ export function LogisticsControl({
             rows={list}
             rowKey={(s) => s.id}
             emptyMessage="No shipments for this brand."
+            loading={logisticsPending}
             rowClassName={(s) => (IN_TRANSIT.includes(s.status) && s.delayed ? 'bg-amber-500/5' : undefined)}
             columns={[
               {
@@ -692,7 +701,7 @@ export function LogisticsControl({
         description="The declared supply route for a consignment and whether a UK inventory buffer / 3PL (Delta Fulfillment) route may be appropriate. Fail-closed: while the escalation thresholds are not agreed, every decision routes to human review and no 3PL is recommended."
         domain="logistics"
       >
-        <SupplyRouteEscalationPanel consignments={routeConsignments} />
+        <SupplyRouteEscalationPanel consignments={routeConsignments} loading={logisticsPending} />
       </WorkspaceSection>
 
       {/* ── §P10 — PO DOCUMENTS AWAITING DOWNLOAD ────────────────────────────
@@ -762,6 +771,7 @@ export function LogisticsControl({
             rows={carrierConsoleRows}
             rowKey={(s) => s.id}
             emptyMessage="No consignments are on screen for the current focus."
+            loading={logisticsPending}
             columns={[
               {
                 key: 'reference',

@@ -215,6 +215,10 @@ export function FulfillmentTrackPanel() {
           rowKey={({ score }) => score.brandId}
           onRowClick={({ score }) => setSelectedId(score.brandId)}
           emptyMessage="No brands match the current filters."
+          /* §Wave 3 Part 5 — the table owns the loading region: the surface no
+             longer declares "No brands match the current filters." while the
+             brand and score queries are still resolving. */
+          loading={brandsQuery.isPending || scoresQuery.isPending}
           columns={[
             {
               key: 'brand',

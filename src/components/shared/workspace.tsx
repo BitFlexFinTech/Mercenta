@@ -25,7 +25,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { DOMAIN_COLOURS, type PaletteDomain } from '@/config/themes';
-import { StatusBadge, type StatusTone } from '@/components/ui';
+import { StatusBadge, Skeleton, type StatusTone } from '@/components/ui';
 import { ArrowRight, X } from 'lucide-react';
 
 /* ── FRAME ─────────────────────────────────────────────────────────────── */
@@ -511,15 +511,24 @@ export function MetricBand({
     <div
       className={cn('overflow-hidden rounded-ds-lg border border-white/[0.06]', className)}
       data-testid="metric-band"
+      /* §Wave 3 Part 5 — the band's OWN loading state is announced now; before
+         this it was silent to assistive technology and the skeleton bars were a
+         second, hand-rolled copy of the canonical `Skeleton` primitive. */
+      aria-busy={loading || undefined}
     >
+      {loading && (
+        <span className="sr-only" role="status" aria-live="polite">
+          Loading metrics…
+        </span>
+      )}
       <div className="grid grid-cols-12 gap-px bg-white/[0.06]">
         {items.map((m, i) => (
           <div key={m.id} className={cn(BAND_BASE_SPAN[baseSpans[i]], BAND_MD_SPAN[mdSpans[i]])}>
             {loading ? (
               <div className="min-h-[80px] space-y-2.5 bg-ink-900 px-3.5 py-3">
-                <div className="h-2.5 w-16 animate-pulse rounded bg-white/[0.06]" />
-                <div className="h-5 w-20 animate-pulse rounded bg-white/[0.06]" />
-                <div className="h-2.5 w-24 animate-pulse rounded bg-white/[0.06]" />
+                <Skeleton className="h-2.5 w-16" />
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-2.5 w-24" />
               </div>
             ) : (
               <MetricTile data={m} />

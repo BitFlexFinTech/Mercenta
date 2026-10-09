@@ -6,7 +6,7 @@ import {
   renewalUrgency,
 } from '@/lib/contracts';
 import { buildDistributionAgreement } from '@/lib/agreement';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, LoadingState } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { Download, Eye, X } from 'lucide-react';
@@ -75,7 +75,9 @@ export function BrandContractView() {
         description="Your distribution agreements — status, renewal dates and signed copies"
       />
 
-      {contracts.length === 0 && (
+      {contractsQuery.isPending && <Card><LoadingState rows={3} label="Loading your agreements…" /></Card>}
+
+      {!contractsQuery.isPending && contracts.length === 0 && (
         <Card className="p-8 text-center">
           <p className="text-xs text-zinc-500">
             No contracts yet — your distribution agreement is generated when you
@@ -84,7 +86,7 @@ export function BrandContractView() {
         </Card>
       )}
 
-      {contracts.map((c) => (
+      {!contractsQuery.isPending && contracts.map((c) => (
         <Card key={c.id}>
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>

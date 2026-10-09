@@ -62,6 +62,13 @@ export interface LogisticsMapCanvasProps {
   visibleIds: Set<string>;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  /**
+   * §Wave 3 Part 5 — the caller's data is still resolving. The canvas must NOT
+   * draw its "No consignment matches the current filters" overlay on an empty
+   * model it has not finished loading (measured defect: that message was painted
+   * during load and replaced by the consignments once they arrived).
+   */
+  loading?: boolean;
   className?: string;
   testId?: string;
 }
@@ -77,6 +84,7 @@ export function LogisticsMapCanvas({
   visibleIds,
   selectedId,
   onSelect,
+  loading = false,
   className,
   testId = 'logistics-map',
 }: LogisticsMapCanvasProps) {
@@ -482,7 +490,19 @@ export function LogisticsMapCanvas({
         </g>
       </svg>
 
-      {drawn.length === 0 && (
+      {loading ? (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-ink-950/70"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+          data-testid={`${testId}-loading`}
+        >
+          <p className="rounded-ds-md border border-white/[0.08] bg-ink-850/95 px-4 py-2 text-ds-body text-zinc-400">
+            Loading consignments…
+          </p>
+        </div>
+      ) : drawn.length === 0 ? (
         <div
           className="absolute inset-0 flex items-center justify-center bg-ink-950/70"
           data-testid={`${testId}-empty`}
@@ -491,7 +511,7 @@ export function LogisticsMapCanvas({
             No consignment matches the current filters. Clear a filter to see the operational picture again.
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

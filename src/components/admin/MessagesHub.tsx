@@ -3,7 +3,7 @@ import { brandInboxAddress, useBrandComms } from '@/components/shared/BrandComm'
 import { useBrands, useMessages } from '@/data/queries';
 import { getProspect } from '@/data/prospectStore';
 import type { Message } from '@/types';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, LoadingState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
@@ -102,6 +102,12 @@ export function MessagesHub() {
 
   const brandsQuery = useBrands();
   const messagesQuery = useMessages();
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG: "No threads match the current filters."
+   * and "No conversations yet." were shown while the brand + message queries
+   * were still resolving (measured in a real browser with a slow data source).
+   */
+  const commsPending = brandsQuery.isPending || messagesQuery.isPending;
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [sendNote, setSendNote] = useState<string | null>(null);
@@ -331,7 +337,11 @@ export function MessagesHub() {
       <div className="grid grid-cols-12 gap-4">
         {/* Thread list */}
         <Card className="col-span-12 md:col-span-4 overflow-hidden p-0" data-testid="messages-thread-list">
-          {visibleThreads.map((t) => (
+          {/* §Wave 3 Part 5 — the list must not say "No threads match the current
+              filters." while the brand + message queries are still resolving
+              (measured in a real browser with a slow data source). */}
+          {commsPending && <LoadingState rows={5} label="Loading conversations…" />}
+          {!commsPending && visibleThreads.map((t) => (
             <ThreadListItem
               key={t.key}
               thread={t}
@@ -339,7 +349,7 @@ export function MessagesHub() {
               onClick={() => setSelectedKey(t.key)}
             />
           ))}
-          {visibleThreads.length === 0 && (
+          {!commsPending && visibleThreads.length === 0 && (
             <p className="px-4 py-4 text-ds-label text-zinc-600">No threads match the current filters.</p>
           )}
         </Card>
@@ -368,6 +378,8 @@ export function MessagesHub() {
                 />
               )}
             </>
+          ) : commsPending ? (
+            <LoadingState rows={4} label="Loading conversations…" />
           ) : (
             <p className="text-xs text-zinc-600">No conversations yet.</p>
           )}

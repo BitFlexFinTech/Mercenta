@@ -66,12 +66,24 @@ function LockedPipeline({ onGoToIntegrations }: { onGoToIntegrations?: () => voi
 
 function UnlockedPipeline() {
   const qc = useQueryClient();
-  const deductions = useDeductions().data?.data ?? [];
-  const purchaseOrders = usePurchaseOrders().data?.data ?? [];
-  const submissions = useCatalogSubmissions().data?.data ?? [];
+  const deductionsQuery = useDeductions();
+  const posQuery = usePurchaseOrders();
+  const submissionsQuery = useCatalogSubmissions();
+  const brandsQuery = useBrands();
+  const deductions = deductionsQuery.data?.data ?? [];
+  const purchaseOrders = posQuery.data?.data ?? [];
+  const submissions = submissionsQuery.data?.data ?? [];
   const brandNames = new Map(
-    (useBrands().data?.data ?? []).map((b) => [b.id, b.profile.businessName] as const)
+    (brandsQuery.data?.data ?? []).map((b) => [b.id, b.profile.businessName] as const)
   );
+  /**
+   * §Wave 3 Part 5 — ONE LOADING FLAG for this surface. Every read used to
+   * destructure `.data` only, so while the queries resolved the surface stated
+   * "No deductions posted." (measured in a real browser with a slow data source:
+   * painted during load, gone once the deductions arrived).
+   */
+  const pipelinePending =
+    deductionsQuery.isPending || posQuery.isPending || submissionsQuery.isPending || brandsQuery.isPending;
   /** §19.1 — dispute workflow state per deduction row. */
   const [disputingId, setDisputingId] = useState<string | null>(null);
   const [disputeNotes, setDisputeNotes] = useState('');
@@ -215,6 +227,7 @@ function UnlockedPipeline() {
           rows={deductions}
           rowKey={(d) => d.id}
           emptyMessage="No deductions posted."
+          loading={pipelinePending}
           columns={[
             {
               key: 'date',

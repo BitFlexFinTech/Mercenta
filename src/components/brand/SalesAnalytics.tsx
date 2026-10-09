@@ -7,7 +7,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
-import { Badge, Card } from '@/components/ui';
+import { Badge, Card, LoadingState } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
@@ -66,6 +66,25 @@ export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => 
       name: s.replace(/_/g, ' '), count: pos.filter((p) => p.status === s).length,
     })), [pos]);
   const maxStatus = Math.max(1, ...statusDist.map((x) => x.count));
+
+  /* §Wave 3 Part 5 — while the purchase-order query resolves, `.data` is
+     undefined so `pos` is [] and this report rendered its EMPTY version
+     ("No POs yet for …") and a board of zeroed metrics. Measured in a real
+     browser with a slow data source. */
+  if (poQuery.isPending) {
+    return (
+      <WorkspaceFrame className="space-y-4" busy>
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · ANALYTICS"
+          title="Sales Analytics"
+          description={`Loading revenue & performance for ${brandProfile.businessName || 'your brand'}`}
+        />
+        <Card title="Sales Analytics">
+          <LoadingState rows={5} label="Loading your sales analytics…" />
+        </Card>
+      </WorkspaceFrame>
+    );
+  }
 
   if (pos.length === 0) {
     return (
