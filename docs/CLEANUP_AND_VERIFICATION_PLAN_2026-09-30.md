@@ -601,7 +601,7 @@ PASSED. Status: **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `b1e6675`**.
 
 **NEXT.** Order item 4 continues at **Wave 3 Part 5** (the empty / loading / error / permission state pass — the primitives `EmptyState`, `Skeleton`, `Alert`, `ErrorBoundary` already exist, so it is a systematic APPLICATION), then the two decision-blocked rows. No credential is required for any of them.
 
-**OUTCOME — THREE-WAY GATE.** This was an application-runtime change, so §10 applied in full: the verified commit is pushed to `origin/redesign/foundation`, deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh`, and the changed functionality was verified on the live site (recorded in the close-out state commit).
+**OUTCOME — THREE-WAY GATE — COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `4f47837`.** This is an application-runtime change, so §10 applied in full and is satisfied: `4f47837` is pushed to `origin/redesign/foundation` (no `--force`), deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` (the script reported `Done.`), and the changed behaviour was verified ON the deployed site by a read-only live check whose exact console evidence is: `LIVE appbar {"scroll":390,"client":390,"widest":378,"vw":390}` · `LIVE catalogue@390 {"tables":0,"regionOverflow":0,"unnamed":0}` · `LIVE catalogue@1440 heads=7 scoped=7 caption=1` · `LIVE contracts heads=6 scoped=6` · `LIVE drawer focus containment PASS (6 Tabs inside the panel)` · `LIVE inventory {"urlsAsText":false,"thumbnails":2}` · `LIVE pageerrors []`. The live entry asset `assets/index-Cm4WomVk.js` is the exact bundle this commit built, so local = GitHub = demo.
 
 
 
