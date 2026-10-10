@@ -1,8 +1,8 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
-> **STATUS: PLANNED — NOT STARTED. Nothing in Parts 1–6 has been built.**
+> **STATUS: PART 1 (BATCH 1) BUILT AND TESTED (session 125, 2026-10-10) — Parts 2–6 remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 1**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 2**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -21,7 +21,15 @@
   updated. Checker: `5182 strictPort ~/Desktop/1. Mercenta`.
 - **First look-only patrol run:** 41 steps · 10 screens · 2 major issues filed, 2 dismissed as noise, ~9p spent.
 
-## PART 1 — GLOBAL RULES AND THE EDITOR ROOT FIX (Batch 1, do FIRST)
+## PART 1 — GLOBAL RULES AND THE EDITOR ROOT FIX (Batch 1) — ✅ **DONE (session 125, 2026-10-10)**
+
+> **Completed.** `08-removal-coherence.md` and `09-editor-and-cli-agree.md` are installed byte-identical in BOTH
+> global rules folders, registered in `RULES-MANIFEST.json` (rules + `requiredMarkers`); `check-rules.mjs` reports
+> **25 rules, 0 fail** (markers mutation-proved). The editor root is fixed and gated: the machine-wide VS Code
+> `typescript.tsdk` pin (workspace-relative) + the committed project `.vscode/settings.json` (+ its `.gitignore`
+> exception), with **3 new assertions** in `scripts/validate-typecheck-coverage.mjs`. Two pre-existing validator
+> failures were fixed at source (the E6 `.vscode/` scope declaration; the resume block's standing credentials
+> decision). `npm run validate:all` **189 PASS / 0 FAIL**. Work commit `10fa22b`.
 
 - **1.1 — Global rule `08-removal-coherence.md`.** Removing something means updating EVERY dependent in the
   same change; a check that asserted the removed thing is REWRITTEN into an **ABSENCE GUARD** (never deleted,
