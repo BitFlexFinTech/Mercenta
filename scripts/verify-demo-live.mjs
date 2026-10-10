@@ -6,9 +6,13 @@
  * own PASS/FAIL with evidence; the script exits non-zero if any check fails.
  *
  * The P4 checks (the proxy direction on the brand PO surface) are kept, and §P5
- * adds the arrival-node checks: the deployed map draws destination-FC nodes and no
- * `mercenta_hub` node, no surface names a Mercenta hub as a destination, and the
- * admin Overview h1 reads "Overview".
+ * adds the arrival-node checks: no surface names a Mercenta hub as a destination,
+ * and the admin Overview h1 reads "Overview".
+ *
+ * §BATCH 3 (2026-10-10) — the §P5 map probes are REPOINTED into ABSENCE guards
+ * (rule 08): the interactive operational map was removed on the owner's
+ * instruction, so the deployed surface must now draw NO map nodes and render NO
+ * map canvas at all (see the probe block below).
  */
 import { chromium } from 'playwright';
 import { readdirSync } from 'node:fs';
@@ -595,15 +599,29 @@ check('§P12 the deployed console STATES why a simulated reading is not applied 
 check('no uncaught page error on the deployed §P12 channel-operations flow',
   adminErrors.length === 0,
   adminErrors.slice(0, 2).join(' | '));
+/**
+ * §BATCH 3 (2026-10-10) — REPOINTED (rule 08).
+ *
+ * OLD CONTRACT: these probes asserted the DEPLOYED MAP drew destination-FC nodes
+ * and no `mercenta_hub` node. The owner instructed the interactive operational
+ * map's removal from both logistics surfaces, so the assertion is INVERTED into
+ * its ABSENCE guard: the deployed surface must now draw NO map nodes at all, and
+ * render no map canvas. The §P5 DOMAIN invariant (a consignment's destination is
+ * the FC its own purchase order declares, never a Mercenta hub) is unchanged and
+ * is still asserted here and in the browser suite.
+ */
 const hubNodeKinds = await page
   .locator('[data-testid^="logistics-node-"]')
   .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))
   .catch(() => []);
+const hubMapCount = await page.locator('[data-testid="logistics-map"]').count().catch(() => 0);
 check('the brand Logistics Hub renders on the deployed build',
-  /Logistics Hub/i.test(hubBody) || hubNodeKinds.length > 0);
-check('the deployed map draws DESTINATION-FC nodes',
-  hubNodeKinds.includes('amazon_fc'), `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
-check('the deployed map draws NO mercenta_hub node',
+  /Logistics Hub/i.test(hubBody));
+check('§BATCH3 the deployed surface draws NO map nodes (the interactive map was REMOVED)',
+  hubNodeKinds.length === 0, `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
+check('§BATCH3 the deployed surface renders NO map canvas',
+  hubMapCount === 0, `logistics-map elements=${hubMapCount}`);
+check('the deployed surface draws NO mercenta_hub node',
   !hubNodeKinds.includes('mercenta_hub'), `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
 check('no deployed surface names a Mercenta hub as a destination',
   !/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i.test(hubBody));
