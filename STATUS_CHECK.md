@@ -88,10 +88,11 @@ never weakened) and PROVED ABLE TO FAIL.
 9. **VERIFICATION.** `npm run typecheck` **0** (four projects) · `npm run lint` **0** · `npm run build` **ok** ·
    `npm run validate:all` **188 PASS / 0 FAIL** · `validate-registry-integrity` **7 PASS / 0 FAIL** · browser: the five
    affected specs (`mercenta-brain`, `canonical-propagation`, `runtime-entry`, `redesign-surfaces`, `accessibility`)
-   **57 passed** in real Chromium. The GitHub push, the demo deploy and the live verification run in this session's
-   close-out and are recorded in the resume block.
-10. **CHECKPOINT / STATE.** All five state sources updated in this session; NEXT TASK is **BATCH 5 (Part 2.6,
-    Mercenta Social)**.
+   **57 passed** in real Chromium. The verified WORK commit `db800db` was pushed to `origin/redesign/foundation`
+   (`1b16ca1..db800db`), deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` (EXIT=0, 108 stale
+   files removed from the host) and verified LIVE — **267 PASS / 0 FAIL**, including the rewritten L26 probes.
+10. **CHECKPOINT / STATE.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** All five state sources updated in this
+    session; NEXT TASK is **BATCH 5 (Part 2.6, Mercenta Social)**.
 
 
 ## §BATCH 3 — THE OPERATIONAL MAP + THE LOGISTICS HERO REMOVED (session 125, 2026-10-10)
