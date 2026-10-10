@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 557,
+    "total_entries": 558,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -374,8 +374,8 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-10 after §BATCH 5 (the Mercenta Social removal). Snapshot only, derived from the entries: built_and_tested:317, built:180, not_started:10, removed:33, deferred:9, blocked:7, complete:1.",
-      "built_and_tested": 317,
+      "_note": "Recomputed 2026-10-10 after §BATCH 6 (the catalogue product image 32px → 64px + the stale-screenshot sweep). Snapshot only, derived from the entries: built_and_tested:318, built:180, not_started:10, removed:33, deferred:9, blocked:7, complete:1.",
+      "built_and_tested": 318,
       "built": 180,
       "not_started": 10,
       "removed": 33,
@@ -1213,6 +1213,15 @@
     }
   },
   "entries": [
+    {
+      "id": "batch6-catalogue-product-image-64px",
+      "description": "§BATCH 6 (2026-10-10) — THE CATALOGUE PRODUCT IMAGE ENLARGED 32px → 64px through the ONE owner (`src/components/shared/ProductThumb.tsx`), whose placeholder glyph and neutral icon now SCALE with the size instead of being hard-coded (`text-lg` / `h-5 w-5`); plus the removal-coherence sweep that deleted 15 stale screenshot artefacts of the surfaces removed earlier in this programme (Mercenta Social, the Mercenta Brain, the logistics operational map and hero).",
+      "source": "docs/NEXT_BUILD_PLAN_2026-10-10.md Part 3.1 (owner directive: enlarge the catalogue product image)",
+      "status": "built_and_tested",
+      "evidence": "DELIVERED 2026-10-10 (§BATCH 6 of docs/NEXT_BUILD_PLAN_2026-10-10.md). ProductThumb's placeholder branch now derives BOTH sizes from `size` — `glyphPx = Math.round(size * 0.5625)` (18px at 32px) and `iconPx = Math.round(size * 0.625)` (20px at 32px) — replacing the hard-coded `text-lg` / `h-5 w-5`; ProductCatalog renders `size={64}`. GATES: scripts/validate-uiux-redesign.mjs §WAVE 3 PART 3.1 (5 assertions, incl. a proof that the ratios still reproduce the previously shipped 32px sizes, so BrandInventory does NOT move) — 357 PASS / 0 FAIL, MUTATION-PROVED FOUR ways (text-lg restored ⇒ 1 FAIL; h-5 w-5 restored ⇒ 1 FAIL; glyph ratio 0.5625→0.5 ⇒ 1 FAIL; catalogue 64→32 ⇒ 1 FAIL; every mutation restored byte-identical — ProductThumb sha256 7847ed723165e07679e826711631d6feaa70a63e47f418f303ed0dbd3271593e, ProductCatalog sha256 2a9616bfda27d010d3e3ffc72810ed9673daa39fcd67704cf68520871cff8af4). e2e/redesign-surfaces.spec.ts measures the RENDERED 64×64 geometry of every catalogue thumbnail and re-verifies the 390px card-list layout — MUTATION-PROVED (size reverted to 32 ⇒ that assertion fails, then passes again on a byte-identical restore). MEASUREMENTS: typecheck 0 · lint 0 · build ok · validate:all 185 PASS / 0 FAIL · the focused browser sweep (redesign-surfaces + inventory = 31 tests) 31 passed / 0 failed. LIVE: scripts/verify-live-demo.mjs L32 (NEW) measures every deployed catalogue thumbnail at 64×64 on https://demo.mercenta.co.uk, asserts no raw image URL is painted as cell text, and re-verifies the 390px labelled-card layout.",
+      "last_verified": "2026-10-10",
+      "superseded_by": null
+    },
     {
       "id": "batch0-header-identity",
       "description": "Header.tsx derives name/email/initials from session",

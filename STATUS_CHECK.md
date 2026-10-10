@@ -26,6 +26,73 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 6 — THE CATALOGUE PRODUCT IMAGE 32px → 64px + THE STALE-ARTEFACT SWEEP (session 127, 2026-10-10)
+
+**BUILT.** The catalogue product image was enlarged **32px → 64px through the ONE owner**
+`src/components/shared/ProductThumb.tsx`. The placeholder branch was the defect: both of its sizes were
+HARD-CODED (`text-lg` = an 18px glyph, `h-5 w-5` = a 20px icon) and ignored `size` entirely, so the enlarged
+tile would have painted a 20px icon adrift in a 64px box. Both now derive from `size` —
+`glyphPx = Math.round(size * 0.5625)` (18px at 32px) and `iconPx = Math.round(size * 0.625)` (20px at 32px) —
+with `lineHeight: 1` so the glyph stays centred. `src/components/brand/ProductCatalog.tsx` renders `size={64}`.
+The ratios reproduce the previously shipped 32px sizes EXACTLY, so `BrandInventory` (32px) is unchanged to the
+pixel; `LogisticsHub` (40px) grows in proportion (an 18→23px glyph), which is the delivered intent of
+"scale with the size".
+
+**REMOVAL COHERENCE (rule 08) — THE OWNER'S POSTIZ QUESTION.** The owner asked why "the Postiz files" had not
+been deleted. The answer was taken FROM THE REPOSITORY, never from memory: a case-insensitive name search over
+the whole repository returns **no Postiz file** — `src/lib/postiz/`, `src/components/admin/PostizAdminPanel.tsx`,
+`scripts/social-sso/` and `supabase/functions/social-session/` are all absent. The 49 remaining textual mentions
+were each read and classified into exactly three harmless kinds: (a) the ABSENCE GUARDS that must name it to
+prove it gone (`validate-retired-platforms` §2c, `validate-d4-persistence` O1/O2, `validate-e6-brand-surfaces`,
+`validate-outreach-provider-hardening`, `validate-admin-shell-bundle`, `e2e/retired-platforms`,
+`e2e/integration-hub`, `e2e/outreach-provider-hardening`); (b) REMOVAL COMMENTS in `docker-compose.services.yml`
+(3) and `scripts/Caddyfile` (2) recording what was deleted; (c) HISTORY (`PROJECT_STATUS.md`, `HANDOFF.md`,
+`STATUS_CHECK.md`, `requirements-registry.json`, `MERCENTA_ARCHITECTURE.md`, `GO_LIVE.md`,
+`PRODUCTION_READINESS.md`, `docs/archive/**`). ONE genuine leftover was found and removed: **15 screenshots** of
+surfaces deleted earlier in this programme were proven to be written by **ZERO** specs and DELETED —
+`redesign-surfaces/brand-social-{390,1440}.png`, `redesign-surfaces/brain-{390,1440}.png`,
+`accessibility/brain-1440.png`, `mercenta-brain/brain-*.png` (7, incl. `brand-map-1440.png`),
+`logistics-hub/01b-map-surface.png`, `logistics-hub/04-admin-map-1440.png` and the whole `logistics-hero/`
+folder. The CURRENT live absence screenshot `mercenta-brain/nav-no-brain-1440.png` was kept. They are
+`test-screenshots/` GENERATED artefacts (gitignored), so deleting them cannot dirty the tree — verified:
+`git status --porcelain` stayed at the four intended source files.
+
+**TESTED.** `scripts/validate-uiux-redesign.mjs` §WAVE 3 PART 3.1 (NEW) — 5 assertions read from the
+COMMENT-STRIPPED source: the catalogue renders through the ONE owner with no bespoke `<img>`; the catalogue is
+`size={64}`; the glyph has no hard-coded `text-lg`; the icon has no hard-coded `h-5 w-5`; and the ratios still
+reproduce 18px/20px at 32px — **357 PASS / 0 FAIL**, **MUTATION-PROVED FOUR WAYS**: `text-lg` restored ⇒
+**1 FAIL**; `h-5 w-5` restored ⇒ **1 FAIL**; the glyph ratio 0.5625→0.5 ⇒ **1 FAIL** ("glyph 16px (expected
+18)"); the catalogue back to 32 ⇒ **1 FAIL**; each restored and re-run **PASS**, and both touched sources were
+restored **byte-identical** (`ProductThumb.tsx` sha256
+`7847ed723165e07679e826711631d6feaa70a63e47f418f303ed0dbd3271593e`, `ProductCatalog.tsx` sha256
+`2a9616bfda27d010d3e3ffc72810ed9673daa39fcd67704cf68520871cff8af4`). A defect in the gate's OWN first draft was
+caught by RUNNING it: the helper strips `/* */` blocks and whole-line `//`, not TRAILING `//`, so my own
+trailing comment naming `text-lg`/`h-5 w-5` made the gate fail — the redundant trailing comments were removed
+(the explanation already lives in the block comment above them). `e2e/redesign-surfaces.spec.ts` — the
+catalogue test now MEASURES the rendered box of every thumbnail (`{w:64,h:64}`) and re-verifies the 390px
+layout (no horizontal page overflow; the labelled card list with no table) — **MUTATION-PROVED**: reverting the
+catalogue to 32px failed exactly that assertion (`toEqual` diff at line 183) and a byte-identical restore passed.
+
+**MEASUREMENTS.** `typecheck` **0** (all four projects) · `lint` **0** · `build` **ok** · `validate:all`
+**185 PASS / 0 FAIL** · `validate:registry-integrity` **7 PASS / 0 FAIL** · evidence-row integrity
+**2311 PASS / 0 FAIL** (498 evidence rows, 1812 references checked) · the focused browser sweep
+(`redesign-surfaces` + `inventory` = 31 tests) **31 passed / 0 failed** · registry **558 entries** — the NEW row
+`batch6-catalogue-product-image-64px` added, `_meta.total_entries` 557 → 558, and `_meta.status_counts`
+recomputed FROM the entries (verified: the derived counts equal the declared counts).
+
+**RESULT — COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Commit **`4017264`**; pushed to
+`origin/redesign/foundation` (no `--force`); deployed via `scripts/deploy-demo.sh` (only
+`demo.mercenta.co.uk`, and run ALONE so no concurrent `npm run build` could race the FTP mirror — which is
+exactly what had dirtied one mirror in the Batch-5 session); **LIVE 276 PASS / 0 FAIL** (`verify:live` exit 0),
+including the NEW **L32** probe: the DEPLOYED catalogue thumbnails measured **64×64, 64×64**, no cell paints a
+raw image URL as text, and 390px re-verified live (0px horizontal overflow, 2 labelled cards, no table).
+268 checks before + the 8 new L32 checks = 276.
+
+**NEXT.** BATCH 7 of the merged programme — Part 4's click-through defects (the notification bell's 5 inert
+item types; the work drawer's "Open record" opening the PO LIST rather than PO-9200) through the existing
+`navigateProductView` + `currentQueryParam` owner, the `brand-regatta` dangling seed, and the three inert
+controls (REMOVE) — then Part 5's gates. Then BATCH 8 (Part 6, the close-out).
+
 ## §BATCH 5 — MERCENTA SOCIAL REMOVED, COMPLETELY (session 126, 2026-10-10)
 
 **BUILT.** The owner's instruction was to remove Mercenta Social completely. **16 files deleted** — the social

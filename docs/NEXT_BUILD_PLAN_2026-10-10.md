@@ -1,10 +1,10 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
 > **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
-> Mercenta Brain) and BATCH 5 (Part 2.6, Mercenta Social) BUILT AND TESTED — Parts 3–6 remain PLANNED, NOT
-> STARTED.**
+> Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social) and BATCH 6 (Part 3.1, the catalogue product image)
+> BUILT AND TESTED — Parts 4–6 remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 6**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 7**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -123,10 +123,13 @@
 
 ## PART 3 — THE CHANGES
 
-- **3.1 — Catalogue product image 32px → 64px.** `ProductCatalog.tsx` (~281) via the single owner
-  `src/components/shared/ProductThumb.tsx`. Its placeholder glyph/icon must SCALE with the size (today the icon
-  is hard-coded `h-5 w-5`, which would look broken at 64px), and the 390px width that Wave-3 Part 4 fixed must be
-  RE-VERIFIED so enlarging the image cannot re-break the table.
+- **3.1 — Catalogue product image 32px → 64px.** ✅ **DONE (BATCH 6, session 127, 2026-10-10).** Delivered
+  through the single owner `src/components/shared/ProductThumb.tsx`, which `ProductCatalog.tsx` (~281) renders at
+  `size={64}`. Its placeholder glyph/icon WAS hard-coded (`text-lg` / `h-5 w-5`) and now SCALES with the size
+  (`Math.round(size * 0.5625)` / `Math.round(size * 0.625)`), and the 390px width that Wave-3 Part 4 fixed is
+  RE-VERIFIED — as a STANDING gate in `e2e/redesign-surfaces.spec.ts`, not a one-off. Gates:
+  `scripts/validate-uiux-redesign.mjs` §WAVE 3 PART 3.1 (5 assertions, mutation-proved four ways) and the new
+  live probe `scripts/verify-live-demo.mjs` **L32** (measured 64×64 on the deployed site).
 
 ## PART 4 — THE DEFECTS (fix, each with a gate)
 
@@ -169,7 +172,8 @@
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
-Batches 1, 2, 3, 4 and 5 are DONE (2026-10-10). **Next: Batch 6 (3.1, the catalogue product image 32px → 64px).**
+Batches 1–6 are DONE (2026-10-10). **Next: Batch 7 (Part 4, the click-through destinations + the dangling
+seed + the inert controls, then Part 5's gates).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.
