@@ -410,21 +410,41 @@ check(
   'the BRAND queue is fed TENANT-SCOPED purchase orders (scopedPos)',
   /pos=\{scopedPos\}/.test(brandSource)
 );
+/**
+ * §BATCH 2 (2026-10-10) — REPOINTED (rule 08, removal coherence: the check that ASSERTS
+ * the removed card exists is REWRITTEN into an ABSENCE GUARD — never deleted, never
+ * weakened). The owner instructed removal of the "Consolidation" card from BOTH logistics
+ * workspaces. The owner lib `src/lib/shipping/consolidation.ts` and the retained (now
+ * unmounted) `ConsolidationPosturePanel` STAY, because decision 11 is a recorded Founder
+ * decision ("deferred, not designed out") — removing a card is not removing a decision.
+ * So each surface now wires its TWO remaining owners AND must render NO consolidation card.
+ */
 check(
-  'the brand Hub wires all three owners (queue, provider configuration, consolidation)',
+  'the brand Hub wires its two remaining owners (queue, provider configuration)',
   /PoDocumentQueuePanel/.test(brandSource) &&
     /carrierProviderConfigurations/.test(brandSource) &&
     /CarrierProviderConfigurationPanel/.test(brandSource) &&
-    /ConsolidationPosturePanel/.test(brandSource) &&
     /scope="brand"/.test(brandSource)
 );
 check(
-  'the admin Hub wires the same owners in the operator scope',
+  'the admin Hub wires the same two owners in the operator scope',
   /PoDocumentQueuePanel/.test(adminSource) &&
     /carrierProviderConfigurations/.test(adminSource) &&
     /CarrierProviderConfigurationPanel/.test(adminSource) &&
-    /ConsolidationPosturePanel/.test(adminSource) &&
     /scope="admin"/.test(adminSource)
+);
+/* ── 9a. §BATCH 2 ABSENCE GUARDS — the removed Consolidation card is GONE ─────────── */
+check(
+  'ABSENCE GUARD — the brand Hub renders NO Consolidation card and mounts no ConsolidationPosturePanel',
+  !/ConsolidationPosturePanel/.test(brandSource) && !/title="Consolidation"/.test(brandSource)
+);
+check(
+  'ABSENCE GUARD — the admin Hub renders NO Consolidation card and mounts no ConsolidationPosturePanel',
+  !/ConsolidationPosturePanel/.test(adminSource) && !/title="Consolidation"/.test(adminSource)
+);
+check(
+  'the deferred decision is RETAINED in its owner lib (decision 11 — deferred, not designed out)',
+  /CONSOLIDATION_POSTURE/.test(read('src/lib/shipping/consolidation.ts'))
 );
 check(
   'the admin provider configuration offers a REAL, RBAC-gated hand-off to the Integrations view',

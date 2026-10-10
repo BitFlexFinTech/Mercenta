@@ -41,7 +41,7 @@ async function openSuperAdminLogistics(page: any) {
   await page.waitForTimeout(1700);
 }
 
-test.describe('§P10 — brand: carrier providers + the deferred consolidation', () => {
+test.describe('§P10 — brand: carrier providers (consolidation card removed in §BATCH 2, see below)', () => {
   test('1. both Mercenta carrier accounts are stated with their lane and real state', async ({ page }) => {
     await openBrandLogistics(page);
 
@@ -77,38 +77,19 @@ test.describe('§P10 — brand: carrier providers + the deferred consolidation',
   });
 });
 
-test.describe('§P10 — brand: the deferred consolidation posture', () => {
-  test('3. consolidation is shown as DEFERRED with its documented evidence and invariants', async ({
-    page,
-  }) => {
+test.describe('§P10 + §BATCH 2 — brand: the Consolidation card is REMOVED', () => {
+  /**
+   * §BATCH 2 (2026-10-10) — REPOINTED (rule 08, removal coherence). This test USED to assert
+   * that the consolidation posture was VISIBLE. The owner then instructed removal of the
+   * "Consolidation" card, so the assertion is REWRITTEN into an ABSENCE GUARD (never
+   * deleted, never weakened): the brand surface must render NO consolidation posture. The
+   * deferred decision (decision 11, "deferred, not designed out") is RETAINED in the owner
+   * lib and the now-unmounted panel — guarded at source by
+   * `scripts/validate-logistics-providers.mjs` §9a.
+   */
+  test('3. the brand surface renders NO consolidation posture', async ({ page }) => {
     await openBrandLogistics(page);
-
-    const posture = page.locator('[data-testid="consolidation-posture"]').first();
-    await expect(posture).toBeVisible({ timeout: 10000 });
-
-    await expect(page.locator('[data-testid="consolidation-status"]').first()).toHaveAttribute(
-      'data-status',
-      'deferred'
-    );
-    await expect(page.locator('[data-testid="consolidation-today"]').first()).toContainText(
-      /One purchase order = one consignment/
-    );
-    await expect(page.locator('[data-testid="consolidation-model-support"]').first()).toContainText(
-      /1\.\.n/
-    );
-
-    // The channel evidence is QUOTED, never asserted as Mercenta's own claim.
-    const evidence =
-      (await page.locator('[data-testid="consolidation-evidence"]').first().innerText()) ?? '';
-    expect(evidence).toMatch(/purchaseOrders/);
-    expect(evidence).toMatch(/per carton/);
-    expect(evidence).toMatch(/100 shipment confirmations/);
-
-    // And the invariants a future grouping must honour are stated.
-    const invariants =
-      (await page.locator('[data-testid="consolidation-invariants"]').first().innerText()) ?? '';
-    expect(invariants).toMatch(/different brands/);
-    expect(invariants).toMatch(/duplicate purchase-order declaration is refused/i);
+    await expect(page.locator('[data-testid="consolidation-posture"]')).toHaveCount(0);
   });
 });
 
@@ -172,6 +153,8 @@ test.describe('§P10 — admin: the same records, operator scope, real hand-off'
     // The operator is told the pack belongs to the brand's own Hub, not re-issued here.
     expect(body).toMatch(/remaining job|download and print/i);
 
-    await expect(page.locator('[data-testid="consolidation-posture"]').first()).toBeVisible();
+    // §BATCH 2 (2026-10-10) — REPOINTED to an ABSENCE guard: the operator surface renders no
+    // consolidation posture either (the "Consolidation" card was removed from both surfaces).
+    await expect(page.locator('[data-testid="consolidation-posture"]')).toHaveCount(0);
   });
 });

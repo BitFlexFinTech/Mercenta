@@ -604,16 +604,6 @@ export function WorkWorkspace({
         </div>
 
         <div className="space-y-3">
-          <ContextPanel title="How this works">
-            <p className="text-ds-label leading-snug text-zinc-400">
-              Every item is projected from an existing record — a retail-channel PO, a compliance
-              document, a contract, a deduction, a shipment, a return, an outreach follow-up.
-              <strong className="font-semibold text-zinc-300"> Record-qualified items close by doing the
-              work</strong>: the surfaces hand you to the record's own workspace, and the item disappears
-              when the record changes. Only a manual task — which has no record — is resolved here, and
-              either way its reminders stop.
-            </p>
-          </ContextPanel>
           {contextExtra}
           <ContextPanel title="Proactive reminders">
             <RecordFieldList

@@ -360,7 +360,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | sl-providers-admin-staff-no-dead-end | commerce_logistics | mercenta_admin | refusal | `e2e/logistics-providers.spec.ts` | `4b. an admin-STAFF session gets the configuration but NO dead-end hand-off` |
 | sl-providers-brand-no-credential-form | commerce_logistics | brand_user | refusal | `e2e/logistics-providers.spec.ts` | `2. the brand surface exposes no credential form and no cost base` |
 | sl-providers-carrier-accounts | commerce_logistics | brand_user | happy | `e2e/logistics-providers.spec.ts` | `1. both Mercenta carrier accounts are stated with their lane and real state` |
-| sl-providers-consolidation-deferred | commerce_logistics | brand_user | happy | `e2e/logistics-providers.spec.ts` | `3. consolidation is shown as DEFERRED with its documented evidence and invariants` |
+| sl-providers-consolidation-deferred | commerce_logistics | brand_user | happy | `e2e/logistics-providers.spec.ts` | `3. the brand surface renders NO consolidation posture` |
 | sl-providers-operator-cross-tenant-queue | commerce_logistics | mercenta_admin | happy | `e2e/logistics-providers.spec.ts` | `5. the operator sees the cross-tenant PO-document queue and the same posture` |
 | sl-providers-super-admin-handoff | commerce_logistics | super_admin | happy | `e2e/logistics-providers.spec.ts` | `4. the SUPER ADMIN sees the provider configuration and reaches Integration Settings` |
 | sl-returns-admin-destination-under-operations | commerce_logistics | mercenta_admin | happy | `e2e/app-shell.spec.ts` | `Admin — grouping is structural (Operations is the action centre)` |

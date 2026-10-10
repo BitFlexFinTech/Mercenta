@@ -35,7 +35,6 @@ import { buildOperationalMap } from '@/lib/logistics/operationsMap';
  */
 import { PoDocumentQueuePanel } from '@/components/shared/logistics/PoDocumentQueuePanel';
 import { CarrierProviderConfigurationPanel } from '@/components/shared/logistics/CarrierProviderConfigurationPanel';
-import { ConsolidationPosturePanel } from '@/components/shared/logistics/ConsolidationPosturePanel';
 import {
   SupplyRouteEscalationPanel,
   type SupplyRouteConsignment,
@@ -738,9 +737,6 @@ export function LogisticsControl({
           }}
           scope="admin"
         />
-        <div className="mt-3">
-          <ConsolidationPosturePanel />
-        </div>
       </WorkspaceSection>
 
       {/*

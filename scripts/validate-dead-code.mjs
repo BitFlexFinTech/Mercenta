@@ -150,6 +150,14 @@ const DECLARED_UNWIRED = new Map([
     'Its only importer was the unreached glue `firecrawlResearch.ts`, which P4 removed; ' +
     'removing the SEAM itself is a FEATURE decision deferred to P5/D2, so the seam stays, ' +
     'declared here until it is either wired to a product surface or removed by the owner.'],
+  ['src/components/shared/logistics/ConsolidationPosturePanel.tsx',
+    'The Consolidation posture panel — the UI of a DEFERRED feature. §BATCH 2 (2026-10-10) took ' +
+    'the "Consolidation" card OUT of both logistics workspaces (LogisticsHub, LogisticsControl) on ' +
+    'the owner\'s instruction, so nothing imports this component now. It is KEPT because programme ' +
+    'decision 11 is a recorded Founder decision ("deferred, not designed out") — removing a card is ' +
+    'not removing a decision — and it remains the ready UI for that decision; its owner lib ' +
+    '`src/lib/shipping/consolidation.ts` is retained for the same reason. Its ABSENCE from both ' +
+    'surfaces is guarded by `scripts/validate-logistics-providers.mjs` §9a.'],
 ]);
 
 // ── DC1 — no undeclared unreferenced source file (the plan's "0 candidates") ──

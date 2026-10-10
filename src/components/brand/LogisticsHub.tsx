@@ -74,7 +74,6 @@ import { downloadHtml } from '@/lib/founder/documentExport';
  */
 import { PoDocumentQueuePanel } from '@/components/shared/logistics/PoDocumentQueuePanel';
 import { CarrierProviderConfigurationPanel } from '@/components/shared/logistics/CarrierProviderConfigurationPanel';
-import { ConsolidationPosturePanel } from '@/components/shared/logistics/ConsolidationPosturePanel';
 import { carrierProviderConfigurations } from '@/lib/shipping/providerConfiguration';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
@@ -1662,14 +1661,6 @@ export function LogisticsHub() {
               </div>
             </ContextPanel>
 
-            {/*
-              §P10 — CONSOLIDATION (programme decision 11): DEFERRED, NOT DESIGNED OUT.
-              The posture and the consignment's declared purchase orders come from the
-              owner, so the surface cannot state something the model does not support.
-            */}
-            <ContextPanel title="Consolidation">
-              <ConsolidationPosturePanel poNumber={selected?.poNumber ?? null} />
-            </ContextPanel>
           </>
         }
       >

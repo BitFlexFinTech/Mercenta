@@ -94,6 +94,22 @@ for (const f of SCAN_SINGLE_FILES) {
 }
 test('no Rocket.Chat reference remains in executable product paths', hits.length === 0);
 if (hits.length) hits.forEach((h) => console.log('    ' + h));
+
+// ── 2b. §Batch 2 (2026-10-10) — the removed work card is ABSENT ────────────
+/**
+ * The owner removed the "How this works" card from the shared Work Workspace
+ * (`src/components/shared/WorkWorkspace.tsx`). It sat OUTSIDE the view switches, so it
+ * cleared BOTH the Calendar and the Tasks & Deadlines views. `CommercialReadiness.tsx`
+ * keeps its OWN, separate "How this works" card — only the shared workspace's copy was
+ * removed. This is the ABSENCE GUARD for that removal (rule 08): re-introducing the card
+ * into the shared workspace fails here.
+ */
+const workWorkspaceSource = readFileSync(resolve(ROOT, 'src/components/shared/WorkWorkspace.tsx'), 'utf-8');
+test('ABSENCE GUARD — the shared WorkWorkspace renders no "How this works" card',
+  !/title="How this works"/.test(workWorkspaceSource));
+test('the CommercialReadiness "How this works" card is untouched (a separate card, not the one removed)',
+  /title="How this works"/.test(readFileSync(resolve(ROOT, 'src/components/brand/CommercialReadiness.tsx'), 'utf-8')));
+
 // ── 3–5. Domain-level assertions through the real modules ───────────────
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
 try {

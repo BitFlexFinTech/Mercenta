@@ -6,9 +6,14 @@
  * it — and, when it is given a consignment's PO, the DECLARED SET that consignment
  * carries (normalised by the owner, so the 1..n shape is executed rather than described).
  *
- * It is rendered by BOTH logistics workspaces: a brand must be able to see that its PO is
- * shipped on its own consignment today and why, rather than wondering where a grouped
- * consignment is.
+ * §BATCH 2 (2026-10-10) — REPOINTED (the statement above that it "is rendered by BOTH
+ * logistics workspaces" is no longer true and is corrected here). This component is
+ * RETAINED because decision 11 (deferred, not designed out) is a recorded Founder decision,
+ * but it is NO LONGER MOUNTED by either logistics workspace: the "Consolidation" card was
+ * removed from `LogisticsHub.tsx` and `LogisticsControl.tsx` on the owner's instruction, so
+ * it sits ready for the deferred feature rather than deleted. The two surfaces' ABSENCE of
+ * this panel is guarded by `scripts/validate-logistics-providers.mjs` (§9a) and
+ * `e2e/logistics-providers.spec.ts`.
  */
 import { StatusBadge } from '@/components/ui';
 import {

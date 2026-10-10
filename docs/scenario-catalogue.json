@@ -2542,12 +2542,12 @@
     {
       "id": "sl-providers-consolidation-deferred",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — carrier providers — consolidation is shown as deferred, with its evidence",
+      "journey": "shipment & logistics — carrier providers — the Consolidation card is REMOVED (the deferred decision stays in its owner)",
       "actor": "brand_user",
       "type": "happy",
       "spec": "e2e/logistics-providers.spec.ts",
-      "test": "3. consolidation is shown as DEFERRED with its documented evidence and invariants",
-      "expects": "The consolidation posture is shown as DEFERRED with the channel evidence that justifies it and its invariants — recorded honestly, neither silently implemented nor designed out."
+      "test": "3. the brand surface renders NO consolidation posture",
+      "expects": "§BATCH 2 (2026-10-10) — the owner removed the \"Consolidation\" card from both logistics workspaces, so the brand surface renders NO consolidation posture (ABSENCE guard, repointed from the former presence assertion per rule 08). The deferred decision (programme decision 11, \"deferred, not designed out\") is retained in the owner lib and the now-unmounted panel, guarded at source by scripts/validate-logistics-providers.mjs §9a."
     },
     {
       "id": "sl-providers-super-admin-handoff",

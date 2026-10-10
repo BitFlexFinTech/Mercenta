@@ -334,10 +334,19 @@ const bundleProbe = await superAdmin
        * pass the live leg by rendering a page that merely looks right.
        */
       p10ProviderConfig: all.includes('carrier-provider-configuration'),
-      p10Consolidation: all.includes('consolidation-posture'),
+      /**
+       * §BATCH 2 (2026-10-10) — REPOINTED to ABSENCE. The owner removed the "Consolidation" card
+       * from BOTH surfaces, so the deferred-posture surface and its quoted channel evidence must
+       * NOT be in the shipped bundle. (The deferred DECISION is retained in the owner lib and the
+       * now-unmounted panel — guarded at source by `scripts/validate-logistics-providers.mjs` §9a —
+       * but the bundle no longer needs to carry the surface.) This replaces the former presence
+       * probes `p10Consolidation`, `p10Deferred` and `p10Truckload`, which all read that ONE
+       * removed surface.
+       */
+      p10ConsolidationGone:
+        !all.includes('consolidation-posture') &&
+        !all.includes('100 shipment confirmations for every truckload shipment'),
       p10Queue: all.includes('po-documents-queue'),
-      p10Deferred: all.includes('One purchase order = one consignment'),
-      p10Truckload: all.includes('100 shipment confirmations for every truckload shipment'),
       /**
        * §P11 — the channel-ingestion build, read from the DEPLOYED bundle itself:
        * the routing owner's fail-closed code, the surface's channel-read control
@@ -386,10 +395,8 @@ check('§P9 the deployed bundle carries NO carrier navigation (BAK Logistics Hub
 check('§P9 the deployed bundle carries NO admin Carrier Monitor', bundleProbe.p9CarrierMonitorGone === true, probeDetail);
 /* §P10 — the deployed bundle IS the logistics-completion build. */
 check('§P10 the deployed bundle carries the carrier provider configuration surface', bundleProbe.p10ProviderConfig === true, probeDetail);
-check('§P10 the deployed bundle carries the consolidation posture surface', bundleProbe.p10Consolidation === true, probeDetail);
+check('§P10+§BATCH2 the deployed bundle carries NO consolidation posture surface (the card was removed)', bundleProbe.p10ConsolidationGone === true, probeDetail);
 check('§P10 the deployed bundle carries the PO-document download queue', bundleProbe.p10Queue === true, probeDetail);
-check('§P10 the deployed bundle records consolidation as DEFERRED (one PO = one consignment)', bundleProbe.p10Deferred === true, probeDetail);
-check('§P10 the deployed bundle carries the documented 100-confirmation truckload evidence', bundleProbe.p10Truckload === true, probeDetail);
 /* §P11 (programme decision 3) — the deployed bundle IS the channel-ingestion build. */
 check('§P11 the deployed bundle carries the channel-ingestion routing owner (fail-closed codes)', bundleProbe.p11IngestionOwner === true, probeDetail);
 check('§P11 the deployed bundle carries the channel-read control (the ONLY PO entry point)', bundleProbe.p11ChannelRead === true, probeDetail);
@@ -465,8 +472,8 @@ check('§P10 a non-super admin session gets NO dead-end credential control',
 check('§P10 the deployed ADMIN Hub carries the cross-tenant PO-document queue',
   (await admin.locator('[data-testid="po-documents-queue-admin"]').count()) > 0 ||
     /PO documents awaiting the brand/i.test(adminHubBody));
-check('§P10 the deployed ADMIN Hub renders the consolidation posture',
-  (await admin.locator('[data-testid="consolidation-posture"]').count()) > 0);
+check('§P10+§BATCH2 the deployed ADMIN Hub renders NO consolidation posture (the card was removed)',
+  (await admin.locator('[data-testid="consolidation-posture"]').count()) === 0);
 
 /* ── §P11 — the ADMIN purchase-order queue, live (decision 3) ─────────────── */
 await admin.click('nav[aria-label="Primary"] >> text=Purchase Orders').catch(() => {});
