@@ -102,6 +102,19 @@ test(`the Edge Function folder holds its functions (${fnTs.length} .ts files)`, 
 test('playwright.config.ts exists at the root', exists('playwright.config.ts'));
 test('scripts/brain-runtime-check.ts exists', exists('scripts/brain-runtime-check.ts'));
 
+/* ── 7. the editor root — the committed pin (half 2 of rule 09) ──────────── */
+// WHY: coverage (above) fixes what the command line checks; it does NOT stop the
+// editor inventing problems with its own bundled compiler. Half 2 pins the editor
+// to THIS project's TypeScript via a workspace-relative path, committed so every
+// clone gets it. See ~/.cline/rules/09-editor-and-cli-agree.md.
+const VSCODE = '.vscode/settings.json';
+test('the committed editor settings exist (.vscode/settings.json)', exists(VSCODE));
+const vs = exists(VSCODE) ? read(VSCODE) : '';
+test("the editor is pinned to THIS project's TypeScript (workspace-relative tsdk)",
+  /"typescript\.tsdk"\s*:\s*"node_modules\/typescript\/lib"/.test(vs), vs);
+test('the editor is told to use the workspace TypeScript without prompting',
+  /"typescript\.enablePromptUseWorkspaceTsdk"\s*:\s*true/.test(vs), vs);
+
 /* ── summary ────────────────────────────────────────────────────────────── */
 const covered = e2eTs.length + fnTs.length + 2; // + playwright.config.ts + brain-runtime-check.ts
 console.log('');

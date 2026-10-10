@@ -1,0 +1,5 @@
+{
+  "// §09-editor-and-cli-agree": "The editor must use THIS project's own TypeScript, not a global copy — see ~/.cline/rules/09-editor-and-cli-agree.md. Workspace-relative, so every project uses its own toolchain.",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}

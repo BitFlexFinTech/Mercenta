@@ -3838,6 +3838,30 @@ const UIUX_WAVE3_PART5_SCOPE = new Set([
 ]);
 
 /**
+ * §BATCH 1 (2026-10-10) — THE EDITOR / COMMAND-LINE AGREEMENT DECLARED SURFACE.
+ *
+ * The editor showed a large problem count the command line did not, because 127
+ * TypeScript files OUTSIDE `src` belonged to NO project (the editor invented
+ * problems; `npm run typecheck` never checked them) and the editor used its own
+ * bundled TypeScript. Half 1 (coverage) already shipped and is gated by
+ * `scripts/validate-typecheck-coverage.mjs`. This phase adds half 2: the committed
+ * editor pin (`.vscode/settings.json`, workspace-relative to THIS project's
+ * TypeScript) plus the widened gate that proves it.
+ *
+ * F6's contract is UNCHANGED: a changed SOURCE file in NO declared set still fails.
+ * Declared here rather than left unexplained — the `scripts/validate-e6-brand-surfaces.mjs`
+ * and `.gitignore` edits are the guard's own scope bookkeeping and the ignore
+ * exception that keeps the committed `.vscode/settings.json` tracked. `.vscode/`
+ * is named because an untracked directory reports as a directory in `git status`.
+ */
+const EDITOR_CLI_AGREEMENT_SCOPE = new Set([
+  '.vscode/',
+  '.vscode/settings.json',
+  '.gitignore',
+  'scripts/validate-typecheck-coverage.mjs',
+]);
+
+/**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
  * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
  * sprint required declares its files here, exactly like every phase before it.
@@ -4224,7 +4248,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...UIUX_WAVE3_PART4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §WAVE 3 PART 5 — the state pass (see above). */
           UIUX_WAVE3_PART5_SCOPE.has(p) ||
-          [...UIUX_WAVE3_PART5_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...UIUX_WAVE3_PART5_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 1 — the editor/command-line agreement surface (see above). */
+          EDITOR_CLI_AGREEMENT_SCOPE.has(p) ||
+          [...EDITOR_CLI_AGREEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
