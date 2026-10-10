@@ -37,6 +37,20 @@ export function ProductThumb({
   const isRenderableUrl =
     typeof candidate === 'string' && /^(https?:\/\/|data:image\/)/i.test(candidate);
 
+  /**
+   * §Wave-3 Part 3.1 (§BATCH 6, 2026-10-10) — the PLACEHOLDER must SCALE with the
+   * box. Both of its sizes used to be hard-coded (`text-lg` = 18px for the glyph,
+   * `h-5 w-5` = 20px for the neutral icon), so they did not track `size` at all:
+   * the owner's enlargement of the catalogue thumbnail to 64px would have painted
+   * a 20px icon adrift inside a 64px tile.
+   *
+   * The ratios are chosen to reproduce the previously shipped sizes EXACTLY at the
+   * size BrandInventory renders (32px → 18px glyph / 20px icon), so no surface that
+   * was not asked to change moves; a 64px tile now gets a 36px glyph / 40px icon.
+   */
+  const glyphPx = Math.round(size * 0.5625);
+  const iconPx = Math.round(size * 0.625);
+
   if (isRenderableUrl) {
     return (
       <img
@@ -50,14 +64,14 @@ export function ProductThumb({
 
   return (
     <span
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, fontSize: glyphPx, lineHeight: 1 }}
       aria-hidden="true"
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-ds-sm bg-white/[0.06] text-lg',
+        'flex shrink-0 items-center justify-center rounded-ds-sm bg-white/[0.06]',
         className
       )}
     >
-      {candidate ? candidate : <Package className="h-5 w-5 text-zinc-500" />}
+      {candidate ? candidate : <Package style={{ width: iconPx, height: iconPx }} className="text-zinc-500" />}
     </span>
   );
 }

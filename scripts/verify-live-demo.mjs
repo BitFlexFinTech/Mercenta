@@ -67,6 +67,14 @@
  *   L29 the Supply Route & 3PL escalation surface on the DEPLOYED admin Logistics
  *       Hub (§PHASE 3 Stage 3): the declared 3PL partner, the not-agreed
  *       thresholds and the fail-closed review decision
+ *   L30 the custom 404 and the response security headers, as deployed (§PHASE 15).
+ *       (Implemented below but never listed here until 2026-10-10, when this list
+ *       was reconciled while adding L32.)
+ *   L31 the privacy policy derived from the third-party data inventory, as deployed
+ *       (§PHASE 15). (Same reconciliation as L30.)
+ *   L32 the ENLARGED catalogue product image on the DEPLOYED brand surface
+ *       (BATCH 6, 2026-10-10): every thumbnail box measured at 64×64, no raw image
+ *       URL painted as text, and the 390px card-list layout still holding
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1930,6 +1938,93 @@ function readRedLines() {
     check(`L31 the deployed privacy policy could NOT be driven (${String(pvError).split('\n')[0].slice(0, 140)})`, false);
   }
   await pvPage.close();
+
+  /* ── L32 — §BATCH 6 (2026-10-10): THE ENLARGED CATALOGUE PRODUCT IMAGE, LIVE ─
+   * WHY THIS EXISTS. The owner enlarged the catalogue thumbnail 32px → 64px through
+   * the ONE owner (`src/components/shared/ProductThumb.tsx`). A source assertion and
+   * a local browser run prove nothing about the DEPLOYED bundle, so the RENDERED
+   * geometry is measured on the live brand surface: every thumbnail box must be
+   * 64×64, no cell may paint a raw image URL as text, and the 390px layout that
+   * Wave-3 Part 4 fixed must still hold (no horizontal page overflow, and the
+   * labelled card list rather than a sideways table).
+   */
+  console.log('\n--- L32 the enlarged catalogue product image, on the live brand surface ---');
+  const catPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const catErrors = [];
+  catPage.on('pageerror', (e) => catErrors.push(String(e)));
+  try {
+    /* The brand entry is retried, exactly as L18 does: the deployed host can be
+     * slow to answer the first request and a single timeout would report a false
+     * defect. The retry is recorded in the check name, never hidden. */
+    let catEntry = 0;
+    let catEntryError = null;
+    for (let attempt = 1; attempt <= 3 && catEntry === 0; attempt++) {
+      try {
+        await gotoLive(catPage, `${SITE}/`);
+        const login = catPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await catPage.waitForTimeout(2500);
+        const card = catPage.locator('text=Tapatío').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await catPage.waitForTimeout(3000);
+        catEntry = attempt;
+      } catch (err) {
+        catEntryError = err;
+      }
+    }
+    if (catEntry === 0) throw catEntryError ?? new Error('entry failed');
+    check(`L32 the deployed site opened and the brand signed in (attempt ${catEntry})`, true);
+
+    const catNav = catPage.locator('nav[aria-label="Primary"] >> text=Product Catalog').first();
+    await catNav.waitFor({ state: 'visible', timeout: 90000 });
+    await catNav.click({ timeout: 30000 });
+    await catPage.waitForTimeout(2500);
+
+    const catTable = catPage.locator('table[data-table="product-catalogue"]').first();
+    await catTable.waitFor({ state: 'visible', timeout: 60000 });
+    check('L32 the DEPLOYED catalogue renders its semantic table', true);
+
+    const catBoxes = await catTable.locator('tbody tr td:first-child img').evaluateAll((els) =>
+      els.map((e) => {
+        const r = e.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height) };
+      })
+    );
+    check(`L32 the DEPLOYED catalogue renders ${catBoxes.length} thumbnail(s)`, catBoxes.length > 0);
+    const catWrong = catBoxes.filter((b) => b.w !== 64 || b.h !== 64);
+    check(
+      `L32 every DEPLOYED catalogue thumbnail is the enlarged 64px box (measured ${catBoxes.map((b) => `${b.w}x${b.h}`).join(', ') || 'none'})`,
+      catBoxes.length > 0 && catWrong.length === 0
+    );
+
+    const catText = await catTable.locator('tbody').innerText();
+    check('L32 no DEPLOYED catalogue cell paints a raw image URL as text', !/https?:\/\//i.test(catText));
+
+    await catPage.setViewportSize({ width: 390, height: 844 });
+    await catPage.waitForTimeout(1200);
+    const catOverflow = await catPage.evaluate(() =>
+      Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, 0)
+    );
+    check(`L32 the DEPLOYED catalogue has NO horizontal overflow at 390px (${catOverflow}px)`, catOverflow <= 1);
+    const catCards = await catPage.locator('ul[aria-label="Product catalogue"] > li').count();
+    check(
+      `L32 below md the DEPLOYED catalogue is the labelled card list, not a sideways table (${catCards} card(s))`,
+      (await catPage.locator('table[data-table="product-catalogue"]').count()) === 0 && catCards > 0
+    );
+
+    check(
+      `L32 the driven catalogue rendered with no uncaught error (errors: ${catErrors.join(' | ') || 'none'})`,
+      catErrors.length === 0
+    );
+  } catch (catError) {
+    check(
+      `L32 the enlarged catalogue image could NOT be driven live (${String(catError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await catPage.close();
 
   await browser.close();
 

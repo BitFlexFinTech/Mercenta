@@ -278,7 +278,11 @@ export function ProductCatalog() {
               primary: true,
               render: (p) => (
                 <div className="flex items-center gap-2.5">
-                  <ProductThumb product={p} size={32} className="rounded-lg" />
+                  {/* §Wave-3 Part 3.1 (§BATCH 6, 2026-10-10) — the owner enlarged
+                      this catalogue thumbnail 32px → 64px. It renders through the
+                      ONE owner (`ProductThumb`), whose placeholder glyph/icon now
+                      scale with the box; nothing else in the cell moved. */}
+                  <ProductThumb product={p} size={64} className="rounded-lg" />
                   <span className="text-sm font-medium text-white">{p.name}</span>
                 </div>
               ),

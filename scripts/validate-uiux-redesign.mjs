@@ -874,6 +874,57 @@ check(
     UKMF_CFG.includes('PUBLIC_HEADER_UTILITY_ACTION')
 );
 
+/* ── §WAVE 3 PART 3.1 (§BATCH 6, 2026-10-10) — THE CATALOGUE PRODUCT IMAGE ──
+ *
+ * WHY THIS EXISTS. The owner enlarged the catalogue thumbnail 32px → 64px. The
+ * image itself already scaled (its width/height come from `size`), but the
+ * PLACEHOLDER branch did not: its glyph size (`text-lg`, a fixed 18px) and its
+ * neutral icon (`h-5 w-5`, a fixed 20px) were both HARD-CODED, so a 64px tile
+ * would have painted a 20px icon adrift in the middle of a 64px box.
+ *
+ * The contract asserted here has three parts, all on the COMMENT-STRIPPED source
+ * so a comment naming the old classes can neither satisfy nor break it:
+ *   1. the catalogue still renders through the ONE owner (no bespoke `<img>`);
+ *   2. the catalogue's size really is the enlarged 64px;
+ *   3. the placeholder derives BOTH sizes from `size`, and those ratios still
+ *      reproduce the previously shipped 32px sizes EXACTLY (18px / 20px), so the
+ *      surfaces that were not asked to change do not move.
+ *
+ * MUTATION PROOF (both ways, restored byte-identical afterwards): restoring
+ * `text-lg` + `h-5 w-5` fails checks 3a/3b; reverting the catalogue to
+ * `size={32}` fails check 2; changing the glyph ratio so 32px no longer yields
+ * 18px fails check 3c.
+ */
+const THUMB_CODE = stripComments(read('src/components/shared/ProductThumb.tsx'));
+const CATALOG_CODE = stripComments(read('src/components/brand/ProductCatalog.tsx'));
+check(
+  'the catalogue renders its product image through the ONE owner (no bespoke <img>)',
+  /<ProductThumb\b/.test(CATALOG_CODE) && !/<img\b/.test(CATALOG_CODE)
+);
+check(
+  'the catalogue thumbnail is rendered at the enlarged 64px size',
+  /<ProductThumb\b[^>]*\bsize=\{64\}/.test(CATALOG_CODE)
+);
+check(
+  'the placeholder GLYPH scales with the size (no hard-coded text-lg)',
+  /fontSize:\s*glyphPx/.test(THUMB_CODE) && !/\btext-lg\b/.test(THUMB_CODE)
+);
+check(
+  'the placeholder ICON scales with the size (no hard-coded h-5 w-5)',
+  /<Package\b[^>]*style=\{\{\s*width:\s*iconPx/.test(THUMB_CODE) && !/\bh-5\b/.test(THUMB_CODE)
+);
+const GLYPH_RATIO = Number(
+  (THUMB_CODE.match(/glyphPx\s*=\s*Math\.round\(size\s*\*\s*([0-9.]+)\)/) ?? [])[1]
+);
+const ICON_RATIO = Number(
+  (THUMB_CODE.match(/iconPx\s*=\s*Math\.round\(size\s*\*\s*([0-9.]+)\)/) ?? [])[1]
+);
+check(
+  'the placeholder ratios reproduce the previously shipped 32px sizes exactly',
+  Math.round(32 * GLYPH_RATIO) === 18 && Math.round(32 * ICON_RATIO) === 20,
+  `at 32px: glyph ${Math.round(32 * GLYPH_RATIO)}px (expected 18), icon ${Math.round(32 * ICON_RATIO)}px (expected 20)`
+);
+
 console.log(`\nUIUX REDESIGN: ${pass} PASS / ${fail} FAIL`);
 if (fail > 0) {
   console.log(errors.map((e) => `  ✗ ${e}`).join('\n'));

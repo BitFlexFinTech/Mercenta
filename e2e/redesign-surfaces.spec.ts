@@ -165,6 +165,34 @@ test.describe('Redesign surfaces — responsive verification (brand)', () => {
     // And no catalogue cell paints a URL as literal text (the defect).
     const bodyText = await table.locator('tbody').innerText();
     expect(bodyText, 'no catalogue cell paints a raw URL as text').not.toMatch(/https?:\/\//i);
+
+    // §Wave-3 Part 3.1 (§BATCH 6, 2026-10-10) — the owner enlarged the thumbnail
+    // 32px → 64px through the ONE owner. Assert the RENDERED geometry, not the call
+    // site: a 64px image that some container clipped back to 32px would satisfy a
+    // source-only check and still fail the owner's requirement.
+    const boxes = await table
+      .locator('tbody tr td:first-child img')
+      .evaluateAll((els) =>
+        els.map((e) => {
+          const r = (e as HTMLElement).getBoundingClientRect();
+          return { w: Math.round(r.width), h: Math.round(r.height) };
+        })
+      );
+    expect(boxes.length, 'catalogue thumbnails were measured').toBeGreaterThan(0);
+    for (const b of boxes) {
+      expect(b, 'catalogue thumbnail renders at the enlarged 64px box').toEqual({ w: 64, h: 64 });
+    }
+
+    // §Wave-3 Part 3.1 — RE-VERIFY the 390px catalogue that Wave-3 Part 4 fixed:
+    // enlarging the image must not re-break the layout. Below md the canonical
+    // DataTable renders its labelled-card list (never a sideways table) and the
+    // page must not overflow horizontally.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await assertNoOverflow(page, 'brand-product-catalogue', 390);
+    await expect(table, 'below md the catalogue is the labelled card list, not a table').toHaveCount(0);
+    const cards = page.locator('ul[aria-label="Product catalogue"] > li');
+    expect(await cards.count(), 'the catalogue card list carries the products at 390px').toBeGreaterThan(0);
+    expect(await cards.locator('img').count(), 'the enlarged thumbnail survives into the mobile card').toBeGreaterThan(0);
   });
 });
 
