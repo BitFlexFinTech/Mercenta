@@ -26,7 +26,6 @@
  */
 import {
   MAP_FRAME,
-  OPERATIONAL_TRUTH,
   resolveGeoPlace,
   type GeoPlace,
   type OperationalTruth,
@@ -341,17 +340,10 @@ export function buildOperationalMap(inputs: OperationalLegInput[]): OperationalM
   };
 }
 
-/** Truth presentation lookup for legends, filters and the inspector. */
-export function truthPresentation(truth: OperationalTruth) {
-  return OPERATIONAL_TRUTH[truth];
-}
-
-/** Statuses still moving — these are the legs eligible for ambient drift. */
-export function isLegInMotion(status: string): boolean {
-  return (
-    status === 'sea_transit' ||
-    status === 'air_transit' ||
-    status === 'uk_customs_cleared' ||
-    status === 'bak_depot'
-  );
-}
+/**
+ * §BATCH 3 (2026-10-10) — the map-only helpers `truthPresentation()` and
+ * `isLegInMotion()` were REMOVED with the interactive map. They were read only
+ * by `LogisticsMapCanvas` (the truth legend and the ambient drift), so with the
+ * canvas gone they had no reader. The leg derivation itself is UNCHANGED: the
+ * consignment list and the inspector on both surfaces still read it.
+ */

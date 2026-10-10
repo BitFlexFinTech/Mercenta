@@ -15,6 +15,32 @@ const path = 'requirements-registry.json';
 
 const reg = JSON.parse(fs.readFileSync(path, 'utf8'));
 const byId = (id) => reg.entries.find((e) => e.id === id);
+/**
+ * §BATCH 3 (2026-10-10) — SUPERSEDED, AND GUARDED AGAINST REGRESSION.
+ *
+ * This tool's rows described the INTERACTIVE OPERATIONAL MAP, which the owner
+ * instructed us to REMOVE (together with the logistics Hero) from both logistics
+ * surfaces. Its `evidence` strings therefore name a DELETED canvas and browser
+ * tests that no longer exist, and — because the script REFRESHES a row's evidence
+ * when it differs — re-running it would OVERWRITE the reconciled rows in
+ * `requirements-registry.json` and re-introduce citations of deleted files.
+ *
+ * It is kept (history is never deleted) but REFUSES to run by default: the rows
+ * it manages are now recorded as `removed` / repointed by hand, and the map's
+ * ABSENCE is guarded by `scripts/validate-logistics-map.mjs` §BATCH3 (which fails
+ * if the map returns).
+ */
+if (!process.env.ALLOW_SUPERSEDED_LOGISTICS_MAP_RECONCILE) {
+  console.error(
+    'reconcile-logistics-map-registry.cjs — SUPERSEDED by §BATCH 3 (2026-10-10): the operational map was removed.\n' +
+      'Its rows are reconciled in requirements-registry.json (status "removed" / repointed) and guarded by\n' +
+      'scripts/validate-logistics-map.mjs §BATCH3. Re-running would re-introduce citations of deleted files.\n' +
+      'Set ALLOW_SUPERSEDED_LOGISTICS_MAP_RECONCILE=1 only if you have read that and still intend to run it.'
+  );
+  process.exit(1);
+}
+
+
 
 const NEW = [
   {

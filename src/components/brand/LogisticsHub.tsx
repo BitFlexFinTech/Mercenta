@@ -12,8 +12,15 @@
  *     dark shell) with three carrier tabs, a non-functional "New Booking" form
  *     whose inputs were never wired to anything, and a flat shipment list.
  *   - it is now an OPERATIONS WORKSPACE built on the canonical workspace
- *     primitives, centred on a real interactive operational MAP whose geometry
- *     comes from `src/lib/logistics/operationsMap.ts`.
+ *     primitives, listing each consignment with the geometry-derived evidence
+ *     state from `src/lib/logistics/operationsMap.ts`.
+ *
+ * §BATCH 3 (2026-10-10) — the interactive operational map and the cinematic
+ * Logistics Hero were REMOVED from both logistics surfaces on the owner's
+ * instruction. The consignment list, the truth classification, the inspector and
+ * the artefacts remain: `operationsMap.ts` is still the ONE derivation the list
+ * and inspector read (verified, not assumed), so it was kept while its map-only
+ * geometry consumer (`LogisticsMapCanvas`) was deleted.
  *
  * TRUTH RULES ENFORCED HERE
  *   - Every leg carries a LIVE VERIFIED / SIMULATED / AMBIENT label derived from
@@ -34,12 +41,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { BRAND_NAME } from '@/config/brand';
-import {
-  MAP_TRUTH_NOTICE,
-  OPERATIONAL_TRUTH,
-  OPERATIONAL_TRUTH_ORDER,
-  freightSemantics,
-} from '@/config/logisticsGeo';
+import { OPERATIONAL_TRUTH, freightSemantics } from '@/config/logisticsGeo';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
 import { currentQueryParam } from '@/lib/runtime/productRoutes';
 import { etaPresentation, isEtaAtRisk } from '@/lib/logistics/shipmentEta';
@@ -51,9 +53,7 @@ import {
   providerModeFor,
   type CarrierEligibility,
 } from '@/lib/shipping/carrierEligibility';
-import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
 import { ProductThumb } from '@/components/shared/ProductThumb';
-import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
 /**
  * §P6 — "Documents for this PO": the document pack surface. It renders the pack
  * built by its ONE owner (`src/lib/documents/poDocumentPack.ts`) and opens the
@@ -577,44 +577,6 @@ function ShipmentTrackingTimeline({
   );
 }
 
-/* ── TRUTH LEGEND ─────────────────────────────────────────────────────── */
-
-/**
- * The map's truth legend. It states the CLAIM each state makes, so a reader can
- * never mistake an ambient context arc for confirmed live tracking.
- */
-function TruthLegend({ counts }: { counts: Record<string, number> }) {
-  const swatch: Record<string, string> = {
-    live_verified: 'bg-state-success',
-    simulated: 'bg-state-info',
-    ambient: 'bg-zinc-600',
-  };
-  return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5" data-testid="logistics-map-legend">
-      {OPERATIONAL_TRUTH_ORDER.map((truth) => {
-        const p = OPERATIONAL_TRUTH[truth];
-        return (
-          <li
-            key={truth}
-            className="flex items-center gap-1.5"
-            data-testid={`logistics-legend-${truth}`}
-            title={p.claim}
-          >
-            <span
-              aria-hidden="true"
-              className={cn('h-2 w-2 flex-shrink-0 rounded-full', swatch[truth])}
-            />
-            <span className="text-ds-micro font-medium uppercase tracking-[0.12em] text-zinc-400">
-              {p.label}
-            </span>
-            <span className="font-mono text-ds-micro text-zinc-600">{counts[truth] ?? 0}</span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 /* ── FREIGHT-TERM BADGE ───────────────────────────────────────────────── */
 
 function FreightTermChip({ term }: { term: 'collect' | 'prepaid' | null }) {
@@ -900,33 +862,6 @@ export function LogisticsHub() {
     [model.legs, visibleIds]
   );
 
-  /**
-   * §WAVE 3 — the Hero's brand lanes come from the SAME canonical legs the
-   * operational map plots, so the cinematic view and the operational view can
-   * never disagree about a consignment, its route or its truth state. Legs the
-   * user has filtered out are NOT dropped from the hero: the hero is a fixed
-   * network view, and the operational filters belong to the operational
-   * surfaces below it.
-   */
-  const heroLegs = useMemo(
-    () =>
-      model.legs.map((leg) => ({
-        id: leg.id,
-        reference: leg.reference,
-        title: leg.title,
-        origin: leg.origin.place,
-        destination: leg.destination.place,
-        truth: leg.truth,
-        exception: leg.exception || leg.delayed,
-      })),
-    [model.legs]
-  );
-  const visibleTruthCounts = useMemo(() => {
-    const out: Record<string, number> = { live_verified: 0, simulated: 0, ambient: 0 };
-    for (const leg of visibleLegs) out[leg.truth] += 1;
-    return out;
-  }, [visibleLegs]);
-
   const selected = model.legs.find((l) => l.id === selectedId) ?? null;
 
   /**
@@ -1090,7 +1025,7 @@ export function LogisticsHub() {
       <WorkspaceHeader
         eyebrow="Brand portal · Logistics"
         title="Logistics Hub"
-        description="Every consignment Mercenta moves on your behalf, plotted on the operational map. Selecting a consignment exposes its route, its carrier position and who actually arranges carriage."
+        description="Every consignment Mercenta moves on your behalf, with its declared route, carrier position and who actually arranges carriage. Selecting a consignment exposes its evidence state and the artefacts you can produce for it."
         entity={
           <>
             <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
@@ -1114,7 +1049,6 @@ export function LogisticsHub() {
             <span className="text-ds-micro text-zinc-500" data-testid="logistics-scope-count">
               {model.legs.length} consignments in scope
             </span>
-            <span className="text-ds-micro text-zinc-600">{MAP_TRUTH_NOTICE}</span>
           </>
         }
         actions={
@@ -1320,19 +1254,6 @@ export function LogisticsHub() {
         />
       </WorkspaceSection>
 
-      {/*
-        §WAVE 3 — THE CINEMATIC LOGISTICS HERO.
-        It is the HERO SECTION of this same page, not a second page: a fixed
-        camera, non-interactive global inbound network view built from authentic
-        geography, carrying the same LIVE VERIFIED / SIMULATED / AMBIENT truth
-        states as the operational surfaces below it. The operational controls
-        (search, evidence filters, consignment list, inspector, artefacts) stay
-        fully interactive underneath — exactly as required.
-      */}
-      <div className="mt-4">
-        <LogisticsHero legs={heroLegs} />
-      </div>
-
       <WorkspaceGrid
         className="mt-4"
         rail={
@@ -1521,8 +1442,8 @@ export function LogisticsHub() {
               <ContextPanel title="Consignment inspector">
                 <div className="p-3" data-testid="logistics-inspector-empty">
                   <p className="text-ds-body text-zinc-500">
-                    Select a consignment on the map or in the list to see its route, evidence state and
-                    who arranges carriage.
+                    Select a consignment in the list to see its route, evidence state and who arranges
+                    carriage.
                   </p>
                 </div>
               </ContextPanel>
@@ -1665,29 +1586,6 @@ export function LogisticsHub() {
         }
       >
         <WorkspaceSection
-          title="Operational map"
-          description="Consignments at their declared coordinates, positioned along their route by the canonical stage."
-          domain="logistics"
-          action={<TruthLegend counts={visibleTruthCounts} />}
-        >
-          <LogisticsMapCanvas
-            model={model}
-            visibleIds={visibleIds}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            loading={logisticsPending}
-            className="h-[280px] sm:h-[360px] lg:h-[440px]"
-          />
-          {model.schematic.length > 0 && (
-            <p className="text-ds-micro text-zinc-600" data-testid="logistics-schematic-notice">
-              {model.schematic.length} consignment{model.schematic.length === 1 ? '' : 's'} declare a
-              location the platform cannot resolve (for example “Brand warehouse”) and are therefore NOT
-              plotted — they are listed below rather than placed at an invented coordinate.
-            </p>
-          )}
-        </WorkspaceSection>
-
-        <WorkspaceSection
           title={`Consignments (${visibleLegs.length})`}
           description="Every consignment in the current filter, with its declared route, evidence state and the artefacts you can produce for it."
           domain="logistics"
@@ -1749,7 +1647,7 @@ export function LogisticsHub() {
                           <ArrowRight className="h-3 w-3 text-zinc-700" aria-hidden="true" />
                           <span>{leg.destination.raw || 'destination not declared'}</span>
                           {!leg.geometry && (
-                            <span className="text-zinc-600">· not plotted (location undeclared)</span>
+                            <span className="text-zinc-600">· location not resolvable</span>
                           )}
                         </span>
                       </span>

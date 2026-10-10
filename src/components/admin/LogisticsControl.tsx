@@ -25,7 +25,6 @@ import {
   type MetricTileData,
 } from '@/components/shared/workspace';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
-import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
 /**
  * §P10 (programme §4 P10) — the Logistics Hub's completion surfaces, each backed by its
@@ -41,11 +40,7 @@ import {
 } from '@/components/shared/logistics/SupplyRouteEscalationPanel';
 import { carrierProviderConfigurations } from '@/lib/shipping/providerConfiguration';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
-import {
-  MAP_TRUTH_NOTICE,
-  OPERATIONAL_TRUTH,
-  OPERATIONAL_TRUTH_ORDER,
-} from '@/config/logisticsGeo';
+import { OPERATIONAL_TRUTH } from '@/config/logisticsGeo';
 import { useWorkItems } from '@/lib/work/useWork';
 import { WORK_SOURCE_LABELS, demoToday, daysBetween } from '@/lib/work/workStore';
 import type { WorkSource } from '@/lib/work/types';
@@ -166,14 +161,16 @@ export function LogisticsControl({
   /* §Sprint 2 — metric drill-downs narrow the SAME grouped shipment list. */
   const [focus, setFocus] = useState<'all' | 'in_transit' | 'delayed' | 'exceptions'>('all');
 
-  /* ── §Logistics-map — the SAME operational map the brand hub uses ──────
-     This is the Mercenta-side counterpart, so it is deliberately cross-tenant:
-     the ops team's job is to see every brand's consignments. The map reads the
-     canonical shipment feed and the canonical provider modes, so its LIVE /
-     SIMULATED / AMBIENT labelling can never disagree with the brand surface. */
+  /* ── §Logistics — the Mercenta-side counterpart of the brand hub. It is
+     deliberately cross-tenant: the ops team's job is to see every brand's
+     consignments. The evidence derivation reads the canonical shipment feed and
+     the canonical provider modes, so its LIVE / SIMULATED / AMBIENT labelling can
+     never disagree with the brand surface.
+     §BATCH 3 (2026-10-10) — the interactive map was removed on the owner's
+     instruction; the consignment inspector is now driven by selecting a
+     consignment in the table below. */
   const { modes, integrations } = useIntegrations();
   const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
-  const [mapTruth, setMapTruth] = useState('all');
 
   /* §P9 — the rehomed carrier-event console: one busy row at a time, and the
      provider's own answer per row (never a fabricated milestone). */
@@ -313,23 +310,6 @@ export function LogisticsControl({
       ),
     [shipments, poByNumber, modes]
   );
-
-  /**
-   * The map obeys the SAME focus filter as the tables below, plus an evidence
-   * filter. A filter that changed the tables but not the map would make the map
-   * decorative.
-   */
-  const mapVisibleIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const leg of mapModel.legs) {
-      if (mapTruth !== 'all' && leg.truth !== mapTruth) continue;
-      if (focus === 'in_transit' && !IN_TRANSIT.includes(leg.status)) continue;
-      if (focus === 'delayed' && !leg.delayed) continue;
-      if (focus === 'exceptions' && !leg.exception) continue;
-      ids.add(leg.id);
-    }
-    return ids;
-  }, [mapModel.legs, mapTruth, focus]);
 
   const selectedLeg = mapModel.legs.find((l) => l.id === selectedShipmentId) ?? null;
   const visibleGroups = useMemo(() => {
@@ -523,7 +503,7 @@ export function LogisticsControl({
                 </div>
               ) : (
                 <p className="text-ds-label text-zinc-500" data-testid="admin-logistics-inspector-empty">
-                  Select a consignment on the map to see its route and evidence state.
+                  Select a consignment in the table to see its route and evidence state.
                 </p>
               )}
             </ContextPanel>
@@ -535,49 +515,6 @@ export function LogisticsControl({
           <p className="text-xs text-zinc-500">No shipments match the current focus.</p>
         </Card>
       )}
-
-      <WorkspaceSection
-        title="Operational map"
-        description="Every brand's consignments on one surface, positioned by the canonical stage. Cross-tenant by design — this is the Mercenta operations view."
-        domain="logistics"
-        action={
-          <div className="flex flex-wrap items-center gap-1.5" data-testid="logistics-map-evidence">
-            {(['all', ...OPERATIONAL_TRUTH_ORDER] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setMapTruth(t)}
-                data-testid={`logistics-map-evidence-${t}`}
-                className={
-                  mapTruth === t
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
-                }
-              >
-                {t === 'all' ? 'All evidence' : OPERATIONAL_TRUTH[t].label}
-              </button>
-            ))}
-          </div>
-        }
-      >
-        <LogisticsMapCanvas
-          model={mapModel}
-          visibleIds={mapVisibleIds}
-          selectedId={selectedShipmentId}
-          onSelect={setSelectedShipmentId}
-          loading={logisticsPending}
-          testId="admin-logistics-map"
-          className="h-[280px] sm:h-[360px] lg:h-[420px]"
-        />
-        <p className="text-ds-micro text-zinc-600">{MAP_TRUTH_NOTICE}</p>
-        {mapModel.schematic.length > 0 && (
-          <p className="text-ds-micro text-zinc-600" data-testid="admin-logistics-schematic-notice">
-            {mapModel.schematic.length} consignment
-            {mapModel.schematic.length === 1 ? '' : 's'} declare an unresolvable location and are listed
-            below rather than plotted at an invented coordinate.
-          </p>
-        )}
-      </WorkspaceSection>
 
       {groups.length === 0 && (
         // §M9 — honest empty state: the surface previously rendered three zero
@@ -609,6 +546,13 @@ export function LogisticsControl({
             emptyMessage="No shipments for this brand."
             loading={logisticsPending}
             rowClassName={(s) => (IN_TRANSIT.includes(s.status) && s.delayed ? 'bg-amber-500/5' : undefined)}
+            /**
+             * §BATCH 3 (2026-10-10) — the consignment inspector is now driven by
+             * the TABLE. Before this, selection came only from the operational map
+             * that has been removed, so the inspector would have become
+             * unreachable. Clicking a row selects that consignment.
+             */
+            onRowClick={(s) => setSelectedShipmentId(s.id)}
             columns={[
               {
                 key: 'poNumber',

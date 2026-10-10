@@ -1,25 +1,25 @@
 /**
- * §LOGISTICS HUB — OPERATIONAL MAP browser verification (real Chromium).
+ * §LOGISTICS HUB — THE OPERATIONAL MAP'S ABSENCE GUARD (rule 08).
  *
- * Proves in a real browser that the redesigned Logistics Hub is a genuine
- * operational surface, and that its TRUTH RULES hold:
+ * §BATCH 3 (2026-10-10) — the owner instructed the interactive operational map's
+ * removal from BOTH logistics surfaces. This spec used to prove the map RENDERED
+ * and INTERACTED; rule 08 requires a check that asserted the removed thing to be
+ * REWRITTEN as an ABSENCE guard rather than deleted. It now proves, in a real
+ * browser, that:
  *
- *   1  the route renders and the map is a real interactive SVG
- *   2  the map draws one leg per visible consignment, from real coordinates
- *   3  zoom controls actually change the rendered zoom
- *   4  selecting a consignment on the map opens the inspector
- *   5  the evidence filter genuinely changes the drawn set AND the list
- *   6  LIVE VERIFIED / SIMULATED / AMBIENT are labelled (never colour-only)
- *   7  nothing is claimed LIVE without a provider reference — count is 0 here
- *   8  Freight Collect is labelled CHANNEL-ARRANGED (no false Mercenta choice)
- *   9  Freight Prepaid is labelled MERCENTA-ARRANGED
- *  10  the honest geographic notice is rendered (no invented precision)
- *  11  reduced motion disables the ambient drift
- *  12  responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390
- *  13  tenant isolation: brand B never sees brand A's consignments
- *  14  empty state renders when filters exclude everything
- *  15  the Waybill / Labels / Track artefacts still open
- *  16  no page errors and no external network calls
+ *   · the map is GONE on the brand hub and on the admin control — no canvas, no
+ *     graticule, no zoom controls, no markers/nodes/legs, no map legend, no map
+ *     evidence filter, and none of the map's ambient-drift animation;
+ *   · the surfaces the map was mounted on STILL WORK — the consignment list, its
+ *     truth labelling, the inspector it opens, the freight-term disclosure, the
+ *     artefacts, tenant isolation, and no horizontal overflow;
+ *   · the §P5 destination-FC rule is unchanged at the DOMAIN level (a
+ *     consignment's destination is the FC its OWN purchase order declares, never
+ *     a Mercenta hub).
+ *
+ * The derivation `src/lib/logistics/operationsMap.ts` is deliberately KEPT — the
+ * list and the inspector on both surfaces still read it (verified, not assumed) —
+ * so this spec drives the LIST as the operational surface.
  *
  * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
@@ -50,9 +50,7 @@ function watchExternalCalls(page: Page): string[] {
  * Done through the tour's OWN store API (`stopTour` / `dismissTour` /
  * `markTourSkipped`) rather than by clicking its controls: clicking the card's
  * dismiss opens a Skip-confirmation modal, which then blocks the page. This is
- * a demo-affordance reset, not an application-state bypass — the tour state
- * lives in a module-level store, and the product's own skip path is what the
- * store calls implement.
+ * a demo-affordance reset, not an application-state bypass.
  */
 async function dismissTour(page: Page, brandId = 'brand-astonish') {
   await page
@@ -70,11 +68,12 @@ async function dismissTour(page: Page, brandId = 'brand-astonish') {
   await page.waitForTimeout(250);
 }
 
+/** Open the brand Logistics Hub and wait for the LIST (the surface that remains). */
 async function openLogistics(page: Page, card = 'Astonish') {
   await loginAs(page, card, 1400);
   await dismissTour(page);
   await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
-  await page.getByTestId('logistics-map').waitFor({ timeout: 15000 });
+  await page.getByTestId('logistics-scope-count').waitFor({ timeout: 15000 });
   await dismissTour(page);
 }
 
@@ -85,8 +84,7 @@ async function openLogistics(page: Page, card = 'Astonish') {
  * visible).
  *
  * The path is the genuine one a brand takes: raise a PO → acknowledge it →
- * file the ASN. Nothing is injected into the store directly, and no second
- * shipment engine is created for the test.
+ * file the ASN. Nothing is injected into the store directly.
  */
 async function seedConsignment(
   page: Page,
@@ -122,13 +120,43 @@ async function openSeededLogistics(
   await page.waitForTimeout(1600);
   await dismissTour(page);
   await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
-  await page.getByTestId('logistics-map').waitFor({ timeout: 15000 });
+  await page.getByTestId('logistics-scope-count').waitFor({ timeout: 15000 });
   await dismissTour(page);
   return seeded;
 }
 
-test.describe('Logistics Hub — operational map', () => {
-  test('1. renders the workspace and a real interactive map', async ({ page }) => {
+/** Every testid the removed map owned. All must be absent on every surface. */
+const MAP_TESTIDS = [
+  'logistics-map',
+  'logistics-map-graticule',
+  'logistics-map-legend',
+  'logistics-map-zoom-in',
+  'logistics-map-zoom-out',
+  'logistics-map-zoom-level',
+  'logistics-map-zoom-reset',
+  'logistics-map-fit',
+  'logistics-map-surface',
+  'admin-logistics-map',
+  'logistics-map-evidence-all',
+];
+
+/** The map is gone: no canvas testid, no drawn geometry, no drift animation. */
+async function expectMapAbsent(page: Page) {
+  for (const id of MAP_TESTIDS) {
+    await expect(page.getByTestId(id), `map testid "${id}" must be gone`).toHaveCount(0);
+  }
+  await expect(page.locator('[data-testid^="logistics-marker-"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid^="logistics-node-"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid^="logistics-leg-path-"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid^="logistics-legend-"]')).toHaveCount(0);
+  await expect(page.locator('.animate-ambient-drift, .animate-ambient-halo')).toHaveCount(0);
+}
+
+
+test.describe('Logistics Hub — the operational map is GONE (absence guard)', () => {
+  test('1. the workspace renders, the map is gone and the list is the operational surface', async ({
+    page,
+  }) => {
     const pageErrors: string[] = [];
     const externalCalls = watchExternalCalls(page);
     page.on('pageerror', (e) => pageErrors.push(String(e)));
@@ -140,49 +168,33 @@ test.describe('Logistics Hub — operational map', () => {
     await expect(page.locator('[data-workspace-header]').first()).toBeVisible();
     await expect(page.locator('[data-workspace-toolbar]').first()).toBeVisible();
 
-    const map = page.getByTestId('logistics-map');
-    await expect(map).toBeVisible();
-    // A real coordinate grid must be drawn — it is what makes the view locatable.
-    await expect(page.getByTestId('logistics-map-graticule').locator('line').first()).toBeAttached();
-    await expect(page.getByTestId('logistics-map-legend')).toBeVisible();
+    await expectMapAbsent(page);
 
-    await dismissTour(page);
+    const rows = await page.locator('[data-testid^="logistics-row-"]').count();
+    expect(rows).toBeGreaterThan(0);
+    await expect(page.getByTestId('logistics-scope-count')).toBeVisible();
+
     await page.screenshot({ path: `${SHOTS}/01-hub-1440.png`, fullPage: false });
-    // A dedicated capture of the map itself, so the drawn geometry is inspected
-    // rather than assumed from source.
-    await dismissTour(page);
-    await page.getByTestId('logistics-map-surface').screenshot({ path: `${SHOTS}/01b-map-surface.png` });
-
-    // Truth must be stated, never implied: this environment holds no live
-    // carrier credentials, so nothing may be presented as live-verified.
-    await expect(page.getByTestId('logistics-legend-live_verified')).toContainText('0');
 
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);
   });
 
-  test('2. draws one leg per visible consignment from declared coordinates', async ({ page }) => {
+  test('2. every consignment row states its evidence state', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
-    const drawn = Number(await page.getByTestId('logistics-map').getAttribute('data-visible-count'));
-    expect(drawn).toBeGreaterThan(0);
-    await expect(page.locator('[data-testid^="logistics-leg-path-"]')).toHaveCount(drawn);
-    await expect(page.locator('[data-testid^="logistics-marker-"]')).toHaveCount(drawn);
-    // Declared coordinates produce real nodes, not invented ones.
-    expect(await page.locator('[data-testid^="logistics-node-"]').count()).toBeGreaterThan(0);
+    const truths = await page
+      .locator('[data-testid^="logistics-row-"]')
+      .evaluateAll((els) => els.map((e) => e.getAttribute('data-truth')));
+    expect(truths.length).toBeGreaterThan(0);
+    expect(
+      truths.every((t) => t === 'live_verified' || t === 'simulated' || t === 'ambient')
+    ).toBe(true);
   });
 
-  test('3. zoom actually changes the rendered view', async ({ page }) => {
-    const seed = await openSeededLogistics(page);
-    expect(seed.ok, JSON.stringify(seed)).toBe(true);
-    const before = await page.getByTestId('logistics-map-zoom-level').innerText();
-    await page.getByTestId('logistics-map-zoom-in').click();
-    await expect(page.getByTestId('logistics-map-zoom-level')).not.toHaveText(before);
-    await page.getByTestId('logistics-map-zoom-reset').click();
-    await expect(page.getByTestId('logistics-map-zoom-level')).toHaveText('100%');
-  });
-
-  test('4. selecting a consignment opens the inspector with its evidence', async ({ page }) => {
+  test('3. selecting a consignment in the list opens the inspector with its evidence', async ({
+    page,
+  }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
     await expect(page.getByTestId('logistics-inspector-empty')).toBeVisible();
@@ -194,26 +206,21 @@ test.describe('Logistics Hub — operational map', () => {
     expect(reason.length).toBeGreaterThan(20);
     // The reason must name the evidence basis, not just assert a state.
     expect(reason.toLowerCase()).toMatch(/simulation|live|provider/);
-    await dismissTour(page);
-    await page.screenshot({ path: `${SHOTS}/02-inspector-1440.png` });
+    await page.screenshot({ path: `${SHOTS}/02-inspector-1440.png`, fullPage: false });
   });
 
-  test('5. the evidence filter changes the drawn set and the list', async ({ page }) => {
+  test('4. the evidence filter changes the list', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
-    const allDrawn = Number(await page.getByTestId('logistics-map').getAttribute('data-visible-count'));
     const allRows = await page.locator('[data-testid^="logistics-row-"]').count();
-    expect(allDrawn).toBe(allRows);
+    expect(allRows).toBeGreaterThan(0);
 
     await page.getByRole('tab', { name: /Ambient/i }).click();
-    const ambientDrawn = Number(
-      await page.getByTestId('logistics-map').getAttribute('data-visible-count')
-    );
-    if (ambientDrawn === 0) {
-      await expect(page.getByTestId('logistics-map-empty')).toBeVisible();
+    const ambientRows = await page.locator('[data-testid^="logistics-row-"]').count();
+    if (ambientRows === 0) {
       await expect(page.getByTestId('logistics-list-empty')).toBeVisible();
     } else {
-      expect(ambientDrawn).toBeLessThanOrEqual(allDrawn);
+      expect(ambientRows).toBeLessThanOrEqual(allRows);
       const truths = await page
         .locator('[data-testid^="logistics-row-"]')
         .evaluateAll((els) => els.map((e) => e.getAttribute('data-truth')));
@@ -224,49 +231,38 @@ test.describe('Logistics Hub — operational map', () => {
     await expect.poll(async () => page.locator('[data-testid^="logistics-row-"]').count()).toBe(allRows);
   });
 
-  test('6/7. evidence is labelled and nothing is falsely live', async ({ page }) => {
+  test('5. nothing is falsely presented as live', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
-    await expect(page.getByTestId('logistics-legend-live_verified')).toContainText('Live verified');
-    await expect(page.getByTestId('logistics-legend-simulated')).toContainText('Simulated');
-    await expect(page.getByTestId('logistics-legend-ambient')).toContainText('Ambient');
-
-    const simLegend = await page.getByTestId('logistics-legend-simulated').innerText();
-    const liveLegend = await page.getByTestId('logistics-legend-live_verified').innerText();
-    // This environment holds simulation-only carrier credentials.
-    expect(Number(liveLegend.replace(/\D/g, ''))).toBe(0);
-    expect(Number(simLegend.replace(/\D/g, ''))).toBeGreaterThan(0);
-
-    // Every row states its evidence state, and never colour-alone.
     const truths = await page
       .locator('[data-testid^="logistics-row-"]')
       .evaluateAll((els) => els.map((e) => e.getAttribute('data-truth')));
-    expect(truths.length).toBeGreaterThan(0);
-    expect(truths.every((s) => s === 'live_verified' || s === 'simulated' || s === 'ambient')).toBe(
-      true
-    );
+    // This environment holds simulation-only carrier credentials.
+    expect(truths).not.toContain('live_verified');
+
     // The state is also rendered as text an assistive technology can read.
     const mentioned = await page
       .locator('[data-testid^="logistics-row-"]')
       .evaluateAll((els) =>
-        els.map((e) => (e.textContent ?? '').toUpperCase().includes('SIM') ||
-          (e.textContent ?? '').toUpperCase().includes('AMBIENT') ||
-          (e.textContent ?? '').toUpperCase().includes('LIVE'))
+        els.map(
+          (e) =>
+            (e.textContent ?? '').toUpperCase().includes('SIM') ||
+            (e.textContent ?? '').toUpperCase().includes('AMBIENT') ||
+            (e.textContent ?? '').toUpperCase().includes('LIVE')
+        )
       );
     expect(mentioned.every(Boolean)).toBe(true);
   });
 
-  test('8/9/10. freight responsibility is stated truthfully', async ({ page }) => {
+
+  test('6. freight responsibility is stated truthfully', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
     const body = await page.locator('[data-workspace-frame]').first().innerText();
 
-    // The honest geographic notice must be on screen — no invented precision.
-    expect(body).toContain('Schematic operational view');
     // The hub must state who arranges carriage for both terms.
     expect(body).toMatch(/CHANNEL-ARRANGED|Freight Collect/i);
     expect(body).toMatch(/MERCENTA-ARRANGED|Freight Prepaid/i);
-
     // Mercenta must never be described as owning the channel-arranged carrier.
     expect(body).not.toMatch(/Mercenta (selects|chooses|owns) Amazon/i);
 
@@ -274,19 +270,7 @@ test.describe('Logistics Hub — operational map', () => {
     await expect(page.getByTestId('logistics-inspector')).toBeVisible();
   });
 
-  test('11. reduced motion disables the ambient drift', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    const seed = await openSeededLogistics(page);
-    expect(seed.ok, JSON.stringify(seed)).toBe(true);
-    const animations = await page
-      .locator('.animate-ambient-drift, .animate-ambient-halo')
-      .evaluateAll((els) =>
-        els.map((e) => getComputedStyle(e).animationName).filter((n) => n && n !== 'none')
-      );
-    expect(animations).toEqual([]);
-  });
-
-  test('12. no horizontal overflow at any required viewport', async ({ page }) => {
+  test('7. no horizontal overflow at any required viewport', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
     for (const [w, h] of [
@@ -302,14 +286,13 @@ test.describe('Logistics Hub — operational map', () => {
       );
       expect(overflow, `horizontal overflow at ${w}px`).toBeLessThanOrEqual(1);
       if (w === 390) {
-        await expect(page.getByTestId('logistics-map')).toBeVisible();
-        await dismissTour(page);
+        await expect(page.getByTestId('logistics-scope-count')).toBeVisible();
         await page.screenshot({ path: `${SHOTS}/03-mobile-390.png`, fullPage: false });
       }
     }
   });
 
-  test('13. tenant isolation — one brand never sees another brand’s consignments', async ({
+  test('8. tenant isolation — one brand never sees another brand’s consignments', async ({
     browser,
   }) => {
     const a = await browser.newContext();
@@ -337,20 +320,9 @@ test.describe('Logistics Hub — operational map', () => {
 
     expect(aIds.length).toBeGreaterThan(0);
     /**
-     * §RUNTIME PARITY — REPOINTED (2026-09-21).
-     *
-     * OLD CONTRACT: `expect(bRows).toBe(0)` — brand B had NO seeded consignment
-     * of its own, so an empty feed was the only way to prove it saw none of
-     * brand A's. That was a property of the EMPTY seed, not of the isolation
-     * rule, and the seed is no longer empty: both cleared demo tenants now hold
-     * their own deterministic consignments (PO-9200… / PO-9210…).
-     *
-     * NEW CONTRACT (strictly stronger — it is asserted WITH data on both sides):
-     *   1. brand B DOES see its own consignments (so the feed is genuinely
-     *      tenant-scoped rather than empty for some other reason);
-     *   2. not one of brand A's consignment ids appears in brand B's feed;
-     *   3. no row of brand B's feed carries brand A's PO numbers, and every one
-     *      of its rows carries a PO number from its own block.
+     * §RUNTIME PARITY — REPOINTED (2026-09-21), UNCHANGED by §BATCH 3: the
+     * assertion is made WITH data on both sides, so the isolation rule is proved
+     * rather than a property of an empty seed.
      */
     expect(bRows).toBeGreaterThan(0);
     expect(aIds.filter((id) => bIds.includes(id))).toEqual([]);
@@ -360,7 +332,8 @@ test.describe('Logistics Hub — operational map', () => {
     expect(aText.join(' \n ')).not.toMatch(/PO-9210|PO-9211|PO-9212/);
   });
 
-  test('14/15. artefacts still open and close', async ({ page }) => {
+
+  test('9. the Waybill / Labels / Track artefacts still open and close', async ({ page }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
     const firstRowTestId = await page
@@ -390,7 +363,7 @@ test.describe('Logistics Hub — operational map', () => {
     await expect(page.getByTestId('logistics-tracking-dialog')).toBeHidden();
   });
 
-  test('16. search narrows the map and the list together', async ({ page }) => {
+  test('10. search narrows the list', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
     const seed = await openSeededLogistics(page);
@@ -403,12 +376,8 @@ test.describe('Logistics Hub — operational map', () => {
     await page.getByTestId('logistics-search').fill(needle);
     await page.waitForTimeout(250);
 
-    const afterRows = await page.locator('[data-testid^="logistics-row-"]').count();
-    const afterDrawn = Number(
-      await page.getByTestId('logistics-map').getAttribute('data-visible-count')
-    );
-    expect(afterRows).toBeLessThanOrEqual(before);
-    expect(afterRows).toBe(afterDrawn);
+    const after = await page.locator('[data-testid^="logistics-row-"]').count();
+    expect(after).toBeLessThanOrEqual(before);
 
     await page.getByTestId('logistics-search').fill('');
     await expect.poll(async () => page.locator('[data-testid^="logistics-row-"]').count()).toBe(before);
@@ -416,33 +385,28 @@ test.describe('Logistics Hub — operational map', () => {
   });
 
   /**
-   * §P5 — THE ARRIVAL NODE IS THE DESTINATION FC ON THE PURCHASE ORDER.
+   * §P5 — THE ARRIVAL IS THE DESTINATION FC ON THE PURCHASE ORDER.
    *
-   * The platform used to route every consignment to a Mercenta UK hub. This test
-   * proves IN THE BROWSER, against the running product, that the removal is real:
-   *   1. no `mercenta_hub` node kind exists in the map's vocabulary, while
-   *      destination-FC nodes do;
-   *   2. no text on the surface claims a Mercenta hub, and the canonical pre-live
-   *      state is offered under its own name;
-   *   3. EVERY consignment's destination is the FC its OWN purchase order declares
-   *      — read from the canonical store, not from the rendered label.
+   * The platform used to route every consignment to a Mercenta UK hub. §BATCH 3
+   * removed the map that used to DRAW this, so the DOM assertions become an
+   * absence guard (no hub node, and the map that drew FC nodes is gone), while
+   * the DOMAIN assertion — every consignment's destination is the FC its OWN
+   * purchase order declares — is unchanged and still proved from the canonical
+   * store, not from a rendered label.
    */
-  test('17. §P5 — the arrival node is the destination FC on the PO, never a hub', async ({
+  test('11. §P5 — no Mercenta-hub node, and every destination is its PO’s declared FC', async ({
     page,
   }) => {
     const seed = await openSeededLogistics(page);
     expect(seed.ok, JSON.stringify(seed)).toBe(true);
 
-    // 1. The map can draw destination-FC nodes and can NEVER draw a hub node.
     expect(await page.locator('[data-kind="mercenta_hub"]').count()).toBe(0);
-    expect(await page.locator('[data-kind="amazon_fc"]').count()).toBeGreaterThan(0);
+    // The map that used to draw FC nodes is gone with the map.
+    expect(await page.locator('[data-kind="amazon_fc"]').count()).toBe(0);
 
-    // 2. No surface copy claims a Mercenta-owned destination.
     const body = await page.locator('[data-workspace-frame]').first().innerText();
     expect(body).not.toMatch(/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i);
 
-    // 3. Domain parity: a consignment's destination IS its PO's declared ship-to
-    //    party, resolved by the one canonical owner.
     const mismatches = await page.evaluate(async () => {
       const store = await import('/src/data/demoStore.ts');
       const dest = await import('/src/config/destinationFc.ts');
@@ -467,40 +431,39 @@ test.describe('Logistics Hub — operational map', () => {
   });
 });
 
+
 /**
- * §LOGISTICS HUB — ADMIN OPERATIONAL MAP.
+ * §LOGISTICS HUB — ADMIN CONTROL, THE SAME ABSENCE GUARD.
  *
- * The Mercenta-side counterpart of the brand hub uses the SAME canvas and the
- * same canonical evidence derivation. These tests prove the admin surface is a
- * real operational map (not a table with a picture above it), that the focus
- * filter genuinely drives the map, and that a consignment created through the
- * real PO lifecycle appears on it.
+ * The Mercenta-side counterpart used the SAME canvas. §BATCH 3 removed it there
+ * too; selection now comes from the consignment TABLE (the inspector would
+ * otherwise have become unreachable). These tests prove the admin map is gone
+ * and that the table still drives the inspector.
  */
-test.describe('Admin Logistics Hub — operational map', () => {
+test.describe('Admin Logistics Hub — the operational map is GONE', () => {
   async function openAdminLogistics(page: Page) {
     await loginAs(page, 'Mercenta Admin Hub', 1400);
     await dismissTour(page);
     await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
-    await page.getByTestId('admin-logistics-map').waitFor({ timeout: 15000 });
+    await page.getByTestId('logistics-focus-all').waitFor({ timeout: 15000 });
     await dismissTour(page);
   }
 
-  test('A. the admin map renders with the canonical truth labelling', async ({ page }) => {
+  test('A. the admin surface renders and its map is gone', async ({ page }) => {
     const pageErrors: string[] = [];
     const externalCalls = watchExternalCalls(page);
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
     await openAdminLogistics(page);
-    await expect(page.getByTestId('admin-logistics-map')).toBeVisible();
-    await expect(page.getByTestId('admin-logistics-map-graticule').locator('line').first()).toBeAttached();
-    await expect(page.getByTestId('logistics-map-evidence-all')).toBeVisible();
-    await page.screenshot({ path: `${SHOTS}/04-admin-map-1440.png` });
+    await expect(page.getByTestId('logistics-focus-all')).toBeVisible();
+    await expectMapAbsent(page);
+    await page.screenshot({ path: `${SHOTS}/04-admin-1440.png`, fullPage: false });
 
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);
   });
 
-  test('B. a consignment created through the real PO lifecycle appears on the admin map', async ({
+  test('B. a consignment created through the real PO lifecycle appears in the admin table and opens the inspector', async ({
     page,
   }) => {
     await openLogin(page);
@@ -510,40 +473,19 @@ test.describe('Admin Logistics Hub — operational map', () => {
     await page.waitForTimeout(1600);
     await dismissTour(page);
     await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
-    await page.getByTestId('admin-logistics-map').waitFor({ timeout: 15000 });
+    await page.getByTestId('logistics-focus-all').waitFor({ timeout: 15000 });
     await dismissTour(page);
 
-    const drawn = Number(
-      await page.getByTestId('admin-logistics-map').getAttribute('data-visible-count')
-    );
-    expect(drawn).toBeGreaterThan(0);
-    await expect(page.locator('[data-testid^="logistics-marker-"]')).toHaveCount(drawn);
+    const table = page.locator('[data-table^="logistics-"]').first();
+    await expect(table.locator('tbody tr').first()).toBeVisible();
+    expect(await table.locator('tbody tr').count()).toBeGreaterThan(0);
 
-    // Selecting it exposes its operational context — map and records are linked.
-    await page.locator('[data-testid^="logistics-marker-"]').first().click({ force: true });
+    // §BATCH 3 — selection now comes from the TABLE (the map that used to drive it is gone).
+    await table.locator('tbody tr').first().click();
     await expect(page.getByTestId('admin-logistics-inspector')).toBeVisible();
-    await expect(page.getByTestId('admin-logistics-truth-reason')).toContainText(/simulation|provider/i);
-  });
-
-  test('C. the evidence filter genuinely changes the drawn set', async ({ page }) => {
-    await openAdminLogistics(page);
-    const all = Number(
-      await page.getByTestId('admin-logistics-map').getAttribute('data-visible-count')
+    await expect(page.getByTestId('admin-logistics-truth-reason')).toContainText(
+      /simulation|provider|ambient|live/i
     );
-    await page.getByTestId('logistics-map-evidence-ambient').click();
-    await page.waitForTimeout(250);
-    const ambient = Number(
-      await page.getByTestId('admin-logistics-map').getAttribute('data-visible-count')
-    );
-    expect(ambient).toBeLessThanOrEqual(all);
-    if (ambient === 0) {
-      await expect(page.getByTestId('admin-logistics-map-empty')).toBeVisible();
-    }
-    await page.getByTestId('logistics-map-evidence-all').click();
-    await expect
-      .poll(async () =>
-        Number(await page.getByTestId('admin-logistics-map').getAttribute('data-visible-count'))
-      )
-      .toBe(all);
   });
 });
+

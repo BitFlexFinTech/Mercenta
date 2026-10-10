@@ -1607,6 +1607,29 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
   ];
 
   /**
+   * §BATCH 3 (2026-10-10) — LOGISTICS SURFACE REMOVALS (Parts 2.3 + 2.4).
+   *
+   * The owner instructed the interactive operational MAP's removal from both
+   * logistics surfaces, and the removal of the cinematic Logistics HERO and its
+   * whole pipeline. Same mechanism as every phase above: a changed source/test
+   * file outside EVERY declared set is still refused. The deleted modules, the two
+   * surfaces, the derivation whose map-only helpers were dropped, and the
+   * validators/specs repointed into absence guards are named here.
+   */
+  const BATCH3_LOGISTICS_REMOVALS_DECLARED = [
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/shared/logistics/LogisticsMapCanvas.tsx',
+    'src/components/shared/logistics/LogisticsHero.tsx',
+    'src/components/shared/logistics/LogisticsHeroScene.tsx',
+    'src/lib/logistics/operationsMap.ts',
+    'src/lib/logistics/heroNetwork.ts',
+    'src/config/logisticsGeo.ts',
+    'src/config/logisticsHero.ts',
+    'src/data/logisticsHeroGeo.ts',
+  ];
+
+  /**
    * §P6 — PO DOCUMENT PACK PHASE DECLARED SURFACE (2026-09-23, programme
    * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P6).
    *
@@ -2254,6 +2277,8 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      * outside EVERY declared set is still refused.
      */
     ...P5_DESTINATION_FC_DECLARED,
+    // §BATCH 3 (2026-10-10) — the logistics map + hero removals (see declaration above).
+    ...BATCH3_LOGISTICS_REMOVALS_DECLARED,
     /**
      * §P6 — REPOINTED (not weakened). The PO-document-pack phase's declared surface
      * is accepted here exactly as every earlier phase's is; a changed source/test

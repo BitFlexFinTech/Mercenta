@@ -26,6 +26,49 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 3 — THE OPERATIONAL MAP + THE LOGISTICS HERO REMOVED (session 125, 2026-10-10)
+
+The recorded NEXT TASK was Batch 3 (Parts 2.3 + 2.4) of `docs/NEXT_BUILD_PLAN_2026-10-10.md`. Both parts were
+executed as ONE bounded batch, each removal repointed into an ABSENCE GUARD (rule 08).
+
+1. **REMOVED — 2.4, THE LOGISTICS HERO AND ITS WHOLE PIPELINE.** DELETED: `src/components/shared/logistics/LogisticsHero.tsx`,
+   `LogisticsHeroScene.tsx`, `src/lib/logistics/heroNetwork.ts`, `src/config/logisticsHero.ts`, `src/data/logisticsHeroGeo.ts`,
+   `scripts/build-logistics-hero-geo.mjs`, `scripts/validate-logistics-hero.mjs`, `e2e/logistics-hero.spec.ts`, and the
+   `.geo-cache/` it built (13 MB of raw Natural Earth / OSM downloads, reproducible and never tracked — its `.gitignore`
+   block went with it). Its mount, its `LogisticsHero` import and its `heroLegs` memo left `LogisticsHub.tsx`; its two
+   `package.json` scripts (`validate:logistics-hero`, `build:hero-geo`) were removed.
+2. **REMOVED — 2.3, THE INTERACTIVE OPERATIONAL MAP, BOTH SURFACES.** The `LogisticsMapCanvas` mount left
+   `LogisticsHub.tsx` (with its `TruthLegend` and `visibleTruthCounts`) and `LogisticsControl.tsx` (with its `mapTruth`
+   state and `mapVisibleIds`), and `src/components/shared/logistics/LogisticsMapCanvas.tsx` was DELETED.
+3. **THE VERIFICATION THE PLAN DEMANDED — "verify, do not assume".** The plan said `operationsMap.ts` goes "IF nothing
+   else uses it". **Something does.** Reading both surfaces shows the consignment LIST (both) and the consignment
+   INSPECTOR (both) read `buildOperationalMap(...)` for truth classification, carrier validation, freight semantics,
+   stage, value and CBM — so the **derivation was KEPT** and only its genuinely map-only helpers `truthPresentation()`
+   and `isLegInMotion()` (read solely by the canvas) were dropped. `MAP_FRAME` stays for the same reason;
+   `MAP_TRUTH_NOTICE`, `graticuleStep` and `OPERATIONAL_TRUTH_ORDER` (map-only legends/labels) were removed.
+4. **A DEFECT FIXED AT SOURCE (rule 07).** On the ADMIN control the consignment inspector was reachable ONLY from the
+   map's `onSelect`, so removing the map would have left the inspector **unreachable** (dead functionality that no
+   typecheck, lint or build can see). FIXED by wiring the per-brand `DataTable`'s existing `onRowClick` to
+   `setSelectedShipmentId`, and repointing the empty-state copy from "on the map" to "in the table". The brand Hub
+   already selected from its list, so it needed no rewiring.
+5. **ABSENCE GUARDS (rule 08), all wired into the standard command.** (a) `scripts/validate-logistics-map.mjs` gained a
+   §BATCH3 group — the canvas file is gone, neither surface imports or mounts it, no map testid renders, and the
+   derivation the list + inspector read is KEPT — **74 → 80 assertions**; (b) `e2e/logistics-hub-map.spec.ts` was
+   REWRITTEN into the matching browser absence guard (13 tests: the map's absence on both surfaces + the retained
+   list/inspector/filter/freight/artefacts/tenant-isolation/responsive coverage); (c) `scripts/validate-functional-parity.mjs`
+   F3 was repointed (the Control no longer carries a map; it must carry its document queue inline); (d) `e2e/runtime-entry.spec.ts`
+   now waits on `logistics-scope-count`; (e) the E6 `F6` scope union and the E7 `allowed` set each gained a declared
+   `§BATCH 3` surface; (f) `docs/scenario-catalogue.json` lost the deleted hero spec's rows and had its map scenarios
+   repointed, and the coverage matrix was regenerated (`node scripts/e2e-catalogue.mjs --doc`); (g) 14 `requirements-registry.json`
+   rows were reconciled (5 map/hero capabilities → `removed`; 9 surviving rows had deleted-file citations marked
+   historical and stale test-title references repointed); (h) `scripts/reconcile-logistics-map-registry.cjs` now REFUSES
+   to run (re-running it would have overwritten the reconciled rows and re-introduced citations of deleted files).
+6. **EVIDENCE.** `npm run typecheck` 0 · `npm run lint` 0 · `npm run build` ok · `node scripts/validate-logistics-map.mjs`
+   LOGISTICS_MAP_VALIDATION_PASS (80 assertions, 0 network calls) · `validate-functional-parity` 40/0 ·
+   `validate-dead-code` 11/11 · `validate-canonical-propagation` 25/0 · `validate-e2e-scenarios` 16/16 ·
+   `validate-built-rows` 2431 PASS / 0 FAIL · `npx playwright test e2e/logistics-hub-map.spec.ts` **13 passed**.
+
+
 ## §BATCH 2 — THE CONSOLIDATION + WORK "HOW THIS WORKS" CARDS REMOVED (session 125, 2026-10-10)
 
 1. **What this session did** — the Founder said "continue". The recorded NEXT TASK was **BATCH 2 (Parts 2.1 + 2.2) of the merged 2026-10-10 programme**, so it was executed: remove two cards, each with its ABSENCE GUARD. This IS an application-runtime change, so the §10 three-way gate applies in full. No credential was needed and none was requested.

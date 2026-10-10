@@ -526,15 +526,6 @@
       "expects": "The listing analyzer journey renders and behaves as its spec asserts."
     },
     {
-      "id": "spec-logistics-hero",
-      "capability": "commerce_logistics",
-      "journey": "logistics hero",
-      "actor": "mixed",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "expects": "The logistics hero journey renders and behaves as its spec asserts."
-    },
-    {
       "id": "spec-logistics-hub-map",
       "capability": "commerce_logistics",
       "journey": "logistics hub map",
@@ -2260,264 +2251,134 @@
       "expects": "For a NON-regulated brand the same on-behalf ASN submits without lot or expiry — the requirement is category-aware and is never applied blanket."
     },
     {
-      "id": "sl-hero-and-map-one-page",
+      "id": "sl-map-and-hero-removed",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — the hero and the operational map are one page",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "1. the hero and the operational map are ONE page",
-      "expects": "The cinematic hero and the operational map render on the SAME page, so the hero is a section of the working surface rather than a separate destination."
-    },
-    {
-      "id": "sl-hero-fixed-camera-scrolls",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — fixed camera, no pointer capture, the page still scrolls",
-      "actor": "brand_user",
-      "type": "a11y",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "2/3. fixed camera, no pointer capture, the page still scrolls",
-      "expects": "The hero camera is fixed and the canvas never captures the pointer, so the page still scrolls with the pointer over the hero — the section never traps the reader."
-    },
-    {
-      "id": "sl-hero-fleet-and-origins",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — many vehicles, lanes and origins",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "4/5. many aircraft, many ships, many road vehicles, many origins",
-      "expects": "The hero actually contains multiple aircraft, ships and road vehicles across multiple origins and lanes — the scene is populated from data, not a single static image."
-    },
-    {
-      "id": "sl-hero-authentic-geography",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — authentic, generated, attributed geography",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "6. authentic, generated, attributed geography (no hand-drawn shapes)",
-      "expects": "The hero's geography is authentic and generated from an attributed dataset — there are no hand-drawn countries or invented coastlines."
-    },
-    {
-      "id": "sl-hero-truth-labels-ambient",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — truth labels, and ambient traffic is never a shipment",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "7/8/11. truth semantics are labelled and ambient is never a shipment",
-      "expects": "LIVE VERIFIED / SIMULATED / AMBIENT are labelled in words (never by colour alone), ambient traffic is explicitly stated NOT to be a Mercenta shipment, and nothing is called live when no provider resolved live."
-    },
-    {
-      "id": "sl-hero-canonical-consignments",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — the hero plots the canonical consignments",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "9. the hero plots the same brand consignments as the operational map",
-      "expects": "The hero plots exactly the same brand consignments as the operational map — one canonical set of records, not a second decorative dataset."
-    },
-    {
-      "id": "sl-hero-reduced-motion",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — reduced motion keeps a meaningful static view",
-      "actor": "brand_user",
-      "type": "a11y",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "10. reduced motion keeps a meaningful static view",
-      "expects": "With reduced motion requested the hero keeps a meaningful static view and says so — the reader who cannot take animation still gets the information."
-    },
-    {
-      "id": "sl-hero-no-external-call",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — the hero makes no external network call",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "12. the hero makes no external network call",
-      "expects": "The hero makes NO external network call — the visual is rendered from local data, so nothing leaves the platform."
-    },
-    {
-      "id": "sl-hero-controls-interactive",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — the operational controls stay interactive",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "13. the operational controls remain interactive below the hero",
-      "expects": "The operational controls below the hero remain fully interactive — the hero adds presentation, it does not disable the working surface."
-    },
-    {
-      "id": "sl-hero-no-horizontal-overflow",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — logistics hero — no horizontal overflow at desktop or mobile",
-      "actor": "brand_user",
-      "type": "responsive",
-      "spec": "e2e/logistics-hero.spec.ts",
-      "test": "14. no horizontal overflow at desktop and mobile widths",
-      "expects": "The hero composes without horizontal overflow at desktop and mobile widths."
-    },
-    {
-      "id": "sl-hub-map-interactive",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — a real interactive map renders in the workspace",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "1. renders the workspace and a real interactive map",
-      "expects": "The Logistics Hub renders its workspace with a real interactive map — the map is a working surface, not a picture."
-    },
-    {
-      "id": "sl-hub-map-leg-per-consignment",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — one leg is drawn per visible consignment",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "2. draws one leg per visible consignment from declared coordinates",
-      "expects": "The map draws one leg per visible consignment, from the coordinates the records actually declare — no drawn lane without a record behind it."
-    },
-    {
-      "id": "sl-hub-map-zoom",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — zoom changes the rendered view",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "3. zoom actually changes the rendered view",
-      "expects": "The zoom controls genuinely change the rendered view rather than being decorative."
-    },
-    {
-      "id": "sl-hub-map-inspector-evidence",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — selecting a consignment opens its evidence",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "4. selecting a consignment opens the inspector with its evidence",
-      "expects": "Selecting a consignment on the map opens the inspector showing that consignment's evidence — the detail is reachable from the map itself."
-    },
-    {
-      "id": "sl-hub-map-evidence-filter",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — the evidence filter changes the map and the list together",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "5. the evidence filter changes the drawn set and the list",
-      "expects": "The evidence filter genuinely changes both the drawn set on the map and the accompanying list — the two never disagree."
-    },
-    {
-      "id": "sl-hub-map-nothing-falsely-live",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — evidence is labelled and nothing is falsely live",
+      "journey": "shipment & logistics — the operational map and the logistics hero are GONE (absence guard)",
       "actor": "brand_user",
       "type": "refusal",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "6/7. evidence is labelled and nothing is falsely live",
-      "expects": "The evidence states are labelled in words (never colour-only) and NOTHING is presented as live without a provider reference — the count of live claims is honestly zero here."
+      "test": "1. the workspace renders, the map is gone and the list is the operational surface",
+      "expects": "The interactive operational map and the cinematic hero are REMOVED from the brand logistics surface — no canvas, no graticule, no zoom controls, no markers, no map legend, no ambient drift — and the consignment list remains the operational surface."
     },
     {
-      "id": "sl-hub-map-freight-responsibility",
+      "id": "sl-hub-list-evidence-state",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — freight responsibility is stated truthfully",
+      "journey": "shipment & logistics — every consignment row states its evidence state",
       "actor": "brand_user",
       "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "8/9/10. freight responsibility is stated truthfully",
-      "expects": "Freight Collect is labelled channel-arranged (no false Mercenta choice), Freight Prepaid is labelled Mercenta-arranged, and the honest geographic notice is rendered — precision is never invented."
+      "test": "2. every consignment row states its evidence state",
+      "expects": "Every consignment row carries its LIVE VERIFIED / SIMULATED / AMBIENT evidence state as a declared value."
     },
     {
-      "id": "sl-hub-map-reduced-motion",
+      "id": "sl-hub-inspector-from-list",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — reduced motion disables the ambient drift",
+      "journey": "shipment & logistics — selecting a consignment in the list opens the inspector",
       "actor": "brand_user",
-      "type": "a11y",
+      "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "11. reduced motion disables the ambient drift",
-      "expects": "With reduced motion requested the map's ambient drift is disabled — motion is a preference, never a requirement."
+      "test": "3. selecting a consignment in the list opens the inspector with its evidence",
+      "expects": "Selecting a consignment in the list opens the inspector showing that consignment’s evidence and the stated reason for its state."
     },
     {
-      "id": "sl-hub-map-responsive",
+      "id": "sl-hub-list-evidence-filter",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — no horizontal overflow at any required viewport",
+      "journey": "shipment & logistics — the evidence filter changes the list",
       "actor": "brand_user",
-      "type": "responsive",
+      "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "12. no horizontal overflow at any required viewport",
-      "expects": "The operational map composes without horizontal overflow at every required viewport (1440 / 1280 / 1024 / 390)."
+      "test": "4. the evidence filter changes the list",
+      "expects": "The evidence filter genuinely changes the rendered list and a real empty state appears when the filter excludes everything."
     },
     {
-      "id": "sl-hub-map-tenant-isolation",
+      "id": "sl-hub-nothing-falsely-live",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — one brand never sees another brand's consignments",
+      "journey": "shipment & logistics — nothing is falsely presented as live",
       "actor": "brand_user",
       "type": "refusal",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "13. tenant isolation — one brand never sees another brand’s consignments",
-      "expects": "Tenant isolation holds on the map: brand B never sees brand A's consignments, and a cross-tenant read fails closed."
+      "test": "5. nothing is falsely presented as live",
+      "expects": "Nothing is presented as live without a provider reference — the count of live claims is honestly zero here, and the state is rendered as text an assistive technology can read."
     },
     {
-      "id": "sl-hub-map-artefacts-and-empty-state",
+      "id": "sl-hub-freight-responsibility",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — the empty state and the shipping artefacts still work",
+      "journey": "shipment & logistics — freight responsibility is stated truthfully",
       "actor": "brand_user",
       "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "14/15. artefacts still open and close",
-      "expects": "The empty state renders when the filters exclude everything, and the Waybill / Labels / Track artefacts still open and close."
+      "test": "6. freight responsibility is stated truthfully",
+      "expects": "Freight Collect is labelled channel-arranged (no false Mercenta choice) and Freight Prepaid is labelled Mercenta-arranged."
     },
     {
-      "id": "sl-hub-map-search",
+      "id": "sl-hub-responsive",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — search narrows the map and the list together",
+      "journey": "shipment & logistics — no horizontal overflow at any required viewport",
+      "actor": "brand_user",
+      "type": "responsive",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "7. no horizontal overflow at any required viewport",
+      "expects": "The logistics surface composes without horizontal overflow at every required viewport (1440 / 1280 / 1024 / 390)."
+    },
+    {
+      "id": "sl-hub-tenant-isolation",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — one brand never sees another brand’s consignments",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "8. tenant isolation — one brand never sees another brand’s consignments",
+      "expects": "Tenant isolation holds: brand B never sees brand A’s consignments, asserted WITH data on both sides."
+    },
+    {
+      "id": "sl-hub-artefacts",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — the shipping artefacts still open and close",
       "actor": "brand_user",
       "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "16. search narrows the map and the list together",
-      "expects": "Searching narrows the drawn map and the list together, so the two views of the same records never diverge."
+      "test": "9. the Waybill / Labels / Track artefacts still open and close",
+      "expects": "The Waybill / Labels / Track artefacts still open and close from the consignment list."
     },
     {
-      "id": "sl-hub-map-arrival-node-is-po-fc",
+      "id": "sl-hub-search",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map — the arrival node is the purchase order's destination fulfilment centre",
+      "journey": "shipment & logistics — search narrows the list",
       "actor": "brand_user",
       "type": "happy",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "17. §P5 — the arrival node is the destination FC on the PO, never a hub",
-      "expects": "The arrival node drawn on the map is the DESTINATION fulfilment centre declared on the purchase order — never a hub the platform substituted."
+      "test": "10. search narrows the list",
+      "expects": "Searching narrows the consignment list, and clearing it restores the full set."
     },
     {
-      "id": "sl-hub-admin-map-truth-labelling",
+      "id": "sl-hub-arrival-node-is-po-fc",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map (admin) — the canonical truth labelling",
+      "journey": "shipment & logistics — no Mercenta-hub node, every destination is the PO’s declared FC",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "11. §P5 — no Mercenta-hub node, and every destination is its PO’s declared FC",
+      "expects": "No Mercenta-hub node exists and every consignment’s destination is the DESTINATION fulfilment centre its own purchase order declares — never a hub the platform substituted."
+    },
+    {
+      "id": "sl-admin-map-removed",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics (admin) — the operational map is GONE (absence guard)",
       "actor": "mercenta_admin",
-      "type": "happy",
+      "type": "refusal",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "A. the admin map renders with the canonical truth labelling",
-      "expects": "The ADMIN map renders the same canonical truth labelling as the brand surface — one owner of the labelling, not two."
+      "test": "A. the admin surface renders and its map is gone",
+      "expects": "The ADMIN logistics control renders with NO interactive map — no canvas, no map evidence filter, no drawn geometry."
     },
     {
-      "id": "sl-hub-admin-map-real-consignment",
+      "id": "sl-admin-table-drives-inspector",
       "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map (admin) — a consignment from the real order lifecycle appears",
+      "journey": "shipment & logistics (admin) — the table drives the inspector for a real consignment",
       "actor": "mercenta_admin",
       "type": "persistence",
       "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "B. a consignment created through the real PO lifecycle appears on the admin map",
-      "expects": "A consignment raised through the REAL purchase-order lifecycle appears on the admin map — the operator sees what the domain actually holds, not a fixture."
-    },
-    {
-      "id": "sl-hub-admin-map-evidence-filter",
-      "capability": "commerce_logistics",
-      "journey": "shipment & logistics — operational map (admin) — the evidence filter changes the drawn set",
-      "actor": "mercenta_admin",
-      "type": "happy",
-      "spec": "e2e/logistics-hub-map.spec.ts",
-      "test": "C. the evidence filter genuinely changes the drawn set",
-      "expects": "On the admin map the evidence filter genuinely changes the drawn set — the operator's filter is real, not decorative."
+      "test": "B. a consignment created through the real PO lifecycle appears in the admin table and opens the inspector",
+      "expects": "A consignment raised through the REAL purchase-order lifecycle appears in the admin table, and selecting that row opens the consignment inspector."
     },
     {
       "id": "sl-providers-carrier-accounts",

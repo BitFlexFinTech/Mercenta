@@ -119,7 +119,7 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await brandPage.waitForTimeout(2500);
     await dismissTour(brandPage);
     expect(new URL(brandPage.url()).pathname).toBe('/brand/logistics');
-    await expect(brandPage.getByTestId('logistics-map')).toBeVisible({ timeout: 15000 });
+    await expect(brandPage.getByTestId('logistics-scope-count')).toBeVisible({ timeout: 15000 });
     await brandPage.close();
 
     expect(errors).toEqual([]);

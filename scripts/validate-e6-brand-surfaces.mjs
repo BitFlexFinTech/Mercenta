@@ -3862,6 +3862,44 @@ const EDITOR_CLI_AGREEMENT_SCOPE = new Set([
 ]);
 
 /**
+ * §BATCH 3 (2026-10-10) — LOGISTICS SURFACE REMOVALS (Parts 2.3 + 2.4).
+ *
+ * The owner instructed two removals from the logistics surfaces: the interactive
+ * operational MAP (on BOTH surfaces) and the cinematic Logistics HERO and its
+ * whole pipeline. This set declares the files the removal touches — the deleted
+ * map canvas + hero modules, the two surfaces that mounted them, the derivation
+ * whose map-only helpers were dropped, the geography config, the validators/specs
+ * repointed into ABSENCE GUARDS (rule 08), and the build/registry wiring.
+ *
+ * The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY
+ * declared set still fails. `operationsMap.ts` is KEPT (the consignment list and
+ * the inspector on both surfaces still read it — verified, not assumed).
+ */
+const BATCH3_LOGISTICS_REMOVALS_SCOPE = new Set([
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/admin/LogisticsControl.tsx',
+  'src/components/shared/logistics/LogisticsMapCanvas.tsx',
+  'src/components/shared/logistics/LogisticsHero.tsx',
+  'src/components/shared/logistics/LogisticsHeroScene.tsx',
+  'src/lib/logistics/operationsMap.ts',
+  'src/lib/logistics/heroNetwork.ts',
+  'src/config/logisticsGeo.ts',
+  'src/config/logisticsHero.ts',
+  'src/data/logisticsHeroGeo.ts',
+  'scripts/validate-logistics-map.mjs',
+  'scripts/validate-logistics-hero.mjs',
+  'scripts/validate-functional-parity.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/build-logistics-hero-geo.mjs',
+  'scripts/reconcile-logistics-map-registry.cjs',
+  'e2e/logistics-hub-map.spec.ts',
+  'e2e/logistics-hero.spec.ts',
+  'e2e/runtime-entry.spec.ts',
+  'package.json',
+]);
+
+/**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
  * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
  * sprint required declares its files here, exactly like every phase before it.
@@ -4251,7 +4289,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...UIUX_WAVE3_PART5_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 1 — the editor/command-line agreement surface (see above). */
           EDITOR_CLI_AGREEMENT_SCOPE.has(p) ||
-          [...EDITOR_CLI_AGREEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...EDITOR_CLI_AGREEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 3 — the logistics map + hero removals (see above). */
+          BATCH3_LOGISTICS_REMOVALS_SCOPE.has(p) ||
+          [...BATCH3_LOGISTICS_REMOVALS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

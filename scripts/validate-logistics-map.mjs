@@ -29,6 +29,15 @@
  *      destination fails closed, the map can produce no hub node, and the
  *      destination of every seeded PO/shipment is the FC DECLARED ON THAT PO
  *      (never a Mercenta-chosen site) with an undeclared PO failing closed
+ *  11  §BATCH 3 (2026-10-10) — the interactive map is GONE from both surfaces
+ *      (ABSENCE GUARD, rule 08): the canvas component is deleted, neither
+ *      surface imports/mounts it, no map testid is rendered, and the derivation
+ *      the list + inspector still read is KEPT. This check FAILS if the map
+ *      returns.
+ *
+ * NOTE (§BATCH 3): the map UI was removed, but this validator's module
+ * assertions 1–10 stay LIVE because `operationsMap.ts` is still the canonical
+ * derivation the consignment list and inspector read on both surfaces.
  *
  * Run: node scripts/validate-logistics-map.mjs
  */
@@ -511,6 +520,55 @@ check(
   '§P5: NO seeded consignment is destined for a Mercenta site',
   S.hubDestinations === 0,
   S.sample.join(' | ')
+);
+
+/* ── 11. §BATCH 3 (2026-10-10) — THE INTERACTIVE MAP IS GONE (ABSENCE GUARD) ──
+ *
+ * The owner instructed the operational map's removal from BOTH logistics
+ * surfaces. Rule 08 (removal coherence) requires this check — which used to
+ * assert the map RENDERED — to become an ABSENCE guard: it must now prove the
+ * map is GONE, and it must FAIL if the map is ever re-introduced.
+ *
+ * The DERIVATION is deliberately NOT removed. `src/lib/logistics/operationsMap.ts`
+ * is still the ONE owner the consignment list and the consignment inspector on
+ * BOTH surfaces read (verified by reading both surfaces, not assumed), so the
+ * module assertions above remain LIVE and meaningful. Only the map-only helpers
+ * (`truthPresentation`, `isLegInMotion`) and the canvas component were removed.
+ */
+const HUB_SURFACE = fs.readFileSync(path.join(ROOT, 'src/components/brand/LogisticsHub.tsx'), 'utf8');
+const CONTROL_SURFACE = fs.readFileSync(
+  path.join(ROOT, 'src/components/admin/LogisticsControl.tsx'),
+  'utf8'
+);
+check(
+  '§BATCH3: the map canvas component is DELETED',
+  !fs.existsSync(path.join(ROOT, 'src/components/shared/logistics/LogisticsMapCanvas.tsx'))
+);
+check(
+  '§BATCH3: the brand hub does NOT import or mount the map canvas',
+  !/import\s*\{[^}]*\bLogisticsMapCanvas\b/.test(HUB_SURFACE) && !/<LogisticsMapCanvas\b/.test(HUB_SURFACE)
+);
+check(
+  '§BATCH3: the admin control does NOT import or mount the map canvas',
+  !/import\s*\{[^}]*\bLogisticsMapCanvas\b/.test(CONTROL_SURFACE) &&
+    !/<LogisticsMapCanvas\b/.test(CONTROL_SURFACE)
+);
+check(
+  '§BATCH3: neither surface renders a map testid',
+  !/logistics-map'|admin-logistics-map|logistics-marker-|logistics-map-evidence|logistics-map-legend/.test(
+    HUB_SURFACE + CONTROL_SURFACE
+  )
+);
+check(
+  '§BATCH3: the derivation is KEPT — the list + inspector on both surfaces still read it',
+  fs.existsSync(path.join(ROOT, 'src/lib/logistics/operationsMap.ts')) &&
+    HUB_SURFACE.includes('buildOperationalMap(') &&
+    CONTROL_SURFACE.includes('buildOperationalMap(')
+);
+check(
+  '§BATCH3: the map-only helpers are gone from the derivation',
+  !MAP_MODULE.includes('export function isLegInMotion') &&
+    !MAP_MODULE.includes('export function truthPresentation')
 );
 
 /* ── Report ─────────────────────────────────────────────────────────────── */

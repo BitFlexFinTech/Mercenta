@@ -1,8 +1,9 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
-> **STATUS: PART 1 (BATCH 1) BUILT AND TESTED (session 125, 2026-10-10) — Parts 2–6 remain PLANNED, NOT STARTED.**
+> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2) and BATCH 3 (Parts 2.3 + 2.4) BUILT AND TESTED
+> (session 125, 2026-10-10) — Parts 2.5–2.6 and 3–6 remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 2**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 4**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -46,8 +47,9 @@
 
 ## PART 2 — REMOVALS (each with its absence guard)
 
-> **2.1 and 2.2 are ✅ DONE (Batch 2, session 125, 2026-10-10); 2.3 – 2.6 remain.** Each removal was repointed
-> into an ABSENCE GUARD (rule 08) and mutation-proved (re-introduce → FAIL → restore byte-identical).
+> **2.1, 2.2 (Batch 2) and 2.3, 2.4 (Batch 3) are ✅ DONE (session 125, 2026-10-10); 2.5 – 2.6 remain.**
+> Each removal was repointed into an ABSENCE GUARD (rule 08) and mutation-proved (re-introduce → FAIL →
+> restore byte-identical).
 
 - **2.1 — "How this works" card. ✅ DONE.** ONE deletion in `WorkWorkspace.tsx` (it sat outside the view
   switches, so it cleared BOTH Calendar and Tasks & Deadlines — `CommercialReadiness`'s own card was left alone).
@@ -58,14 +60,20 @@
   `ConsolidationPosturePanel` stays too, declared in `validate-dead-code`'s unwired allowlist). Guards:
   `scripts/validate-logistics-providers.mjs` §9a, `e2e/logistics-providers.spec.ts` (tests 3 and 5 rewritten),
   and the `verify-demo-live.mjs` probes repointed to absence.
-- **2.3 — Operational map, BOTH surfaces.** `LogisticsHub.tsx` (~1676–1697) and `LogisticsControl.tsx` (~541).
-  Then `LogisticsMapCanvas` + `src/lib/logistics/operationsMap.ts` go too IF nothing else uses them (verify,
-  do not assume), with `validate-logistics-map.mjs` and `e2e/logistics-hub-map.spec.ts` rewritten as absence guards.
-- **2.4 — Logistics Hero** (the "fixed camera · non-interactive map") **and its whole pipeline:** the mount in
-  `LogisticsHub.tsx` (~1333–1335), `shared/logistics/LogisticsHero.tsx`, `LogisticsHeroScene.tsx`,
-  `src/lib/logistics/heroNetwork.ts`, `src/config/logisticsHero.ts`, `src/data/logisticsHeroGeo.ts`,
-  `scripts/build-logistics-hero-geo.mjs`, `scripts/validate-logistics-hero.mjs`, `e2e/logistics-hero.spec.ts`,
-  and the `.geo-cache` it built.
+- **2.3 — Operational map, BOTH surfaces. ✅ DONE (Batch 3).** The `LogisticsMapCanvas` mount was removed
+  from `LogisticsHub.tsx` and `LogisticsControl.tsx`, and the canvas component was DELETED. **VERIFIED, NOT
+  ASSUMED:** `src/lib/logistics/operationsMap.ts` is STILL USED — the consignment list and the consignment
+  inspector on BOTH surfaces read `buildOperationalMap` (truth classification, carrier validation, freight
+  semantics, stage) — so the derivation was KEPT and only its map-only helpers (`truthPresentation`,
+  `isLegInMotion`) were dropped. `validate-logistics-map.mjs` gained 6 §BATCH3 absence guards (74 → 80
+  assertions) and `e2e/logistics-hub-map.spec.ts` was rewritten as the matching absence guard. The admin
+  inspector would otherwise have become unreachable (the map was its only selector), so the per-brand
+  `DataTable` now drives it via `onRowClick`.
+- **2.4 — Logistics Hero (the "fixed camera · non-interactive map") and its whole pipeline. ✅ DONE (Batch 3).**
+  DELETED: `shared/logistics/LogisticsHero.tsx`, `LogisticsHeroScene.tsx`, `src/lib/logistics/heroNetwork.ts`,
+  `src/config/logisticsHero.ts`, `src/data/logisticsHeroGeo.ts`, `scripts/build-logistics-hero-geo.mjs`,
+  `scripts/validate-logistics-hero.mjs`, `e2e/logistics-hero.spec.ts`, and the `.geo-cache/` it built (plus its
+  `.gitignore` block and its two `package.json` scripts). The hero mount + `heroLegs` left `LogisticsHub.tsx`.
 - **2.5 — MERCENTA BRAIN, COMPLETELY** (owner directive: it serves no purpose): `src/components/admin/MercentaBrain.tsx`;
   `src/components/shared/brain/` (BrainCanvas, BrainCanvas3D, BrainScene); `src/lib/intelligence/brain/`
   (buildGraph, layout, layout3d, project, types); `src/components/brand/BrandRelationshipMap.tsx` + its
@@ -132,6 +140,8 @@
 
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
+
+Batches 1, 2 and 3 are DONE (session 125, 2026-10-10). **Next: Batch 4 (2.5, Mercenta Brain).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

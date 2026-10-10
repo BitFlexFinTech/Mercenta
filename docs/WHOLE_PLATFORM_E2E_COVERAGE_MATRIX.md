@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 441 · **Capabilities:** 8
+**Scenarios:** 427 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -25,7 +25,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | Capability | Scenarios |
 |---|---|
 | brands_marketing | 3 |
-| commerce_logistics | 142 |
+| commerce_logistics | 128 |
 | finance | 32 |
 | founder | 49 |
 | integrations | 22 |
@@ -315,6 +315,8 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | po-revision-brand-notified | commerce_logistics | brand_user | happy | `e2e/po-revision-surfaces.spec.ts` | `3. the brand is told the channel changed its order, and what changed` |
 | po-revision-console-change-list | commerce_logistics | mercenta_admin | happy | `e2e/po-revision-surfaces.spec.ts` | `2. the console shows every recorded revision with its change list` |
 | po-revision-refused-until-read | commerce_logistics | mercenta_admin | refusal | `e2e/po-revision-surfaces.spec.ts` | `1. the simulated change is refused until the channel has been read` |
+| sl-admin-map-removed | commerce_logistics | mercenta_admin | refusal | `e2e/logistics-hub-map.spec.ts` | `A. the admin surface renders and its map is gone` |
+| sl-admin-table-drives-inspector | commerce_logistics | mercenta_admin | persistence | `e2e/logistics-hub-map.spec.ts` | `B. a consignment created through the real PO lifecycle appears in the admin table and opens the inspector` |
 | sl-appointment-eta-coverage-detail | commerce_logistics | brand_user | happy | `e2e/delivery-appointment.spec.ts` | `2. the ETA-coverage tile opens the detail, and every consignment names a documented state` |
 | sl-appointment-inspector-window-verdict | commerce_logistics | brand_user | happy | `e2e/delivery-appointment.spec.ts` | `1. the consignment inspector shows the appointment and the window verdict` |
 | sl-appointment-window-rule-stated | commerce_logistics | brand_user | refusal | `e2e/delivery-appointment.spec.ts` | `3. the window rule is always stated — inside the window, or a refusal with a reason` |
@@ -331,32 +333,17 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | sl-fulfilment-direct-model | commerce_logistics | mercenta_admin | happy | `e2e/fulfillment-tracks.spec.ts` | `1. Direct model is documented` |
 | sl-fulfilment-financed-model | commerce_logistics | mercenta_admin | happy | `e2e/fulfillment-tracks.spec.ts` | `2. Financed model is documented` |
 | sl-fulfilment-scoreboard | commerce_logistics | mercenta_admin | happy | `e2e/fulfillment-tracks.spec.ts` | `3. Scoreboard renders per-brand scores` |
-| sl-hero-and-map-one-page | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `1. the hero and the operational map are ONE page` |
-| sl-hero-authentic-geography | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `6. authentic, generated, attributed geography (no hand-drawn shapes)` |
-| sl-hero-canonical-consignments | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `9. the hero plots the same brand consignments as the operational map` |
-| sl-hero-controls-interactive | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `13. the operational controls remain interactive below the hero` |
-| sl-hero-fixed-camera-scrolls | commerce_logistics | brand_user | a11y | `e2e/logistics-hero.spec.ts` | `2/3. fixed camera, no pointer capture, the page still scrolls` |
-| sl-hero-fleet-and-origins | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `4/5. many aircraft, many ships, many road vehicles, many origins` |
-| sl-hero-no-external-call | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `12. the hero makes no external network call` |
-| sl-hero-no-horizontal-overflow | commerce_logistics | brand_user | responsive | `e2e/logistics-hero.spec.ts` | `14. no horizontal overflow at desktop and mobile widths` |
-| sl-hero-reduced-motion | commerce_logistics | brand_user | a11y | `e2e/logistics-hero.spec.ts` | `10. reduced motion keeps a meaningful static view` |
-| sl-hero-truth-labels-ambient | commerce_logistics | brand_user | happy | `e2e/logistics-hero.spec.ts` | `7/8/11. truth semantics are labelled and ambient is never a shipment` |
-| sl-hub-admin-map-evidence-filter | commerce_logistics | mercenta_admin | happy | `e2e/logistics-hub-map.spec.ts` | `C. the evidence filter genuinely changes the drawn set` |
-| sl-hub-admin-map-real-consignment | commerce_logistics | mercenta_admin | persistence | `e2e/logistics-hub-map.spec.ts` | `B. a consignment created through the real PO lifecycle appears on the admin map` |
-| sl-hub-admin-map-truth-labelling | commerce_logistics | mercenta_admin | happy | `e2e/logistics-hub-map.spec.ts` | `A. the admin map renders with the canonical truth labelling` |
-| sl-hub-map-arrival-node-is-po-fc | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `17. §P5 — the arrival node is the destination FC on the PO, never a hub` |
-| sl-hub-map-artefacts-and-empty-state | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `14/15. artefacts still open and close` |
-| sl-hub-map-evidence-filter | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `5. the evidence filter changes the drawn set and the list` |
-| sl-hub-map-freight-responsibility | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `8/9/10. freight responsibility is stated truthfully` |
-| sl-hub-map-inspector-evidence | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `4. selecting a consignment opens the inspector with its evidence` |
-| sl-hub-map-interactive | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `1. renders the workspace and a real interactive map` |
-| sl-hub-map-leg-per-consignment | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `2. draws one leg per visible consignment from declared coordinates` |
-| sl-hub-map-nothing-falsely-live | commerce_logistics | brand_user | refusal | `e2e/logistics-hub-map.spec.ts` | `6/7. evidence is labelled and nothing is falsely live` |
-| sl-hub-map-reduced-motion | commerce_logistics | brand_user | a11y | `e2e/logistics-hub-map.spec.ts` | `11. reduced motion disables the ambient drift` |
-| sl-hub-map-responsive | commerce_logistics | brand_user | responsive | `e2e/logistics-hub-map.spec.ts` | `12. no horizontal overflow at any required viewport` |
-| sl-hub-map-search | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `16. search narrows the map and the list together` |
-| sl-hub-map-tenant-isolation | commerce_logistics | brand_user | refusal | `e2e/logistics-hub-map.spec.ts` | `13. tenant isolation — one brand never sees another brand’s consignments` |
-| sl-hub-map-zoom | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `3. zoom actually changes the rendered view` |
+| sl-hub-arrival-node-is-po-fc | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `11. §P5 — no Mercenta-hub node, and every destination is its PO’s declared FC` |
+| sl-hub-artefacts | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `9. the Waybill / Labels / Track artefacts still open and close` |
+| sl-hub-freight-responsibility | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `6. freight responsibility is stated truthfully` |
+| sl-hub-inspector-from-list | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `3. selecting a consignment in the list opens the inspector with its evidence` |
+| sl-hub-list-evidence-filter | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `4. the evidence filter changes the list` |
+| sl-hub-list-evidence-state | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `2. every consignment row states its evidence state` |
+| sl-hub-nothing-falsely-live | commerce_logistics | brand_user | refusal | `e2e/logistics-hub-map.spec.ts` | `5. nothing is falsely presented as live` |
+| sl-hub-responsive | commerce_logistics | brand_user | responsive | `e2e/logistics-hub-map.spec.ts` | `7. no horizontal overflow at any required viewport` |
+| sl-hub-search | commerce_logistics | brand_user | happy | `e2e/logistics-hub-map.spec.ts` | `10. search narrows the list` |
+| sl-hub-tenant-isolation | commerce_logistics | brand_user | refusal | `e2e/logistics-hub-map.spec.ts` | `8. tenant isolation — one brand never sees another brand’s consignments` |
+| sl-map-and-hero-removed | commerce_logistics | brand_user | refusal | `e2e/logistics-hub-map.spec.ts` | `1. the workspace renders, the map is gone and the list is the operational surface` |
 | sl-providers-admin-staff-no-dead-end | commerce_logistics | mercenta_admin | refusal | `e2e/logistics-providers.spec.ts` | `4b. an admin-STAFF session gets the configuration but NO dead-end hand-off` |
 | sl-providers-brand-no-credential-form | commerce_logistics | brand_user | refusal | `e2e/logistics-providers.spec.ts` | `2. the brand surface exposes no credential form and no cost base` |
 | sl-providers-carrier-accounts | commerce_logistics | brand_user | happy | `e2e/logistics-providers.spec.ts` | `1. both Mercenta carrier accounts are stated with their lane and real state` |
@@ -431,7 +418,6 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-launch-centre | platform | mixed | happy | `e2e/launch-centre.spec.ts` | — |
 | spec-legal-agreements | platform | mixed | happy | `e2e/legal-agreements.spec.ts` | — |
 | spec-listing-analyzer | platform | mixed | happy | `e2e/listing-analyzer.spec.ts` | — |
-| spec-logistics-hero | commerce_logistics | mixed | happy | `e2e/logistics-hero.spec.ts` | — |
 | spec-logistics-hub-map | commerce_logistics | mixed | happy | `e2e/logistics-hub-map.spec.ts` | — |
 | spec-logistics-providers | commerce_logistics | mixed | happy | `e2e/logistics-providers.spec.ts` | — |
 | spec-logistics-wave3 | commerce_logistics | mixed | happy | `e2e/logistics-wave3.spec.ts` | — |

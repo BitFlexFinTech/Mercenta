@@ -276,11 +276,16 @@ export function resolveGeoPlace(raw?: string | null): GeoResolution {
 /* ── Map frame ────────────────────────────────────────────────────────── */
 
 /**
- * The equirectangular frame the SVG projects into. Declared here (not in the
- * component) so the projection and the drawn graticule can never disagree.
+ * The equirectangular frame the projection uses. Declared here (not in a
+ * component) so every caller agrees on the bounds.
  *
  * The bounds deliberately include every origin the platform can actually
  * produce (South Korea → USA) so no record is silently off-canvas.
+ *
+ * §BATCH 3 (2026-10-10) — `graticuleStep` and `MAP_TRUTH_NOTICE` were REMOVED
+ * with the interactive map (the canvas was their only reader). `MAP_FRAME` is
+ * KEPT: `src/lib/logistics/operationsMap.ts` still projects into it to decide
+ * whether a consignment's declared location is resolvable.
  */
 export const MAP_FRAME = {
   viewBoxWidth: 1000,
@@ -289,13 +294,7 @@ export const MAP_FRAME = {
   lonMax: 145,
   latMin: -45,
   latMax: 68,
-  /** Drawn graticule spacing in degrees. */
-  graticuleStep: 15,
 } as const;
-
-/** Honest labelling shown on every map render. */
-export const MAP_TRUTH_NOTICE =
-  'Schematic operational view — real declared coordinates (city where a city is declared, national centroid otherwise). Routes are indicative arcs between declared points, not surveyed road or sea paths.';
 
 /* ── Operational truth states ─────────────────────────────────────────── */
 
@@ -344,13 +343,6 @@ export const OPERATIONAL_TRUTH: Record<OperationalTruth, TruthPresentation> = {
     claim: 'No positive provider resolution — plotted for operational context only, claiming nothing.',
   },
 };
-
-/** Truth states in the order the legend and filters render them. */
-export const OPERATIONAL_TRUTH_ORDER: readonly OperationalTruth[] = [
-  'live_verified',
-  'simulated',
-  'ambient',
-] as const;
 
 /* ── Freight-term semantics (preserved, never invented) ───────────────── */
 

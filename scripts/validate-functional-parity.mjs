@@ -98,10 +98,21 @@ const NAMED_CAPABILITY = [
   ['src/components/admin/CatalogManagerAdmin.tsx', ['ImageSetEditor', 'evaluateProductCompleteness'], 'a Manager must carry editing + evaluation inline'],
   ['src/components/admin/CompanyControlCentre.tsx', ['companiesHouseConnectionCredentials'], 'a Centre must carry its connection inline'],
   ['src/components/admin/FounderControlCentre.tsx', ['buildFounderBrief'], 'a Centre must carry its brief inline'],
-  ['src/components/admin/LogisticsControl.tsx', ['LogisticsMapCanvas', 'PoDocumentQueuePanel'], 'a Control must carry its map + queue inline'],
+  /**
+   * §BATCH 3 (2026-10-10) — REPOINTED, not weakened.
+   *
+   * OLD CONTRACT: 'a Control must carry its map + queue inline' — the symbol
+   * list named `LogisticsMapCanvas`. The owner instructed the interactive map's
+   * removal from BOTH logistics surfaces, so the Control no longer carries a map;
+   * the cross-tenant DOCUMENT QUEUE it also carries is unchanged. The map's
+   * ABSENCE is proved by `scripts/validate-logistics-map.mjs` §BATCH3 (which
+   * FAILS if the map returns); this entry keeps asserting the capability the
+   * Control still owes its name.
+   */
+  ['src/components/admin/LogisticsControl.tsx', ['PoDocumentQueuePanel'], 'a Control must carry its document queue inline'],
   ['src/components/admin/PartnershipsCentre.tsx', ['getProspects'], 'a Centre must carry its records inline'],
   ['src/components/brand/ComplianceHub.tsx', ['generateCustomsDocBundle'], 'a Hub must carry its document generation inline'],
-  ['src/components/brand/LogisticsHub.tsx', ['buildOperationalMap'], 'a Hub must carry its map inline'],
+  ['src/components/brand/LogisticsHub.tsx', ['buildOperationalMap'], 'a Hub must carry its consignment derivation inline'],
 ];
 const REDIRECT = /<Navigate\b|useNavigate\(/;
 for (const [rel, symbols, why] of NAMED_CAPABILITY) {
