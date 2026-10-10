@@ -1787,8 +1787,27 @@ function readRedLines() {
     const hubText = (await hub.innerText()) ?? '';
     check('L28 the DEPLOYED Integration Hub renders the Delta Fulfillment 3PL card',
       /Delta Fulfillment \(3PL\)/.test(hubText));
-    check('L28 the deployed provider count includes the 3PL partner (23 providers)',
-      /23 providers/.test(hubText));
+    /**
+     * §BATCH 5 (2026-10-10) — REPOINTED to the SINGLE SOURCE OF TRUTH. This check
+     * used to pin the literal "23 providers", which went stale the moment a provider
+     * was legitimately removed (Mercenta Social's `postiz`). It now DERIVES the
+     * expected count from `INTEGRATION_ORDER` itself, so a future add or removal
+     * cannot make the live check wrong — it still proves the deployed hub renders
+     * the registry's own provider set, including the 3PL partner.
+     */
+    const orderSrc = readFileSync(path.join(ROOT, 'src/integrations/registry.ts'), 'utf8');
+    const orderBlock = orderSrc.slice(
+      orderSrc.indexOf('export const INTEGRATION_ORDER'),
+      orderSrc.indexOf('];', orderSrc.indexOf('export const INTEGRATION_ORDER'))
+    );
+    const expectedProviders = (orderBlock.match(/^ {2}'[a-z_0-9]+',/gm) ?? []).length;
+    check(
+      `L28 the deployed provider count is the registry's own count (${expectedProviders} providers)`,
+      hubText.includes(`${expectedProviders} providers`)
+    );
+    /* §BATCH 5 — the LIVE absence guard for the removal: no Postiz card remains. */
+    check('L28 the deployed hub offers NO Postiz card (§BATCH 5 removed Mercenta Social)',
+      !/Postiz/i.test(hubText));
     check(
       `L28 the driven Integrations Hub rendered with no uncaught error (errors: ${dltErrors.join(' | ') || 'none'})`,
       dltErrors.length === 0

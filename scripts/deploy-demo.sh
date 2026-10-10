@@ -14,5 +14,21 @@ NAMECHEAP_FTP_USER=$(grep '^NAMECHEAP_FTP_USER=' .env | cut -d= -f2-)
 NAMECHEAP_FTP_PASS=$(grep '^NAMECHEAP_FTP_PASS=' .env | cut -d= -f2-)
 NAMECHEAP_FTP_PORT=$(grep '^NAMECHEAP_FTP_PORT=' .env | cut -d= -f2-)
 
-lftp -u "$NAMECHEAP_FTP_USER,$NAMECHEAP_FTP_PASS" -p "$NAMECHEAP_FTP_PORT" "$NAMECHEAP_FTP_HOST" -e "set ftp:ssl-allow true; set ssl:verify-certificate no; mirror -R --delete dist/ .; quit"
+# §BATCH 5 (2026-10-10) — SECURITY FIX AT SOURCE. This used to run
+# `lftp -u "user,password" …`, which puts the FTP PASSWORD in the process table,
+# where ANY other process on the machine can read it with `ps` (it was observed
+# there during a deploy). The credentials now go into a mode-600 lftp SCRIPT FILE
+# instead, and the file is deleted as soon as lftp exits.
+LFTP_RC="$(mktemp)"
+chmod 600 "$LFTP_RC"
+trap 'rm -f "$LFTP_RC"' EXIT
+{
+  printf 'set ftp:ssl-allow true\n'
+  printf 'set ssl:verify-certificate no\n'
+  printf 'open -u %s,%s -p %s %s\n' "$NAMECHEAP_FTP_USER" "$NAMECHEAP_FTP_PASS" "$NAMECHEAP_FTP_PORT" "$NAMECHEAP_FTP_HOST"
+  printf 'mirror -R --delete dist/ .\n'
+  printf 'quit\n'
+} > "$LFTP_RC"
+
+lftp -f "$LFTP_RC"
 echo "Done. Check: https://demo.mercenta.co.uk"

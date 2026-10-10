@@ -26,6 +26,53 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 5 — MERCENTA SOCIAL REMOVED, COMPLETELY (session 126, 2026-10-10)
+
+**BUILT.** The owner's instruction was to remove Mercenta Social completely. **16 files deleted** — the social
+config (`src/config/mercentaSocial.ts`), the four `src/lib/social/` modules, the Postiz engine client
+(`src/lib/postiz/postizClient.ts`), the brand surface `MercentaSocial.tsx` and its adapter
+`BrandSocialConnect.tsx`, the admin control centre `PostizAdminPanel.tsx`, the `social-session` Edge Function,
+the `scripts/social-sso/` SSO bridge, the three validators (`validate-e7-embedded-social`, `validate-postiz`,
+`validate-social-simulation`) and `e2e/embedded-social.spec.ts`. **Every dependent was repointed** — both shells
+(nav item, lazy import, breadcrumb, render branch), the integration registry + `types.ts`, data-processing, the
+operating-cost line, the theme accent token `--mr-feature-social`, `statusPresentation`'s social helper, the
+investor-demo stage (**25 → 24 stages**, including its summary text and four count literals), the edge-function
+rate-limit table, `docker-compose.services.yml`, `scripts/Caddyfile`, `deploy-docker.sh`, `vps-bootstrap.sh`,
+`forensic-screenshots.mjs`, the scenario catalogue (**416 → 404 rows**, matrix regenerated), four `reconcile-*`
+tools and the docs. The protected `src/lib/postiz/` surface was **DECLARED** in the E6 guard
+(`BATCH5_SOCIAL_REMOVAL_SCOPE`) rather than the fix being skipped.
+
+**TESTED.** **ABSENCE GUARD (rule 08)** `scripts/validate-retired-platforms.mjs` §2c — 16 removed-file + 4
+removed-directory + 21 live-marker assertions — **MUTATION-PROVED BOTH WAYS**: re-creating a removed module
+made it **FAIL with 2 failures naming the exact file and directory**; re-adding the brand nav id made it
+**FAIL with 1 naming BrandShell**; each was restored **byte-identical** and the guard's own sha256 was unchanged
+(`c2194baf…`). Domain-level holes were closed too: `validate-d4-persistence` O1/O2 (Postiz absent — the old
+assertions that it REMAINED became the inverse), `validate-admin-shell-bundle`, `validate-workspace-shell`,
+`validate-investor-demo` (the 24-stage lifecycle, element-by-element), `validate-operating-costs`,
+`validate-e6-brand-surfaces` F8 (the brand nav's exact 18-item order) and five browser specs repointed from
+VISIBLE to **ABSENT** (`retired-platforms`, `app-shell`, `integration-hub`, `redesign-surfaces`,
+`investor-demo`). `typecheck` **0** (four projects) · `lint` **0** · `build` **ok** · `validate:all`
+**185 PASS / 0 FAIL** (188 before, minus the three validators deleted with the feature) · registry integrity
+**7 PASS / 0 FAIL** · evidence-row integrity **2294 PASS / 0 FAIL** · browser **70 passed / 0 failed** · LIVE
+**268 PASS / 0 FAIL**.
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`26e2d9e`**: pushed to
+`origin/redesign/foundation` (no `--force`), deployed with `scripts/deploy-demo.sh` (EXIT=0, 107 stale files
+removed from the host), and verified live (including the new live absence probe: the deployed hub offers NO
+Postiz card).
+
+**DEFECT INVENTORY (rule 07 — every defect found, FIXED with its gate, or BLOCKED).**
+
+| # | Defect | Disposition | Evidence / gate |
+|---|---|---|---|
+| 1 | The live verifier pinned the literal **"23 providers"**, which went stale the moment `postiz` left the registry (L28 failed live) | **FIXED at source** — the count is now DERIVED from `INTEGRATION_ORDER`, so a future add/remove cannot make it wrong | live probe re-run: **268 PASS / 0 FAIL**, exit 0 |
+| 2 | `scripts/deploy-demo.sh` passed the **FTP password on the command line**, where `ps` exposes it to any other process on the machine (observed during this session's deploy) | **FIXED at source** — credentials now go into a mode-600 lftp script file, deleted on exit | `pgrep -fl lftp` during the re-deploy matched **0** credential strings; the deploy then ran clean (EXIT=0) |
+| 3 | `PROJECT_STATUS.md` carried the **Wave-3-Part-2 block TWICE**, the second copy under a wrong `§E2E-9` heading | **FIXED at source** — the duplicate is removed; exactly one `§E2E-9` heading remains | `grep -c '**§E2E-9:'` = **1**; the historical stack now reads Part 5 → Part 4 → Part 3 → Part 2 → E2E-9 → E2E-8 |
+| 4 | Four `reconcile-*` tools would have **re-introduced citations of deleted files** if re-run (they refresh evidence strings) | **FIXED at source** — three are NEUTRALISED (refuse to run without an env override) and one is repointed to the current function set | the tools exit 1 with an explanatory message; `validate-built-rows` reports **0 FAIL** |
+
+**NEXT.** Batch 6 (Part 3.1, the catalogue product image 32px → 64px through the ONE `ProductThumb` owner),
+then Batch 7 (Part 4's click-through defects + the new gates) and Batch 8 (Part 6, the close-out).
+
 ## §BATCH 4 — THE MERCENTA BRAIN REMOVED, COMPLETELY (session 125, 2026-10-10)
 
 The recorded NEXT TASK was Batch 4 (Part 2.5) of `docs/NEXT_BUILD_PLAN_2026-10-10.md`. The owner's directive is

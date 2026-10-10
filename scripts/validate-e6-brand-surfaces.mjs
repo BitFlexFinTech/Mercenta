@@ -3389,6 +3389,8 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'scripts/reconcile-redesign-remaining-surfaces-registry.cjs',
     'scripts/reconcile-runtime-parity-registry.cjs',
     'scripts/reconcile-master-build-reconciliation-registry.cjs',
+    'scripts/verify-live-demo.mjs',
+    'scripts/deploy-demo.sh',
     'e2e/app-shell.spec.ts',
     'e2e/retired-platforms.spec.ts',
     'e2e/integration-hub.spec.ts',
