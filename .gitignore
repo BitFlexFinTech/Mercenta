@@ -71,5 +71,7 @@ Review Zip/*
 # read/applied during implementation. Reference material, never bundled.
 .skills/
 
-# bug-patrol run data (screenshots, findings)
+# bug-patrol run data (screenshots, findings, app map, routines) — all machine-generated
 .bugpatrol/runs/
+.bugpatrol/appmap.json
+.bugpatrol/routines/
