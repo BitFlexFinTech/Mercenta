@@ -17,7 +17,7 @@
  *   - the surface title is a single h1 with an accessible name;
  *   - the primary content region does not collapse below the mobile width.
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';

@@ -16,7 +16,7 @@
  *   - a manually created task appears in the list, board and calendar
  *   - no horizontal overflow at 390px
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';

@@ -8,7 +8,7 @@
  *  - no horizontal overflow at the seven required viewports
  *  - screenshots at every viewport
  *
- * Dev server started by playwright.config.ts (`npm run dev`, :5173).
+ * Dev server started by playwright.config.ts (`npm run dev`, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';

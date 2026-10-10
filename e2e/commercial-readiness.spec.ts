@@ -21,7 +21,7 @@
  *   6. RBAC: the Founder Control Centre is never reachable from a brand session
  *   7. ZERO external network calls and ZERO page errors for the whole run
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';

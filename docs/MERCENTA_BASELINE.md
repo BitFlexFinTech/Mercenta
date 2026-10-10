@@ -35,7 +35,7 @@
 
 | Action | Command |
 |---|---|
-| Dev | `npm run dev` (default 5173) |
+| Dev | `npm run dev` (**pinned port 5182**, `strictPort: true`) |
 | Build | `npm run build` (output `dist/`) |
 | Typecheck | `npx tsc --noEmit -p tsconfig.app.json` |
 | Preview | `npm run preview` |

@@ -21,7 +21,7 @@
  *    colours. The measured result is printed on every run and recorded in the
  *    session report as a known, quantified gap.
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';

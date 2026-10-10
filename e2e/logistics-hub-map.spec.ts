@@ -21,7 +21,7 @@
  *  15  the Waybill / Labels / Track artefacts still open
  *  16  no page errors and no external network calls
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs, openLogin } from './helpers/auth';

@@ -19,7 +19,7 @@
  *   9  a public address stays public even with a live session
  *  10  no page errors and no external calls while doing all of the above
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { openLogin } from './helpers/auth';

@@ -19,7 +19,7 @@
  *  10. TENANT BOUNDARY: a brand session sees its own relationship map on Market
  *      Intelligence, never a prospect or another tenant, and never the Brain.
  *
- * The dev server is started by playwright.config.ts (npm run dev, :5173).
+ * The dev server is started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';

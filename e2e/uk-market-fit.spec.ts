@@ -25,7 +25,7 @@
  *  10. RBAC: a brand session never reaches the Control Centre
  *  11. the whole run makes ZERO external network calls, and no page errors occur
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';

@@ -11,7 +11,7 @@
  *  - partial reset honesty
  *  - responsive screenshots at the seven required viewports
  *
- * The dev server is started by playwright.config.ts (npm run dev, :5173).
+ * The dev server is started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { openLogin } from './helpers/auth';

@@ -47,7 +47,7 @@
     header /* {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
-        Content-Security-Policy "frame-ancestors 'self' https://demo.mercenta.co.uk https://mercenta.co.uk https://www.mercenta.co.uk http://localhost:5173 http://127.0.0.1:5173"
+        Content-Security-Policy "frame-ancestors 'self' https://demo.mercenta.co.uk https://mercenta.co.uk https://www.mercenta.co.uk http://localhost:5182 http://127.0.0.1:5182"
         -X-Frame-Options
     }
     log {

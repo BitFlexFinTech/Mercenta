@@ -13,7 +13,7 @@
  *   5. an AUTHENTICATED session is private even at `/`;
  *   6. the public pages still render (no functional regression from the change).
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';

@@ -12,7 +12,7 @@
  *     engine host, and pageErrors === [] throughout;
  *   - the admin control centre reports the verified engine and its findings.
  *
- * The dev server is started by playwright.config.ts (npm run dev, :5173).
+ * The dev server is started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';

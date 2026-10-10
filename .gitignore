@@ -70,3 +70,6 @@ Review Zip/*
 # Sourced from the Founder-provided repositories named in the master prompt and
 # read/applied during implementation. Reference material, never bundled.
 .skills/
+
+# bug-patrol run data (screenshots, findings)
+.bugpatrol/runs/

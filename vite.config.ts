@@ -5,6 +5,21 @@ import { fileURLToPath, URL } from 'node:url';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  /**
+   * §unique-dev-port-per-project (global rule) — MERCENTA OWNS PORT 5182.
+   *
+   * Defect fixed 2026-10-10: this project pinned NO port, so it fell back to
+   * Vite's default 5173 — WHICH IS ALREADY OWNED BY `TSL Zimbabwe/TSL-Zimbabwe`
+   * (see `~/.cline/DEV_PORTS.md`). Two dev servers cannot share one port: the
+   * second one to start silently slides to another port, so the address you
+   * typed can show ANOTHER project's page. `strictPort: true` makes the server
+   * STOP with a clear error instead of sliding.
+   *
+   * 5182 is the next free port in the registry. Anything that must reach the
+   * dev server (playwright.config.ts, scripts/runtime-sweep.mjs) is updated to
+   * match in the same change — a port is only pinned if every consumer agrees.
+   */
+  server: { port: 5182, strictPort: true },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

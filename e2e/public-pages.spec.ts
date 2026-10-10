@@ -26,7 +26,7 @@
  * is caught before deployment. It also closes the recorded registry defect that
  * the B3 row declared `built_and_tested` while no e2e spec referenced it.
  *
- * Dev server is started by playwright.config.ts (`npm run dev`, :5173).
+ * Dev server is started by playwright.config.ts (`npm run dev`, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { PUBLIC_NAV, PUBLIC_CLAIM_RED_LINES } from '../src/config/positioning';

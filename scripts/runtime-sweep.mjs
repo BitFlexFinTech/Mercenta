@@ -6,7 +6,7 @@
  */
 import { chromium } from '@playwright/test';
 
-const BASE = process.env.BASE_URL || 'http://localhost:5173';
+const BASE = process.env.BASE_URL || 'http://localhost:5182';
 const ROLES = [
   { card: 'Super Admin — Tadii', view: 'super admin' },
   { card: 'Mercenta Admin Hub', view: 'admin' },

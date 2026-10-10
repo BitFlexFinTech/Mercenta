@@ -15,7 +15,7 @@
  * the sections that remain, the business figures now on it, and the POSITIVE
  * absence of the removed surfaces — so the duplication cannot silently return.
  *
- * Dev server started by playwright.config.ts (`npm run dev`, :5173).
+ * Dev server started by playwright.config.ts (`npm run dev`, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';

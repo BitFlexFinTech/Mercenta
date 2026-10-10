@@ -18,7 +18,7 @@
  * the DEPLOYED site; this spec asserts them against the dev server, so a
  * regression is caught before deployment.
  *
- * Dev server is started by playwright.config.ts (`npm run dev`, :5173).
+ * Dev server is started by playwright.config.ts (`npm run dev`, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { APPROVED_CATEGORIES } from '../src/types';

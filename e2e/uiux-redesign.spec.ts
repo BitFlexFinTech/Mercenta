@@ -17,7 +17,7 @@
  *   - responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390
  *   - homepage: redesigned, TAM/SAM gone, tracker animation preserved
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';

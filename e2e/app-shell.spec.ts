@@ -9,7 +9,7 @@
  * Super Admin Simulation + Design System reachability, and no horizontal
  * overflow at the seven target viewports (with screenshots).
  *
- * Dev server started by playwright.config.ts (npm run dev, :5173).
+ * Dev server started by playwright.config.ts (npm run dev, :5182).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs as loginAsPortal, openLogin } from './helpers/auth';
