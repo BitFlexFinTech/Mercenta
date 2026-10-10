@@ -112,7 +112,7 @@ export function ensureProspectStore(): void {
 /* ── §Phase C / §CANONICAL SIGNAL — canonical change signal ─────────────────
  * §CANONICAL CHANGE SIGNAL — REPOINTED (2026-09-21). The signal's IMPLEMENTATION
  * now lives in `src/lib/domain/canonicalSignal.ts`, because it is consumed by
- * every projection (Brain, logistics map, dashboards, work layer) and fired by
+ * every projection (logistics list and inspector, dashboards, work layer) and fired by
  * every mutation path — not only by the Brand-Intelligence universe this module
  * happens to own. These re-exports keep every existing import path working while
  * there is exactly ONE counter and ONE notification list in the process.

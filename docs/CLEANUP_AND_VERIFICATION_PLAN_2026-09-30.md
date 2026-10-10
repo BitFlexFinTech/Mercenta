@@ -1,5 +1,13 @@
 # CLEAN-UP, VERIFICATION AND "ONE SWITCH" PLAN — 2026-09-30
 
+> ## ⚠ NOTE (§BATCH 4, 2026-10-10) — SOME REFERENCES BELOW ARE HISTORICAL
+> This is a dated plan record and is preserved as history. Its references to the **Mercenta Brain**
+> (`scripts/brain-runtime-check.ts`, the "Brain's dead-end KPI band", the Brain's leak-scan in the type-check coverage
+> note) describe work on a surface **REMOVED on 2026-10-10** by owner instruction
+> (`docs/NEXT_BUILD_PLAN_2026-10-10.md` Part 2.5). The lessons recorded here still hold; the Brain-specific files no
+> longer exist and the coverage gate now asserts that absence.
+
+
 **Status:** **THE SINGLE PLAN OF RECORD (2026-10-02).** This file is the ONE plan — the former
 `docs/NEXT_BUILD_PLAN_2026-09-27.md` is **MERGED INTO IT here (§6)** and reduced to a pointer at this file, so there
 is exactly ONE plan and it cannot drift (exactly the rule this file already carried).

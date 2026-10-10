@@ -37,7 +37,7 @@
  * session report): each mutation-sensitive assertion was shown able to fail and
  * the mutated file restored byte-identical.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
@@ -152,15 +152,17 @@ test('F4 no dead metric band (every MetricBand fed a MetricTileData[] has a dril
   deadBands.length === 0,
   deadBands.length ? `dead bands (a wall of numbers with no drill-down):\n      ${deadBands.join('\n      ')}` : undefined);
 
-/* F4b — the Brain KPI band specifically: EVERY tile drills down into its set. */
-const brain = read('src/components/admin/MercentaBrain.tsx');
-const brainTileIds = ['entities', 'relationships', 'verified', 'simulation', 'unknown', 'human'];
-const brainMissing = brainTileIds.filter((id) => !new RegExp(`id: '${id}'`).test(brain));
-test('F4 the Brain KPI band declares its six tiles', brainMissing.length === 0, brainMissing.join(', '));
-const brainOnOpen = (brain.match(/onOpen:/g) || []).length;
-test('F4 every Brain KPI tile carries a drill-down (onOpen)',
-  brainOnOpen >= brainTileIds.length,
-  `expected >= ${brainTileIds.length} onOpen, found ${brainOnOpen} — a tile without one is a dead-end number`);
+/* F4b — §BATCH 4 (2026-10-10) — REPOINTED, not deleted (rule 08). This block used
+ * to pin the Brain's KPI band (six tiles, each giving a drill-down). The owner
+ * instructed the Brain's complete removal, so the dead-end-number risk it guarded
+ * no longer exists; the check now pins the ABSENCE of the surfaces, and F4a above
+ * still catches a dead metric band anywhere else in the product. */
+const BRAIN_SURFACES = [
+  'src/components/admin/MercentaBrain.tsx',
+  'src/components/brand/BrandRelationshipMap.tsx',
+];
+test('F4 §BATCH4 the removed Brain surfaces stay removed',
+  BRAIN_SURFACES.every((rel) => !existsSync(join(ROOT, rel))), BRAIN_SURFACES.join(', '));
 
 /* F4c — the audited metric surfaces keep their drill-down. */
 const DRILLDOWN = [

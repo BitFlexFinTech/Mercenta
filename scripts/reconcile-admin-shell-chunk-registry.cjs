@@ -65,7 +65,8 @@ const a = raise(
   'scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — asserts the shell holds NO ' +
     'static import from `@/components/admin/`, declares ≥30 `lazy(() => import(` bindings, renders its switch ' +
     'inside a `<Suspense>`, keeps exactly ONE `vendor` chunk, holds the AdminShell chunk ≤ 300 kB, and splits ' +
-    '≥25 panels (incl. the heaviest, AdminDashboard + MercentaBrain) into their own chunks. PROVED ABLE TO ' +
+    '≥25 panels (incl. the heaviest, AdminDashboard — §BATCH 4 (2026-10-10) removed the former second heavy panel, ' +
+    'MercentaBrain) into their own chunks. PROVED ABLE TO ' +
     'FAIL against the pre-fix bundle (7/9 assertions fail: eager imports, no lazy bindings, no Suspense, ' +
     '890 kB shell chunk, 0 panel chunks). Browser: e2e/app-shell.spec.ts navigates admin destinations ' +
     '(e.g. `nav >> text=Super Admin`) and therefore loads the lazily-split panel chunks.',

@@ -24,8 +24,8 @@ function AppContent() {
   /**
    * §CANONICAL CHANGE PROPAGATION — the ONE subscriber that keeps every React
    * Query read of canonical state in step with the domain, so projections built
-   * on it (the Logistics operational map and list, dashboards, queues, ledgers,
-   * Brain) reflect a domain change without a reload. Mounted here because the
+   * on it (the logistics list and inspector, dashboards, queues, ledgers)
+   * reflect a domain change without a reload. Mounted here because the
    * QueryClientProvider wraps the whole application (`main.tsx`).
    */
   useCanonicalQuerySync();

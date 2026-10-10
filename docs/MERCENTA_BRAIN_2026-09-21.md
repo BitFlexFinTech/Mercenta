@@ -1,5 +1,15 @@
 # MERCENTA BRAIN — IMPLEMENTATION RECORD (2026-09-21)
 
+> ## ⚠ SUPERSEDED — THE MERCENTA BRAIN WAS REMOVED (§BATCH 4, 2026-10-10)
+> **This document is a HISTORICAL IMPLEMENTATION RECORD and is preserved as history only.** On 2026-10-10 the owner
+> instructed the Mercenta Brain's **complete removal** ("it serves no purpose"). Deleted: `src/components/admin/MercentaBrain.tsx`,
+> `src/components/shared/brain/`, `src/lib/intelligence/brain/`, `src/components/brand/BrandRelationshipMap.tsx`,
+> `src/lib/hooks/useWebglPalette.ts`, `src/lib/hooks/usePrefersReducedMotion.ts` and `scripts/brain-runtime-check.ts`.
+> Every "the Brain is…" statement below therefore describes a surface that **no longer exists**. The absence is guarded
+> by `scripts/validate-mercenta-brain.mjs` (the contract validator rewritten into an ABSENCE guard, rule 08) and by
+> `e2e/mercenta-brain.spec.ts`. Authority: `docs/NEXT_BUILD_PLAN_2026-10-10.md` Part 2.5.
+
+
 **Status:** implemented + browser-verified this session · **Branch:** `redesign/foundation`
 **Companions:** `PROJECT_STATUS.md` (current position block) · `HANDOFF.md` · `requirements-registry.json` ·
 `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` · `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md`

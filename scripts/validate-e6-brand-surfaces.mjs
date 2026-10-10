@@ -3331,6 +3331,70 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
       migFiles.sort().at(-1).startsWith('028_') &&
       BATCH1B_CONNECT_BACKEND_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`));
 
+  /**
+   * §BATCH 4 (2026-10-10) — MERCENTA BRAIN REMOVAL (Part 2.5).
+   *
+   * The owner instructed the Mercenta Brain's COMPLETE removal ("it serves no
+   * purpose"). This set declares every path the removal touches — the deleted
+   * surface, graph modules, renderers, the brand relationship graph, the two
+   * Brain-only hooks and the runtime harness; the two shells that mounted them; the
+   * shared signal/derivation whose stale Brain comments were repointed; and the
+   * validators/specs rewritten into ABSENCE guards (rule 08) plus the build/registry
+   * wiring.
+   *
+   * It is declared HERE (above the working-tree scope proof) because F5/F5b read it
+   * and a declaration further down would be in its temporal dead zone when they run.
+   * The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY declared
+   * set still fails. `src/lib/domain/canonicalSignal.ts` and
+   * `src/lib/logistics/operationsMap.ts` are KEPT (their consumers remain — verified,
+   * not assumed); only their stale Brain comments changed.
+   */
+  const BATCH4_BRAIN_REMOVAL_SCOPE = new Set([
+    'src/components/admin/MercentaBrain.tsx',
+    'src/components/brand/BrandRelationshipMap.tsx',
+    'src/components/shared/brain/',
+    'src/lib/intelligence/brain/',
+    'src/lib/hooks/useWebglPalette.ts',
+    'src/lib/hooks/usePrefersReducedMotion.ts',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/lib/domain/canonicalSignal.ts',
+    'src/lib/logistics/operationsMap.ts',
+    'src/App.tsx',
+    'src/data/demoStore.ts',
+    'src/data/prospectStore.ts',
+    'scripts/brain-runtime-check.ts',
+    'scripts/validate-mercenta-brain.mjs',
+    'scripts/validate-canonical-propagation.mjs',
+    'scripts/validate-product-routes.mjs',
+    'scripts/validate-functional-parity.mjs',
+    'scripts/validate-admin-shell-bundle.mjs',
+    'scripts/validate-typecheck-coverage.mjs',
+    'scripts/validate-e2e-scenarios.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-live-demo.mjs',
+    'scripts/reconcile-mercenta-brain-registry.cjs',
+    'scripts/reconcile-mercenta-brain-removal-registry.cjs',
+    'scripts/reconcile-canonical-propagation-registry.cjs',
+    'scripts/reconcile-admin-shell-chunk-registry.cjs',
+    'tsconfig.node.json',
+    'e2e/mercenta-brain.spec.ts',
+    'e2e/accessibility.spec.ts',
+    'e2e/redesign-surfaces.spec.ts',
+    'e2e/runtime-entry.spec.ts',
+    'e2e/canonical-propagation.spec.ts',
+    'docs/scenario-catalogue.json',
+    'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',
+    'docs/MERCENTA_BRAIN_2026-09-21.md',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'package.json',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ]);
+
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
   try {
@@ -3494,7 +3558,17 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §CREDENTIAL VAULT — the vault's declared surface (see above). First protected-path check (F5). */
         CREDENTIAL_VAULT_SCOPE.has(p) ||
-        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /**
+         * §BATCH 4 (2026-10-10) — the MERCENTA BRAIN removal. This phase DELETES
+         * files under the PROTECTED `src/lib/intelligence/` prefix
+         * (`src/lib/intelligence/brain/`), so per `.clinerules/defect-remediation.md`
+         * the surface is DECLARED here (a documented, reviewable act) rather than the
+         * fix being skipped. Every other protected prefix stays untouched and F5b
+         * still pins the exact files.
+         */
+        BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
+        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3627,7 +3701,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §CREDENTIAL VAULT — same declaration, second protected-path check (F5b). */
         CREDENTIAL_VAULT_SCOPE.has(p) ||
-        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 4 — the Mercenta Brain removal (see the F5 declaration). Second protected-path check (F5b). */
+        BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
+        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3898,6 +3975,13 @@ const BATCH3_LOGISTICS_REMOVALS_SCOPE = new Set([
   'e2e/runtime-entry.spec.ts',
   'package.json',
 ]);
+
+/**
+ * §BATCH 4 (2026-10-10) — MERCENTA BRAIN REMOVAL — the declared file set
+ * (`BATCH4_BRAIN_REMOVAL_SCOPE`) is declared ABOVE, immediately before the
+ * working-tree scope proof, because the F5/F5b protected-path checks read it and a
+ * `const` declared here would be in its temporal dead zone when they run.
+ */
 
 /**
  * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
@@ -4292,7 +4376,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...EDITOR_CLI_AGREEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 3 — the logistics map + hero removals (see above). */
           BATCH3_LOGISTICS_REMOVALS_SCOPE.has(p) ||
-          [...BATCH3_LOGISTICS_REMOVALS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH3_LOGISTICS_REMOVALS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 4 — the Mercenta Brain removal (see above). */
+          BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
+          [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

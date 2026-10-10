@@ -30,8 +30,10 @@
 //   4. exactly ONE `vendor-*.js` chunk (the §P3 single-vendor invariant);
 //   5. an `AdminShell-*.js` chunk exists and is ≤ ADMIN_SHELL_BUDGET_KB;
 //   6. at least MIN_PANEL_CHUNKS distinct panel chunks exist by basename;
-//   7. the two heaviest panels (AdminDashboard, MercentaBrain) are split into
-//      their own chunks.
+//   7. the heaviest panel (AdminDashboard) is split into its own chunk.
+//      §BATCH 4 (2026-10-10) — REPOINTED: `MercentaBrain` was the second heavy
+//      panel; the Mercenta Brain was removed by owner instruction, so only
+//      `AdminDashboard` is named here now.
 //
 // PROVED ABLE TO FAIL: run against the PRE-FIX bundle (eager imports) it fails
 // 1, 2, 3, 5, 6 and 7 (recorded in the session report).
@@ -84,10 +86,11 @@ const SHELLS = [
       'SuperAdminPanel', 'AdminAuditLog', 'BrandIntelligencePanel',
       'BrandIntelligenceStrategyPanel', 'OpportunityDiscoveryPanel',
       'ProductDiscoveryPanel', 'RegionalPriorityPanel', 'AmazonAdsDashboard',
-      'FounderControlCentre', 'MercentaBrain', 'FounderInvestorCentre',
+      'FounderControlCentre', 'FounderInvestorCentre',
       'PartnershipsCentre', 'OnboardingPipeline', 'WorkManagement',
     ],
-    heavy: ['AdminDashboard', 'MercentaBrain'],
+    /* §BATCH 4 (2026-10-10) — 'MercentaBrain' left both lists with the surface. */
+    heavy: ['AdminDashboard'],
   },
   {
     label: 'BrandShell',

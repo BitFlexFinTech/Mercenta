@@ -231,8 +231,8 @@ export function ensureDistributionAgreement(input: {
  *
  * These four functions are now the ONLY writers of the contract cycle. Every one
  * records WHY and WHO on the EXISTING platform audit log (`demoAuditLog`) and
- * announces the canonical change, so the work layer, the Brain, the CRM timeline
- * and every query-backed surface re-read the same truth.
+ * announces the canonical change, so the work layer, the CRM timeline and every
+ * query-backed surface re-read the same truth.
  */
 
 /** Audit one contract-cycle mutation on the existing platform log. */
@@ -465,8 +465,8 @@ export function amendShipment(
  *
  * It SIGNALS the canonical change itself, following the established pattern for an
  * audit helper (`recordComplianceAudit`): a function that writes to a canonical
- * collection must announce it, which is what keeps the Brain and the logistics
- * projection dynamic — asserted by `scripts/validate-canonical-propagation.mjs`.
+ * collection must announce it, which is what keeps the logistics projection
+ * dynamic — asserted by `scripts/validate-canonical-propagation.mjs`.
  */
 function pushShipmentAudit(
   shipmentId: string,
@@ -507,7 +507,7 @@ function pushShipmentAudit(
  *   · writes `status` AND the derived `stage` from the ONE mapping in
  *     `src/types.ts` (`STATUS_TO_STAGE`), so the two can never disagree;
  *   · notifies the canonical signal, so every query-backed surface (the admin
- *     Logistics Hub, the brand hub, reports, the Brain) reflects the change.
+ *     Logistics Hub, the brand hub, reports) reflects the change.
  *
  * It makes no network call and contacts no carrier.
  */

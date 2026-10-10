@@ -13,13 +13,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* §OPTION-A (2026-10-04) — `scripts/brain-runtime-check.ts` (the only stray
-       `.ts` in scripts/) imports the app through the `@/` alias, so the tooling
-       project needs the same mapping the application uses. */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
+    /* §BATCH 4 (2026-10-10) — REPOINTED. The `baseUrl`/`paths` mapping and the
+       `scripts/brain-runtime-check.ts` include existed ONLY because that one stray
+       `.ts` imported the app through the `@/` alias. Both the file and the
+       Mercenta Brain it exercised were removed by owner instruction, so the
+       mapping and the include are gone with them. */
 
     /* Linting */
     "strict": true,
@@ -27,5 +25,5 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "scripts/brain-runtime-check.ts", "src/vite-env.d.ts"]
+  "include": ["vite.config.ts", "src/vite-env.d.ts"]
 }

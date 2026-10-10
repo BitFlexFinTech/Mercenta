@@ -97,17 +97,23 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     const errors = await trackErrors(page);
 
     // COLD: no session at all. The login entry is shown and the address is kept.
-    await page.goto('/admin/brain');
+    /* §BATCH 4 (2026-10-10) — REPOINTED (rule 08). This used `/admin/brain`, which
+       was removed with the Mercenta Brain; the deep link now targets a live admin
+       destination, so the test still proves a cold link keeps its address and
+       lands on the requested view. */
+    await page.goto('/admin/logistics');
     await expect(page.getByRole('heading', { name: 'Partner Login' })).toBeVisible({
       timeout: 10000,
     });
-    expect(new URL(page.url()).pathname).toBe('/admin/brain');
+    expect(new URL(page.url()).pathname).toBe('/admin/logistics');
 
     // The one-click demo login is the REAL entry path; no session is fabricated.
     await page.click('text=Super Admin — Tadii');
     await page.waitForTimeout(2000);
-    expect(new URL(page.url()).pathname).toBe('/admin/brain');
-    await expect(page.getByTestId('brain-canvas')).toBeVisible({ timeout: 15000 });
+    expect(new URL(page.url()).pathname).toBe('/admin/logistics');
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
+      timeout: 15000,
+    });
 
     // The brand side of the same rule.
     const brandPage = await page.context().newPage();
@@ -159,9 +165,12 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
       timeout: 10000,
     });
-    await nav.getByRole('button', { name: 'Mercenta Brain', exact: true }).click();
-    await expect(page.getByTestId('brain-canvas')).toBeVisible({ timeout: 15000 });
-    expect(new URL(page.url()).pathname).toBe('/admin/brain');
+    /* §BATCH 4 (2026-10-10) — REPOINTED (rule 08). The second destination used to be
+       the removed Mercenta Brain; a live admin destination is used so the test
+       still proves Back/Forward move between product views. */
+    await nav.getByRole('button', { name: 'Integration Settings', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Integration Settings' })).toBeVisible({ timeout: 15000 });
+    expect(new URL(page.url()).pathname).toBe('/admin/integrations');
 
     await page.goBack();
     await page.waitForTimeout(1000);
@@ -172,8 +181,8 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
 
     await page.goForward();
     await page.waitForTimeout(1000);
-    expect(new URL(page.url()).pathname).toBe('/admin/brain');
-    await expect(page.getByTestId('brain-canvas')).toBeVisible({ timeout: 15000 });
+    expect(new URL(page.url()).pathname).toBe('/admin/integrations');
+    await expect(page.getByRole('heading', { name: 'Integration Settings' })).toBeVisible({ timeout: 15000 });
   });
 
   /**
@@ -237,7 +246,12 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     // The private nav destinations are hidden for this tier as well.
     const nav = page.locator('nav[aria-label="Primary"]');
     await expect(nav.getByRole('button', { name: 'Super Admin', exact: true })).toHaveCount(0);
-    await expect(nav.getByRole('button', { name: 'Mercenta Brain', exact: true })).toHaveCount(0);
+    /* §BATCH 4 (2026-10-10) — REPOINTED (rule 08). This assertion used to name the
+       'Mercenta Brain' private destination; that surface was removed, so the
+       remaining Super-Admin-only private destination ('Control Centre') is
+       asserted instead — the check still proves a private destination is hidden
+       from a non-Super-Admin tier. */
+    await expect(nav.getByRole('button', { name: 'Control Centre', exact: true })).toHaveCount(0);
   });
 
   test('8. a tampered or unknown persisted session fails CLOSED', async ({ page }) => {

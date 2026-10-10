@@ -4,7 +4,7 @@
  * Typecheck and build cannot see any of the failures this gate catches. The
  * product can compile perfectly while:
  *
- *   1. an address means the wrong thing (`/admin/brain` resolving to a guessed
+ *   1. an address means the wrong thing (`/admin/overview` resolving to a guessed
  *      environment, or an unknown segment being silently defaulted);
  *   2. a NAV ITEM HAS NO RENDER BRANCH — a nav id declared in the shell with no
  *      `{view === 'x' && …}` branch renders an EMPTY PAGE with no error at all.
@@ -46,7 +46,10 @@ try {
   /* ── 1. Address → environment + view, and BACK (round-trip, fail-closed) ── */
   const declared = [
     ['/admin/overview', 'admin', 'overview'],
-    ['/admin/brain', 'admin', 'brain'],
+    /* §BATCH 4 (2026-10-10) — REPOINTED: `['/admin/brain','admin','brain']` is
+       REMOVED with the surface. `/admin/brain` still PARSES (product paths are
+       slug-generic) but names no view the admin shell renders, so it resolves to
+       the default view — pinned as an absence assertion below. */
     ['/brand/logistics', 'brand', 'logistics'],
     ['/brand/purchase-orders', 'brand', 'purchase-orders'],
     /* §P9 (programme decision 4) — REPOINTED: `['/carrier/bak','carrier','bak']`
@@ -75,6 +78,16 @@ try {
     check(`default view for ${env} is declared`,
       typeof routes.PRODUCT_DEFAULT_VIEW[env] === 'string' && routes.PRODUCT_DEFAULT_VIEW[env].length > 0);
   }
+
+  /* §BATCH 4 (2026-10-10) — THE REMOVED BRAIN DESTINATION IS NOT RENDERABLE.
+     `parseProductPath('/admin/brain')` still returns a {environment,view} object
+     (product paths are slug-generic), so the truth is asserted where it belongs:
+     'brain' must not be a view the ADMIN shell declares, which is what makes
+     `resolveProductView` fall back to the default view instead of rendering a
+     blank workspace. If the destination returns, this FAILS. */
+  const adminShellBrainSrc = read('src/components/layout/AdminShell.tsx');
+  check("§BATCH4 the removed 'brain' destination is NOT a declared admin nav id",
+    !/id:\s*'brain'/.test(adminShellBrainSrc.replace(/\/\*[\s\S]*?\*\//g, '')));
 
   /* §P9 — THE REMOVED CARRIER ADDRESSES MUST NOT RESOLVE (fail-closed). */
   for (const p of ['/carrier', '/carrier/manifest', '/carrier/bak', '/carrier/auditor']) {

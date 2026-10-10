@@ -1630,6 +1630,39 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
   ];
 
   /**
+   * §BATCH 4 (2026-10-10) — MERCENTA BRAIN REMOVAL (Part 2.5). The owner
+   * instructed the Mercenta Brain's COMPLETE removal. Same mechanism as every
+   * phase above: a changed source/test file outside EVERY declared set is still
+   * refused. The deleted modules, the two shells that mounted them, and the
+   * validators/specs repointed into absence guards are named here.
+   */
+  const BATCH4_BRAIN_REMOVAL_DECLARED = [
+    'src/components/admin/MercentaBrain.tsx',
+    'src/components/brand/BrandRelationshipMap.tsx',
+    'src/components/shared/brain/',
+    'src/lib/intelligence/brain/',
+    'src/lib/hooks/useWebglPalette.ts',
+    'src/lib/hooks/usePrefersReducedMotion.ts',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/lib/domain/canonicalSignal.ts',
+    'src/lib/logistics/operationsMap.ts',
+    'src/App.tsx',
+    'src/data/demoStore.ts',
+    'src/data/prospectStore.ts',
+    'e2e/mercenta-brain.spec.ts',
+    'e2e/accessibility.spec.ts',
+    'e2e/redesign-surfaces.spec.ts',
+    'e2e/runtime-entry.spec.ts',
+    'e2e/canonical-propagation.spec.ts',
+    'tsconfig.node.json',
+    'scripts/reconcile-mercenta-brain-registry.cjs',
+    'scripts/reconcile-mercenta-brain-removal-registry.cjs',
+    'scripts/reconcile-canonical-propagation-registry.cjs',
+    'scripts/reconcile-admin-shell-chunk-registry.cjs',
+  ];
+
+  /**
    * §P6 — PO DOCUMENT PACK PHASE DECLARED SURFACE (2026-09-23, programme
    * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P6).
    *
@@ -2141,7 +2174,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
           !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §PHASE 10 — the UK opportunity states at scale's declared surface. */
           !PHASE10_UK_OPPORTUNITY_STATES_DECLARED.includes(f) &&
-          !PHASE10_UK_OPPORTUNITY_STATES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !PHASE10_UK_OPPORTUNITY_STATES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 4 (2026-10-10) — THE MERCENTA BRAIN REMOVAL. This phase DELETES
+           * files under the PROTECTED `src/lib/intelligence/` prefix
+           * (`src/lib/intelligence/brain/`), so its surface is DECLARED here exactly as
+           * every earlier phase's is (see `.clinerules/defect-remediation.md`). An
+           * UNEXPLAINED protected change still fails.
+           */
+          !BATCH4_BRAIN_REMOVAL_DECLARED.includes(f) &&
+          !BATCH4_BRAIN_REMOVAL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2279,6 +2321,8 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     ...P5_DESTINATION_FC_DECLARED,
     // §BATCH 3 (2026-10-10) — the logistics map + hero removals (see declaration above).
     ...BATCH3_LOGISTICS_REMOVALS_DECLARED,
+    // §BATCH 4 (2026-10-10) — the Mercenta Brain removal (see declaration above).
+    ...BATCH4_BRAIN_REMOVAL_DECLARED,
     /**
      * §P6 — REPOINTED (not weakened). The PO-document-pack phase's declared surface
      * is accepted here exactly as every earlier phase's is; a changed source/test

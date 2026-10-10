@@ -1,9 +1,9 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
-> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2) and BATCH 3 (Parts 2.3 + 2.4) BUILT AND TESTED
-> (session 125, 2026-10-10) — Parts 2.5–2.6 and 3–6 remain PLANNED, NOT STARTED.**
+> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4) and BATCH 4 (Part 2.5, the
+> Mercenta Brain) BUILT AND TESTED (session 125, 2026-10-10) — Parts 2.6 and 3–6 remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 4**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 5**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -47,7 +47,7 @@
 
 ## PART 2 — REMOVALS (each with its absence guard)
 
-> **2.1, 2.2 (Batch 2) and 2.3, 2.4 (Batch 3) are ✅ DONE (session 125, 2026-10-10); 2.5 – 2.6 remain.**
+> **2.1, 2.2 (Batch 2), 2.3, 2.4 (Batch 3) and 2.5 (Batch 4) are ✅ DONE (session 125, 2026-10-10); 2.6 remains.**
 > Each removal was repointed into an ABSENCE GUARD (rule 08) and mutation-proved (re-introduce → FAIL →
 > restore byte-identical).
 
@@ -74,7 +74,8 @@
   `src/config/logisticsHero.ts`, `src/data/logisticsHeroGeo.ts`, `scripts/build-logistics-hero-geo.mjs`,
   `scripts/validate-logistics-hero.mjs`, `e2e/logistics-hero.spec.ts`, and the `.geo-cache/` it built (plus its
   `.gitignore` block and its two `package.json` scripts). The hero mount + `heroLegs` left `LogisticsHub.tsx`.
-- **2.5 — MERCENTA BRAIN, COMPLETELY** (owner directive: it serves no purpose): `src/components/admin/MercentaBrain.tsx`;
+- **2.5 — MERCENTA BRAIN, COMPLETELY. ✅ DONE (Batch 4, session 125, 2026-10-10).**
+  (owner directive: it serves no purpose) DELETED: `src/components/admin/MercentaBrain.tsx`;
   `src/components/shared/brain/` (BrainCanvas, BrainCanvas3D, BrainScene); `src/lib/intelligence/brain/`
   (buildGraph, layout, layout3d, project, types); `src/components/brand/BrandRelationshipMap.tsx` + its
   import/mount in `BrandIntelligence.tsx` (**this one component is BOTH of the owner's requests #1 and #7** —
@@ -85,6 +86,21 @@
   `demoStore.ts:234/468/510`, `prospectStore.ts:115`, `canonicalSignal.ts:6/16`).
   **Side effect: the filed patrol issue `iss_f301a06913ba` (Brain WebGL crash + stale error card) is resolved by
   removal — nothing to fix.**
+  **DONE (Batch 4):** 13 files DELETED (the surface, 3 renderers, the 5 graph modules, the brand relationship
+  graph, the 2 Brain-only hooks and the runtime harness); `AdminShell.tsx` lost the lazy import, nav item,
+  Super-Admin allowlist entry, breadcrumb and render branch; `BrandIntelligence.tsx` lost the graph mount; the
+  seven stale "Brain as a live projection" comments were repointed (`App.tsx`, `demoStore.ts` ×3,
+  `prospectStore.ts`, `canonicalSignal.ts` ×2, `operationsMap.ts` — one MORE than the six this plan named);
+  `validate-mercenta-brain.mjs` REWRITTEN as an 18-assertion ABSENCE guard; `e2e/mercenta-brain.spec.ts`
+  rewritten as a 4-test browser absence guard; `validate-canonical-propagation` (S4/R2), `validate-product-routes`,
+  `validate-functional-parity` (F4b), `validate-admin-shell-bundle`, `validate-typecheck-coverage`,
+  `verify-live-demo` (L26) and the E6/E7 scope unions all repointed; the 11 `op-brain-*` scenario rows removed and
+  the matrix regenerated; 9 registry rows marked `removed` + 7 citations repointed; 3 docs bannered SUPERSEDED; the
+  two old reconcile tools neutralised. **Defect found and FIXED at source (rule 07):**
+  `e2e/canonical-propagation.spec.ts` still drove the map testids DELETED in Batch 3 (`admin-logistics-map`,
+  `logistics-map`, `data-visible-count`) — an inherited defect that would have failed — now repointed to the
+  canonical consignment list. Guards mutation-proved (source guard: re-created module → FAIL 1/18 + propagation
+  20/22 → removed → 18/18 + 22/22; browser guard: nav item re-added → 2 FAILED → removed → 4 passed).
 - **2.6 — MERCENTA SOCIAL, COMPLETELY** (owner directive: remove everything): `src/config/mercentaSocial.ts`;
   `src/components/brand/MercentaSocial.tsx`; `BrandSocialConnect.tsx`; the `social` nav item + route + breadcrumb
   in `BrandShell.tsx`; `supabase/functions/social-session/`; `scripts/social-sso/server.mjs`; the service in
@@ -141,7 +157,7 @@
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
-Batches 1, 2 and 3 are DONE (session 125, 2026-10-10). **Next: Batch 4 (2.5, Mercenta Brain).**
+Batches 1, 2, 3 and 4 are DONE (session 125, 2026-10-10). **Next: Batch 5 (2.6, Mercenta Social).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

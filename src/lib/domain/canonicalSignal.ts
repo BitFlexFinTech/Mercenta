@@ -3,18 +3,22 @@
  *
  * WHY THIS MODULE EXISTS
  * ----------------------
- * Every projection in this platform (Mercenta Brain, the Logistics operational
- * map, dashboards, work layer, attention lists) is derived from the SAME
+ * Every projection in this platform (the logistics list and inspector, the
+ * dashboards, the work layer, attention lists) is derived from the SAME
  * canonical stores. A projection is only genuinely DYNAMIC when a change to a
  * canonical object is observable without a page reload — i.e. when the mutation
  * tells the projections that something changed.
+ *
+ * §BATCH 4 (2026-10-10) — REPOINTED. The Mercenta Brain (an earlier projection
+ * that read this signal) was removed by owner instruction, so it is no longer
+ * named here; the signal and its consumers are unchanged.
  *
  * Before this module the platform had a change signal, but it lived inside
  * `prospectStore` (a Brand-Intelligence-specific module), was fired by only a
  * handful of mutation paths, and was consumed by only a few BI/ICP panels. The
  * measured consequence: **17 modules / 39 mutation sites** changed canonical
- * state silently, and neither the Brain nor the logistics queries subscribed at
- * all — so both surfaces showed a snapshot taken at mount even though their
+ * state silently, and the logistics queries did not subscribe at
+ * all — so the surfaces showed a snapshot taken at mount even though their
  * rendering was a pure projection of canonical data.
  *
  * THE CONTRACT

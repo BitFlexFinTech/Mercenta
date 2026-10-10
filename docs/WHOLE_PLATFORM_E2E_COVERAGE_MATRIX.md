@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 427 · **Capabilities:** 8
+**Scenarios:** 416 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -30,7 +30,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | founder | 49 |
 | integrations | 22 |
 | onboarding_acquisition | 58 |
-| operations | 57 |
+| operations | 46 |
 | platform | 78 |
 
 ## Scenarios
@@ -192,17 +192,6 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | op-bi-internal-notes-audited | operations | super_admin | happy | `e2e/workstream-b-intelligence.spec.ts` | `4. Internal notes editor saves via the canonical store with an audited lifecycle event` |
 | op-bi-non-super-denied | operations | mercenta_admin | refusal | `e2e/workstream-b-intelligence.spec.ts` | `2. Non-Super staff are denied the proprietary BI surface (nav hidden, not merely relabelled)` |
 | op-bi-super-admin-full-surface | operations | super_admin | happy | `e2e/workstream-b-intelligence.spec.ts` | `1. Super Admin sees the full proprietary BI surface incl. Product Discovery + Regional Priority` |
-| op-brain-empty-state-honest | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `3. a no-match filter shows an honest empty state` |
-| op-brain-entity-inspector | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `4. selecting an entity shows its detail, provenance, authority and relationships` |
-| op-brain-entity-list-keyboard | operations | super_admin | a11y | `e2e/mercenta-brain.spec.ts` | `6. the entity list is the keyboard-accessible equivalent` |
-| op-brain-filters-truthful-total | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `2. filters change the rendered set and the total stays truthful` |
-| op-brain-kpi-drilldown | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `11. every KPI tile drills down into the set it counts (part 2b interactivity)` |
-| op-brain-operating-graph-counts | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `1. renders the real operating graph with domain-derived counts` |
-| op-brain-reduced-motion | operations | super_admin | a11y | `e2e/mercenta-brain.spec.ts` | `9. reduced motion is honoured without breaking rendering` |
-| op-brain-relationship-reselect | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `5. relationship inspection re-selects the related entity` |
-| op-brain-responsive-no-overflow | operations | super_admin | responsive | `e2e/mercenta-brain.spec.ts` | `8. responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390` |
-| op-brain-tenant-boundary-brand-map | operations | brand_user | refusal | `e2e/mercenta-brain.spec.ts` | `10. tenant boundary: a brand sees its own map, never the Brain` |
-| op-brain-zoom-controls | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `7. zoom controls work and the graph stays usable` |
 | op-case-full-lifecycle | operations | mercenta_admin | happy | `e2e/brand-case-workflow.spec.ts` | `2. brand → Mercenta review → escalation (simulated) → response → resolution → brand` |
 | op-case-sufficiency-gate | operations | brand_user | refusal | `e2e/brand-case-workflow.spec.ts` | `1. the brand-visible sufficiency gate fails closed, then opens on its own record` |
 | op-case-tenant-isolation | operations | brand_user | refusal | `e2e/brand-case-workflow.spec.ts` | `3. tenant isolation — another brand never sees this brand’s case` |

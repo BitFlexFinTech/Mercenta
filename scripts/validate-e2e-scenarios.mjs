@@ -147,11 +147,12 @@ if (c) {
    * the auto-seeded `spec-*` rows.
    *
    * §E2E-7 — the SAME obligation is extended to the operations domain
-   * (`op-*`: the work layer · the command centre · Mercenta Brain · channel-read
-   * ingestion & auto-fulfilment · guided tours · brand-intelligence boundaries),
-   * so each enumerated scenario there is pinned to the real test that proves it.
-   * The self-check below now asserts the prefix set covers ALL SEVEN enumerated
-   * domains and never the auto-seeded `spec-*` rows.
+   * (`op-*`: the work layer · the command centre · channel-read
+   * ingestion & auto-fulfilment · guided tours · brand-intelligence boundaries;
+   * the Mercenta Brain's ten scenarios were REMOVED with the surface in §BATCH 4,
+   * 2026-10-10), so each enumerated scenario there is pinned to the real test that
+   * proves it. The self-check below now asserts the prefix set covers ALL SEVEN
+   * enumerated domains and never the auto-seeded `spec-*` rows.
    *
    * §E2E-8 — the SAME obligation is extended to the integrations domain
    * (`in-*`: the Integration Settings hub · Mercenta Social & its automatic

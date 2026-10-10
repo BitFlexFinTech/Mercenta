@@ -8,7 +8,6 @@ import { Card } from '@/components/ui';
 import { getProspects } from '@/data/prospectStore';
 import { APPROVED_CATEGORIES } from '@/types';
 import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
-import { BrandRelationshipMap } from '@/components/brand/BrandRelationshipMap';
 import { Package, ArrowUpRight } from 'lucide-react';
 import {
   ContextPanel,
@@ -173,11 +172,10 @@ export function BrandIntelligence() {
 
       <MetricBand items={metrics} columns={4} />
 
-      {/* §Brand Intelligence — the tenant-scoped relationship experience. It is
-          built by the SAME relationship builder as the Mercenta Brain, but with
-          a brand scope, so it can never expose another tenant, a prospect or
-          Mercenta-internal machinery. */}
-      <BrandRelationshipMap />
+      {/* §BATCH 4 (2026-10-10) — REMOVED: the tenant-scoped relationship graph
+          (`BrandRelationshipMap`). It was the same relationship builder as the
+          Mercenta Brain, which the owner instructed us to remove completely.
+          Its absence is guarded by `scripts/validate-mercenta-brain.mjs`. */}
 
       {(detail === 'none' || detail === 'competitors') && (
       <WorkspaceSection

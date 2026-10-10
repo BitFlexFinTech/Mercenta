@@ -59,17 +59,15 @@ test.describe('Redesign surfaces — responsive verification (admin)', () => {
     }
   });
 
-  test('Mercenta Brain holds at every target width', async ({ page }) => {
+  test('the removed Mercenta Brain is no longer a responsive surface', async ({ page }) => {
+    /* §BATCH 4 (2026-10-10) — REPOINTED, not deleted (rule 08). This sweep used to
+       measure the Brain at every target width. The Brain was removed by owner
+       instruction, so there is nothing to measure; its ABSENCE is asserted and
+       the remaining surfaces keep their full width sweeps. */
     await loginAs(page, 'Super Admin — Tadii', 1400);
-    await page.locator('nav[aria-label="Primary"]').getByRole('button', { name: 'Mercenta Brain' }).first().click();
-    await page.getByTestId('brain-counts').waitFor({ timeout: 12000 });
-    for (const { w, h } of WIDTHS) {
-      await page.setViewportSize({ width: w, height: h });
-      await assertNoOverflow(page, 'brain', w);
-      if (w === 1440 || w === 390) {
-        await page.screenshot({ path: `${SHOTS}/brain-${w}.png`, fullPage: false });
-      }
-    }
+    await expect(
+      page.locator('nav[aria-label="Primary"]').getByRole('button', { name: 'Mercenta Brain' })
+    ).toHaveCount(0);
   });
 
   test('Helpdesk holds at desktop and mobile widths', async ({ page }) => {

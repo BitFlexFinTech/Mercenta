@@ -26,6 +26,74 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 4 — THE MERCENTA BRAIN REMOVED, COMPLETELY (session 125, 2026-10-10)
+
+The recorded NEXT TASK was Batch 4 (Part 2.5) of `docs/NEXT_BUILD_PLAN_2026-10-10.md`. The owner's directive is
+explicit ("the Mercenta Brain serves no purpose"), so it was removed COMPLETELY — not hidden, not disabled. This asks
+for more than deleting a folder: global rule 08 (**removal coherence**) requires EVERY dependent to be updated in the
+same change, and every check that asserted the removed thing to be REWRITTEN into an ABSENCE GUARD (never deleted,
+never weakened) and PROVED ABLE TO FAIL.
+
+1. **DELETED — the whole surface and its machinery (13 files).** `src/components/admin/MercentaBrain.tsx`;
+   `src/components/shared/brain/` (BrainCanvas, BrainCanvas3D, BrainScene); `src/lib/intelligence/brain/`
+   (buildGraph, layout, layout3d, project, types); `src/components/brand/BrandRelationshipMap.tsx`; the two
+   Brain-only hooks `src/lib/hooks/useWebglPalette.ts` and `src/lib/hooks/usePrefersReducedMotion.ts` (verified by a
+   repo-wide search to have NO other reader); and the runtime harness `scripts/brain-runtime-check.ts`. The
+   generated `.bugpatrol` routines for the removed screen were deleted too (gitignored).
+2. **REPOINTED — every mount point.** `AdminShell.tsx` lost the lazy import, the `brain` nav item, its
+   Super-Admin allowlist entry, its breadcrumb and its render branch (each with an inline `§BATCH 4 — REMOVED`
+   record); `BrandIntelligence.tsx` lost the relationship-graph import and mount; the seven stale "the Brain is a
+   live projection" comments were repointed (`App.tsx`, `demoStore.ts` ×3, `prospectStore.ts`, `canonicalSignal.ts`
+   ×2, `operationsMap.ts` — one MORE than the six the plan named, catching a stale comparison the plan missed).
+3. **KEPT, because something still reads them (verified, not assumed).** `src/lib/domain/canonicalSignal.ts` (the
+   ONE "the domain changed" notifier) and `src/lib/logistics/operationsMap.ts` (the consignment truth/geometry
+   derivation) are still consumed by the logistics surfaces, the dashboards and the work layer — so only their
+   Brain-specific comments changed. Deleting them would have removed working behaviour.
+4. **THE GUARDS — rewritten into ABSENCE guards and WIRED INTO THE STANDARD COMMAND.**
+   `scripts/validate-mercenta-brain.mjs` is no longer a contract validator: it is now an **18-assertion absence
+   guard** (`MERCENTA_BRAIN_ABSENCE_GUARD_PASS`) that fails if the surface, its modules, its testids, its imports,
+   the nav destination, a reconcile tool's re-introduction, or an ACTIVE registry citation returns. It keeps its
+   filename and its `npm run validate:brain` entry, and `scripts/validate-all.sh` globs it, so it runs on every
+   ordinary check. `e2e/mercenta-brain.spec.ts` was rewritten as a 4-test BROWSER absence guard. Also repointed:
+   `validate-canonical-propagation` (S4 absence + R2 proof that the module cannot even be loaded),
+   `validate-product-routes` (the removed destination is not a renderable admin view), `validate-functional-parity`
+   (F4b), `validate-admin-shell-bundle` (the heavy-panel list), `validate-typecheck-coverage` (the deleted stray
+   `.ts`), `scripts/verify-live-demo.mjs` (L26 is now a LIVE Brain-absence probe), and the E6/E7 scope unions.
+5. **MUTATION-PROVED — both guards shown able to FAIL.** (a) SOURCE: a temporary
+   `src/lib/intelligence/brain/buildGraph.ts` was created → the absence guard FAILED `(1 of 18)` and
+   `validate-canonical-propagation` FAILED `20 PASS / 2 FAIL` (S4 + R2) → the file was removed → **18/18** and
+   **22/22**. (b) BROWSER: the `brain` nav item was temporarily put back in `AdminShell.tsx` →
+   `e2e/mercenta-brain.spec.ts` **2 failed** → the item was removed → **4 passed**.
+
+6. **DATA — the catalogue, matrix, registry and docs.** The 11 `op-brain-*` scenario rows were removed and
+   `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` regenerated (`npm run catalogue:e2e`, 416 scenarios, gate 16/16);
+   **9 registry rows** were set `removed` and **7 citations** repointed by a committed tool
+   (`scripts/reconcile-mercenta-brain-removal-registry.cjs`), with `_meta.status_counts` recomputed FROM THE
+   ENTRIES (it was already stale) — and the two older reconcile tools that would have re-introduced deleted-file
+   citations were NEUTRALISED (they refuse to run without an explicit env flag). `docs/MERCENTA_BRAIN_2026-09-21.md`,
+   `RUNTIME_PARITY_PLAN_2026-09-21.md` and `CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` carry SUPERSEDED banners;
+   the master matrix marks D26 removed; the audit's Brain row is marked REMOVED.
+7. **DEFECTS FOUND AND FIXED AT SOURCE (rule 07 — never merely reported).**
+   (a) **INHERITED, from Batch 3:** `e2e/canonical-propagation.spec.ts` still drove testids the map removal DELETED
+   (`admin-logistics-map`, `logistics-map`, `data-visible-count`) — it would have failed on the next run; repointed to
+   the canonical consignment list. (b) **THIS PHASE'S OWN:** `validate-typecheck-coverage`'s new assertion tested the
+   raw `tsconfig.node.json`, so the §BATCH 4 repoint COMMENT naming the deleted file made it fail — a gate fooled by
+   its own documentation; it now strips comments before matching (the same fix the original validators already use).
+   (c) In E7 the first draft added the new clause with `||` inside an all-`&&` chain, which silently changed the
+   guard's meaning; caught by running it and corrected to `&&`.
+8. **THE PROTECTED-PATH DECLARATION.** The deletion touches the PROTECTED `src/lib/intelligence/` prefix in the
+   E6/E7 scope guards. Per `.clinerules/defect-remediation.md` the fix is the documented, reviewable DECLARATION —
+   added to E6's F5/F5b/F6 and E7's F5/protected checks, with the guards still refusing any UNDECLARED protected
+   change. No protected production path (SP-API, DHL, Xero, invoice, migrations, deploy) was touched.
+9. **VERIFICATION.** `npm run typecheck` **0** (four projects) · `npm run lint` **0** · `npm run build` **ok** ·
+   `npm run validate:all` **188 PASS / 0 FAIL** · `validate-registry-integrity` **7 PASS / 0 FAIL** · browser: the five
+   affected specs (`mercenta-brain`, `canonical-propagation`, `runtime-entry`, `redesign-surfaces`, `accessibility`)
+   **57 passed** in real Chromium. The GitHub push, the demo deploy and the live verification run in this session's
+   close-out and are recorded in the resume block.
+10. **CHECKPOINT / STATE.** All five state sources updated in this session; NEXT TASK is **BATCH 5 (Part 2.6,
+    Mercenta Social)**.
+
+
 ## §BATCH 3 — THE OPERATIONAL MAP + THE LOGISTICS HERO REMOVED (session 125, 2026-10-10)
 
 The recorded NEXT TASK was Batch 3 (Parts 2.3 + 2.4) of `docs/NEXT_BUILD_PLAN_2026-10-10.md`. Both parts were

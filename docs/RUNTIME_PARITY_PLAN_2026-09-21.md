@@ -1,5 +1,13 @@
 # RUNTIME PARITY PLAN — make the new product the runtime reached by `npm run dev`
 
+> ## ⚠ NOTE (§BATCH 4, 2026-10-10) — SOME REFERENCES BELOW ARE HISTORICAL
+> This is a dated plan record (2026-09-21) and is preserved as history. Every reference it makes to the **Mercenta
+> Brain** (the `brain-canvas` proof, the `admin nav → Mercenta Brain` row, `/admin/brain` as a cold-load proof, the
+> `BrandRelationshipMap` table row) describes a surface **REMOVED on 2026-10-10** by owner instruction
+> (`docs/NEXT_BUILD_PLAN_2026-10-10.md` Part 2.5). The parity mechanisms the plan introduced (the address layer, the
+> runtime-entry spec, fail-closed routing) are **unchanged and still live**; only the Brain references are historical.
+
+
 > **Status: EXECUTED — R1 → R5 COMPLETE (2026-09-21, session 5).**
 > Written 2026-09-21 on branch `redesign/foundation` (HEAD `22b6b62`) as a PLAN-ONLY deliverable, then executed in the
 > following session on the SAME branch with the dirty Founder worktree **preserved**. The Founder brief for the

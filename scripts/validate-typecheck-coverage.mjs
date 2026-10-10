@@ -3,15 +3,18 @@
 // WHY THIS EXISTS
 // ---------------
 // 121 TypeScript files OUTSIDE `src` belonged to NO TypeScript project: 96 under
-// `e2e/`, 23 under `supabase/functions/`, plus `playwright.config.ts` and
-// `scripts/brain-runtime-check.ts`. The editor therefore checked them with wrong
+// `e2e/`, 23 under `supabase/functions/`, plus `playwright.config.ts` and a stray
+// `scripts/brain-runtime-check.ts` (since DELETED with the Mercenta Brain — see
+// §BATCH 4 below). The editor therefore checked them with wrong
 // defaults and invented ~178 problems, and `npm run typecheck` NEVER checked them
 // at all — a real error there could ship unnoticed.
 //
 // THE FIX (this file guards it):
 //   * `tsconfig.e2e.json`        — the Playwright browser-test project
 //   * `tsconfig.functions.json`  — the Supabase Edge Function project
-//   * `tsconfig.node.json`       — now also covers `scripts/brain-runtime-check.ts`
+//   * `tsconfig.node.json`       — covered the stray `scripts/brain-runtime-check.ts`
+//                                  (§BATCH 4: that file is deleted, so the mapping
+//                                   and the include are gone — see below)
 //   all referenced from the root `tsconfig.json`, and `npm run typecheck` runs
 //   every one of them.
 //
@@ -81,8 +84,17 @@ const nodeCfg = exists('tsconfig.node.json') ? read('tsconfig.node.json') : '';
 test('the e2e project includes the e2e/ folder', /"e2e"/.test(e2eCfg), e2eCfg);
 test('the e2e project includes playwright.config.ts', /playwright\.config\.ts/.test(e2eCfg), e2eCfg);
 test('the functions project includes supabase/functions', /supabase\/functions/.test(fnCfg), fnCfg);
-test('the tooling project includes scripts/brain-runtime-check.ts',
-  /brain-runtime-check\.ts/.test(nodeCfg), nodeCfg);
+/* §BATCH 4 (2026-10-10) — REPOINTED into an ABSENCE guard (rule 08). This
+   assertion used to REQUIRE the tooling project to include the one stray
+   `scripts/brain-runtime-check.ts`. That file exercised the Mercenta Brain, which
+   the owner instructed us to remove, so it is DELETED and must not be referenced
+   here again (a stale include would make `npm run typecheck` fail on a missing
+   file — exactly the drift this whole gate exists to catch). */
+test('the tooling project no longer references the removed scripts/brain-runtime-check.ts',
+  /* test the CODE, not the file's prose: the §BATCH 4 repoint comment necessarily
+     names the removed file, and a gate that fails on its own documentation is a
+     broken gate (the same reason the original validators strip comments). */
+  !/brain-runtime-check\.ts/.test(nodeCfg.replace(/\/\*[\s\S]*?\*\//g, '')), nodeCfg);
 
 /* ── 5. the ambient Edge-runtime types exist and declare the Deno surface ── */
 const AMBIENT = 'supabase/functions/_types/edge-runtime.d.ts';
@@ -100,7 +112,7 @@ test(`the e2e folder holds its browser specs (${e2eTs.length} .ts files)`, e2eTs
 test(`the Edge Function folder holds its functions (${fnTs.length} .ts files)`, fnTs.length > 15,
   `found ${fnTs.length}`);
 test('playwright.config.ts exists at the root', exists('playwright.config.ts'));
-test('scripts/brain-runtime-check.ts exists', exists('scripts/brain-runtime-check.ts'));
+test('§BATCH4 the removed scripts/brain-runtime-check.ts is GONE', !exists('scripts/brain-runtime-check.ts'));
 
 /* ── 7. the editor root — the committed pin (half 2 of rule 09) ──────────── */
 // WHY: coverage (above) fixes what the command line checks; it does NOT stop the
@@ -116,9 +128,12 @@ test('the editor is told to use the workspace TypeScript without prompting',
   /"typescript\.enablePromptUseWorkspaceTsdk"\s*:\s*true/.test(vs), vs);
 
 /* ── summary ────────────────────────────────────────────────────────────── */
-const covered = e2eTs.length + fnTs.length + 2; // + playwright.config.ts + brain-runtime-check.ts
+/* §BATCH 4 (2026-10-10) — the former `+ 2` also counted
+   `scripts/brain-runtime-check.ts`, which is now deleted; only
+   `playwright.config.ts` remains. */
+const covered = e2eTs.length + fnTs.length + 1; // + playwright.config.ts
 console.log('');
-console.log(`TypeScript files OUTSIDE src now covered by a project: ${covered} (${e2eTs.length} e2e · ${fnTs.length} functions · playwright.config.ts · scripts/brain-runtime-check.ts)`);
+console.log(`TypeScript files OUTSIDE src now covered by a project: ${covered} (${e2eTs.length} e2e · ${fnTs.length} functions · playwright.config.ts)`);
 console.log(`Assertions run: ${checks} · failures: ${failures}`);
 console.log(failures === 0 ? 'TYPECHECK_COVERAGE_VALIDATION_PASS' : `TYPECHECK_COVERAGE_VALIDATION_FAIL (${failures})`);
 process.exit(failures === 0 ? 0 : 1);

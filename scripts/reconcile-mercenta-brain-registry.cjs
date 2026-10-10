@@ -16,6 +16,33 @@ const path = 'requirements-registry.json';
 const reg = JSON.parse(fs.readFileSync(path, 'utf8'));
 const byId = (id) => reg.entries.find((e) => e.id === id);
 
+/**
+ * §BATCH 4 (2026-10-10) — SUPERSEDED, AND GUARDED AGAINST REGRESSION.
+ *
+ * This tool's rows described the MERCENTA BRAIN, which the owner instructed us to
+ * REMOVE COMPLETELY ("it serves no purpose"). Its `evidence` strings therefore
+ * name DELETED modules (`src/lib/intelligence/brain/*`,
+ * `src/components/shared/brain/*`, `src/components/admin/MercentaBrain.tsx`) and
+ * a DELETED harness (`scripts/brain-runtime-check.ts`) — and because the script
+ * REFRESHES a row's evidence when it differs, re-running it would OVERWRITE the
+ * reconciled rows in `requirements-registry.json` and re-introduce citations of
+ * deleted files.
+ *
+ * It is kept (history is never deleted) but REFUSES to run by default: its rows
+ * are now recorded as `removed` (or repointed) by hand, and the Brain's ABSENCE
+ * is guarded by `scripts/validate-mercenta-brain.mjs` (rewritten into an absence
+ * guard, rule 08), which fails if any part of the Brain returns.
+ */
+if (!process.env.ALLOW_SUPERSEDED_MERCENTA_BRAIN_RECONCILE) {
+  console.error(
+    'reconcile-mercenta-brain-registry.cjs — SUPERSEDED by §BATCH 4 (2026-10-10): the Mercenta Brain was removed.\n' +
+      'Its rows are reconciled in requirements-registry.json (status "removed" / repointed) and guarded by\n' +
+      'scripts/validate-mercenta-brain.mjs. Re-running would re-introduce citations of deleted files.\n' +
+      'Set ALLOW_SUPERSEDED_MERCENTA_BRAIN_RECONCILE=1 only if you have read that and still intend to run it.'
+  );
+  process.exit(1);
+}
+
 const NEW = [
   {
     id: 'mercenta-brain-entity-model',

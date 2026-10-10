@@ -714,9 +714,16 @@ script refuses to write otherwise.
 
 ---
 
-## 26. D26 — MERCENTA BRAIN (added 2026-09-21)
+## 26. D26 — MERCENTA BRAIN — **REMOVED (§BATCH 4, 2026-10-10)** (added 2026-09-21)
 
-**What it is:** the platform's third information-architecture destination — "how is everything connected, what do
+> **§BATCH 4 (2026-10-10) — REMOVED.** The owner instructed the Mercenta Brain's complete removal ("it serves no
+> purpose"). The surface, its graph modules, its renderers, the brand relationship graph (`BrandRelationshipMap`) and
+> the two Brain-only hooks were DELETED; `AdminShell.tsx` no longer declares the destination. This section is kept as
+> the historical record of the capability; the absence is guarded by `scripts/validate-mercenta-brain.mjs` (rewritten
+> as an absence guard, rule 08), `e2e/mercenta-brain.spec.ts`, `scripts/validate-canonical-propagation.mjs` and the
+> L26 live probe. Everything below describes the surface **as it was**.
+
+**What it was:** the platform's third information-architecture destination — "how is everything connected, what do
 we know, and why?" — implemented as a first-class interactive product surface. It is a **projection** of the
 canonical domain: it owns no business state and mutates nothing.
 
@@ -737,11 +744,13 @@ canonical domain: it owns no business state and mutates nothing.
 | Evidence | `e2e/mercenta-brain.spec.ts` (10 passed / 0 failed, executed) · `scripts/validate-mercenta-brain.mjs` (30 assertions + runtime, PASS) |
 | Status | **VERIFIED** (browser-executed this session) |
 
-**Brand counterpart — tenant-scoped relationship map.** `src/components/brand/BrandRelationshipMap.tsx`, a section
-of Brand Intelligence, built by the SAME builder with `scope: { kind: 'brand', tenantId }`. The brand branch never
-runs the platform/policy/decision/automation/agent/acquisition layers; an unknown tenant fails closed. Verified
-tenant-scoped (39 records / 42 relationships for `brand-astonish`; no leaked kind, no leaked tenant) by
-`e2e/mercenta-brain.spec.ts` test 10 — **executed**.
+**Brand counterpart — tenant-scoped relationship map — REMOVED (§BATCH 4, 2026-10-10).**
+`src/components/brand/BrandRelationshipMap.tsx` was a section of Brand Intelligence, built by the SAME builder with
+`scope: { kind: 'brand', tenantId }`, and was DELETED with the Brain. Brand Intelligence keeps its Market Intel
+content; its relationship graph is gone (guarded by `scripts/validate-mercenta-brain.mjs`). The historical record:
+the brand branch never ran the platform/policy/decision/automation/agent/acquisition layers; an unknown tenant failed
+closed; and it was verified tenant-scoped (39 records / 42 relationships for `brand-astonish`) by the then-executed
+`e2e/mercenta-brain.spec.ts` test 10.
 
 **Deliberately NOT done by this increment:** the Amazon-truth semantics remain unchanged
 (`docs/AMAZON_RECONCILIATION_STATUS.md`: 52 findings, APPLIED = 0). `src/config/payouts.ts`

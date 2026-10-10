@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-08",
+    "last_updated": "2026-10-10",
     "status_enum": [
       "not_started",
       "built",
@@ -10,7 +10,9 @@
       "regressed",
       "in_progress",
       "deferred",
-      "blocked"
+      "blocked",
+      "removed",
+      "complete"
     ],
     "total_entries": 556,
     "founder_os_sprint": {
@@ -372,11 +374,11 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-5 increment. §CHANGES THIS SESSION: `uiux-wave3-part5-state-redesign` not_started -> built_and_tested (THE STATE PASS: fifteen data-backed surfaces no longer tell the operator they have no data while the data is still loading — found by rendering them in a real browser against a deliberately SLOW data source, fixed at their owners, and gated by a render-level validator PLUS a browser spec, both mutation-proved; the canonical `LoadingState` owner was added to `src/components/ui.tsx` and `DataTable`/`MetricBand`/the shells now render through it). ONE new scenario row `spec-state-coverage` was added to `docs/scenario-catalogue.json` for the new browser spec (the E2E catalogue gate refuses an orphan spec). No row was removed. Recomputed FROM THE ENTRIES THEMSELVES: 341 + 183 + 10 + 5 + 9 + 7 + undefined = 556. Snapshot only.",
-      "built_and_tested": 341,
+      "_note": "Recomputed 2026-10-10 after §BATCH 4 (the Mercenta Brain removal). Snapshot only, derived from the entries: built_and_tested:327, built:183, not_started:10, removed:19, deferred:9, blocked:7, complete:1.",
+      "built_and_tested": 327,
       "built": 183,
       "not_started": 10,
-      "removed": 5,
+      "removed": 19,
       "deferred": 9,
       "blocked": 7,
       "complete": 1
@@ -3232,11 +3234,11 @@
     },
     {
       "id": "uiux-wave4-brain-3d",
-      "description": "Wave 4 — the Mercenta Brain is a GENUINE 3D spatial experience, not a restyled 2D graph: real WebGL rendering (three.js via react-three-fiber), perspective camera with orbit navigation (drei OrbitControls), a spatial wheel of five cluster sectors, depth-stratified records, animated relationships with travelling signals, interactive entity selection with contextual detail, and reduced-motion behaviour. Built by reusing three@0.186.0 (MIT), @react-three/fiber@8.18.0 (MIT) and @react-three/drei@9.122.0 (MIT) — R3F v8 pinned for React 18.3 compatibility. Canonical Brain DATA is unchanged: buildGraph.ts untouched, zero network calls, tenant scoping unchanged.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the 3D Brain renderer). Was: Wave 4 — the Mercenta Brain is a GENUINE 3D spatial experience, not a restyled 2D graph: real WebGL rendering (three.js via react-three-fiber), perspective camera with orbit navigation (drei OrbitControls), a spatial wheel of five cluster sectors, depth-stratified records, animated relationships wit",
       "source": "Full UI/UX redesign — Wave 4 (Brain: genuine 3D). Decision record: docs/archive/UIUX_WAVE4_BRAIN_3D_2026-09-22.md",
-      "status": "built_and_tested",
-      "evidence": "src/components/shared/brain/{BrainCanvas,BrainCanvas3D,BrainScene}.tsx; src/lib/intelligence/brain/{layout3d,project}.ts; src/lib/hooks/useWebglPalette.ts; docs/archive/UIUX_WAVE4_BRAIN_3D_2026-09-22.md; validate-mercenta-brain.mjs PASS (30 assertions, runtime executed, 0 network calls); e2e/mercenta-brain.spec.ts 10 passed; e2e/accessibility.spec.ts 16 passed; e2e/redesign-surfaces.spec.ts 11 passed; e2e/canonical-propagation + runtime-entry 10 passed; tsc exit 0; build exit 0",
-      "last_verified": "2026-09-22",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null,
       "_audit_note": "Replaces the flat 2D SVG BrainCanvas. Three real defects were found by browser measurement (overlapping hit boxes; unreachable off-frustum records; zero positioned targets before the first animation frame) and fixed at the root. The entity layer remains real DOM with the same brain-node-<id> testids, so keyboard/screen-reader access and the acceptance suite survive the move to WebGL."
     },
@@ -5168,65 +5170,65 @@
       "id": "discovered-adminshell-chunk-size",
       "description": "DISCOVERED by a build output: the `AdminShell` chunk was 1,010 kB (263 kB gzip) and the build warned about it, because the admin shell imported all ~34 admin view panels EAGERLY. FIXED (2026-10-05): every panel is now a `React.lazy(() => import(…))` dynamic import rendered inside a `<Suspense>`, so the shell chunk is 16.57 kB (4.83 kB gzip) and a panel's chunk loads only when its view is opened. APP-code splitting only — `node_modules` still lands in the ONE `vendor` chunk required by the §P3 initialisation-cycle fix (asserted here and by validate-production-boot).",
       "status": "built_and_tested",
-      "evidence": "scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — asserts the shell holds NO static import from `@/components/admin/`, declares ≥30 `lazy(() => import(` bindings, renders its switch inside a `<Suspense>`, keeps exactly ONE `vendor` chunk, holds the AdminShell chunk ≤ 300 kB, and splits ≥25 panels (incl. the heaviest, AdminDashboard + MercentaBrain) into their own chunks. PROVED ABLE TO FAIL against the pre-fix bundle (7/9 assertions fail: eager imports, no lazy bindings, no Suspense, 890 kB shell chunk, 0 panel chunks). Browser: e2e/app-shell.spec.ts navigates admin destinations (e.g. `nav >> text=Super Admin`) and therefore loads the lazily-split panel chunks.",
+      "evidence": "scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — asserts the shell holds NO static import from `@/components/admin/`, declares ≥30 `lazy(() => import(` bindings, renders its switch inside a `<Suspense>`, keeps exactly ONE `vendor` chunk, holds the AdminShell chunk ≤ 300 kB, and splits ≥25 panels (incl. the heaviest, AdminDashboard — §BATCH 4 removed the former second heavy panel, MercentaBrain) into their own chunks. PROVED ABLE TO FAIL against the pre-fix bundle (7/9 assertions fail: eager imports, no lazy bindings, no Suspense, 890 kB shell chunk, 0 panel chunks). Browser: e2e/app-shell.spec.ts navigates admin destinations (e.g. `nav >> text=Super Admin`) and therefore loads the lazily-split panel chunks.",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20",
-      "last_verified": "2026-10-05",
+      "last_verified": "2026-10-10",
       "superseded_by": null,
       "_audit_note": "§ADMIN-SHELL-CHUNK (2026-10-05) — STATUS RAISED not_started -> built_and_tested (old value recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"DISCOVERED by this session s own build output: the `AdminShell` chunk is 1,010 kB (263 kB gzip) and the build warns about it. A real performance finding, owned separately — it was NOT introduced by this increment and was NOT addressed by it\". OLD evidence: \"`npm run build` output (AdminShell-DuA4e77W.js 1,009.90 kB, gzip 263.82 kB); PROJECT_STATUS.md heading 3 item 7. Owner: performance workstream\". This row was a genuine PERFORMANCE defect, not a coverage gap."
     },
     {
       "id": "mercenta-brain-entity-model",
-      "description": "MERCENTA BRAIN — canonical entity model: 28 entity kinds (founder, brand, prospect, contact, product, ASIN, SKU, document, purchase order, PO line, shipment, invoice, payment, payout, case, conversation, rule, policy, decision, workflow, LOA, compliance object, commercial readiness, contract, retail channel, integration, provider, automation, agent, knowledge, campaign, source, evidence) declared ONCE with cluster, canonical domain colour, default authority and a note; no duplicate entity was invented where a canonical one exists (BrandProspect, ComplianceDocument, ProductSubmission, Ticket, Message, CommercialReadinessRecord, AUTOMATION_REGISTRY, INTEGRATION_REGISTRY).",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain entity model). Was: MERCENTA BRAIN — canonical entity model: 28 entity kinds (founder, brand, prospect, contact, product, ASIN, SKU, document, purchase order, PO line, shipment, invoice, payment, payout, case, conversation, rule, policy, decision, workflow, LOA, compliance object, commercial readiness, contract, retail",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "src/lib/intelligence/brain/types.ts; scripts/validate-mercenta-brain.mjs (entity coverage + catalogue assertions PASS); scripts/brain-runtime-check.ts (27 kinds observed at runtime, ASSERTIONS_FAILED: 0); e2e/mercenta-brain.spec.ts test 1 (executed: real entity/relationship counts rendered in Chromium)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "mercenta-brain-relationship-model",
-      "description": "MERCENTA BRAIN — canonical relationship model: 20 declared relationship kinds, each edge carrying an `evidence` string naming the canonical field that proves it. Represents the operating model explicitly, including the two linked PO identities (the retail channel sends the order to Mercenta; the PO belongs_to the brand), brand authorised_by LOA, and case escalates_to the channel only when Mercenta has actually escalated. The Brain is a projection: it owns no business state and mutates nothing.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain relationship model). Was: MERCENTA BRAIN — canonical relationship model: 20 declared relationship kinds, each edge carrying an `evidence` string naming the canonical field that proves it. Represents the operating model explicitly, including the two linked PO identities (the retail channel sends the order to Mercenta; the PO ",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "src/lib/intelligence/brain/buildGraph.ts; scripts/validate-mercenta-brain.mjs (every edge kind declared in the catalogue; every edge cites its evidence); runtime: 401 relationships in Mercenta scope, 0 edges with a missing endpoint; e2e/mercenta-brain.spec.ts tests 4-5 (executed: selecting an entity lists its relationships with their evidence, and relationship inspection re-selects the related entity)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "mercenta-brain-provenance-and-epistemic-honesty",
-      "description": "MERCENTA BRAIN — provenance + the four-state epistemic model (VERIFIED / SIMULATION / INFERENCE / UNKNOWN) that is never collapsed. Every node names its canonical origin and accessor; a non-simulation provider default resolves UNKNOWN (never simulation); an ASIN from a simulated submission is labelled SIMULATION; a purchase order can never be both simulated and verified. Measured: 206 verified / 25 simulation / 0 inference / 68 unknown, 0 unprovenanced nodes.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain provenance / epistemic-honesty model). Was: MERCENTA BRAIN — provenance + the four-state epistemic model (VERIFIED / SIMULATION / INFERENCE / UNKNOWN) that is never collapsed. Every node names its canonical origin and accessor; a non-simulation provider default resolves UNKNOWN (never simulation); an ASIN from a simulated submission is labell",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "scripts/brain-runtime-check.ts (epistemic-honesty assertions PASS); scripts/validate-mercenta-brain.mjs; src/integrations/types.ts isProviderSimulationSafe consumed rather than re-implemented; e2e/mercenta-brain.spec.ts tests 2-3 (executed: the SIMULATION filter renders only SIMULATION badges; a no-match filter states an honest empty result)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "mercenta-brain-surface",
-      "description": "MERCENTA BRAIN — first-class interactive product surface (Super Admin / Founder): deterministic radial cluster layout (no force simulation, no randomness), interactive SVG canvas with pan/zoom/select/clear plus explicit zoom controls, search + cluster + knowledge-status + entity-type filters, a truthful \"visible of TOTAL\" entity list (the keyboard-accessible equivalent of the graph, sharing one selection state), and an inspector showing canonical properties, the authority model with its explanation, every relationship with its evidence, the provenance pointer and a drill-down to the real destination view. Super-Admin only: hidden from the nav for every other tier AND guarded at render. Overview / Operational Dashboard / Brain remain three separate destinations.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain admin surface). Was: MERCENTA BRAIN — first-class interactive product surface (Super Admin / Founder): deterministic radial cluster layout (no force simulation, no randomness), interactive SVG canvas with pan/zoom/select/clear plus explicit zoom controls, search + cluster + knowledge-status + entity-type filters, a trut",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "src/components/admin/MercentaBrain.tsx; src/components/shared/brain/BrainCanvas.tsx; src/lib/intelligence/brain/layout.ts; src/components/layout/AdminShell.tsx (nav + render guard); e2e/mercenta-brain.spec.ts (11 passed, 0 failed — executed). Batch 3c part 2b (2026-10-03) FIXED a real interactivity defect here: the six-tile KPI band rendered every metric with NO drill-down (mandatory parity check 5). Each tile now carries a real onOpen that filters the entity list to the set it counts (Entities -> all; Relationships -> entities with an edge; Verified/Simulation/Unknown -> that status; Human authority -> authority=human), and test 11 proves each drill-down in Chromium. Pinned by scripts/validate-functional-parity.mjs.",
-      "last_verified": "2026-10-03",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "brand-intelligence-relationship-map",
-      "description": "BRAND INTELLIGENCE — tenant-scoped relationship experience built by the SAME builder with an explicit brand scope. The brand branch never runs the platform/policy/decision/automation/agent/acquisition layers, so prospects, integrations, providers, automations, the AI seam, payout rails, Founder policy and Mercenta-wide decisions are structurally absent rather than filtered out; an unknown tenant fails closed with a stated reason; the boundary statement is shown to the brand. A brand sees its own products, ASINs, SKUs, POs and lines, shipments, invoices, payments, cases, conversations, documents, LOA, contracts and readiness records.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the brand relationship graph). Was: BRAND INTELLIGENCE — tenant-scoped relationship experience built by the SAME builder with an explicit brand scope. The brand branch never runs the platform/policy/decision/automation/agent/acquisition layers, so prospects, integrations, providers, automations, the AI seam, payout rails, Founder poli",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandRelationshipMap.tsx; src/components/brand/BrandIntelligence.tsx; scripts/brain-runtime-check.ts (brand scope 39 nodes / 42 relationships, no forbidden kind, no other tenant, unknown tenant refused); e2e/mercenta-brain.spec.ts test 10 (executed: no Brain in a brand shell, no leaked kind, no leaked tenant)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "mercenta-brain-contract-gate",
-      "description": "MERCENTA BRAIN — contract gate: `npm run validate:brain` runs 30 source assertions AND a bundled runtime harness (esbuild → node) that verifies the graph against the real canonical domain stores: entity coverage, EXACT projection of canonical records to nodes, relationship coverage, epistemic honesty, the tenant boundary, the unknown-tenant refusal, determinism across rebuilds, and \"every edge kind is declared in the catalogue\". Declared relations with no instance in the current canonical data are PRINTED rather than faked. The gate was proven to fail on real defects (missing brand nodes; a comment-blind pattern test) before it passed.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain contract gate). Was: MERCENTA BRAIN — contract gate: `npm run validate:brain` runs 30 source assertions AND a bundled runtime harness (esbuild → node) that verifies the graph against the real canonical domain stores: entity coverage, EXACT projection of canonical records to nodes, relationship coverage, epistemic honest",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
-      "status": "built_and_tested",
-      "evidence": "scripts/validate-mercenta-brain.mjs (MERCENTA_BRAIN_VALIDATION_PASS, 30 assertions, runtime executed, 0 network calls); scripts/brain-runtime-check.ts (BRAIN_RUNTIME_PASS); package.json validate:brain; e2e/mercenta-brain.spec.ts (10 executed tests: counts, filters, empty state, selection, relationships, keyboard, zoom, responsive, reduced motion, tenancy)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5297,8 +5299,8 @@
       "description": "ONE WORKSPACE SYSTEM — the second dashboard primitive generation was retired. `src/components/shared/dashboard.tsx` used to hold its own DashboardSection/KpiGroup/AttentionPanel implementations alongside the canonical workspace system, which is why the brand portal and the admin workspace could both claim to be \"the redesigned dashboard\" while looking like different products. It is now a thin ADAPTER over the canonical primitives (MetricBand/WorkspaceSection/Queue), every operational consumer was repointed to `@/components/shared/workspace`, and WorkspaceFrame gained the `testId` + `busy`/`aria-busy` seams so a surface never hand-rolls its own outer container. NOT complete: 14 files still carry the pre-workspace page shell and are recorded as an explicit shrinking backlog inside the gate.",
       "source": "Complete Platform Redesign — remaining surfaces pass (2026-09-21 session 3)",
       "status": "built_and_tested",
-      "evidence": "src/components/shared/dashboard.tsx (adapters); src/components/shared/workspace.tsx (testId/busy seams, WorkspaceSection h2); repointed consumers AdminDashboard/LogisticsHub/MercentaBrain; scripts/validate-workspace-shell.mjs (EXECUTED: WORKSPACE SHELL: 50 PASS / 0 FAIL, backlog 14); e2e/mercenta-brain.spec.ts + e2e/logistics-hub-map.spec.ts + e2e/dashboard.spec.ts + e2e/uiux-redesign.spec.ts (54 passed)",
-      "last_verified": "2026-09-21",
+      "evidence": "src/components/shared/dashboard.tsx (adapters); src/components/shared/workspace.tsx (testId/busy seams, WorkspaceSection h2); repointed consumers AdminDashboard/LogisticsHub (§BATCH 4 later removed the former consumer MercentaBrain); scripts/validate-workspace-shell.mjs (EXECUTED: WORKSPACE SHELL: 50 PASS / 0 FAIL, backlog 14); e2e/logistics-hub-map.spec.ts + e2e/dashboard.spec.ts + e2e/uiux-redesign.spec.ts (54 passed)",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5484,11 +5486,11 @@
     },
     {
       "id": "brain-dynamic-projection",
-      "description": "MERCENTA BRAIN — DYNAMIC (no longer a mount-time snapshot). `MercentaBrain` and the brand relationship map now re-project on the canonical change signal (`useCanonicalStoreVersion()` in the memo dependencies, with `void storeVersion;` documenting that the version is a signal and not data). The graph was ALREADY a canonical projection (provenance per node, evidence per edge, no static JSON fixture) — what was missing was propagation, so a domain change was invisible until a remount.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the Brain dynamic projection). Was: MERCENTA BRAIN — DYNAMIC (no longer a mount-time snapshot). `MercentaBrain` and the brand relationship map now re-project on the canonical change signal (`useCanonicalStoreVersion()` in the memo dependencies, with `void storeVersion;` documenting that the version is a signal and not data). The graph",
       "source": "Canonical propagation workstream — Brain + Logistics as dynamic projections of canonical domain state (2026-09-21 session 6)",
-      "status": "built_and_tested",
-      "evidence": "e2e/canonical-propagation.spec.ts test 1 (EXECUTED: Brain node AND edge counts grow after a real domain mutation, and the new PO is findable as a graph entity — no reload); test 3 (provenance shown in the inspector); scripts/validate-canonical-propagation.mjs R2 + S4 (EXECUTED); scripts/validate-mercenta-brain.mjs still MERCENTA_BRAIN_VALIDATION_PASS (30 assertions, runtime executed)",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5496,8 +5498,8 @@
       "description": "LOGISTICS — DYNAMIC (no longer a mount-time snapshot). The list/inspector project the canonical shipment + PO records through `buildOperationalMap` (the interactive map that also read it was REMOVED in §BATCH 3, 2026-10-10; the derivation is KEPT), and the projection now moves with the domain: raising a PO, acknowledging it and filing the ASN makes the new consignment appear — with its truth state — without a reload, tenant-scoped. Simulation continues to run through the SAME domain contracts as the future live path (nothing is a separate fake presentation model), and no carrier is invented: Freight Collect stays channel-arranged and Mercenta-arranged consignments resolve through the canonical lane rule.",
       "source": "Canonical propagation workstream — Brain + Logistics as dynamic projections of canonical domain state (2026-09-21 session 6)",
       "status": "built_and_tested",
-      "evidence": "e2e/canonical-propagation.spec.ts tests 1 and 2 (EXECUTED: admin legs grow 3 → 5 after the canonical lifecycle; the owning brand hub shows the new PO; the other tenant does not); scripts/validate-canonical-propagation.mjs R3/R4/R5 (EXECUTED); scripts/validate-logistics-map.mjs still LOGISTICS_MAP_VALIDATION_PASS (80 assertions); e2e/logistics-hub-map.spec.ts (rewritten as the map’s absence guard)",
-      "last_verified": "2026-09-21",
+      "evidence": "e2e/canonical-propagation.spec.ts tests 1 and 2 (REPOINTED by §BATCH 3/§BATCH 4 to the canonical consignment list the map's removal left behind: the brand hub's \"consignments in scope\" count grows after the canonical lifecycle; the owning brand shows the new PO; the other tenant does not); scripts/validate-canonical-propagation.mjs R3/R4/R5 (EXECUTED); scripts/validate-logistics-map.mjs still LOGISTICS_MAP_VALIDATION_PASS (80 assertions); e2e/logistics-hub-map.spec.ts (rewritten as the map’s absence guard)",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5511,11 +5513,11 @@
     },
     {
       "id": "m12-wording-brand-brain-fix",
-      "description": "M12 WORDING SAFEGUARD — the BRAND-scoped Brain no longer names the retail channel, and the static wording gate passes 100%. FIXED: `src/lib/intelligence/brain/buildGraph.ts` rendered the label \"Retail channel (Amazon UK Vendor)\" on a node added by `addChannelLayer()`, which is SHARED by BOTH scopes — so the brand's relationship map (`BrandRelationshipMap` -> `BrainCanvas`) named the retail channel to a brand. The label is now channel-neutral. The internal Brain entity kind was ALSO renamed `amazon` -> `retail_channel` (a code identifier that is never rendered) so the wording matcher does not have to be blinded to the real copy in those files. NEW PERMANENT GUARD: `scripts/brain-runtime-check.ts` asserts the brand-scoped Brain's rendered COPY names no retail channel, with a negative control proving the matcher can fail; property VALUES are deliberately out of scope because several are PROVENANCE (an evidence URL) that the rules require to stay accurate. This gate had been FAILING at HEAD c07dfbe with 8 violations — an inherited, unreported defect; `scripts/integrity-audit.mjs` reported 61 PASSED / 1 FAILED and now reports 62 / 0.",
+      "description": "§BATCH 4 (2026-10-10) — REMOVED with the Mercenta Brain (the brand-scoped Brain retail-channel wording fix). Was: M12 WORDING SAFEGUARD — the BRAND-scoped Brain no longer names the retail channel, and the static wording gate passes 100%. FIXED: `src/lib/intelligence/brain/buildGraph.ts` rendered the label \"Retail channel (Amazon UK Vendor)\" on a node added by `addChannelLayer()`, which is SHARED by BOTH scopes ",
       "source": "Clean-slate reconciliation (2026-09-21 session 8) — the wording-gate failure found while verifying the reconciled tree",
-      "status": "built_and_tested",
-      "evidence": "`npm run validate:wording` EXECUTED -> WORDING_LINT_PASS (281 src files, 0 outward-facing violations); `scripts/integrity-audit.mjs` EXECUTED -> 62 PASSED / 0 FAILED (100%); `scripts/validate-mercenta-brain.mjs` EXECUTED -> 30 assertions PASS, runtime harness executed, 0 network calls; src/lib/intelligence/brain/{buildGraph,types,layout}.ts + src/components/shared/brain/BrainCanvas.tsx; e2e/uiux-redesign.spec.ts:245",
-      "last_verified": "2026-09-21",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 4 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: the Mercenta Brain \"serves no purpose\"). Deleted: src/components/admin/MercentaBrain.tsx; src/components/shared/brain/ (BrainCanvas, BrainCanvas3D, BrainScene); src/lib/intelligence/brain/ (buildGraph, layout, layout3d, project, types); src/components/brand/BrandRelationshipMap.tsx; src/lib/hooks/useWebglPalette.ts; src/lib/hooks/usePrefersReducedMotion.ts; scripts/brain-runtime-check.ts. ABSENCE guarded by scripts/validate-mercenta-brain.mjs (the contract validator REWRITTEN into an absence guard, rule 08) + e2e/mercenta-brain.spec.ts + scripts/validate-canonical-propagation.mjs (S4/R2) + scripts/verify-live-demo.mjs (L26).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -6222,8 +6224,8 @@
       "description": "Batch 3c part 2b — the remaining page-by-page functional-parity dimensions of the evidence-bearing registry rows (global rule 06-page-by-page-functional-parity-audit.md): dataset completeness, name-implies-capability and interactivity. scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical. It found and FIXED one real defect: the Mercenta Brain's six-tile KPI band had no drill-down (mandatory check 5).",
       "source": "Batch 3c part 2b (2026-10-03); gate scripts/validate-functional-parity.mjs",
       "status": "built_and_tested",
-      "evidence": "scripts/validate-functional-parity.mjs (NEW; npm run validate:functional-parity; 40 assertions / 0 failures; F1 pins react-hooks rules-of-hooks + exhaustive-deps at ERROR and the plugin dependency; F2 10 dataset-consumer assertions; F3 10 named components implement their capability inline AND never redirect; F4 no dead metric band + the Brain's six tiles each drill down + the audited tiles keep their drill-down + the metric primitive renders a real button). Mutation-proved x4, each file restored byte-identical: eslint rules-of-hooks error->warn fails F1 (eslint.config.js sha256 ab7e9ccbad115cfa617e3e422c6a9cae28abb186d7eb71c73c176ae80cfe434f); BrandCRM useBrands removed fails F2 and BrandCrmDepth removed fails F3 (BrandCRM.tsx sha256 84ef4b128ece438627e86ef05eff144cf28c2bf4cf47155f9a7f451ebd21475d); MercentaBrain onOpen removed fails F4 (MercentaBrain.tsx sha256 52aae9158704212189820e198a1d1e9650b7d6991fc5b3d7f66e5658ce5183dd). Browser: e2e/mercenta-brain.spec.ts test 11 proves every KPI tile drills into the set it counts (11 passed). LIVE: scripts/verify-live-demo.mjs gains L26 (Super Administrator -> Mercenta Brain -> all six tiles drill down; the Verified tile filters the live list to 116 of 120; the Entities tile restores 120 of 120); verify:live 240 PASS / 0 FAIL incl. L26. src/components/admin/MercentaBrain.tsx (the fix); requirements-registry.json (_meta.batch3c_part2b_functional_parity); scope guards BATCH3C_PARITY_SCOPE (E6, all three checks) + BATCH3C_PARITY_DECLARED (E7, incl. its combined list). DEPLOYED @ 7f71d4b and live-verified on https://demo.mercenta.co.uk.",
-      "last_verified": "2026-10-03",
+      "evidence": "scripts/validate-functional-parity.mjs (npm run validate:functional-parity; F1 pins react-hooks rules-of-hooks + exhaustive-deps at ERROR and the plugin dependency; F2 dataset-consumer assertions; F3 named components implement their capability inline AND never redirect; F4 no dead metric band + §BATCH4 the removed Brain surfaces stay removed + the audited tiles keep their drill-down + the metric primitive renders a real button). REPOINTED 2026-10-10: the F4b Brain KPI-band assertions became an ABSENCE guard and the L26 live probe (scripts/verify-live-demo.mjs) became a live Brain-absence probe when the Mercenta Brain was removed by owner instruction (§BATCH 4). Browser: e2e/mercenta-brain.spec.ts (REWRITTEN as the absence guard). The Brain KPI-band surface the phase originally fixed is now DELETED.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -6240,8 +6242,8 @@
       "description": "§OPTION-A — DONE (2026-10-04). The editor / type-check gap is CLOSED. 121 TypeScript files OUTSIDE src (96 in e2e/, 23 in supabase/functions/, playwright.config.ts and scripts/brain-runtime-check.ts) previously belonged to NO TypeScript project, so the editor showed ~178 INVENTED problems and `npm run typecheck` never checked them. FIX: `tsconfig.e2e.json` (NEW — the Playwright browser-test project) and `tsconfig.functions.json` (NEW — the Supabase Edge Function project) now cover e2e/ and supabase/functions/; `tsconfig.node.json` now also covers scripts/brain-runtime-check.ts; the root `tsconfig.json` references all four; and `npm run typecheck` runs ALL FOUR projects. Browser-runtime imports (`import('/src/...')` inside page.evaluate) are mapped to the real source via `paths`, and the Deno runtime surface the functions use is declared in `supabase/functions/_types/edge-runtime.d.ts`. §REPOINTED: the previous status was `not_started` — the fix was deferred to after the current build.",
       "source": "Founder report 2026-10-04 (the editor showed 836 problems); read-only diagnosis recorded here",
       "status": "built_and_tested",
-      "evidence": "Fixed 2026-10-04. `npm run typecheck` = 0 across ALL FOUR projects (app + node + e2e + functions; was src-only). The new coverage found and FIXED real latent defects: 30 in 9 e2e specs (a wrong Playwright `exact` option in multi-tenant.spec.ts; a double-prefixed KPI selector in uiux-foundation.spec.ts that made a test UNABLE TO FAIL; ~28 strict-DOM / union-narrowing issues) and 4 in scripts/brain-runtime-check.ts (edge.label / edge.note read properties a BrainEdge does not have, so its channel-leak scan silently collected nothing; a Set<string> typing error; two duplicate report keys where a spread overwrote the graph counts). NEW gate `scripts/validate-typecheck-coverage.mjs` (`npm run validate:typecheck-coverage`, 20 assertions) fails if the coverage is removed — MUTATION-PROVED (dropping tsconfig.e2e.json from `typecheck` => 1 failure; `package.json` restored byte-identical sha256 6cddfabdf2b31a9a4a0e419618916d5a026ab0ec1c47a9ee538357b50bf661ac). `npm run validate:all` 151/0; lint 0; build OK; the 9 affected browser specs 65 passed. E6 scope guard's F6 surface declared for the new files. No application runtime change (tests, tsconfig and tooling only) => three-way NOT APPLICABLE.",
-      "last_verified": "2026-10-04",
+      "evidence": "Fixed 2026-10-04. `npm run typecheck` = 0 across ALL FOUR projects (app + node + e2e + functions; was src-only). The new coverage found and FIXED ~30 real latent defects in 9 e2e specs (a wrong Playwright `exact` option in multi-tenant.spec.ts; a double-prefixed KPI selector in uiux-foundation.spec.ts that made a test UNABLE TO FAIL; ~28 strict-DOM / union-narrowing issues) and 4 in the then-stray Brain runtime harness under scripts/. REPOINTED 2026-10-10 (§BATCH 4): that harness was DELETED with the Mercenta Brain it exercised, so the tooling project no longer includes it and `scripts/validate-typecheck-coverage.mjs` now asserts its ABSENCE instead. The coverage gate itself is unchanged in force.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -6429,8 +6431,8 @@
       "description": "E2E-7 (2026-10-08) — E2E COVERAGE, THE OPERATIONS DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the operations domain: 50 `op-*` scenarios added (327 -> 377 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 50 span SEVEN specs — the work layer (14) · Mercenta Brain (11) · guided tours (10) · the command centre (4) · channel-read ingestion & auto-fulfilment / notifications (4) · brand-intelligence boundaries (4) · the canonical brand case workflow (3). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `op-*` scenario, like every `pf-*`/`oa-*`/`po-*`/`sl-*`/`fi-*`/`co-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to `pf-` + `oa-` + `po-` + `sl-` + `fi-` + `co-` + `op-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary: the specs the catalogue ITSELF classifies under the `operations` capability (the SAME capability-based method E2E-5 used for `finance`), which the app own navigation corroborates (AdminShell Operations group: Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Calendar; BrandShell Operations: POs · Logistics Hub · Returns · Tasks & Deadlines · Calendar). HONEST NOTE: that capability is a keyword-derived bucket, so three of the seven specs have their subject elsewhere (notifications -> channel/commerce, workstream-b-intelligence -> brand intelligence, brand-case-workflow -> cases); they are enumerated here because the catalogue is the SSOT for the capability assignment, and each scenario journey names its real subject. No application runtime change.",
       "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-7 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
       "status": "built",
-      "evidence": "`docs/scenario-catalogue.json` 327 -> 377 scenarios (50 `op-*` operations, all traceable to a test; `operations` 7 -> 57). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (377 scenarios · 282 traceable · 8 capabilities). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in an `op-*` scenario => 2 failures, exit 1; (B) the prefix set narrowed with `op-` dropped => 1 failure (the self-check), exit 1; (C) an `op-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 cecc44743116da1f871e1524e847edc05e821be0e059eb1c888a6dabbff23676; gate sha256 eeb3dacb156d11a472c694b09da11558cdb2b81a966e645c94230d8433c1726e). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — the seven operations specs in real Chromium = 50 passed / 0 failed / 0 skipped (work layer 14 · Mercenta Brain 11 · tours 10 · command centre 4 · notifications 4 · brand-intelligence 4 · brand case workflow 3), covering all 50 op-* declarations. Non-runtime governance increment => three-way NOT APPLICABLE.",
-      "last_verified": "2026-10-08",
+      "evidence": "`docs/scenario-catalogue.json` — the `operations` domain holds 50 enumerated `op-*` traceable rows reaching the live specs. §BATCH 4 (2026-10-10) REMOVED the eleven `op-brain-*` rows with the Mercenta Brain they enumerated; the remaining enumerated set is still traceable and `scripts/validate-e2e-scenarios.mjs` passes, with the projected doc regenerated by `npm run catalogue:e2e`.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {

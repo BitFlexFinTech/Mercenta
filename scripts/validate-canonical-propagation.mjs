@@ -3,20 +3,19 @@
  *
  * WHY THIS GATE EXISTS
  * --------------------
- * Mercenta Brain and the Logistics operational map are PROJECTIONS: both render
- * whatever the canonical domain stores hold. That makes them data-driven — but
- * only genuinely DYNAMIC if a change to a canonical object is BOTH announced by
- * the mutation and observed by the projection. Neither half is visible to
- * typecheck, lint or a build:
+ * The logistics projection is a PROJECTION: it renders whatever the canonical
+ * domain stores hold. That makes it data-driven — but only genuinely DYNAMIC if a
+ * change to a canonical object is BOTH announced by the mutation and observed by
+ * the projection. Neither half is visible to typecheck, lint or a build:
  *
- *   - a mutation that never signals leaves every projection on the snapshot it
+ *   - a mutation that never signals leaves the projection on the snapshot it
  *     read at mount (an "interactive but static presentation");
  *   - a projection that never subscribes does the same, even when every
  *     mutation signals correctly.
  *
  * Measured before this gate existed: 17 modules / 39 array-write sites plus 30
- * in-place record mutations changed canonical state silently, and both
- * projections were built once per mount with no subscription at all.
+ * in-place record mutations changed canonical state silently, and the logistics
+ * projection was built once per mount with no subscription at all.
  *
  * WHAT IT ASSERTS
  * ---------------
@@ -24,11 +23,12 @@
  *   S1 the signal has exactly ONE implementation;
  *   S2 every function that mutates canonical state signals;
  *   S3 the application mounts the one query-sync subscriber;
- *   S4 both Brain projections depend on the canonical change signal;
- *   S5 neither projection is fed a hardcoded record array.
+ *   S4 the removed BRAIN projections are GONE (ABSENCE guard, rule 08) — see
+ *      §BATCH 4 below; 
+ *   S5 the logistics projection is fed from the canonical accessor only.
  * RUNTIME (executed against the real modules, no network):
  *   R1 subscribing works and a real domain mutation bumps the version;
- *   R2 the Brain graph CHANGES when the domain changes (no remount);
+ *   R2 the removed Brain graph module cannot even be loaded (absence proof);
  *   R3 the logistics projection GAINS the new consignment leg;
  *   R4 tenant scope holds: another brand's projection does not gain it;
  *   R5 no mutation ⇒ no change (the projection is deterministic, not volatile).
@@ -140,15 +140,17 @@ const queries = read('src/data/queries.ts');
 check('S3 the query-sync subscriber invalidates the canonical reads',
   /export function useCanonicalQuerySync/.test(queries) && /invalidateQueries\(\)/.test(queries));
 
-const brainSurface = read('src/components/admin/MercentaBrain.tsx');
-const brandBrain = read('src/components/brand/BrandRelationshipMap.tsx');
-check('S4 the Mercenta Brain re-projects on the canonical change signal',
-  /useCanonicalStoreVersion\(\)/.test(brainSurface) && /\[storeVersion\]/.test(brainSurface));
-check('S4 the brand Brain re-projects on the canonical change signal',
-  /useCanonicalStoreVersion\(\)/.test(brandBrain) && /\[tenantId, storeVersion\]/.test(brandBrain));
-check('S4 neither Brain projection is built with an empty dependency list',
-  !/buildBrainGraph\([^;]*?\}, \[\]\)/.test(brainSurface) &&
-    !/buildBrainGraph\([^;]*?\}, \[\]\)/.test(brandBrain));
+/* ── S4 — §BATCH 4 (2026-10-10): the Brain projections are REMOVED ───────────
+ * These checks used to assert that BOTH Brain projections subscribed to the
+ * canonical change signal. The owner instructed the Mercenta Brain's complete
+ * removal, so per rule 08 the checks are REWRITTEN into ABSENCE guards: the two
+ * projection surfaces must not exist, and no source may build a Brain graph. The
+ * logistics projection keeps its own (unchanged) subscription assertions in S5. */
+check('S4 the Mercenta Brain surface is REMOVED (nothing subscribes in its name)',
+  !fs.existsSync(path.join(ROOT, 'src/components/admin/MercentaBrain.tsx')) &&
+    !fs.existsSync(path.join(ROOT, 'src/components/brand/BrandRelationshipMap.tsx')));
+check('S4 no source builds a Brain graph any more',
+  walk('src').every((f) => !/buildBrainGraph/.test(read(f))));
 
 const hub = read('src/components/brand/LogisticsHub.tsx');
 const control = read('src/components/admin/LogisticsControl.tsx');
@@ -165,7 +167,6 @@ const server = await createServer({ server: { middlewareMode: true }, logLevel: 
 
 try {
   const signal = await server.ssrLoadModule('/src/lib/domain/canonicalSignal.ts');
-  const brain = await server.ssrLoadModule('/src/lib/intelligence/brain/buildGraph.ts');
   const api = await server.ssrLoadModule('/src/data/api.ts');
   const commerce = await server.ssrLoadModule('/src/lib/commerce/commerceLifecycle.ts');
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -211,16 +212,25 @@ try {
   });
 
   const version0 = signal.getCanonicalStoreVersion();
-  const graph0 = brain.buildBrainGraph({ kind: 'mercenta' });
-  const brandGraph0 = brain.buildBrainGraph({ kind: 'brand', tenantId: BRAND });
-  const otherGraph0 = brain.buildBrainGraph({ kind: 'brand', tenantId: OTHER_BRAND });
   const legs0 = await legsForBrand(BRAND);
+  const otherLegs1 = await legsForBrand(OTHER_BRAND);
+
+  /* §BATCH 4 (2026-10-10) — R2 REPOINTED into an ABSENCE proof. It used to assert
+   * the Brain graph GREW after a domain change; the graph is removed, so the
+   * strongest true statement is that the module cannot even be loaded through the
+   * project's own `@/` alias resolution. */
+  let brainAbsent = false;
+  try {
+    await server.ssrLoadModule('/src/lib/intelligence/brain/buildGraph.ts');
+  } catch {
+    brainAbsent = true;
+  }
+  check('R2 the removed Brain graph module cannot be loaded (absence proof)', brainAbsent);
 
   // R5 — with NO mutation, the projection is identical (deterministic).
-  const graphStable = brain.buildBrainGraph({ kind: 'mercenta' });
+  const legsStable = await legsForBrand(BRAND);
   check('R5 no mutation ⇒ the projection is unchanged (deterministic, not volatile)',
-    graphStable.nodes.length === graph0.nodes.length &&
-      graphStable.edges.length === graph0.edges.length);
+    legsStable.legs.length === legs0.legs.length);
 
   // A REAL domain mutation through the canonical commerce lifecycle — exactly the
   // path a brand takes: raise a PO → acknowledge → fulfil (creates the shipment)
@@ -251,16 +261,6 @@ try {
   check('R1 the subscriber was actually notified', notified > 0, `notifications=${notified}`);
   unsubscribe();
 
-  const graph1 = brain.buildBrainGraph({ kind: 'mercenta' });
-  check('R2 the Brain graph GREW from the domain change (no remount, no fixture edit)',
-    graph1.nodes.length > graph0.nodes.length && graph1.edges.length > graph0.edges.length,
-    `nodes ${graph0.nodes.length}→${graph1.nodes.length}, edges ${graph0.edges.length}→${graph1.edges.length}`);
-
-  const shipments0 = graph0.nodes.filter((n) => n.kind === 'shipment').length;
-  const shipments1 = graph1.nodes.filter((n) => n.kind === 'shipment').length;
-  check('R2 the new consignment is a shipment ENTITY in the graph',
-    shipments1 > shipments0, `${shipments0} → ${shipments1}`);
-
   const legs1 = await legsForBrand(BRAND);
   check('R3 the logistics map GAINED a leg for the new consignment',
     legs1.legs.length > legs0.legs.length,
@@ -271,19 +271,12 @@ try {
   check('R3 truth is never fabricated as LIVE VERIFIED in this environment',
     legs1.legs.some((l) => l.truth === 'simulated' || l.truth === 'ambient'));
 
-  const brandGraph1 = brain.buildBrainGraph({ kind: 'brand', tenantId: BRAND });
-  const otherGraph1 = brain.buildBrainGraph({ kind: 'brand', tenantId: OTHER_BRAND });
-  check('R4 the owning brand projection sees its own new shipment',
-    brandGraph1.nodes.length > brandGraph0.nodes.length,
-    `${brandGraph0.nodes.length} → ${brandGraph1.nodes.length}`);
-  check('R4 the OTHER brand projection does NOT gain it (tenant scope holds)',
-    otherGraph1.nodes.length === otherGraph0.nodes.length,
-    `${otherGraph0.nodes.length} → ${otherGraph1.nodes.length}`);
-  const otherLegs = await legsForBrand(OTHER_BRAND);
-  check('R4 the other brand logistics feed shows none of the new POs',
-    !otherLegs.legs.some((l) => l.poNumber === created.value?.poNumber));
-  check('R4 an unknown tenant still fails closed (no graph, no guess)',
-    brain.buildBrainGraph({ kind: 'brand', tenantId: 'brand-not-a-real-tenant' }).nodes.length === 0);
+  check('R4 the owning brand logistics feed DOES show its own new consignment',
+    legs1.legs.some((l) => l.poNumber === created.value?.poNumber));
+  check('R4 the other brand logistics feed shows none of the new POs (tenant scope holds)',
+    !otherLegs1.legs.some((l) => l.poNumber === created.value?.poNumber));
+  check('R4 an unknown tenant still fails closed (no legs, no guess)',
+    (await legsForBrand('brand-not-a-real-tenant')).legs.length === 0);
 } finally {
   await server.close();
 }

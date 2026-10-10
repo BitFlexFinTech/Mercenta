@@ -76,7 +76,8 @@ Retained unchanged, because they are genuine safety rules and not workflow restr
 - **The existing UI is NOT the visual baseline.** An authorised completion/redesign directive may replace the
   presentation layer: layout, information architecture, navigation, component structure, shell, spacing, typography,
   hierarchy, density, tables, forms, cards, drawers, empty/loading/error states, responsive behaviour and interaction
-  patterns — across admin, brand, Brain and Logistics surfaces.
+  patterns — across admin, brand and Logistics surfaces (§BATCH 4, 2026-10-10: the Brain surface was removed, so it is
+  no longer named here).
 - Preserved regardless of presentation: business logic, domain logic, security, RBAC, tenant boundaries, data
   contracts, workflow semantics, integrations, persistence and business rules.
 - The existing ink/brass system and `docs/DESIGN_SYSTEM.md` MAY be reused where appropriate — they are NOT a freeze,

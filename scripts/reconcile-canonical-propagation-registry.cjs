@@ -25,6 +25,31 @@ const path = 'requirements-registry.json';
 const reg = JSON.parse(fs.readFileSync(path, 'utf8'));
 const byId = (id) => reg.entries.find((e) => e.id === id);
 
+/**
+ * §BATCH 4 (2026-10-10) — SUPERSEDED, AND GUARDED AGAINST REGRESSION.
+ *
+ * Two of this tool's rows (`brain-dynamic-projection`, and the Brain half of
+ * `canonical-propagation-gate`'s evidence) described the MERCENTA BRAIN, which the
+ * owner instructed us to REMOVE COMPLETELY. Because the script REFRESHES an existing
+ * row's evidence, re-running it would OVERWRITE the reconciled `removed` row in
+ * `requirements-registry.json` and re-introduce citations of deleted files — which
+ * `scripts/validate-mercenta-brain.mjs` A14 rejects.
+ *
+ * It is kept (history is never deleted) but REFUSES to run by default: the
+ * canonical-signal rows it also managed are unchanged and already correct, the Brain
+ * row is recorded as `removed` by hand, and the Brain's ABSENCE is guarded by
+ * `scripts/validate-mercenta-brain.mjs`.
+ */
+if (!process.env.ALLOW_SUPERSEDED_CANONICAL_PROPAGATION_RECONCILE) {
+  console.error(
+    'reconcile-canonical-propagation-registry.cjs — SUPERSEDED by §BATCH 4 (2026-10-10): the Mercenta Brain was removed.\n' +
+      'Its brain-dynamic-projection row is reconciled in requirements-registry.json (status "removed") and the Brain\'s\n' +
+      'absence is guarded by scripts/validate-mercenta-brain.mjs. Re-running would re-introduce citations of deleted files.\n' +
+      'Set ALLOW_SUPERSEDED_CANONICAL_PROPAGATION_RECONCILE=1 only if you have read that and still intend to run it.'
+  );
+  process.exit(1);
+}
+
 const SOURCE =
   'Canonical propagation workstream — Brain + Logistics as dynamic projections of canonical domain state (2026-09-21 session 6)';
 const DATE = '2026-09-21';

@@ -93,13 +93,16 @@ test.describe('Accessibility — admin / founder surfaces', () => {
     await page.screenshot({ path: `${SHOTS}/admin-overview-1440.png`, fullPage: false });
   });
 
-  test('2. Mercenta Brain is structurally sound and scan-clean', async ({ page }) => {
+  test('2. the removed Mercenta Brain is gone from the Super-Admin nav', async ({ page }) => {
+    /* §BATCH 4 (2026-10-10) — REPOINTED, not deleted (rule 08). This scan used to
+       audit the Brain surface with axe. The Brain was removed by owner
+       instruction, so there is nothing left to scan; the surface's ABSENCE is
+       asserted instead and the remaining admin/founder surfaces (tests 3+) keep
+       their full axe scans. */
     await loginAs(page, 'Super Admin — Tadii', 1400);
-    await page.locator('nav[aria-label="Primary"]').getByRole('button', { name: 'Mercenta Brain' }).first().click();
-    await page.getByTestId('brain-counts').waitFor({ timeout: 12000 });
-    await assertSurfaceSkeleton(page, 'brain');
-    await auditSurface(page, 'ADMIN · Mercenta Brain');
-    await page.screenshot({ path: `${SHOTS}/brain-1440.png` });
+    await expect(
+      page.locator('nav[aria-label="Primary"]').getByRole('button', { name: 'Mercenta Brain' })
+    ).toHaveCount(0);
   });
 
   test('3. Integrations control centre is structurally sound and scan-clean', async ({ page }) => {

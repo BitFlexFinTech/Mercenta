@@ -56,8 +56,9 @@
  *   L24 the contract closing controls (Renew / Terminate) on the DEPLOYED admin
  *       surface (BATCH 3a · S7)
  *   L25 the founder closing path on the DEPLOYED Super-Admin work surface (BATCH 3b)
- *   L26 the Mercenta Brain's KPI drill-down on the DEPLOYED Super-Admin surface:
- *       every tile opens into the set it counts (BATCH 3c part 2b)
+ *   L26 the Mercenta Brain's ABSENCE on the DEPLOYED Super-Admin surface: no Brain
+ *       nav destination and the removed `/admin/brain` address falls back to the
+ *       default view (BATCH 4, 2026-10-10 — rewritten from the KPI-drill-down probe)
  *   L27 the platform-mode switch on the DEPLOYED Super-Admin surface (§Batch-0):
  *       the ONE switch states the current mode in words
  *   L28 the Delta Fulfillment 3PL card on the DEPLOYED Super-Admin Integration
@@ -1642,22 +1643,19 @@ function readRedLines() {
   }
   await fndPage.close();
 
-  /* ── L26 — BATCH 3c PART 2b: THE BRAIN'S KPI DRILL-DOWN, LIVE ───────────────
-   * WHY THIS EXISTS. The mandatory parity audit (check 5) requires every metric
-   * card to open into the set it counts. The Mercenta Brain's six-tile KPI band
-   * previously rendered every tile with NO drill-down (a wall of dead numbers);
-   * each tile now filters the entity list to its set. A source assertion would
-   * prove nothing about the DEPLOYED bundle, so the tiles are clicked on the live
-   * Super-Admin surface and the rendered entity list is read.
+  /* ── L26 — §BATCH 4 (2026-10-10): THE MERCENTA BRAIN IS GONE, LIVE ──────────
+   * WHY THIS EXISTS. This probe used to drive the Brain's KPI drill-down on the
+   * deployed Super-Admin surface. The owner instructed the Brain's complete
+   * removal, so per rule 08 the probe is REWRITTEN into a LIVE ABSENCE guard: the
+   * deployed nav must offer no Brain destination, and a direct `/admin/brain`
+   * address must resolve to the default view instead of rendering a blank
+   * workspace (the fail-closed contract of `resolveProductView`).
    */
-  console.log('\n--- L26 the Brain KPI drill-down, on the live Super-Admin surface ---');
+  console.log('\n--- L26 the Mercenta Brain is GONE, on the live Super-Admin surface ---');
   const brnPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
   const brnErrors = [];
   brnPage.on('pageerror', (e) => brnErrors.push(String(e)));
   try {
-    /* The Brain is Super-Admin-only (hidden in the nav for every other tier), so
-       L26 signs in as the SUPER ADMIN — `liveAdminEntry`'s "Mercenta Admin Hub"
-       tier does not carry the Brain nav item. Mirrors L25's login. */
     await gotoLive(brnPage, `${SITE}/`);
     const brnLogin = brnPage.getByRole('button', { name: 'Partner Login' }).first();
     await brnLogin.waitFor({ state: 'visible', timeout: 90000 });
@@ -1669,60 +1667,33 @@ function readRedLines() {
     await brnPage.waitForTimeout(3500);
     check('L26 the deployed site opened and the Super Admin signed in', true);
 
-    const brnNav = brnPage.locator('nav[aria-label="Primary"] >> text=Mercenta Brain').first();
-    await brnNav.waitFor({ state: 'visible', timeout: 90000 });
-    await brnNav.click({ timeout: 30000 });
-    await brnPage.getByTestId('brain-counts').waitFor({ state: 'visible', timeout: 60000 });
-    await brnPage.waitForTimeout(1200);
+    const brnNav = brnPage.locator('nav[aria-label="Primary"] >> text=Mercenta Brain');
+    check('L26 the DEPLOYED nav offers NO Mercenta Brain destination',
+      (await brnNav.count()) === 0);
 
-    /* every one of the six tiles carries a real drill-down button */
-    const brnIds = ['entities', 'relationships', 'verified', 'simulation', 'unknown', 'human'];
-    const brnMissing = [];
-    for (const id of brnIds) {
-      const ok = await brnPage.getByTestId(`kpi-open-${id}`).first().isVisible().catch(() => false);
-      if (!ok) brnMissing.push(id);
-    }
+    /* A direct address for the removed surface must not render a blank workspace. */
+    await gotoLive(brnPage, `${SITE}/admin/brain`);
+    await brnPage.waitForTimeout(3000);
+    check('L26 the removed /admin/brain address renders NO Brain surface',
+      (await brnPage.getByTestId('brain-counts').count()) === 0 &&
+        (await brnPage.getByTestId('brain-canvas').count()) === 0);
+    const brnHeading = await brnPage
+      .getByRole('heading', { level: 1 })
+      .first()
+      .innerText()
+      .catch(() => '');
     check(
-      `L26 all six KPI tiles expose a drill-down button on the DEPLOYED build${
-        brnMissing.length ? ` (missing: ${brnMissing.join(', ')})` : ''
-      }`,
-      brnMissing.length === 0
-    );
-
-    /* clicking the Verified tile filters the entity list to that tile's set */
-    const brnRows = brnPage.locator('[data-testid^="brain-entity-"]');
-    const brnAll = await brnRows.count();
-    await brnPage.getByTestId('kpi-open-verified').click({ timeout: 30000 });
-    await brnPage.waitForTimeout(1200);
-    const brnShown = await brnRows.count();
-    const brnBadges = brnPage.locator('[data-testid^="brain-entity-"] [data-status]');
-    const brnBadgeCount = await brnBadges.count();
-    let brnAllVerified = brnBadgeCount > 0;
-    for (let i = 0; i < brnBadgeCount; i++) {
-      const v = await brnBadges.nth(i).getAttribute('data-status');
-      if (v !== 'verified') { brnAllVerified = false; break; }
-    }
-    check(
-      `L26 clicking the Verified tile filters the LIVE entity list to verified entities (${brnShown} of ${brnAll} shown)`,
-      brnShown > 0 && brnShown <= brnAll && brnAllVerified
-    );
-
-    /* the Entities tile restores the full set */
-    await brnPage.getByTestId('kpi-open-entities').click({ timeout: 30000 });
-    await brnPage.waitForTimeout(1000);
-    const brnRestored = await brnRows.count();
-    check(
-      `L26 the Entities tile restores the full set on the DEPLOYED build (${brnRestored} of ${brnAll})`,
-      brnRestored === brnAll
+      `L26 the removed address falls back to the default view, not a blank page (h1: ${brnHeading.trim() || 'none'})`,
+      brnHeading.trim().length > 0
     );
 
     check(
-      `L26 the driven Brain surface rendered with no uncaught error (errors: ${brnErrors.join(' | ') || 'none'})`,
+      `L26 the driven Super-Admin surface rendered with no uncaught error (errors: ${brnErrors.join(' | ') || 'none'})`,
       brnErrors.length === 0
     );
   } catch (brnError) {
     check(
-      `L26 the Brain KPI drill-down could NOT be driven live (${String(brnError).split('\n')[0].slice(0, 140)})`,
+      `L26 the Brain-absence probe could NOT be driven live (${String(brnError).split('\n')[0].slice(0, 140)})`,
       false
     );
   }

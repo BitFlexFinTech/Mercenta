@@ -37,7 +37,7 @@ and an optional AI seam that is never required.
 | Alert triage | `src/lib/monitoring/alertTriage.ts` | Rules first; model only for narrative | **AUTOMATION CORRECT** |
 | Acquisition scoring | `src/lib/acquisition/acquisitionEngine.ts` + `scoringBridge.ts` | Deterministic scoring over declared factors | **CODE CORRECT** |
 | Auto-approve | `src/lib/automation/autoApprove.ts` | Declared policy, not a model | **CODE CORRECT** |
-| Brain graph projection | `src/lib/intelligence/brain/buildGraph.ts` | Pure projection of canonical records; declares `AMAZON_PROGRAMME_STATUS` | **CODE CORRECT** |
+| Brain graph projection | ~~`src/lib/intelligence/brain/buildGraph.ts`~~ | §BATCH 4 (2026-10-10) — the Mercenta Brain projection was REMOVED by owner instruction; the file no longer exists. Its absence is guarded by `scripts/validate-mercenta-brain.mjs` (an absence guard, rule 08). Historical classification: pure projection of canonical records, declared `AMAZON_PROGRAMME_STATUS`. | **REMOVED** |
 | Intelligence layer | `src/lib/intelligence/intelligenceLayer.ts` | Derived, evidence-carrying projections | **CODE CORRECT** |
 
 ## Findings

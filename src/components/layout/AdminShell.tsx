@@ -57,7 +57,6 @@ const ProductDiscoveryPanel = lazy(() => import('@/components/admin/ProductDisco
 const RegionalPriorityPanel = lazy(() => import('@/components/admin/RegionalPriorityPanel').then((m) => ({ default: m.RegionalPriorityPanel })));
 const AmazonAdsDashboard = lazy(() => import('@/components/admin/AmazonAdsDashboard').then((m) => ({ default: m.AmazonAdsDashboard })));
 const FounderControlCentre = lazy(() => import('@/components/admin/FounderControlCentre').then((m) => ({ default: m.FounderControlCentre })));
-const MercentaBrain = lazy(() => import('@/components/admin/MercentaBrain').then((m) => ({ default: m.MercentaBrain })));
 const FounderInvestorCentre = lazy(() => import('@/components/admin/FounderInvestorCentre').then((m) => ({ default: m.FounderInvestorCentre })));
 const PartnershipsCentre = lazy(() => import('@/components/admin/PartnershipsCentre').then((m) => ({ default: m.PartnershipsCentre })));
 const OnboardingPipeline = lazy(() => import('@/components/admin/OnboardingPipeline').then((m) => ({ default: m.OnboardingPipeline })));
@@ -72,7 +71,6 @@ import {
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
   Phone, ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
-  Brain,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -85,10 +83,10 @@ const ADMIN_SECTIONS = [
         hidden from the nav for every other tier here AND guarded again at render.
       */
       { id: 'control_centre', label: 'Control Centre', icon: <Gauge className="w-4 h-4" /> },
-      /* §MERCENTA BRAIN — the third question of the IA: how is everything
-         connected, what do we know, and why. Super-Admin only: hidden here for
-         every other tier AND guarded again at render. */
-      { id: 'brain', label: 'Mercenta Brain', icon: <Brain className="w-4 h-4" /> },
+      /* §BATCH 4 (2026-10-10) — REMOVED: the 'brain' nav item ('Mercenta Brain').
+         The owner instructed the Mercenta Brain's complete removal (it serves no
+         purpose). Its absence is guarded by `scripts/validate-mercenta-brain.mjs`
+         (rewritten into an ABSENCE guard, rule 08). */
     ],
   },
   {
@@ -194,10 +192,12 @@ export default function AdminShell() {
   const { role, actingStaff } = useApp();
   /**
    * §RUNTIME PARITY (R1) — the active admin view IS the address
-   * (`/admin/brain`, `/admin/logistics`, …). Initialised from the URL, written
+   * (`/admin/overview`, `/admin/logistics`, …). Initialised from the URL, written
    * back on every navigation, and re-read on Back/Forward. No second store.
    * An address naming a view this shell cannot render resolves to the declared
    * default view instead of rendering an empty workspace.
+   * §BATCH 4 (2026-10-10) — `brain` was such a view until the Mercenta Brain was
+   * removed; its address now resolves to the default view here.
    */
   const [adminView, setAdminViewState] = useState(() =>
     resolveProductView('admin', currentPathname(), ADMIN_VIEW_IDS)
@@ -246,10 +246,8 @@ export default function AdminShell() {
     // centre: internal acquisition pipeline, automation administration and AI
     // governance must never be reachable from a non-Super-Admin session.
     'control_centre',
-    // §MERCENTA BRAIN — internal relationship/intelligence surface: it exposes
-    // prospects, Mercenta-wide decisions, automations and provider machinery, so
-    // it must never be reachable from a non-Super-Admin session.
-    'brain',
+    // §BATCH 4 (2026-10-10) — REMOVED: 'brain' left this Super-Admin allowlist with
+    // the Mercenta Brain surface it guarded.
   ]);
   const navSections = (isSuper
     ? ADMIN_SECTIONS
@@ -298,7 +296,7 @@ export default function AdminShell() {
     partnerships: 'Partnerships & Fundraising',
     work: 'Work Management', calendar: 'Operations Calendar',
     control_centre: 'Control Centre',
-    brain: 'Mercenta Brain',
+    /* §BATCH 4 (2026-10-10) — REMOVED: `brain: 'Mercenta Brain'` left with the surface. */
   };
 
   return (
@@ -323,10 +321,10 @@ export default function AdminShell() {
                 second time at render (defense in depth), like the other private
                 founder surfaces. */}
             {adminView === 'control_centre' && (isSuper ? <FounderControlCentre onNavigate={setAdminView} /> : <AccessDenied />)}
-            {/* §MERCENTA BRAIN — the relationship/intelligence destination. Guarded
-                a second time at render (defense in depth), like the other
-                Super-Admin-only surfaces. */}
-            {adminView === 'brain' && (isSuper ? <MercentaBrain onNavigate={setAdminView} /> : <AccessDenied />)}
+            {/* §BATCH 4 (2026-10-10) — REMOVED: the Mercenta Brain render branch.
+                A `/admin/brain` address resolves to the default view via
+                `resolveProductView` (the view is no longer in ADMIN_VIEW_IDS), so it
+                can never render a blank workspace. */}
             {/* §Sprint — canonical work layer: tasks/deadlines + derived calendar. */}
             {adminView === 'work' && <AdminWorkManagement onNavigate={setAdminView} />}
             {adminView === 'calendar' && <AdminWorkCalendar onNavigate={setAdminView} />}

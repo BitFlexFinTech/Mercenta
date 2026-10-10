@@ -6,8 +6,9 @@
  * and — critically — an HONEST truth classification for each leg.
  *
  * This module owns NO business state and performs NO fetching. It is a
- * projection, exactly like the Mercenta Brain graph: callers pass already
- * tenant-scoped records and receive geometry + labels back.
+ * projection: callers pass already tenant-scoped records and receive geometry +
+ * labels back. (The old "exactly like the Mercenta Brain graph" comparison was
+ * dropped in §BATCH 4 (2026-10-10) when that graph was removed.)
  *
  * TRUTH DISCIPLINE (§Integration modes — fail closed)
  * ---------------------------------------------------

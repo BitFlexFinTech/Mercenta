@@ -24,7 +24,8 @@
 > recorded in `.clinerules/operating-model.md` §4: **the existing UI is NOT the visual baseline**, and an authorised
 > completion/redesign directive MAY change layout, IA, navigation, component structure, shell, spacing, typography,
 > hierarchy, density, responsive behaviour and interaction patterns — including admin and brand surfaces and the
-> Brain/Logistics presentation — while preserving the underlying business/domain contracts. The original text is kept
+> Logistics presentation (§BATCH 4, 2026-10-10: the Brain surface named in this sentence was removed) — while
+> preserving the underlying business/domain contracts. The original text is kept
 > verbatim below as history only.
 
 <!-- HISTORY ONLY — the following is the retired clause, quoted for the record.
