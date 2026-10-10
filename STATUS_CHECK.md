@@ -26,6 +26,23 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 2 — THE CONSOLIDATION + WORK "HOW THIS WORKS" CARDS REMOVED (session 125, 2026-10-10)
+
+1. **What this session did** — the Founder said "continue". The recorded NEXT TASK was **BATCH 2 (Parts 2.1 + 2.2) of the merged 2026-10-10 programme**, so it was executed: remove two cards, each with its ABSENCE GUARD. This IS an application-runtime change, so the §10 three-way gate applies in full. No credential was needed and none was requested.
+
+2. **Removed (2.1)** — the shared `WorkWorkspace` "How this works" card. It sat OUTSIDE the view switches, so it cleared BOTH the Calendar and the Tasks & Deadlines views. `CommercialReadiness.tsx` keeps its OWN, separate card (left untouched).
+
+3. **Removed (2.2)** — the "Consolidation" card from BOTH logistics workspaces (`LogisticsHub.tsx`, `LogisticsControl.tsx`). **The owner lib `src/lib/shipping/consolidation.ts` and the now-unmounted `ConsolidationPosturePanel` STAY**, because programme decision 11 ("deferred, not designed out") is a recorded Founder decision — removing a card is not removing a decision. The retained-but-unwired panel is declared (with its reason) in `validate-dead-code`'s DECLARED_UNWIRED allowlist, and its stale header comment was corrected.
+
+4. **Every dependent repointed into an ABSENCE GUARD (rule 08 — never deleted, never weakened).** `scripts/validate-logistics-providers.mjs` §9a (the two wiring checks now assert the surfaces render NO consolidation card), `scripts/validate-retired-platforms.mjs` §2b (the WorkWorkspace card is absent; the CommercialReadiness card survives), `e2e/logistics-providers.spec.ts` tests 3 and 5 (rewritten from presence to absence), the scenario catalogue row + the regenerated coverage matrix (via `npm run catalogue:e2e`, the SSOT owner), and the `verify-demo-live.mjs` probes. **MUTATION-PROVED:** re-introducing each card made the guards FAIL (`ROCKETCHAT_REMOVAL_VALIDATION_FAIL`, `LOGISTICS_PROVIDERS_VALIDATION_FAIL`); both files were restored byte-identical (WorkWorkspace sha256 `4eef33e6…`; LogisticsHub `a6330f08…`; LogisticsControl `5a27a8f5…`).
+
+5. **THREE pre-existing live-verifier defects FIXED at source (rule 07).** (a) the bundle probe read only the chunks the inspected page happened to load, giving **false negatives** ("the deployed bundle does not carry X" while the live asset provably did) — it now reads EVERY locally-built chunk from the LIVE origin and proves the deploy is CURRENT; (b) the brand-Hub navigation was **flaky** (a strict-mode click plus a fixed sleep, swallowed by `.catch`) — it now waits for the Hub's own rendered surface; (c) a **stale on-behalf check** (the authority gate shipped in `ef48534`; a later batch repointed 11 specs but missed this live check) — it now asserts the surface STATES its authority and offers the control only when permitted.
+
+6. **Evidence.** `npm run typecheck` 0 · `npm run lint` 0 · `npm run build` ok · `npm run validate:all` **189 PASS / 0 FAIL** · `npx playwright test e2e/logistics-providers.spec.ts` **6 passed** · **deployed** via `scripts/deploy-demo.sh` and verified LIVE: **`LIVE_VERIFICATION_PASS` 208/208 checks, 0 page errors** (brand 0 / admin 0 / superAdmin 0), including the three §BATCH2 consolidation ABSENCE checks and the new deploy-CURRENT check. Work commit **`ec33927`**.
+
+7. **Checkpoint / state.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** All five state sources updated; NEXT TASK is **BATCH 3 (Parts 2.3 + 2.4)**.
+
+
 ## §BATCH 1 — THE TWO GLOBAL RULES + THE EDITOR ROOT FIX (session 125, 2026-10-10)
 
 1. **What this session did** — the Founder said "continue where you left off". The recorded NEXT TASK was **BATCH 1 (Part 1) of the merged 2026-10-10 programme**, so it was executed: install two new GLOBAL rules and fix the editor root. This is a TOOLING / GOVERNANCE increment — no application-runtime code changed, so the §10 three-way gate is **NOT APPLICABLE (no application runtime change)**. No credential was needed and none was requested.

@@ -46,11 +46,18 @@
 
 ## PART 2 — REMOVALS (each with its absence guard)
 
-- **2.1 — "How this works" card.** ONE deletion in `WorkWorkspace.tsx` (~606–616): it sits outside the view
-  switches, so it clears BOTH Calendar and Tasks & Deadlines. (Leave `CommercialReadiness`'s own card alone.)
-- **2.2 — Consolidation card, BOTH surfaces.** `LogisticsHub.tsx` (~1670–1672) and `LogisticsControl.tsx` (~742).
+> **2.1 and 2.2 are ✅ DONE (Batch 2, session 125, 2026-10-10); 2.3 – 2.6 remain.** Each removal was repointed
+> into an ABSENCE GUARD (rule 08) and mutation-proved (re-introduce → FAIL → restore byte-identical).
+
+- **2.1 — "How this works" card. ✅ DONE.** ONE deletion in `WorkWorkspace.tsx` (it sat outside the view
+  switches, so it cleared BOTH Calendar and Tasks & Deadlines — `CommercialReadiness`'s own card was left alone).
+  Guard: `scripts/validate-retired-platforms.mjs` §2b.
+- **2.2 — Consolidation card, BOTH surfaces. ✅ DONE.** Removed from `LogisticsHub.tsx` and `LogisticsControl.tsx`.
   **The canonical owner `src/lib/shipping/consolidation.ts` STAYS** — programme decision 11 ("deferred, not
-  designed out") is a recorded Founder decision; removing a card is not removing a decision.
+  designed out") is a recorded Founder decision; removing a card is not removing a decision (the now-unmounted
+  `ConsolidationPosturePanel` stays too, declared in `validate-dead-code`'s unwired allowlist). Guards:
+  `scripts/validate-logistics-providers.mjs` §9a, `e2e/logistics-providers.spec.ts` (tests 3 and 5 rewritten),
+  and the `verify-demo-live.mjs` probes repointed to absence.
 - **2.3 — Operational map, BOTH surfaces.** `LogisticsHub.tsx` (~1676–1697) and `LogisticsControl.tsx` (~541).
   Then `LogisticsMapCanvas` + `src/lib/logistics/operationsMap.ts` go too IF nothing else uses them (verify,
   do not assume), with `validate-logistics-map.mjs` and `e2e/logistics-hub-map.spec.ts` rewritten as absence guards.

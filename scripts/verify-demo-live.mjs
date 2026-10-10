@@ -11,6 +11,30 @@
  * admin Overview h1 reads "Overview".
  */
 import { chromium } from 'playwright';
+import { readdirSync } from 'node:fs';
+
+/**
+ * §BATCH 2 (2026-10-10) — DETERMINISTIC BUNDLE-PROBE MANIFEST (rule 07, fixed at source).
+ *
+ * The bundle probe below used to read only the JS chunks the inspected page happened to
+ * load (its script tags + the browser resource timeline). That is NOT deterministic: a
+ * rebuild can re-split shared chunks so a string moves into a lazy chunk the page never
+ * loaded, and the probe then reports a FALSE NEGATIVE — "the deployed bundle does not
+ * carry X" while the deployed asset demonstrably does (proved this session: the string was
+ * present on the live origin and in the live chunk, yet the probe missed it).
+ *
+ * The fix enumerates EVERY JS chunk the LOCAL build produced (`dist/assets/*.js`) and
+ * fetches each from the LIVE origin, so the probe reads the WHOLE deployed bundle AND
+ * proves the deploy is current (a stale deploy 404s a chunk name). The content probed is
+ * still the LIVE text, never local text.
+ */
+const DIST_CHUNKS = (() => {
+  try {
+    return readdirSync(new URL('../dist/assets/', import.meta.url)).filter((f) => f.endsWith('.js'));
+  } catch {
+    return [];
+  }
+})();
 
 const BASE = process.env.LIVE_BASE ?? 'https://demo.mercenta.co.uk';
 let failures = 0;
@@ -280,7 +304,7 @@ check('§P7 the deployed registry labels the payment figures as derived (no Vend
  * when this leg first ran.
  */
 const bundleProbe = await superAdmin
-  .evaluate(async () => {
+  .evaluate(async (distChunkNames) => {
     const urls = Array.from(
       new Set([
         ...Array.from(document.querySelectorAll('script[src]')).map((s) => s.getAttribute('src') ?? ''),
@@ -288,12 +312,21 @@ const bundleProbe = await superAdmin
           .getEntriesByType('resource')
           .map((r) => r.name)
           .filter((n) => n.endsWith('.js')),
+        // §BATCH 2 — the DETERMINISTIC manifest: every chunk the local build produced,
+        // fetched from the LIVE origin (see DIST_CHUNKS). This makes the probe independent
+        // of which chunks the inspected page happened to load.
+        ...distChunkNames.map((n) => new URL(`/assets/${n}`, location.origin).href),
       ])
     ).filter(Boolean);
     const texts = [];
+    const missing = [];
     for (const u of urls) {
       try {
         const r = await fetch(u);
+        if (!r.ok) {
+          missing.push(u);
+          continue;
+        }
         texts.push(await r.text());
       } catch {
         /* a chunk that cannot be read is simply not part of the evidence */
@@ -303,6 +336,8 @@ const bundleProbe = await superAdmin
     return {
       count: urls.length,
       read: texts.length,
+      distCount: distChunkNames.length,
+      missing,
       receiptGate: all.includes('RECEIPT_REQUIRED'),
       zeroValue: all.includes('INVOICE_ZERO_VALUE'),
       terms: all.includes('INVOICE_TERM_RULE'),
@@ -374,9 +409,12 @@ const bundleProbe = await superAdmin
       p12SimulatedReadNotice: all.includes('Simulation (mock) — simulated channel read'),
       p12InventoryPush: all.includes('catalog-inventory-push'),
     };
-  })
-  .catch(() => ({ count: 0, read: 0 }));
-const probeDetail = `${bundleProbe.read}/${bundleProbe.count} loaded chunk(s) read`;
+  }, DIST_CHUNKS)
+  .catch(() => ({ count: 0, read: 0, missing: [] }));
+const probeDetail = `${bundleProbe.read}/${bundleProbe.count} chunk(s) read · ${bundleProbe.distCount ?? 0} in the local manifest`;
+check('§BATCH2 the deployed bundle is CURRENT (every locally-built chunk is on the live origin)',
+  (bundleProbe.missing ?? []).length === 0,
+  `${(bundleProbe.missing ?? []).length} manifest chunk(s) missing live`);
 check('§P7 the deployed bundle carries the receipt gate (AV-018)', bundleProbe.receiptGate === true, probeDetail);
 check('§P7 the deployed bundle carries the zero-value refusal (AV-022)', bundleProbe.zeroValue === true, probeDetail);
 check('§P7 the deployed bundle carries the declared-term refusal', bundleProbe.terms === true, probeDetail);
@@ -415,8 +453,25 @@ check('no uncaught page error on the deployed P7 invoicing flows',
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
 
 /* ── 5. §P5 — THE DEPLOYED ARRIVAL NODE IS THE FC ON THE PO, NOT A HUB ───── */
-await page.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => {});
-await page.waitForTimeout(4000);
+/**
+ * §BATCH 2 (2026-10-10) — MADE DETERMINISTIC (rule 07: a FLAKY check is a defect, fixed at
+ * source). This used a strict-mode `text=Logistics Hub` click plus a fixed 4s sleep. The
+ * click could match several nodes (swallowed by `.catch`), leaving the page on the previous
+ * surface, so the brand-Hub assertions below intermittently failed (observed: PASS in one
+ * live run, FAIL in others). It now clicks `.first()` and WAITS for the Hub's own rendered
+ * completion surface instead of sleeping.
+ */
+await page
+  .locator('nav[aria-label="Primary"]')
+  .getByText('Logistics Hub', { exact: false })
+  .first()
+  .click()
+  .catch(() => {});
+await page
+  .locator('[data-testid="carrier-provider-dhl"]')
+  .first()
+  .waitFor({ timeout: 15000 })
+  .catch(() => {});
 const hubBody = await page.locator('body').innerText().catch(() => '');
 /**
  * §P9 (programme decision 4) — THE REHOMED CARRIER CONSOLE IS AN **ADMIN** SURFACE.
@@ -442,8 +497,9 @@ check('§P10 the deployed brand Hub tells the brand who configures its carriers'
   /Mercenta holds and configures these carrier accounts/i.test(hubBody));
 check('§P10 the deployed brand Hub exposes NO credential form for a carrier',
   (await page.locator('input[type="password"]').count()) === 0);
-check('§P10 the deployed brand Hub renders the consolidation posture as DEFERRED',
-  (await page.locator('[data-testid="consolidation-status"][data-status="deferred"]').count()) > 0);
+check('§P10+§BATCH2 the deployed brand Hub renders NO consolidation posture (the card was removed)',
+  (await page.locator('[data-testid="consolidation-posture"]').count()) === 0 &&
+    (await page.locator('[data-testid="consolidation-status"]').count()) === 0);
 check('§P10 the deployed brand Hub never names a retired carrier as an account',
   !/FedEx|BAK Logistics/i.test(hubBody));
 /* Navigate the EXISTING admin session through the product's own nav (a reload
@@ -922,8 +978,27 @@ check('§P13/S7 the deployed admin detail calls the CLOSING window out (the owne
 check('§P13/S7 the deployed admin detail’s deadline tile is the OWNER’s state — never the old EXPIRED wording',
   /Ack within/.test(s7TileText) && !/EXPIRED/.test(s7TileText),
   s7TileText.replace(/\s+/g, ' ').slice(0, 120));
-check('§P13/S7 the deployed admin detail offers the acceptance the owner permits (an in-queue PO)',
-  (await admin.locator('button', { hasText: 'Acknowledge on behalf of' }).count()) > 0);
+/**
+ * §BATCH 2 (2026-10-10) — REPOINTED (rule 07: a check asserting a STALE contract is a
+ * defect, fixed at source). The on-behalf AUTHORITY gate (owner-reported defect, commit
+ * `ef48534`, 2026-09-30) made the "Acknowledge on behalf of" control CONDITIONAL: it
+ * renders only when the brand has recorded `any_decision` authorisation. A later batch
+ * (`2de0e75`) repointed 11 on-behalf browser SPECS but MISSED this LIVE check, which kept
+ * asserting the button unconditionally. The correct contract: the admin detail STATES its
+ * authority (from the ONE owner) and offers the control ONLY when permitted — never a dead
+ * control the domain writer would refuse.
+ */
+const s7OnBehalfAuthority = admin.locator('[data-testid^="admin-po-on-behalf-authority-"]').first();
+const s7OnBehalfPermitted = await s7OnBehalfAuthority
+  .getAttribute('data-on-behalf-permitted')
+  .catch(() => null);
+const s7OnBehalfButtonCount = await admin
+  .locator('button', { hasText: 'Acknowledge on behalf of' })
+  .count();
+check('§P13/S7 the deployed admin detail STATES the on-behalf authority and offers the control only when permitted',
+  s7OnBehalfPermitted !== null &&
+    (s7OnBehalfPermitted === 'any_decision' ? s7OnBehalfButtonCount > 0 : s7OnBehalfButtonCount === 0),
+  `permitted=${s7OnBehalfPermitted} · button=${s7OnBehalfButtonCount}`);
 
 /** A DECIDED order: the owner's reason is stated and NO dead control is offered. */
 await admin.goto(`${BASE}/admin/purchase_orders_admin`, { waitUntil: 'domcontentloaded' }).catch(() => {});
