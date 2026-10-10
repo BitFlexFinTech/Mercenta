@@ -206,18 +206,6 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Ping Twilio API to verify the Account SID and Auth Token',
   },
-  postiz: {
-    id: 'postiz',
-    name: 'Postiz',
-    description:
-      'Self-hosted social media scheduler (AGPL-3.0). Schedule posts to Instagram, TikTok, LinkedIn, X, Facebook, YouTube, and more from the admin Marketing section. Supports AI drafting, agent CLI, and public REST API.',
-    authMethod: 'api_key',
-    fields: [
-      { key: 'api_url', label: 'Postiz URL', placeholder: 'http://localhost:8100', secret: false },
-      { key: 'api_key', label: 'API Key', placeholder: 'Postiz admin API key', secret: true },
-    ],
-    testCallDescription: 'Fetch Postiz health endpoint to verify the server is reachable',
-  },
   // §Phase 4 — registered so their MODE is authoritative for scenario safety.
   // Deliberately NOT added to INTEGRATION_ORDER: they have dedicated
   // non-wizard integration paths (Xero: services/xero + AccountingPanel;
@@ -381,7 +369,6 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'firecrawl',
   'usertour',
   'twilio_whatsapp',
-  'postiz',
   // §Priority-1 — provider control-plane coverage: logistics + compliance +
   // finance providers with authoritative simulation defaults.
   'dhl',
@@ -429,7 +416,6 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   firecrawl: { category: 'data', defaultMode: 'available' },
   usertour: { category: 'communications', defaultMode: 'simulation' },
   twilio_whatsapp: { category: 'communications', defaultMode: 'available' },
-  postiz: { category: 'marketing', defaultMode: 'available' },
   // §Phase 4 — scenario-required providers. Docs-verified simulation state:
   // DHL waiting/simulation, Xero demo/simulation. Registered so every scenario
   // provider resolves authoritatively (never falls to UNKNOWN).

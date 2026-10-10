@@ -36,7 +36,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
       'Billing', 'Contract Cycle', 'Logistics Hub',
       'Compliance Approvals', 'Messages', 'Helpdesk', 'Monitoring',
       'Super Admin', 'Audit Log', 'Onboarding Tours',
-      'Integration Settings', 'Social Media', 'WhatsApp']) {
+      'Integration Settings', 'WhatsApp']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
     /* §P9 (programme decision 4) — REPOINTED: 'Carrier Monitor' was in the list
@@ -60,15 +60,18 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     for (const heading of ['Overview', 'Operations', 'Catalogue', 'Compliance', 'Insights', 'Account']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
     }
-    // §Phase E7 — the brand nav item is the customer-facing Mercenta Social
-    // identity (src/config/mercentaSocial.ts → MERCENTA_SOCIAL.navLabel). The
-    // assertion is unchanged in strength: the item must still be visible.
+    // §BATCH 5 (2026-10-10) — REPOINTED. The brand nav item 'Mercenta Social' was
+    // asserted VISIBLE here; the owner removed the feature COMPLETELY, so the item
+    // is now asserted ABSENT (the same strength, inverted — the source-level guard
+    // lives in scripts/validate-retired-platforms.mjs).
     for (const item of ['Dashboard', 'Product Catalog', 'Purchase Orders', 'Returns',
       'Logistics Hub', 'Onboarding & Legal', 'UK Compliance', 'Contracts',
       'Analytics', 'Market Intel', 'Reports', 'Documents & Account',
-      'Support & Team', 'Mercenta Social', 'Settings']) {
+      'Support & Team', 'Settings']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
+    await expect(nav.locator('text=Mercenta Social')).toHaveCount(0);
+    await expect(page.locator('text=Mercenta Social')).toHaveCount(0);
   });
 
   /**

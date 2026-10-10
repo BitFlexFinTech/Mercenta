@@ -80,7 +80,8 @@ const SHELLS = [
     panels: [
       'AdminDashboard', 'LogisticsControl', 'BrandCRM', 'CatalogManagerAdmin',
       'ComplianceApprovals', 'MarketingHub', 'IntegrationsPanel', 'UsertourAdminPanel',
-      'PostizAdminPanel', 'WhatsAppAdminPanel', 'FulfillmentTrack', 'RetailPipeline',
+      'WhatsAppAdminPanel', 'FulfillmentTrack', 'RetailPipeline',
+      /* §BATCH 5 (2026-10-10) — 'PostizAdminPanel' left this list with the surface. */
       'BillingPanel', 'ContractsAdminPanel', 'MessagesHub', 'HelpdeskDashboard',
       'ReturnsTrackingDashboard', 'MonitoringDashboard', 'AdminPurchaseOrderList',
       'SuperAdminPanel', 'AdminAuditLog', 'BrandIntelligencePanel',
@@ -104,7 +105,8 @@ const SHELLS = [
       'BrandDashboard', 'OnboardingWizard', 'OnboardingSummary', 'ProductCatalog',
       'BrandInventory', 'LogisticsHub', 'ComplianceHub', 'BrandContractView',
       'BrandPurchaseOrders', 'BrandReturns', 'BrandReports', 'BrandSelfService',
-      'BrandSettings', 'BrandTeamMessages', 'BrandSocialConnect', 'BrandIntelligence',
+      'BrandSettings', 'BrandTeamMessages', 'BrandIntelligence',
+      /* §BATCH 5 (2026-10-10) — 'BrandSocialConnect' left this list with the surface. */
       'CommercialReadiness', 'BrandAdvertising', 'ListingAnalyzer',
       'SalesEstimatorCard', 'SalesAnalytics', 'WorkManagement', 'BrandSupport',
     ],

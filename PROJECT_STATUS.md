@@ -125,24 +125,6 @@ No defect was parked, mirrored or left as a "known exception". The one thing del
 9. **NEXT EXECUTION SCOPE** — WAVE 3 PART 3 (order item 4 continues): the brand-surface pass.
 ## PREVIOUS PLATFORM POSITION — **§E2E-9: E2E COVERAGE, THE FOUNDER DOMAIN (THE LAST NAMED DOMAIN)** (2026-10-08) — SUPERSEDED BY ORDER ITEM 4 · WAVE 3 PART 2
 
-1. **COMPLETED / VERIFIED — product work, so the §10 three-way gate APPLIES (this IS an application-runtime change); the commit hash and the demo/live legs are recorded in the follow-up state commit of this task's close.** Order item 3 (the E2E coverage programme's named domains) was COMPLETE, so order item 4 (the legacy UI-redesign backlog) was resumed at its FIRST row — Wave 3 Part 2, the Admin Overview composition.
-   - `src/components/shared/workspace.tsx` — **fixed AT THE ONE OWNER (`MetricBand`)**: the band lays out on a **12-track grid** and each tile carries a track span, so every row is exactly full and a trailing part-row's tiles share the remaining tracks **EQUALLY**. Before: "Business position" (5 tiles in a 4-up grid) painted **three EMPTY CELLS** and "Operations" (7 tiles) painted **one**. Measured at 1440 after the fix: the 5-tile band = **4 × 203 + 1 × 814 (full width)**; the 7-tile band = **4 × 203 + 3 × 271**; even rows keep their previous 203px width **EXACTLY**, so nothing else on the surface moved. (An interim 2+1+1 distribution was measured, judged as noise — mixed tile widths inside one row — and replaced.)
-   - `e2e/dashboard.spec.ts` — new **test 8** ("no band row leaves an empty cell") at 1440 and 390, measuring the RENDERED geometry of every band. **MUTATION-PROVED BOTH WAYS:** with the span rule reverted to the pre-fix behaviour the test **FAILS at BOTH viewports** ("a 1-tile row must fill the band (span 177.5 vs grid 356)", non-zero exit); restored, it **passes** — the source was restored **byte-identical** (sha256 `982890f5c56396c77e62b2e1f62b7cfa06217e8b865ec4698b55eb7eb4adadf2`).
-   - **§DEFECTS FIXED AT SOURCE (rule 07):** (a) the registry row `uiux-wave3-part2-admin-dashboard-composition` stated something **FALSE** — it described this surface as still the "Operations Overview" carrying the "Command centre" block "as one long list of equally-weighted rows"; that block left the surface on **2026-09-22** (recorded §Dashboard-cleanup consolidation) and the composition was restructured afterwards. The row is corrected and now carries the delivered work + its evidence. (b) Wave 3 Parts 3/4/5 each cited a `PROJECT_STATUS.md` heading that **no longer exists in that form** — all three **repointed** with the old contract recorded inline.
-   - **§DISCOVERED, classified as WORK (not parked, not silently changed):** `discovered-overview-vestigial-toolbar-strip` — the Overview's sticky toolbar holds only an inert ⌘K hint because the controls it was built for were removed by that same cleanup; both fixes are DECISIONS ((a) remove it and repoint the Wave-2 architecture assertion in `e2e/uiux-redesign.spec.ts` test 1, or (b) make it operable, which needs new shell plumbing for the palette), so the row names the exact choice.
-   - `scripts/validate-resume-state.mjs` — **§REPOINTED, not weakened:** the next-task token vocabulary now accepts **`WAVE n`** (the plan's own label for the work that is genuinely next) alongside `BATCH n` / `S n` / `E2E-n`, because a CORRECT resume state named a label the gate could not express; the drift check (both files must name the SAME token) and the negative self-check are unchanged, and the new case is added to that self-check.
-   - `validate:all` **188 PASS / 0 FAIL** · typecheck **0** · lint **0** · build **ok** · registry integrity **7 PASS / 0 FAIL** · evidence-row integrity **2419 PASS / 0 FAIL**; BROWSER LEG — the Overview spec **15 passed** and the wider band-consuming sweep (**15 spec files = 154 passed / 0 failed**).
-   - Registry: `uiux-wave3-part2-admin-dashboard-composition` `not_started` → `built_and_tested`; ONE discovered row added; `_meta.total_entries` 554 → 555 and `_meta.status_counts` recomputed from the entries (338 + 183 + 12 + 5 + 9 + 7 + 1); plan §0b order item 4 moved to IN PROGRESS with this session's update appended.
-2. **IN PROGRESS** — order item 4 (the legacy UI-redesign backlog): Part 2 shipped this session; Parts 3 (brand surfaces), 4 (tables/forms/drawers) and 5 (states) remain genuinely open, plus the Part-2 discovery above.
-3. **REMAINING — CURRENT ROADMAP** — (1) Wave 3 Part 3, the brand surfaces; (2) Wave 3 Part 4, tables/forms/drawers; (3) Wave 3 Part 5, the state pass; (4) `discovered-overview-vestigial-toolbar-strip` (needs the (a)/(b) choice); (5) the four Founder decision-blocked rows; (6) the residual auto-seeded `spec-*` rows (a Founder decision); (7) order item 1's 8 externally-blocked gates.
-4. **DEFERRED / PARKED** — unchanged (`uiux-wave3-theme-alpha-shims-removal` stays correctly `deferred`; its own row records WHY — the shim serves ~215 live call sites in the CURRENT design system, so deleting it would remove working behaviour).
-5. **BLOCKED / DEPENDENCIES** — unchanged. **Credentials are NOT blockers.**
-6. **KNOWN EXCEPTIONS** — none introduced.
-7. **CURRENT CHECKPOINT** — this session's commit (hash in the follow-up state commit); previous verified `0b3af5b` (§E2E-9); last verified APPLICATION-RUNTIME commit before this session `5cec2b3`.
-8. **VERIFICATION STATUS** — `validate:all` PASS (188) · typecheck 0 · lint 0 · build ✓ · resume-state PASS · registry-integrity 7/0 · built-rows 2419/0 · browser 15 (Overview) + 154 (15 specs) passed.
-9. **NEXT EXECUTION SCOPE** — WAVE 3 PART 3 (order item 4 continues): the brand-surface pass.
-## PREVIOUS PLATFORM POSITION — **§E2E-9: E2E COVERAGE, THE FOUNDER DOMAIN (THE LAST NAMED DOMAIN)** (2026-10-08) — SUPERSEDED BY ORDER ITEM 4 · WAVE 3 PART 2
-
 1. **COMPLETED / VERIFIED — VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** Order item 3 was resumed at E2E-9, exactly as the previous session's record said it would. This increment changes a scenario catalogue, its GENERATED document, a validator, one registry row and the state sources; the live site continues to serve the last verified application-runtime commit `5cec2b3` (live `verify:live` 267 PASS / 0 FAIL).
    - `docs/scenario-catalogue.json` — the ONE owner, extended **396 → 440 scenarios** with **44 `fo-*`** founder scenarios, each carrying a `test` field naming the exact Playwright test that proves it. The 44 span FIVE specs — the company / government control centre (4) · the founder investor centre & partnerships (3) · the Founder Operating System Control Centre and its twenty-six sections (26) · the funding / accelerator pipeline (3) · the investor demo incl. its tenant-isolation, RBAC, error-recovery, accessibility and responsive checks (8). `founder` coverage **5 → 49**.
    - Domain boundary uses the SAME capability-based method as E2E-5/E2E-7/E2E-8: the specs the catalogue ITSELF classifies under the `founder` capability, corroborated by the app's own navigation (`AdminShell.tsx` Super-Admin group: Company · Control Centre · Grants & Investors; the founder investor centre and partnerships are Super-Admin-only surfaces).
@@ -344,7 +326,6 @@ No defect was parked, mirrored or left as a "known exception". The one thing del
 7. **CURRENT CHECKPOINT** — app-runtime commit `79e4d59`.
 8. **VERIFICATION STATUS** — `validate:all` PASS (187) · typecheck 0 · lint 0 · build ✓ · `validate:tutorial-recordings` PASS (35, mutation-proved twice) · E6/E7 PASS · browser 25 passed · LIVE 267/0.
 9. **NEXT EXECUTION SCOPE** — order item 2 (the remaining build backlog).
-
 
 
 1. **COMPLETED / VERIFIED — COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** (app-runtime commit `7f9577e`, deployed to `demo.mercenta.co.uk`, live-verified 267/0).
@@ -1040,7 +1021,6 @@ No defect was parked, mirrored or left as a "known exception". The one thing del
 9. **NEXT EXECUTION SCOPE** — **P1**, in the shape the plan declares, gated by a NEW `validate:environment`.
 
 
-
 ## CURRENT PLATFORM POSITION — **BATCH 2j (`AV-009` + `AV-010b`): THE ACKNOWLEDGEMENT NOW KNOWS WHEN IT IS INCOMPLETE, AND A CHANNEL-HELD ORDER CAN AT LAST BE REFUSED AS THE CHANNEL REQUIRES** (2026-09-30)
 
 1. **COMPLETED / VERIFIED (local + committed)** — `src/lib/commerce/poAcknowledgementCompleteness.ts` (NEW — the completeness owner: the rule's wording from its config owner, the missing lines derived from the ORDER, fail-closed on an order with no readable lines); `src/lib/commerce/poAcknowledgementWindow.ts` (the hold duty, its refusal, the inside-limit warning, and `holdRejectionPermitted` — the override that makes the channel-REQUIRED rejection performable past the 48-hour update window); `src/config/purchaseOrders.ts` (the two rule statements + the three hold-state labels, declared once, guarded at module load); `src/types.ts` (the channel's three-valued hold vocabulary, `PoChannelHoldStatement`, and the PO fields `channelHold` / `implicitlyRejectedLines`); `src/data/api.ts` (both duties enforced before the general late rule; the omitted lines recorded on the order and in the audit trail; the ONE hold-statement recorder, which refuses a statement claiming a live source); `src/components/brand/BrandPurchaseOrders.tsx` (both duties rendered from the owners, with the completeness verdict exposed as data); `src/components/admin/AdminPurchaseOrderList.tsx` (the guarded simulated declaration that makes a hold reachable in the deployed demo). **Gates:** `npm run validate:po-ack-duties` (NEW, 43 assertions, executing the REAL writer and store), `e2e/po-ack-duties.spec.ts` (4 passed) and the live leg `L19`.
@@ -1384,8 +1364,6 @@ use — `shadcn`, `write-swift`, `animate-expo`, `mobile-native`, `apple-design`
 applied) and **"the project outranks a skill"**. Also corrected: `05-thoroughness-overrides-brevity.md` carried a
 stale project path (`BoxBee/BoxBee`); it now reads `/Users/tadii/Desktop/1. Mercenta` and states the rule for
 every project.
-
-
 
 
 ---
@@ -3480,7 +3458,6 @@ Continue with heading 3 item 4 (Command Centre ↔ Control Centre reconciliation
 4. **No credential exists for anything in heading 5** — do not attempt those without one, and never claim a simulated provider is live.
 
 
-
 ## 🛠 OPERATING-RULES MIGRATION — STALE GATES RETIRED (2026-09-21, session 7) — HISTORICAL RECORD
 
 > **SUPERSEDED by the clean-slate reconciliation above (session 8).** This block records the RULE migration only; the
@@ -3666,7 +3643,6 @@ fixed at the architecture level rather than in two screens.
 ---
 
 
-
 Branch `redesign/foundation`. **Start HEAD `22b6b62`** (the legacy-shell retirement checkpoint — preserved, never reset).
 The dirty Founder worktree was carried forward and **preserved** (no `reset`, no `clean`, no `checkout -- .`, no stash,
 no force push). **No deploy. `.env` never read. No credential activated. No live provider call.**
@@ -3759,8 +3735,6 @@ first refresh made the product vanish. It no longer does.
 - **Payout rail labels**: the DEFAULT constant and every doc/copy statement are reconciled to T-1; the per-rail
   `accountLabel` strings in `src/config/payouts.ts` were left as-is because nothing in the product depends on their
   order and changing them adds risk for no behavioural gain. Recorded, not hidden.
-
-
 
 
 ### 7. CURRENT CHECKPOINT
@@ -5428,7 +5402,6 @@ retained unchanged below as history.**
 > Phase 2 — Commercial readiness + product economics, OR Phase 15 production-readiness work, per the founder's
 > priority. **Do NOT re-open Phase 1 unless a regression is found.** Phase 14 and the Phase 1 live-research
 > activation stay blocked on credentials.
-
 
 
 >

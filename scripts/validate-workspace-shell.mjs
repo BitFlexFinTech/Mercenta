@@ -204,20 +204,23 @@ const SHELL_MIGRATED_SURFACES = [
   'src/components/brand/BrandAdvertising.tsx',
   'src/components/brand/BrandTeamMessages.tsx',
   'src/components/brand/ListingAnalyzer.tsx',
-  'src/components/brand/MercentaSocial.tsx',
-  /* §P9 (programme decision 4) — REPOINTED: 'src/components/admin/CarrierMonitor.tsx',
-     'src/components/carrier/BakLogistics.tsx' and 'src/components/carrier/CarrierDashboard.tsx'
-     are REMOVED from SHELL_MIGRATED_SURFACES with the carrier surface. Their absence
-     is asserted below. */
+  /* §BATCH 5 (2026-10-10) — REPOINTED: 'src/components/brand/MercentaSocial.tsx' is
+     REMOVED from SHELL_MIGRATED_SURFACES with the surface it belonged to. Its
+     absence is asserted below. */
   'src/components/brand/OnboardingSummary.tsx',
 ];
 
-/* §P9 — the removed surfaces must be GONE, not merely unmigrated. */
+/**
+ * §P9 + §BATCH 5 — removed surfaces must be GONE, not merely unmigrated.
+ */
 for (const f of [
   'src/components/admin/CarrierMonitor.tsx',
   'src/components/carrier/BakLogistics.tsx',
   'src/components/carrier/CarrierDashboard.tsx',
   'src/components/layout/CarrierShell.tsx',
+  // §BATCH 5 (2026-10-10) — the Mercenta Social brand surface and its adapter.
+  'src/components/brand/MercentaSocial.tsx',
+  'src/components/brand/BrandSocialConnect.tsx',
 ]) {
   check(`§P9 removed surface is deleted: ${f}`, !fs.existsSync(path.join(ROOT, f)));
 }

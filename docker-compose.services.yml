@@ -2,7 +2,8 @@
 # Start: docker compose -f docker-compose.services.yml up -d
 # Phase D1 (2026-09-11): Rocket.Chat removed from the platform — its service
 # and Mongo volume were deleted from this stack. Mercenta's communications are
-# canonical (CRM / Messages / Helpdesk) and require no self-hosted chat engine.
+# §BATCH 5 (2026-10-10): Mercenta Social removed — the Postiz engine, its
+# Postgres/Redis and the social-sso bridge were deleted from this stack.
 
 services:
   usertour-db:
@@ -50,100 +51,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  postiz-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: postiz
-      POSTGRES_USER: postiz
-      POSTGRES_PASSWORD: postiz_dev_pw
-    ports:
-      - "5434:5432"
-    volumes:
-      - postiz_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postiz"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  postiz-redis:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  postiz:
-    image: ghcr.io/gitroomhq/postiz-app:latest
-    ports:
-      - "8100:5000"
-    environment:
-      # §Phase E8 — REAL public URLs (were http://localhost:5000, which broke
-      # OAuth callbacks, absolute links and the embed origin). Served with real
-      # TLS by Caddy; see scripts/Caddyfile. Add a DNS A record for
-      # postiz.mercenta.co.uk → this droplet to switch to the branded hostname.
-      MAIN_URL: "https://46-101-75-185.sslip.io"
-      FRONTEND_URL: "https://46-101-75-185.sslip.io"
-      NEXT_PUBLIC_BACKEND_URL: "https://46-101-75-185.sslip.io/api"
-      JWT_SECRET: "mercenta-postiz-jwt-secret-change-me"
-      DATABASE_URL: "postgresql://postiz:postiz_dev_pw@postiz-db:5432/postiz-db-local"
-      REDIS_URL: "redis://postiz-redis:6379"
-      TEMPORAL_ADDRESS: "temporal:7233"
-      BACKEND_INTERNAL_URL: "http://localhost:3000"
-      IS_GENERAL: "true"
-      # §Phase E8 — the ENGINE's own registration switch. Mercenta provisions
-      # brand organizations server-side through the engine's supported API (it is
-      # the only path the engine offers), so the flag is off — and the public
-      # signup/login surface is instead blocked at OUR edge: scripts/Caddyfile
-      # answers 403 for /auth* and /api/auth/* from the internet, so no brand (or
-      # stranger) can register or log in directly. Only the Mercenta Social SSO
-      # service, inside this network, may call those endpoints.
-      DISABLE_REGISTRATION: "false"
-      RUN_CRON: "true"
-      STORAGE_PROVIDER: "local"
-      UPLOAD_DIRECTORY: "/uploads"
-      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
-    volumes:
-      # §Phase E8 — engine media must outlive a container rebuild.
-      - postiz_uploads:/uploads
-    depends_on:
-      postiz-db:
-        condition: service_healthy
-      postiz-redis:
-        condition: service_healthy
-      temporal:
-        condition: service_healthy
-    restart: unless-stopped
-
-  # §Phase E8 — MERCENTA SOCIAL SSO + PROVISIONING SERVICE (server-side only).
-  #
-  # Gives an approved Mercenta brand a session in the real engine WITHOUT any
-  # signup, account creation, plan choice or password handling by the brand.
-  # Implementation: scripts/social-sso/server.mjs. It runs inside the engine
-  # network so it can reach the engine's auth API, which Caddy blocks from the
-  # internet. Secrets live in ./social-sso/.env on the server (never in git).
-  social-sso:
-    image: node:20-alpine
-    command: ["node", "/app/server.mjs"]
-    working_dir: /app
-    volumes:
-      - ./social-sso:/app:ro
-    env_file:
-      - ./social-sso/.env
-    environment:
-      ENGINE_INTERNAL: "http://postiz:5000"
-      PORT: "8080"
-    ports:
-      # Bound to loopback only: Caddy (on the host) proxies /sso here.
-      - "127.0.0.1:8110:8080"
-    depends_on:
-      postiz:
-        condition: service_started
-    restart: unless-stopped
+  # §BATCH 5 (2026-10-10) — MERCENTA SOCIAL REMOVED. The Postiz engine, its
+  # Postgres/Redis pair and the `social-sso` bridge (`scripts/social-sso/server.mjs`,
+  # `supabase/functions/social-session`) were deleted from the platform and from
+  # this stack. `scripts/validate-retired-platforms.mjs` asserts their absence.
 
   temporal-postgresql:
     container_name: temporal-postgresql
@@ -163,12 +74,14 @@ services:
     volumes:
       - temporal_postgres_data:/var/lib/postgresql/data
 
-  # §Phase E8 — Temporal is REQUIRED by the Postiz backend (it exits with
-  # "connect ECONNREFUSED ::1:7233" without it, so nginx answered 502 for every
-  # /api/* call). Its Elasticsearch visibility store is required too: with SQL
-  # visibility the engine's own search attributes exceed the 3-Text-attribute
-  # limit ("Unable to create search attributes: cannot have more than 3 search
-  # attribute of type Text"), which also stops the backend from starting.
+  # §BATCH 5 (2026-10-10) — REPOINTED. This stack used to justify itself by the
+  # Postiz backend that required it ("connect ECONNREFUSED ::1:7233" made every
+  # /api/* call answer 502). That engine has been removed, so the justification
+  # above is no longer true of the current product: Temporal is retained as
+  # general workflow infrastructure and NOTHING in the shipped product depends on
+  # it today. Its Elasticsearch visibility store is kept for the same reason
+  # (with SQL visibility, the previous engine's search attributes exceeded the
+  # 3-Text-attribute limit).
   temporal:
     container_name: temporal
     restart: always
@@ -223,7 +136,5 @@ services:
 
 volumes:
   usertour_pgdata:
-  postiz_pgdata:
-  postiz_uploads:
   temporal_postgres_data:
   temporal_elasticsearch_data:

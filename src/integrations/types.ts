@@ -23,7 +23,6 @@ export type IntegrationId =
   | 'firecrawl'
   | 'usertour'
   | 'twilio_whatsapp'
-  | 'postiz'
   // §Phase 4 — scenario-required providers registered so their mode is
   // authoritative (docs-verified current state: DHL waiting/simulation,
   // Xero demo/simulation). No longer implicit/unknown.
@@ -225,7 +224,6 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   firecrawl: { status: 'disconnected', sandbox: false },
   usertour: { status: 'connected', sandbox: true, connectedAt: '2026-09-05T00:00:00.000Z', lastVerifiedAt: '2026-09-05T00:00:00.000Z', metadata: { note: 'Self-hosted Docker service — provisioned via vps-bootstrap.sh on the Mercenta VPS.' } },
   twilio_whatsapp: { status: 'disconnected', sandbox: false },
-  postiz: { status: 'disconnected', sandbox: false },
   // §Phase 4 — scenario-required providers with authoritative (docs-verified)
   // simulation default. They are simulation-capable ONLY because current
   // repository state confirms DHL = waiting/simulation, Xero = demo/simulation.

@@ -400,15 +400,6 @@
       "expects": "The domain persistence journey renders and behaves as its spec asserts."
     },
     {
-      "id": "spec-embedded-social",
-      "capability": "integrations",
-      "journey": "embedded social",
-      "actor": "mixed",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "expects": "The embedded social journey renders and behaves as its spec asserts."
-    },
-    {
       "id": "spec-founder-investor-centre",
       "capability": "founder",
       "journey": "founder investor centre",
@@ -3591,116 +3582,6 @@
       "expects": "An implausible OAuth client id is REFUSED with a clear message and NO Google window opens; the connection state stays “none”."
     },
     {
-      "id": "in-social-provisioned-automatically",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — an approved brand reaches it and is provisioned automatically",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "1. approved brand reaches Mercenta Social and is provisioned automatically",
-      "expects": "An approved brand reaches Mercenta Social with a derived workspace id (msoc-…), provisioned automatically (or reused), and the application frame appears ONLY once a real handoff URL was obtained."
-    },
-    {
-      "id": "in-social-branded-identity",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — the customer-facing identity is Mercenta Social, with no engine name and no sign-up",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "2. customer-facing identity is Mercenta Social — no engine name, no sign-up",
-      "expects": "The brand surface carries the Mercenta Social identity (“included with your Mercenta partnership”) and never names the underlying engine, shows a sign-up/subscribe/upgrade/checkout prompt, or exposes an affiliate link."
-    },
-    {
-      "id": "in-social-module-surface-drilldown",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — the full module surface is present and each module drills down",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "3. the FULL module surface is present and each module drills down",
-      "expects": "All eight modules (calendar, agents, analytics, media, plugs, third-party, settings, launches) are present as real buttons, each drills into a detail panel, and no channel is shown as connected."
-    },
-    {
-      "id": "in-social-reload-no-duplicate",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — a browser reload cannot duplicate the workspace",
-      "actor": "brand_user",
-      "type": "persistence",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "4. a browser reload cannot duplicate the workspace (identity is derived, not stored)",
-      "expects": "After a hard reload the SAME derived workspace id is present (or re-entering resolves it) — identity is derived from the tenant, never stored, so no second workspace is provisioned."
-    },
-    {
-      "id": "in-social-relogin-no-duplicate",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — logging out and back in does not provision a second workspace",
-      "actor": "brand_user",
-      "type": "persistence",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "5. logout + re-login does NOT provision a second workspace",
-      "expects": "Switching to another brand and back returns the SAME workspace id for the first brand — logging out and back in never provisions a second workspace."
-    },
-    {
-      "id": "in-social-tenant-separate-workspaces",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — two brands receive separate workspaces and cannot see each other",
-      "actor": "brand_user",
-      "type": "refusal",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "6. two brands receive SEPARATE workspaces and cannot see each other",
-      "expects": "Two brands receive DIFFERENT workspace ids and neither brand’s surface leaks the other’s workspace identity — the id is derived from the tenant."
-    },
-    {
-      "id": "in-social-unapproved-brand-denied",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — an unapproved brand cannot reach Mercenta Social",
-      "actor": "brand_user",
-      "type": "refusal",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "7. an unapproved brand cannot reach Mercenta Social",
-      "expects": "A brand whose partnership is not approved never receives the Social nav item or surface — entitlement fails closed."
-    },
-    {
-      "id": "in-social-simulation-zero-calls",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — simulation stays simulation, with zero external provider/engine calls",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "8. simulation stays simulation — zero external provider/engine calls",
-      "expects": "Operating the workspace makes ZERO external provider/engine calls and the engine state is honestly reported as Connected or Simulation."
-    },
-    {
-      "id": "in-social-launch-handoff-or-truth",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — opening the workspace either hands off to the engine or reports the truth",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "10. opening the workspace either hands off to the real engine or reports the truth",
-      "expects": "With a handoff URL the brand surface renders the engine frame and records the workspace linked; with NO engine URL it never claims a live engine — the launch control stays disabled with the reason stated and the deterministic simulation studio is offered instead."
-    },
-    {
-      "id": "in-social-simulation-studio",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — the simulation studio runs the engine workflow deterministically with no live call",
-      "actor": "brand_user",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "11. the simulation studio runs the engine workflow deterministically, with no live call",
-      "expects": "The simulation studio connects a channel (simulated), queues a post, runs the queue (QUEUE → PUBLISHED with an unmistakably simulated release id “sim-rel-”), the analytics agree with the queue, and no provider/engine host is contacted."
-    },
-    {
-      "id": "in-social-admin-control-centre",
-      "capability": "integrations",
-      "journey": "integrations — Mercenta Social — the admin control centre reports the verified engine, mode and findings",
-      "actor": "super_admin",
-      "type": "happy",
-      "spec": "e2e/embedded-social.spec.ts",
-      "test": "9. admin control centre reports the verified engine, mode and findings",
-      "expects": "The operator’s Social Media control centre reports the verified engine identity (v1.47.0), its mode (Simulation/Connected), the workspace count and the recorded findings (engine operational; branded hostname has no DNS)."
-    },
-    {
       "id": "fo-company-identity-honest",
       "capability": "founder",
       "journey": "founder — company / government control centre — the identity, the unread register and the honest notices render",
@@ -4061,14 +3942,14 @@
       "expects": "The §31 approval gate is real end to end: a submission is REFUSED outright before any approval, a reference plus the confirmation is still NOT enough without approval (the stage stays Discovered), recording the founder’s approval moves the stage to Founder approval recording NO submission, and only then is the founder’s own submission recordable, recording THEIR reference."
     },
     {
-      "id": "fo-demo-25-stage-lifecycle",
+      "id": "fo-demo-lifecycle",
       "capability": "founder",
-      "journey": "founder — investor demo — the full 25-stage lifecycle runs in the browser and every stage reports OK",
+      "journey": "founder — investor demo — the full 24-stage lifecycle runs in the browser and every stage reports OK",
       "actor": "super_admin",
       "type": "happy",
       "spec": "e2e/investor-demo.spec.ts",
-      "test": "1. the full 25-stage lifecycle runs in the browser and every stage reports OK",
-      "expects": "The investor demo runs the full 25-stage lifecycle in the browser with every stage present and reporting OK, states both commercial models’ canonical figures (£2,000 / £8,000 / £2,500 / £2,270) and the real consequences (£504.00, a mock_tr_ payout, gate BLOCKED, a sim-rel_ release), and reports network calls 0 with zero external calls and no page errors."
+      "test": "1. the full 24-stage lifecycle runs in the browser and every stage reports OK",
+      "expects": "The investor demo runs the full 24-stage lifecycle in the browser with every stage present and reporting OK, states both commercial models’ canonical figures (£2,000 / £8,000 / £2,500 / £2,270) and the real consequences (£504.00, a mock_tr_ payout, gate BLOCKED), and reports network calls 0 with zero external calls and no page errors. §BATCH 5 (2026-10-10) removed the Mercenta Social stage (25 → 24 stages) and with it the `sim-rel_` release id this row used to name."
     },
     {
       "id": "fo-demo-zero-external-calls",

@@ -2,6 +2,15 @@
 
 **Last updated: 2026-10-05 (§BATCH10 — the health-check + daily-digest pair built and gated).**
 
+## §BATCH 5 (2026-10-10) — MERCENTA SOCIAL WAS REMOVED COMPLETELY
+
+On the owner's instruction, the Mercenta Social feature was removed in full: the brand surface and its adapter,
+the social config and domain modules, the **Postiz** engine client and its admin control centre, the
+`social-session` Edge Function, the `scripts/social-sso/` SSO bridge, the Postiz services in
+`docker-compose.services.yml`, the Caddy engine vhost, and the three guards and one browser spec that belonged
+to it. **Every statement in this file about Postiz / Mercenta Social is therefore HISTORICAL, not current** —
+the feature no longer exists, and `scripts/validate-retired-platforms.mjs` §2c fails if any part of it returns.
+
 ## §BATCH10 — THE HEALTH-CHECK + DAILY-DIGEST PAIR (2026-10-05)
 
 Two Edge Functions the registry recorded as missing, and which had NEVER existed across the full git history, are now
@@ -9,7 +18,8 @@ BUILT and gated: `supabase/functions/health-check/index.ts` exposes an HONEST se
 `supabase/functions/daily-digest/index.ts` — the endpoint `supabase/migrations/025_cron_daily_digest.sql` posts to every
 morning — CALLS the SAME shared owner (`supabase/functions/_shared/readiness.ts`) and includes the health result plus a
 TRIAGE SUMMARY in the digest it returns. Gate: `npm run validate:health-digest` (39 assertions, mutation-proved twice).
-Both functions are rate-limited (the limiter now covers 16 functions).
+Both functions are rate-limited (the limiter now covers **15** functions — **§BATCH 5 (2026-10-10) removed
+`social-session`, so it is no longer 16**).
 
 **DEPLOY-TIME / ACTIVATION items (NOT blockers):**
 - These functions are served by a **Supabase project**, which does not exist yet in this environment; they are deployed
@@ -369,8 +379,10 @@ removed from `mercenta-services` (46.101.75.185)**: containers, dedicated Mongo 
 volumes, images and the compose service/volume entries are gone; the stack re-validates and all 10
 active services were verified unaffected (engine `/api/` 200, `/auth` 403 edge block intact, Caddy
 config valid, disk 27 → 24 GB). Also in G1: the **brand-facing deductions ledger** was built
-(Tour 5 surface) using only canonical domain read/mutate paths. **Mercenta Social/Postiz remains
-DEFERRED** — the droplet was not resized and the Postiz roadmap was not continued.
+(Tour 5 surface) using only canonical domain read/mutate paths. **§BATCH 5 (2026-10-10) — MERCENTA SOCIAL
+WAS REMOVED COMPLETELY** (this paragraph used to say it "remains DEFERRED"): the brand surface, the Postiz
+engine client, the admin control centre, the `social-session` bridge and the whole self-hosted engine stack
+are DELETED, not deferred.
 **Last updated:** Phase E7 (12 Sep) — **Mercenta Social (the full Postiz application exposed to approved brands) is integrated and simulated end-to-end at the Mercenta boundary; the ENGINE side is blocked by deployment, not by code.** Engine version verified as **v1.47.0** (`root-postiz-1` on `mercenta-services`, 46.101.75.185). Verified blockers: the NestJS backend exits on `ECONNREFUSED ::1:7233` because **Temporal is missing**, so nginx answers **502** for `/api/*`; **`DISABLE_REGISTRATION=false` (engine self-signup OPEN)**; `MAIN_URL`/`FRONTEND_URL` = `http://localhost:5000`; media storage container-local; droplet RAM 73.7 %. Consequently the Mercenta→engine link is **not established** (`engineLinked:false`, reported truthfully) and channel connect / publishing / the server-side session bridge remain **deferred**. Mercenta Social itself performs **zero network calls** and claims no connection. (Earlier: Phase E3 catalog is complete and simulated end-to-end…)  The catalog submission path runs through the EXISTING mock-first seam (`createSPApiClientForConnection` → `MockAmazonSPAPIClient`) and now records a canonical submission record with explicit `simulated:true` provenance, persisted through the D4 domain port (memory adapter by default → **nothing durable** while browser Supabase credentials are absent). Go-live for this path = enter real Amazon SP-API credentials in the wizard (**zero code changes**) + deploy the `spapi` Edge Functions + run migration `022_create_catalog_persistence.sql` (RLS, brand-isolation policy, **not executed**). No Amazon outcome is fabricated anywhere: a mock result is labelled SIMULATED in the record, the UI and the audit log, and no ASIN is invented. (Earlier: Stage 26 completion — server-side tenant enforcement is now REAL: `compliance-gate-check` and `catalog-import` derive brand_id exclusively from the verified JWT (never the request body; mismatch → 403), and the live CSV-import client sends the session token. Runtime cross-tenant tests execute in `validate:stage26`; all 24 views smoke-render; layout audit green. **Remaining go-live work is deploy/credential-only** — no unbuilt scope.)
 
 **Policy:** every external integration is built behind a swappable seam (`createSPApiClientForConnection` pattern): a `Mock*Client` runs whenever real credentials are absent; the `Real*Client` activates purely by entering real credentials in the Integrations wizard. **Going live should never require code changes** — only credentials + flipping the connection out of mock mode.
@@ -457,8 +469,10 @@ zero network calls) so nothing is un-demoable in the meantime.
   `TEST_ENDPOINT_NOT_DECLARED` — no endpoint is invented and no success is faked. Declared today (7):
   `openrouter`, `hunter`, `instantly`, `email` (postmark · sendgrid), `lead_sourcing` (apollo · instantly).
   **Not yet declared** (entering a real key for these refuses honestly and stores nothing): Stripe, E-Signature,
-  Amazon Ads, Keepa, Firecrawl, Usertour, Twilio WhatsApp, Postiz, Xero, Google, Wise, Payoneer, Companies House,
+  Amazon Ads, Keepa, Firecrawl, Usertour, Twilio WhatsApp, Xero, Google, Wise, Payoneer, Companies House,
   HMRC, CSV import (which has no provider API at all — the wizard records it as a manual choice and claims nothing).
+  **§BATCH 5 (2026-10-10): Postiz was REMOVED from this list with the Mercenta Social feature — there is no
+  Postiz card and no Postiz provider any more.**
 - A provider with **no API** (CSV import) is no longer marked "Live": previously it completed as `connected` with
   `sandbox: false`, i.e. it displayed a verified live connection although nothing had been verified. **Fixed.**
 - **The browser keeps NOTHING.** After a server-side connect the wizard deliberately does NOT put the key in the
@@ -542,7 +556,7 @@ never unlimited.
 | Hunter.io | Not connected | Free Hunter plan (25 verified emails/mo) suffices for dev | Integrations wizard → **Hunter.io** card (live ping implemented) | None |
 | OpenRouter | Not connected | OpenRouter account + API key (pay-per-use, no approval process) | Integrations wizard → **OpenRouter** card (live ping implemented) | None |
 | Instantly.ai | Reply webhook **SPECIFIED, NOT PRESENT IN THIS REPO** (§M10 correction): `instantly-reply-webhook` (classify → persist → hot-lead flag) is pinned contractually by `scripts/validate-edge-functions.mjs` but the Edge Function does not exist on disk — the client-side classifier (`src/lib/marketing.ts`) and the mocked outbound enrolment are built | Instantly Outreach plan + dedicated cold domain (**not** a subdomain of mercanta.co.uk — deliverability isolation per Stage 10 spec) | Integrations wizard → **Instantly.ai** card; webhook URL configured per-campaign in Instantly | Create + deploy the webhook function + set `INSTANTLY_WEBHOOK_SECRET` |
-| **Postiz → Mercenta Social** (full social application, engine v1.47.0) | Engine deployed but **unusable**: API 502 (Temporal missing); `MockPostizClient` in-memory and nothing published; Mercenta side = workspace identity/provisioning/entitlement/isolation only, `engineLinked:false` | **Deployment fixes first:** re-add Temporal; `DISABLE_REGISTRATION=true`; `MAIN_URL`/`FRONTEND_URL` → public URL; move media off container-local storage; add RAM. **Then:** enter the engine URL + API key in the wizard, and deploy the server-side provisioning/session-bridge function | Integrations wizard → **Postiz** card (`api_url`, `api_key`); admin **Mercenta Social** control centre shows state + findings | **None for the Mercenta client seam** (mock → real is credential-only). The **server-side provisioning/session bridge is the one remaining build item** (E7 deferred it deliberately — see the E7 report §9.4) |
+| **Postiz → Mercenta Social** — ⛔ **REMOVED (§BATCH 5, 2026-10-10)** | The whole feature was deleted on the owner's instruction, so there is nothing to activate: the engine client, the admin control centre, the `social-session` bridge, the self-hosted Postiz services and the Caddy engine vhost are gone | **Nothing** — activation no longer applies | — | **None.** `scripts/validate-retired-platforms.mjs` §2c asserts the absence |
 
 **Summary:** only Amazon genuinely requires the admin's own account/approval process. Every other provider can become real today via a free sandbox/test-mode signup, entered through its existing wizard card.
 

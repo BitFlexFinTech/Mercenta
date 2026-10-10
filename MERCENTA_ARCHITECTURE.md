@@ -68,7 +68,7 @@ App.tsx
   (`outreachLifecycle.ts` state machine + `outreachSender.ts` transport seam)**,
   **onboarding (`onboardingLifecycle.ts` — §Phase E1 opportunity → tenant
   hand-off)**,
-  discovery, research, marketing, postiz, whatsapp, mail, messaging,
+  discovery, research, marketing, whatsapp, mail, messaging,
   monitoring, automation, events, simulation, verification, shipping, warehouse,
   esign, grants, notifications.
 - `src/integrations/` — registry (22 providers — Rocket.Chat removed in Phase
@@ -101,15 +101,17 @@ the provider adapter/mode changes.
 - Registry (`src/integrations/registry.ts`) — 22 providers: `amazon_sp_api`,
   `amazon_ads`, `stripe`, `esignature`, `email`, `lead_sourcing`, `openrouter`,
   `hunter`, `instantly`, `keepa`, `firecrawl`, `usertour`,
-  `twilio_whatsapp`, `postiz`, `dhl`, `palletline`, `xero`,
+  `twilio_whatsapp`, `dhl`, `palletline`, `xero`,
   `companies_house`, `hmrc`, `wise`, `payoneer`, `google`. This list mirrors
   `INTEGRATION_ORDER` (single source of truth). Rocket.Chat was removed in
   Phase D1 (19 → 18); Phase 1 (2026-09-16) reconciled this doc to the actual
   `INTEGRATION_ORDER` (22) and added the Amazon Ads dashboard (§12).
+  **§BATCH 5 (2026-10-10) — `postiz` was REMOVED with the Mercenta Social feature
+  (owner directive: remove it completely), so the registry is now 21 providers.**
 - Default modes: `simulation` (amazon_sp_api, stripe, usertour,
   dhl, xero, companies_house, hmrc) · `available` (amazon_ads, esignature,
   email, lead_sourcing, openrouter, hunter, instantly, keepa, firecrawl,
-  twilio_whatsapp, postiz). Rakazo is NOT in the registry.
+  twilio_whatsapp). Rakazo is NOT in the registry.
 - Each provider behind Mock*/Real* seam with identical signatures. `UNKNOWN ≠
   SIMULATION`: only an explicit `simulation` mode may simulate; every other
   state (unknown/unregistered/unconfigured/disabled/configuring/live/degraded/
@@ -320,7 +322,8 @@ carries a `prospectId`.
   creation), brand acceptance, tenant-pinned actor guard, the Admin Onboarding
   Pipeline (`OnboardingPipeline.tsx`) and portal reachability for a canonical
   tenant (`activateOnboardingBrand`). **Still remaining:** E3–E7 (catalog,
-  commerce simulation, admin/brand operational surfaces, embedded Postiz), and
+  commerce simulation, admin/brand operational surfaces — §BATCH 5 (2026-10-10)
+  later REMOVED the fourth item, the embedded Postiz engine), and
   resolving the deliberate `brandProfile.onboarded` vs canonical-status seam.
   Also still remaining from D4: run the migrations + exercise the durable path
   against a credentialed Supabase project (never executed here).
@@ -353,7 +356,16 @@ carries a `prospectId`.
   (additive, 4 tables, RLS + brand isolation, **NOT executed**). Every record is
   explicitly `mode:'simulation'`/`simulated:true`; UNKNOWN is never simulation-safe;
   zero external network calls. Validator 108/108 · E2E spec 4/4 · full E2E 189/0/4.
-- **Phase E7 — embedded Mercenta Social / full Postiz application (2026-09-12):** ✅
+- **Phase E7 — embedded Mercenta Social / full Postiz application (2026-09-12):**
+  **§BATCH 5 (2026-10-10) — ⛔ SUPERSEDED: MERCENTA SOCIAL WAS REMOVED COMPLETELY.**
+  Every artefact this entry describes (`src/config/mercentaSocial.ts`,
+  `src/lib/social/**`, `src/components/brand/MercentaSocial.tsx`, the admin control
+  centre in `PostizAdminPanel.tsx`, the engine client `src/lib/postiz/**`, the
+  `social-session` Edge Function, `scripts/social-sso/`, `docker-compose.services.yml`'s
+  Postiz services and the Caddy engine vhost) was DELETED, and the feature's ABSENCE is
+  asserted by `scripts/validate-retired-platforms.mjs` §2c, `scripts/validate-d4-persistence.mjs`
+  (O1/O2) and `e2e/retired-platforms.spec.ts`. The text below is the HISTORICAL record.
+  ✅ (as built then):
   the COMPLETE deployed engine (Postiz **v1.47.0**, container `root-postiz-1` on
   `mercenta-services`) is exposed to every approved brand as **MERCENTA SOCIAL**.
   New: `src/config/mercentaSocial.ts` (identity SSOT: 8 brand modules, 35 verified

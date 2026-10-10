@@ -26,7 +26,7 @@ import { createServer } from 'vite';
 // contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
 // silently broke this walk (ENOENT on `1.%20Mercenta`).
 import { fileURLToPath } from 'node:url';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
 let failures = 0;
@@ -338,13 +338,18 @@ try {
     !Object.keys(registry.INTEGRATION_REGISTRY).includes(removedId) &&
     !registry.INTEGRATION_ORDER.includes(removedId));
   test('N2 the other communications providers still survive (no over-removal)',
-    ['usertour', 'twilio_whatsapp', 'postiz'].every((p) => p in registry.INTEGRATION_REGISTRY));
+    ['usertour', 'twilio_whatsapp'].every((p) => p in registry.INTEGRATION_REGISTRY));
 
-  // ══ O. Postiz remains present ══
-  test('O1 Postiz remains a registered platform capability',
-    /postiz/i.test(readSrc('src/integrations/registry.ts')));
-  test('O2 a Postiz implementation is still present in the repository',
-    readdirSync(fileURLToPath(new URL('../src/lib/postiz', import.meta.url))).length > 0);
+  // ══ O. §BATCH 5 (2026-10-10) — Postiz is GONE (REPOINTED, not weakened) ══
+  // O used to assert that Postiz REMAINED a registered capability and that an
+  // implementation existed under src/lib/postiz. The owner removed Mercenta Social
+  // COMPLETELY, so the assertion is INVERTED — the same strength, now proving the
+  // absence (rule 08). `scripts/validate-retired-platforms.mjs` carries the full
+  // absence guard for the whole feature.
+  test('O1 Postiz is NO LONGER a registered platform capability',
+    !/postiz/i.test(readSrc('src/integrations/registry.ts')));
+  test('O2 NO Postiz implementation remains in the repository',
+    !existsSync(fileURLToPath(new URL('../src/lib/postiz', import.meta.url))));
 
   // ══ P. No duplicate stores / no new database mechanism ══
   const drSrc = readSrc('src/data/domainRepository.ts');

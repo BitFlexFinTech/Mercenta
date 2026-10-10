@@ -1,9 +1,10 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
-> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4) and BATCH 4 (Part 2.5, the
-> Mercenta Brain) BUILT AND TESTED (session 125, 2026-10-10) — Parts 2.6 and 3–6 remain PLANNED, NOT STARTED.**
+> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
+> Mercenta Brain) and BATCH 5 (Part 2.6, Mercenta Social) BUILT AND TESTED — Parts 3–6 remain PLANNED, NOT
+> STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 5**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 6**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -101,13 +102,24 @@
   `logistics-map`, `data-visible-count`) — an inherited defect that would have failed — now repointed to the
   canonical consignment list. Guards mutation-proved (source guard: re-created module → FAIL 1/18 + propagation
   20/22 → removed → 18/18 + 22/22; browser guard: nav item re-added → 2 FAILED → removed → 4 passed).
-- **2.6 — MERCENTA SOCIAL, COMPLETELY** (owner directive: remove everything): `src/config/mercentaSocial.ts`;
-  `src/components/brand/MercentaSocial.tsx`; `BrandSocialConnect.tsx`; the `social` nav item + route + breadcrumb
-  in `BrandShell.tsx`; `supabase/functions/social-session/`; `scripts/social-sso/server.mjs`; the service in
-  `docker-compose.services.yml`; the SSO block in `scripts/Caddyfile`; `scripts/validate-e7-embedded-social.mjs`;
-  `e2e/embedded-social.spec.ts` + its `e2e/app-shell.spec.ts` assertions; the scenario-catalogue rows; the
-  registry rows; the `social` row in `src/config/operatingCosts.ts`; the investor-demo entries
-  (`src/lib/simulation/investorDemo.ts`); docs.
+- **2.6 — MERCENTA SOCIAL, COMPLETELY. ✅ DONE (Batch 5, 2026-10-10).** (owner directive: remove everything)
+  DELETED (16 files): `src/config/mercentaSocial.ts`; `src/lib/social/` (workspace, engineAdapter, brandStatus,
+  index); `src/lib/postiz/postizClient.ts`; `src/components/brand/MercentaSocial.tsx`;
+  `src/components/brand/BrandSocialConnect.tsx`; `src/components/admin/PostizAdminPanel.tsx`;
+  `supabase/functions/social-session/`; `scripts/social-sso/` (server + engine-patches);
+  `scripts/validate-e7-embedded-social.mjs`; `scripts/validate-postiz.mjs`; `scripts/validate-social-simulation.mjs`;
+  `e2e/embedded-social.spec.ts`. REPOINTED (every dependent): both shells (nav item, lazy import, breadcrumb,
+  render branch); the integration registry + `types.ts` (provider entry, order, meta, initial state); data-processing
+  (the `marketing-outreach` processor); operating costs (the `social` row); the theme accent token
+  `--mr-feature-social`; `statusPresentation`'s social post-state helper; the investor-demo stage (24 stages now);
+  the edge-function rate-limit table; `docker-compose.services.yml` (Postiz db/redis/engine + the `social-sso`
+  service + volumes), `scripts/Caddyfile` (the engine snippet, vhost and sslip hostname), `deploy-docker.sh`,
+  `vps-bootstrap.sh`, `forensic-screenshots.mjs`; the catalogue's 12 `social` rows (regenerated matrix);
+  `reconcile-*` tools neutralised or repointed; and the docs. **ABSENCE GUARD (rule 08):**
+  `scripts/validate-retired-platforms.mjs` §2c — 16 removed-file + 4 removed-directory + 21 live-marker assertions,
+  mutation-proved; plus `validate-d4-persistence` O1/O2, `validate-admin-shell-bundle`, `validate-workspace-shell`,
+  `validate-investor-demo`, `validate-operating-costs`, `validate-e6-brand-surfaces` F8 and the browser specs
+  (`e2e/retired-platforms.spec.ts`, `app-shell`, `integration-hub`, `redesign-surfaces`, `investor-demo`).
 
 ## PART 3 — THE CHANGES
 
@@ -157,7 +169,7 @@
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
-Batches 1, 2, 3 and 4 are DONE (session 125, 2026-10-10). **Next: Batch 5 (2.6, Mercenta Social).**
+Batches 1, 2, 3, 4 and 5 are DONE (2026-10-10). **Next: Batch 6 (3.1, the catalogue product image 32px → 64px).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

@@ -3,14 +3,12 @@
 # Mercenta VPS Bootstrap Script
 #
 # One-time setup for a fresh Ubuntu/Debian VPS to run self-hosted
-# services (Usertour, Postiz).
+# services (Usertour).
 #
 # Usage:
 #   1. Provision a VPS (DigitalOcean $12/mo, Hetzner €4.09/mo, etc.)
 #   2. Point subdomains to the VPS IP:
 #        usertour.mercenta.co.uk  → A record
-#        chat.mercenta.co.uk       → A record
-#        postiz.mercenta.co.uk     → A record
 #   3. Run this script as root on the VPS:
 #        wget -qO- https://raw.githubusercontent.com/.../vps-bootstrap.sh | bash
 #      OR copy and run manually:
@@ -125,8 +123,6 @@ echo ""
 echo "  ── Next steps ──"
 echo "  1. Configure DNS:"
 echo "     usertour.mercenta.co.uk  → A  $IP"
-echo "     chat.mercenta.co.uk       → A  $IP"
-echo "     postiz.mercenta.co.uk     → A  $IP"
 echo ""
 echo "  2. Deploy services from local machine:"
 echo "     bash scripts/deploy-docker.sh"

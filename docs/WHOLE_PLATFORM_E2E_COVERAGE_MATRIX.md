@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 416 · **Capabilities:** 8
+**Scenarios:** 404 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -28,7 +28,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | commerce_logistics | 128 |
 | finance | 32 |
 | founder | 49 |
-| integrations | 22 |
+| integrations | 10 |
 | onboarding_acquisition | 58 |
 | operations | 46 |
 | platform | 78 |
@@ -81,10 +81,10 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | fo-company-credential-masked | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `4. a government credential is stored as a mask and never rendered in full` |
 | fo-company-identity-honest | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `1. it renders the company identity, the unread register and the honest notices` |
 | fo-company-read-register-simulated | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `2. reading the register performs a real (simulated, labelled) registrar read` |
-| fo-demo-25-stage-lifecycle | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `1. the full 25-stage lifecycle runs in the browser and every stage reports OK` |
 | fo-demo-accessible-names | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `7. accessibility: real accessible names, and status is never colour-only` |
 | fo-demo-deterministic-replay | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `3. reset → replay reproduces the same digest (deterministic)` |
 | fo-demo-failure-drills-recovered | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `6. the deterministic failure drills are executed and recovered` |
+| fo-demo-lifecycle | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `1. the full 24-stage lifecycle runs in the browser and every stage reports OK` |
 | fo-demo-rbac-non-super-admin | founder | mercenta_admin | refusal | `e2e/investor-demo.spec.ts` | `5. a non-Super-Admin session cannot reach the investor demo controls` |
 | fo-demo-responsive-no-overflow | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `the investor demo surface runs with no horizontal overflow` |
 | fo-demo-tenant-isolation-rbac | founder | super_admin | refusal | `e2e/investor-demo.spec.ts` | `4. brand-pinned actors are refused cross-tenant and operator-only actions IN THE DOMAIN` |
@@ -129,17 +129,6 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | in-hub-no-page-errors | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `5. no page errors while operating the Hub` |
 | in-hub-search-truthful-count | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `3. search filters providers and reports the true visible/total count` |
 | in-hub-tiles-derived | integrations | super_admin | happy | `e2e/integration-hub.spec.ts` | `1. overview tiles are derived from the rendered provider modes` |
-| in-social-admin-control-centre | integrations | super_admin | happy | `e2e/embedded-social.spec.ts` | `9. admin control centre reports the verified engine, mode and findings` |
-| in-social-branded-identity | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `2. customer-facing identity is Mercenta Social — no engine name, no sign-up` |
-| in-social-launch-handoff-or-truth | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `10. opening the workspace either hands off to the real engine or reports the truth` |
-| in-social-module-surface-drilldown | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `3. the FULL module surface is present and each module drills down` |
-| in-social-provisioned-automatically | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `1. approved brand reaches Mercenta Social and is provisioned automatically` |
-| in-social-reload-no-duplicate | integrations | brand_user | persistence | `e2e/embedded-social.spec.ts` | `4. a browser reload cannot duplicate the workspace (identity is derived, not stored)` |
-| in-social-relogin-no-duplicate | integrations | brand_user | persistence | `e2e/embedded-social.spec.ts` | `5. logout + re-login does NOT provision a second workspace` |
-| in-social-simulation-studio | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `11. the simulation studio runs the engine workflow deterministically, with no live call` |
-| in-social-simulation-zero-calls | integrations | brand_user | happy | `e2e/embedded-social.spec.ts` | `8. simulation stays simulation — zero external provider/engine calls` |
-| in-social-tenant-separate-workspaces | integrations | brand_user | refusal | `e2e/embedded-social.spec.ts` | `6. two brands receive SEPARATE workspaces and cannot see each other` |
-| in-social-unapproved-brand-denied | integrations | brand_user | refusal | `e2e/embedded-social.spec.ts` | `7. an unapproved brand cannot reach Mercenta Social` |
 | oa-ack-guidance-admin-preview | onboarding_acquisition | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `3. the admin tour-management preview shows the OWNER’s rule (never a copy)` |
 | oa-ack-guidance-brand-tour | onboarding_acquisition | brand_user | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `1. the brand tour step and the KB article it links to teach the OWNER’s rule` |
 | oa-ack-guidance-wizard | onboarding_acquisition | brand_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `2. the wizard’s operational-guidance step states the OWNER’s rule` |
@@ -393,7 +382,6 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-document-verification | platform | mixed | happy | `e2e/document-verification.spec.ts` | — |
 | spec-domain-acceptance | platform | mixed | happy | `e2e/domain-acceptance.spec.ts` | — |
 | spec-domain-persistence | platform | mixed | happy | `e2e/domain-persistence.spec.ts` | — |
-| spec-embedded-social | integrations | mixed | happy | `e2e/embedded-social.spec.ts` | — |
 | spec-founder-investor-centre | founder | mixed | happy | `e2e/founder-investor-centre.spec.ts` | — |
 | spec-founder-operating-system | founder | mixed | happy | `e2e/founder-operating-system.spec.ts` | — |
 | spec-fulfillment-tracks | commerce_logistics | mixed | happy | `e2e/fulfillment-tracks.spec.ts` | — |

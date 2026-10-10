@@ -6,10 +6,11 @@
 
 ## 1. Current registry (verified in `src/integrations/registry.ts`)
 
-**22 integrations** today — the count below is derived from `INTEGRATION_ORDER`
+**21 integrations** today — the count below is derived from `INTEGRATION_ORDER`
 in `src/integrations/registry.ts` (the single source of truth), not hand-counted.
-Rocket.Chat was removed in Phase D1 (2026-09-11); the registry now carries the
-full 22-provider set including the Phase-4 logistics/compliance/finance and
+Rocket.Chat was removed in Phase D1 (2026-09-11); **§BATCH 5 (2026-10-10) removed
+`postiz` with the Mercenta Social feature**, so the registry now carries the
+remaining provider set including the Phase-4 logistics/compliance/finance and
 §6 payout-rail providers plus Google. `authMethod` = `oauth | api_key`; connect
 flow in `IntegrationsContext`; live test pings in `src/lib/integrations/testCalls.ts`.
 
@@ -28,7 +29,6 @@ flow in `IntegrationsContext`; live test pings in `src/lib/integrations/testCall
 | firecrawl | Firecrawl | api_key | no | discovery web fetch |
 | usertour | Usertour | api_key | no | self-hosted |
 | twilio_whatsapp | Twilio WhatsApp | api_key | no | escalation |
-| postiz | Postiz | api_key | no | self-hosted social scheduler |
 | dhl | DHL | api_key | no | EU/international carrier; simulation default (`mock:dhl-eu-demo-key`) |
 | palletline | Palletline | api_key | no | UK-domestic carrier; mock/real adapter (`src/lib/palletline`) |
 | xero | Xero | oauth | no | Real OAuth v2 client + sync engine; demo 28-day resync (`src/services/xero/*`) |
@@ -58,7 +58,7 @@ See `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
 - **Rakazo** — `RakazoPanel` iframe into self-hosted bots; `VITE_RAKAZO_URL`.
 - **Supabase** — `src/lib/supabase.ts` + migrations (RLS).
 - **Postmark notifier**, **WhatsApp client +
-  escalation**, **Postiz client**, **Firecrawl/discovery engine**,
+  escalation**, **Firecrawl/discovery engine**,
   **Keepa client (research)**, **OpenRouter via discovery research**,
   **Hunter variants**, **PandaDoc/esign lib**.
 
@@ -218,7 +218,9 @@ silently re-routing brand money. `payouts-transfer` requires `approved: true`
 
 `payouts-transfer` · `catalog-import` · `discovery-directory` ·
 `esign-envelope` · `send-email` · `instantly-reply-webhook`
-(plus the pre-existing `xero-token`, `xero-webhook`, `social-session`).
+(plus the pre-existing `xero-token`, `xero-webhook`).
+**§BATCH 5 (2026-10-10) — `social-session` was deleted with the Mercenta Social
+feature, so it is no longer one of them.**
 
 Each derives identity from the **verified JWT** (never the request body),
 enforces role authorisation, validates input, is idempotent where a retry could

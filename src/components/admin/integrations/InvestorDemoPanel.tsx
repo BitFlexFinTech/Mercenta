@@ -140,7 +140,7 @@ export function InvestorDemoPanel() {
               Runs the whole platform lifecycle on the canonical domain: application → approval →
               onboarding → compliance → catalogue → purchase order → acknowledgement → fulfilment →
               shipment → delivery → returns → deductions → dispute → commission → payout → CRM →
-              marketing → integrations → social → RBAC → audit → error/recovery. Every stage writes
+              marketing → integrations → RBAC → audit → error/recovery. Every stage writes
               real canonical state; nothing is a decorative UI-only action.
             </p>
           </div>

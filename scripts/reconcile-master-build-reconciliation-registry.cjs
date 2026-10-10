@@ -72,7 +72,7 @@ const BUILT = [
 const DISCOVERED = [
   [
     's0-discovered-live-spapi-edge-functions-missing',
-    'DISCOVERED (S0): the real SP-API transport calls three Edge Function routes — `/catalog-items`, `/purchase-orders` and `/shipments/confirm` — and NONE of them exists in supabase/functions (the present set is catalog-import, discovery-directory, esign-envelope, instantly-reply-webhook, payouts-transfer, send-email, social-session, xero-token, xero-webhook). The live SP-API path is therefore UNIMPLEMENTED, not merely uncredentialed, and simulation is currently the only working path. Owner: S7',
+    'DISCOVERED (S0): the real SP-API transport calls three Edge Function routes — `/catalog-items`, `/purchase-orders` and `/shipments/confirm` — and NONE of them exists in supabase/functions (the present set is catalog-import, discovery-directory, esign-envelope, instantly-reply-webhook, payouts-transfer, send-email, xero-token, xero-webhook). The live SP-API path is therefore UNIMPLEMENTED, not merely uncredentialed, and simulation is currently the only working path. Owner: S7',
     'blocked',
     'src/lib/spapi/client.ts (three routes with no matching Edge Function); supabase/functions/ (9 functions present); docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md §11 row 19',
   ],

@@ -1,5 +1,13 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
+
+> **§BATCH 5 (2026-10-10) — HISTORICAL: MERCENTA SOCIAL WAS REMOVED.** This dated record names the Mercenta
+> Social feature (the Postiz engine and its admin control centre, the brand surface, the `social-session` Edge
+> Function, `scripts/social-sso/`, and the `e2e/embedded-social.spec.ts` /
+> `scripts/validate-e7-embedded-social.mjs` guards). All of it was DELETED on the owner's instruction, and
+> `scripts/validate-retired-platforms.mjs` §2c now asserts its ABSENCE. The record is preserved as history;
+> any Social-specific statement in it no longer describes the current product.
+
 **Status: COMPLETE — P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8**, **P9**, **P10**, **P11** and **P12** are ALL DONE and committed. The programme has no remaining phase.**
 **Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
 `PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's and P4's are recorded in the `CURRENT RESUME STATE` block.

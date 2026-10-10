@@ -1,5 +1,13 @@
 # CLEAN-UP, VERIFICATION AND "ONE SWITCH" PLAN — 2026-09-30
 
+
+> **§BATCH 5 (2026-10-10) — HISTORICAL: MERCENTA SOCIAL WAS REMOVED.** This dated record names the Mercenta
+> Social feature (the Postiz engine and its admin control centre, the brand surface, the `social-session` Edge
+> Function, `scripts/social-sso/`, and the `e2e/embedded-social.spec.ts` /
+> `scripts/validate-e7-embedded-social.mjs` guards). All of it was DELETED on the owner's instruction, and
+> `scripts/validate-retired-platforms.mjs` §2c now asserts its ABSENCE. The record is preserved as history;
+> any Social-specific statement in it no longer describes the current product.
+
 > ## ⚠ NOTE (§BATCH 4, 2026-10-10) — SOME REFERENCES BELOW ARE HISTORICAL
 > This is a dated plan record and is preserved as history. Its references to the **Mercenta Brain**
 > (`scripts/brain-runtime-check.ts`, the "Brain's dead-end KPI band", the Brain's leak-scan in the type-check coverage

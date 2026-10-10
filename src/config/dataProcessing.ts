@@ -309,18 +309,6 @@ export const DATA_PROCESSORS: readonly DataProcessor[] = [
     status: 'active',
   },
   {
-    id: 'marketing-outreach',
-    name: 'Postiz',
-    category: 'marketing',
-    purpose: 'Publishing and scheduling Mercenta’s own marketing communications.',
-    dataCategories: ['contact', 'communications'],
-    lawfulBasis: 'consent',
-    location: 'European Union / United States',
-    dpaRequired: true,
-    provider: 'postiz',
-    status: 'active',
-  },
-  {
     id: 'market-research',
     name: 'Lead-sourcing providers (CSV import / Apollo / Instantly)',
     category: 'research',
@@ -460,7 +448,12 @@ export const PUBLIC_PROCESSING_CATEGORIES: readonly PublicProcessingCategory[] =
   { category: 'email', label: 'Email delivery', purpose: 'Sending the messages and documents the service requires.' },
   { category: 'esignature', label: 'Contract signing', purpose: 'Sending and storing the agreements you sign with us.' },
   { category: 'messaging', label: 'Messaging', purpose: 'Sending you operational messages about your orders and account.' },
-  { category: 'marketing', label: 'Marketing', purpose: 'Sending our marketing communications, only where you have opted in.' },
+  /* §BATCH 5 (2026-10-10) — REMOVED: { category: 'marketing', label: 'Marketing',
+     purpose: 'Sending our marketing communications, only where you have opted in.' }.
+     The ONLY marketing-category processor was `marketing-outreach` (the Postiz social
+     scheduler), which was deleted with the Mercenta Social feature, so this public
+     row described processing the platform no longer declares. `validate-data-inventory`
+     asserts the projection and the processors agree in BOTH directions. */
   { category: 'research', label: 'Market and prospect research', purpose: 'Researching the market and identifying businesses we might work with.' },
   { category: 'ai', label: 'AI-assisted analysis', purpose: 'Using AI models to help summarise and analyse the information we hold.' },
   { category: 'infrastructure', label: 'Document and file storage', purpose: 'Storing and sharing documents across the team.' },

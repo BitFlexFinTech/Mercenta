@@ -157,18 +157,6 @@ export const OPERATING_COST_LINES: OperatingCostLine[] = [
     note: 'No Twilio messaging credential is configured for the platform.',
   },
   {
-    id: 'social',
-    name: 'Social scheduling (Postiz, self-hosted)',
-    providerId: 'postiz',
-    category: 'marketing',
-    plan: 'Self-hosted on the Mercenta VPS',
-    billing: 'free',
-    fixedMonthlyGbp: 0,
-    usageBudgetGbp: 0,
-    source: 'MANUAL',
-    note: 'No licence fee; it consumes VPS capacity already counted under hosting.',
-  },
-  {
     id: 'google',
     name: 'Google (Drive/Docs/Sheets/Slides/Calendar)',
     providerId: 'google',

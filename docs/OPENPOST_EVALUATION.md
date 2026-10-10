@@ -1,5 +1,13 @@
 # OPENPOST / SOCIAL PUBLISHING EVALUATION
 
+
+> **§BATCH 5 (2026-10-10) — HISTORICAL: MERCENTA SOCIAL WAS REMOVED.** This dated record names the Mercenta
+> Social feature (the Postiz engine and its admin control centre, the brand surface, the `social-session` Edge
+> Function, `scripts/social-sso/`, and the `e2e/embedded-social.spec.ts` /
+> `scripts/validate-e7-embedded-social.mjs` guards). All of it was DELETED on the owner's instruction, and
+> `scripts/validate-retired-platforms.mjs` §2c now asserts its ABSENCE. The record is preserved as history;
+> any Social-specific statement in it no longer describes the current product.
+
 > Repository inspection performed 2026-09-21 (redesign workstream, session 3).
 > **Postiz was NOT deployed. No social account was activated. No paid service was
 > subscribed to.** This is an evaluation only.

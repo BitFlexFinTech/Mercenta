@@ -70,11 +70,10 @@ test(
 /* ── C: dev-only hosts, with a DECLARED allowlist ──────────────────────────── */
 const DEV_HOST_RE = /\b(localhost|127\.0\.0\.1)\b/;
 /* The ONLY files allowed to carry a dev host, each with its reason. These are the
-   DEFAULT URLs of integrations that are PARKED by decision (Postiz admin panel,
-   Usertour) — a placeholder default, never a production endpoint. */
+   DEFAULT URLs of integrations that are PARKED by decision (Usertour) — a
+   placeholder default, never a production endpoint. */
 const DEV_HOST_ALLOWED = new Map([
-  ['src/integrations/registry.ts', 'parked-integration placeholder defaults (Postiz :8100, Usertour :8090)'],
-  ['src/components/admin/PostizAdminPanel.tsx', 'parked integration (Postiz) default URL'],
+  ['src/integrations/registry.ts', 'parked-integration placeholder defaults (Usertour :8090)'],
   ['src/lib/usertour/useUsertour.ts', 'parked integration (Usertour) default URL'],
 ]);
 const withDevHost = files.filter((f) => DEV_HOST_RE.test(codeOf(f)));

@@ -132,8 +132,9 @@ export const DEMO_BRANDS: DemoBrand[] = [
   // Brand C — Le Creuset (Model B, buy/resell); BLOCKED compliance-scenario tenant.
   { id: 'brand-lecreuset', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
   // Brand D — Kit & Kin: a brand STILL IN ONBOARDING (not yet in the portal). It
-  // demonstrates the onboarding wizard AND an UNAPPROVED brand (contract 'sent' →
-  // the Social gate refuses it). No operational data.
+  // demonstrates the onboarding wizard AND an UNAPPROVED brand (contract 'sent',
+  // so the shell keeps it in the onboarding wizard rather than the operational
+  // workspace). No operational data.
   { id: 'brand-kitkin', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
 ];
 

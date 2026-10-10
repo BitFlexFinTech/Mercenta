@@ -8,7 +8,7 @@
  *     → compliance → catalogue
  *     → purchase order → acknowledgement → fulfilment → shipment → delivery
  *     → returns → deductions → dispute → resolution → commission → payout
- *     → CRM → marketing → integrations → social → RBAC → audit → error/recovery
+ *     → CRM → marketing → integrations → RBAC → audit → error/recovery
  *
  * Nothing here is a parallel demo application. Every stage calls the SAME
  * domain seams the product's own UI calls:
@@ -22,7 +22,6 @@
  *   - `billing/payouts` + `api.settleBrandPayout` (Stage-8 commission payout)
  *   - `crmStore`, `returnsTracking`, `prospectStore`, `acquisitionStore`
  *   - the Integration Hub's own mode resolution (Phase 4 fail-closed gate)
- *   - `social/engineAdapter` (Phase S deterministic mock-first social seam)
  *
  * HONESTY CONTRACT:
  *   - ZERO network calls. `networkCalls` is reported as 0 and NO live provider,
@@ -233,13 +232,6 @@ import {
 } from '@/integrations/types';
 import { INTEGRATION_ORDER, defaultIntegrationMode, integrationMeta } from '@/integrations/registry';
 import {
-  createIsolatedSimulatedSocialClient,
-  createSocialEngineClient,
-  SIMULATED_FAILURE_MARKER,
-  type SocialEngineClient,
-} from '@/lib/social/engineAdapter';
-import { stableHash } from '@/lib/social/workspace';
-import {
   canAccessEnvironment,
   canAccessView,
   type SessionTier,
@@ -269,7 +261,6 @@ export type InvestorDemoStageId =
   | 'marketing'
   | 'integrations'
   | 'cases'
-  | 'social'
   | 'rbac'
   | 'audit'
   | 'error_recovery';
@@ -522,7 +513,10 @@ function purgeInvestorDemoRecords(): number {
  *   - restores only the stores above (seeded data intact),
  *   - purges only the demo tenant's own records + its onboarding record,
  *   - resets only the deterministic simulation seams (mocks, events, payouts,
- *     social client, settled-commission ledger).
+ *     settled-commission ledger).
+ * §BATCH 5 (2026-10-10) — the sentence above used to end "…payouts, social client,
+ * settled-commission ledger)". The social engine seam was REMOVED with Mercenta
+ * Social, so it is no longer reset here (there is nothing left to reset).
  * Nothing else in the session is destroyed.
  */
 export function resetInvestorDemo(): InvestorDemoResetResult {
@@ -552,9 +546,6 @@ export function resetInvestorDemo(): InvestorDemoResetResult {
   resetBrandCommercialModels();
   resetEvents();
   simulateHmrcOutage(false);
-
-  const social = createSocialEngineClient('simulation');
-  if (social.ok) social.value.reset();
 
   return {
     resetAt: new Date().toISOString(),
@@ -588,7 +579,6 @@ export const INVESTOR_DEMO_STAGES: readonly { id: InvestorDemoStageId; label: st
   { id: 'marketing', label: 'Acquisition / marketing' },
   { id: 'integrations', label: 'Integration Hub (simulation)' },
   { id: 'cases', label: 'Cases — Mercenta review before channel escalation' },
-  { id: 'social', label: 'Mercenta Social' },
   { id: 'rbac', label: 'RBAC & tenant isolation' },
   { id: 'audit', label: 'Auditability' },
   { id: 'error_recovery', label: 'Error & recovery' },
@@ -2028,104 +2018,6 @@ export async function runInvestorDemo(
   });
 
 
-  /* 19 — MERCENTA SOCIAL (deterministic engine seam) --------------------- */
-  await stage('social', async () => {
-    // FAIL-CLOSED factory: only a positively identified simulation executes.
-    const refusedModes = ['configured', 'live', 'degraded', 'error', 'disabled', 'unknown'];
-    const wronglyAccepted = refusedModes.filter((m) => createSocialEngineClient(m).ok);
-    if (wronglyAccepted.length > 0) {
-      throw new Error(`non-simulation social modes were accepted: ${wronglyAccepted.join(', ')}`);
-    }
-    const factory = createSocialEngineClient('simulation');
-    if (!factory.ok) throw new Error(`simulation social client refused: ${factory.error}`);
-    const engine = factory.value;
-
-    // connect a simulated channel
-    const channel = engine.connectChannel('x');
-    if (!channel.ok) throw new Error(`channel connect refused: ${channel.error}`);
-    if (channel.value.simulated !== true) throw new Error('channel is not marked simulated');
-
-    // create a post → QUEUE (scheduled in the future)
-    const scheduled = engine.createPost({
-      channelId: channel.value.id,
-      body: 'Cape Verdant launches with Mercenta (simulated)',
-      scheduledFor: '2026-09-14T09:00:00.000Z',
-    });
-    if (!scheduled.ok || scheduled.value.state !== 'QUEUE') {
-      throw new Error('scheduled post did not enter the queue');
-    }
-
-    // the queue is deterministic: a not-yet-due schedule is NOT executed
-    const early = engine.runQueue('2026-09-13T09:00:00.000Z');
-    if (early.length !== 0) throw new Error('queue executed a post before its schedule');
-
-    // execute the queue → simulated publish with a sim-only release id
-    engine.runQueue('2026-09-14T09:00:00.000Z');
-    const published = engine.listPosts().find((p) => p.id === scheduled.value.id);
-    if (!published || published.state !== 'PUBLISHED') {
-      throw new Error('scheduled post was not published');
-    }
-    if (!published.releaseId?.startsWith('sim-rel-')) {
-      throw new Error(`release id is not unmistakably simulated: ${published.releaseId}`);
-    }
-
-    // failure → retry → recovery on a degraded provider
-    engine.connectChannel('tiktok');
-    const failing = engine.createPost({
-      channelId: 'sim-ch-tiktok',
-      body: `Degraded provider ${SIMULATED_FAILURE_MARKER} recovery proof`,
-    });
-    if (!failing.ok) throw new Error('failure-path post was not created');
-    engine.runQueue('2026-09-14T09:00:00.000Z');
-    const failed = engine.listPosts().find((p) => p.id === failing.value.id);
-    if (!failed || failed.state !== 'ERROR') throw new Error('the degraded provider did not fail');
-    const retried = engine.retryPost(failed.id);
-    if (!retried.ok || retried.value.state !== 'PUBLISHED') {
-      throw new Error('retry did not recover the failed post');
-    }
-
-    // cancel a queued item → DRAFT (held back for review)
-    const toCancel = engine.createPost({
-      channelId: channel.value.id,
-      body: 'Draft held back for review (simulated)',
-    });
-    if (!toCancel.ok) throw new Error('cancel-path post was not created');
-    const cancelled = engine.cancelPost(toCancel.value.id);
-    if (!cancelled.ok || cancelled.value.state !== 'DRAFT') {
-      throw new Error('queued post did not cancel back to DRAFT');
-    }
-
-    // analytics reflect the same canonical simulation state
-    const analytics = engine.analytics();
-    const live = engine.listPosts();
-    if (
-      analytics.posts !== live.length ||
-      analytics.published !== live.filter((p) => p.state === 'PUBLISHED').length
-    ) {
-      throw new Error('social analytics do not match the simulation state');
-    }
-    const allSimulated = live.every((p) => p.simulated === true);
-    if (!allSimulated) throw new Error('a social post was not marked simulated');
-    return {
-      detail: `Social studio (simulation): channel connected, scheduled post published (${published.releaseId}), degraded provider failed → retried → recovered, queued item cancelled → DRAFT, analytics ${analytics.published} published / ${analytics.drafts} draft / ${analytics.failed} failed.`,
-      entityIds: live.map((p) => p.id),
-      facts: {
-        failClosedModes: refusedModes.length,
-        wronglyAccepted: wronglyAccepted.length,
-        channels: analytics.channels,
-        posts: analytics.posts,
-        published: analytics.published,
-        drafts: analytics.drafts,
-        failed: analytics.failed,
-        scheduledNotRunEarly: early.length === 0,
-        retryRecovered: retried.ok,
-        allSimulated,
-      },
-    };
-  });
-
-
-
   /* 20 — RBAC & TENANT ISOLATION ----------------------------------------- */
   await stage('rbac', async () => {
     // (a) A brand can never initiate onboarding for itself or another tenant.
@@ -2368,6 +2260,24 @@ export async function runInvestorDemo(
  * generated by the seams, e.g. the shipment id), and no wall-clock value is
  * ever included — so `reset → run` reproduces the same digest exactly.
  */
+/**
+ * §BATCH 5 (2026-10-10) — the deterministic 32-bit FNV-1a hash the demo digest is
+ * computed with. It lived in the Mercenta Social workspace module
+ * (`src/lib/social/workspace.ts`) until that feature was removed; the algorithm is
+ * reproduced BYTE-FOR-BYTE here, so every recorded demo digest stays identical.
+ * (Four other modules already keep their own local copy of the same helper —
+ * `commerce/poAcknowledgementWindow`, `commerce/poRevisions`, `documents/sscc`,
+ * `routing/gateways` — so a local copy is this codebase's own convention.)
+ */
+function stableHash(value: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    h ^= value.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
 export function computeInvestorDemoDigest(
   run: Pick<InvestorDemoRun, 'runId' | 'tenantId' | 'stages'>
 ): string {

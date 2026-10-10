@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 556,
+    "total_entries": 557,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -374,11 +374,11 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-10 after §BATCH 4 (the Mercenta Brain removal). Snapshot only, derived from the entries: built_and_tested:327, built:183, not_started:10, removed:19, deferred:9, blocked:7, complete:1.",
-      "built_and_tested": 327,
-      "built": 183,
+      "_note": "Recomputed 2026-10-10 after §BATCH 5 (the Mercenta Social removal). Snapshot only, derived from the entries: built_and_tested:317, built:180, not_started:10, removed:33, deferred:9, blocked:7, complete:1.",
+      "built_and_tested": 317,
+      "built": 180,
       "not_started": 10,
-      "removed": 19,
+      "removed": 33,
       "deferred": 9,
       "blocked": 7,
       "complete": 1
@@ -2057,12 +2057,12 @@
     },
     {
       "id": "batchD-postiz-integration",
-      "description": "Postiz mock-first client + admin scheduler panel (NOT the full application)",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Postiz mock-first client + admin scheduler panel (NOT the full application)",
       "source": "Batch D",
-      "status": "built",
-      "evidence": "docker-compose.services.yml (engine service, deployment only); src/lib/postiz/postizClient.ts (mock-first client); src/components/admin/PostizAdminPanel.tsx; validate-postiz.mjs; e2e/embedded-social.spec.ts",
-      "last_verified": "2026-09-12",
-      "superseded_by": "phaseE7-mercenta-social-identity",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
+      "superseded_by": null,
       "_audit_note": "Phase E7 audit 2026-09-12: the original entry described this as the 'Postiz self-hosted social scheduler' built_and_tested, citing e2e specs that no longer exist. In reality it was a mock-first client plus a 6-platform scheduler form; the engine's own REST shapes used by RealPostizClient (/api/posts, /api/health) were NEVER verified against the real application (the verified developer API is /public/v1). Downgraded to 'built' and superseded by the E7 Mercenta Social integration."
     },
     {
@@ -2133,8 +2133,8 @@
       "description": "Self-hosted service panels show honest 'requires Docker VPS' message (Rocket.Chat panel deleted in Phase D1)",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "PostizAdminPanel.tsx; UsertourAdminPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
-      "last_verified": "2026-09-01",
+      "evidence": "[removed with Mercenta Social, §BATCH 5 2026-10-10]; UsertourAdminPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -2148,11 +2148,11 @@
     },
     {
       "id": "batchF-brand-social-connect",
-      "description": "Brand-side one-click social account OAuth connection wizard",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Brand-side one-click social account OAuth connection wizard",
       "source": "Batch F",
-      "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandSocialConnect.tsx; src/App.tsx (BRAND_NAV + render); e2e/brand-operational-surfaces.spec.ts",
-      "last_verified": "2026-09-01",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -2401,101 +2401,101 @@
     },
     {
       "id": "phaseE7-mercenta-social-identity",
-      "description": "Mercenta Social is the customer-facing product identity for the full social application (single source of truth, not CSS hiding)",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Mercenta Social is the customer-facing product identity for the full social application (single source of truth, not CSS hiding)",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (MERCENTA_SOCIAL); src/components/brand/MercentaSocial.tsx; src/components/layout/BrandShell.tsx (nav label from the SSOT); e2e/embedded-social.spec.ts test 2; scripts/validate-e7-embedded-social.mjs",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-engine-inventory",
-      "description": "Complete engine feature inventory derived from the RUNNING deployed application (v1.47.0): 8 brand modules, 35 providers, 40+ tables, route/controller surface",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Complete engine feature inventory derived from the RUNNING deployed application (v1.47.0): 8 brand modules, 35 providers, 40+ tables, route/controller surface",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (SOCIAL_MODULES / SOCIAL_PROVIDERS / SOCIAL_ENGINE_VERIFIED); docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md section 3; verified on droplet mercenta-services, container root-postiz-1",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-auto-provisioning",
-      "description": "Automatic Brand to Mercenta Social workspace provisioning: deterministic id and idempotent (no duplicate on refresh or re-login)",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Automatic Brand to Mercenta Social workspace provisioning: deterministic id and idempotent (no duplicate on refresh or re-login)",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/lib/social/workspace.ts (socialWorkspaceIdForTenant = msoc-hash, provisionSocialWorkspace, ensureSocialWorkspaceForBrand); validator sections 3-4; e2e/embedded-social.spec.ts tests 1/4/5",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-entitlement-gate",
-      "description": "Fail-closed entitlement gate: only approved/active brands may use Mercenta Social; pending/in_review/rejected/suspended/deactivated/terminated/unknown are refused",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Fail-closed entitlement gate: only approved/active brands may use Mercenta Social; pending/in_review/rejected/suspended/deactivated/terminated/unknown are refused",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/lib/social/workspace.ts (socialAccessForBrand); src/lib/social/brandStatus.ts; validator section 4 (full status matrix); e2e/embedded-social.spec.ts test 7",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-tenant-isolation",
-      "description": "Tenant isolation enforced in the DOMAIN (cross-tenant workspace read refused), not by UI filtering",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Tenant isolation enforced in the DOMAIN (cross-tenant workspace read refused), not by UI filtering",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/lib/social/workspace.ts (readWorkspaceForTenant returns CROSS_TENANT; cross-tenant provisioning refusal); validator section 3; e2e/embedded-social.spec.ts test 6",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-commercial-boundary",
-      "description": "No separate commercial relationship: engine sign-up, billing, plan, checkout and affiliate paths are declared blocked and never rendered or linked for a brand",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: No separate commercial relationship: engine sign-up, billing, plan, checkout and affiliate paths are declared blocked and never rendered or linked for a brand",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (SOCIAL_BLOCKED_ENGINE_PATHS, SOCIAL_FORBIDDEN_BRAND_STRINGS); validator section 7; e2e/embedded-social.spec.ts test 2; admin control centre commercial-boundary section",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-admin-control-centre",
-      "description": "Admin integration control centre on the EXISTING Integrations architecture: engine identity/mode, provisioning state, commercial boundary, deployment findings - no secrets",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Admin integration control centre on the EXISTING Integrations architecture: engine identity/mode, provisioning state, commercial boundary, deployment findings - no secrets",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/components/admin/PostizAdminPanel.tsx; src/lib/postiz/postizClient.ts (getSocialEngineStatus, socialFindingCounts); e2e/embedded-social.spec.ts test 9",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-no-fabricated-connection-state",
-      "description": "Fabricated in-browser connection state removed: the false 'Live' badge and the local connection Map are gone; providers are listed as available, never connected",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Fabricated in-browser connection state removed: the false 'Live' badge and the local connection Map are gone; providers are listed as available, never connected",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandSocialConnect.tsx (now a compatibility adapter); src/components/brand/MercentaSocial.tsx (ProviderSurface); validator section 7; e2e/embedded-social.spec.ts test 3",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-simulation-zero-network",
-      "description": "Simulation stays simulation: opening or provisioning Mercenta Social performs ZERO network calls and contacts no provider or engine host",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Simulation stays simulation: opening or provisioning Mercenta Social performs ZERO network calls and contacts no provider or engine host",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "validator section 6 (spied global fetch, 0 calls); e2e/embedded-social.spec.ts test 8 (request capture across a full session)",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-deployment-findings",
-      "description": "Verified engine deployment defects recorded: backend 502 (Temporal missing), self-registration OPEN, MAIN_URL/FRONTEND_URL localhost, container-local media storage, droplet RAM 73.7 percent",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Verified engine deployment defects recorded: backend 502 (Temporal missing), self-registration OPEN, MAIN_URL/FRONTEND_URL localhost, container-local media storage, droplet RAM 73.7 percent",
       "source": "Phase E7",
-      "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (SOCIAL_DEPLOYMENT_FINDINGS, 6 findings); admin findings panel; docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 2.5 and 8; PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
       "id": "phaseE7-engine-link-not-established",
-      "description": "Engine-side link, channel connect, publishing and the Mercenta to engine session bridge are NOT implemented: they require the deployment fix (Temporal/502) plus a server-side provisioning call",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: Engine-side link, channel connect, publishing and the Mercenta to engine session bridge are NOT implemented: they require the deployment fix (Temporal/502) plus a server-side provisioning call",
       "source": "Phase E7",
-      "status": "built",
-      "evidence": "src/lib/social/workspace.ts (engineLinked:false, engineOrganizationId null, simulated:true - reported truthfully); docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 5.4, 9.3, 9.4",
-      "last_verified": "2026-09-12",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -3072,8 +3072,8 @@
       "description": "Infrastructure + dev-tooling + social providers provenance: SUPABASE - .env holds SUPABASE_URL/PUBLISHABLE/SECRET/JWKS/DB_PASSWORD (all NON-VITE -> not browser-exposed) and NO VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY anywhere -> isSupabaseConfigured=false -> demo runs fully on the in-memory demoStore; migrations/RLS (33 tables) exist for a later real connection. DIGITALOCEAN_API_TOKEN (.env) + NAMECHEAP FTP (.env/.env.deploy) are DEPLOYMENT/INFRA TOOLING used by scripts/deploy-demo.sh and droplet ops ONLY - NO runtime app consumer (Cline/development-operations consumers). GOOGLE - no OAuth exchange; MockGoogleClient + wizard only. INSTANTLY.AI - .env INSTANTLY_API_KEY NON-VITE; RealInstantlyClient never instantiated; instantly-reply-webhook EF in code, not deployed (needs INSTANTLY_WEBHOOK_SECRET). WHATSAPP (Twilio) - no Twilio creds; MockWhatsAppClient only; no runtime escalation caller in src. POSTIZ - self-hosted social scheduler, client only, not live. LINKEDIN/FACEBOOK/INSTAGRAM/X - Social Media Manager PAUSED-NOT-FORGOTTEN (engineAdapter SimulatedSocialEngineClient fail-closed simulation; no OAuth creds). RAKAZO - untouched, iframe via VITE_RAKAZO_URL, deferred. Classification: all SIMULATION/UNAVAILABLE; DigitalOcean/Namecheap/Supabase-server = dev tooling.",
       "source": "Phase 4 / Integration entitlement, credential provenance & cost-control audit (2026-09-17)",
       "status": "built_and_tested",
-      "evidence": "src/lib/supabase.ts; .env/.env.deploy name audit; scripts/deploy-demo.sh; src/lib/social/engineAdapter.ts; src/lib/whatsapp/whatsAppClient.ts; src/lib/postiz/postizClient.ts; RakazoPanel.tsx; supabase/functions listing; docs/INTEGRATIONS.md",
-      "last_verified": "2026-09-17",
+      "evidence": "src/lib/supabase.ts; .env/.env.deploy name audit; scripts/deploy-demo.sh; [removed with Mercenta Social, §BATCH 5 2026-10-10]; src/lib/whatsapp/whatsAppClient.ts; [removed with Mercenta Social, §BATCH 5 2026-10-10]; RakazoPanel.tsx; supabase/functions listing; docs/INTEGRATIONS.md",
+      "last_verified": "2026-10-10",
       "superseded_by": null,
       "_build_state": "audited",
       "_internal_brand": "internal",
@@ -3663,8 +3663,8 @@
       "description": "e6 F8 brand-nav contract repointed to the canonical 17-item order (old 15-item contract recorded inline); e6/e7 change-set scope guards declare the sprint surface without weakening the mechanism",
       "source": "Sprint 2026-09-19 §26",
       "status": "built_and_tested",
-      "evidence": "scripts/validate-e6-brand-surfaces.mjs; scripts/validate-e7-embedded-social.mjs (PASS); e2e/app-shell.spec.ts (brand nav items); e6 F6 fails ONLY on the 5 pre-existing offenders",
-      "last_verified": "2026-09-19",
+      "evidence": "scripts/validate-e6-brand-surfaces.mjs; [removed with Mercenta Social, §BATCH 5 2026-10-10] (PASS); e2e/app-shell.spec.ts (brand nav items); e6 F6 fails ONLY on the 5 pre-existing offenders",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5103,19 +5103,19 @@
       "id": "uiux-wave3-part3-brand-surfaces",
       "description": "BRAND-SURFACE PASS DELIVERED (order item 4, 2026-10-08). EVERY brand view declared in the shell's own nav (BrandShell → BRAND_VIEW_IDS: 20 views) was RENDERED in a real Chromium at 1440/1280/1024/768/390 and inspected, so the pass is a complete sweep, not a curated subset. It found and FIXED three real render-only defects — none of which typecheck/lint/build can see: (1) the Product Catalog's 'Product' cell painted `product.image` — for a seeded demo product a `picsum.photos` URL — as literal `text-xl` text inside a 32px box, overflowing as garbled overlapping text; (2) and (3) BrandContractView ('Contracts') and BrandSelfService ('Documents & Account') were the only two brand surfaces NOT on the canonical workspace composition — each hand-rolled a `p-6 … max-w-[1100px]` container with an `<h2>`, so neither rendered the surface's single h1 nor its `data-workspace-frame`. A suspected 'metric-band gap' on the brand dashboard was DISPROVED by measurement (every band row fills 100%).",
       "status": "built_and_tested",
-      "evidence": "`src/components/shared/ProductThumb.tsx` — NEW single owner for a product's image (URL/data-URI → `<img>`, glyph → text, nothing → the neutral package icon; a URL is NEVER painted as text); the previously DUPLICATED logic is consolidated out of `src/components/brand/ProductCatalog.tsx` and `src/components/brand/LogisticsHub.tsx`, both now pointing at it. `BrandContractView.tsx` and `BrandSelfService.tsx` moved onto `WorkspaceFrame`+`WorkspaceHeader` (each now renders its ONE h1 + `data-workspace-frame`). GATES, both EXECUTED and MUTATION-PROVED: `e2e/redesign-surfaces.spec.ts` — the brand loop now covers ALL 20 shell views (was 8) and each test captures `pageerror` as a smoke-render check: 24 passed; and the new test 'brand product catalogue renders thumbnails as images, never a raw URL as text' measured 1 passed, then FAILED ('catalogue rows render a product thumbnail <img>', 1 failed) with the URL branch disabled and passed again after restoring `ProductThumb.tsx` byte-identical (sha256 5644e5ed99a4519989dcf86ac628bf4c0cf0dc642da7fb33a79039eeef998c26). The 20-view loop ALREADY FAILED on brand-contracts + brand-documents-account BEFORE the frame fix (22 passed / 2 failed) and passes after — that failure IS the frame defect's fault demonstration. DEFECT FIXED IN A VALIDATOR: `scripts/validate-review-s5.mjs` asserted `/v\\d/` on the raw SSR HTML, which matched a digit inside a lucide icon's SVG path — it passed for the WRONG reason and could not fail if the contract text disappeared (and fired falsely the moment the unrelated header icon was removed); it now strips React's SSR text-node separators and asserts the card's real `distribution agreement — v{n}` text, proved able to fail (1 failed on the mutated card, then restored byte-identical sha256 d051343e2e1de81a877d765f5c79ea82568662ebdb14330d71a486522486334b). Validator corpus: `npm run validate:all` 188 PASS / 0 FAIL · typecheck 0 · lint 0 · build ok. Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART3_SCOPE` declared in BOTH `scripts/validate-e6-brand-surfaces.mjs` and `scripts/validate-e7-embedded-social.mjs`. Rendered evidence: `test-screenshots/redesign-surfaces/brand-*-1440.png` and `brand-*-390.png` (20 views × 2 widths).",
+      "evidence": "`src/components/shared/ProductThumb.tsx` — NEW single owner for a product's image (URL/data-URI → `<img>`, glyph → text, nothing → the neutral package icon; a URL is NEVER painted as text); the previously DUPLICATED logic is consolidated out of `src/components/brand/ProductCatalog.tsx` and `src/components/brand/LogisticsHub.tsx`, both now pointing at it. `BrandContractView.tsx` and `BrandSelfService.tsx` moved onto `WorkspaceFrame`+`WorkspaceHeader` (each now renders its ONE h1 + `data-workspace-frame`). GATES, both EXECUTED and MUTATION-PROVED: `e2e/redesign-surfaces.spec.ts` — the brand loop now covers ALL 20 shell views (was 8) and each test captures `pageerror` as a smoke-render check: 24 passed; and the new test 'brand product catalogue renders thumbnails as images, never a raw URL as text' measured 1 passed, then FAILED ('catalogue rows render a product thumbnail <img>', 1 failed) with the URL branch disabled and passed again after restoring `ProductThumb.tsx` byte-identical (sha256 5644e5ed99a4519989dcf86ac628bf4c0cf0dc642da7fb33a79039eeef998c26). The 20-view loop ALREADY FAILED on brand-contracts + brand-documents-account BEFORE the frame fix (22 passed / 2 failed) and passes after — that failure IS the frame defect's fault demonstration. DEFECT FIXED IN A VALIDATOR: `scripts/validate-review-s5.mjs` asserted `/v\\d/` on the raw SSR HTML, which matched a digit inside a lucide icon's SVG path — it passed for the WRONG reason and could not fail if the contract text disappeared (and fired falsely the moment the unrelated header icon was removed); it now strips React's SSR text-node separators and asserts the card's real `distribution agreement — v{n}` text, proved able to fail (1 failed on the mutated card, then restored byte-identical sha256 d051343e2e1de81a877d765f5c79ea82568662ebdb14330d71a486522486334b). Validator corpus: `npm run validate:all` 188 PASS / 0 FAIL · typecheck 0 · lint 0 · build ok. Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART3_SCOPE` declared in BOTH `scripts/validate-e6-brand-surfaces.mjs` and `[removed with Mercenta Social, §BATCH 5 2026-10-10]`. Rendered evidence: `test-screenshots/redesign-surfaces/brand-*-1440.png` and `brand-*-390.png` (20 views × 2 widths).",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-10-08",
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-10"
     },
     {
       "id": "uiux-wave3-part4-tables-forms-drawers",
       "description": "DELIVERED (order item 4 continues, 2026-10-08). The tables / forms / filters / drawers pass was executed as ONE bounded sweep: the surfaces carrying the canonical `DataTable`, the search/filter/sort table primitive, the form primitives and `RecordDrawer` were RENDERED in a real Chromium at 1440/768/390 and MEASURED, which found defects that typecheck, lint and build cannot see. FIXED AT THEIR OWNERS: (1) `src/components/shared/DataTable.tsx` rendered its OWN `<table>` — a second presentation owner with no `scope=\"col\"`, no caption, no `data-table` hook, no mobile strategy and a toolbar whose search/filter controls had NO accessible name; it is now the search/filter/sort/pagination LAYER over the ONE canonical `DataTable`, so its two surfaces (Global Catalog, Contract Cycle) gained every canonical contract including the labelled card list below `md` (measured: at 390 the table forced 205–309px of sideways page scroll; now 0). Every capability is kept — sorting became keyboard-accessible instead of a mouse-only `<th>` click. (2) `Select` and `Textarea` rendered a `<label>` with no `htmlFor` and a control with no `id`, so EVERY select and textarea in the platform was unnamed to assistive technology; `Input` derived its id from the label text alone, so two inputs sharing a label produced the same id (fixed with `useId` ids). (3) `RecordDrawer` declared `role=\"dialog\"` + `aria-modal=\"true\"` but never contained focus — the audit measured six Tab presses moving focus onto the shell's nav filter BEHIND the open drawer. (4) The app bar pushed its notification and profile controls off a 390px viewport (content measured 580px; the shell root clips its overflow, so they were UNREACHABLE) — the context zone may shrink, the breadcrumb truncates, and the exit control's label is hidden below `sm`. (5) `BrandInventory` painted the raw `product.image` URL as literal text in a 32px box (the same defect Part 3 fixed in the Product catalog) — it now renders through the ONE owner `ProductThumb`. (6) The brand PO row's action cluster could not wrap (240px wider than the content region at 390). (7) The Helpdesk filter chip rows were clipped by their card at 768px (the last priority chip was cut off). (8) Ten surfaces had form controls with no accessible name (a placeholder is not a name).",
       "status": "built_and_tested",
-      "evidence": "GATES, ALL EXECUTED HERE AND ALL MUTATION-PROVED (break → FAIL → restore byte-identical, hashes recorded): `e2e/record-drawer.spec.ts` test 11 (the drawer's tab cycle stays inside the panel — 1 failed when the cycle was disabled, restored sha256 ae8f6e7b4e6c7f56eea03c7bac74d9e7871e2e47b7b1d7c82274cd610b4e2e5a); `e2e/redesign-surfaces.spec.ts` — the table-primitive gate for Global Catalog + Contract Cycle (cards below md, no sideways content region, every visible control named, `scope` on every header + a caption at 1440) and the Helpdesk filter-chip gate (19px overflow with `flex-wrap` removed; title-bar names removed made it 2 failed) — restored sha256 2f220fc589e9a96f29dcfeb195356ea9972818b77efc14116d0fc350e3b2d322; `e2e/design-system.spec.ts` (every form control reachable by its label — 1 failed with Select's `htmlFor` removed, restored sha256 5b3a8f83c07d819012022c2566ebdff7e9ace852f57e6a541b24bc7c47717a64); `e2e/app-shell.spec.ts` (no app-bar control outside a 390px viewport — 1 failed with `flex-shrink-0` restored, sha256 58a4c6a7393375a81dd4eec786f190b2efe67358b5966a45f7500c0b8dbe295b); `e2e/inventory.spec.ts` test 5 (no raw image URL painted as text — 1 failed with the old cell restored, sha256 021c135caab2466140ac10c337b3aabedf2cb87c1a52d301728622cdf404a164); the Helpdesk chip gate (19px, restored sha256 350ea167841b99af6982e64d1b24156ca14d4fe4b64cf93b26649b0f2f7c1727). Browser legs re-run green: `e2e/app-shell.spec.ts` **24 passed** (including the two narrow viewports my own breadcrumb change honestly broke first — fixed, then 24 passed on re-run). Validators: `npm run validate:all` **188 PASS / 0 FAIL** after REPOINTING `scripts/validate-stage19.mjs`, whose literal `toggleSort` token pinned the retired implementation — repointed to the current canonical contract with the old one recorded inline (§Wave-3 Part 4 REPOINTED, not weakened). Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART4_SCOPE` in `validate-e6-brand-surfaces.mjs` + the mirror declaration in `validate-e7-embedded-social.mjs` (16 source files + the 5 gate specs). THREE-WAY GATE: `4f47837` is pushed to `origin/redesign/foundation`, deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` (the script reported `Done.`; the live entry asset `assets/index-Cm4WomVk.js` is that build's exact bundle), and the changed behaviour was verified LIVE by a read-only check — exact console evidence: `LIVE appbar {\"scroll\":390,\"client\":390,\"widest\":378,\"vw\":390}` · `LIVE catalogue@390 {\"tables\":0,\"regionOverflow\":0,\"unnamed\":0}` · `LIVE catalogue@1440 heads=7 scoped=7 caption=1` · `LIVE contracts heads=6 scoped=6` · `LIVE drawer focus containment PASS (6 Tabs inside the panel)` · `LIVE inventory {\"urlsAsText\":false,\"thumbnails\":2}` · `LIVE pageerrors []`. NOTE: TanStack Table / AG Grid remain REFERENCE ONLY — this pass consolidated Mercenta's own two table primitives; it did not adopt a dependency.",
+      "evidence": "GATES, ALL EXECUTED HERE AND ALL MUTATION-PROVED (break → FAIL → restore byte-identical, hashes recorded): `e2e/record-drawer.spec.ts` test 11 (the drawer's tab cycle stays inside the panel — 1 failed when the cycle was disabled, restored sha256 ae8f6e7b4e6c7f56eea03c7bac74d9e7871e2e47b7b1d7c82274cd610b4e2e5a); `e2e/redesign-surfaces.spec.ts` — the table-primitive gate for Global Catalog + Contract Cycle (cards below md, no sideways content region, every visible control named, `scope` on every header + a caption at 1440) and the Helpdesk filter-chip gate (19px overflow with `flex-wrap` removed; title-bar names removed made it 2 failed) — restored sha256 2f220fc589e9a96f29dcfeb195356ea9972818b77efc14116d0fc350e3b2d322; `e2e/design-system.spec.ts` (every form control reachable by its label — 1 failed with Select's `htmlFor` removed, restored sha256 5b3a8f83c07d819012022c2566ebdff7e9ace852f57e6a541b24bc7c47717a64); `e2e/app-shell.spec.ts` (no app-bar control outside a 390px viewport — 1 failed with `flex-shrink-0` restored, sha256 58a4c6a7393375a81dd4eec786f190b2efe67358b5966a45f7500c0b8dbe295b); `e2e/inventory.spec.ts` test 5 (no raw image URL painted as text — 1 failed with the old cell restored, sha256 021c135caab2466140ac10c337b3aabedf2cb87c1a52d301728622cdf404a164); the Helpdesk chip gate (19px, restored sha256 350ea167841b99af6982e64d1b24156ca14d4fe4b64cf93b26649b0f2f7c1727). Browser legs re-run green: `e2e/app-shell.spec.ts` **24 passed** (including the two narrow viewports my own breadcrumb change honestly broke first — fixed, then 24 passed on re-run). Validators: `npm run validate:all` **188 PASS / 0 FAIL** after REPOINTING `scripts/validate-stage19.mjs`, whose literal `toggleSort` token pinned the retired implementation — repointed to the current canonical contract with the old one recorded inline (§Wave-3 Part 4 REPOINTED, not weakened). Scope guards DECLARED, not weakened: `UIUX_WAVE3_PART4_SCOPE` in `validate-e6-brand-surfaces.mjs` + the mirror declaration in `[removed with Mercenta Social, §BATCH 5 2026-10-10]` (16 source files + the 5 gate specs). THREE-WAY GATE: `4f47837` is pushed to `origin/redesign/foundation`, deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` (the script reported `Done.`; the live entry asset `assets/index-Cm4WomVk.js` is that build's exact bundle), and the changed behaviour was verified LIVE by a read-only check — exact console evidence: `LIVE appbar {\"scroll\":390,\"client\":390,\"widest\":378,\"vw\":390}` · `LIVE catalogue@390 {\"tables\":0,\"regionOverflow\":0,\"unnamed\":0}` · `LIVE catalogue@1440 heads=7 scoped=7 caption=1` · `LIVE contracts heads=6 scoped=6` · `LIVE drawer focus containment PASS (6 Tabs inside the panel)` · `LIVE inventory {\"urlsAsText\":false,\"thumbnails\":2}` · `LIVE pageerrors []`. NOTE: TanStack Table / AG Grid remain REFERENCE ONLY — this pass consolidated Mercenta's own two table primitives; it did not adopt a dependency.",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-10-08",
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-10"
     },
     {
       "id": "discovered-support-team-mobile-pane-overflow",
@@ -5399,8 +5399,8 @@
       "description": "BRAND SHELL MIGRATION (guards and secondary surfaces) — Brand Advertising (both the no-tenant guard and the main surface, whose simulated-ad badge moved into the header status slot), Support & Team (chat layout preserved via a `flex h-full flex-col` frame), Listing Analyzer (both guard branches, test ids preserved), Mercenta Social (all three branches: no-session, access-denied and the main workspace, with the engine-state badge moved into the header status slot and the `ms-engine-state` / `ms-access-denied` test ids preserved), and Onboarding Complete.",
       "source": "Complete Platform Redesign — legacy page-shell retirement pass (2026-09-21 session 4)",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/{BrandAdvertising,BrandTeamMessages,ListingAnalyzer,MercentaSocial,OnboardingSummary}.tsx; scripts/validate-workspace-shell.mjs SHELL_MIGRATED_SURFACES (EXECUTED, part of the 92 PASS); e2e/brand-advertising.spec.ts + e2e/listing-analyzer.spec.ts + e2e/embedded-social.spec.ts + e2e/onboarding-handoff.spec.ts + e2e/onboarding-workflow.spec.ts passed in the targeted run",
-      "last_verified": "2026-09-21",
+      "evidence": "src/components/brand/{BrandAdvertising,BrandTeamMessages,ListingAnalyzer,MercentaSocial,OnboardingSummary}.tsx; scripts/validate-workspace-shell.mjs SHELL_MIGRATED_SURFACES (EXECUTED, part of the 92 PASS); e2e/brand-advertising.spec.ts + e2e/listing-analyzer.spec.ts + [removed with Mercenta Social, §BATCH 5 2026-10-10] + e2e/onboarding-handoff.spec.ts + e2e/onboarding-workflow.spec.ts passed in the targeted run",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5426,8 +5426,8 @@
       "description": "SESSION PERSISTENCE (R2) — a refresh in the Admin Hub / Brand Portal / Carrier terminal no longer silently signs the user out. `src/lib/runtime/sessionPersistence.ts` stores the demo session in `sessionStorage` (tab-scoped, never `localStorage`) and RE-VALIDATES it on restore through the SAME canonical RBAC allowlist `signIn` uses; a tampered, stale, mismatched-tier or malformed value fails closed to the public entry, an unknown tenant is refused outright, and a restored brand session is re-hydrated through the SAME canonical activation path the login used. The acquisition WORKING SET remains honestly memory-only.",
       "source": "Runtime parity workstream — the current product as the runtime reached by npm run dev (2026-09-21 session 5)",
       "status": "built_and_tested",
-      "evidence": "scripts/validate-product-routes.mjs (sessionStorage-not-localStorage, fail-closed, clear-on-sign-out assertions); e2e/runtime-entry.spec.ts tests 4, 7, 8 (F5 in place; non-Super-Admin refused at /admin/super_admin; tampered + unknown-tenant + malformed sessions fail closed); e2e/domain-acceptance.spec.ts #6, e2e/domain-persistence.spec.ts #2 and e2e/embedded-social.spec.ts #4 REPOINTED to the new contract with inline notes",
-      "last_verified": "2026-09-21",
+      "evidence": "scripts/validate-product-routes.mjs (sessionStorage-not-localStorage, fail-closed, clear-on-sign-out assertions); e2e/runtime-entry.spec.ts tests 4, 7, 8 (F5 in place; non-Super-Admin refused at /admin/super_admin; tampered + unknown-tenant + malformed sessions fail closed); e2e/domain-acceptance.spec.ts #6, e2e/domain-persistence.spec.ts #2 and [removed with Mercenta Social, §BATCH 5 2026-10-10] #4 REPOINTED to the new contract with inline notes",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5435,8 +5435,8 @@
       "description": "TOUR PROGRESS PERSISTENCE (R4) — `TourEngine`'s module-level progress Map died with the page, so the brand orientation tour re-opened over the portal after EVERY refresh. Progress is now seeded from and written through `sessionStorage` per brand tenant (same `TourProgress` shape, no duplicate type). The auto-start rule is NOT weakened: a genuinely new brand still gets its tour.",
       "source": "Runtime parity workstream — the current product as the runtime reached by npm run dev (2026-09-21 session 5)",
       "status": "built_and_tested",
-      "evidence": "src/components/shared/TourEngine.tsx (readPersistedTour / writePersistedTour); e2e/tours.spec.ts 10 passed; e2e/embedded-social.spec.ts + e2e/logistics-hub-map.spec.ts (which drive the tour store) passed",
-      "last_verified": "2026-09-21",
+      "evidence": "src/components/shared/TourEngine.tsx (readPersistedTour / writePersistedTour); e2e/tours.spec.ts 10 passed; [removed with Mercenta Social, §BATCH 5 2026-10-10] + e2e/logistics-hub-map.spec.ts (which drive the tour store) passed",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -5986,8 +5986,8 @@
       "description": "PO-ACK S9 (2026-09-25, session 34) - RECEIPT -> INVOICE AUTOMATION. The stage row is the only written scope, so the contract was FIXED FROM THE REPOSITORY FIRST and recorded in the programme doc before implementation. WHAT WAS MISSING: the receipt and the invoice were TWO human actions with nothing between them - commerceLifecycle.receiveCommercePurchaseOrder logged the receipt (deriving the receiving status and auto-raising shortage deductions) and issueCommerceInvoice raised the invoice only when somebody pressed a button - and the receipt is the invoice's ONLY precondition, so the missing link WAS the stage. WHOSE RULE IT IS: the channel documents its invoice rules (AV-022) and documents invoicing a SHIPPED order; invoicing AFTER RECEIPT is Mercenta's own stricter rule (AV-018), so the automation is a MERCENTA operating decision and is LABELLED as Mercenta's, never as a channel rule. (1) THE ONE OWNER: NEW src/lib/commerce/receiptInvoiceAutomation.ts - the PURE decision (receiptInvoiceAutomationDecision: the TERMS are validated FIRST, then skip / refuse / issue), the write path with the canonical invoice writer INJECTED (applyReceiptInvoiceAutomation - the channelReceivingSync shape, so the module can never become a second way to raise an invoice), the declared automatic identity RECEIPT_INVOICE_AUTOMATION_ACTOR_ID = 'mercenta-system:receipt-invoice', the outcome codes (issue_on_receipt / already_invoiced / not_delivered / undeclared_terms / writer_refused), the statement RECEIPT_INVOICE_AUTOMATION_STATEMENT (headline, Mercenta's own process labelled, the terms basis DERIVED from invoiceTerms, the AV-022 correction, the simulation provenance) and the ONE surface wording receiptInvoiceAutomationSummary. No store, no clock, no randomness, no network. (2) THE RECEIPT IS THE TRIGGER: commerceLifecycle.receiveCommercePurchaseOrder gains an optional 4th argument carrying the terms (absent => the owner's DECLARED default, stated), runs the automation AFTER the receipt is recorded, and returns invoiceAutomation + invoice; the invoice goes through issueCommerceInvoice - the SAME canonical writer, so the receipt gate (AV-018), the number registry (AV-022), the zero-value refusal, the canonical trail and the derived due date are all unchanged. The trigger's own authorisation (RBAC + tenant isolation, enforced BEFORE the receipt) is what authorises the automatic issue. (3) ATTRIBUTION: issueCommerceInvoice gains automatedBy - the automatic issue is attributed to the declared automatic identity and NAMES the human trigger on BOTH canonical records ('Raised AUTOMATICALLY by mercenta-system:receipt-invoice (receipt by <actor>)'), the S2/S5 precedent, so the trail can never read as if somebody had issued the invoice by hand. (4) ONE NEW canonical activity type: invoice_automation_refused (src/types.ts), so a refusal is RECORDED rather than swallowed - the receipt stands (the goods arrived) while the invoice is not raised. (5) THE SURFACES: CommerceOperationsPanel chooses the terms AT THE RECEIPT (the select's enablement REPOINTED to 'while an invoice can still be raised', disabled once one is in force), passes them to the receipt, states the outcome from the owner's wording, renders the owner's statement (data-state admin-receipt-invoice-automation) and KEEPS the manual issue control as the fallback and AV-022's correction path (old contract recorded inline); CommerceSimulationPanel renders the same statement (data-state commerce-receipt-invoice-automation) and the same outcome wording. (6) REPOINTED CARRIERS (old contract recorded inline): e2e/invoicing.spec.ts (the terms are chosen BEFORE the receipt, which is what raises the invoice), e2e/admin-operational-surfaces.spec.ts, e2e/commerce-operational-simulation.spec.ts and e2e/deterministic-journey.spec.ts including its shared driveToDelivered helper. (7) TWO REAL REGRESSIONS THE EXISTING GATES FOUND, repointed never weakened: validate-e4-commerce's Q1/Q2/Q4 durable-write guarantee produced its invoice AFTER the conformance repository was injected - a write the automation now performs at the earlier receipt - so it now proves the guarantee through the S9 path itself (a PO received after the injection); and the E6/E7 change-scope guards gained the declared S9_RECEIPT_INVOICE_SCOPE / S9_RECEIPT_INVOICE_DECLARED surface with their contracts unchanged. (8) AN INHERITED DEFECT RECONCILED (proved NOT S9-caused by running it in a git worktree at the S8 checkpoint 7365e8f): validate-work-layer.mjs's 'brand reminder scope is a subset of the admin reminder set' compared COUNTS while its title states a SUBSET relation, failed at that checkpoint, and was never in the validate:* npm sweep; it is repointed to the invariant it names (every brand reminder IS in the admin set, and the brand scope is non-empty so the check cannot pass vacuously) with the real numbers printed on failure (brand=2 admin=2).",
       "status": "built_and_tested",
       "source": "Founder directive 2026-09-24 (Amazon-exact PO process) - session 34, stage S9 of S1-S10 (docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md section S9)",
-      "evidence": "node scripts/validate-receipt-invoice-automation.mjs -> 61 assertions PASS, 0 FAIL, 0 network calls: the owner's declarations (one automatic identity, the statement DERIVES the terms from invoiceTerms and labels the automation as Mercenta's own process and NOT a channel rule, every outcome code declared once); the PURE decision (the declared default when no terms are stated, the stated terms carried, an undeclared term REFUSED even when an invoice already exists, an ACTIVE or SETTLED invoice skipping, a CANCELLED invoice NOT skipping - AV-022's correction path, a non-delivered PO refused); the WRITE path (the canonical writer called EXACTLY once with the resolved terms and the trigger, NEVER on skip/refuse, the writer's own refusal passed through unchanged); the REAL DOMAIN through the receipt (the invoice raised at receipt, one registry number consumed, the receipt's terms carried, the due date still derived from the invoice's own terms, the received quantity billed, attributed to the declared automatic identity on the platform audit log WITH the human trigger named on both canonical records); idempotency (a second receipt refused, no second invoice, the manual issue returning the SAME invoice with its terms intact); fail-closed-and-recorded (an undeclared term and a zero-value receipt both leave the receipt standing, raise NO invoice, consume NO number, and record invoice_automation_refused naming the rule); a partial receipt invoicing what arrived; RBAC + tenant isolation writing nothing; the P12 channel-receiving seam still refusing a simulated reading; ONE owner / ONE writer checks; and zero network calls (fetch sabotaged before any module loads + a source scan of the owner and the lifecycle). PROVED ABLE TO FAIL TWICE: the skip branch disabled -> 5 red; the undeclared-term refusal disabled -> 4 red; both restored BYTE-IDENTICAL (shasum bbd95e59d8865c4718c0293ffbc6b215ec3ac65a unchanged). Whole validate:* sweep 34/34 PASS on EXIT CODES (33 -> 34 with the new gate). The affected non-npm gates all PASS: validate-e4-commerce (Q1/Q2/Q4 repointed to the S9 path), validate-e5-admin-surfaces, validate-e6-brand-surfaces (the declared S9 scope), validate-e7-embedded-social (the declared S9 surface), validate-work-layer (the inherited reminder-scope repoint), validate-financial-reconciliation, validate-investor-demo, validate-automation, validate-demo-completeness, validate-canonical-model, validate-canonical-propagation, validate-command-centre. npm run typecheck 0; npx tsc --noEmit (root, incl. e2e/ and scripts/) 0; npx eslint 0 on every changed file; npm run build OK (5.47s). Playwright: the five affected specs 22 passed / 0 failed (28.1s) - invoicing, admin-operational-surfaces, commerce-operational-simulation, deterministic-journey, brand-operational-surfaces - and the ENTIRE suite 515 passed / 2 skipped / 0 failed (517, 7.0m) (one earlier full run showed a single failure in e2e/embedded-social.spec.ts section 6, unrelated to S9, which passes in isolation and passed on the re-run). LIVE: LIVE_VERIFICATION_PASS 187/187 checks, 0 page errors, with the seven new section S9 legs; the first live run failed 18 legs on a COLD host (one of them a real bug in the new leg - a case-sensitive match against a CSS-uppercase element - now fixed). HONEST LIMIT OF THE DEPLOYED DEMO: it holds NO simulated purchase order (the ten seeded POs are the channel's own, none simulated), so the admin console legitimately states 'Operable simulated purchase orders (0)' and the automation is proved at the DOMAIN level (the gate drives the REAL receipt) and by the surfaces' rendering; the new section S9 live legs assert the owner's statement on BOTH deployed surfaces, the terms basis, the receipt control, the manual fallback and that honest empty state. RECORDED BOUNDARIES (not gaps): the channel SUBMISSION stays P12's explicit labelled action, and there is NO scheduled sweep - the receipt IS the trigger, so no historical row is silently invoiced.",
-      "last_verified": "2026-09-25",
+      "evidence": "node scripts/validate-receipt-invoice-automation.mjs -> 61 assertions PASS, 0 FAIL, 0 network calls: the owner's declarations (one automatic identity, the statement DERIVES the terms from invoiceTerms and labels the automation as Mercenta's own process and NOT a channel rule, every outcome code declared once); the PURE decision (the declared default when no terms are stated, the stated terms carried, an undeclared term REFUSED even when an invoice already exists, an ACTIVE or SETTLED invoice skipping, a CANCELLED invoice NOT skipping - AV-022's correction path, a non-delivered PO refused); the WRITE path (the canonical writer called EXACTLY once with the resolved terms and the trigger, NEVER on skip/refuse, the writer's own refusal passed through unchanged); the REAL DOMAIN through the receipt (the invoice raised at receipt, one registry number consumed, the receipt's terms carried, the due date still derived from the invoice's own terms, the received quantity billed, attributed to the declared automatic identity on the platform audit log WITH the human trigger named on both canonical records); idempotency (a second receipt refused, no second invoice, the manual issue returning the SAME invoice with its terms intact); fail-closed-and-recorded (an undeclared term and a zero-value receipt both leave the receipt standing, raise NO invoice, consume NO number, and record invoice_automation_refused naming the rule); a partial receipt invoicing what arrived; RBAC + tenant isolation writing nothing; the P12 channel-receiving seam still refusing a simulated reading; ONE owner / ONE writer checks; and zero network calls (fetch sabotaged before any module loads + a source scan of the owner and the lifecycle). PROVED ABLE TO FAIL TWICE: the skip branch disabled -> 5 red; the undeclared-term refusal disabled -> 4 red; both restored BYTE-IDENTICAL (shasum bbd95e59d8865c4718c0293ffbc6b215ec3ac65a unchanged). Whole validate:* sweep 34/34 PASS on EXIT CODES (33 -> 34 with the new gate). The affected non-npm gates all PASS: validate-e4-commerce (Q1/Q2/Q4 repointed to the S9 path), validate-e5-admin-surfaces, validate-e6-brand-surfaces (the declared S9 scope), validate-e7-embedded-social (the declared S9 surface), validate-work-layer (the inherited reminder-scope repoint), validate-financial-reconciliation, validate-investor-demo, validate-automation, validate-demo-completeness, validate-canonical-model, validate-canonical-propagation, validate-command-centre. npm run typecheck 0; npx tsc --noEmit (root, incl. e2e/ and scripts/) 0; npx eslint 0 on every changed file; npm run build OK (5.47s). Playwright: the five affected specs 22 passed / 0 failed (28.1s) - invoicing, admin-operational-surfaces, commerce-operational-simulation, deterministic-journey, brand-operational-surfaces - and the ENTIRE suite 515 passed / 2 skipped / 0 failed (517, 7.0m) (one earlier full run showed a single failure in [removed with Mercenta Social, §BATCH 5 2026-10-10] section 6, unrelated to S9, which passes in isolation and passed on the re-run). LIVE: LIVE_VERIFICATION_PASS 187/187 checks, 0 page errors, with the seven new section S9 legs; the first live run failed 18 legs on a COLD host (one of them a real bug in the new leg - a case-sensitive match against a CSS-uppercase element - now fixed). HONEST LIMIT OF THE DEPLOYED DEMO: it holds NO simulated purchase order (the ten seeded POs are the channel's own, none simulated), so the admin console legitimately states 'Operable simulated purchase orders (0)' and the automation is proved at the DOMAIN level (the gate drives the REAL receipt) and by the surfaces' rendering; the new section S9 live legs assert the owner's statement on BOTH deployed surfaces, the terms basis, the receipt control, the manual fallback and that honest empty state. RECORDED BOUNDARIES (not gaps): the channel SUBMISSION stays P12's explicit labelled action, and there is NO scheduled sweep - the receipt IS the trigger, so no historical row is silently invoiced.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -6446,11 +6446,11 @@
     },
     {
       "id": "e2e-embedded-social-flaky-tenant-switch",
-      "description": "E2E-8 (2026-10-08) — DEFECT FIXED AT SOURCE (rule 07). While enumerating the integrations domain, `e2e/embedded-social.spec.ts` was found FLAKY under parallel load: tests 4 and 5 read the Social workspace id IMMEDIATELY after a brand switch (`expect(await workspaceId(page)).toBe(before)` with NO wait), so either could sample the MID-SWITCH tenant; the poll budget was only 10s and the whole test sat on Playwright 30s default. Observed: tests 5 and 6 failing intermittently at 8 workers. FIX AT SOURCE: the three immediate assertions now GO THROUGH the spec own wait helper — which is only satisfiable by the app genuinely returning to that tenant, because the id is `msoc-${stableHash(tenantId)}`, a deterministic function of the tenant alone — and the budgets are raised (polls 40s, per-test 120s). NO assertion was changed or removed. The changed test file is declared in BOTH scope guards (E6 + E7), mirroring the E2E-4 record-drawer precedent. HONEST LIMIT (not hidden): under this machine AMBIENT load from several UNRELATED projects (multiple Vite dev servers + another project Playwright run were observed), the switch can still exceed the budget and the spec can fail (~1 of 6 local runs); it passes reliably in isolation. The PRODUCT is correct — the surface always shows the CURRENT session own workspace and the cross-tenant assertions never leaked — so this is test-load sensitivity, not a product defect, and the affected test must not be reported as reliably passing under ambient load.",
+      "description": "§BATCH 5 (2026-10-10) — REMOVED with Mercenta Social. Was: E2E-8 (2026-10-08) — DEFECT FIXED AT SOURCE (rule 07). While enumerating the integrations domain, `e2e/embedded-social.spec.ts` was found FLAKY under parallel load: tests 4 and 5 read the Social workspace id IMMEDIATELY after a brand switch",
       "source": "Discovered during E2E-8 while enumerating the integrations domain; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
-      "status": "built",
-      "evidence": "The three `expect(await workspaceId(page)).toBe(before)` occurrences are gone (grep count 3 -> 0) and are replaced by `await waitForWorkspaceId(page, before)`; the helpers carry 40s polls and the file a 120s per-test budget (grep-verifiable). E6 PASS · E7 PASS (121/0) · `validate:all` 188 PASS / 0 FAIL · typecheck 0 · build ✓. The spec runs green in isolation (1/1) and 19/19 in 5 of 6 consecutive parallel runs; the residual 1/6 is the disclosed ambient-load sensitivity. Non-runtime governance increment => three-way NOT APPLICABLE.",
-      "last_verified": "2026-10-08",
+      "status": "removed",
+      "evidence": "REMOVED 2026-10-10 (§BATCH 5 of docs/NEXT_BUILD_PLAN_2026-10-10.md, owner directive: remove Mercenta Social COMPLETELY). Deleted: src/config/mercentaSocial.ts; src/lib/social/ (workspace, engineAdapter, brandStatus, index); src/lib/postiz/postizClient.ts; src/components/brand/MercentaSocial.tsx; src/components/brand/BrandSocialConnect.tsx; src/components/admin/PostizAdminPanel.tsx; supabase/functions/social-session/; scripts/social-sso/; scripts/validate-e7-embedded-social.mjs; scripts/validate-postiz.mjs; scripts/validate-social-simulation.mjs; e2e/embedded-social.spec.ts. ABSENCE guarded by scripts/validate-retired-platforms.mjs §2c (rule 08) and asserted at the domain level in scripts/validate-d4-persistence.mjs (O1/O2) and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     },
     {
@@ -6469,6 +6469,15 @@
       "status": "built",
       "evidence": "`docs/scenario-catalogue.json` 396 -> 440 scenarios (44 `fo-*` founder, all traceable to a test; `founder` 5 -> 49). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (440 scenarios · 345 traceable · 8 capabilities); the self-check now pins NINE enumerated domains. GATE MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in a `fo-*` scenario => exit 1, 2 failures (the proving-test check + the generated-doc drift); (B) the prefix set narrowed with `fo-` dropped => exit 1, 1 failure (the self-check); (C) a `fo-*` scenario with no `test` field => exit 1, 2 failures (the traceability check + the generated-doc drift). Each file restored byte-identical (catalogue sha256 9bbe1d7c791806f62af6a2c3dddf460bb51e12989021dbe53b8278fa5c497721; gate sha256 54b3e9495e44a650efd67186cb0f9389a1c33d81b4284a30f2d137cc7853d8a4). No orphan test, no missing test. BROWSER LEG — the five founder specs run in real Chromium = 46 passed / 0 failed / 0 skipped / 0 flaky (4 company control centre · 3 investor centre · 26 Founder OS Control Centre · 3 funding pipeline · 10 investor demo incl. its three responsive viewports). `npm run validate:all` PASS · typecheck 0 · lint 0 · build ok. Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "batch5-mercenta-social-removal",
+      "description": "§BATCH 5 (2026-10-10) — MERCENTA SOCIAL REMOVED COMPLETELY on the owner's instruction. 16 files deleted (the brand surface + adapter, the social config and domain modules, the Postiz engine client and its admin control centre, the `social-session` Edge Function, the `scripts/social-sso/` bridge, three validators and the browser spec) and every dependent repointed (both shells, the integration registry and its types, data-processing, operating costs, the theme accent token, the status-presentation helper, the investor-demo stage, the edge-function rate-limit table, docker-compose, the Caddyfile, the deploy/bootstrap/forensic scripts, and the docs). The scenario catalogue dropped its 12 `social` rows and the coverage matrix was regenerated (416 → 404).",
+      "source": "docs/NEXT_BUILD_PLAN_2026-10-10.md Part 2.6 (owner directive: remove everything)",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-retired-platforms.mjs §2c — the ABSENCE GUARD (16 removed-file + 4 removed-directory + 21 live-marker assertions), MUTATION-PROVED (a re-created social module ⇒ FAIL; restored byte-identical ⇒ PASS); scripts/validate-d4-persistence.mjs O1/O2 (Postiz absent); scripts/validate-admin-shell-bundle.mjs + scripts/validate-workspace-shell.mjs + scripts/validate-investor-demo.mjs (24-stage lifecycle) + scripts/validate-operating-costs.mjs + scripts/validate-e6-brand-surfaces.mjs F8 (18-item brand nav); e2e/retired-platforms.spec.ts + e2e/app-shell.spec.ts + e2e/integration-hub.spec.ts + e2e/redesign-surfaces.spec.ts (all repointed to ABSENCE); scripts/validate-built-rows.mjs PASS (no surviving row cites a deleted file); node scripts/validate-e2e-scenarios.mjs (16/16, 404 scenarios).",
+      "last_verified": "2026-10-10",
       "superseded_by": null
     }
   ]

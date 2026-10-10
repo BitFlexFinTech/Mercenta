@@ -38,7 +38,6 @@ const BrandReports = lazy(() => import('@/components/brand/BrandReports').then((
 const BrandSelfService = lazy(() => import('@/components/brand/BrandSelfService').then((m) => ({ default: m.BrandSelfService })));
 const BrandSettings = lazy(() => import('@/components/brand/BrandSettings').then((m) => ({ default: m.BrandSettings })));
 const BrandTeamMessages = lazy(() => import('@/components/brand/BrandTeamMessages').then((m) => ({ default: m.BrandTeamMessages })));
-const BrandSocialConnect = lazy(() => import('@/components/brand/BrandSocialConnect').then((m) => ({ default: m.BrandSocialConnect })));
 const BrandIntelligence = lazy(() => import('@/components/brand/BrandIntelligence').then((m) => ({ default: m.BrandIntelligence })));
 const CommercialReadiness = lazy(() => import('@/components/brand/CommercialReadiness').then((m) => ({ default: m.CommercialReadiness })));
 const BrandAdvertising = lazy(() => import('@/components/brand/BrandAdvertising').then((m) => ({ default: m.BrandAdvertising })));
@@ -48,11 +47,10 @@ const SalesAnalytics = lazy(() => import('@/components/brand/SalesAnalytics').th
 const BrandWorkManagement = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkManagement })));
 const BrandWorkCalendar = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkCalendar })));
 const BrandSupport = lazy(() => import('@/components/brand/BrandSupport').then((m) => ({ default: m.BrandSupport })));
-import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
 import { NAV_BADGE_LABELS, useBrandNavBadges } from '@/lib/nav/navBadges';
 import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
-  ShieldCheck, BarChart3, RotateCcw, Target, Settings,
+  ShieldCheck, BarChart3, RotateCcw, Settings,
   MessageSquare, ScrollText, ListChecks, CalendarDays, ClipboardCheck,
   Boxes,
 } from 'lucide-react';
@@ -119,7 +117,6 @@ const BRAND_SECTIONS = [
       { id: 'documents', label: 'Documents & Account', icon: <ScrollText className="w-4 h-4" /> },
       { id: 'cases', label: 'Support & Cases', icon: <MessageSquare className="w-4 h-4" /> },
       { id: 'team', label: 'Support & Team', icon: <MessageSquare className="w-4 h-4" /> },
-      { id: 'social', label: MERCENTA_SOCIAL.navLabel, icon: <Target className="w-4 h-4" /> },
       { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, tourAttr: 'nav-settings' },
     ],
   },
@@ -210,7 +207,6 @@ export default function BrandShell() {
     : brandView === 'reports' ? 'Reports'
     : brandView === 'team' ? 'Support & Team'
     : brandView === 'cases' ? 'Support & Cases'
-    : brandView === 'social' ? MERCENTA_SOCIAL.navLabel
     : brandView === 'market' ? 'Market Intelligence'
     : brandView === 'settings' ? 'Settings'
     : brandView === 'work' ? 'Tasks & Deadlines'
@@ -253,7 +249,6 @@ export default function BrandShell() {
             {brandView === 'team' && <BrandTeamMessages />}
             {/* §Brief §6 — the brand's own case surface (Mercenta-mediated). */}
             {brandView === 'cases' && <BrandSupport />}
-            {brandView === 'social' && <BrandSocialConnect />}
             {brandView === 'market' && (
               <div className="space-y-4">
                 <BrandIntelligence />

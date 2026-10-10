@@ -107,7 +107,6 @@ test.describe('Redesign surfaces — responsive verification (brand)', () => {
     ['brand-documents-account', 'Documents & Account'],
     ['brand-support-cases', 'Support & Cases'],
     ['brand-support-team', 'Support & Team'],
-    ['brand-social', 'Mercenta Social'],
     ['brand-settings', 'Settings'],
   ] as const) {
     test(`${label} holds at every target width`, async ({ page }) => {

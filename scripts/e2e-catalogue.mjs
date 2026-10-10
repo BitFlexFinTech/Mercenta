@@ -17,6 +17,10 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
+/** §BATCH 5 (2026-10-10) — the Mercenta Social feature (and with it
+ *  `e2e/embedded-social.spec.ts`) was removed, so its capability tokens are gone
+ *  from this classifier too: a dead token here would misclassify a future spec. */
+
 const ROOT = new URL('../', import.meta.url);
 const CATALOGUE = 'docs/scenario-catalogue.json';
 const DOC = 'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md';
@@ -32,7 +36,7 @@ function capabilityOf(journey) {
   if (/billing|invoic|payout|deduction|dispute|xero|finance|costs/.test(n)) return 'finance';
   if (/crm|brand-intelligence|marketing|amazon-ads|discovery/.test(n)) return 'brands_marketing';
   if (/work|command-centre|brain|monitoring|automation|notification|tour/.test(n)) return 'operations';
-  if (/integration|embedded-social|social|whatsapp|helpdesk|messaging|mail|google/.test(n)) return 'integrations';
+  if (/integration|whatsapp|helpdesk|messaging|mail|google/.test(n)) return 'integrations';
   if (/founder|investor|funding|partnership|company-control|operating-costs/.test(n)) return 'founder';
   return 'platform';
 }

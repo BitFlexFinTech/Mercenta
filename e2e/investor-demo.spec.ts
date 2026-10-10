@@ -5,7 +5,7 @@
  * (Super Admin → Simulation Control Centre → Investor demo) and asserts, by
  * consequence rather than by layout:
  *
- *   1. the full 25-stage lifecycle runs in the browser and every stage reports OK;
+ *   1. the full 24-stage lifecycle runs in the browser and every stage reports OK;
  *   2. ZERO external network calls are made while it runs;
  *   3. reset → replay reproduces the SAME digest (deterministic, no duplicates);
  *   4. tenant isolation + RBAC hold in the DOMAIN (not merely hidden buttons);
@@ -61,7 +61,9 @@ async function runDemoAndWait(page: import('@playwright/test').Page) {
   await runButton(page).click();
   await expect(page.locator('[data-state="investor-demo-summary"]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-state="investor-demo-summary"]')).toHaveText(
-    '25/25 stages OK',
+    /* §BATCH 5 (2026-10-10) — REPOINTED: the lifecycle is 24 stages, not 25
+       (the Mercenta Social stage was removed with the feature). */
+    '24/24 stages OK',
     { timeout: 30000 }
   );
 }
@@ -73,7 +75,7 @@ async function digestOf(page: import('@playwright/test').Page): Promise<string> 
 }
 
 test.describe('Investor demo — lifecycle', () => {
-  test('1. the full 25-stage lifecycle runs in the browser and every stage reports OK', async ({
+  test('1. the full 24-stage lifecycle runs in the browser and every stage reports OK', async ({
     page,
   }) => {
     const externalCalls = watchExternalCalls(page);
@@ -93,7 +95,9 @@ test.describe('Investor demo — lifecycle', () => {
     await runDemoAndWait(page);
 
     // Every stage is present, individually, with an explicit status word.
-    await expect(stageRows(page)).toHaveCount(25);
+    /* §BATCH 5 (2026-10-10) — REPOINTED: 24 stages, not 25 (the Mercenta Social
+       stage was removed with the feature). */
+    await expect(stageRows(page)).toHaveCount(24);
     for (const id of [
       'application',
       'approval',
@@ -114,7 +118,6 @@ test.describe('Investor demo — lifecycle', () => {
       'crm',
       'marketing',
       'integrations',
-      'social',
       'rbac',
       'audit',
       'error_recovery',
@@ -145,9 +148,11 @@ test.describe('Investor demo — lifecycle', () => {
     await expect(page.locator('li[data-state="investor-demo-stage-dispute"]')).toContainText(
       'operator resolved as'
     );
-    await expect(page.locator('li[data-state="investor-demo-stage-social"]')).toContainText(
-      'sim-rel-'
-    );
+    // §BATCH 5 (2026-10-10) — REPOINTED. This asserted the 'social' stage's
+    // simulated release id; the stage was removed with Mercenta Social, so the
+    // assertion is now that NO social stage is rendered at all.
+    await expect(page.locator('li[data-state="investor-demo-stage-social"]')).toHaveCount(0);
+    await expect(page.locator('li[data-state^="investor-demo-stage-"]').filter({ hasText: 'Mercenta Social' })).toHaveCount(0);
     await expect(page.locator('li[data-state="investor-demo-stage-error_recovery"]')).toContainText(
       'Error & recovery'
     );
@@ -239,7 +244,7 @@ test.describe('Investor demo — tenant isolation & RBAC', () => {
       });
 
       return {
-        allStagesOk: run.summary.ok === 25 && run.summary.error === 0 && run.summary.blocked === 0,
+        allStagesOk: run.summary.ok === 24 && run.summary.error === 0 && run.summary.blocked === 0,
         networkCalls: run.networkCalls,
         // Canonical lifecycle evidence from the run's own facts.
         poDelivered: facts.delivery?.poStatus === 'delivered',
@@ -329,7 +334,7 @@ test.describe('Investor demo — responsive & accessible', () => {
 
     await runControl.click();
     await expect(page.locator('[data-state="investor-demo-summary"]')).toHaveText(
-      '25/25 stages OK',
+      '24/24 stages OK',
       { timeout: 30000 }
     );
 
@@ -337,8 +342,8 @@ test.describe('Investor demo — responsive & accessible', () => {
     const list = page.getByRole('list', { name: 'Investor demo lifecycle stages' });
     await expect(list).toBeVisible();
     const rows = list.getByRole('listitem');
-    await expect(rows).toHaveCount(25);
-    for (let i = 0; i < 25; i += 1) {
+    await expect(rows).toHaveCount(24);
+    for (let i = 0; i < 24; i += 1) {
       await expect(rows.nth(i)).toContainText(/(OK|BLOCKED|ERROR)/);
     }
   });
@@ -354,7 +359,7 @@ test.describe('Investor demo — responsive & accessible', () => {
       /**
        * §P2 (2026-09-22) — PRE-EXISTING BUDGET FLAKE, fixed without touching a
        * single assertion. This test logs in, opens the Simulation Control Centre
-       * and runs the FULL 25-stage investor lifecycle before measuring overflow:
+       * and runs the FULL 24-stage investor lifecycle before measuring overflow:
        * measured at 375x812 it takes ~29.0s against Playwright's 30s default, so
        * it tipped over whenever the machine was under load (it failed
        * intermittently in full-suite runs while passing in isolation). `slow()`

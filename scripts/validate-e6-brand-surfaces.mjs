@@ -214,7 +214,8 @@ const M12_SCOPE = new Set([
   'src/components/admin/FounderInvestorCentre.tsx',
   'src/components/admin/PartnershipsCentre.tsx',
   'src/components/layout/AdminShell.tsx',
-  // §20 — the investor demo's commercial-relationship stage (25 stages now).
+  // §20 — the investor demo's commercial-relationship stage (24 stages now;
+  // §BATCH 5 (2026-10-10) removed the Mercenta Social stage from the lifecycle).
   'src/lib/simulation/investorDemo.ts',
   // §29 — this phase's validators + browser specs.
   'scripts/validate-commercial-model-selection.mjs',
@@ -273,7 +274,6 @@ const M13_SCOPE = new Set([
   'scripts/validate-db-hardening.mjs',
   'scripts/validate-e5-admin-surfaces.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   // §9–§14 — the Opportunity Discovery layer (the ADDITIONAL discovery engine over
   // the same canonical prospect universe, plus its validator and browser spec).
   'src/lib/intelligence/opportunityDiscovery.ts',
@@ -461,32 +461,24 @@ const FUNCTIONAL_COMPLETION_SCOPE = new Set([
  * set while STILL refusing anything outside it, and F5b additionally pins which
  * protected-area file E7 was allowed to move (the engine client seam — the file
  * E7 exists to extend). Nothing here widens what E7 may touch.
+ *
+ * §BATCH 5 (2026-10-10) — REPOINTED. Every Mercenta Social artefact this set
+ * declared was DELETED by the Batch-5 removal (`src/config/mercentaSocial.ts`,
+ * `src/lib/social/`, `src/lib/postiz/`, both brand components, the admin panel,
+ * the E7 guard itself, `scripts/social-sso/`,
+ * `supabase/functions/social-session/`, `e2e/embedded-social.spec.ts`). The
+ * surviving entries below are the files E7/E8 also touched that still exist. The
+ * deletion is declared by `BATCH5_SOCIAL_REMOVAL_SCOPE`, and its ABSENCE is
+ * asserted by `scripts/validate-retired-platforms.mjs`.
  */
 const E7_SCOPE = new Set([
-  'src/config/mercentaSocial.ts',
-  // New E7 module directory (git reports a brand-new untracked directory as a
-  // single path, so the directory itself is part of the E7 scope):
-  'src/lib/social/',
-  'src/lib/social/workspace.ts',
-  'src/lib/social/brandStatus.ts',
-  'src/lib/social/index.ts',
-  'src/components/brand/MercentaSocial.tsx',
-  'src/components/brand/BrandSocialConnect.tsx',
-  'src/components/admin/PostizAdminPanel.tsx',
   'src/components/layout/BrandShell.tsx',
-  'src/lib/postiz/postizClient.ts',
-  'scripts/validate-e7-embedded-social.mjs',
-  // §Phase E8 — the operational Mercenta Social work (live engine deployment fix,
-  // server-side SSO/provisioning bridge, and their canonical configuration):
-  'scripts/social-sso/',
-  'supabase/functions/social-session/',
   'docker-compose.services.yml',
   'scripts/Caddyfile',
   'docs/PRODUCT_CONSOLIDATION_PHASEE8_2026-09-12.md',
   // E7 extended THIS guard (F5/F5b/F6) so it still refuses any path outside the
   // E6 + E7 change sets — the file itself is therefore part of the E7 scope:
   'scripts/validate-e6-brand-surfaces.mjs',
-  'e2e/embedded-social.spec.ts',
   'e2e/app-shell.spec.ts',
   'docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md',
   'requirements-registry.json',
@@ -574,7 +566,6 @@ const BATCH2C_PO_REVISION_SCOPE = new Set([
   'e2e/po-revision-surfaces.spec.ts',               /* NEW — the browser proof of both surfaces */
   'scripts/verify-live-demo.mjs',                   /* L15 — the SAME flow driven on the deployed site */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -603,7 +594,6 @@ const BATCH2D_ACK_INVOICE_PRICE_SCOPE = new Set([
   'scripts/validate-ack-invoice-price.mjs',
   'scripts/verify-live-demo.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -638,7 +628,6 @@ const BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE = new Set([
   'scripts/validate-compliance-attribution.mjs',
   'scripts/verify-live-demo.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -661,7 +650,6 @@ const BATCH2F_WORDING_GUARD_SCOPE = new Set([
   'src/lib/intelligence/amazonWording.ts',          /* the rule owner (PROTECTED) */
   'scripts/validate-wording-guard.mjs',             /* NEW — this phase's gate */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 /**
@@ -699,7 +687,6 @@ const BATCH2H_PO_VOCABULARY_SCOPE = new Set([
   'src/lib/commerce/channelReceivingSync.ts',
   'scripts/validate-po-channel-vocabulary.mjs',     /* NEW — this phase's gate */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -734,7 +721,6 @@ const BATCH2I_DELIVERY_APPOINTMENT_SCOPE = new Set([
   'scripts/verify-live-demo.mjs',                   /* +L18 — the appointment on the deployed surface */
   'e2e/delivery-appointment.spec.ts',               /* NEW — the browser proof */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -775,7 +761,6 @@ const BATCH2J_PO_ACK_DUTIES_SCOPE = new Set([
   'scripts/validate-po-ack-duties.mjs',                 /* NEW — this phase's gate */
   'e2e/po-ack-duties.spec.ts',                          /* NEW — the browser proof */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -824,7 +809,6 @@ const OWNER_REPORTED_DEFECTS_SCOPE = new Set([
   'e2e/invoicing.spec.ts',
   'e2e/p12-channel-operations.spec.ts',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -850,7 +834,6 @@ const PLAIN_ENGLISH_ENFORCEMENT_SCOPE = new Set([
   '.clinerules/protection-rules.md',
   'PROJECT_STATUS.md',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -879,7 +862,6 @@ const P0_LOOP_TRACE_SCOPE = new Set([
   'STATUS_CHECK.md',
   'requirements-registry.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -914,7 +896,6 @@ const MERGED_PLAN_AND_VENDOR_CODES_SCOPE = new Set([
   'src/data/demoData.ts',
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -938,7 +919,6 @@ const P1_ENVIRONMENT_SCOPE = new Set([
   'e2e/simulation-control.spec.ts',                         /* the browser proof of the switch */
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -971,7 +951,6 @@ const P1FIX_DOWNLOAD_CONTROL_SCOPE = new Set([
   'e2e/po-documents.spec.ts',                                /* the browser proof of the download */
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1006,7 +985,6 @@ const P2_TWO_DEMO_BRANDS_SCOPE = new Set([
   'e2e/amazon-ads-dashboard.spec.ts',            /* the brand-universe count repoint */
   'e2e/founder-operating-system.spec.ts',        /* the brand-count metric repoint */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1031,7 +1009,6 @@ const P3_UI_WIRING_SCOPE = new Set([
   'scripts/validate-ui-wiring.mjs',                  /* NEW — this phase's gate */
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1058,7 +1035,6 @@ const P4_CLEANUP_SCOPE = new Set([
   'scripts/verify-registry.mjs',              /* knownFiles repointed (firecrawlResearch.ts → firecrawlClient.ts) */
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1084,7 +1060,6 @@ const BATCH2K_ACK_VERIFICATION_SCOPE = new Set([
   'scripts/validate-ack-verification.mjs',            /* NEW — this phase's gate */
   'scripts/verify-live-demo.mjs',                     /* +L20 — the live check of both verdicts */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1110,7 +1085,6 @@ const BATCH2L_ASN_BEFORE_RECEIPT_SCOPE = new Set([
   'scripts/validate-asn-before-receipt.mjs',          /* NEW — this phase's gate */
   'scripts/verify-live-demo.mjs',                     /* +L20 — the live check of both verdicts */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1135,7 +1109,6 @@ const BATCH2M_PICKUP_LEAD_TIME_SCOPE = new Set([
   'scripts/verify-live-demo.mjs',                     /* +L21 — the live check of the lead-time verdicts */
   'e2e/p12-channel-operations.spec.ts',               /* the browser proof of the surfaced verdict */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1167,7 +1140,6 @@ const BATCH2N_ASN_PALLETS_SCOPE = new Set([
   'scripts/verify-live-demo.mjs',                  /* +L22 — the live check of the pallet structure */
   'e2e/po-documents.spec.ts',                      /* the browser proof the labels render a pallet structure */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -1182,7 +1154,6 @@ const BATCH2N_ASN_PALLETS_SCOPE = new Set([
 const BATCH2O_AV013_RECONCILIATION_SCOPE = new Set([
   'scripts/validate-wave3-logistics.mjs',          /* §8 — the repo-wide AV-013 claim-absence sweep + inline-record + owner-consumption assertions */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -1221,7 +1192,6 @@ const BATCH2P_INFERENCE_RELABELS_SCOPE = new Set([
   'e2e/fulfillment-tracks.spec.ts',
   /* the two scope guards + the registry entry that names the new gate */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 /**
@@ -1238,7 +1208,6 @@ const BATCH3A_S7_CONTRACT_CLOSING_SCOPE = new Set([
   'scripts/validate-contract-closing.mjs',          /* NEW - this phase's gate */
   'scripts/validate-review-s5.mjs',                 /* repointed: no local extraDrafts */
   'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
-  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
   'package.json',                                   /* validate:contract-closing registered */
 ]);
 /**
@@ -1253,7 +1222,6 @@ const BATCH3B_FOUNDER_CLOSING_SCOPE = new Set([
   'src/lib/work/workStore.ts',                      /* owners repointed; two gaps closed; four reasons added */
   'scripts/validate-founder-closing.mjs',           /* NEW - this phase's gate */
   'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
-  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
   'scripts/verify-live-demo.mjs',                   /* NEW - the L25 live check */
   'package.json',                                   /* validate:founder-closing registered */
   'docs/WORK_LAYER_SSOT_2026-09-26.md',             /* §3/§4 updated */
@@ -1277,7 +1245,6 @@ const BATCH3C_PARITY_SCOPE = new Set([
   'scripts/validate-functional-parity.mjs',         /* NEW - this phase's gate */
   'e2e/mercenta-brain.spec.ts',                     /* NEW - the KPI drill-down browser test */
   'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
-  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
   'scripts/verify-live-demo.mjs',                   /* NEW - the L26 live check */
   'package.json',                                   /* validate:functional-parity registered */
   'requirements-registry.json',                     /* the audited rows reconciled */
@@ -1330,7 +1297,6 @@ const SPRINT_FOUNDER_OS_SCOPE = new Set([
   'scripts/validate-founder-operating-system.mjs',
   'scripts/validate-uiux-redesign.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/reconcile-founder-os-registry.cjs',
   'scripts/lint-wording.mjs',
   'e2e/founder-operating-system.spec.ts',
@@ -1368,7 +1334,6 @@ const SPRINT_UK_MARKET_FIT_SCOPE = new Set([
   'scripts/integrity-audit.mjs',
   'scripts/validate-uiux-redesign.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/reconcile-roadmap-phase1-registry.cjs',
   'e2e/uk-market-fit.spec.ts',
   'docs/SPRINT_UK_MARKET_FIT_PHASE1_2026-09-19.md',
@@ -1407,7 +1372,6 @@ const SPRINT_ROUTING_GATEWAYS_SCOPE = new Set([
   'scripts/validate-routing-gateways.mjs',
   'scripts/reconcile-phase2-routing-registry.cjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'PROJECT_STATUS.md',
 ]);
 
@@ -1497,7 +1461,6 @@ const P5_DESTINATION_FC_SCOPE = new Set([
   'scripts/reconcile-logistics-map-registry.cjs',
   'scripts/verify-demo-live.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
   'docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md',
   'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
@@ -1537,7 +1500,6 @@ const P6_PO_DOCUMENT_PACK_SCOPE = new Set([
   'e2e/po-documents.spec.ts',
   'scripts/validate-po-documents.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
   'PRODUCTION_READINESS.md',
@@ -1564,7 +1526,6 @@ const P7_ADMIN_INVOICING_SCOPE = new Set([
   'scripts/validate-p7-invoicing.mjs',
   'scripts/validate-work-layer.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/verify-demo-live.mjs',          // carries the §P7 live checks
   'package.json',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
@@ -1604,7 +1565,6 @@ const P8_INVENTORY_SCOPE = new Set([
   'e2e/inventory.spec.ts',
   'scripts/validate-p8-inventory.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/verify-demo-live.mjs',             // carries the §P8 live checks
   'package.json',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
@@ -1682,7 +1642,6 @@ const P9_CARRIER_REMOVAL_SCOPE = new Set([
   'scripts/validate-stage26.mjs',
   'scripts/validate-workspace-shell.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/verify-demo-live.mjs',
   /* Documentation + the state sources */
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
@@ -1721,7 +1680,6 @@ const P10_LOGISTICS_COMPLETION_SCOPE = new Set([
   'scripts/validate-logistics-providers.mjs',
   'scripts/validate-po-documents.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/verify-demo-live.mjs',
   'package.json',
   'e2e/po-documents.spec.ts',
@@ -1765,7 +1723,6 @@ const P11_CHANNEL_PO_INGESTION_SCOPE = new Set([
   'scripts/validate-e4-commerce.mjs',
   'scripts/validate-e5-admin-surfaces.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/validate-mock-seam.mjs',
   'scripts/verify-demo-live.mjs',
   'package.json',
@@ -1828,7 +1785,6 @@ const P12_SPAPI_SEAM_SCOPE = new Set([
   'scripts/validate-proxy-model.mjs',
   'scripts/validate-logistics-providers.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/verify-demo-live.mjs',
   'e2e/p12-channel-operations.spec.ts',
   /* Documentation + the state sources */
@@ -2187,7 +2143,6 @@ const BATCH2A_AMAZON_ATTRIBUTION_SCOPE = new Set([
   'scripts/validate-amazon-attribution.mjs',
   'scripts/validate-resume-state.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -2247,7 +2202,7 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
  * still refused. Nothing protected is touched (no migration, no provider client,
  * no Xero, no billing).
  */
-const BATCH0_PLATFORM_MODE_SCOPE = new Set(['src/lib/platform/', 'src/config/environment.ts', 'src/main.tsx', 'src/components/shared/DemoBanner.tsx', 'src/components/auth/Login.tsx', 'src/components/admin/integrations/SimulationControl.tsx', 'scripts/validate-e6-brand-surfaces.mjs', 'scripts/validate-e7-embedded-social.mjs']);
+const BATCH0_PLATFORM_MODE_SCOPE = new Set(['src/lib/platform/', 'src/config/environment.ts', 'src/main.tsx', 'src/components/shared/DemoBanner.tsx', 'src/components/auth/Login.tsx', 'src/components/admin/integrations/SimulationControl.tsx', 'scripts/validate-e6-brand-surfaces.mjs']);
 
 /**
  * §OPTION-A — THE TYPE-CHECK COVERAGE (2026-10-04).
@@ -2363,7 +2318,6 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
    */
   '.gitignore',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   /**
    * §REPO-CLEANUP (2026-10-04) — dead ROOT relics archived into `docs/archive/` (history
    * preserved, not destroyed). These five were referenced by ZERO live files; the docs/
@@ -2378,7 +2332,6 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
   'AUDIT_REPORT.md',
   'Mercenta Build 1.rtf',
   'scripts/validate-po-ack-programme.mjs',   /* its programme doc repointed to docs/archive/ (the doc was relocated, not changed) */
-  'scripts/validate-e7-embedded-social.mjs',
   /**
    * §REPO-CLEANUP (2026-10-04) — the retired-platform guard and its browser spec
    * RENAMED to neutral names so no live FILE NAME carries the removed product's
@@ -2415,7 +2368,6 @@ const PHASE15_LAUNCH_SCOPE = new Set([
   'package.json',                             /* validate:phase15-launch */
   'package-lock.json',                        /* the npm audit fix */
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'PRODUCTION_READINESS.md',
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
   /* §PHASE 15 (2026-10-05, follow-up) — the THIRD-PARTY DATA INVENTORY as code:
@@ -2465,7 +2417,6 @@ const RATE_LIMIT_SCOPE = new Set([
   'scripts/validate-rate-limiting.mjs',
   'scripts/validate-no-stale-blockers.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -2490,7 +2441,6 @@ const HEALTH_DIGEST_SCOPE = new Set([
   'supabase/functions/',
   'scripts/validate-health-digest.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -2511,7 +2461,6 @@ const FLOAT_LAUNCHER_SCOPE = new Set([
   'src/components/layout/BrandShell.tsx',
   'scripts/validate-float-launcher-collision.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 
@@ -2549,7 +2498,6 @@ const OPERATOR_RELABEL_SCOPE = new Set([
   'docs/AMAZON_RECONCILIATION_STATUS.md',
   'requirements-registry.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
 /**
@@ -2584,7 +2532,6 @@ const ADMIN_SHELL_CHUNK_SCOPE = new Set([
   'requirements-registry.json',
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2624,7 +2571,6 @@ const CLAIMS_REGISTRY_SCOPE = new Set([
   'scripts/lint-wording.mjs',                       /* the definitions-file exclusion (guarded by the new gate) */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2649,7 +2595,6 @@ const ACQ_CONVERSION_SCOPE = new Set([
   'scripts/validate-acquisition-conversion.mjs',    /* NEW — this phase's gate */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2671,7 +2616,6 @@ const CAPITAL_REQUIREMENT_SCOPE = new Set([
   'scripts/validate-capital-requirement.mjs',       /* NEW — this phase's gate */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2697,7 +2641,6 @@ const OBJECT_RESOLUTION_SCOPE = new Set([
   'requirements-registry.json',
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2719,7 +2662,6 @@ const FINANCING_ROUTER_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',           /* test 9 renders the Financing routes section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2743,7 +2685,6 @@ const PHASE10_PRODUCT_IDENTITY_SCOPE = new Set([
   'scripts/validate-product-identity.mjs',         /* NEW — this phase's gate */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2766,7 +2707,6 @@ const PHASE9_LOCALISATION_SCOPE = new Set([
   'scripts/validate-localisation.mjs',             /* NEW — this phase's gate */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2791,7 +2731,6 @@ const PHASE9_COUNTRY_FRAMEWORK_SCOPE = new Set([
   'scripts/validate-country-framework.mjs',        /* NEW — this phase's gate */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2818,7 +2757,6 @@ const PHASE4_LEARNING_LOOP_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',          /* test 11 renders the Brand learning loop section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2843,7 +2781,6 @@ const PHASE4_ONBOARDING_CURRICULUM_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',          /* test 12 renders the curriculum section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2865,7 +2802,6 @@ const PHASE5_CONTEXTUAL_EDUCATION_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',          /* test 13 renders the contextual-education section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2888,7 +2824,6 @@ const PHASE5_SHARED_WORKFLOW_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',          /* test 14 renders the shared-workflows section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2915,7 +2850,6 @@ const PHASE7_FINANCIER_LIFECYCLE_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',          /* test 15 renders the Financier lifecycle section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -2944,7 +2878,6 @@ const PHASE8_PITCH_WORKSPACE_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',      /* test 16 renders the Pitch workspace section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 
@@ -2973,7 +2906,6 @@ const PHASE7_FOUNDER_OUTREACH_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',      /* test 17 renders the outreach pipeline section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -3138,7 +3070,6 @@ const PHASE9_LOCALIZATION_SEO_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',      /* test 18 renders the localisation/SEO section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -3167,7 +3098,6 @@ const PHASE13_AMAZON_GOVERNANCE_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',                /* test 19 renders the governance section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -3195,7 +3125,6 @@ const PHASE11_FOUNDER_INTELLIGENCE_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',                /* test 20 renders the intelligence section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 /**
@@ -3214,7 +3143,6 @@ const PHASE12_INTEGRATED_LOOP_SCOPE = new Set([
   'e2e/founder-operating-system.spec.ts',                /* test 21 renders the loop section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
 ]);
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3267,7 +3195,6 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   'scripts/validate-seo-foundation.mjs',
   'scripts/validate-uk-market-fit.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   /**
    * §PUBLIC MESSAGING (2026-09-28, session 47) — the live-verification script.
    * The homepage's live check used to live in /tmp, so verification of the
@@ -3372,7 +3299,6 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'scripts/validate-typecheck-coverage.mjs',
     'scripts/validate-e2e-scenarios.mjs',
     'scripts/validate-e6-brand-surfaces.mjs',
-    'scripts/validate-e7-embedded-social.mjs',
     'scripts/verify-live-demo.mjs',
     'scripts/reconcile-mercenta-brain-registry.cjs',
     'scripts/reconcile-mercenta-brain-removal-registry.cjs',
@@ -3389,6 +3315,89 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'docs/MERCENTA_BRAIN_2026-09-21.md',
     'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
     'package.json',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ]);
+
+  /**
+   * §BATCH 5 (2026-10-10) — MERCENTA SOCIAL REMOVAL (Part 2.6).
+   *
+   * The owner instructed Mercenta Social's COMPLETE removal. This set declares every
+   * path the removal touches: the brand surface and its compatibility adapter, the
+   * social config + domain modules, the Postiz engine client and its admin control
+   * panel, the SSO/provisioning bridge (edge function + server + Caddy vhost +
+   * compose services), the three validators and the browser spec deleted with it,
+   * the platform surfaces that registered it (both shells, the integration registry,
+   * data-processing, operating costs, the theme accent token, the investor-demo
+   * stage), and the gates/catalogue/registry/docs repointed into absence.
+   *
+   * It DELETES files under the PROTECTED `src/lib/postiz/` prefix, so per
+   * `.clinerules/defect-remediation.md` the surface is DECLARED here rather than the
+   * removal being skipped. Every other protected prefix stays untouched and F5b still
+   * pins the exact files. The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file
+   * outside EVERY declared set still fails.
+   */
+  const BATCH5_SOCIAL_REMOVAL_SCOPE = new Set([
+    // ── deleted with the feature ──
+    'src/config/mercentaSocial.ts',
+    'src/lib/social/',
+    'src/lib/postiz/',
+    'src/components/brand/MercentaSocial.tsx',
+    'src/components/brand/BrandSocialConnect.tsx',
+    'src/components/admin/PostizAdminPanel.tsx',
+    'supabase/functions/social-session/',
+    'scripts/social-sso/',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/validate-postiz.mjs',
+    'scripts/validate-social-simulation.mjs',
+    'e2e/embedded-social.spec.ts',
+    // ── surfaces that registered or mounted it ──
+    'src/components/layout/AdminShell.tsx',
+    'src/components/layout/BrandShell.tsx',
+    'src/integrations/registry.ts',
+    'src/integrations/types.ts',
+    'src/config/dataProcessing.ts',
+    'src/config/operatingCosts.ts',
+    'src/config/themes.ts',
+    'src/lib/statusPresentation.ts',
+    'src/lib/simulation/investorDemo.ts',
+    'src/data/demoData.ts',
+    'supabase/functions/_shared/rateLimit.ts',
+    'src/components/admin/integrations/InvestorDemoPanel.tsx',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
+    // ── infrastructure and tooling ──
+    'docker-compose.services.yml',
+    'scripts/Caddyfile',
+    'scripts/deploy-docker.sh',
+    'scripts/vps-bootstrap.sh',
+    'scripts/forensic-screenshots.mjs',
+    // ── gates repointed into absence ──
+    'scripts/validate-retired-platforms.mjs',
+    'scripts/validate-admin-shell-bundle.mjs',
+    'scripts/validate-workspace-shell.mjs',
+    'scripts/validate-d4-persistence.mjs',
+    'scripts/validate-investor-demo.mjs',
+    'scripts/validate-operating-costs.mjs',
+    'scripts/validate-e2e-scenarios.mjs',
+    'scripts/validate-production-hygiene.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/e2e-catalogue.mjs',
+    'scripts/reconcile-mercenta-social-removal-registry.cjs',
+    'scripts/reconcile-redesign-backlog-retirement-registry.cjs',
+    'scripts/reconcile-redesign-remaining-surfaces-registry.cjs',
+    'scripts/reconcile-runtime-parity-registry.cjs',
+    'scripts/reconcile-master-build-reconciliation-registry.cjs',
+    'e2e/app-shell.spec.ts',
+    'e2e/retired-platforms.spec.ts',
+    'e2e/integration-hub.spec.ts',
+    'e2e/redesign-surfaces.spec.ts',
+    'e2e/investor-demo.spec.ts',
+    // ── catalogue, registry and state ──
+    'docs/scenario-catalogue.json',
+    'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',
+    'docs/NEXT_BUILD_PLAN_2026-10-10.md',
     'requirements-registry.json',
     'PROJECT_STATUS.md',
     'HANDOFF.md',
@@ -3568,12 +3577,27 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
          * still pins the exact files.
          */
         BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
-        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /**
+         * §BATCH 5 (2026-10-10) — the MERCENTA SOCIAL removal. Same declaration,
+         * first protected-path check (F5): it deletes files under the PROTECTED
+         * `src/lib/postiz/` prefix.
+         */
+        BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
+        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .filter((p) => PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)))
-      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
+      /**
+       * §BATCH 5 (2026-10-10) — REPOINTED. This chain used to begin with a literal
+       * escape hatch for `src/lib/postiz/postizClient.ts`. §BATCH 5 DELETED that
+       * file with the Mercenta Social feature, so the literal is gone and the
+       * deletion is accepted through `BATCH5_SOCIAL_REMOVAL_SCOPE` below (it is the
+       * same declaration mechanism every other protected path uses). The F5b
+       * contract is UNCHANGED: a protected file in NO declared set still fails.
+       */
+      .every((p) => M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
         FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
         SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
         SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) || P4_PROXY_MODEL_SCOPE.has(p) ||
@@ -3704,17 +3728,20 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 4 — the Mercenta Brain removal (see the F5 declaration). Second protected-path check (F5b). */
         BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
-        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 5 — the Mercenta Social removal (see the F5 declaration). Second protected-path check (F5b). */
+        BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
+        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
  * FUNCTIONAL_COMPLETION_SCOPE above. The wave is PRESENTATION-ONLY (theme tokens,
  * workspace composition, shell/navigation, charts, motion, homepage copy) and
- * changes no business logic, data model, permission or integration. The single
- * canonical declaration lives in scripts/validate-e7-embedded-social.mjs
- * (UIUX_REDESIGN_DECLARED); this Set is that declaration echoed for the E6 guard,
- * which cannot import from the other validator. An UNEXPLAINED change still
- * fails.
+ * changes no business logic, data model, permission or integration. §BATCH 5 (2026-10-10) — REPOINTED. This comment used to say the single
+ * canonical declaration lived in `scripts/validate-e7-embedded-social.mjs`
+ * (`UIUX_REDESIGN_DECLARED`). THAT VALIDATOR WAS DELETED with the Mercenta Social
+ * feature, so THIS Set is now the only declaration. Its contract is unchanged:
+ * an UNEXPLAINED change still fails.
  */
 const UIUX_REDESIGN_SCOPE = new Set([
   // ── Wave 1 — theme/token foundation + presentation seams ──
@@ -3760,8 +3787,8 @@ const UIUX_REDESIGN_SCOPE = new Set([
   'docs/UIUX_REDESIGN_WAVE2_2026-09-18.md',
   'docs/UIUX_FOUNDATION_PASS_2026-09-18.md',
   // ── §UI/UX Wave 2 COMPLETION (2026-09-18, finish-and-fix pass) — the same
-  //    declaration as UIUX_REDESIGN_DECLARED in validate-e7-embedded-social.mjs
-  //    (this validator cannot import from it). ──
+  //    declaration as UIUX_REDESIGN_DECLARED, which §BATCH 5 (2026-10-10) left as the
+  //    only copy here when the guard that held it was deleted. ──
   'src/components/admin/AdminPurchaseOrderList.tsx',
   'src/components/admin/ComplianceApprovals.tsx',
   'src/components/admin/ReturnsTrackingDashboard.tsx',
@@ -3967,7 +3994,6 @@ const BATCH3_LOGISTICS_REMOVALS_SCOPE = new Set([
   'scripts/validate-logistics-hero.mjs',
   'scripts/validate-functional-parity.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'scripts/build-logistics-hero-geo.mjs',
   'scripts/reconcile-logistics-map-registry.cjs',
   'e2e/logistics-hub-map.spec.ts',
@@ -4001,7 +4027,6 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
   'src/components/shared/NotificationCenter.tsx',
   'scripts/validate-work-layer.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
-  'scripts/validate-e7-embedded-social.mjs',
   'e2e/work-layer.spec.ts',
 ]);
 
@@ -4094,7 +4119,6 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
     'scripts/validate-work-layer.mjs',
     'scripts/validate-uiux-redesign.mjs',
     'scripts/validate-e6-brand-surfaces.mjs',
-    'scripts/validate-e7-embedded-social.mjs',
     'e2e/deterministic-journey.spec.ts',
     'docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md',
   ]);
@@ -4379,7 +4403,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH3_LOGISTICS_REMOVALS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 4 — the Mercenta Brain removal (see above). */
           BATCH4_BRAIN_REMOVAL_SCOPE.has(p) ||
-          [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 5 — the Mercenta Social removal (see above). */
+          BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
+          [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
@@ -4437,11 +4464,17 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
        * added or removed, which the exact comparison below proves), and the
        * comparison remains an EXACT ordered id list, so any further restructuring
        * still fails this test.
+       *
+       * §BATCH 5 (2026-10-10) — REPOINTED, not weakened. Mercenta Social was REMOVED
+       * by owner instruction, so the brand nav now holds 18 destinations: 'social'
+       * left with the surface. The comparison is STILL an EXACT ordered id list, and
+       * `scripts/validate-retired-platforms.mjs` additionally asserts that 'social'
+       * can never return to the nav.
        */
       const EXPECTED = [
         'overview', 'purchase_orders', 'logistics', 'returns', 'work', 'calendar',
         'catalog', 'commercial_readiness', 'onboarding', 'compliance', 'contracts',
-        'analytics', 'market', 'reports', 'documents', 'cases', 'team', 'social',
+        'analytics', 'market', 'reports', 'documents', 'cases', 'team',
         'settings',
       ];
       return ids.join(',') === EXPECTED.join(',');

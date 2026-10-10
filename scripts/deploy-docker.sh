@@ -2,7 +2,7 @@
 # ──────────────────────────────────────────────────────────────────────
 # Mercenta Self-Hosted Services Deploy Script
 #
-# Deploys the self-hosted services stack (Usertour, Postiz)
+# Deploys the self-hosted services stack (Usertour)
 # to a Docker-capable VPS. Also deploys the Caddy reverse proxy config.
 # Requires:
 #   - SSH access to the target server (VPS provisioned via vps-bootstrap.sh)
@@ -138,7 +138,6 @@ echo ""
 echo "   Service        Internal URL              External URL (if configured)"
 echo "   ───────        ────────────              ───────────────────────────"
 echo "   Usertour       http://localhost:8090      https://usertour.mercenta.co.uk"
-echo "   Postiz         http://localhost:8100      https://postiz.mercenta.co.uk"
 echo ""
 echo "   Next: update demo.mercenta.co.uk Integrations panel with real URLs."
 echo "   Next: verify HTTPS certs: curl -I https://usertour.mercenta.co.uk"

@@ -15,6 +15,28 @@
  *
  * Run: node scripts/reconcile-redesign-remaining-surfaces-registry.cjs
  */
+/**
+ * §BATCH 5 (2026-10-10) — SUPERSEDED, AND GUARDED AGAINST REGRESSION.
+ *
+ * This tool's `evidence` strings name MERCENTA SOCIAL artefacts that the owner
+ * instructed us to REMOVE COMPLETELY (`src/components/brand/MercentaSocial.tsx`).
+ * Because the script REFRESHES a row's evidence when it differs, re-running it
+ * would OVERWRITE the reconciled rows in `requirements-registry.json` and
+ * re-introduce citations of DELETED files.
+ *
+ * It is kept (history is never deleted) but REFUSES to run by default; those rows
+ * are reconciled by hand and the feature's ABSENCE is guarded by
+ * `scripts/validate-retired-platforms.mjs` §2c (rule 08).
+ */
+if (!process.env.ALLOW_SUPERSEDED_SOCIAL_RECONCILE) {
+  console.error(
+    'reconcile-redesign-remaining-surfaces-registry.cjs — SUPERSEDED by §BATCH 5 (2026-10-10): Mercenta Social was removed.\n' +
+      'Its rows are reconciled in requirements-registry.json and guarded by\n' +
+      'scripts/validate-retired-platforms.mjs §2c. Re-running would re-introduce citations of deleted files.\n' +
+      'Set ALLOW_SUPERSEDED_SOCIAL_RECONCILE=1 only if you have read that and still intend to run it.'
+  );
+  process.exit(1);
+}
 const fs = require('fs');
 const path = 'requirements-registry.json';
 

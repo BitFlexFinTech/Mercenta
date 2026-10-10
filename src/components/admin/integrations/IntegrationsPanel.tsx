@@ -62,7 +62,7 @@ const CATEGORY_DESCRIPTIONS: Partial<Record<IntegrationCategory, string>> = {
   logistics: 'Carriers and shipment tracking providers.',
   compliance: 'Registrar and tax-authority verification providers.',
   communications: 'Email, messaging and in-product guidance providers.',
-  marketing: 'Outreach, prospecting, social publishing and advertising providers.',
+  marketing: 'Outreach, prospecting and advertising providers.',
   ai: 'Model providers used by research and drafting workflows.',
   data: 'Market-data and web-fetch providers used by research workflows.',
   infrastructure: 'Hosted services operated by Mercenta itself.',

@@ -143,7 +143,9 @@ test.describe('Phase B — Integration Hub control centre', () => {
     await expect(hub.locator('h3', { hasText: 'Google' }).first()).toBeVisible({ timeout: 4000 });
     // Provider cards remain h3 (the registry-removal contract depends on it).
     await expect(hub.locator('h3', { hasText: 'Twilio WhatsApp' }).first()).toBeVisible();
-    await expect(hub.locator('h3', { hasText: 'Postiz' }).first()).toBeVisible();
+    // §BATCH 5 (2026-10-10) — the 'Postiz' card was asserted VISIBLE here; it left
+    // the registry with Mercenta Social, so it is now asserted ABSENT.
+    await expect(hub.locator('h3', { hasText: 'Postiz' })).toHaveCount(0);
   });
 
   test('5. no page errors while operating the Hub', async ({ page }) => {

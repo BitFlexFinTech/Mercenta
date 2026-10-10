@@ -40,7 +40,7 @@ try {
   /* ── every cost line is labelled; nothing claims live billing ─────────── */
   const lines = cfg.OPERATING_COST_LINES;
   test('every provider cost line exists (AI, infra, data, comms, marketing, compliance)',
-    ['openrouter', 'supabase', 'hosting', 'email', 'firecrawl', 'keepa', 'hunter', 'instantly', 'whatsapp', 'social', 'google', 'companies_house', 'hmrc']
+    ['openrouter', 'supabase', 'hosting', 'email', 'firecrawl', 'keepa', 'hunter', 'instantly', 'whatsapp', 'google', 'companies_house', 'hmrc']
       .every((id) => lines.some((l) => l.id === id)), lines.map((l) => l.id).join(', '));
   test('every cost line carries an explicit source label',
     lines.every((l) => ['MANUAL', 'ESTIMATED', 'SIMULATED', 'NOT CONNECTED', 'LIVE'].includes(l.source)));

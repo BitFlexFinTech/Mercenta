@@ -68,9 +68,15 @@ try {
     'compliance', 'catalogue',
     'purchase_order', 'acknowledgement', 'fulfilment', 'shipment', 'shipping_commercial',
     'delivery', 'returns', 'deductions', 'dispute', 'commission', 'payout',
-    'crm', 'marketing', 'integrations', 'cases', 'social', 'rbac', 'audit', 'error_recovery',
+    'crm', 'marketing', 'integrations', 'cases', 'rbac', 'audit', 'error_recovery',
   ];
-  test('the stage vocabulary is the documented 25-stage lifecycle',
+  /**
+   * §BATCH 5 (2026-10-10) — REPOINTED, not weakened. Mercenta Social was REMOVED by
+   * owner instruction, so the lifecycle is now 24 stages ('social' left with the
+   * surface). The assertion is UNCHANGED in strength: the FULL ordered list is
+   * compared element-by-element, so any further change still fails.
+   */
+  test('the stage vocabulary is the documented 24-stage lifecycle',
     mod.INVESTOR_DEMO_STAGES.length === EXPECTED_STAGES.length &&
     EXPECTED_STAGES.every((id, i) => mod.INVESTOR_DEMO_STAGES[i].id === id),
     mod.INVESTOR_DEMO_STAGES.map((s) => s.id).join(','));
@@ -362,11 +368,10 @@ try {
     byId.integrations.facts.unknownIsUnsafe === true &&
     byId.integrations.facts.liveIsUnsafe === true &&
     byId.integrations.facts.requiredProvidersSafe === 6);
-  test('social: fail-closed, simulated publish, failure recovered, all simulated',
-    byId.social.facts.wronglyAccepted === 0 &&
-    byId.social.facts.retryRecovered === true &&
-    byId.social.facts.allSimulated === true &&
-    byId.social.facts.scheduledNotRunEarly === true);
+  test('§BATCH 5 — the social stage is GONE from the demo lifecycle (and cannot return)',
+    !byId.social &&
+      !('social' in byId) &&
+      run.stages.every((s) => s.id !== 'social'));
   test('rbac: all refusal/allow checks hold',
     byId.rbac.facts.brandOnboardingInitiationRefused === true &&
     byId.rbac.facts.crossTenantReadRefused === true &&

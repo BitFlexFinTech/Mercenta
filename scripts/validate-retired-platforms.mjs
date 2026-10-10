@@ -52,7 +52,10 @@ const INTENTIONAL = [
    */
   { file: 'scripts/validate-e6-brand-surfaces.mjs', contains: 'validate-rocketchat-removal.mjs' },
   { file: 'scripts/validate-e6-brand-surfaces.mjs', contains: 'rocketchat-removal.spec.ts' },
-  { file: 'scripts/validate-e7-embedded-social.mjs', contains: 'rocketchat-removal.spec.ts' },
+  /* §BATCH 5 (2026-10-10) — the allowlist entry that named
+     `scripts/validate-e7-embedded-social.mjs` is REMOVED WITH THAT FILE: it was
+     deleted together with the Mercenta Social feature, so there is no file left to
+     allow. Leaving the entry would keep a pointer to a non-existent script. */
 ];
 const SKIP_FILES = new Set([
   'e2e/retired-platforms.spec.ts',
@@ -110,6 +113,81 @@ test('ABSENCE GUARD — the shared WorkWorkspace renders no "How this works" car
 test('the CommercialReadiness "How this works" card is untouched (a separate card, not the one removed)',
   /title="How this works"/.test(readFileSync(resolve(ROOT, 'src/components/brand/CommercialReadiness.tsx'), 'utf-8')));
 
+// ── 2c. §BATCH 5 (2026-10-10) — MERCENTA SOCIAL is ABSENT ────────────────
+/**
+ * The owner instructed Mercenta Social's COMPLETE removal. This is its ABSENCE
+ * GUARD (rule 08): every assertion below FAILS if any part of the feature returns —
+ * the files, the brand/admin destinations, the engine registration, the SSO bridge,
+ * or the infrastructure that served it.
+ *
+ * Proved able to fail BEFORE the removal was reported done: re-creating a removed
+ * module and re-adding a removed nav id each produced a FAIL; both were restored
+ * byte-identical (hashes recorded in PROJECT_STATUS.md).
+ */
+const SOCIAL_REMOVED_FILES = [
+  'src/config/mercentaSocial.ts',
+  'src/components/brand/MercentaSocial.tsx',
+  'src/components/brand/BrandSocialConnect.tsx',
+  'src/components/admin/PostizAdminPanel.tsx',
+  'src/lib/postiz/postizClient.ts',
+  'src/lib/social/workspace.ts',
+  'src/lib/social/engineAdapter.ts',
+  'src/lib/social/brandStatus.ts',
+  'src/lib/social/index.ts',
+  'scripts/social-sso/server.mjs',
+  'scripts/social-sso/engine-patches.mjs',
+  'supabase/functions/social-session/index.ts',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/validate-postiz.mjs',
+  'scripts/validate-social-simulation.mjs',
+  'e2e/embedded-social.spec.ts',
+];
+for (const p of SOCIAL_REMOVED_FILES) {
+  test(`§BATCH5 removed file absent: ${p}`, !existsSync(resolve(ROOT, p)));
+}
+for (const d of [
+  'src/lib/social',
+  'src/lib/postiz',
+  'scripts/social-sso',
+  'supabase/functions/social-session',
+]) {
+  test(`§BATCH5 removed directory absent: ${d}`, !existsSync(resolve(ROOT, d)));
+}
+
+/**
+ * The SURVIVING files that registered, mounted or served the feature must carry no
+ * LIVE trace of it. Each pattern is the exact marker the feature needed — never a
+ * bare word — so a §BATCH 5 removal note may legitimately NAME what it deleted
+ * while the code stays clean.
+ */
+const SOCIAL_MARKERS = [
+  ['src/components/layout/BrandShell.tsx', /id: 'social'|MERCENTA_SOCIAL|BrandSocialConnect/],
+  ['src/components/layout/AdminShell.tsx', /postiz|PostizAdminPanel/i],
+  ['src/integrations/registry.ts', /postiz/i],
+  ['src/integrations/types.ts', /postiz/i],
+  ['src/config/dataProcessing.ts', /provider: 'postiz'|name: 'Postiz'/],
+  ['src/config/operatingCosts.ts', /providerId: 'postiz'|id: 'social'/],
+  ['src/config/themes.ts', /mr-feature-social/],
+  ['src/lib/statusPresentation.ts', /socialPostStatePresentation|SOCIAL_POST_STATE/],
+  ['src/lib/simulation/investorDemo.ts', /createSocialEngineClient|createIsolatedSimulatedSocialClient|'social'/],
+  ['src/components/admin/integrations/InvestorDemoPanel.tsx', /integrations → social/],
+  ['supabase/functions/_shared/rateLimit.ts', /social-session/],
+  ['docker-compose.services.yml', /ghcr\.io\/gitroomhq\/postiz-app|^\s{2}postiz(-db|-redis)?:|^\s{2}social-sso:/m],
+  ['scripts/Caddyfile', /^\(mercenta_social_engine\)|^postiz\.mercenta\.co\.uk \{/m],
+  ['scripts/deploy-docker.sh', /postiz/i],
+  ['scripts/vps-bootstrap.sh', /postiz/i],
+  ['scripts/forensic-screenshots.mjs', /'social'|'postiz'/],
+  ['e2e/app-shell.spec.ts', /text=Mercenta Social'\)\.first\(\)\.toBeVisible|'Social Media', 'WhatsApp'/],
+  ['e2e/retired-platforms.spec.ts', /text=Social Media'\)\.first\(\)\.toBeVisible|hasText: 'Postiz' \}\)\.first\(\)\.toBeVisible/],
+  ['e2e/integration-hub.spec.ts', /hasText: 'Postiz' \}\)\.first\(\)\.toBeVisible/],
+  ['e2e/redesign-surfaces.spec.ts', /brand-social/],
+  ['e2e/investor-demo.spec.ts', /investor-demo-stage-social"\]\)\.toContainText/],
+];
+for (const [file, pattern] of SOCIAL_MARKERS) {
+  test(`§BATCH5 no LIVE Social marker remains in ${file}`,
+    !pattern.test(readFileSync(resolve(ROOT, file), 'utf-8')));
+}
+
 // ── 3–5. Domain-level assertions through the real modules ───────────────
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
 try {
@@ -133,8 +211,17 @@ try {
   test('no rocketchat id in INTEGRATION_ORDER', !reg.INTEGRATION_ORDER.includes('rocketchat'));
   test('no rocketchat key in INTEGRATION_META', !('rocketchat' in reg.INTEGRATION_META));
   test('no rocketchat key in INITIAL_INTEGRATIONS', !('rocketchat' in types.INITIAL_INTEGRATIONS));
-  test('other communications providers intact (usertour, twilio_whatsapp, postiz)',
-    ['usertour', 'twilio_whatsapp', 'postiz'].every((p) => ids.includes(p)));
+  test('other communications providers intact (usertour, twilio_whatsapp)',
+    ['usertour', 'twilio_whatsapp'].every((p) => ids.includes(p)));
+  /**
+   * §BATCH 5 (2026-10-10) — REPOINTED, not weakened. This list held THREE providers
+   * ('usertour', 'twilio_whatsapp', 'postiz'). `postiz` was the Mercenta Social
+   * engine and left the registry with the feature, so it moved to the §2c absence
+   * guard above (where its ABSENCE is asserted). The D1 contract is unchanged: the
+   * other communications providers survive and no over-removal happened.
+   */
+  test('§BATCH5 postiz is gone from the registry (it left with Mercenta Social)',
+    !ids.includes('postiz') && !reg.INTEGRATION_ORDER.includes('postiz'));
 
   test('AdminShell has no rocketchat nav id / route / import', !/rocketchat/i.test(adminShell));
 

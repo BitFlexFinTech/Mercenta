@@ -43,7 +43,9 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
 
     // The Integration section survived the removal with its other entries.
     await expect(nav.locator('text=Integration Settings').first()).toBeVisible();
-    await expect(nav.locator('text=Social Media').first()).toBeVisible();
+    // §BATCH 5 (2026-10-10) — 'Social Media' was asserted VISIBLE here; the owner
+    // removed Mercenta Social COMPLETELY, so it is now asserted ABSENT.
+    await expect(nav.locator('text=Social Media')).toHaveCount(0);
     await expect(nav.locator('text=WhatsApp').first()).toBeVisible();
 
     // Admin still boots and renders the real dashboard.
@@ -61,7 +63,8 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     // Super-only entries stay hidden for a normal admin (RBAC untouched)…
     await expect(nav.locator('text=Integration Settings')).toHaveCount(0);
     // …while the non-super Integration-section entries remain reachable.
-    await expect(nav.locator('text=Social Media').first()).toBeVisible();
+    // §BATCH 5 (2026-10-10) — REPOINTED to ABSENCE (Mercenta Social removed).
+    await expect(nav.locator('text=Social Media')).toHaveCount(0);
     await expect(nav.locator('text=WhatsApp').first()).toBeVisible();
     await expect(nav.locator('text=Brand CRM').first()).toBeVisible();
   });
@@ -75,7 +78,9 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     // The remaining communications providers still render (removal was surgical).
     await expect(page.locator('h3', { hasText: 'Twilio WhatsApp' }).first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('h3', { hasText: 'Usertour' }).first()).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('h3', { hasText: 'Postiz' }).first()).toBeVisible({ timeout: 6000 });
+    // §BATCH 5 (2026-10-10) — the 'Postiz' card was asserted VISIBLE here; it left
+    // the registry with Mercenta Social, so it is now asserted ABSENT.
+    await expect(page.locator('h3', { hasText: 'Postiz' })).toHaveCount(0);
   });
 
   test('4. core communications still work: CRM → Messages → Helpdesk (one canonical thread)', async ({ page }) => {

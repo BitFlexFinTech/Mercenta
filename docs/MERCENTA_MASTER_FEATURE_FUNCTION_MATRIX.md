@@ -213,7 +213,7 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D04-24` | `audit_log` | **PARTIALLY VERIFIED** | `e2e/status-semantics.spec.ts` | history is never destroyed |
 | `D04-25` | `usertour` | **VERIFIED** | `e2e/tours.spec.ts` | KB ↔ UserTour link |
 | `D04-26` | `integrations` | **VERIFIED** | `e2e/integration-hub.spec.ts`, `e2e/google-setup.spec.ts`, `e2e/xero.spec.ts` | credential control centre |
-| `D04-27` | `postiz` | **VERIFIED** | `e2e/embedded-social.spec.ts` | |
+| `D04-27` | `postiz` | **REMOVED (§BATCH 5, 2026-10-10)** | — | the Mercenta Social engine; deleted with the feature (absence guarded by `scripts/validate-retired-platforms.mjs` §2c) |
 | `D04-28` | `whatsapp` | **PARTIALLY VERIFIED** | — | render-only today (gap R4) |
 | `D04-29` | `founder_centre` | **VERIFIED** | `e2e/founder-operating-system.spec.ts`, `e2e/founder-investor-centre.spec.ts` | 9 operating views |
 | `D04-30` | `partnerships` | **IMPLEMENTED — NOT VERIFIED** | `e2e/admin-operational-surfaces.spec.ts` (partial) | no dedicated spec |
@@ -456,12 +456,12 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D14-02` | Messages hub / log | admin `messages`, brand `team` | **VERIFIED** | `e2e/crm.spec.ts`, `e2e/admin-operational-surfaces.spec.ts` |
 | `D14-03` | Notification centre + derivation | all shells | **VERIFIED** | `e2e/notifications.spec.ts`, `e2e/dashboard.spec.ts` |
 | `D14-04` | Transactional email seam | `src/lib/mail/**` (the ONE seam) | **PARTIALLY VERIFIED** | `e2e/outreach-provider-hardening.spec.ts` |
-| `D14-05` | Social / Postiz / embedded social | brand `social`, admin `postiz` | **VERIFIED** | `e2e/embedded-social.spec.ts` |
+| `D14-05` | Social / Postiz / embedded social | brand `social`, admin `postiz` | **REMOVED (§BATCH 5, 2026-10-10)** | — | deleted COMPLETELY on owner instruction; absence guarded by `scripts/validate-retired-platforms.mjs` §2c + `e2e/retired-platforms.spec.ts` |
 | `D14-06` | WhatsApp (Twilio) | admin `whatsapp` | **PARTIALLY VERIFIED** | render-only today (gap R4) |
 | `D14-07` | UserTour in-app tours + KB link | `usertour` + `TourEngine` | **VERIFIED** | `e2e/tours.spec.ts` |
 | `D14-08` | Rocket.Chat removal | historical removal retained as a regression guard | **VERIFIED** | `e2e/retired-platforms.spec.ts` |
 
-**Domain contract — D14:** module `src/lib/crm/crmStore.ts`, `src/lib/messaging/**`, `src/lib/notifications/**`, `src/lib/social/**`, `src/lib/postiz/**`, `src/lib/whatsapp/**`, `src/lib/usertour/**`, `src/data/api.ts` (`logMessage`). Every outbound message is logged in the single canonical messages store; no surface keeps its own copy.
+**Domain contract — D14:** module `src/lib/crm/crmStore.ts`, `src/lib/messaging/**`, `src/lib/notifications/**`, `src/lib/whatsapp/**`, `src/lib/usertour/**`, `src/data/api.ts` (`logMessage`) — **§BATCH 5 (2026-10-10) removed `src/lib/social/**` and `src/lib/postiz/**` from this contract with the Mercenta Social feature.** Every outbound message is logged in the single canonical messages store; no surface keeps its own copy.
 
 ---
 
