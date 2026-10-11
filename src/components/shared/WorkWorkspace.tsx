@@ -11,7 +11,7 @@
  * Tenant scoping is not done here — the caller passes the session's own
  * `tenantId` and the store filters inside `getWorkItems`.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityFeed,
   ContextPanel,
@@ -32,6 +32,7 @@ import { Button, Input, StatusBadge, type StatusTone } from '@/components/ui';
  * instead of dropping the operator on the generic list. No second mechanism.
  */
 import { navigateProductView } from '@/lib/runtime/productRoutes';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import {
   WORK_COUNT_SETS,
   WORK_PRIORITY_LABELS,
@@ -269,6 +270,20 @@ export function WorkWorkspace({
     () => everything.find((w) => w.id === selectedId) ?? null,
     [everything, selectedId]
   );
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/<env>/work?work=<id>` opens THAT unit of
+   * work's drawer, so a notification about a work item lands on the item rather
+   * than on the work list. Applied ONCE per id, so it never overrides a drawer
+   * the operator opens afterwards — the same contract the purchase-order lists
+   * and the Logistics Hub use for their own `?po=` deep link.
+   */
+  const deepLinkWork = useRecordDeepLink('work');
+  useEffect(() => {
+    if (!deepLinkWork) return;
+    if (!everything.some((w) => w.id === deepLinkWork)) return;
+    setSelectedId(deepLinkWork);
+  }, [deepLinkWork, everything]);
 
   const today = demoToday();
   const overdue = all.filter((w) => w.dueDate !== null && w.dueDate < today);

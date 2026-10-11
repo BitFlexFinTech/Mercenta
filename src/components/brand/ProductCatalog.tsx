@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useRecordDeepLink, useFocusRecordElement } from '@/lib/runtime/recordDeepLink';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, Button, DataTable, Input, Select } from '@/components/ui';
@@ -104,6 +105,24 @@ export function ProductCatalog() {
     void submissionsData; // reactivity anchor: the canonical submission query result
     return (sku: string) => (brandId ? latestSubmissionForProduct(brandId, sku) : undefined);
   }, [submissionsData, brandId]);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/brand/catalog?submission=<id>` marks and
+   * scrolls to THAT submission's product row, so a "rejected catalog submission"
+   * notice lands on the record it names rather than on the catalogue. (Before this
+   * change the notice did NOTHING when clicked.) The submission is resolved from
+   * the canonical submission store by its own id — never re-derived — and a
+   * submission that is not on this page is a no-op, not an invented record.
+   */
+  const deepLinkSubmission = useRecordDeepLink('submission');
+  const deepLinkSubmissionSku = useMemo(() => {
+    if (!deepLinkSubmission) return null;
+    const sub = (submissionsData?.data ?? []).find((s) => s.id === deepLinkSubmission);
+    return sub ? sub.sku : null;
+  }, [deepLinkSubmission, submissionsData]);
+  useFocusRecordElement(
+    deepLinkSubmissionSku ? `[data-testid="catalog-asin-${deepLinkSubmissionSku}"]` : null
+  );
 
   /** Completeness is DERIVED from the canonical prerequisite list per product. */
   const completenessBySku = new Map(

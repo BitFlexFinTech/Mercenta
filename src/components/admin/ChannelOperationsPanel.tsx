@@ -29,6 +29,7 @@
  *     receipt happened.
  */
 import { useMemo, useState } from 'react';
+import { useRecordDeepLink, useFocusRecordElement } from '@/lib/runtime/recordDeepLink';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { demoCommerceInvoices, demoPurchaseOrders } from '@/data/demoStore';
@@ -172,6 +173,20 @@ export function ChannelOperationsPanel() {
     () => demoCommerceInvoices.filter((i) => i.status === 'issued').slice().reverse().slice(0, 8),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [version]
+  );
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/retail_pipeline?invoice=<id>` marks
+   * and scrolls to THAT invoice's row, so a "simulated invoice awaiting payment"
+   * notice lands on the invoice it names rather than on the section. The selector
+   * is only built when the id is one of the rows this panel actually renders, so a
+   * notice can never focus an element that is not its record.
+   */
+  const deepLinkInvoice = useRecordDeepLink('invoice');
+  useFocusRecordElement(
+    deepLinkInvoice && invoiceRows.some((i) => i.id === deepLinkInvoice)
+      ? `[data-record-id="${deepLinkInvoice}"]`
+      : null
   );
 
   const labels = channelShipmentLabelsAvailability(UK_MARKETPLACE_ID);
@@ -516,6 +531,7 @@ export function ChannelOperationsPanel() {
               return (
                 <li
                   key={invoice.id}
+                  data-record-id={invoice.id}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-white/[0.06] bg-ink-850/60 px-2 py-1"
                 >
                   <span className="text-ds-label text-zinc-300">

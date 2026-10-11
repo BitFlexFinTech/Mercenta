@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { DemoBanner } from '@/components/shared/DemoBanner';
@@ -26,6 +26,7 @@ import {
 } from '@/components/shared/workspace';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 /**
  * §P10 (programme §4 P10) — the Logistics Hub's completion surfaces, each backed by its
  * ONE owner: the cross-tenant document queue (the SAME rule the brand's badge counts),
@@ -177,6 +178,20 @@ export function LogisticsControl({
   const { addApiLog, apiLogs, products } = useApp();
   const [busyShipmentId, setBusyShipmentId] = useState<string | null>(null);
   const [lastCarrierResult, setLastCarrierResult] = useState<Record<string, string>>({});
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/logistics?shipment=<id>` selects THAT
+   * consignment in the inspector, so an "ASN filed" notice lands on the consignment
+   * it names rather than on the logistics hub. The id is the canonical shipment id
+   * (the leg id IS the shipment id — `buildOperationalMap` maps `id: input.id`).
+   * Applied ONCE per value by the shared reader.
+   */
+  const deepLinkShipment = useRecordDeepLink('shipment');
+  useEffect(() => {
+    if (!deepLinkShipment) return;
+    if (!shipments.some((s) => s.id === deepLinkShipment)) return;
+    setSelectedShipmentId(deepLinkShipment);
+  }, [deepLinkShipment, shipments]);
 
   /**
    * §P10 — THE CARRIER PROVIDER CONFIGURATION (matrix `D10-10`).

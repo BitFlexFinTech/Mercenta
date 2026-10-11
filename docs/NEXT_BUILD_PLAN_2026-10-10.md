@@ -2,11 +2,13 @@
 
 > **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
 > Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social), BATCH 6 (Part 3.1, the catalogue product image) and
-> BATCH 7 (Parts 4.1b + 4.2 + 4.3 — the work-drawer deep link, the dangling-brand seed fix, and the three
-> inert controls REMOVED) BUILT AND TESTED — Part 4.1a (the notification bell's record destinations), the
-> remainder of Part 5 and Part 6 remain PLANNED, NOT STARTED.**
+> BATCH 7 in FULL — Part 4.1b + 4.2 + 4.3 (session 128: the work-drawer deep link, the dangling-brand seed fix,
+> the three inert controls removed) AND Part 4.1a + Part 5.2 (session 129, 2026-10-11: the notification bell's
+> RECORD destinations — all fourteen item builders, routed through the ONE address layer — plus the DEEP-LINK
+> GATE) — ARE BUILT AND TESTED. The remainder of Part 5 (5.1 absence guards, 5.3 coverage parity) and Part 6
+> remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 7**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at the remainder of Part 5**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -141,6 +143,14 @@
   currently do NOTHING when clicked (contract, score, submission, deduction, compliance) and the other 9 land on a
   SECTION, never the record; (b) the **work drawer's "Open record"** — filed by the patrol as `iss_a82e04e941f9`:
   it opens the PO LIST rather than PO-9200.
+  **✅ DONE.** (4.1b) session 128. **(4.1a) session 129 (2026-10-11)** — every one of the fourteen item builders now
+  carries a REQUIRED typed destination `{ kind, view, id }`; the record-link query keys are declared ONCE
+  (`productRoutes.ts → RECORD_LINK_PARAMS`) and read by ONE reader (`recordDeepLink.ts → useRecordDeepLink`, which
+  re-reads the address on `popstate` — fixing the mount-only capture the first version shipped with). Gate:
+  `scripts/validate-batch7-deeplinks.mjs` (36 assertions, mutation-proved four ways). Browser:
+  `e2e/notification-deeplinks.spec.ts` (4 tests). The five **inert** types now go somewhere real; the score notice is
+  ADMIN-ONLY because no brand surface owns a score; the brand's invoice notice opens the PO the invoice was raised
+  against because the brand portal has no per-invoice surface (both recorded, not hidden).
 - **4.2 — `brand-regatta` dangling seed.** PROVEN: the demo universe holds only FOUR brands (Astonish, Tapatío,
   Le Creuset, Kit & Kin) and **no `brand-regatta` record exists**, yet `src/lib/warehouse/returnsTracking.ts`
   (`rt-003`) and `src/lib/helpdesk/ticketStore.ts` (`tkt-004`) reference it, so the lookup falls back to the raw id
@@ -157,6 +167,12 @@
   `scripts/validate-*.mjs`, so no hand-list needs editing).
 - **5.2 — Deep-link gate:** fails if any clickable item has no destination, points at a view the shell cannot
   render, or forgets the record it names.
+  **✅ DONE (session 129, 2026-10-11)** — `scripts/validate-batch7-deeplinks.mjs` (36 assertions). It reads the
+  comment-stripped source, the ONE registry, the ONE reader, and BOTH shells' render branches (so "a view the shell
+  cannot render" is checked against the shell's real renderable set, never a hand-written list). Mutation-proved FOUR
+  ways: a builder with no destination ⇒ FAIL; an unrenderable destination view ⇒ FAIL; a click that forgets the
+  record id ⇒ FAIL; a surface re-owning the reader ⇒ the repointed `validate-batch7-cleanup` FAIL. Every mutation
+  restored byte-identical.
 - **5.3 — Coverage parity:** keep `validate:typecheck-coverage` green and pin the editor (1.4) so the editor and
   the command line cannot disagree again.
 
@@ -174,9 +190,12 @@
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
-Batches 1–6 are DONE (2026-10-10) and Batch 7's Parts 4.1b/4.2/4.3 are DONE (session 128, 2026-10-10,
-gated by `scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11). **Next: Batch 7 Part
-4.1a (the notification bell's record destinations) + the Part 5 deep-link gate, then Batch 8 (Part 6).**
+Batches 1–6 are DONE (2026-10-10); Batch 7 is DONE IN FULL — Parts 4.1b/4.2/4.3 (session 128, 2026-10-10, gated by
+`scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11) and Part 4.1a + Part 5.2 (session 129,
+2026-10-11, gated by `scripts/validate-batch7-deeplinks.mjs` + `e2e/notification-deeplinks.spec.ts`). **Next: the
+remainder of Part 5 — 5.1 (absence guards for every Part 2 removal, added to the EXISTING
+`scripts/validate-retired-platforms.mjs`) and 5.3 (coverage parity: keep `validate:typecheck-coverage` green and the
+editor pinned so the editor and the command line cannot disagree again) — then Batch 8 (Part 6, the close-out).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

@@ -27,8 +27,9 @@
  * derived-store re-render signal (`useCanonicalStoreVersion`). No new visual
  * language, no new layout system, no new store, no migration.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import {
   listBrandCommerceExceptions,
@@ -82,6 +83,19 @@ export function DeductionsLedger() {
   const disputable = rows.filter((d) => d.status === 'open' && !d.dispute);
   const totalDeducted = rows.reduce((sum, d) => sum + d.amountGbp, 0);
   const recordedOutcomes = rows.filter((d) => d.dispute?.outcome);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/brand/reports?deduction=<id>` opens THAT
+   * deduction's dispute row, so a "deduction −£x open" notice lands on the row it
+   * names rather than on the ledger. (Before this change the notice did NOTHING
+   * when clicked.) Applied ONCE per value by the shared reader.
+   */
+  const deepLinkDeduction = useRecordDeepLink('deduction');
+  useEffect(() => {
+    if (!deepLinkDeduction) return;
+    if (!rows.some((d) => d.id === deepLinkDeduction)) return;
+    setDisputingId(deepLinkDeduction);
+  }, [deepLinkDeduction, rows]);
 
   const categories = useMemo(() => {
     const map = new Map<string, { count: number; amount: number }>();

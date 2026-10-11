@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { createEsignClient } from '@/lib/esign/esign';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { useBrands, useContracts, useFulfillmentScores } from '@/data/queries';
 import {
   CONTRACT_STATUS_LABELS,
@@ -76,7 +77,20 @@ export function ContractsAdminPanel() {
    * written through `saveContractDraft` and returns via `useContracts`, which the
    * canonical change signal refetches.
    */
-  const allContracts = contractsQuery.data?.data ?? [];
+  const allContracts = useMemo(() => contractsQuery.data?.data ?? [], [contractsQuery.data]);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/contracts_admin?contract=<id>` opens
+   * THAT agreement's document viewer, so a renewal notice lands on the contract it
+   * names rather than on the contract list. Applied ONCE per id.
+   */
+  const deepLinkContract = useRecordDeepLink('contract');
+  useEffect(() => {
+    if (!deepLinkContract) return;
+    const match = allContracts.find((c) => c.id === deepLinkContract);
+    if (!match) return;
+    setViewingContract(match);
+  }, [deepLinkContract, allContracts]);
 
   return (
     <WorkspaceFrame className="space-y-4">

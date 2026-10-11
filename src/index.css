@@ -401,3 +401,17 @@ textarea:focus-visible {
 [data-shell-theme='light'] .bg-red-700.text-white {
   color: #FFFFFF;
 }
+
+/**
+ * §BATCH 7 (Part 4.1a) — THE RECORD A DEEP LINK FOCUSED.
+ *
+ * `useFocusRecordElement` marks the record's OWN element with this attribute on a
+ * surface that has no detail view of its own (a ledger row, a tile, a card), so a
+ * notice's destination is visible, not merely scrolled to. The ring uses the
+ * existing focus token, so it follows the active theme.
+ */
+[data-record-focused='true'] {
+  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
+  outline-offset: 2px;
+  border-radius: 6px;
+}

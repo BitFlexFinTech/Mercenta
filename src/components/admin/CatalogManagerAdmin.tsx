@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { useBrands, useProducts, useCatalogSubmissions, useCanonicalStoreVersion } from '@/data/queries';
 import { updateProductAvailability, updateProductCost, latestSubmissionForProduct } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
@@ -326,6 +327,26 @@ export function CatalogManagerAdmin() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   /* §Sprint 2 — the metric band's drill-downs narrow the SAME list (one source). */
   const [focus, setFocus] = useState<'all' | 'not_submitted' | 'inactive'>('all');
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/catalog?submission=<id>` opens the
+   * PRODUCT of that submission in the detail modal, so a rejected-submission
+   * notice lands on the record it names rather than on the catalogue. (Before
+   * this change the notice did NOTHING when clicked.) The product is resolved
+   * through the submission's OWN canonical links — `productId` first, then the
+   * (brand, sku) pair — never by re-deriving which product a submission means.
+   */
+  const deepLinkSubmission = useRecordDeepLink('submission');
+  useEffect(() => {
+    if (!deepLinkSubmission) return;
+    const sub = submissions.find(function(s) { return s.id === deepLinkSubmission; });
+    if (!sub) return;
+    const product =
+      products.find(function(p) { return p.id === sub.productId; }) ??
+      products.find(function(p) { return p.brandId === sub.brandId && p.sku === sub.sku; });
+    if (!product) return;
+    setSelectedProduct(product);
+  }, [deepLinkSubmission, submissions, products]);
 
   /**
    * §Phase E5 (G9) — ONE canonical latest-submission derivation.

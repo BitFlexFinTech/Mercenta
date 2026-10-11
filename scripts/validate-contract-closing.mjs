@@ -201,10 +201,17 @@ try {
       panelSrc.includes('renewContract') &&
       panelSrc.includes('terminateContract')
   );
+  /**
+   * §BATCH 7 (Part 4.1a) — REPOINTED (the old contract is recorded here, rule 07).
+   * This pinned the EXACT declaration text; the panel now wraps the SAME canonical
+   * derivation in `useMemo` (a react-hooks dependency fix, required by the new
+   * deep-link effect that depends on the array). The check reads the DECLARATION
+   * and asserts it derives from the canonical query — intent unchanged.
+   */
+  const allContractsDecl = (panelSrc.match(/const allContracts = [^;]+;/) ?? [])[0] ?? '';
   test(
     'the panel table is the canonical query alone (drafts included)',
-    panelSrc.includes('rows={allContracts}') &&
-      panelSrc.includes('const allContracts = contractsQuery.data?.data ?? [];')
+    panelSrc.includes('rows={allContracts}') && /contractsQuery\.data\?\.data/.test(allContractsDecl)
   );
 
   console.log(

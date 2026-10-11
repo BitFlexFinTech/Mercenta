@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useBrands, useFulfillmentScores } from '@/data/queries';
 import { applyFulfillmentOverride, recalculateAllScores } from '@/data/api';
 import type { FulfillmentScore, FulfillmentTrack } from '@/types';
@@ -8,6 +8,7 @@ import { isBorderline, scoreBrand, computeComponentScores, type ScoreInputs } fr
 import { Badge, Card, Button, DataTable, Input } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import {
   ArrowLeft, Info, BarChart3, Table2, Beaker, History, RotateCcw, RefreshCw,
 } from 'lucide-react';
@@ -100,6 +101,18 @@ export function FulfillmentTrackPanel() {
   });
 
   const selected = rows.find((r) => r.score.brandId === selectedId);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/fulfillment_track?score=<brandId>`
+   * opens THAT brand's scorecard, so a borderline-score notice lands on the score
+   * it names rather than on the track list. Applied ONCE per brand id.
+   */
+  const deepLinkScore = useRecordDeepLink('score');
+  useEffect(() => {
+    if (!deepLinkScore) return;
+    if (!rows.some((r) => r.score.brandId === deepLinkScore)) return;
+    setSelectedId(deepLinkScore);
+  }, [deepLinkScore, rows]);
 
   if (selected) {
     return (

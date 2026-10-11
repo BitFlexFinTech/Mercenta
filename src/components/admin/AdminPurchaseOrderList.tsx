@@ -3,7 +3,7 @@
  * Shows all POs across all brands with full detail, acknowledgment status,
  * ASN filing, and on-behalf actions. Replaces the old 3PL Terminal view.
  */
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 /** §P13 — the order DATE is rendered through the ONE display helper. */
 import { orderDateLabel } from '@/lib/dates';
@@ -63,7 +63,7 @@ import type { Deduction, PurchaseOrder } from '@/types';
 import type { DemoShipment } from '@/data/demoData';
 import { Search, Eye, RefreshCw, FlaskConical } from 'lucide-react';
 /** §BATCH 7 (Part 4.1) — read the `?po=` deep link so a work item can open its record. */
-import { currentQueryParam } from '@/lib/runtime/productRoutes';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 
 const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'];
 
@@ -89,17 +89,21 @@ export function AdminPurchaseOrderList() {
   /**
    * §BATCH 7 (Part 4.1) — DEEP LINK. `/admin/purchase_orders_admin?po=PO-9200` opens
    * that purchase order's record (defect iss_a82e04e941f9: the Work drawer's "Open
-   * record" used to land on this LIST, not the record). Applied ONCE per PO value, so
-   * it never overrides a selection the operator makes afterwards — the same contract
-   * the Logistics Hub uses for its own `?po=` deep link.
+   * record" used to land on this LIST, not the record).
+   *
+   * §BATCH 7 (Part 4.1a) — REPOINTED to the ONE reader (`useRecordDeepLink`),
+   * which fixes a real defect in the first version: it captured `?po=` ONCE at
+   * mount, so a deep link into the view the operator was ALREADY on did not
+   * remount this panel and the record never opened — the click silently did
+   * nothing. The shared reader re-reads the address on every product navigation
+   * (the shells dispatch `popstate`) and returns each PO number once, so closing
+   * the record does not re-open it while a genuine navigation always does.
    */
-  const deepLinkPo = useMemo(() => currentQueryParam('po'), []);
-  const appliedDeepLink = useRef<string | null>(null);
+  const deepLinkPo = useRecordDeepLink('po');
   useEffect(() => {
-    if (!deepLinkPo || appliedDeepLink.current === deepLinkPo) return;
+    if (!deepLinkPo) return;
     const match = pos.find((p) => p.poNumber === deepLinkPo);
     if (!match) return;
-    appliedDeepLink.current = deepLinkPo;
     setSelectedPoId(match.id);
   }, [deepLinkPo, pos]);
   /* §P11 — channel purchase-order ingestion state (the ONLY way a PO arrives). */

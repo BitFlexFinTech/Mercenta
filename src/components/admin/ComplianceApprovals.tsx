@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBrands, useComplianceDocuments, useProducts } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
@@ -61,6 +62,19 @@ export function ComplianceApprovals() {
   const reviewer = 'Tadii';
   const preview = docs.find(function(d) { return d.id === previewId; }) ?? null;
   const drawerDoc = docs.find(function(d) { return d.id === drawerId; }) ?? null;
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/admin/compliance?doc=<id>` opens THAT
+   * document's review drawer, so a "compliance doc awaiting review" notice lands
+   * on the document it names rather than on the approvals queue. (Before this
+   * change the notice did NOTHING when clicked.)
+   */
+  const deepLinkDoc = useRecordDeepLink('compliance');
+  useEffect(() => {
+    if (!deepLinkDoc) return;
+    if (!docs.some(function(d) { return d.id === deepLinkDoc; })) return;
+    setDrawerId(deepLinkDoc);
+  }, [deepLinkDoc, docs]);
 
   /* §UI/UX Wave 2 completion — the review-state filter is a REAL filter over the
      canonical document status vocabulary (no curated subset: `rows={docs}`). */

@@ -69,8 +69,19 @@ test(
     workWs
   )
 );
-test('§BATCH7 admin PO list consumes the ?po= deep link', /currentQueryParam\('po'\)/.test(adminPoList));
-test('§BATCH7 brand PO list consumes the ?po= deep link', /currentQueryParam\('po'\)/.test(brandPoList));
+/**
+ * §BATCH 7 (Part 4.1a) — REPOINTED (the old contract is recorded here, rule 07).
+ *
+ * The old contract asserted `/currentQueryParam\('po'\)/` in both lists — i.e.
+ * that each list kept its OWN copy of the read. Batch 7 Part 4.1a moved the read
+ * into ONE owner (`src/lib/runtime/recordDeepLink.ts → useRecordDeepLink`), which
+ * ALSO fixed a real defect: the per-list copies captured `?po=` once at mount, so
+ * a deep link into the view already open did nothing. The intent is unchanged —
+ * both lists must consume the `po` record link and open that record — so the
+ * assertion now pins the CANONICAL reader instead of the duplicated copy.
+ */
+test('§BATCH7 admin PO list consumes the ?po= deep link', /useRecordDeepLink\('po'\)/.test(adminPoList));
+test('§BATCH7 brand PO list consumes the ?po= deep link', /useRecordDeepLink\('po'\)/.test(brandPoList));
 test('§BATCH7 admin PO list opens the deep-linked record', /setSelectedPoId\(\s*match\.id\s*\)/.test(adminPoList));
 test('§BATCH7 brand PO list opens the deep-linked record', /setExpandedPO\(\s*match\.id\s*\)/.test(brandPoList));
 

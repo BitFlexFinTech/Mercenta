@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useRecordDeepLink, useFocusRecordElement } from '@/lib/runtime/recordDeepLink';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Badge, Button, Card, LoadingState, StatusBadge } from '@/components/ui';
@@ -266,7 +267,7 @@ function ComplianceUploadCard({
   const docsQuery = useComplianceDocuments();
   const contractsQuery = useContracts();
   const agreementsQuery = useBrandAgreements();
-  const allDocs = docsQuery.data?.data ?? [];
+  const allDocs = useMemo(() => docsQuery.data?.data ?? [], [docsQuery.data]);
   const allContracts = contractsQuery.data?.data ?? [];
   const allAgreements = agreementsQuery.data?.data ?? [];
   const brandDocs = brandId ? allDocs.filter(function(d) { return d.brandId === brandId; }) : [];
@@ -292,6 +293,22 @@ function ComplianceUploadCard({
     ? documentVerificationStanding(brandId, category, brandDocs, gate)
     : null;
   const latestDocs = latestDocumentsByType(brandDocs);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/brand/compliance?doc=<id>` marks and
+   * scrolls to THAT document's requirement row, so a "compliance doc awaiting
+   * review" notice lands on the document it names rather than on the hub. (Before
+   * this change the notice did NOTHING when clicked.) The document is resolved to
+   * the canonical requirement TYPE — the row this surface renders — and a document
+   * with no row here is a no-op, never an invented record.
+   */
+  const deepLinkDoc = useRecordDeepLink('compliance');
+  const deepLinkDocType = useMemo(() => {
+    if (!deepLinkDoc) return null;
+    const doc = allDocs.find(function(d) { return d.id === deepLinkDoc; });
+    return doc ? doc.type : null;
+  }, [deepLinkDoc, allDocs]);
+  useFocusRecordElement(deepLinkDocType ? `[data-record-id="${deepLinkDocType}"]` : null);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [replacementNote, setReplacementNote] = useState<string | null>(null);
   const qc = useQueryClient();
@@ -390,7 +407,7 @@ function ComplianceUploadCard({
             const row = standing?.rows.find(function(r) { return r.type === type; });
             const verification = row && row.verification ? row.verification : null;
             return (
-              <div key={type} className="flex items-center justify-between py-2.5 gap-3">
+              <div key={type} data-record-id={type} className="flex items-center justify-between py-2.5 gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>

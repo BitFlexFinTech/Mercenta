@@ -571,6 +571,16 @@
       "expects": "The notifications journey renders and behaves as its spec asserts."
     },
     {
+      "id": "op-notification-record-destinations",
+      "capability": "operations",
+      "journey": "operations — the notification bell — every notice opens the RECORD it names",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/notification-deeplinks.spec.ts",
+      "test": "4. a deep link into the view you are ALREADY on still opens the record",
+      "expects": "Every notice in the bell carries a real record destination (kind + view + id) and clicking one opens the record it names through the address — including a deep link into the view the operator is ALREADY on, which the first reader silently ignored because it captured the parameter once at mount (§BATCH 7 Part 4.1a)."
+    },
+    {
       "id": "spec-onboarding-handoff",
       "capability": "onboarding_acquisition",
       "journey": "onboarding handoff",

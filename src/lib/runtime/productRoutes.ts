@@ -172,6 +172,55 @@ export function currentQueryParam(key: string): string | null {
   return value && value.trim() ? value.trim() : null;
 }
 
+/* ── §BATCH 7 (Part 4.1a) — THE RECORD DEEP-LINK REGISTRY (single source) ──
+ *
+ * A notice in the shell names a RECORD, not just a section: "Contract
+ * commercial_agreement renews ≤ 7 days" is about ONE contract record. This
+ * registry declares, ONCE, the query key each record kind uses in a product
+ * address, so that:
+ *   · the notification centre writes the key through `recordLinkQuery` (never a
+ *     hand-written string);
+ *   · the surface that OWNS the record reads the SAME key through
+ *     `currentQueryParam`; and
+ *   · `scripts/validate-batch7-deeplinks.mjs` can assert the two ends agree —
+ *     a notice can never name a record whose surface reads a different key.
+ *
+ * `po` is the key the Logistics Hub and both purchase-order lists already use
+ * (the pre-existing contract, declared here so there is only one place that
+ * knows it); every other kind is declared here for the first time.
+ */
+export const RECORD_LINK_PARAMS = {
+  /** A purchase order, by its `poNumber` (e.g. `PO-9002`). */
+  po: 'po',
+  /** A contract/agreement record, by its id. */
+  contract: 'contract',
+  /** A brand's fulfillment score, by the brand id. */
+  score: 'score',
+  /** A catalog submission, by its id. */
+  submission: 'submission',
+  /** A deduction/chargeback, by its id. */
+  deduction: 'deduction',
+  /** A compliance document, by its id. */
+  compliance: 'doc',
+  /** A consignment, by its id. */
+  shipment: 'shipment',
+  /** A simulated commerce invoice, by its id. */
+  invoice: 'invoice',
+  /** A unit of work, by its id. */
+  work: 'work',
+} as const;
+
+export type RecordLinkKind = keyof typeof RECORD_LINK_PARAMS;
+
+/**
+ * The ONE query object a record deep link uses. Callers pass the record's own
+ * identifier — never a view name, never a section — so the address carries the
+ * record and the owning surface can open it.
+ */
+export function recordLinkQuery(kind: RecordLinkKind, id: string): Record<string, string> {
+  return { [RECORD_LINK_PARAMS[kind]]: id };
+}
+
 /**
  * Write a product address into the address bar. A no-op outside the browser
  * (validators/SSR import the pure functions above; only the app navigates).

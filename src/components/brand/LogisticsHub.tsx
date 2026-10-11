@@ -43,7 +43,7 @@ import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { BRAND_NAME } from '@/config/brand';
 import { OPERATIONAL_TRUTH, freightSemantics } from '@/config/logisticsGeo';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
-import { currentQueryParam } from '@/lib/runtime/productRoutes';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { etaPresentation, isEtaAtRisk } from '@/lib/logistics/shipmentEta';
 import { appointmentPresentation } from '@/lib/shipping/deliveryAppointment';
 import { buildDeliveryPerformance, performanceLabel } from '@/lib/logistics/deliveryPerformance';
@@ -743,13 +743,11 @@ export function LogisticsHub() {
    * responsibility and document actions instead of an unselected list. Applied
    * ONCE per PO value; it never overrides a selection the operator makes after.
    */
-  const deepLinkPo = useMemo(() => currentQueryParam('po'), []);
-  const appliedDeepLink = useRef<string | null>(null);
+  const deepLinkPo = useRecordDeepLink('po');
   useEffect(() => {
-    if (!deepLinkPo || appliedDeepLink.current === deepLinkPo) return;
+    if (!deepLinkPo) return;
     const match = liveShipments.find((s) => (s as unknown as { poNumber?: string }).poNumber === deepLinkPo);
     if (!match) return;
-    appliedDeepLink.current = deepLinkPo;
     setSelectedId(match.id);
   }, [deepLinkPo, liveShipments]);
 

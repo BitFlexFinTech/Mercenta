@@ -3413,6 +3413,11 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
    * contract is satisfied by DECLARATION (a documented, reviewable act), never by
    * skipping a fix.
    *
+   * §BATCH 7 Part 4.1a (2026-10-10) — EXTENDED, not weakened: the notification
+   * bell's record destinations add the ONE address-layer registry, the ONE
+   * deep-link reader, the notification centre itself and every surface that now
+   * consumes a record link. An UNEXPLAINED source change still fails.
+   *
    * It touches ONE protected path — `src/services/xero/xeroReseed.ts` — SOLELY to
    * correct a comment that named the now-removed "Sync Now" button (removal
    * coherence, rule 08); there is no behavioural change. F5b still pins the exact
@@ -3437,6 +3442,28 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'scripts/validate-e6-brand-surfaces.mjs',
     'e2e/domain-acceptance.spec.ts',
     'e2e/work-layer.spec.ts',
+    // ── Part 4.1a (2026-10-10) — the notification bell's RECORD destinations ──
+    // The ONE address layer + the ONE deep-link reader, then every surface that
+    // consumes a record link. Declared, not weakened (rule 07): the gate for this
+    // half is `scripts/validate-batch7-deeplinks.mjs`.
+    'src/lib/runtime/productRoutes.ts',       /* the record-link registry */
+    'src/lib/runtime/recordDeepLink.ts',      /* NEW — the ONE reader */
+    'src/components/shared/NotificationCenter.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/admin/ContractsAdminPanel.tsx',
+    'src/components/brand/BrandContractView.tsx',
+    'src/components/admin/FulfillmentTrack.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/brand/ProductCatalog.tsx',
+    'src/components/admin/ComplianceApprovals.tsx',
+    'src/components/brand/ComplianceHub.tsx',
+    'src/components/admin/RetailPipeline.tsx',
+    'src/components/brand/DeductionsLedger.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'src/index.css',                          /* the focused-record marker */
+    'scripts/validate-batch7-deeplinks.mjs',  /* NEW — this half's gate */
+    'e2e/notification-deeplinks.spec.ts',     /* NEW — its browser test */
     // ── catalogue, registry and state ──
     'docs/NEXT_BUILD_PLAN_2026-10-10.md',
     'requirements-registry.json',

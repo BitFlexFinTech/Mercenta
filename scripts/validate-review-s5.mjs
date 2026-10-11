@@ -104,9 +104,18 @@ try {
   // ("[...extraDrafts, ...(contractsQuery.data?.data ?? [])]"), which was a second
   // source of truth for contracts (it vanished on reload). The table is now the
   // CANONICAL store alone, and every draft/closure goes through the store's writers.
+  /**
+   * §BATCH 7 (Part 4.1a) — REPOINTED (the old contract is recorded here, rule 07).
+   * This pinned the EXACT declaration text. The panel now wraps the SAME canonical
+   * derivation in `useMemo` (a react-hooks dependency fix: the array identity was
+   * changing every render and a new deep-link effect depends on it), so the check
+   * reads the DECLARATION and asserts it derives from the canonical query. Intent
+   * unchanged: the table is the canonical store alone, with no local draft state.
+   */
+  const allContractsDecl = (adminSrc.match(/const allContracts = [^;]+;/) ?? [])[0] ?? '';
   test('admin table is backed by the full canonical dataset, drafts included',
     adminSrc.includes('rows={allContracts}') &&
-      adminSrc.includes('const allContracts = contractsQuery.data?.data ?? [];') &&
+      /contractsQuery\.data\?\.data/.test(allContractsDecl) &&
       !adminSrc.includes('setExtraDrafts'));
   test('the panel writes drafts and closures through the canonical store',
     adminSrc.includes('saveContractDraft') &&

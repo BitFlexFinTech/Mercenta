@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useContracts } from '@/data/queries';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import {
   CONTRACT_STATUS_LABELS,
   renewalUrgency,
@@ -42,6 +43,18 @@ export function BrandContractView() {
 
   const [viewingId, setViewingId] = useState<string | null>(null);
   const viewing = contracts.find((c) => c.id === viewingId) ?? null;
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINK. `/brand/contracts?contract=<id>` opens THAT
+   * agreement's document viewer, so a renewal notice lands on the contract it
+   * names rather than on the contracts list. Applied ONCE per id.
+   */
+  const deepLinkContract = useRecordDeepLink('contract');
+  useEffect(() => {
+    if (!deepLinkContract) return;
+    if (!contracts.some((c) => c.id === deepLinkContract)) return;
+    setViewingId(deepLinkContract);
+  }, [deepLinkContract, contracts]);
 
   /** Render the real clause-block contract for a given agreement record. */
   const renderAgreement = (contract: (typeof contracts)[number]) =>

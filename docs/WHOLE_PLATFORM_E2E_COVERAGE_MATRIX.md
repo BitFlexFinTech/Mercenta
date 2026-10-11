@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 404 · **Capabilities:** 8
+**Scenarios:** 405 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -30,7 +30,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | founder | 49 |
 | integrations | 10 |
 | onboarding_acquisition | 58 |
-| operations | 46 |
+| operations | 47 |
 | platform | 78 |
 
 ## Scenarios
@@ -188,6 +188,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | op-command-rank-why-funding-route | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `4. every founder row shows its rank and WHY, and the funding slot routes` |
 | op-command-source-filters-single-list | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `3. the founder categories are real source filters, and the Control Centre has no second list` |
 | op-command-work-management-founder-console | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `1. Work Management carries the founder console, one hand-off per row` |
+| op-notification-record-destinations | operations | super_admin | happy | `e2e/notification-deeplinks.spec.ts` | `4. a deep link into the view you are ALREADY on still opens the record` |
 | op-notify-ack-simulated-provenance | operations | mercenta_admin | happy | `e2e/notifications.spec.ts` | `3. Mercenta transmits the acknowledgement to the retail channel (simulated)` |
 | op-notify-brand-accept-consignment | operations | brand_user | happy | `e2e/notifications.spec.ts` | `2. Brand accepts all lines -> Mercenta acts and the consignment appears in logistics` |
 | op-notify-channel-read-entry | operations | mercenta_admin | happy | `e2e/notifications.spec.ts` | `1. Admin channel-read entry exists (the ONLY way a PO arrives)` |

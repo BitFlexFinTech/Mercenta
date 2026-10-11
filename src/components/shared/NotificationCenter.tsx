@@ -38,6 +38,19 @@ import { renewalUrgency } from '@/lib/contracts';
 import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { useWorkItems } from '@/lib/work/useWork';
 import { WORK_SOURCE_LABELS } from '@/lib/work/workStore';
+/**
+ * §BATCH 7 (Part 4.1a) — THE ONE ADDRESS LAYER.
+ *
+ * A notice is a DEEP LINK: clicking it opens the RECORD it names, through the
+ * same address mechanism the rest of the product uses (`navigateProductView` +
+ * the record-link registry), never a second navigation path.
+ */
+import {
+  navigateProductView,
+  recordLinkQuery,
+  type ProductEnvironment,
+  type RecordLinkKind,
+} from '@/lib/runtime/productRoutes';
 
 /**
  * §Stage-19.3 — In-app notification center.
@@ -69,8 +82,22 @@ export interface NotificationItem {
    */
   meta?: string;
   severity: 'high' | 'medium';
-  /** §Batch-10 — navigation target when clicked. */
-  navTarget?: string;
+  /**
+   * §BATCH 7 (Part 4.1a) — WHERE THIS NOTICE LEADS: the RECORD it is about.
+   *
+   * `kind` selects the query key through the ONE registry
+   * (`RECORD_LINK_PARAMS` in `src/lib/runtime/productRoutes.ts`), `view` is the
+   * surface that OWNS the record for THIS session (the role-resolved view id),
+   * and `id` is the record's own identifier — never a view name, never a
+   * section.
+   *
+   * It is REQUIRED, deliberately. Before this change five of the centre's
+   * fourteen item builders did NOTHING when clicked (contract, score,
+   * submission, deduction, compliance) and the other nine landed on a SECTION,
+   * never the record. Because the field is now required, a builder that forgets
+   * a destination is a TYPE error — a dead click cannot be written by accident.
+   */
+  record: { kind: RecordLinkKind; view: string; id: string };
 }
 
 function useNotifications(): NotificationItem[] {
@@ -107,7 +134,7 @@ function useNotifications(): NotificationItem[] {
           title: `PO ${p.poNumber} awaiting action`,
           detail: `${brandName(p.brandId)} · £${p.poValue.toLocaleString()} · ${p.status.replace(/_/g, ' ')}`,
           severity: 'high' as const,
-          navTarget: poTarget,
+          record: { kind: 'po', view: poTarget, id: p.poNumber },
         }))
     )
     .concat(
@@ -121,7 +148,7 @@ function useNotifications(): NotificationItem[] {
               title: `PO ${p.poNumber} acknowledged by brand`,
               detail: `${brandName(p.brandId)} · £${p.poValue.toLocaleString()} · lines: ${p.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered').length}/${p.lineItems.length} accepted`,
               severity: 'medium' as const,
-              navTarget: poTarget,
+              record: { kind: 'po', view: poTarget, id: p.poNumber },
             }))
         : []
     )
@@ -134,7 +161,7 @@ function useNotifications(): NotificationItem[] {
           title: `PO ${p.poNumber} was REJECTED`,
           detail: `${brandName(p.brandId)} · £${p.poValue.toLocaleString()} · all lines rejected`,
           severity: 'high' as const,
-          navTarget: poTarget,
+          record: { kind: 'po', view: poTarget, id: p.poNumber },
         }))
     )
     .concat(
@@ -150,18 +177,38 @@ function useNotifications(): NotificationItem[] {
             urgency === 'expired' || urgency === '7d'
               ? ('high' as const)
               : ('medium' as const),
+          /**
+           * §BATCH 7 (Part 4.1a) — this builder was one of the five that did
+           * NOTHING when clicked. The notice names ONE agreement record, so the
+           * destination is that contract on the surface that owns it.
+           */
+          record: { kind: 'contract', view: contractTarget, id: c.id },
         }))
     )
     .concat(
-      scores
-        .filter((s) => !s.manualOverride && isBorderline(s.totalScore))
-        .map((s) => ({
-          id: `score-${s.brandId}`,
-          kind: 'score' as const,
-          title: `Fulfillment score borderline (${s.totalScore})`,
-          detail: `${brandName(s.brandId)} · held for manual review`,
-          severity: 'medium' as const,
-        }))
+      /**
+       * §BATCH 7 (Part 4.1a) — ADMIN/STAFF ONLY.
+       *
+       * A borderline score is Mercenta's OWN manual-review queue: the score is
+       * held for an OPERATOR decision. The brand portal has no surface that owns
+       * a fulfillment score, so a brand notice about one could only ever be a
+       * dead click — which is exactly what it was. It is therefore not built for
+       * a brand session, the mirror image of the rule the shipping-documents
+       * builder below applies in the other direction.
+       */
+      tenantId === null
+        ? scores
+            .filter((s) => !s.manualOverride && isBorderline(s.totalScore))
+            .map((s) => ({
+              id: `score-${s.brandId}`,
+              kind: 'score' as const,
+              title: `Fulfillment score borderline (${s.totalScore})`,
+              detail: `${brandName(s.brandId)} · held for manual review`,
+              severity: 'medium' as const,
+              /** That brand's scorecard row on Fulfillment Track, by brand id. */
+              record: { kind: 'score', view: 'fulfillment_track', id: s.brandId },
+            }))
+        : []
     )
     .concat(
       /**
@@ -189,7 +236,12 @@ function useNotifications(): NotificationItem[] {
               title: `Shipping documents ready — ${p.poNumber}`,
               detail: `${brandName(p.brandId)} · download & print before dispatch`,
               severity: 'medium' as const,
-              navTarget: 'logistics',
+              /**
+               * §BATCH 7 (Part 4.1a) — the record is the PURCHASE ORDER whose
+               * document pack is ready. The Logistics Hub already opens a PO from
+               * `?po=`, so the notice and the pack land on the same record.
+               */
+              record: { kind: 'po', view: 'logistics', id: p.poNumber },
             }))
     );
 }
@@ -201,6 +253,16 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const shipTarget = isBrandSession ? 'logistics' : 'logistics'; // both brand+admin use 'logistics' view
   /** §Phase E5 (G7) — where the operational commerce surface lives per session. */
   const commerceTarget = isBrandSession ? 'purchase_orders' : 'retail_pipeline';
+  /**
+   * §BATCH 7 (Part 4.1a) — the surface that OWNS each remaining record kind for
+   * THIS session, so every notice can open its record:
+   *   · a deduction lives on the operator ledger (`retail_pipeline`) or the
+   *     brand's own ledger, which renders on Analytics and Reports;
+   *   · a commerce invoice is listed by the operator channel-operations panel
+   *     (inside `retail_pipeline`) and, for a brand, on its Overview, which is
+   *     the surface that states the brand's receivable.
+   */
+  const deductionTarget = isBrandSession ? 'reports' : 'retail_pipeline';
   const inScope = <T extends { brandId: string }>(rows: T[]): T[] =>
     tenantId ? rows.filter((r) => r.brandId === tenantId) : rows;
 
@@ -268,6 +330,12 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           title: 'Rejected catalog submission needs human',
           detail: `${s.productName} · ${s.rejectionReason ?? 'no reason recorded'}`,
           severity: 'medium' as const,
+          /**
+           * §BATCH 7 (Part 4.1a) — was one of the five that did NOTHING. The
+           * record is the submission; the catalog surface (operator or brand)
+           * opens the submission's product row.
+           */
+          record: { kind: 'submission', view: 'catalog', id: s.id },
         }))
     )
     .concat(
@@ -281,6 +349,12 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           // flag (never inferred from text). Non-simulated rows are unchanged.
           detail: `${brandName(d.brandId)} · ${d.purchaseOrderId} · ${d.reason}${d.simulated ? ' · (sim)' : ''}`,
           severity: d.status === 'open' ? ('high' as const) : ('medium' as const),
+          /**
+           * §BATCH 7 (Part 4.1a) — was one of the five that did NOTHING. The
+           * record is the deduction; its own ledger opens it (the operator's
+           * dispute row, or the brand's deduction row).
+           */
+          record: { kind: 'deduction', view: deductionTarget, id: d.id },
         }))
     )
     .concat(
@@ -292,6 +366,12 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           title: `Compliance doc awaiting review (${d.type.replace(/_/g, ' ')})`,
           detail: brandName(d.brandId),
           severity: 'medium' as const,
+          /**
+           * §BATCH 7 (Part 4.1a) — was one of the five that did NOTHING. The
+           * record is the compliance document; the compliance surface opens its
+           * review drawer (operator) / its document row (brand).
+           */
+          record: { kind: 'compliance', view: 'compliance', id: d.id },
         }))
     )
     .concat(
@@ -306,7 +386,8 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
               title: `ASN filed for ${s.poNumber}`,
               detail: `${brandName(s.brandId)} · ${s.carrier} · ${s.status.replace(/_/g, ' ')} · £${s.value.toLocaleString()}`,
               severity: 'medium' as const,
-              navTarget: shipTarget,
+              /** The consignment itself, opened in the Logistics Hub inspector. */
+              record: { kind: 'shipment', view: shipTarget, id: s.id },
             }))
         : []
     )
@@ -319,7 +400,18 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           title: `Simulated invoice ${i.number} awaiting payment`,
           detail: `${brandName(i.brandId)} · £${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
           severity: 'medium' as const,
-          navTarget: commerceTarget,
+          /** The invoice record itself, on the surface that lists receivables. */
+          record: isBrandSession
+            ? /**
+               * §BATCH 7 (Part 4.1a) — a BRAND has no per-invoice surface: its
+               * only invoice view is the Overview receivable tile, which is a
+               * COUNT, not a record. So the brand's destination is the PURCHASE
+               * ORDER the invoice was raised against — a real record that carries
+               * the invoice's state — rather than a dead click. Recorded as an
+               * honest limitation in the batch report.
+               */
+              { kind: 'po', view: 'purchase_orders', id: i.poNumber }
+            : { kind: 'invoice', view: 'retail_pipeline', id: i.id },
         }))
     )
     .concat(
@@ -331,7 +423,8 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           title: `Simulated PO ${p.poNumber} delivered — invoice outstanding`,
           detail: `${brandName(p.brandId)} · £${p.poValue.toFixed(2)} · (sim)`,
           severity: 'medium' as const,
-          navTarget: commerceTarget,
+          /** The purchase order the outstanding invoice was raised against. */
+          record: { kind: 'po', view: commerceTarget, id: p.poNumber },
         }))
     )
     .concat(
@@ -351,7 +444,8 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           title: w.title,
           detail: `${w.detail} · ${WORK_SOURCE_LABELS[w.source]}${w.dueDate ? ` · due ${w.dueDate}` : ''}`,
           severity: w.priority === 'critical' ? ('high' as const) : ('medium' as const),
-          navTarget: workScope === 'brand' ? 'work' : 'work',
+          /** The work item itself — the work workspace opens its drawer. */
+          record: { kind: 'work', view: 'work', id: w.id },
         }))
     )
     /**
@@ -375,7 +469,12 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
         detail: `${brandName(view.delivery.brandId)} · ${PO_ACK_CHANNEL_LABELS[view.delivery.channel]} · ${view.delivery.stage}h reminder · sent by Mercenta`,
         meta: poAckReminderChannelDetail(view),
         severity: view.delivery.finalStage ? ('high' as const) : ('medium' as const),
-        navTarget: poTarget,
+        /**
+         * §BATCH 7 (Part 4.1a) — the delivered reminder names a PURCHASE ORDER,
+         * so it opens that order (the delivery record carries its own
+         * `poNumber`), not merely the purchase-order section.
+         */
+        record: { kind: 'po', view: poTarget, id: view.delivery.poNumber },
       }))
     );
 }
@@ -415,6 +514,12 @@ const SEVERITY_TONE = {
 
 export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const [open, setOpen] = useState(false);
+  const { session } = useApp();
+  /**
+   * §BATCH 7 (Part 4.1a) — the environment a notice's address belongs to. The
+   * session's tier decides it, exactly as the shells decide their own prefix.
+   */
+  const environment: ProductEnvironment = session?.tier === 'brand' ? 'brand' : 'admin';
   const brands = useBrands().data?.data ?? [];
   const brandName = (id: string) =>
     brands.find((b) => b.id === id)?.profile.businessName ?? id;
@@ -433,11 +538,26 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
+  /**
+   * §BATCH 7 (Part 4.1a) — A NOTICE IS A DEEP LINK.
+   *
+   * The click opens the RECORD the notice names, through the ONE address layer:
+   * the environment's view is written to the address WITH the record's own
+   * identifier, so the owning surface opens that record and the address is
+   * shareable, bookmarkable and reloadable. No second navigation mechanism is
+   * introduced — this is the same `navigateProductView` the Logistics Hub's
+   * document hand-off and the Work drawer's "Open record" already use.
+   */
   function handleClick(n: NotificationItem) {
     setOpen(false);
-    if (n.navTarget && onNavigate) {
-      onNavigate(n.navTarget);
-    }
+    navigateProductView(environment, n.record.view, recordLinkQuery(n.record.kind, n.record.id));
+    /**
+     * Outside the browser `navigateProductView` is a documented no-op (it is what
+     * lets validators SSR-render this shell), so the host's own view setter is
+     * the only way to move the shell there. In the browser the address layer has
+     * already moved it, and the shell's `popstate` handler is what applies it.
+     */
+    if (typeof window === 'undefined') onNavigate?.(n.record.view);
   }
 
   const ariaSummary = items.length === 0
@@ -515,6 +635,16 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                     onClick={() => handleClick(n)}
                     data-severity={tone}
                     data-notification={n.kind}
+                    /**
+                     * §BATCH 7 (Part 4.1a) — the notice's DESTINATION is OBSERVABLE:
+                     * the record kind, the owning view and the record's own id. A
+                     * browser test (and an operator inspecting the DOM) can see where
+                     * a notice leads without reading React state — and a notice that
+                     * led nowhere would have no id to show.
+                     */
+                    data-record-kind={n.record.kind}
+                    data-record-view={n.record.view}
+                    data-record-id={n.record.id}
                     className="w-full flex items-start gap-2.5 px-4 py-2.5 hover:bg-white/[0.05] text-left transition-colors"
                   >
                     <span

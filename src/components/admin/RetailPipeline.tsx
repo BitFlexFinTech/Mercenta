@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
 import { useQueryClient } from '@tanstack/react-query';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { useBrands, useDeductions, usePurchaseOrders, useCatalogSubmissions } from '@/data/queries';
@@ -70,8 +71,8 @@ function UnlockedPipeline() {
   const posQuery = usePurchaseOrders();
   const submissionsQuery = useCatalogSubmissions();
   const brandsQuery = useBrands();
-  const deductions = deductionsQuery.data?.data ?? [];
-  const purchaseOrders = posQuery.data?.data ?? [];
+  const deductions = useMemo(() => deductionsQuery.data?.data ?? [], [deductionsQuery.data]);
+  const purchaseOrders = useMemo(() => posQuery.data?.data ?? [], [posQuery.data]);
   const submissions = submissionsQuery.data?.data ?? [];
   const brandNames = new Map(
     (brandsQuery.data?.data ?? []).map((b) => [b.id, b.profile.businessName] as const)
@@ -89,6 +90,28 @@ function UnlockedPipeline() {
   const [disputeNotes, setDisputeNotes] = useState('');
   /** §Batch-0.5 — PO detail drill-down (full line-item, ASN, deductions). */
   const [detailPoId, setDetailPoId] = useState<string | null>(null);
+
+  /**
+   * §BATCH 7 (Part 4.1a) — DEEP LINKS, on the operator's commerce surface.
+   *
+   * `/admin/retail_pipeline?deduction=<id>` opens THAT deduction's dispute row and
+   * `?po=<poNumber>` opens THAT purchase order's drill-down, so a notice about a
+   * deduction or an outstanding-invoice PO lands on the record it names rather
+   * than on this section. Both are applied ONCE per value by the shared reader.
+   */
+  const deepLinkDeduction = useRecordDeepLink('deduction');
+  const deepLinkPo = useRecordDeepLink('po');
+  useEffect(() => {
+    if (!deepLinkDeduction) return;
+    if (!deductions.some((d) => d.id === deepLinkDeduction)) return;
+    setDisputingId(deepLinkDeduction);
+  }, [deepLinkDeduction, deductions]);
+  useEffect(() => {
+    if (!deepLinkPo) return;
+    const match = purchaseOrders.find((p) => p.poNumber === deepLinkPo);
+    if (!match) return;
+    setDetailPoId(match.id);
+  }, [deepLinkPo, purchaseOrders]);
 
   async function openDispute(id: string) {
     if (!disputeNotes.trim()) return;
