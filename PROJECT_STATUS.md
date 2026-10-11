@@ -6,12 +6,12 @@
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md.
      EXACTLY ONE FIELD SET. `npm run validate:resume-state` enforces the ten fields and the HANDOFF mirror. -->
 LAST COMPLETED TASK: **BATCH 7 (Parts 4.1b + 4.2 + 4.3) of the merged 2026-10-10 programme (2026-10-10, session 128).** Part 4's defects fixed AT SOURCE with a gate each: **(4.1b)** the work drawer's "Open record" now DEEP-LINKS to the record through the ONE address layer (`WorkWorkspace.openOwningRecord` → `navigateProductView(scope, item.actionView, { po: item.entity.label })`, read by `AdminPurchaseOrderList` + `BrandPurchaseOrders` via `currentQueryParam('po')`) — patrol defect `iss_a82e04e941f9`; **(4.2)** the seeded helpdesk tickets and returns-tracking rows were repointed from retired-universe brands (regatta/seep/clipper) to canonical brands, and the returns brand is now DERIVED from its canonical return; **(4.3)** three INERT controls REMOVED (AccountingPanel "Sync Now" / "Sync Costs", DesignSystemShowcase "Manage"). GATED by `scripts/validate-batch7-cleanup.mjs` (16 assertions, MUTATION-PROVED) and `e2e/work-layer.spec.ts` test 11 (MUTATION-PROVED). **Part 4.1a (the notification bell's record destinations) is NOT done — it is the NEXT task.**
-CURRENT VERIFIED STATE: **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** until the demo leg below is verified; then **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**.
+CURRENT VERIFIED STATE: **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** This changes application runtime, so the three-way gate applies and all three legs are verified: LOCAL (typecheck **0** · lint **0** · build **ok** · `validate:all` **186 PASS / 0 FAIL** · registry integrity **7 PASS / 0 FAIL** · browser sweeps **25/25** then **15/15** · four source mutations + one browser mutation proved) = the GitHub committed state (`074e84f`) = the deployed demo, verified LIVE (**276 PASS / 0 FAIL**).
 CURRENT BRANCH: redesign/foundation
-LAST VERIFIED COMMIT: recorded in the `docs(state)` close-out commit that follows the work commit.
-GITHUB PUSH: to `origin/redesign/foundation` (no `--force`).
-DEMO DEPLOYMENT: deployed via `scripts/deploy-demo.sh` to `demo.mercenta.co.uk` only.
-LIVE VERIFICATION: recorded in the `docs(state)` close-out commit.
+LAST VERIFIED COMMIT: **`074e84f`** — `feat(batch7): deep-link the work drawer to its record, fix dangling brand seeds, remove three inert controls`, plus this `docs(state)` close-out commit. The previous checkpoint was **`bfc18db`** (the Batch-6 close-out).
+GITHUB PUSH: pushed to `origin/redesign/foundation` (**`bfc18db..074e84f`**, plus this `docs(state)` close-out commit), no `--force`.
+DEMO DEPLOYMENT: **deployed @ `074e84f`** via `scripts/deploy-demo.sh` (only `demo.mercenta.co.uk`); the run finished "Done. Check: https://demo.mercenta.co.uk" (EXIT=0), run alone (no concurrent `validate:all`).
+LIVE VERIFICATION: **276 PASS / 0 FAIL** on `https://demo.mercenta.co.uk` (`verify:live` exit 0). The live `index.html` references the same asset hash (`index-C9f9Hadg.js`) as the local build.
 OUTSTANDING BLOCKER: none. Credentials are never a build blocker and are never asked for. Part 4.1a needs no credential and no decision.
 NEXT TASK: **BATCH 7 Part 4.1a** — give the notification bell's 5 inert item types (contract, score, submission, deduction, compliance) a real destination through `navigateProductView` and re-point the other 9 from a SECTION to their record, plus the Part 5 "deep-link gate". Then BATCH 8 (Part 6, the close-out).
 EXACT NEXT STARTING POINT: `src/components/shared/NotificationCenter.tsx` (the item builders + `handleClick`) and `src/lib/runtime/productRoutes.ts`.
@@ -26,7 +26,7 @@ PLAIN SUMMARY (OWNER-FACING): Step seven of the saved plan is partly finished, a
 4. **DEFERRED / PARKED** — unchanged (see the §BATCH 6 block below).
 5. **BLOCKED / DEPENDENCIES** — unchanged. **Credentials are NOT blockers** and were not requested.
 6. **KNOWN EXCEPTIONS** — none introduced. `discovered-support-team-mobile-pane-overflow` remains the one BLOCKED-on-decision item (a UX decision, unchanged).
-7. **CURRENT CHECKPOINT** — the work commit for Batch 7 Parts 4.1b/4.2/4.3 (hash recorded in the `docs(state)` close-out commit).
+7. **CURRENT CHECKPOINT** — `074e84f` (plus the `docs(state)` close-out commit): pushed to GitHub and deployed to the demo, live-verified at 276 PASS / 0 FAIL.
 8. **VERIFICATION STATUS** — typecheck 0 · lint 0 · build ok · `validate:all` **186 PASS / 0 FAIL** · registry integrity **7 PASS / 0 FAIL** · focused browser sweeps 25/25 then 15/15 · four source mutations + one browser mutation proved and restored byte-identical.
 9. **NEXT EXECUTION SCOPE** — Batch 7 Part 4.1a (the notification destinations + the deep-link gate).
 
