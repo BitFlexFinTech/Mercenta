@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 559,
+    "total_entries": 560,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -374,10 +374,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-11 at the §BATCH 8 = Part 6 close-out of the merged 2026-10-10 programme. That close-out added NO capability row (it reconciled the state sources), so the figures are UNCHANGED from the 2026-10-10 recomputation after §BATCH 7 — and they were re-verified against the entries themselves: built_and_tested:319, built:180, not_started:10, removed:33, deferred:9, blocked:7, complete:1 — total 559 = _meta.total_entries. The later rule-07 corrections of this session (the picture-comparison premise and the carrier-branch claims) and the verify-registry repoint added NO capability row either, so these figures still stand.",
+      "_note": "Recomputed 2026-10-11 at the §BATCH 8 = Part 6 close-out of the merged 2026-10-10 programme. That close-out added NO capability row (it reconciled the state sources), so the figures are UNCHANGED from the 2026-10-10 recomputation after §BATCH 7 — and they were re-verified against the entries themselves: built_and_tested:319, built:180, not_started:10, removed:33, deferred:9, blocked:7, complete:1 — total 559 = _meta.total_entries. The later rule-07 corrections of this session (the picture-comparison premise and the carrier-branch claims) and the verify-registry repoint added NO capability row either. The ONLY row added by this session is rule10-machine-wide-describer-sweep (not_started), which records the remaining per-project sweep required by global rule 10 — hence 560 entries and not_started 11.",
       "built_and_tested": 319,
       "built": 180,
-      "not_started": 10,
+      "not_started": 11,
       "removed": 33,
       "deferred": 9,
       "blocked": 7,
@@ -1248,6 +1248,15 @@
     }
   },
   "entries": [
+    {
+      "id": "rule10-machine-wide-describer-sweep",
+      "description": "GLOBAL RULE 10 SWEEP (discovered 2026-10-11, session 131) — the owner asked for the carrier-drift class to be fixed permanently and for EVERY project, and the new global rule 10-describers-must-match-reality.md REQUIRES every project to have a describer (reality) check wired into its single standard command. THIS project complies and is the worked example. THIS ROW IS THE OUTSTANDING SWEEP: every OTHER project on this machine must be visited and given the same treatment — discover the truth from its own code (the shells/routes/roles/providers that exist; the files its own matrix calls removed), assert that live documents agree with that truth, delete the leftovers of removed things (pictures, caches, exports), and prove the new check can fail. Per-project work that copies this project's pattern, NOT a redesign.",
+      "status": "not_started",
+      "source": "Owner directive 2026-10-11 (session 131): it should never happen again, not only in this project but in all the other projects — furthered by global rule 10-describers-must-match-reality.md, installed the same session, machine-wide, declared in RULES-MANIFEST.json.",
+      "evidence": "THE RULE: ~/.cline/rules/10-describers-must-match-reality.md and ~/Documents/Cline/Rules/ are byte-identical (sha256 4da3ba12ce3ae6e547b506577a076e707c894d7fc84410b77470e28f985724bd), declared in ~/.cline/rules/RULES-MANIFEST.json with six required parts; node ~/.cline/rules/check-rules.mjs gives RULES_CHECK_PASS (17 passed, 0 failed, 27 rules declared). THE WORKED EXAMPLE in this project: scripts/validate-no-stale-blockers.mjs section 11 checks every file the matrix calls DELETED is absent (13 checked, 0 present) with a vacuity guard, and scripts/validate-rules-application.mjs section 5b DISCOVERS that check and FAILS when it is silenced (proved 28/29). NOT DONE FOR ANY OTHER PROJECT: no other project has been visited yet — that is this row.",
+      "last_verified": "2026-10-11",
+      "superseded_by": null
+    },
     {
       "id": "batch7-click-through-and-cleanup",
       "description": "§BATCH 7 (2026-10-10) — Part 4 defects fixed AT SOURCE, each with a gate: (4.1a) THE NOTIFICATION BELL'S RECORD DESTINATIONS — all fourteen item builders now name the RECORD they are about: the five formerly INERT types (contract, score, submission, deduction, compliance) go somewhere real, and the other nine open their record instead of a SECTION — routed through the ONE address layer; (4.1b) a work item's \"Open record\" DEEP-LINKS to its own record instead of opening the generic PO list (defect iss_a82e04e941f9); (4.2) the seeded helpdesk tickets and returns-tracking rows no longer reference brands from the retired 17-brand universe (brand-regatta / brand-seep / brand-clipper) — the returns brand is now DERIVED from the return it describes; (4.3) three inert controls REMOVED (AccountingPanel \"Sync Now\" / \"Sync Costs\", DesignSystemShowcase \"Manage\") that carried no handler.",

@@ -129,6 +129,18 @@ reconciliation, not a feature.
    its vacuity guard is silenced (**proved: 28/29 with "found: NONE"**), and also asserts rule 10 is installed in
    both folders. **Mutation-proved twice more** (re-create a deleted file ⇒ FAIL; break both deletion conventions
    ⇒ the vacuity guard FAILS with "found 0"), everything restored byte-identical.
+10. **§HANDOVER FOR THE NEXT CHAT, AND ONE SLIP OF MINE RECORDED.** The owner closed this chat (context nearly
+    exhausted), so the resume block now carries the remaining work as an ORDERED list — **(1) the rule-10
+    machine-wide sweep** (registry row `rule10-machine-wide-describer-sweep`, `not_started`, **no decision needed**),
+    **(2) WAVE 3 PART 6** (the picture-comparison check: needs the first baseline set captured-and-KEPT PLUS one
+    Founder decision), **(3) the unblocked `discovered-*` fallback**, **(4) the unchanged remainder** — with every
+    file to open named in `EXACT NEXT STARTING POINT`. **MY OWN SLIP, RECORDED NOT HIDDEN:** while adding the sweep
+    row I ran a one-line hash check that matched the FIRST `sha256 …` in the registry instead of the one in my new
+    row, and overwrote a genuine hash inside the `_meta.batch3b_founder_closing` note. It was caught immediately by
+    comparing EVERY hash in the file against the last saved version and repaired from that saved version (the true
+    value came from the repository, never from memory). **Proof after repair: all 73 pre-existing hashes still
+    present, exactly ONE new hash added (the rule's own), and that hash re-verified against the rule file on disk.**
+    A pattern-matching one-liner that edits a shared file is exactly the class of bug rule 07 exists for.
 
 **TESTED.** BEFORE (tree at `e581d05`) → AFTER (this close-out, re-run for real): `npm run typecheck` **0 → 0** ·
 `npm run lint` **0 → 0** · `npm run build` **ok → ok** · `npm run validate:all` **187 PASS / 0 FAIL → 187 PASS / 0
