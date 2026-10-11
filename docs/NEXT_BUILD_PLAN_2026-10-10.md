@@ -215,7 +215,11 @@
   corrected at source — rule 07: the TWO citations that still said "only BATCH 8 = Part 6 remains", ONE
   `PROJECT_STATUS.md` heading that had lost its SUPERSEDED marker, and the picture-comparison row's claim that the
   screenshots are committed (with the generator script that produces that row and the gap analysis's D-4 row it
-  cites) · **the sprint record**.
+  cites), and the FIVE carrier-as-a-live-branch claims the owner's own challenge exposed (ARCHITECTURE.md · the
+  gap analysis's D-8 · RUNTIME_PARITY_PLAN · MERCENTA_MASTER_CONTEXT · one stale PROJECT_STATUS bullet) · **the
+  sprint record**. A SIXTH defect found while checking — `scripts/verify-registry.mjs` reading nav arrays that exist
+  nowhere, making its reachability check vacuous — is repointed to discover the shells that exist (40 nav ids) with a
+  self-check that fails if the discovery returns nothing.
   **NOTE, stated plainly rather than papered over:** this programme has NO separate `docs/SPRINT_*.md` file. The
   repository's record of it is **THIS plan document plus the `STATUS_CHECK.md` `§BATCH 1 … §BATCH 8` sections** —
   the convention every programme has followed since 2026-10-04 (the last `docs/SPRINT_*` records are in

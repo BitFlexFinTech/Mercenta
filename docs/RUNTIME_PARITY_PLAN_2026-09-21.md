@@ -15,6 +15,16 @@
 > (`docs/NEXT_BUILD_PLAN_2026-10-10.md` Part 2.5). The parity mechanisms the plan introduced (the address layer, the
 > runtime-entry spec, fail-closed routing) are **unchanged and still live**; only the Brain references are historical.
 
+> ## ⚠ NOTE (§REPOINTED 2026-10-11, rule 07) — EVERY CARRIER-USER REFERENCE BELOW IS HISTORICAL TOO
+> This plan predates the removal of the carrier surface (2026-09-21 vs **2026-09-23**). Its §4.3 ("Carrier terminal —
+> 1 destination"), its `<CarrierShell />` catch-all row and its `CarrierShell.tsx` consumer list describe a **removed
+> product branch**. Founder decision **T-2**: *no external carrier users/logins*; **a carrier never logs into
+> Mercenta** — DHL and Palletline are operated **by API** from the Brand/Admin-facing Logistics Hub. `CarrierShell.tsx`
+> and `src/components/carrier/` do not exist, the `carrier` environment and `'3pl'` tier are gone from
+> `src/lib/auth/rbac.ts` and `src/types.ts`, and `scripts/validate-conversion-gate.mjs` asserts their absence. The
+> plan's routing mechanisms remain correct; only its carrier references are history. (The owner asked on 2026-10-11
+> why the project still mentioned carriers — this note is part of the answer.)
+
 
 > **Status: EXECUTED — R1 → R5 COMPLETE (2026-09-21, session 5).**
 > Written 2026-09-21 on branch `redesign/foundation` (HEAD `22b6b62`) as a PLAN-ONLY deliverable, then executed in the

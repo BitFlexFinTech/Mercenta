@@ -29,10 +29,21 @@
 App.tsx
 ├── home     → HomeShell  (marketing / auth)
 ├── login    → HomeShell
-├── brand    → BrandShell (15 views)
-├── admin    → AdminShell (24 views incl. Super Admin sub-tabs)
-└── carrier  → CarrierShell (3 views)
+├── brand    → BrandShell
+└── admin    → AdminShell (incl. Super Admin sub-tabs)
 ```
+
+> **§REPOINTED (2026-10-11, rule 07) — THERE IS NO CARRIER BRANCH, AND IT WAS NEVER JUST HIDDEN.** This tree
+> used to carry a fifth line, `carrier → CarrierShell (3 views)`. The whole 3PL carrier surface was **REMOVED
+> on 2026-09-23** (§P9, programme decision 4 — the standing Founder decision **T-2**: *no external carrier
+> users/logins*). **A carrier never logs into Mercenta**: Mercenta operates DHL (international) and Palletline
+> (UK domestic) **by API** from the Logistics Hub, which is Brand/Admin-facing. Evidence, all re-verified
+> 2026-10-11: `src/components/layout/CarrierShell.tsx` and `src/components/carrier/` **do not exist**; the
+> `carrier` environment and the `'3pl'` session tier are gone from `src/lib/auth/rbac.ts` and `src/types.ts`
+> (both carry inline `§P9 — REPOINTED` notes saying exactly this); `src/App.tsx` names the removed branch and
+> states the two remaining product branches are exhaustive; and
+> `scripts/validate-conversion-gate.mjs` asserts the absence, so the surface cannot come back unnoticed.
+> **The live tree is the four lines above.** The carrier line is history and is deliberately not restored.
 
 Each shell is `React.lazy()`. `EnvironmentRouter` is the switch.
 

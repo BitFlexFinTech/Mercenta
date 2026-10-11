@@ -9,7 +9,7 @@
  *   (ADMIN_NAV/BRAND_NAV/CARRIER_NAV) AND have a render condition in App.tsx.
  */
 
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -30,43 +30,69 @@ try {
 const entries = registry.entries || [];
 console.log('\nRequirements Registry:', entries.length, 'entries\n');
 
-// ── Build nav + render-condition lookup from App.tsx
+// ── Build nav + render-condition lookup from the shells that EXIST, plus App.tsx's render conditions
+//
+// §REPOINTED (2026-10-11, rule 07 — "a check that cannot fail proves nothing"). This lookup used to read
+// `ADMIN_NAV` / `BRAND_NAV` / `CARRIER_NAV` arrays out of `src/App.tsx`. Those arrays exist NOWHERE in
+// `src/` any more (measured this session: 0 occurrences — the navigation moved into the shells), so the
+// nav set came back EMPTY and every reachability verdict this script printed was vacuous: it reported
+// "not mapped to any navId in ADMIN_NAV/BRAND_NAV/CARRIER_NAV" for whatever it looked at, without ever
+// consulting the real navigation. It now DISCOVERS the `*Shell.tsx` files that exist and reads THEIR nav
+// items, and the self-check below FAILS the run if that discovery returns nothing — so it cannot silently
+// go inert again. The retired `CARRIER_NAV` name is gone with the carrier surface (§P9 / Founder decision
+// T-2: no external carrier users/logins; a carrier never logs into Mercenta).
+const LAYOUT_DIR = resolve(ROOT, 'src/components/layout');
 let navLookup = new Set();
 let navIdToLabel = {};
 let componentNavMap = {};
 let renderConditions = new Set();
-function buildLookup(appTsx) {
-  const navRegex = /(ADMIN_NAV|BRAND_NAV|CARRIER_NAV)\s*=\s*\[([\s\S]*?)\];/g;
-  let match;
-  while ((match = navRegex.exec(appTsx)) !== null) {
-    const content = match[2];
-    const itemRegex = /\{\s*id:\s*'([^']+)'\s*,\s*label:\s*'([^']+)'/g;
-    let item;
-    while ((item = itemRegex.exec(content)) !== null) {
-      const id = item[1], label = item[2];
-      navLookup.add(id);
-      navIdToLabel[id] = label;
-      const pascal = id.replace(/_([a-z])/g, (_, c) => c.toUpperCase()).replace(/^([a-z])/, (_, c) => c.toUpperCase());
-      for (const suffix of ['AdminPanel', 'Panel', 'Dashboard', 'Hub', 'Manager', 'List']) {
-        componentNavMap[(pascal + suffix).toLowerCase()] = id;
-      }
-      componentNavMap[pascal.toLowerCase()] = id;
-    }
-  }
+let navSourceFiles = [];
 
-  const condRegex = /(adminView|brandView|carrierView)\s*===\s*'([^']+)'\s*&&/g;
-  let cond;
-  while ((cond = condRegex.exec(appTsx)) !== null) {
-    renderConditions.add(cond[2]);
+function loadNavItems(content) {
+  const itemRegex = /\{\s*id:\s*'([^']+)'\s*,\s*label:\s*'([^']+)'/g;
+  let item;
+  while ((item = itemRegex.exec(content)) !== null) {
+    const id = item[1], label = item[2];
+    navLookup.add(id);
+    navIdToLabel[id] = label;
+    const pascal = id.replace(/_([a-z])/g, (_, c) => c.toUpperCase()).replace(/^([a-z])/, (_, c) => c.toUpperCase());
+    for (const suffix of ['AdminPanel', 'Panel', 'Dashboard', 'Hub', 'Manager', 'List']) {
+      componentNavMap[(pascal + suffix).toLowerCase()] = id;
+    }
+    componentNavMap[pascal.toLowerCase()] = id;
   }
 }
 
 try {
-  const appTsx = readFileSync(APP_TSX_PATH, 'utf-8');
-  buildLookup(appTsx);
+  for (const file of readdirSync(LAYOUT_DIR).filter((f) => f.endsWith('Shell.tsx')).sort()) {
+    loadNavItems(readFileSync(resolve(LAYOUT_DIR, file), 'utf-8'));
+    navSourceFiles.push('src/components/layout/' + file);
+  }
 } catch (err) {
-  console.warn('Could not read App.tsx for reachability:', err.message);
+  console.warn('Could not read the shell files for reachability:', err.message);
 }
+
+try {
+  const appTsx = readFileSync(APP_TSX_PATH, 'utf-8');
+  const condRegex = /(adminView|brandView)\s*===\s*'([^']+)'\s*&&/g;
+  let cond;
+  while ((cond = condRegex.exec(appTsx)) !== null) {
+    renderConditions.add(cond[2]);
+  }
+} catch (err) {
+  console.warn('Could not read App.tsx for render conditions:', err.message);
+}
+
+/* §SELF-CHECK — THE LOOKUP MUST NOT BE INERT. Zero discovered nav ids means every reachability verdict
+   below would be meaningless, so the run FAILS rather than printing vacuous flags. Mutation-proved by
+   breaking the discovery (renaming the shell suffix) and watching this exit non-zero. */
+if (navLookup.size === 0) {
+  console.error('\nVERIFY REGISTRY FAILED — the reachability lookup discovered ZERO nav ids under ' + LAYOUT_DIR);
+  console.error('The navigation moved or the shells were renamed, so every reachability verdict would be vacuous.');
+  console.error('Repoint this lookup at the current navigation owner before trusting any reachability output.');
+  process.exit(1);
+}
+console.log('Reachability lookup: ' + navLookup.size + ' nav ids discovered from ' + navSourceFiles.join(', '));
 
 function resolveFilePath(ref) {
   let path = ref
@@ -119,7 +145,7 @@ function checkReachability(componentPath) {
   }
 
   if (!navId) {
-    return { ok: false, msg: 'Component not mapped to any navId in ADMIN_NAV/BRAND_NAV/CARRIER_NAV' };
+    return { ok: false, msg: 'Component not mapped to any navId declared by the shells (source: ' + navSourceFiles.join(', ') + ')' };
   }
   if (!navLookup.has(navId)) {
     return { ok: false, msg: "Derived navId '" + navId + "' not found in any nav array" };

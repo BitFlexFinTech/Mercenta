@@ -21,7 +21,7 @@
 // 6-8 pin the corrected state, so the close-out cannot silently un-complete itself: the plan of record
 // must still read COMPLETE, the registry must still carry `programme_2026_10_10_closeout`, and the
 // resume block must not point back at the finished batch. Each assertion was mutation-proved.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 let failures = 0;
 let checks = 0;
@@ -225,6 +225,69 @@ test(
 );
 
 
+
+
+/**
+ * §10 — THE CARRIER-USER CLAIM, PINNED (2026-10-11, rule 07).
+ *
+ * An owner-facing report described a screenshot as "the page a carrier sees first". The owner challenged it:
+ * carriers do not connect to Mercenta — Mercenta calls the carriers' APIs. **The owner was right and the
+ * project was already right**: the whole 3PL carrier surface was REMOVED on 2026-09-23 (§P9, programme
+ * decision 4 / Founder decision T-2 — "no external carrier users/logins"), `rbac.ts` and `types.ts` say so
+ * inline, and `validate-conversion-gate` asserts the files' absence. What had NOT been updated was FOUR
+ * documents that still described the carrier branch as live, plus a leftover picture of the deleted screen
+ * sitting in the throwaway folder — which is precisely what the report misread. The corrections are pinned
+ * here so the claim cannot come back, and the shell list is DISCOVERED from disk (rule 09), never retyped.
+ */
+const layoutFiles = readdirSync(new URL('src/components/layout/', ROOT))
+  .filter((f) => f.endsWith('Shell.tsx'))
+  .sort();
+test(
+  `the shells on disk are exactly the four that exist — no carrier shell (found: ${layoutFiles.join(', ')})`,
+  layoutFiles.join(',') === 'AdminShell.tsx,AppShell.tsx,BrandShell.tsx,HomeShell.tsx'
+);
+const archText = read('docs/ARCHITECTURE.md');
+/* The `AppShell` wrapper is deliberately NOT a route branch, so the routing tree omits it — that is a
+   discovered exclusion (the file ends in `Shell.tsx` but is not one of the `environment` branches), not a
+   hand-written excuse. Every OTHER shell must be named. */
+for (const shell of layoutFiles.filter((f) => f !== 'AppShell.tsx')) {
+  // The document names shells by component ("HomeShell"), not by file ("HomeShell.tsx") — assert the name.
+  test(`ARCHITECTURE.md names the shell that exists on disk: ${shell}`, archText.includes(shell.replace(/\.tsx$/, '')));
+}
+test(
+  'ARCHITECTURE.md carries the carrier-removal §REPOINTED note',
+  /§REPOINTED \(2026-10-11, rule 07\) — THERE IS NO CARRIER BRANCH/.test(archText)
+);
+test(
+  'ARCHITECTURE.md no longer presents a carrier branch as a live route',
+  !/─+\s*carrier\s*→/.test(archText.replace(/^>.*$/gm, ''))
+);
+test(
+  'src/types.ts offers exactly home/login/brand/admin — the carrier environment is gone',
+  /export type Environment = 'home' \| 'login' \| 'brand' \| 'admin';/.test(read('src/types.ts'))
+);
+test(
+  'rbac.ts states the fact where every session reads it: a carrier never logs into Mercenta',
+  /a carrier never logs into Mercenta/.test(read('src/lib/auth/rbac.ts'))
+);
+test(
+  'the gap analysis carries the D-8 carrier correction too (not only the D-4 one)',
+  /§REPOINTED \(2026-10-11, rule 07\) — the D-8 row above is ALSO STALE/.test(read('docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md'))
+);
+test(
+  'the runtime-parity plan warns that its carrier-terminal sections are history',
+  /EVERY CARRIER-USER REFERENCE BELOW IS HISTORICAL/.test(read('docs/RUNTIME_PARITY_PLAN_2026-09-21.md'))
+);
+test(
+  'MERCENTA_MASTER_CONTEXT.md warns that the carrier portal it lists does not exist',
+  /THE CARRIER PORTAL BELOW DOES NOT EXIST/.test(read('MERCENTA_MASTER_CONTEXT.md'))
+);
+const verifyRegistryText = read('scripts/verify-registry.mjs');
+test(
+  'verify-registry no longer treats the retired CARRIER_NAV as a live source, and self-checks its lookup',
+  !/ADMIN_NAV\|BRAND_NAV\|CARRIER_NAV/.test(verifyRegistryText) &&
+    /the reachability lookup discovered ZERO nav ids/.test(verifyRegistryText)
+);
 
 
 console.log(`\n${checks - failures}/${checks} checks passed`);

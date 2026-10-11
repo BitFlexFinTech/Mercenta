@@ -11,6 +11,11 @@
 > - Business invariants: **`.clinerules/mercenta-business-model.md`**
 > - Granular capability matrix: **`requirements-registry.json`**
 > - Presentation rules: **`docs/DESIGN_SYSTEM.md`** (the UI is **NOT** frozen)
+> - **§REPOINTED (2026-10-11, rule 07) — THE CARRIER PORTAL BELOW DOES NOT EXIST.** This document lists a
+>   "Carrier operator / Carrier portal / manifest management, hub logistics, API auditor". That whole 3PL carrier
+>   surface was **REMOVED on 2026-09-23** (§P9, programme decision 4 — Founder decision **T-2**: *no external carrier
+>   users/logins*). **A carrier never logs into Mercenta**; Mercenta operates DHL and Palletline **by API**. Nothing
+>   else in this historical document overrides that.
 >
 > Its Design Freeze passages are already struck through inline below and have **no
 > authority**. Any other instruction here that conflicts with the canonical

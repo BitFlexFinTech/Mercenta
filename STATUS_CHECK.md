@@ -72,6 +72,37 @@ reconciliation, not a feature.
    used is precise: the stale wording may appear only AFTER the `§REPOINTED` marker, and **four** mutations
    (registry row · generator script · D-4 note · `.gitignore`) each make the gate FAIL, every file restored
    byte-identical (`…a79b4ace01ef`, `…ec9188c073b7`, `…97ed0ae8804b`, `…5669954664b7`).
+6. **§THE OWNER'S CARRIER CHALLENGE — ACCEPTED, AND IT FOUND FIVE MORE DEFECTS.** The owner read "the page a carrier
+   sees first" in the previous report and replied that carriers do **not** connect with Mercenta — Mercenta calls the
+   carriers' APIs — and asked why this had not been updated. **The owner was right, and the project was already
+   right:** the 3PL carrier surface was REMOVED on 2026-09-23 (§P9, programme decision 4 / Founder decision **T-2**
+   "no external carrier users/logins"), `src/lib/auth/rbac.ts` and `src/types.ts` state inline that *a carrier never
+   logs into Mercenta*, `src/App.tsx` names the removed branch, and `scripts/validate-conversion-gate.mjs` asserts the
+   absence. **What had not been updated was five other things, all now FIXED at source:** (i) `docs/ARCHITECTURE.md`
+   — an undated architecture document whose routing tree still listed `carrier → CarrierShell (3 views)` as a live
+   branch; (ii) `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md` **D-8** ("4 shells … CarrierShell") — the same
+   document whose **D-4** was corrected earlier the same session; (iii) `docs/RUNTIME_PARITY_PLAN_2026-09-21.md`,
+   whose §4.3 carrier terminal and `<CarrierShell />` rows predate the removal by two days; (iv)
+   `MERCENTA_MASTER_CONTEXT.md`, which listed a "Carrier operator / Carrier portal"; (v) an old `PROJECT_STATUS.md`
+   bullet that still read as **open work** needing a Founder decision (now marked resolved). Each carries a dated
+   `§REPOINTED` note with the evidence and the T-2 fact, so history is preserved and nothing reads as live. **My own
+   error is stated plainly:** the phrase came from a leftover PICTURE — `test-screenshots/carrier-dashboard.png`,
+   taken 2026-09-07, before the surface was removed — sitting in the throwaway folder; I invented a meaning for a
+   filename instead of checking it. Both orphan pictures of that deleted screen were deleted, and the term will not
+   be used again for anything that is not a Mercenta carrier *account* operated by API.
+7. **§A SIXTH DEFECT FOUND WHILE CHECKING — `verify-registry` HAD BEEN CHECKING NOTHING, AND IS NOW REPOINTED.**
+   `scripts/verify-registry.mjs` built its reachability lookup by reading `ADMIN_NAV` / `BRAND_NAV` / `CARRIER_NAV`
+   arrays out of `src/App.tsx`. **Those arrays exist nowhere in `src/` (0 occurrences — the navigation moved into the
+   shells)**, so the lookup was EMPTY and every reachability verdict it printed was vacuous: it named arrays that do
+   not exist and never consulted the real navigation. It now **DISCOVERS the `*Shell.tsx` files that exist** and reads
+   their nav items — **40 nav ids found** — and a **self-check FAILS the run** (exit 1) if that discovery returns
+   nothing, so it cannot silently go inert again. Mutation-proved by breaking the discovery (exit 1) and restoring the
+   file byte-identical (`3b9aabcab218…`).
+8. **§EVERY NEW ASSERTION IS MUTATION-PROVED.** The stale-record/claim gate now runs **44 assertions** (was 23 at the
+   start of the session). Eight mutations were executed this round — registry row, generating script, D-4 note,
+   `.gitignore`, ARCHITECTURE.md live carrier branch, MERCENTA_MASTER_CONTEXT correction, the `Environment` type, and
+   re-creating a `CarrierShell.tsx` — **each made the gate FAIL**, and every file was restored byte-identical (or the
+   created file removed).
 
 **TESTED.** BEFORE (tree at `e581d05`) → AFTER (this close-out, re-run for real): `npm run typecheck` **0 → 0** ·
 `npm run lint` **0 → 0** · `npm run build` **ok → ok** · `npm run validate:all` **187 PASS / 0 FAIL → 187 PASS / 0
