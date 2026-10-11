@@ -1,19 +1,22 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
-> **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
-> Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social), BATCH 6 (Part 3.1, the catalogue product image) and
-> BATCH 7 IN FULL — Part 4.1b + 4.2 + 4.3 (session 128: the work-drawer deep link, the dangling-brand seed fix,
-> the three inert controls removed), Part 4.1a + Part 5.2 (session 129, 2026-10-11: the notification bell's
-> RECORD destinations — all fourteen item builders, routed through the ONE address layer — plus the DEEP-LINK
-> GATE) AND Part 5.1 + 5.3 (session 130, 2026-10-11) — ARE BUILT AND TESTED.**
-> **PART 5 IS NOW COMPLETE.** 5.1 added the four consolidated ABSENCE-GUARD groups (§2d–§2g) to the EXISTING
-> `scripts/validate-retired-platforms.mjs` — 30 assertions, MUTATION-PROVED one per group — so that ONE file now
-> guards every Part-2 removal; 5.3 added the rule-09 COVERAGE GATE (§6b of
+> **STATUS: ✅ THE WHOLE PROGRAMME IS COMPLETE — NOTHING IN THIS PLAN IS LEFT PLANNED (closed out 2026-10-11,
+> session 131).** BATCH 1 (Part 1, the two global rules + the editor root), BATCH 2 (Parts 2.1 + 2.2), BATCH 3
+> (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social), BATCH 6
+> (Part 3.1, the catalogue product image) and BATCH 7 IN FULL — Part 4.1b + 4.2 + 4.3 (session 128: the
+> work-drawer deep link, the dangling-brand seed fix, the three inert controls removed), Part 4.1a + Part 5.2
+> (session 129, 2026-10-11: the notification bell's RECORD destinations — all fourteen item builders, routed
+> through the ONE address layer — plus the DEEP-LINK GATE) and Part 5.1 + 5.3 (session 130, 2026-10-11) — **plus
+> BATCH 8 = PART 6, THE CLOSE-OUT (session 131, 2026-10-11) — ARE ALL BUILT, TESTED AND CLOSED OUT.**
+> **PARTS 1–6 ARE ALL DELIVERED.** Part 5: 5.1 added the four consolidated ABSENCE-GUARD groups (§2d–§2g) to the
+> EXISTING `scripts/validate-retired-platforms.mjs` — 30 assertions, MUTATION-PROVED one per group — so that ONE
+> file now guards every Part-2 removal; 5.3 added the rule-09 COVERAGE GATE (§6b of
 > `scripts/validate-typecheck-coverage.mjs`), which DISCOVERS the covered roots from the four projects' own
 > `include` arrays and fails if any `.ts`/`.tsx` belongs to no project (573 files discovered, 0 uncovered).
-> **ONLY PART 6 (the close-out, = BATCH 8) REMAINS.**
+> **PART 6 (the close-out) IS DELIVERED — its evidence is in §PART 6 below. NOTHING IN THIS PLAN REMAINS.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 8 = Part 6 (the close-out)**.
+> Its checklist is COMPLETE; the work that FOLLOWS this programme is named by `PROJECT_STATUS.md` →
+> `CURRENT RESUME STATE` → `NEXT TASK`, and is deliberately NOT part of this plan.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -198,14 +201,41 @@
   stays pinned by three assertions. **The registry note that claimed the gate ran "20 assertions" was corrected at
   source (rule 07).**
 
-## PART 6 — CLOSE-OUT (mandatory)
+## PART 6 — CLOSE-OUT (mandatory) — ✅ **DONE (BATCH 8, session 131, 2026-10-11)**
 
-- **6.1** Keep `PROJECT_STATUS.md` updated after EVERY batch (this plan is the tracked checklist).
-- **6.2** Update all five state sources (`PROJECT_STATUS.md`, `HANDOFF.md`, `STATUS_CHECK.md`,
+- ✅ **6.1** Keep `PROJECT_STATUS.md` updated after EVERY batch (this plan is the tracked checklist).
+  **DONE** — each of Batches 1–8 carries its own `## CURRENT PLATFORM POSITION` section, and this close-out adds
+  the Batches 1–8 ROLL-UP as ONE programme-complete section on top of them.
+- ✅ **6.2** Update all five state sources (`PROJECT_STATUS.md`, `HANDOFF.md`, `STATUS_CHECK.md`,
   `requirements-registry.json`, sprint record).
-- **6.3** `npm run typecheck` · `npm run lint` · `npm run build` · `npm run validate:all` — before/after counts.
-- **6.4** Commit · push · deploy to the demo · open it · verify live · confirm local = GitHub = demo.
-- **6.5** Export the review zip (ONE file, overwritten) · confirm `git status --porcelain` prints nothing.
+  **DONE** — `PROJECT_STATUS.md` (resume block + headings 1–9) · `HANDOFF.md` (mirror of the resume block) ·
+  `STATUS_CHECK.md` (a new §BATCH 8 section; the previous sections marked SUPERSEDED) · `requirements-registry.json`
+  (`_meta.last_updated` → 2026-10-11, the recomputed `status_counts` note, the new
+  `_meta.programme_2026_10_10_closeout` programme record, and the TWO stale citations that still said "only
+  BATCH 8 = Part 6 remains" corrected at source — rule 07) · **the sprint record**.
+  **NOTE, stated plainly rather than papered over:** this programme has NO separate `docs/SPRINT_*.md` file. The
+  repository's record of it is **THIS plan document plus the `STATUS_CHECK.md` `§BATCH 1 … §BATCH 8` sections** —
+  the convention every programme has followed since 2026-10-04 (the last `docs/SPRINT_*` records are in
+  `docs/archive/`). A sixth, parallel sprint document was deliberately NOT created, because a second record of the
+  same work is a second source of truth that drifts; both of the real records ARE updated.
+- ✅ **6.3** `npm run typecheck` · `npm run lint` · `npm run build` · `npm run validate:all` — before/after counts.
+  **DONE** — BEFORE (tree at `e581d05`) → AFTER (this close-out): `typecheck` **0 → 0** · `lint` **0 → 0** ·
+  `build` **ok → ok** · `validate:all` **187 PASS / 0 FAIL → 187 PASS / 0 FAIL**. Identical BY CONSTRUCTION,
+  because this batch changes no application file at all — nothing under `src/`, `e2e/` or the built app. The ONE
+  executable file it touches is an EXISTING gate script, `scripts/validate-no-stale-blockers.mjs`, which was
+  EXTENDED with this close-out's own assertions (tooling, not application runtime) — and the AFTER figures are a
+  real re-run of both commands, not a copy of the BEFORE ones.
+- ✅ **6.4** Commit · push · deploy to the demo · open it · verify live · confirm local = GitHub = demo.
+  **DONE, with the deploy leg NOT APPLICABLE** (`operating-model.md` §10.4): committed and pushed to
+  `origin/redesign/foundation` (the exact hashes are in `PROJECT_STATUS.md` → `CURRENT RESUME STATE`), and because
+  NO file the demo serves changed in this batch there was nothing to deploy — the demo still carries the last
+  verified product commit **`c026524`**, whose live verification was **276 PASS / 0 FAIL**. **THREE-WAY STATUS:
+  NOT APPLICABLE (no application runtime change)** — recorded here so no reader mistakes this close-out for a
+  deployment, and so no later session invents one.
+- ✅ **6.5** Export the review zip (ONE file, overwritten) · confirm `git status --porcelain` prints nothing.
+  **DONE** — the ONE `Review Zip/mercenta-review.zip` was re-exported (the script's credential guard PASSes: no
+  `.env` and no gitignored private/generated tree inside), and `git status --porcelain` prints NOTHING at the
+  recorded checkpoint.
 
 ## EXECUTION ORDER
 
@@ -216,8 +246,11 @@ Batches 1–6 are DONE (2026-10-10); Batch 7 is DONE IN FULL — Parts 4.1b/4.2/
 `scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11), Part 4.1a + Part 5.2 (session 129,
 2026-10-11, gated by `scripts/validate-batch7-deeplinks.mjs` + `e2e/notification-deeplinks.spec.ts`) and Part 5.1 +
 5.3 (session 130, 2026-10-11: the consolidated absence guards §2d–§2g of `scripts/validate-retired-platforms.mjs`
-and the §6b coverage gate of `scripts/validate-typecheck-coverage.mjs`). **PART 5 IS COMPLETE. Next: BATCH 8 —
-Part 6, the close-out.**
+and the §6b coverage gate of `scripts/validate-typecheck-coverage.mjs`). **Batch 8 = Part 6 (the close-out) is DONE
+TOO (session 131, 2026-10-11): the five state sources were reconciled onto this plan and `PART 6` above carries its
+before/after evidence. THE WHOLE EXECUTION ORDER IS THEREFORE COMPLETE AND NOTHING HERE REMAINS.** The work that
+follows this programme is NOT in this plan — it is named by `PROJECT_STATUS.md` → `CURRENT RESUME STATE` →
+`NEXT TASK` (`WAVE 3 PART 6`, the visual-regression gate, which waits on ONE Founder decision).
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

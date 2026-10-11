@@ -26,7 +26,61 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 7 (PARTS 5.1 + 5.3) — THE CONSOLIDATED ABSENCE RECORD AND THE TYPE-CHECK COVERAGE GATE (session 130, 2026-10-11)
+## §BATCH 8 (PART 6) — THE PROGRAMME CLOSE-OUT (session 131, 2026-10-11)
+
+**BUILT.** The close-out of the merged 2026-10-10 programme — deliberately NO runtime work: Part 6 is the state
+reconciliation, not a feature.
+
+1. `docs/NEXT_BUILD_PLAN_2026-10-10.md` — the SINGLE PLAN OF RECORD is now marked **COMPLETE with NOTHING LEFT
+   PLANNED**: its status header says the whole programme is complete, Part 6 carries per-item evidence for 6.1–6.5,
+   and the execution-order paragraph records that Batches 1–7 were done and Batch 8 closed the programme.
+2. **All five state sources reconciled onto it in ONE pass** — `PROJECT_STATUS.md` (a new resume block + ONE
+   Batches-1–8 roll-up section carrying headings 1–9) · `HANDOFF.md` (the mirror, values identical) ·
+   `STATUS_CHECK.md` (this section; the earlier sections marked SUPERSEDED) · `requirements-registry.json`
+   (`_meta.last_updated` → 2026-10-11 · a recomputed `status_counts` note · the NEW
+   `_meta.programme_2026_10_10_closeout` programme record · the two stale citations that still said "only BATCH 8 =
+   Part 6 remains" corrected at source) · the programme's record document.
+3. **§THE "SPRINT RECORD" QUESTION — ANSWERED, NOT INVENTED.** The five-source contract
+   (`project-state-contract.md`) names a `docs/SPRINT_*_<date>.md` as the historical record of a sprint, but this
+   programme never had one: every programme since 2026-10-04 has been recorded in its `docs/NEXT_BUILD_PLAN_*.md`
+   plus the `STATUS_CHECK.md` sections (the last `docs/SPRINT_*` files are in `docs/archive/`). Minting a sixth,
+   parallel document would make a SECOND source of truth for the same work, so the two REAL records were updated
+   instead — and the plan's Part 6.2 states this plainly rather than leaving the omission silent.
+4. **§RULE 07 — EVERY FIX CARRIES A GATE, SO THE CLOSE-OUT CANNOT UN-COMPLETE ITSELF.** Three stale statements were
+   found and FIXED at source (the two registry citations that still said "only BATCH 8 = Part 6 remains", and one
+   `PROJECT_STATUS.md` section heading that had lost its SUPERSEDED marker while every sibling keeps one). Because a
+   close-out is exactly the record a later session silently reverts, the corrected state is now PINNED by new
+   assertions in the EXISTING `scripts/validate-no-stale-blockers.mjs` (the project's designated stale-record gate,
+   swept by `validate:all`): the plan of record must still say the programme is COMPLETE and must not claim "ONLY
+   PART 6" remains; the registry must still carry `programme_2026_10_10_closeout` with status COMPLETE and must not
+   contain the stale phrase again; and the resume block must NOT still name the finished batch as `NEXT TASK`. Each
+   assertion was MUTATION-PROVED (re-introduce the stale claim ⇒ FAIL ⇒ restore byte-identical).
+
+**TESTED.** BEFORE (tree at `e581d05`) → AFTER (this close-out, re-run for real): `npm run typecheck` **0 → 0** ·
+`npm run lint` **0 → 0** · `npm run build` **ok → ok** · `npm run validate:all` **187 PASS / 0 FAIL → 187 PASS / 0
+FAIL** (of 187 validators) · plus the state gates that read the very files this batch rewrote —
+`validate-resume-state` · `validate-plain-english` · `validate-rules-application` · `validate-registry-integrity` ·
+`verify-registry` · `validate-no-stale-blockers` — all PASS. The counts are IDENTICAL BY CONSTRUCTION: **no
+application file changed at all** (nothing under `src/`, `e2e/` or the built app), and the only executable file
+touched is ONE existing check script extended with the assertions above — tooling, not application runtime. The
+after figures are a real re-run, never a copied figure. **The AFTER set was re-measured TWICE — once with the state
+documents reconciled, and once more after the gate extension above — and gave the SAME figures both times**, so the
+numbers reported here describe the final tree exactly.
+
+**COMMITTED.** The close-out commit carrying this section, pushed to `origin/redesign/foundation` (never
+`--force`); the exact hash and range are recorded in `PROJECT_STATUS.md` → `CURRENT RESUME STATE`.
+`git status --porcelain` EMPTY. The ONE `Review Zip/mercenta-review.zip` was re-exported (credential guard PASS)
+and is a generated, gitignored artefact.
+
+**RESULT.** DONE. **THE MERGED 2026-10-10 PROGRAMME IS COMPLETE — NOTHING IN ITS PLAN REMAINS.** **THREE-WAY
+STATUS: NOT APPLICABLE (no application runtime change)** — nothing the demo serves changed, so there was nothing
+to deploy; the demo still carries the last verified product commit `c026524` (live 276 PASS / 0 FAIL). Two stale
+statements were FIXED at source (rule 07) rather than reported. **NEXT:** WAVE 3 PART 6 — the visual-regression
+gate (`uiux-wave3-visual-regression-gate`), whose FIRST step is ONE plain-English Founder decision (what may
+change a stored baseline image, and who approves it), with the unblocked `discovered-*` rows as the fallback if the
+owner defers it.
+
+## §BATCH 7 (PARTS 5.1 + 5.3) — THE CONSOLIDATED ABSENCE RECORD AND THE TYPE-CHECK COVERAGE GATE (session 130, 2026-10-11) — SUPERSEDED BY §BATCH 8 (THE PROGRAMME CLOSE-OUT)
 
 **BUILT.** (5.1) `scripts/validate-retired-platforms.mjs` is now the ONE place that guards EVERY removal the owner
 instructed on 2026-10-10, beside the existing §2b/§2c: **§2d** the Consolidation card on BOTH logistics surfaces

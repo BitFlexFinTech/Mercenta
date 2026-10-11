@@ -14,6 +14,13 @@
 // global rule `07-fix-defects-at-source.md`). This is that gate: it asserts the standing decision is
 // WRITTEN where every session reads it, and that the specific stale claims are GONE — so their return
 // fails the build.
+//
+// §BATCH 8 = Part 6 (2026-10-11) — SECTIONS 6-8 ADDED: the merged 2026-10-10 programme was closed out
+// that session, and closing it exposed three stale statements (two registry citations still claiming
+// only Part 6 remained, and one PROJECT_STATUS heading that had lost its SUPERSEDED marker). Sections
+// 6-8 pin the corrected state, so the close-out cannot silently un-complete itself: the plan of record
+// must still read COMPLETE, the registry must still carry `programme_2026_10_10_closeout`, and the
+// resume block must not point back at the finished batch. Each assertion was mutation-proved.
 import { readFileSync } from 'node:fs';
 
 let failures = 0;
@@ -89,6 +96,67 @@ test(
   "HANDOFF's old NEXT PLAN section is marked SUPERSEDED",
   /NEXT PLAN — BATCHES 1, 2 and 3[^\n]*SUPERSEDED/.test(read('HANDOFF.md'))
 );
+
+/**
+ * §BATCH 8 = Part 6 (2026-10-11) — THE PROGRAMME'S CLOSE-OUT CANNOT UN-COMPLETE ITSELF.
+ *
+ * WHY THIS EXISTS. The merged 2026-10-10 programme was closed out this session, and closing it
+ * exposed THREE stale statements that had to be fixed at source (`.clinerules/defect-remediation.md`,
+ * global rule 07): TWO registry citations that still said "Only BATCH 8 = Part 6 (the close-out)
+ * remains" although the plan they cite is complete, and ONE `PROJECT_STATUS.md` section heading that
+ * had lost the SUPERSEDED marker every sibling section carries — so a reader could take a finished
+ * batch's "NEXT EXECUTION SCOPE" as the live one.
+ *
+ * A close-out is exactly the kind of record a later session silently reverts (the plan gets re-marked
+ * "REMAINING", the resume block points back at finished work, the registry re-adds the stale claim),
+ * so the corrected state is PINNED here rather than merely written. This gate is already swept by
+ * `npm run validate:all` (it globs every `scripts/validate-*.mjs`), so no hand-list had to change.
+ * Every assertion below was proved able to fail (mutated, observed failing, restored byte-identical).
+ */
+
+/* 6. the plan of record still says the programme is COMPLETE, and claims nothing remains */
+const planOfRecord = read('docs/NEXT_BUILD_PLAN_2026-10-10.md');
+test(
+  'the 2026-10-10 plan of record still states the WHOLE PROGRAMME is COMPLETE',
+  /THE WHOLE PROGRAMME IS COMPLETE/.test(planOfRecord)
+);
+test(
+  'the plan of record no longer claims ONLY PART 6 (the close-out) remains',
+  !/ONLY PART 6/.test(planOfRecord)
+);
+test(
+  'the plan of record marks PART 6 — CLOSE-OUT as DONE',
+  /## PART 6 — CLOSE-OUT \(mandatory\) — ✅ \*\*DONE/.test(planOfRecord)
+);
+test('the plan of record states that nothing in it remains', /NOTHING IN THIS PLAN REMAINS/.test(planOfRecord));
+
+/* 7. the registry carries the programme close-out record, and the stale claim is gone */
+const registryJson = read('requirements-registry.json');
+test(
+  'the registry no longer says "Only BATCH 8 = Part 6 (the close-out) remains"',
+  !/Only BATCH 8 = Part 6 \(the close-out\) remains/.test(registryJson)
+);
+test('the registry carries the 2026-10-10 programme close-out record', /"programme_2026_10_10_closeout"/.test(registryJson));
+test(
+  'that programme record states the programme is COMPLETE',
+  /"status": "COMPLETE — nothing in the plan remains/.test(registryJson)
+);
+
+/* 8. the resume block does NOT still name the FINISHED batch as the next task */
+const resumeNow = read('PROJECT_STATUS.md');
+const resumeStartNow = resumeNow.indexOf('## CURRENT RESUME STATE');
+const resumeEndNow = resumeNow.indexOf('\n## ', resumeStartNow + 3);
+const resumeBlockNow = resumeStartNow >= 0 && resumeEndNow > resumeStartNow ? resumeNow.slice(resumeStartNow, resumeEndNow) : '';
+test('the resume block was read for the close-out check', resumeBlockNow.length > 200);
+test(
+  'the resume block does NOT still name the finished BATCH 8 = Part 6 as the NEXT TASK',
+  !/NEXT TASK:[^\n]*BATCH 8 = Part 6/.test(resumeBlockNow)
+);
+test(
+  'the resume block names the work that FOLLOWS the programme (WAVE 3 PART 6)',
+  /NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow)
+);
+
 
 console.log(`\n${checks - failures}/${checks} checks passed`);
 if (failures > 0) {
