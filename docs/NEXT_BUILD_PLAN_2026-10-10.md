@@ -2,13 +2,18 @@
 
 > **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
 > Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social), BATCH 6 (Part 3.1, the catalogue product image) and
-> BATCH 7 in FULL — Part 4.1b + 4.2 + 4.3 (session 128: the work-drawer deep link, the dangling-brand seed fix,
-> the three inert controls removed) AND Part 4.1a + Part 5.2 (session 129, 2026-10-11: the notification bell's
+> BATCH 7 IN FULL — Part 4.1b + 4.2 + 4.3 (session 128: the work-drawer deep link, the dangling-brand seed fix,
+> the three inert controls removed), Part 4.1a + Part 5.2 (session 129, 2026-10-11: the notification bell's
 > RECORD destinations — all fourteen item builders, routed through the ONE address layer — plus the DEEP-LINK
-> GATE) — ARE BUILT AND TESTED. The remainder of Part 5 (5.1 absence guards, 5.3 coverage parity) and Part 6
-> remain PLANNED, NOT STARTED.**
+> GATE) AND Part 5.1 + 5.3 (session 130, 2026-10-11) — ARE BUILT AND TESTED.**
+> **PART 5 IS NOW COMPLETE.** 5.1 added the four consolidated ABSENCE-GUARD groups (§2d–§2g) to the EXISTING
+> `scripts/validate-retired-platforms.mjs` — 30 assertions, MUTATION-PROVED one per group — so that ONE file now
+> guards every Part-2 removal; 5.3 added the rule-09 COVERAGE GATE (§6b of
+> `scripts/validate-typecheck-coverage.mjs`), which DISCOVERS the covered roots from the four projects' own
+> `include` arrays and fails if any `.ts`/`.tsx` belongs to no project (573 files discovered, 0 uncovered).
+> **ONLY PART 6 (the close-out, = BATCH 8) REMAINS.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
-> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at the remainder of Part 5**.
+> Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 8 = Part 6 (the close-out)**.
 
 ## PART 0 — ALREADY DONE (recorded so it is not re-planned)
 
@@ -52,7 +57,9 @@
 
 ## PART 2 — REMOVALS (each with its absence guard)
 
-> **2.1, 2.2 (Batch 2), 2.3, 2.4 (Batch 3) and 2.5 (Batch 4) are ✅ DONE (session 125, 2026-10-10); 2.6 remains.**
+> **ALL of Part 2 is ✅ DONE — 2.1 + 2.2 (Batch 2), 2.3 + 2.4 (Batch 3) and 2.5 (Batch 4) in session 125, and
+> 2.6 (Mercenta Social) in Batch 5 (session 126) — and since session 130 EVERY one of them is guarded in ONE
+> place: `scripts/validate-retired-platforms.mjs` §2b–§2g.**
 > Each removal was repointed into an ABSENCE GUARD (rule 08) and mutation-proved (re-introduce → FAIL →
 > restore byte-identical).
 
@@ -165,6 +172,14 @@
 - **5.1 — Absence guards** for every Part 2 removal, added as assertion groups to the EXISTING
   `scripts/validate-retired-platforms.mjs` (which already runs inside `validate:all` — that script globs every
   `scripts/validate-*.mjs`, so no hand-list needs editing).
+  **✅ DONE (session 130, 2026-10-11)** — four new groups beside the existing §2b/§2c: **§2d** the Consolidation card
+  on BOTH logistics surfaces (owner lib + unmounted panel KEPT), **§2e** the interactive operational map on BOTH
+  surfaces (derivation KEPT), **§2f** the Logistics Hero and its whole pipeline (8 files + `.geo-cache` + the two
+  npm scripts + the `.gitignore` block + a comment-stripped whole-`src` scan), **§2g** the Mercenta Brain (5 files
+  + 2 directories + the shell + Brand Intelligence): **30 assertions**, MUTATION-PROVED **one mutation per group**
+  (mount the panel ⇒ §2d FAIL · re-mount the canvas ⇒ §2e FAIL · re-create `logisticsHeroGeo.ts` ⇒ §2f FAIL ·
+  re-add a `brain` nav id ⇒ §2g FAIL), every file restored byte-identical. The file's header now declares the
+  consolidated §2b–§2g record and cross-references the heavier specialist guards.
 - **5.2 — Deep-link gate:** fails if any clickable item has no destination, points at a view the shell cannot
   render, or forgets the record it names.
   **✅ DONE (session 129, 2026-10-11)** — `scripts/validate-batch7-deeplinks.mjs` (36 assertions). It reads the
@@ -175,6 +190,13 @@
   restored byte-identical.
 - **5.3 — Coverage parity:** keep `validate:typecheck-coverage` green and pin the editor (1.4) so the editor and
   the command line cannot disagree again.
+  **✅ DONE (session 130, 2026-10-11)** — `scripts/validate-typecheck-coverage.mjs` gained **§6b, the rule-09
+  COVERAGE GATE**: it DISCOVERS the covered roots from the four projects' own `include` arrays (app · node · e2e ·
+  functions) and FAILS if any `.ts`/`.tsx` in the tree belongs to no project — **573 files discovered, 0 uncovered**,
+  MUTATION-PROVED by creating `scripts/coverage-probe.ts` (1 FAIL) then deleting it. The gate now runs 25 assertions;
+  the committed editor pin (`.vscode/settings.json`, workspace-relative `typescript.tsdk`) was already green and
+  stays pinned by three assertions. **The registry note that claimed the gate ran "20 assertions" was corrected at
+  source (rule 07).**
 
 ## PART 6 — CLOSE-OUT (mandatory)
 
@@ -191,11 +213,11 @@
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
 Batches 1–6 are DONE (2026-10-10); Batch 7 is DONE IN FULL — Parts 4.1b/4.2/4.3 (session 128, 2026-10-10, gated by
-`scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11) and Part 4.1a + Part 5.2 (session 129,
-2026-10-11, gated by `scripts/validate-batch7-deeplinks.mjs` + `e2e/notification-deeplinks.spec.ts`). **Next: the
-remainder of Part 5 — 5.1 (absence guards for every Part 2 removal, added to the EXISTING
-`scripts/validate-retired-platforms.mjs`) and 5.3 (coverage parity: keep `validate:typecheck-coverage` green and the
-editor pinned so the editor and the command line cannot disagree again) — then Batch 8 (Part 6, the close-out).**
+`scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11), Part 4.1a + Part 5.2 (session 129,
+2026-10-11, gated by `scripts/validate-batch7-deeplinks.mjs` + `e2e/notification-deeplinks.spec.ts`) and Part 5.1 +
+5.3 (session 130, 2026-10-11: the consolidated absence guards §2d–§2g of `scripts/validate-retired-platforms.mjs`
+and the §6b coverage gate of `scripts/validate-typecheck-coverage.mjs`). **PART 5 IS COMPLETE. Next: BATCH 8 —
+Part 6, the close-out.**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

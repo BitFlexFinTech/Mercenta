@@ -26,7 +26,41 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 7 (PARTS 4.1a + 5.2) — THE NOTIFICATION BELL'S RECORD DESTINATIONS AND THE DEEP-LINK GATE (session 129, 2026-10-11)
+## §BATCH 7 (PARTS 5.1 + 5.3) — THE CONSOLIDATED ABSENCE RECORD AND THE TYPE-CHECK COVERAGE GATE (session 130, 2026-10-11)
+
+**BUILT.** (5.1) `scripts/validate-retired-platforms.mjs` is now the ONE place that guards EVERY removal the owner
+instructed on 2026-10-10, beside the existing §2b/§2c: **§2d** the Consolidation card on BOTH logistics surfaces
+(the owner lib + the unmounted panel are KEPT — decision 11 is a recorded Founder decision); **§2e** the interactive
+operational map on BOTH surfaces (the derivation is KEPT — both surfaces still read `buildOperationalMap(`); **§2f**
+the Logistics Hero and its whole pipeline (8 files + `.geo-cache` + the two npm scripts + the `.gitignore` block +
+a comment-stripped scan of every `.ts`/`.tsx` under `src/`); **§2g** the Mercenta Brain (5 files + 2 directories +
+the comment-stripped shell + Brand Intelligence). **30 new assertions in total**, and the file's header now declares
+the consolidated §2b–§2g record and cross-references the heavier specialist guards (validate-mercenta-brain ·
+validate-logistics-map §11 · validate-logistics-providers §9a · validate-e6-brand-surfaces §BATCH3).
+(5.3) `scripts/validate-typecheck-coverage.mjs` gained **§6b — the rule-09 COVERAGE GATE**: it DISCOVERS the covered
+roots from the four projects' own `include` arrays and FAILS if any `.ts`/`.tsx` in the tree belongs to NO project
+(**573 files discovered, 0 uncovered**); the committed editor pin (`.vscode/settings.json`, workspace-relative
+`typescript.tsdk`) stays green.
+
+**TESTED.** `validate:all` **187 PASS / 0 FAIL** (of 187) · typecheck **0** · lint **0** · build **ok** · the four
+browser absence-guard specs (`retired-platforms` · `mercenta-brain` · `logistics-hub-map` · `logistics-providers`)
+**28 passed / 0 failed / 0 skipped**. **MUTATION-PROVED, one mutation per group** (rule 08 §4): mounting
+`ConsolidationPosturePanel` on the admin surface ⇒ §2d FAIL · re-mounting `LogisticsMapCanvas` on the brand surface
+⇒ §2e FAIL · re-creating `src/data/logisticsHeroGeo.ts` ⇒ §2f FAIL · re-adding a `brain` nav id to the shell ⇒ §2g
+FAIL · creating `scripts/coverage-probe.ts` ⇒ §6b FAIL. Every file was restored **byte-identical**
+(`LogisticsControl.tsx` sha256 `9ad9fb7a…` · `LogisticsHub.tsx` `0895f1e7…` · `AdminShell.tsx` `8fc5d024…`), and
+both throwaway files were confirmed absent again.
+
+**COMMITTED.** work commit **`3953f1b`** (`test(batch7): guard every Part-2 removal and gate the type-check
+coverage`), pushed to `origin/redesign/foundation`; the state/docs commit carrying this block follows. Tree clean.
+
+**RESULT.** DONE. **PART 5 IS COMPLETE.** **THREE-WAY STATUS: NOT APPLICABLE (no application runtime change)** —
+only two check scripts changed, so nothing that is deployed differs; the demo still carries the last verified
+product commit `c026524` (live 276 PASS / 0 FAIL). Two stale statements were found and FIXED at source (rule 07):
+the registry note that claimed the coverage gate runs 20 assertions, and the registry row that still listed Part 5
+as outstanding. **NEXT:** Batch 8 = Part 6 (the close-out).
+
+## PREVIOUS — §BATCH 7 (PARTS 4.1a + 5.2) — THE NOTIFICATION BELL'S RECORD DESTINATIONS AND THE DEEP-LINK GATE (session 129, 2026-10-11) — SUPERSEDED BY §BATCH 7 PARTS 5.1 + 5.3
 
 **DELIVERED.** The plan's Part 4.1(a) and Part 5.2, fixed AT SOURCE with a gate each.
 
