@@ -85,8 +85,9 @@ documents reconciled, and once more after the gate extension above — and gave 
 numbers reported here describe the final tree exactly.
 
 **COMMITTED.** The close-out commit **`065d1c4`** (`docs(closeout): complete the merged 2026-10-10 programme (Batch 8
-= Part 6)`), pushed to `origin/redesign/foundation` as **`e581d05..065d1c4`** (never `--force`), with the small
-`docs(state)` commit that carries this section pushed immediately after it. `git status --porcelain` prints
+= Part 6)`), pushed to `origin/redesign/foundation` as **`e581d05..065d1c4`** (never `--force`), then the state commit
+**`2420d38`** that records that hash in the resume block, then — after the owner's question exposed the fourth stale
+statement — the rule-07 correction commit **`cf729bc`** (`2420d38..cf729bc`). `git status --porcelain` prints
 NOTHING. The ONE `Review Zip/mercenta-review.zip` was re-exported (45 MB, credential guard **PASS** — no `.env`
 file and no gitignored private/generated tree inside) and is a generated, gitignored artefact; the `Review Zip/`
 folder holds exactly ONE zip.
