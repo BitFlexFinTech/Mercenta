@@ -26,7 +26,38 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 8 (PART 6) — THE PROGRAMME CLOSE-OUT (session 131, 2026-10-11)
+## §BATCH 9 — THE RULE-10 MACHINE-WIDE SWEEP: BATCH A BUILT AND PROVED, BATCH B BEGUN (session 132, 2026-10-12)
+
+**What was asked.** On 2026-10-11 the Owner asked for the describer-drift class — a document keeping on describing something the code has already removed, with nothing checking it — to be fixed for good, *"not only in this project but in all the other projects"*. Session 131 did this project's half (global rule 10, installed machine-wide, plus the class-wide check in `scripts/validate-no-stale-blockers.mjs` §11, discovered by `scripts/validate-rules-application.mjs` §5b). This session did the machine-wide half.
+
+**BUILT — three files, ALL outside every repository, because the rule they enforce is machine-wide (exactly like the rule itself).**
+
+| File | Role |
+|---|---|
+| `~/.cline/RULE10_SWEEP.md` | The worklist: every project on this machine and each one's sweep state, DISCOVERED from the machine (20 project roots under `~/Desktop`; 47 folders hold a `package.json`; the other 27 are packages inside a listed project). |
+| `~/.cline/rules/check-describer-checks.mjs` | Discovers those projects ITSELF, then fails when one is unregistered, when a row names a folder that is gone, when a SWEPT row cannot stand up (its standard command must exist in that project's own `package.json` and must really reach the named check), when a state is unreadable, and when the scan finds nothing (rule 10 §5). |
+| `~/.cline/rules/prove-describer-checks.mjs` | The permanent proof: seven deliberate breaks of the registry, all seven detected, registry restored byte-identical. |
+
+**TESTED — real output from this session only.**
+
+- `node ~/.cline/rules/check-describer-checks.mjs` → `DESCRIBER_CHECK_FAIL (2 of 20 swept)`, with **17 project roots named as TODO, one EXCLUDED** (a saved review copy). **A red that is TRUE**, and the honest state of the sweep.
+- `node ~/.cline/rules/prove-describer-checks.mjs` → `DESCRIBER_PROOF_PASS (7/7 breaks detected, registry unchanged)`, `sha256 bcfbf46478c9656d24ca170c87aa5237d419bcce09d938ccdbd054fe5f936d45` before and after.
+- `node ~/.cline/rules/check-rules.mjs` → `RULES_CHECK_PASS (17 passed, 0 failed, 27 rules declared)`.
+- Mercenta itself: typecheck **0** · lint **0** · build **ok** · `validate:all` **187 PASS / 0 FAIL** (of 187 validators) · `validate:resume-state` **PASS (56 assertions)** · `git status --porcelain` EMPTY at the recorded checkpoint.
+- `policy-nexus`: its own `npm run validate` **PASS** on the clean tree; then a retired claim put back into `README.md` made it **FAIL** (`retired document statements absent — 1 violation(s)`, exit 1); `README.md` then restored **byte-identical** (`sha256 4029134124ee66c22ece1919a11bab0ccf6a366ad458d3214014c8d31f0f4de5`).
+
+**DEFECTS FOUND THIS SESSION — every one FIXED at its source, each with a gate (rule 07's inventory).**
+
+1. **The sweep worklist silently truncated a project's path.** It was first written as a markdown table; one project on this machine is called `SplitSchedule | Co-Parent/splitschedule-guardian`, and the pipe character is the table's own column separator — so that path was CUT IN HALF and the project came back looking **unregistered**. Nothing warned anybody: the row simply stopped meaning what it said. **FIXED at source** — the registry is a **list**, not a table, and an entry that loses its path is a FAILURE. **Gate:** section 1 of `check-describer-checks.mjs`; mutation M2 (a path cut short) proved it fails, and the registry was restored byte-identical. The CLASS is gated, not just the instance (rule 10 §8).
+2. **The checker printed a false green.** Its first version printed `DESCRIBER_CHECK_PASS … every one swept` while **18 of the 20 projects were NOT STARTED** — a false statement about the product, and exactly the "comfortable green that certifies the wrong state" rule 10 §5 forbids. **FIXED at source** — outstanding work is now a FAILURE and the summary line is derived from the measured data. **Gate:** the same checker's section 6; the current run prints `DESCRIBER_CHECK_FAIL (2 of 20 swept)`. A second gate was added at the same time: a row whose state cannot be read is a FAILURE, so no project can vanish from both the swept AND the outstanding lists.
+3. **My own new registry dated this session's work 2026-10-11 — yesterday, not today.** **FIXED at source** in all three places it appeared; the file now says 2026-10-12, and the one 2026-10-11 date that remains is the historical event date, which is correct.
+4. **A recorded fingerprint would have become a false statement.** The evidence section named the registry's own `sha256` — but writing a value into a file changes that file, so the number would no longer describe "the file you are reading". **FIXED** by stating it precisely as "**the revision proved**", and by shipping the proof as a permanent runnable command (`prove-describer-checks.mjs`) instead of pointing at a temporary script that would not survive.
+
+**Three-way status: VERIFIED COMMITTED CHECKPOINT — the demo leg NOT APPLICABLE (no application runtime change).** Nothing under `src/`, `e2e/` or the built app changed, so `operating-model.md` §10.4 applies and there was nothing to deploy; the demo still carries the last verified product commit `c026524` (2026-10-11).
+
+**RESULT: PARTIAL, AND HONESTLY SO.** Batch A is DONE and proved; Batch B has verified **one** of the 19 other projects (`policy-nexus`). **17 remain, and the checker names every one of them.** **NEXT:** continue the sweep; then WAVE 3 PART 6, which waits on ONE plain-English Owner decision (what may change a stored baseline picture, and who approves it).
+
+## §BATCH 8 (PART 6) — THE PROGRAMME CLOSE-OUT (session 131, 2026-10-11) — SUPERSEDED BY §BATCH 9 (THE RULE-10 MACHINE-WIDE SWEEP)
 
 **BUILT.** The close-out of the merged 2026-10-10 programme — deliberately NO runtime work: Part 6 is the state
 reconciliation, not a feature.
