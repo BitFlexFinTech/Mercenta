@@ -28,6 +28,16 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## §BATCH 9 — THE RULE-10 MACHINE-WIDE SWEEP: BATCH A BUILT AND PROVED, BATCH B BEGUN (session 132, 2026-10-12)
 
+> **⚠ SCOPE CORRECTION, THE SAME DAY (2026-10-12).** Everything below was really done, and every figure in it is
+> true — but **the OWNER CORRECTED ITS SCOPE in the same session**: sweeping the other projects on this machine is
+> **NOT what he asked for**. He asked only that the **basic global rules apply to the other projects**, which
+> installing the rules machine-wide already does (`node ~/.cline/rules/check-rules.mjs` → `RULES_CHECK_PASS`).
+> Corrected at source with him: the register's sweep row is now `deferred` and marked NOT REQUESTED, the resume
+> block's next task is Mercenta's own work again, and the machine-wide sweep file carries a banner forbidding a
+> sweep unless he asks. **Read the rest of this section as a record of what was MEASURED, never as work owed.**
+> **Nothing outside Mercenta was changed:** two other projects were only read, and the single file temporarily
+> altered in `policy-nexus` — to prove its check really fails — was restored byte-identical in the same step.
+
 **What was asked.** On 2026-10-11 the Owner asked for the describer-drift class — a document keeping on describing something the code has already removed, with nothing checking it — to be fixed for good, *"not only in this project but in all the other projects"*. Session 131 did this project's half (global rule 10, installed machine-wide, plus the class-wide check in `scripts/validate-no-stale-blockers.mjs` §11, discovered by `scripts/validate-rules-application.mjs` §5b). This session did the machine-wide half.
 
 **BUILT — three files, ALL outside every repository, because the rule they enforce is machine-wide (exactly like the rule itself).**
