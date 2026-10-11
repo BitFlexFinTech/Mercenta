@@ -1,8 +1,10 @@
 # NEXT BUILD PLAN — 2026-10-10 · REMOVALS, RULES AND THE DEEP-LINK FIX
 
 > **STATUS: BATCH 1 (Part 1), BATCH 2 (Parts 2.1 + 2.2), BATCH 3 (Parts 2.3 + 2.4), BATCH 4 (Part 2.5, the
-> Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social) and BATCH 6 (Part 3.1, the catalogue product image)
-> BUILT AND TESTED — Parts 4–6 remain PLANNED, NOT STARTED.**
+> Mercenta Brain), BATCH 5 (Part 2.6, Mercenta Social), BATCH 6 (Part 3.1, the catalogue product image) and
+> BATCH 7 (Parts 4.1b + 4.2 + 4.3 — the work-drawer deep link, the dangling-brand seed fix, and the three
+> inert controls REMOVED) BUILT AND TESTED — Part 4.1a (the notification bell's record destinations), the
+> remainder of Part 5 and Part 6 remain PLANNED, NOT STARTED.**
 > This is the SINGLE PLAN OF RECORD. It supersedes `docs/NEXT_BUILD_PLAN_2026-09-27.md` as the plan to resume from.
 > Resume by reading `PROJECT_STATUS.md → CURRENT RESUME STATE`, then **start at BATCH 7**.
 
@@ -172,8 +174,9 @@
 **Batch 1** Part 1 (rules + editor) → **Batch 2** 2.1 + 2.2 → **Batch 3** 2.3 + 2.4 → **Batch 4** 2.5 (Brain)
 → **Batch 5** 2.6 (Social) → **Batch 6** 3.1 (image) → **Batch 7** Part 4 + the new gates → **Batch 8** Part 6.
 
-Batches 1–6 are DONE (2026-10-10). **Next: Batch 7 (Part 4, the click-through destinations + the dangling
-seed + the inert controls, then Part 5's gates).**
+Batches 1–6 are DONE (2026-10-10) and Batch 7's Parts 4.1b/4.2/4.3 are DONE (session 128, 2026-10-10,
+gated by `scripts/validate-batch7-cleanup.mjs` + `e2e/work-layer.spec.ts` test 11). **Next: Batch 7 Part
+4.1a (the notification bell's record destinations) + the Part 5 deep-link gate, then Batch 8 (Part 6).**
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.

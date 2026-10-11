@@ -139,13 +139,15 @@ test.describe('Domain Acceptance Gate', () => {
   test('5. Helpdesk lifecycle — real status transition is audited', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1200);
     await openNav(page, 'Helpdesk');
-    // Open the Seep ticket and resolve it via the real store mutation.
-    await page.locator('button:has-text("Seep")').first().click();
+    // §BATCH 7 (Part 4.2) — REPOINTED: the compliance ticket's brand was the retired
+    // `brand-seep`; it is now Kit & Kin (a canonical demo tenant).
+    // Open the Kit & Kin ticket and resolve it via the real store mutation.
+    await page.locator('button:has-text("Kit & Kin")').first().click();
     await page.waitForTimeout(400);
     const statusSelect = page.locator('select').filter({ has: page.locator('option', { hasText: 'Open' }) }).first();
     await statusSelect.selectOption('resolved');
     // The ticket row reflects the new status.
-    await expect(page.locator('button:has-text("Seep")').first()).toContainText('resolved', { timeout: 5000 });
+    await expect(page.locator('button:has-text("Kit & Kin")').first()).toContainText('resolved', { timeout: 5000 });
     // The transition was audited (ticket_status_changed exists in the registry).
     await openNav(page, 'Audit Log');
     await expect(page.locator('option', { hasText: 'ticket_status_changed' })).toHaveCount(1, { timeout: 6000 });

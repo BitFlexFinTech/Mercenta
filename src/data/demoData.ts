@@ -71,28 +71,16 @@ export interface DemoBrand {
   website: string;
 }
 
-/** §Phase 4 — real brand websites (public evidence, not invented facts). */
+/** §Phase 4 — real brand websites (public evidence, not invented facts).
+ *  §BATCH 7 (Part 4.2) — REPOINTED to the canonical demo universe. This map used to
+ *  carry 20 entries from the retired 17-brand universe (seep, regatta, clipper, …);
+ *  those ids no longer resolve to a brand, so the extra keys were dead references
+ *  kept alive only here. It now declares exactly the four canonical brands. */
 const BRAND_SITE: Record<string, string> = {
   'brand-astonish': 'https://astonishcleaning.com',
-  'brand-seep': 'https://seepuk.com',
-  'brand-delphis': 'https://delphiseco.com',
-  'brand-kitkin': 'https://kitandkin.com',
-  'brand-bulldog': 'https://bulldogskincare.com',
-  'brand-joseph': 'https://josephjoseph.com',
-  'brand-roberts': 'https://www.robertsradio.co.uk',
-  'brand-clipper': 'https://www.clipper-teas.com',
-  'brand-regatta': 'https://www.regatta.com',
-  'brand-autoglym': 'https://www.autoglym.com',
   'brand-tapatio': 'https://tapatiohotsauce.com',
-  'brand-cholula': 'https://cholula.com',
-  'brand-valentina': 'https://valentina.mx',
-  'brand-flybyjing': 'https://flybyjing.com',
   'brand-lecreuset': 'https://www.lecreuset.co.uk',
-  'brand-smeg': 'https://www.smeguk.com',
-  'brand-moleskine': 'https://www.moleskine.com/en',
-  'brand-sennheiser': 'https://www.sennheiser.com',
-  'brand-logitech': 'https://www.logitech.com/en-gb',
-  'brand-vileda': 'https://www.vileda.co.uk',
+  'brand-kitkin': 'https://kitandkin.com',
 };
 
 /**

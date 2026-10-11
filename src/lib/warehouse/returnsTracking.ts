@@ -5,9 +5,24 @@ import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 const uid = (p: string) => p + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 
+/**
+ * §BATCH 7 (Part 4.2) — SINGLE SOURCE OF TRUTH for a tracking row's brand.
+ *
+ * The seed below used to declare each row's `brandId` by hand, and one row
+ * (`rt-003`) named `brand-regatta` — a brand from the RETIRED 17-brand universe
+ * that no longer exists. The brand lookup therefore fell back to the raw id and
+ * the Returns queue rendered `brand-regatta` as if it were a brand name.
+ *
+ * The brand now comes from the RETURN the row describes (`demoReturns` — itself
+ * derived from the canonical PO + product stores), so a tracking row can only
+ * ever carry a brand its own return belongs to and the seed can never drift again.
+ */
+const returnBrand = (returnId: string): string =>
+  demoReturns.find((r) => r.id === returnId)?.brandId ?? 'brand-astonish';
+
 export const demoReturnTracking: ReturnTrackingEntry[] = [
   {
-    id: 'rt-001', returnId: 'ret-1', brandId: 'brand-astonish',
+    id: 'rt-001', returnId: 'ret-1', brandId: returnBrand('ret-1'),
     receivedAtWarehouse: new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'DHL', inboundTrackingNumber: 'DHL-UK-RET-77123',
     conditionOnReceipt: '2 cases with unsealed bottle caps. Product leaked in transit. Remaining 4 cases intact.',
@@ -20,7 +35,7 @@ export const demoReturnTracking: ReturnTrackingEntry[] = [
     linkedDeductionId: 'ded-1',
   },
   {
-    id: 'rt-002', returnId: 'ret-2', brandId: 'brand-astonish',
+    id: 'rt-002', returnId: 'ret-2', brandId: returnBrand('ret-2'),
     receivedAtWarehouse: new Date(Date.now() - 4 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'FedEx', inboundTrackingNumber: 'FDX-UK-RET-45112',
     conditionOnReceipt: 'Moisture content exceeded spec per lab report. 12 units segregated for QC review.',
@@ -30,7 +45,7 @@ export const demoReturnTracking: ReturnTrackingEntry[] = [
     linkedDeductionId: 'ded-1',
   },
   {
-    id: 'rt-003', returnId: 'ret-3', brandId: 'brand-regatta',
+    id: 'rt-003', returnId: 'ret-3', brandId: returnBrand('ret-3'),
     receivedAtWarehouse: new Date(Date.now() - 10 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'Palletline', inboundTrackingNumber: 'PLL-UK-RET-30987',
     conditionOnReceipt: 'Carton crushed by pallet over-stacking. 6 units damaged, rest intact.',

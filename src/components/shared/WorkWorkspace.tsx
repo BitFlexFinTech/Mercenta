@@ -26,6 +26,12 @@ import {
   type QueueRowData,
 } from '@/components/shared/workspace';
 import { Button, Input, StatusBadge, type StatusTone } from '@/components/ui';
+/**
+ * §BATCH 7 (Part 4.1) — the ONE existing address layer (`navigateProductView`).
+ * A work item names a canonical record, so its hand-off deep-links to that record
+ * instead of dropping the operator on the generic list. No second mechanism.
+ */
+import { navigateProductView } from '@/lib/runtime/productRoutes';
 import {
   WORK_COUNT_SETS,
   WORK_PRIORITY_LABELS,
@@ -211,6 +217,23 @@ export function WorkWorkspace({
       requestAdminNav({ view: item.actionView, tab: item.navTab, source: `work:${item.id}` });
     }
     setSelectedId(null);
+    /**
+     * §BATCH 7 (Part 4.1) — DEEP-LINK TO THE RECORD (defect iss_a82e04e941f9).
+     *
+     * The item already names a canonical record (`item.entity`); handing the
+     * operator to the destination view is only useful if it lands ON that record.
+     * Previously "Open record" on "Ship window for PO-9200" opened the purchase-order
+     * LIST, so the operator had to search for PO-9200 by hand. The destination is now
+     * the EXISTING address layer with the record's own identifier in the query, and
+     * the PO list selects that record on load.
+     *
+     * Wired for the `purchase_order` entity today (the same `?po=` contract the
+     * Logistics Hub already consumes). Every other entity keeps the section hand-off.
+     */
+    if (item.entity.type === 'purchase_order' && item.entity.label) {
+      navigateProductView(scope, item.actionView, { po: item.entity.label });
+      return;
+    }
     onNavigate(item.actionView);
   };
 

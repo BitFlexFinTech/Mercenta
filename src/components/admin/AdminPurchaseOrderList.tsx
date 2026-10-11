@@ -3,7 +3,7 @@
  * Shows all POs across all brands with full detail, acknowledgment status,
  * ASN filing, and on-behalf actions. Replaces the old 3PL Terminal view.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 /** §P13 — the order DATE is rendered through the ONE display helper. */
 import { orderDateLabel } from '@/lib/dates';
@@ -62,6 +62,8 @@ import {
 import type { Deduction, PurchaseOrder } from '@/types';
 import type { DemoShipment } from '@/data/demoData';
 import { Search, Eye, RefreshCw, FlaskConical } from 'lucide-react';
+/** §BATCH 7 (Part 4.1) — read the `?po=` deep link so a work item can open its record. */
+import { currentQueryParam } from '@/lib/runtime/productRoutes';
 
 const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'];
 
@@ -84,6 +86,22 @@ export function AdminPurchaseOrderList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
+  /**
+   * §BATCH 7 (Part 4.1) — DEEP LINK. `/admin/purchase_orders_admin?po=PO-9200` opens
+   * that purchase order's record (defect iss_a82e04e941f9: the Work drawer's "Open
+   * record" used to land on this LIST, not the record). Applied ONCE per PO value, so
+   * it never overrides a selection the operator makes afterwards — the same contract
+   * the Logistics Hub uses for its own `?po=` deep link.
+   */
+  const deepLinkPo = useMemo(() => currentQueryParam('po'), []);
+  const appliedDeepLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!deepLinkPo || appliedDeepLink.current === deepLinkPo) return;
+    const match = pos.find((p) => p.poNumber === deepLinkPo);
+    if (!match) return;
+    appliedDeepLink.current = deepLinkPo;
+    setSelectedPoId(match.id);
+  }, [deepLinkPo, pos]);
   /* §P11 — channel purchase-order ingestion state (the ONLY way a PO arrives). */
   const [ingestBusy, setIngestBusy] = useState(false);
   const [ingestResult, setIngestResult] = useState<ChannelIngestionResult | null>(null);

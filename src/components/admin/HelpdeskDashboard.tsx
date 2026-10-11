@@ -39,9 +39,9 @@ function useAiSug(brandId: string, _ctx: string): string | null {
     if (!brandId) return null;
     const m: Record<string, string> = {
       'brand-astonish': 'Let me check dispatch for your latest PO - updating within 2h.',
-      'brand-seep': 'Thank you for submitting HMRC docs. In review - 3-5 business days.',
-      'brand-clipper': 'I see the pricing discrepancy on PO-9045. Escalating, will reply within 24h.',
-      'brand-regatta': 'PO-9002 scheduled for next consolidation. Dispatch within 10 days.',
+      'brand-kitkin': 'Thank you for submitting HMRC docs. In review - 3-5 business days.',
+      'brand-tapatio': 'I see the pricing discrepancy on PO-9002. Escalating, will reply within 24h.',
+      'brand-lecreuset': 'Thanks — your compliance documents are with our review team.',
     };
     return m[brandId] ?? 'Thank you. Let me investigate and get back to you.';
   }, [brandId]);

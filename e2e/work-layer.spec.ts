@@ -196,6 +196,21 @@ test.describe('Work layer — admin workspace', () => {
     await page.screenshot({ path: `${SHOTS}/admin-work-owning-action.png`, fullPage: false });
   });
 
+  /**
+   * §BATCH 7 (Part 4.1) — THE DEEP LINK, VERIFIED IN A BROWSER (defect
+   * iss_a82e04e941f9). The Work drawer's "Open record" on "Ship window for PO-9200"
+   * used to open the purchase-order LIST; the item now hands over via `?po=<number>`
+   * and the PO list opens THAT record. Proven here against the record itself.
+   */
+  test('11. the ?po= deep link opens the purchase order record, not the list', async ({ page }) => {
+    await loginAs(page, 'Super Admin — Tadii', 1200);
+    await page.getByTestId('dashboard-loaded').waitFor({ timeout: 12000 });
+    await page.goto('/admin/purchase_orders_admin?po=PO-9200');
+    // The record's own detail heading — present ONLY when the record is open.
+    await expect(page.getByRole('heading', { name: 'PO-9200' })).toBeVisible({ timeout: 8000 });
+    await page.screenshot({ path: `${SHOTS}/admin-po-deeplink.png`, fullPage: false });
+  });
+
   test('5b. a MANUAL task still resolves and leaves the list (the work layer owns it)', async ({ page }) => {
     await openAdminWork(page);
     const before = await page.locator('[data-testid^="work-row-"]').count();

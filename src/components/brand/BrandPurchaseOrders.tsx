@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 /** §P13 — the order DATE is rendered through the ONE display helper. */
 import { orderDateLabel } from '@/lib/dates';
@@ -110,7 +110,7 @@ import { RoutingRequestIndicator, RoutingRequestStatus, routingCarrierLabel } fr
 import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, FileText, MessageSquare, Phone, Truck } from 'lucide-react';
-import { navigateProductView } from '@/lib/runtime/productRoutes';
+import { currentQueryParam, navigateProductView } from '@/lib/runtime/productRoutes';
 import { MERCENTA_CARRIER_LABELS } from '@/config/shipping';
 /**
  * §P4 — the canonical routing RULE is read here for the preview's read-only
@@ -335,6 +335,22 @@ export function BrandPurchaseOrders() {
   const viewingBrandId_ = tenantId ?? brands[0]?.id ?? null;
   const allPOs = poQuery.data?.data ?? [];
   const pos = allPOs.filter((p) => p.brandId === viewingBrandId_);
+
+  /**
+   * §BATCH 7 (Part 4.1) — DEEP LINK: `/brand/purchase_orders?po=PO-9200` expands that
+   * purchase order's record. Uses the SAME `?po=` contract the admin PO list consumes,
+   * so a work item's "Open record" lands on the record in either shell. Applied once,
+   * so it never overrides an expansion the operator makes afterwards.
+   */
+  const deepLinkPo = useMemo(() => currentQueryParam('po'), []);
+  const appliedDeepLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!deepLinkPo || appliedDeepLink.current === deepLinkPo) return;
+    const match = pos.find((p) => p.poNumber === deepLinkPo);
+    if (!match) return;
+    appliedDeepLink.current = deepLinkPo;
+    setExpandedPO(match.id);
+  }, [deepLinkPo, pos]);
   /**
    * §Wave 3 Part 5 — THE ONE LOADING FLAG for this surface. While a query is
    * resolving its `data` is undefined, so `pos` is [] — and every empty/zero

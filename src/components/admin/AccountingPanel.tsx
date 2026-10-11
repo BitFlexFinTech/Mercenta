@@ -27,7 +27,6 @@ import { cn } from '@/utils/cn';
 import {
   RefreshCw, Link2, AlertTriangle, CheckCircle2, Loader2,
   Clock, DollarSign, TrendingUp, TrendingDown,
-  Banknote,
 } from 'lucide-react';
 import {
   ContextPanel,
@@ -613,14 +612,17 @@ export function AccountingPanel() {
       </Card>
 
       <Card title="Amazon Remittance Sync" className="p-5">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-zinc-400">
-            {connected ? 'Xero connected. Sync remittance statements from Amazon.' : 'Connect Xero to enable Amazon remittance sync.'}
-          </p>
-          <Button disabled={!connected || !!busy} variant="secondary" size="sm">
-            <RefreshCw className="w-3.5 h-3.5" /> Sync Now
-          </Button>
-        </div>
+        {/*
+          §BATCH 7 (Part 4.3) — REMOVED: a "Sync Now" button that carried NO handler.
+          The Button primitive defaults to `type="button"` and there is no <form>, so
+          the control became ENABLED as soon as Xero was connected and then did
+          nothing — a dead control implying a capability that does not exist. Wiring a
+          real Xero remittance sync is a separate feature; until it exists the card
+          states its status honestly and offers no control.
+        */}
+        <p className="text-xs text-zinc-400">
+          {connected ? 'Xero connected. Remittance statements from Amazon are reconciled in simulation.' : 'Connect Xero to enable Amazon remittance sync.'}
+        </p>
       </Card>
 
       {/* §Phase D6 — REAL brand payouts. This card used to be a hardcoded
@@ -904,18 +906,18 @@ export function AccountingPanel() {
       </Card>
 
       <Card title="Penny Pincher Integration" className="p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-zinc-400">
-              Last infra cost sync: {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
-            </p>
-            <p className="text-ds-label text-zinc-500 mt-1">
-              Month-to-date infrastructure costs will sync via Penny Pincher when connected.
-            </p>
-          </div>
-          <Button disabled={!connected || !!busy} variant="secondary" size="sm">
-            <Banknote className="w-3.5 h-3.5" /> Sync Costs
-          </Button>
+        {/*
+          §BATCH 7 (Part 4.3) — REMOVED: a "Sync Costs" button with NO handler (enabled
+          and inert once connected). The Penny Pincher cost sync is a separate feature;
+          until it exists the card reports its last-sync status only.
+        */}
+        <div>
+          <p className="text-xs text-zinc-400">
+            Last infra cost sync: {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
+          </p>
+          <p className="text-ds-label text-zinc-500 mt-1">
+            Month-to-date infrastructure costs will sync via Penny Pincher when connected.
+          </p>
         </div>
       </Card>
       </div>

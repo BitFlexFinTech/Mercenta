@@ -3406,6 +3406,45 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'STATUS_CHECK.md',
   ]);
 
+  /**
+   * §BATCH 7 (2026-10-10) — the CLEANUP phase: Part 4.2 (dangling brand/record
+   * seeds), Part 4.3 (three inert controls removed) and Part 4.1 (a work item's
+   * "Open record" deep-links to its record). Declared here so the F5/F5b/F6
+   * contract is satisfied by DECLARATION (a documented, reviewable act), never by
+   * skipping a fix.
+   *
+   * It touches ONE protected path — `src/services/xero/xeroReseed.ts` — SOLELY to
+   * correct a comment that named the now-removed "Sync Now" button (removal
+   * coherence, rule 08); there is no behavioural change. F5b still pins the exact
+   * files, so no OTHER protected path may move.
+   */
+  const BATCH7_CLEANUP_SCOPE = new Set([
+    // ── Part 4.2 — dangling brand/record seeds ──
+    'src/lib/helpdesk/ticketStore.ts',
+    'src/lib/warehouse/returnsTracking.ts',
+    'src/components/admin/HelpdeskDashboard.tsx',
+    'src/data/demoData.ts',
+    // ── Part 4.3 — the three inert controls, removed ──
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/design/DesignSystemShowcase.tsx',
+    'src/services/xero/xeroReseed.ts',        /* protected prefix — comment only */
+    // ── Part 4.1 — the work item's "Open record" deep link ──
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    // ── the batch's own gate and its repointed browser test ──
+    'scripts/validate-batch7-cleanup.mjs',    /* NEW — this work's gate */
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'e2e/domain-acceptance.spec.ts',
+    'e2e/work-layer.spec.ts',
+    // ── catalogue, registry and state ──
+    'docs/NEXT_BUILD_PLAN_2026-10-10.md',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ]);
+
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
   try {
@@ -3586,7 +3625,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
          * `src/lib/postiz/` prefix.
          */
         BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
-        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 7 (2026-10-10) — the cleanup phase (see the declaration above). First protected-path check (F5). */
+        BATCH7_CLEANUP_SCOPE.has(p) ||
+        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3733,7 +3775,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 5 — the Mercenta Social removal (see the F5 declaration). Second protected-path check (F5b). */
         BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
-        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 7 — the cleanup phase (see the F5 declaration). Second protected-path check (F5b). */
+        BATCH7_CLEANUP_SCOPE.has(p) ||
+        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -4408,7 +4453,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH4_BRAIN_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 5 — the Mercenta Social removal (see above). */
           BATCH5_SOCIAL_REMOVAL_SCOPE.has(p) ||
-          [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 7 — the cleanup phase (see above). */
+          BATCH7_CLEANUP_SCOPE.has(p) ||
+          [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

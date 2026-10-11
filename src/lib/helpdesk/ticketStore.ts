@@ -44,36 +44,45 @@ export const demoTickets: Ticket[] = [
     seenByStaff: true, brandOnline: true, category: 'fulfillment',
   },
   {
-    id: 'tkt-002', brandId: 'brand-seep',
-    messageIds: ['msg-brand-seep-1'],
+    /* §BATCH 7 (Part 4.2) — REPOINTED from the retired 17-brand universe. `brand-seep`
+       is NOT a demo tenant (the canonical universe is Astonish, Tapatío, Le Creuset,
+       Kit & Kin), so this ticket's brand fell back to the raw id and the Helpdesk
+       rendered "brand-seep" as if it were a brand name. The UK-brand compliance
+       review is Kit & Kin's actual stage. */
+    id: 'tkt-002', brandId: 'brand-kitkin',
+    messageIds: ['msg-brand-kitkin-1'],
     lastMessagePreview: 'Submitted HMRC docs, what is the timeline?',
     lastMessageAt: new Date(Date.now() - 12 * 3600000).toISOString(),
     status: 'open', priority: 'medium',
     assignedToStaffId: 'staff-003', source: 'email',
-    subject: 'Seep — compliance timeline',
+    subject: 'Kit & Kin — compliance timeline',
     createdAt: new Date(Date.now() - 24 * 3600000).toISOString(),
     seenByStaff: false, category: 'compliance',
   },
   {
-    id: 'tkt-003', brandId: 'brand-clipper',
-    messageIds: ['msg-brand-clipper-1'],
-    lastMessagePreview: 'PO-9045 wrong unit pricing — can you correct?',
+    /* §BATCH 7 (Part 4.2) — REPOINTED from `brand-clipper` (not a demo tenant) to
+       Tapatío, and to a purchase order Tapatío actually owns (PO-9002). */
+    id: 'tkt-003', brandId: 'brand-tapatio',
+    messageIds: ['msg-brand-tapatio-1'],
+    lastMessagePreview: 'PO-9002 wrong unit pricing — can you correct?',
     lastMessageAt: new Date(Date.now() - 48 * 3600000).toISOString(),
     status: 'pending', priority: 'urgent',
     assignedToStaffId: 'staff-001', source: 'email',
-    subject: 'Clipper — PO-9045 pricing discrepancy',
+    subject: 'Tapatío — PO-9002 pricing discrepancy',
     createdAt: new Date(Date.now() - 72 * 3600000).toISOString(),
     slaDeadline: new Date(Date.now() + 24 * 3600000).toISOString(),
     seenByStaff: true, category: 'pricing',
   },
   {
-    id: 'tkt-004', brandId: 'brand-regatta',
-    messageIds: ['msg-brand-regatta-1'],
-    lastMessagePreview: 'When is next shipment for PO-9002 scheduled?',
+    /* §BATCH 7 (Part 4.2) — REPOINTED from `brand-regatta` (not a demo tenant) to
+       Astonish, and to a lifecycle PO Astonish actually owns (PO-9200). */
+    id: 'tkt-004', brandId: 'brand-astonish',
+    messageIds: ['msg-brand-astonish-1'],
+    lastMessagePreview: 'When is next shipment for PO-9200 scheduled?',
     lastMessageAt: new Date(Date.now() - 96 * 3600000).toISOString(),
     status: 'open', priority: 'low',
     assignedToStaffId: 'staff-002', source: 'live_chat',
-    subject: 'Regatta — shipment schedule',
+    subject: 'Astonish — shipment schedule',
     createdAt: new Date(Date.now() - 120 * 3600000).toISOString(),
     seenByStaff: true, brandOnline: false, category: 'logistics',
   },

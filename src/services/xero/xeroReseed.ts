@@ -156,7 +156,8 @@ export async function autoReseedIfReset(partnerId: string): Promise<XeroReseedRe
   return fullReseed(partnerId);
 }
 
-/** Called at start of Margaret daily run or from Super Admin 'Sync Now'. */
+/** Called at the start of Margaret's daily run (the Super Admin 'Sync Now' button
+ *  that used to call it too was REMOVED in §BATCH 7 Part 4.3 — it had no handler). */
 export async function checkAndReseed(partnerId: string): Promise<XeroReseedResult | null> {
   const mode = getXeroClientMode();
   if (mode === 'demo') return autoReseedIfReset(partnerId);

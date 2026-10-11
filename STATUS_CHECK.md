@@ -26,6 +26,22 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
+## §BATCH 7 (PARTS 4.1b + 4.2 + 4.3) — THE CLICK-THROUGH DEEP LINK, THE DANGLING-BRAND SEED FIX, AND THREE INERT CONTROLS REMOVED (session 128, 2026-10-10)
+
+**DELIVERED.** Part 4's defects, fixed AT SOURCE with a gate each:
+
+1. **(4.1b) The work drawer's "Open record" DEEP-LINKS to its record** (patrol defect `iss_a82e04e941f9` — "Ship window for PO-9200" opened the PO LIST, not the record). `WorkWorkspace.openOwningRecord` routes a `purchase_order` item through the ONE address layer — `navigateProductView(scope, item.actionView, { po: item.entity.label })` — and `AdminPurchaseOrderList` + `BrandPurchaseOrders` read `currentQueryParam('po')` and open that record. No second navigation mechanism.
+2. **(4.2) The dangling brand/record seeds reconciled.** The seeded helpdesk tickets and returns-tracking rows named brands from the RETIRED 17-brand universe (`brand-regatta`, `brand-seep`, `brand-clipper`), so the lookup fell back to the raw id. Now: `ticketStore` tkt-002/003/004 → Kit & Kin / Tapatío / Astonish with EXISTING message ids; `returnsTracking` DERIVES each row's brand from the canonical return (`returnBrand`); `demoData` `BRAND_SITE` reduced to the four canonical brands. `e2e/domain-acceptance.spec.ts` repointed (the compliance ticket is now Kit & Kin).
+3. **(4.3) Three INERT controls REMOVED** — `AccountingPanel` "Sync Now" and "Sync Costs" (no handler; enabled once connected and then did nothing) and `DesignSystemShowcase` "Manage". The `xeroReseed.ts` comment that named the removed button was corrected (removal coherence).
+
+**GATES (rule 07) — EXECUTED, MUTATION-PROVED, RESTORED BYTE-IDENTICAL:**
+- `scripts/validate-batch7-cleanup.mjs` (NEW) — 16 assertions on comment-stripped source + SSR-loaded modules — **16 PASS / 0 FAIL**. Mutations: `Sync Now` restored ⇒ FAIL; `brand-regatta` restored in the returns seed ⇒ 2 FAIL; the work-drawer deep link / `?po=` / `setSelectedPoId` mutated ⇒ FAIL. Every mutation restored byte-identical.
+- `e2e/work-layer.spec.ts` test 11 — opens `/admin/purchase_orders_admin?po=PO-9200` and asserts the PO-9200 record heading — **MUTATION-PROVED** (`setSelectedPoId` removed ⇒ 1 failed, restored byte-identical).
+
+**MEASUREMENTS:** typecheck **0** · lint **0** · build **ok** · `validate:all` **186 PASS / 0 FAIL** · registry integrity **7 PASS / 0 FAIL** · focused browser sweeps **25 passed / 0 failed** then **15 passed / 0 failed**. `scripts/validate-e6-brand-surfaces.mjs` §BATCH 7 CLEANUP `BATCH7_CLEANUP_SCOPE` DECLARED (not weakened), covering ONE protected path (`src/services/xero/xeroReseed.ts`, comment only).
+
+**NOT DONE — NEXT.** Batch 7 **Part 4.1a**: the notification bell's 5 inert item types (contract, score, submission, deduction, compliance) need real destinations, and the other 9 move from a SECTION to the record, plus the Part 5 "deep-link gate".
+
 ## §BATCH 6 — THE CATALOGUE PRODUCT IMAGE 32px → 64px + THE STALE-ARTEFACT SWEEP (session 127, 2026-10-10)
 
 **BUILT.** The catalogue product image was enlarged **32px → 64px through the ONE owner**

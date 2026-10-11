@@ -259,7 +259,6 @@ export function DesignSystemShowcase() {
         title="Astonish"
         status={<StatusBadge tone="success" dataStatus="active">Active</StatusBadge>}
         description="Home · UK distribution · Brand-direct supply"
-        actions={<Button variant="secondary">Manage</Button>}
       />
 
       <Modal
