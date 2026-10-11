@@ -98,11 +98,37 @@ reconciliation, not a feature.
    their nav items — **40 nav ids found** — and a **self-check FAILS the run** (exit 1) if that discovery returns
    nothing, so it cannot silently go inert again. Mutation-proved by breaking the discovery (exit 1) and restoring the
    file byte-identical (`3b9aabcab218…`).
-8. **§EVERY NEW ASSERTION IS MUTATION-PROVED.** The stale-record/claim gate now runs **44 assertions** (was 23 at the
-   start of the session). Eight mutations were executed this round — registry row, generating script, D-4 note,
-   `.gitignore`, ARCHITECTURE.md live carrier branch, MERCENTA_MASTER_CONTEXT correction, the `Environment` type, and
-   re-creating a `CarrierShell.tsx` — **each made the gate FAIL**, and every file was restored byte-identical (or the
-   created file removed).
+8. **§EVERY NEW ASSERTION IS MUTATION-PROVED.** The stale-record/claim gate grew from **23 assertions to 48** this
+   session. **Fourteen mutations were executed** across four rounds — registry row · generating script · D-4 note ·
+   `.gitignore` · ARCHITECTURE.md live carrier branch · MERCENTA_MASTER_CONTEXT correction · the `Environment` type ·
+   re-creating `CarrierShell.tsx` · re-creating a file the matrix calls DELETED · breaking both deletion conventions ·
+   and silencing the describer check itself — **every one made the intended check FAIL**, and every file was restored
+   byte-identical (or the created file removed again) with the hashes recorded.
+9. **§THE OWNER DEMANDED A PERMANENT FIX — AND IT IS NOW A GLOBAL RULE FOR EVERY PROJECT.** After the carrier drift
+   was corrected, the owner refused a third round of the same conversation: *"we cannot go back and forth over these
+   stupid issues… figure out how this is going to be fixed permanently and is going to be a Cline global rule."*
+   The root cause is stated in the rule itself: **the removal was verified in the CODE and only HOPED for in the
+   prose, and nothing ever CHECKED the prose.** The permanent fix is a new global rule —
+   **`10-describers-must-match-reality.md`** — installed **byte-identical in BOTH** global rules folders
+   (`~/.cline/rules/` and `~/Documents/Cline/Rules/`, sha256 `4da3ba12ce3ae6e547b506577a076e707c894d7fc84410b77470e28f985724bd`)
+   and **declared in `RULES-MANIFEST.json`** with six required parts, so it cannot be quietly weakened:
+   `"NO CLAIM OUTLIVES"` · `"Describers match reality"` · `"Dated ≠ historical"` ·
+   `"A check that finds NOTHING is a FAILURE"` · `"proved able to fail"` · `"The owner never reports the same drift twice"`.
+   **`node ~/.cline/rules/check-rules.mjs` → RULES_CHECK_PASS (17 passed, 0 failed, 27 rules declared)**, including
+   "10-describers-must-match-reality.md still carries its 6 required part(s)".
+   Its obligations: (1) no claim outlives the thing it describes — every describer, including generated leftovers,
+   updated in the same change; (2) a written fact has ONE author — discovered from the code, never re-typed;
+   (3) **dated ≠ historical** — a document without a banner is a LIVE claim; (4) every project must HAVE a
+   describer check, wired into its single standard command; (5) **a check that finds nothing is a FAILURE**;
+   (6) prove it can fail; (7) an artefact is a describer and **no report may narrate a filename as behaviour**;
+   (8) **the owner never reports the same drift twice** — fix the CLASS, not the instance.
+   **This project is now compliant and mechanically so:** `scripts/validate-no-stale-blockers.mjs` §11 does the
+   class-wide job — every file the matrix says was DELETED must actually be absent (**13 checked, 0 present**) —
+   with a vacuity guard (**fails if it finds fewer than 5**, so it can never silently check nothing);
+   `scripts/validate-rules-application.mjs` §5b **discovers** that describer check and FAILS if it is deleted or
+   its vacuity guard is silenced (**proved: 28/29 with "found: NONE"**), and also asserts rule 10 is installed in
+   both folders. **Mutation-proved twice more** (re-create a deleted file ⇒ FAIL; break both deletion conventions
+   ⇒ the vacuity guard FAILS with "found 0"), everything restored byte-identical.
 
 **TESTED.** BEFORE (tree at `e581d05`) → AFTER (this close-out, re-run for real): `npm run typecheck` **0 → 0** ·
 `npm run lint` **0 → 0** · `npm run build` **ok → ok** · `npm run validate:all` **187 PASS / 0 FAIL → 187 PASS / 0

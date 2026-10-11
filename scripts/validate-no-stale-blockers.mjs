@@ -21,7 +21,7 @@
 // 6-8 pin the corrected state, so the close-out cannot silently un-complete itself: the plan of record
 // must still read COMPLETE, the registry must still carry `programme_2026_10_10_closeout`, and the
 // resume block must not point back at the finished batch. Each assertion was mutation-proved.
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 
 let failures = 0;
 let checks = 0;
@@ -287,6 +287,50 @@ test(
   'verify-registry no longer treats the retired CARRIER_NAV as a live source, and self-checks its lookup',
   !/ADMIN_NAV\|BRAND_NAV\|CARRIER_NAV/.test(verifyRegistryText) &&
     /the reachability lookup discovered ZERO nav ids/.test(verifyRegistryText)
+);
+
+
+/**
+ * §11 — DESCRIBERS MATCH REALITY, THE CLASS-WIDE VERSION (2026-10-11).
+ *
+ * Global rule `10-describers-must-match-reality.md` demands that a project CHECK its describers against reality
+ * instead of trusting them. Sections 9–10 pinned two known drift classes by hand; this section does the general
+ * job from the registry itself: **every file the matrix says was DELETED must actually be absent.**
+ *
+ * The paths are DISCOVERED from the registry (two conventions the project already uses — a path marked
+ * `(DELETED)`, and a `Deleted: a; b; c` list). Two things are asserted that most checks get wrong:
+ *   · the extraction must not silently truncate (`MercentaSocial.tsx` must not be read as `.ts`, which would
+ *     "pass" because that path never exists — the exact cannot-fail bug found while writing this);
+ *   · the discovery must not come back EMPTY — rule 10 §5: a check that finds nothing is a FAILURE, not a pass.
+ * Mutation-proved twice (re-create a deleted file ⇒ FAIL; break the `(DELETED)` convention ⇒ the vacuity guard
+ * FAILS), every file restored byte-identical.
+ */
+const removedRows = (JSON.parse(registryJson).entries || []).filter((e) => e.status === 'removed');
+const claimedDeleted = new Map();
+for (const e of removedRows) {
+  const text = (e.description || '') + ' ' + (e.evidence || '');
+  for (const m of text.matchAll(/(src\/[\w./-]+\.(?:tsx|ts|css)\b)\s*\(DELETED/gi)) claimedDeleted.set(m[1], e.id);
+  for (const m of text.matchAll(/Deleted:([\s\S]*?)(?=\.\s+[A-Z]|$)/gi)) {
+    for (const p of m[1].matchAll(/(src\/[\w./-]+\.(?:tsx|ts|css)\b)/g)) claimedDeleted.set(p[1], e.id);
+  }
+}
+test(
+  `the registry's removed rows were found (${removedRows.length})`,
+  removedRows.length > 20
+);
+test(
+  `the DELETED-file discovery is not vacuous — it found ${claimedDeleted.size} claimed-deleted paths (a check that finds nothing is a FAILURE)`,
+  claimedDeleted.size >= 5
+);
+const survivors = [...claimedDeleted.entries()].filter(([p]) => existsSync(new URL(p, ROOT)));
+test(
+  `every file the matrix says was DELETED is actually absent (${claimedDeleted.size} checked)`,
+  survivors.length === 0,
+  survivors.map(([p, id]) => `${p} (row ${id})`).join(', ')
+);
+test(
+  'the deleted-path extraction keeps real extensions (no `.tsx` silently truncated to `.ts`)',
+  [...claimedDeleted.keys()].every((p) => /\.(tsx|ts|css)$/.test(p))
 );
 
 

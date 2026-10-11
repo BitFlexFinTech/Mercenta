@@ -165,6 +165,31 @@ check(
   appliedMatch ? appliedMatch[1].slice(0, 120) : 'field missing'
 );
 
+/* ── 5b. RULE 10's OWN REQUIREMENT: this project must HAVE a describer check ─────────
+ *
+ * Global rule `10-describers-must-match-reality.md` §4 forbids a project that "has none",
+ * and §5 forbids a check that finds nothing. Rather than TRUSTING that such a check exists
+ * here, DISCOVER it: at least one `scripts/validate-*.mjs` must implement BOTH halves — the
+ * deleted-path discovery read from the registry AND the vacuity guard. Delete the check, or
+ * silence the guard, and this fails. (Added 2026-10-11 after the owner asked why a removed
+ * carrier login was still being described: the project had the rule and no mechanism.) */
+
+console.log('\n§ 5b. This project HAS a describer check (rule 10 §4–5), discovered not assumed\n');
+const validatorFiles = fs.readdirSync(path.join(ROOT, 'scripts')).filter((f) => /^validate-.*\.mjs$/.test(f));
+const describerChecks = validatorFiles.filter((f) => {
+  const t = fs.readFileSync(path.join(ROOT, 'scripts', f), 'utf8');
+  return /\(DELETED\)/.test(t) && /is not vacuous/i.test(t);
+});
+check(
+  `a scripts/validate-*.mjs implements the deleted-file describer check (found: ${describerChecks.join(', ') || 'NONE'})`,
+  describerChecks.length > 0
+);
+check(
+  'the global rule 10-describers-must-match-reality.md is installed in every rules folder the assistant reads',
+  fs.existsSync(path.join(HOME, '.cline/rules/10-describers-must-match-reality.md')) &&
+    fs.existsSync(path.join(HOME, 'Documents/Cline/Rules/10-describers-must-match-reality.md'))
+);
+
 /* ── 6. the parser must be able to REJECT a skipped declaration ──────────── */
 
 console.log('\n§ 6. The check is proved able to fail\n');
