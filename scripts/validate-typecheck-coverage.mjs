@@ -114,6 +114,47 @@ test(`the Edge Function folder holds its functions (${fnTs.length} .ts files)`, 
 test('playwright.config.ts exists at the root', exists('playwright.config.ts'));
 test('§BATCH4 the removed scripts/brain-runtime-check.ts is GONE', !exists('scripts/brain-runtime-check.ts'));
 
+/* ── 6b. rule 09 §1/§3 — THE COVERAGE GATE: no TypeScript file sits outside
+       every declared project ─────────────────────────────────────────────────
+   WHY: sections 1–6 fix WHAT the projects check; this proves NOTHING is left
+   out of them. The original defect was exactly one stray file —
+   `scripts/brain-runtime-check.ts` — which belonged to NO project, so the editor
+   invented problems for it AND `npm run typecheck` never checked it at all. Rather
+   than freeze a folder list (which would go stale the moment a project changed),
+   the covered roots are DISCOVERED from the projects' own `include` arrays: a
+   project that stops including a folder fails HERE instead of silently
+   un-covering it. Generated/output folders are excluded because nothing in them
+   is source. */
+const SKIP_DIRS = new Set([
+  'node_modules', 'dist', '.git', 'coverage', 'test-results', 'playwright-report',
+  'e2e-report', 'test-screenshots', 'forensic-captures', 'Review Zip', '.geo-cache',
+]);
+function listAllTs(dir, out = []) {
+  for (const e of readdirSync(new URL(`${dir}/`, ROOT), { withFileTypes: true })) {
+    if (e.isDirectory()) {
+      if (!SKIP_DIRS.has(e.name)) listAllTs(`${dir}/${e.name}`, out);
+    } else if (/\.tsx?$/.test(e.name)) {
+      out.push(`${dir}/${e.name}`.replace(/^\.\//, ''));
+    }
+  }
+  return out;
+}
+const includeEntries = [];
+for (const cfg of ['tsconfig.app.json', 'tsconfig.node.json', 'tsconfig.e2e.json', 'tsconfig.functions.json']) {
+  if (!exists(cfg)) continue;
+  const body = read(cfg).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const m = body.match(/"include"\s*:\s*\[([\s\S]*?)\]/);
+  if (m) includeEntries.push(...[...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]));
+}
+const allTs = listAllTs('.');
+const isCovered = (f) =>
+  includeEntries.some((entry) => (/\.tsx?$/.test(entry) ? f === entry : f.startsWith(`${entry}/`)));
+const uncovered = allTs.filter((f) => !isCovered(f));
+test('rule 09 §1/§3 COVERAGE GATE — every TypeScript file belongs to a declared project',
+  uncovered.length === 0, uncovered.join(', '));
+test(`the coverage gate really walked the source tree (${allTs.length} .ts/.tsx files discovered)`,
+  allTs.length > 400);
+
 /* ── 7. the editor root — the committed pin (half 2 of rule 09) ──────────── */
 // WHY: coverage (above) fixes what the command line checks; it does NOT stop the
 // editor inventing problems with its own bundled compiler. Half 2 pins the editor

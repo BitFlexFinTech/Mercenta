@@ -1,5 +1,21 @@
 // §Phase D1 — Rocket.Chat removal gate (static + domain level).
 //
+// §BATCH 7 PART 5.1 (2026-10-11) — THE CONSOLIDATED PART-2 ABSENCE RECORD.
+// This file is now the ONE place that guards EVERY removal the owner instructed
+// on 2026-10-10, so the whole removal is swept by `npm run validate:all`:
+//   §2b  2.1 — the shared WorkWorkspace "How this works" card
+//   §2c  2.6 — Mercenta Social (16 files + 4 dirs + 21 live markers)
+//   §2d  2.2 — the Consolidation card on BOTH logistics surfaces (owner lib kept)
+//   §2e  2.3 — the interactive operational map on BOTH surfaces (derivation kept)
+//   §2f  2.4 — the Logistics Hero and its whole pipeline (+ .geo-cache, npm scripts)
+//   §2g  2.5 — the Mercenta Brain (surface, renderers, graph, hooks, harness)
+// Groups §2b–§2g are ABSENCE GUARDS (global rule 08): each FAILS if the removed
+// thing returns. The heavier specialist guards stay where they are and are
+// cross-referenced in each group's comment (validate-mercenta-brain.mjs 18
+// assertions · validate-logistics-map.mjs §11 · validate-logistics-providers.mjs
+// §9a · validate-e6-brand-surfaces.mjs §BATCH3) — this file is the consolidated
+// record, not a replacement for them.
+//
 // Proves Rocket.Chat is absent from the executable product, not merely
 // unlinked:
 //   1. The Rocket.Chat files/directory no longer exist.
@@ -187,6 +203,132 @@ for (const [file, pattern] of SOCIAL_MARKERS) {
   test(`§BATCH5 no LIVE Social marker remains in ${file}`,
     !pattern.test(readFileSync(resolve(ROOT, file), 'utf-8')));
 }
+
+// ── 2d. §BATCH 2 (2026-10-10) — THE CONSOLIDATION CARD is ABSENT ──────────
+/**
+ * The owner instructed the "Consolidation" card's removal from BOTH logistics
+ * workspaces. ABSENCE GUARD (rule 08) — it FAILS if the card returns to either
+ * surface. The canonical owner `src/lib/shipping/consolidation.ts` and the
+ * retained (now unmounted) `ConsolidationPosturePanel` STAY: programme decision 11
+ * ("deferred, not designed out") is a recorded Founder decision, so only the CARD
+ * was removed. The behavioural guard lives in validate-logistics-providers §9a;
+ * this group is the consolidated Part-2 record.
+ */
+const stripComments = (s) =>
+  s
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//'))
+    .join('\n');
+const HUB_SRC = stripComments(readFileSync(resolve(ROOT, 'src/components/brand/LogisticsHub.tsx'), 'utf-8'));
+const CONTROL_SRC = stripComments(readFileSync(resolve(ROOT, 'src/components/admin/LogisticsControl.tsx'), 'utf-8'));
+
+test('ABSENCE GUARD — the brand Hub mounts no ConsolidationPosturePanel and renders no Consolidation card',
+  !/ConsolidationPosturePanel/.test(HUB_SRC) && !/title="Consolidation"/.test(HUB_SRC));
+test('ABSENCE GUARD — the admin Control mounts no ConsolidationPosturePanel and renders no Consolidation card',
+  !/ConsolidationPosturePanel/.test(CONTROL_SRC) && !/title="Consolidation"/.test(CONTROL_SRC));
+test('the consolidation DECISION is kept — the owner lib and the unmounted panel survive',
+  existsSync(resolve(ROOT, 'src/lib/shipping/consolidation.ts')) &&
+    /CONSOLIDATION_POSTURE/.test(readFileSync(resolve(ROOT, 'src/lib/shipping/consolidation.ts'), 'utf-8')) &&
+    existsSync(resolve(ROOT, 'src/components/shared/logistics/ConsolidationPosturePanel.tsx')));
+
+// ── 2e. §BATCH 3 (2026-10-10) — THE OPERATIONAL MAP is ABSENT ─────────────
+/**
+ * The owner instructed the interactive operational map's removal from BOTH
+ * logistics surfaces. ABSENCE GUARD (rule 08) — it FAILS if the map returns.
+ * The DERIVATION is deliberately KEPT: `src/lib/logistics/operationsMap.ts` is
+ * still the ONE owner the consignment list and the consignment inspector on BOTH
+ * surfaces read (verified, not assumed), so only the canvas and the map-only
+ * helpers were removed. The module-level guard lives in validate-logistics-map §11.
+ */
+const OPS_MAP_SRC = readFileSync(resolve(ROOT, 'src/lib/logistics/operationsMap.ts'), 'utf-8');
+test('§BATCH3 ABSENCE GUARD — the map canvas component is DELETED',
+  !existsSync(resolve(ROOT, 'src/components/shared/logistics/LogisticsMapCanvas.tsx')));
+test('§BATCH3 ABSENCE GUARD — neither logistics surface imports or mounts the map canvas',
+  !/import\s*\{[^}]*\bLogisticsMapCanvas\b/.test(HUB_SRC) && !/<LogisticsMapCanvas\b/.test(HUB_SRC) &&
+    !/import\s*\{[^}]*\bLogisticsMapCanvas\b/.test(CONTROL_SRC) && !/<LogisticsMapCanvas\b/.test(CONTROL_SRC));
+test('§BATCH3 ABSENCE GUARD — neither surface renders a map testid',
+  !/logistics-map'|admin-logistics-map|logistics-marker-|logistics-map-evidence|logistics-map-legend/.test(
+    HUB_SRC + CONTROL_SRC));
+test('§BATCH3 the DERIVATION is KEPT — both surfaces still read buildOperationalMap',
+  existsSync(resolve(ROOT, 'src/lib/logistics/operationsMap.ts')) &&
+    HUB_SRC.includes('buildOperationalMap(') && CONTROL_SRC.includes('buildOperationalMap('));
+test('§BATCH3 the map-only helpers are gone from the derivation',
+  !/export function isLegInMotion/.test(OPS_MAP_SRC) && !/export function truthPresentation/.test(OPS_MAP_SRC));
+
+// ── 2f. §BATCH 3 (2026-10-10) — THE LOGISTICS HERO is ABSENT ──────────────
+/**
+ * The owner instructed the removal of the cinematic "fixed camera" Logistics Hero
+ * AND its whole pipeline. ABSENCE GUARD (rule 08) — it FAILS if any part of the
+ * hero returns: its two renderers, its network derivation, its geometry config and
+ * data, the build script that generated the geometry, its own validator and spec,
+ * the generated `.geo-cache/` and the two `package.json` scripts that drove them.
+ * The full declaration of the removal's file set lives in validate-e6-brand-surfaces
+ * (§BATCH3); this group is the consolidated Part-2 record.
+ */
+const HERO_REMOVED_FILES = [
+  'src/components/shared/logistics/LogisticsHero.tsx',
+  'src/components/shared/logistics/LogisticsHeroScene.tsx',
+  'src/lib/logistics/heroNetwork.ts',
+  'src/config/logisticsHero.ts',
+  'src/data/logisticsHeroGeo.ts',
+  'scripts/build-logistics-hero-geo.mjs',
+  'scripts/validate-logistics-hero.mjs',
+  'e2e/logistics-hero.spec.ts',
+];
+for (const p of HERO_REMOVED_FILES) {
+  test(`§BATCH3 removed hero file absent: ${p}`, !existsSync(resolve(ROOT, p)));
+}
+test('§BATCH3 the generated hero geometry cache (.geo-cache/) is GONE',
+  !existsSync(resolve(ROOT, '.geo-cache')));
+test('§BATCH3 the hero build/validate npm scripts are GONE from package.json',
+  !/logistics-hero|hero-geo/.test(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')));
+test('§BATCH3 the `.geo-cache` ignore block is GONE from .gitignore',
+  !/geo-cache/.test(readFileSync(resolve(ROOT, '.gitignore'), 'utf-8')));
+test('§BATCH3 the hub no longer carries a heroLegs mount (comments excluded)',
+  !/heroLegs/.test(HUB_SRC) && !/heroLegs/.test(CONTROL_SRC));
+/** No live source file under src/ may reference a removed hero module. */
+const heroHits = [];
+(function walkHero(dir) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) { walkHero(full); continue; }
+    if (!/\.tsx?$/.test(name)) continue;
+    const body = stripComments(readFileSync(full, 'utf-8'));
+    if (/logisticsHero|heroNetwork|LogisticsHeroScene|LogisticsHero\b/.test(body)) heroHits.push(relative(ROOT, full));
+  }
+})(resolve(ROOT, 'src'));
+test('§BATCH3 no live source file under src/ references a removed hero module',
+  heroHits.length === 0);
+if (heroHits.length) heroHits.forEach((h) => console.log('    ' + h));
+
+// ── 2g. §BATCH 4 (2026-10-10) — THE MERCENTA BRAIN is ABSENT ──────────────
+/**
+ * The owner instructed the Mercenta Brain's COMPLETE removal ("it serves no
+ * purpose"). ABSENCE GUARD (rule 08) — it FAILS if any part returns: the surface,
+ * its renderers, its five graph modules, the brand relationship graph, its two
+ * dedicated hooks and its runtime harness. The FULL 18-assertion guard (including
+ * the whole-src "no file mentions the Brain" scan) is `validate-mercenta-brain.mjs`;
+ * this group is the consolidated Part-2 record.
+ */
+const BRAIN_REMOVED_FILES = [
+  'src/components/admin/MercentaBrain.tsx',
+  'src/components/brand/BrandRelationshipMap.tsx',
+  'src/lib/hooks/useWebglPalette.ts',
+  'src/lib/hooks/usePrefersReducedMotion.ts',
+  'scripts/brain-runtime-check.ts',
+];
+for (const p of BRAIN_REMOVED_FILES) {
+  test(`§BATCH4 removed Brain file absent: ${p}`, !existsSync(resolve(ROOT, p)));
+}
+for (const d of ['src/components/shared/brain', 'src/lib/intelligence/brain']) {
+  test(`§BATCH4 removed Brain directory absent: ${d}`, !existsSync(resolve(ROOT, d)));
+}
+const ADMIN_SHELL_SRC = stripComments(readFileSync(resolve(ROOT, 'src/components/layout/AdminShell.tsx'), 'utf-8'));
+test('§BATCH4 the admin shell declares no brain destination (comments excluded)',
+  !/\bbrain\b/i.test(ADMIN_SHELL_SRC));
+test('§BATCH4 Brand Intelligence no longer imports or mounts the relationship graph (comments excluded)',
+  !/BrandRelationshipMap/.test(stripComments(readFileSync(resolve(ROOT, 'src/components/brand/BrandIntelligence.tsx'), 'utf-8'))));
 
 // ── 3–5. Domain-level assertions through the real modules ───────────────
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
