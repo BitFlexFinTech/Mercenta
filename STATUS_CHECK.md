@@ -67,10 +67,12 @@ after figures are a real re-run, never a copied figure. **The AFTER set was re-m
 documents reconciled, and once more after the gate extension above — and gave the SAME figures both times**, so the
 numbers reported here describe the final tree exactly.
 
-**COMMITTED.** The close-out commit carrying this section, pushed to `origin/redesign/foundation` (never
-`--force`); the exact hash and range are recorded in `PROJECT_STATUS.md` → `CURRENT RESUME STATE`.
-`git status --porcelain` EMPTY. The ONE `Review Zip/mercenta-review.zip` was re-exported (credential guard PASS)
-and is a generated, gitignored artefact.
+**COMMITTED.** The close-out commit **`065d1c4`** (`docs(closeout): complete the merged 2026-10-10 programme (Batch 8
+= Part 6)`), pushed to `origin/redesign/foundation` as **`e581d05..065d1c4`** (never `--force`), with the small
+`docs(state)` commit that carries this section pushed immediately after it. `git status --porcelain` prints
+NOTHING. The ONE `Review Zip/mercenta-review.zip` was re-exported (45 MB, credential guard **PASS** — no `.env`
+file and no gitignored private/generated tree inside) and is a generated, gitignored artefact; the `Review Zip/`
+folder holds exactly ONE zip.
 
 **RESULT.** DONE. **THE MERGED 2026-10-10 PROGRAMME IS COMPLETE — NOTHING IN ITS PLAN REMAINS.** **THREE-WAY
 STATUS: NOT APPLICABLE (no application runtime change)** — nothing the demo serves changed, so there was nothing
