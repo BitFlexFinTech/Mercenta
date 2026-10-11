@@ -102,7 +102,7 @@ const DISCOVERED = [
   ],
   [
     'uiux-wave3-visual-regression-gate',
-    'CARRIED FORWARD, not implemented. No automated pixel-diff gate exists (finding D-4) — screenshots are captured and committed but nothing diffs them, so a taste regression is invisible to CI. Playwright `toHaveScreenshot` is already an available dependency and the baseline PNGs are already committed, so the gate is cheap; the missing piece is a BASELINE POLICY decision',
+    'CARRIED FORWARD, not implemented — the ONE automated pixel-comparison check over the app`s own screens (finding D-4). §REPOINTED 2026-10-11 (rule 07): the sentence that used to be here — screenshots are captured and committed, and the baseline PNGs are already committed — was TRUE when it was written (2026-09-20) and became FALSE on 2026-09-21, when the clean-slate reconciliation put test-screenshots/ on the NEVER-TRACKED list (.gitignore line 46). Today 224 of these pictures exist ON DISK and NONE of them is kept in the project (git ls-files test-screenshots = 0), so there is NO baseline set inside the project to compare against and no pixel-diff step runs anywhere. The work therefore has TWO parts: (a) capture and KEEP a baseline set of the app screens — the browser walk-throughs already photograph them (e2e/redesign-surfaces.spec.ts writes to test-screenshots/redesign-surfaces/), the pictures are simply not kept — and (b) the BASELINE POLICY decision: what may change a stored picture, and who approves that change. Playwright toHaveScreenshot is available, so the comparison step itself is cheap.',
     'not_started',
     'PROJECT_STATUS.md heading 3 item 6; docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md finding D-4. Owner: Wave 3 Part 6 / Founder baseline-policy decision',
   ],

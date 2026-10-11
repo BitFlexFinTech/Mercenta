@@ -46,7 +46,7 @@ reconciliation, not a feature.
    plus the `STATUS_CHECK.md` sections (the last `docs/SPRINT_*` files are in `docs/archive/`). Minting a sixth,
    parallel document would make a SECOND source of truth for the same work, so the two REAL records were updated
    instead — and the plan's Part 6.2 states this plainly rather than leaving the omission silent.
-4. **§RULE 07 — EVERY FIX CARRIES A GATE, SO THE CLOSE-OUT CANNOT UN-COMPLETE ITSELF.** Three stale statements were
+4. **§RULE 07 — EVERY FIX CARRIES A GATE, SO THE CLOSE-OUT CANNOT UN-COMPLETE ITSELF.** THREE stale statements were
    found and FIXED at source (the two registry citations that still said "only BATCH 8 = Part 6 remains", and one
    `PROJECT_STATUS.md` section heading that had lost its SUPERSEDED marker while every sibling keeps one). Because a
    close-out is exactly the record a later session silently reverts, the corrected state is now PINNED by new
@@ -55,6 +55,23 @@ reconciliation, not a feature.
    PART 6" remains; the registry must still carry `programme_2026_10_10_closeout` with status COMPLETE and must not
    contain the stale phrase again; and the resume block must NOT still name the finished batch as `NEXT TASK`. Each
    assertion was MUTATION-PROVED (re-introduce the stale claim ⇒ FAIL ⇒ restore byte-identical).
+5. **§A FOURTH STALE STATEMENT — FOUND BY ANSWERING THE OWNER'S OWN QUESTION, AND THE PREMISE OF THE NEXT JOB.**
+   Asked plainly "a photo of what?", the honest answer needed the project's picture files — and THAT exposed a false
+   claim in **three live places**: the registry row `uiux-wave3-visual-regression-gate`, the generator script that
+   produces that row (`scripts/reconcile-uiux-wave3-registry.cjs`), and finding **D-4** in
+   `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md` — all saying the screenshots "are captured and committed" and
+   "the baseline PNGs are already committed". **TRUE when written (2026-09-20); FALSE since 2026-09-21**, when the
+   clean-slate reconciliation put `test-screenshots/` on the never-tracked list (`.gitignore` line 46). **Measured
+   this session: 224 pictures on disk, 0 kept** (`git ls-files test-screenshots` = 0). Left alone, the next session
+   would hunt for baselines that do not exist, so the row, its generator and D-4 were corrected with dated
+   `§REPOINTED` notes (history kept, never destroyed) and the corrected premise — the missing work is BOTH
+   capture-and-keep a baseline set AND the policy decision — is pinned by **section 9** of the same gate.
+   **TWO OF MY OWN FIRST ATTEMPTS AT THAT GATE WERE DEFECTIVE AND ARE RECORDED, NOT HIDDEN:** attempt 1 tested raw
+   text and flagged the correction's own quotation (a false alarm); attempt 2 stripped whole `REPOINTED` lines, which
+   cannot work for a one-line JSON row, and a mutant then PASSED — the classic cannot-fail assertion. The rule now
+   used is precise: the stale wording may appear only AFTER the `§REPOINTED` marker, and **four** mutations
+   (registry row · generator script · D-4 note · `.gitignore`) each make the gate FAIL, every file restored
+   byte-identical (`…a79b4ace01ef`, `…ec9188c073b7`, `…97ed0ae8804b`, `…5669954664b7`).
 
 **TESTED.** BEFORE (tree at `e581d05`) → AFTER (this close-out, re-run for real): `npm run typecheck` **0 → 0** ·
 `npm run lint` **0 → 0** · `npm run build` **ok → ok** · `npm run validate:all` **187 PASS / 0 FAIL → 187 PASS / 0

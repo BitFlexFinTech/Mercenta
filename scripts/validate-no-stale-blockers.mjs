@@ -156,6 +156,75 @@ test(
   'the resume block names the work that FOLLOWS the programme (WAVE 3 PART 6)',
   /NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow)
 );
+/**
+ * §9 — THE PICTURE-COMPARISON JOB'S PREMISE, CORRECTED (2026-10-11, rule 07).
+ *
+ * The first thing the owner asked about the next job was the plainest one: "a photo of what?".
+ * Answering it exposed a FOURTH stale statement — the registry row for `uiux-wave3-visual-regression-gate`
+ * (and the reconcile script that generates it, and finding D-4 in the gap analysis) all claimed
+ * "screenshots are captured and committed" and "the baseline PNGs are already committed". That was
+ * true on 2026-09-20 and became FALSE on 2026-09-21, when the clean-slate reconciliation put
+ * `test-screenshots/` on the never-tracked list. Measured: 224 pictures on disk, 0 kept.
+ *
+ * Left unchecked, the next session would hunt for baselines that do not exist. These assertions pin the
+ * corrected premise AND the reason it must stay true: the folder is deliberately untracked, so the
+ * missing work is capture-and-keep PLUS the policy decision — never just the policy decision.
+ */
+const gitignoreText = read('.gitignore');
+test(
+  'the picture folder test-screenshots/ is STILL deliberately never-tracked (the corrected premise)',
+  /^test-screenshots\/$/m.test(gitignoreText)
+);
+const regressionRow = (JSON.parse(registryJson).entries || []).find((e) => e.id === 'uiux-wave3-visual-regression-gate');
+test('the registry still carries the picture-comparison row', Boolean(regressionRow));
+const rowText = JSON.stringify(regressionRow || {});
+const rowDescription = (regressionRow || {}).description || '';
+/**
+ * §FIXED MY OWN FIRST TWO ATTEMPTS (2026-10-11) — recorded because both were real defects in the gate.
+ *  (1) The first version tested the RAW text and therefore flagged the correction itself, which QUOTES the
+ *      old wording on purpose (history is never destroyed). That was a false alarm, not a stale claim.
+ *  (2) The second version stripped whole lines carrying `REPOINTED` — which cannot work for a row that is
+ *      ONE long JSON line, so the strip removed everything and the assertion could not fail any more.
+ *      A mutant (re-inserting the stale claim with no marker at all) PASSED, which is exactly how a
+ *      cannot-fail assertion is caught. The rule now used is precise: the stale wording may appear only
+ *      AFTER the `§REPOINTED` marker; anything before it is a live claim and fails.
+ */
+const livePart = (text) => text.split('§REPOINTED')[0];
+test(
+  'the row description makes the stale claim ONLY after its §REPOINTED marker',
+  !/baseline PNGs are already committed|screenshots are captured and committed/i.test(livePart(rowDescription))
+);
+test(
+  'the row description records the old wording as a dated §REPOINTED correction',
+  /§REPOINTED 2026-10-11/.test(rowDescription)
+);
+test(
+  'that row states the pictures are NOT kept, so no baseline set exists in the project',
+  /NEVER-TRACKED list/.test(rowText) && /NONE of them is kept in the project/.test(rowText)
+);
+const gapAnalysisText = read('docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md');
+test(
+  'finding D-4 carries the 2026-10-11 REPOINTED correction (history kept, stale claim not left live)',
+  /§REPOINTED \(2026-10-11, rule 07\) — the D-4 row above is STALE/.test(gapAnalysisText)
+);
+test(
+  'that correction states no baseline set lives in the repository',
+  /no baseline set lives in the repository/.test(gapAnalysisText)
+);
+const reconcileScriptText = read('scripts/reconcile-uiux-wave3-registry.cjs');
+/** The script line that GENERATES the picture-comparison row's description. */
+const scriptDescLine =
+  reconcileScriptText.split('\n').find((l) => /pixel-(diff|comparison)|baseline PNGs/.test(l)) || '';
+test(
+  'the script that GENERATES that row was found, and carries the same correction',
+  scriptDescLine.length > 0 && /NEVER-TRACKED list/.test(scriptDescLine)
+);
+test(
+  'the generating script makes the stale claim ONLY after its §REPOINTED marker (so re-running it cannot restore the lie)',
+  !/baseline PNGs are already committed|screenshots are captured and committed/i.test(livePart(scriptDescLine))
+);
+
+
 
 
 console.log(`\n${checks - failures}/${checks} checks passed`);

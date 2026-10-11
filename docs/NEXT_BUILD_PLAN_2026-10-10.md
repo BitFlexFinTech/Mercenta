@@ -211,8 +211,11 @@
   **DONE** — `PROJECT_STATUS.md` (resume block + headings 1–9) · `HANDOFF.md` (mirror of the resume block) ·
   `STATUS_CHECK.md` (a new §BATCH 8 section; the previous sections marked SUPERSEDED) · `requirements-registry.json`
   (`_meta.last_updated` → 2026-10-11, the recomputed `status_counts` note, the new
-  `_meta.programme_2026_10_10_closeout` programme record, and the TWO stale citations that still said "only
-  BATCH 8 = Part 6 remains" corrected at source — rule 07) · **the sprint record**.
+  `_meta.programme_2026_10_10_closeout` programme record · and EVERY stale statement the close-out exposed
+  corrected at source — rule 07: the TWO citations that still said "only BATCH 8 = Part 6 remains", ONE
+  `PROJECT_STATUS.md` heading that had lost its SUPERSEDED marker, and the picture-comparison row's claim that the
+  screenshots are committed (with the generator script that produces that row and the gap analysis's D-4 row it
+  cites) · **the sprint record**.
   **NOTE, stated plainly rather than papered over:** this programme has NO separate `docs/SPRINT_*.md` file. The
   repository's record of it is **THIS plan document plus the `STATUS_CHECK.md` `§BATCH 1 … §BATCH 8` sections** —
   the convention every programme has followed since 2026-10-04 (the last `docs/SPRINT_*` records are in

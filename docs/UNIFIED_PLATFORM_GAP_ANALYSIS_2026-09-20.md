@@ -260,6 +260,8 @@ be treated as accepted.** The honest position this increment reached:
 criterion is "PREMIUM B2B PLATFORM". D-2/D-3/D-4 are the concrete, measurable
 remaining work; the Founder's own first-hand review remains the acceptance act.
 
+**§REPOINTED (2026-10-11, rule 07) — the D-4 row above is STALE in ONE respect and is left as written history.** It says the screenshots are captured AND COMMITTED and that the repository already tracks PNGs, so "the baseline exists". That was true when it was written: on 2026-09-21 the clean-slate reconciliation put `test-screenshots/` on the NEVER-TRACKED list (`.gitignore` line 46), because 117 picture files made the saved state permanently messy. Measured today: **224** pictures exist on disk and **0** are kept in the project (`git ls-files test-screenshots` = 0). So **no baseline set lives in the repository**, and the missing work is BOTH (a) capture-and-keep a baseline set of the app's screens and (b) the baseline-policy decision. The pixel-diff step itself is still missing, exactly as the row says.
+
 ## 5. Investigation E — PUBLIC WEB / SEO / AI-SEARCH FOUNDATION
 
 ### E.1 What the previous audit reported vs the CURRENT repository (re-verified)
