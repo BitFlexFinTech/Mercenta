@@ -160,9 +160,20 @@ test(
  * now pins its ABSENCE: the resume block must name the CURRENT work (BATCH 10 — finishing the build) and must
  * record the closed item as CLOSED, never present it as the next task.
  */
+/**
+ * §REPOINTED (2026-10-12, rules 07/09 — NOT weakened). This assertion used to pin
+ * the literal label `BATCH 10`. That label is a SESSION-LOCAL name for the current
+ * programme, and it moved to `BATCH 11` on 2026-10-12 when the two remaining UX
+ * decisions were built — so a literal label fails the gate for a reason that has
+ * nothing to do with staleness (exactly the hand-maintained-literal trap of rule
+ * 09 §4). It now pins the STABLE intent this check is named for: the resume block
+ * names the work that FOLLOWS the plan — the FINISHING-THE-BUILD work. The batch
+ * token itself stays gated by `validate-resume-state` (a token must exist, and the
+ * two state files must agree on it).
+ */
 test(
-  'the resume block names the work that FOLLOWS the programme (BATCH 10 — finishing the build)',
-  /NEXT TASK:[^\n]*BATCH 10/.test(resumeBlockNow)
+  'the resume block names the work that FOLLOWS the programme (finishing the build)',
+  /NEXT TASK:[^\n]*FINISHING THE BUILD/.test(resumeBlockNow)
 );
 test(
   'the closed picture-comparison check is recorded as CLOSED, not presented as the next work (absence guard)',
