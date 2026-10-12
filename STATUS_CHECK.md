@@ -26,7 +26,43 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 11 — THE LAST TWO APPLICATION-RUNTIME DECISIONS BUILT (session 136, 2026-10-12)
+## §BATCH 12 — THE WHATSAPP/TWILIO FEATURE REMOVED COMPLETELY (session 137, 2026-10-13)
+
+**Owner instruction: "WhatsApp is not needed."** The WhatsApp-via-Twilio escalation feature was removed END TO END —
+not merely its stale record — and every assertion that used to prove it EXISTS was repointed to prove it is GONE
+(rules 07/08: repoint, never weaken).
+
+- **DELETED (4 files):** `src/lib/whatsapp/whatsAppClient.ts` · `src/lib/whatsapp/whatsAppEscalation.ts` ·
+  `src/components/admin/WhatsAppAdminPanel.tsx` · `scripts/validate-whatsapp.mjs`.
+- **REPOINTED SOURCE:** the `twilio_whatsapp` provider left `src/integrations/registry.ts` + `types.ts`; the
+  automation now declares `externalProviders: []`; the instant-message (`sms`) channel, its `Mock`/`Real` clients and
+  the `instantMessageMode` seam left `src/lib/commerce/poAcknowledgementNotifications.ts`; `NotificationChannel` is now
+  `'email' | 'in_app'`; the nav entry/title/render left `AdminShell.tsx`; the cost line left `operatingCosts.ts`; the
+  Article-30 processor (and the now-unused `messaging` category + its public-safe row) left `dataProcessing.ts`.
+- **REPOINTED GATES (9) + SPECS (4):** `validate-po-acknowledgement-notifications` gained 5 ABSENCE assertions (no
+  client, provider, factory, `sms` channel or `twilio_whatsapp` import); `validate-po-acknowledgement-brand-surfaces`,
+  `validate-retired-platforms`, `validate-d4-persistence`, `validate-data-inventory`, `validate-operating-costs`,
+  `validate-admin-shell-bundle`, `validate-phase15-launch`; `e2e/retired-platforms.spec.ts` (the nav entry and the
+  provider card are now asserted ABSENT), `e2e/integration-hub.spec.ts`, `e2e/app-shell.spec.ts`,
+  `e2e/po-notification-fanout.spec.ts`. `scripts/validate-e6-brand-surfaces.mjs` declares
+  `BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE` — the documented act its own rule requires.
+- **ONE REAL BEHAVIOUR CHANGE, RECORDED:** for a non-Super-Admin the admin nav's "Integrations" group now renders NO
+  heading (its only remaining item is Super-Admin-only, and the shell never renders an empty group). The spec asserts
+  the heading ABSENT for a normal admin and VISIBLE for a Super Admin.
+- **THREE DEFECTS FIXED AT SOURCE (not parked):** (1) `PRODUCTION_READINESS.md` said the `instantly-reply-webhook`
+  function "does not exist on disk" while it EXISTS (and §M11 said so); (2) the same file's Edge-Functions heading said
+  "NOT PRESENT IN THIS REPOSITORY" while its own body said the opposite; (3) the live probe
+  `scripts/verify-demo-live.mjs` slept a fixed 2.5s and then read the page — a timing assumption that made three
+  §P13/S3 admin-queue checks report a present surface as missing (the work layer genuinely derives
+  `Acknowledge PO-9000/9001/9002`, proved directly). It now WAITS for the rows, exactly as `e2e/dashboard.spec.ts` did.
+- **VERIFICATION:** `typecheck` **0** · `lint` **0** · `build` **ok** · `validate:all` **187 PASS / 0 FAIL (of 187)** ·
+  `validate:built-rows` **2352/0** · `e2e/app-shell.spec.ts` **24 passed** · `e2e/dashboard.spec.ts` **15 passed** ·
+  `e2e/retired-platforms.spec.ts` + `e2e/integration-hub.spec.ts` + `e2e/po-notification-fanout.spec.ts` **12 passed** ·
+  DEPLOYED @ `026e32e` · live `verify-live-demo.mjs` **276 PASS / 0 FAIL** · live `verify-demo-live.mjs`
+  **209/209 PASS · LIVE_VERIFICATION_PASS**.
+- **STATUS:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** @ `026e32e`.
+
+## §BATCH 11 — THE LAST TWO APPLICATION-RUNTIME DECISIONS BUILT (session 136, 2026-10-12) — SUPERSEDED BY §BATCH 12
 
 **BUILT — the two recorded UX rows, each with a mutation-proved gate.** **(1) `discovered-overview-vestigial-toolbar-strip` (option (a)):** the Admin Overview's sticky `toolbar` slot held only an inert ⌘K hint and read as an empty control bar, so the prop is REMOVED from `src/components/admin/AdminDashboard.tsx` (the shared shell only renders `[data-workspace-toolbar]` when the prop is passed) and the hint moved into the header's `meta` facts line; `e2e/uiux-redesign.spec.ts` test 1 is repointed (documented §REPOINTED). **(2) `discovered-support-team-mobile-pane-overflow` (option (a)):** `src/components/brand/BrandTeamMessages.tsx` now uses `flex flex-col … md:flex-row` with the team pane `w-full … md:w-56`, so at 390px the panes STACK (chat first, team pane below) and the measured 86–102px sideways scroll is gone. Both rows are now `built_and_tested`; registry `not_started` **8 → 6**.
 

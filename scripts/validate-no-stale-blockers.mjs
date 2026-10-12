@@ -171,13 +171,40 @@ test(
  * token itself stays gated by `validate-resume-state` (a token must exist, and the
  * two state files must agree on it).
  */
+/**
+ * §REPOINTED (2026-10-13, §BATCH 12, rules 07/09 — NOT weakened). This assertion used to
+ * pin the literal `FINISHING THE BUILD`, and the sibling below pinned `CLOSED, NOT PENDING`.
+ * BOTH were SESSION-LOCAL labels for a stage that has since ENDED: on 2026-10-13 the build
+ * work genuinely finished (the WhatsApp/Twilio feature — the last build item — was removed),
+ * so `FINISHING THE BUILD` is no longer the truth and pinning it would FORCE a false
+ * statement into the resume block. That is exactly the hand-maintained-literal trap of rule
+ * 09 §4, which this validator's own §REPOINTED note above already recognises.
+ *
+ * The check now pins the STABLE intent it is named for: the resume block must NAME the work
+ * that follows the programme — which is now the OWNER'S remaining items (the `not_started`
+ * decisions + the `phase15-*` launch prerequisites) and explicitly NOT build work. The
+ * closed picture-comparison half is kept, and made STRONGER: it is an ABSENCE guard in the
+ * resume block PLUS a positive pin on the registry row's CLOSED state (`deferred`), so the
+ * item can neither re-appear as next work nor silently change status.
+ */
 test(
-  'the resume block names the work that FOLLOWS the programme (finishing the build)',
-  /NEXT TASK:[^\n]*FINISHING THE BUILD/.test(resumeBlockNow)
+  'the resume block names the work that FOLLOWS the programme (the Owner’s remaining items, not build work)',
+  /NEXT TASK:[^\n]*NOT BUILD WORK/.test(resumeBlockNow) &&
+    /NEXT TASK:[^\n]*(OWNER|DECISION|prerequisite)/i.test(resumeBlockNow)
 );
 test(
-  'the closed picture-comparison check is recorded as CLOSED, not presented as the next work (absence guard)',
-  /NEXT TASK:[^\n]*CLOSED, NOT PENDING/.test(resumeBlockNow) && !/NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow)
+  'the closed picture-comparison check is NOT presented as the next work (absence guard) and its registry row stays CLOSED',
+  !/NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow) &&
+    !/NEXT TASK:[^\n]*picture-comparison/i.test(resumeBlockNow) &&
+    (() => {
+      try {
+        const reg = JSON.parse(read('requirements-registry.json'));
+        const row = (reg.entries || []).find((e) => e.id === 'uiux-wave3-visual-regression-gate');
+        return !!row && row.status === 'deferred';
+      } catch {
+        return false;
+      }
+    })()
 );
 /**
  * §9 — THE PICTURE-COMPARISON JOB'S PREMISE, CORRECTED (2026-10-11, rule 07).

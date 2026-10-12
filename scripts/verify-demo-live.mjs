@@ -863,7 +863,18 @@ async function closeLiveOverlays(target) {
 /* The brand's OWN queue (Tapatío): this session accepted PO-9002 above, so its only
    remaining seeded PO is PO-9003 — which must NOT be offered as acknowledgement work. */
 await openLiveNav(page, 'Tasks & Deadlines');
-await page.waitForTimeout(2500);
+/* §2026-10-13 — REPOINTED (rule 07), a timing assumption removed at its source.
+   This used to sleep a fixed 2.5s and then read the body, which is exactly the
+   class of defect that produced the earlier flaky `embedded-social` run: on a
+   slower LIVE load the rows had not painted yet, the probe read an empty body and
+   reported a missing surface that was in fact present. The local spec
+   (e2e/dashboard.spec.ts test 8) already waits for the row; this probe now does the
+   same, and the assertion below is unchanged in strength. */
+await page
+  .locator('[data-testid^="work-row-work-po_acknowledgement-"]')
+  .first()
+  .waitFor({ state: 'visible', timeout: 15000 })
+  .catch(() => {});
 const brandWorkBody = await page.locator('body').innerText().catch(() => '');
 check('§P13/S3 the deployed brand work list renders (Operations → Tasks & Deadlines)',
   brandWorkBody.length > 200 && /Tasks & Deadlines/i.test(brandWorkBody),
@@ -873,7 +884,13 @@ check('§P13/S3 the deployed brand queue offers NO acknowledgement work for PO-9
 
 /* Mercenta's queue spans BOTH tenants on the SAME deployed bundle. */
 await openLiveNav(admin, 'Work Management');
-await admin.waitForTimeout(2500);
+/* §2026-10-13 — the SAME repoint as the brand probe above: wait for the
+   acknowledgement rows to paint instead of sleeping a fixed 2.5s. */
+await admin
+  .locator('[data-testid^="work-row-work-po_acknowledgement-"]')
+  .first()
+  .waitFor({ state: 'visible', timeout: 15000 })
+  .catch(() => {});
 const adminWorkBody = await admin.locator('body').innerText().catch(() => '');
 const liveAckRows = await admin.locator('[data-testid^="work-row-work-po_acknowledgement-"]').count();
 check('§P13/S3 the deployed admin work list renders (Work Management)',
