@@ -23,6 +23,7 @@ Allow: /uk-market-access   # UK Market Access (public)
 Allow: /for-brands         # For Brands (public)
 Allow: /faq                # FAQ (public)
 Allow: /explore-uk-market-fit  # Explore UK Market Fit — public assessment
+Allow: /lift-off           # Lift Off — the launch programme (public)
 Allow: /favicon.svg
 Allow: /favicon-32.png
 Allow: /apple-touch-icon.png

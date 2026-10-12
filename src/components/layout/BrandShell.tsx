@@ -43,6 +43,7 @@ const CommercialReadiness = lazy(() => import('@/components/brand/CommercialRead
 const BrandAdvertising = lazy(() => import('@/components/brand/BrandAdvertising').then((m) => ({ default: m.BrandAdvertising })));
 const ListingAnalyzer = lazy(() => import('@/components/brand/ListingAnalyzer').then((m) => ({ default: m.ListingAnalyzer })));
 const SalesEstimatorCard = lazy(() => import('@/components/brand/SalesEstimatorCard').then((m) => ({ default: m.SalesEstimatorCard })));
+const LiftOffProgramme = lazy(() => import('@/components/brand/LiftOffProgramme').then((m) => ({ default: m.LiftOffProgramme })));
 const SalesAnalytics = lazy(() => import('@/components/brand/SalesAnalytics').then((m) => ({ default: m.SalesAnalytics })));
 const BrandWorkManagement = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkManagement })));
 const BrandWorkCalendar = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkCalendar })));
@@ -52,7 +53,7 @@ import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Settings,
   MessageSquare, ScrollText, ListChecks, CalendarDays, ClipboardCheck,
-  Boxes,
+  Boxes, Zap,
 } from 'lucide-react';
 
 const BRAND_SECTIONS = [
@@ -93,6 +94,17 @@ const BRAND_SECTIONS = [
       },
       // §Phase 2 — what Mercenta needs to assess a product commercially, and why.
       { id: 'commercial_readiness', label: 'Commercial Readiness', icon: <ClipboardCheck className="w-4 h-4" /> },
+    ],
+  },
+  {
+    /**
+     * §LIFT OFF — the launch programme gets its OWN section. It is a different
+     * customer to Operations: a brand NEW to the retail channel, launching a
+     * product through Mercenta's named programme (see `src/config/liftOff.ts`).
+     */
+    label: 'Programme',
+    items: [
+      { id: 'lift_off', label: 'Lift Off', icon: <Zap className="w-4 h-4" />, tourAttr: 'nav-lift-off' },
     ],
   },
   {
@@ -249,6 +261,7 @@ export default function BrandShell() {
             {brandView === 'team' && <BrandTeamMessages />}
             {/* §Brief §6 — the brand's own case surface (Mercenta-mediated). */}
             {brandView === 'cases' && <BrandSupport />}
+            {brandView === 'lift_off' && <LiftOffProgramme />}
             {brandView === 'market' && (
               <div className="space-y-4">
                 <BrandIntelligence />

@@ -37,6 +37,8 @@
  */
 import { BRAND_DOMAIN, BRAND_LEGAL_NAME, BRAND_NAME } from '@/config/brand';
 import { EXPLORE_UK_MARKET_FIT_PATH } from '@/config/ukMarketFit';
+/** §LIFT OFF — the public route is declared in the programme's OWN owner. */
+import { LIFT_OFF_PATH } from '@/config/liftOff';
 /**
  * §B7 (2026-09-29) — THE HOME DESCRIPTION IS DERIVED FROM ITS OWNER.
  *
@@ -57,7 +59,8 @@ export type PublicRoutePage =
   | 'faq'
   | 'privacy'
   | 'terms'
-  | 'explore-uk-market-fit';
+  | 'explore-uk-market-fit'
+  | 'lift-off';
 
 export interface PublicRouteDefinition {
   /** The canonical path, exactly as it appears in the address bar. */
@@ -179,6 +182,16 @@ export const PUBLIC_ROUTES: readonly PublicRouteDefinition[] = [
     title: `Explore UK Market Fit — ${BRAND_NAME}`,
     description:
       'A guided assessment of whether there appears to be a credible UK opportunity for a brand, based on the evidence available. A simulation-labelled assessment, never a promise.',
+    robots: 'index, follow',
+    changefreq: 'monthly',
+    priority: '0.8',
+  },
+  {
+    path: LIFT_OFF_PATH,
+    page: 'lift-off',
+    title: `Lift Off — ${BRAND_NAME}`,
+    description:
+      'Mercenta\u2019s launch programme for brands new to the UK retail channel: Mercenta runs the launch end to end, with a large opening order behind the product.',
     robots: 'index, follow',
     changefreq: 'monthly',
     priority: '0.8',

@@ -5330,3 +5330,18 @@ pinned invariant failed **1**); both files restored **byte-identical** (owner sh
 the registry's `not_started` build rows (**15** remain, e.g. `phase5-tutorial-recording` and the
 `discovered-*` architecture increments). No credential required.
 
+
+---
+
+## SESSION 133 (2026-10-12) — §LIFT OFF: MERCENTA'S OWN-NAMED LAUNCH PROGRAMME
+
+**WHAT THE OWNER ASKED.** "Why can't I see the Born to Run programme … it should have its own section." Then, corrected plainly: the channel's Born to Run programme, renamed under Mercenta's own name with the SAME rules — because Mercenta is the proxy and runs everything for the brand, and that is what the brand is charged for — and a DIFFERENT customer (bigger brands) only wants Mercenta to manage their UK distribution. The Founder chose the name **"Lift Off | By Mercenta"**.
+
+**RESEARCH FIRST (real sources, never invented).** The channel's "Born to Run" programme was researched from NAMED sources (Jungle Scout, Tinuiti, Pattern, ChannelSight, Amazowl SOP): invite-only; a vendor asks for a large OPENING ORDER (the "launch buy") instead of waiting for one; in exchange, RETURN RIGHTS on unsold stock and ADVERTISING SUPPORT, over a TEN-WEEK sell-through; the vendor contract is amended. The channel-specific NUMERIC thresholds are NOT asserted (`LIFT_OFF_TERMS_VERIFIED=false`, fail-closed) and are verified against the live terms per launch.
+
+**BUILT.** `src/config/liftOff.ts` (the ONE owner: name, endorsement, mirrored rules, eligibility, statuses, public copy, named sources) · `src/lib/liftOff/eligibility.ts` (REAL, deterministic, fail-closed against the brand's own records) · `src/components/brand/LiftOffProgramme.tsx` (the brand-portal section, its own "Programme" nav section, lazy-loaded) · `src/components/marketing/LiftOff.tsx` (the public, outcome-only offer page feeding Explore UK Market Fit) · the public route wired through `publicRoutes.ts` / `positioning.ts` / `Home.tsx` / `robots.txt` / `sitemap.xml` · `scripts/validate-lift-off.mjs` (31 checks).
+
+**DEFECTS FIXED AT SOURCE (rule 07).** (a) The E6 F8 brand-nav guard's regex required `id: '…', label:` on ONE line, so the multi-line `inventory` item was INVISIBLE — the guard could not catch that item being removed or reordered, and its own comment overstated the count. The regex now spans the newline, and the list was repointed to 20 items. (b) The retired-Rocket.Chat guard flagged the first icon chosen for the new nav item (lucide `Rocket`) — swapped for `Zap`.
+
+**EVIDENCE.** typecheck 0 (four projects) · lint 0 · build ok · `npm run validate:all` **188 PASS / 0 FAIL** · the new gate **31/31**, MUTATION-PROVED (`LIFT_OFF_TERMS_VERIFIED`→true ⇒ **FAIL**; restored byte-identical, sha256 `32284806b13d10af28bc3a99d17648c83dd6442159c8b179bc2af22fbb90ddab`) · `validate:public-claims` PASS (20 renders, both shells) · `validate:seo` PASS (9 routes) · `validate:wording` PASS (0 violations) · `validate:e6-brand-surfaces` PASS (F8 sees all 20 items) · `validate:registry-integrity` 7 PASS / 0 FAIL (562 entries). Registry row `lift-off-launch-programme` added (`built`).
+

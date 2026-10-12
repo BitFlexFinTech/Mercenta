@@ -4198,6 +4198,33 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §LIFT OFF — THE LAUNCH PROGRAMME (2026-10-12). Declared set for the phase that
+   * gives Mercenta's own-named launch programme its own brand-portal section and a
+   * public offer page. The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file
+   * outside EVERY declared set still fails. No PROTECTED path is touched.
+   */
+  const LIFT_OFF_SCOPE = new Set([
+    'src/config/liftOff.ts',                              /* NEW — the ONE owner */
+    'src/lib/liftOff/',                                   /* NEW — the eligibility evaluator */
+    'src/components/brand/LiftOffProgramme.tsx',          /* NEW — the brand section */
+    'src/components/marketing/LiftOff.tsx',               /* NEW — the public offer page */
+    'src/components/layout/BrandShell.tsx',               /* the section + its nav entry */
+    'src/lib/seo/publicRoutes.ts',                        /* the public route */
+    'src/config/positioning.ts',                          /* the public nav/footer model */
+    'src/components/marketing/Home.tsx',                  /* the page renderer */
+    'public/robots.txt',                                  /* the allow list */
+    'public/sitemap.xml',                                 /* the sitemap entry */
+    'scripts/validate-lift-off.mjs',                      /* NEW — the programme gate */
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'e2e/lift-off.spec.ts',
+    'package.json',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -4232,6 +4259,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...SPRINT_UK_MARKET_FIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_ROUTING_GATEWAYS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §LIFT OFF — the launch programme's declared surface (see above). */
+          LIFT_OFF_SCOPE.has(p) ||
+          [...LIFT_OFF_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P6 — the PO-document-pack phase's declared surface (see above). */
           P6_PO_DOCUMENT_PACK_SCOPE.has(p) ||
           [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -4510,7 +4540,21 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
       // still compares the full ordered id list exactly, so any further
       // restructuring still fails.
       const brandShell = readSrc('src/components/layout/BrandShell.tsx');
-      const ids = [...brandShell.matchAll(/id: '([a-z_]+)', label:/g)].map((m) => m[1]);
+      /**
+       * §LIFT OFF (2026-10-12) — REPOINTED, and a REAL DEFECT FIXED (rule 07).
+       *
+       * DEFECT: this regex required `id: '...', label:` on ONE line, so the store the
+       * nav declares multi-line (`{ id: 'inventory',\n label: 'Inventory' }`) was
+       * INVISIBLE to the guard — the exact ordered-list comparison therefore could not
+       * catch 'inventory' being removed or reordered, and the comment below overstated
+       * the item count (it said 18 while the nav held 19). `\s*` now spans the newline,
+       * so EVERY declared item is seen; the comparison is still EXACT and ordered.
+       *
+       * REPOINTED: the phase gives the launch programme its own brand-portal SECTION,
+       * so the canonical list is now 20 ids with 'lift_off' (after 'commercial_readiness')
+       * and the previously-invisible 'inventory' named too. The contract is NOT weakened.
+       */
+      const ids = [...brandShell.matchAll(/id: '([a-z_]+)',\s*label:/g)].map((m) => m[1]);
       /**
        * §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (not weakened).
        * The canonical brand navigation grew by TWO items after this list was
@@ -4550,9 +4594,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
        */
       const EXPECTED = [
         'overview', 'purchase_orders', 'logistics', 'returns', 'work', 'calendar',
-        'catalog', 'commercial_readiness', 'onboarding', 'compliance', 'contracts',
-        'analytics', 'market', 'reports', 'documents', 'cases', 'team',
-        'settings',
+        'catalog', 'inventory', 'commercial_readiness', 'lift_off', 'onboarding',
+        'compliance', 'contracts', 'analytics', 'market', 'reports', 'documents',
+        'cases', 'team', 'settings',
       ];
       return ids.join(',') === EXPECTED.join(',');
     })());

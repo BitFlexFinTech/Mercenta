@@ -41,6 +41,8 @@ import { COMPANY_REGISTRATION } from './company';
  * the footer and the button that opens the assessment cannot disagree.
  */
 import { EXPLORE_UK_MARKET_FIT_CTA } from './ukMarketFit';
+/** §LIFT OFF — the public nav label is the programme's OWN name (one owner). */
+import { LIFT_OFF_NAME } from './liftOff';
 /**
  * §PUBLIC MESSAGING B3 (2026-09-28) — the ten approved categories are declared
  * ONCE in `src/types.ts` and READ here, never retyped, so the FAQ answer and the
@@ -508,7 +510,8 @@ export type PublicLinkPage =
   | 'faq'
   | 'privacy'
   | 'terms'
-  | 'explore-uk-market-fit';
+  | 'explore-uk-market-fit'
+  | 'lift-off';
 
 export interface PublicNavLink {
   label: string;
@@ -522,6 +525,7 @@ export interface PublicNavGroup extends PublicNavLink {
 /** The public links, each declared once and referred to everywhere else. */
 export const PUBLIC_LINK = {
   explore: { label: EXPLORE_UK_MARKET_FIT_CTA, page: 'explore-uk-market-fit' },
+  liftOff: { label: LIFT_OFF_NAME, page: 'lift-off' },
   howItWorks: { label: 'How It Works', page: 'how-it-works' },
   ukMarketAccess: { label: 'UK Market Access', page: 'uk-market-access' },
   forBrands: { label: 'For Brands', page: 'for-brands' },
@@ -537,6 +541,7 @@ export const PUBLIC_NAV: readonly PublicNavGroup[] = [
     page: PUBLIC_LINK.howItWorks.page,
     children: [
       PUBLIC_LINK.explore,
+      PUBLIC_LINK.liftOff,
       PUBLIC_LINK.howItWorks,
       PUBLIC_LINK.ukMarketAccess,
       PUBLIC_LINK.forBrands,

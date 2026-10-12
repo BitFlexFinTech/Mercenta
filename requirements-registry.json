@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 561,
+    "total_entries": 562,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6550,6 +6550,15 @@
       "status": "built_and_tested",
       "evidence": "scripts/validate-retired-platforms.mjs §2c — the ABSENCE GUARD (16 removed-file + 4 removed-directory + 21 live-marker assertions), MUTATION-PROVED (a re-created social module ⇒ FAIL; restored byte-identical ⇒ PASS); scripts/validate-d4-persistence.mjs O1/O2 (Postiz absent); scripts/validate-admin-shell-bundle.mjs + scripts/validate-workspace-shell.mjs + scripts/validate-investor-demo.mjs (24-stage lifecycle) + scripts/validate-operating-costs.mjs + scripts/validate-e6-brand-surfaces.mjs F8 (18-item brand nav); e2e/retired-platforms.spec.ts + e2e/app-shell.spec.ts + e2e/integration-hub.spec.ts + e2e/redesign-surfaces.spec.ts (all repointed to ABSENCE); scripts/validate-built-rows.mjs PASS (no surviving row cites a deleted file); node scripts/validate-e2e-scenarios.mjs (16/16, 404 scenarios).",
       "last_verified": "2026-10-10",
+      "superseded_by": null
+    },
+    {
+      "id": "lift-off-launch-programme",
+      "description": "LIFT OFF | BY MERCENTA (2026-10-12) — Mercenta's OWN-NAMED launch programme, and a DIFFERENT customer to the plain managed-UK-distribution service an established brand takes. It mirrors the rules of the retail channel's new-product launch programme EXACTLY: a large OPENING ORDER requested up front (not waited for) in exchange for RETURN RIGHTS on unsold stock and ADVERTISING SUPPORT, over a TEN-WEEK sell-through window, by INVITATION with the channel deciding eligibility and approval. Mercenta runs the whole programme for a brand — that is what the brand pays for. The channel-specific NUMERIC thresholds are NOT asserted (LIFT_OFF_TERMS_VERIFIED=false, fail-closed) and are checked against the live terms per launch; no rule was invented and no outcome is promised.",
+      "source": "Founder directive 2026-10-12 — the programme must mirror the channel's rules under Mercenta's own name, get its OWN section in the brand portal, and be offered on the public site; the name 'Lift Off | By Mercenta' was chosen by the Founder.",
+      "status": "built",
+      "evidence": "src/config/liftOff.ts (the ONE owner: name, endorsement, rules, eligibility, statuses, public copy, named sources); src/lib/liftOff/eligibility.ts (deterministic, tenant-scoped, fail-closed eligibility); src/components/brand/LiftOffProgramme.tsx (the brand-portal section, its own 'Programme' nav section, lazy-loaded); src/components/marketing/LiftOff.tsx (the public outcome-only offer page feeding Explore UK Market Fit); src/lib/seo/publicRoutes.ts + src/config/positioning.ts + src/components/marketing/Home.tsx (the public route); public/robots.txt + public/sitemap.xml; scripts/validate-lift-off.mjs (31 checks, MUTATION-PROVED: LIFT_OFF_TERMS_VERIFIED flipped to true => FAIL, restored byte-identical sha256 32284806b13d10af28bc3a99d17648c83dd6442159c8b179bc2af22fbb90ddab); scripts/validate-e6-brand-surfaces.mjs F8 repointed to the 20-item brand nav AND its multi-line-item defect FIXED.",
+      "last_verified": "2026-10-12",
       "superseded_by": null
     }
   ]

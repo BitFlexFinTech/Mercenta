@@ -43,6 +43,8 @@ const FAQ = lazy(() => import('@/components/marketing/FAQ').then(m => ({ default
 const ExploreUkMarketFit = lazy(() =>
   import('@/components/marketing/ExploreUkMarketFit').then(m => ({ default: m.ExploreUkMarketFit }))
 );
+// §LIFT OFF — the public offer page, code-split like the other public pages.
+const LiftOff = lazy(() => import('@/components/marketing/LiftOff').then(m => ({ default: m.LiftOff })));
 
 import {
   ArrowRight,
@@ -156,6 +158,12 @@ function renderPublicPageBody(
   if (page === 'explore-uk-market-fit') return (
     <Suspense fallback={SUSPENSE_FALLBACK}>
       <ExploreUkMarketFit onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
+  // §LIFT OFF — the launch programme's public offer page (outcome only).
+  if (page === 'lift-off') return (
+    <Suspense fallback={SUSPENSE_FALLBACK}>
+      <LiftOff onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
   return null;
