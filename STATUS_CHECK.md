@@ -26,7 +26,41 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 10 — THE RECORD RECONCILIATION: NO BUILDABLE `not_started` ROW REMAINS (session 135, 2026-10-12)
+## §BATCH 10 — THE LIFT OFF DEMO LEG CLEARED: THE APPLICATION IS THREE-WAY VERIFIED (session 136, 2026-10-12)
+
+**BUILT — the ONE recorded OUTSTANDING BLOCKER was executed on its own and cleared.** The resume block's
+outstanding blocker was the owed Lift Off demo-leg clean live run. `node scripts/verify-live-demo.mjs`
+(read-only; `npm run verify:live`) was run on its own against `https://demo.mercenta.co.uk` →
+**276 PASS / 0 FAIL** (exit 0). Every previously non-passing check cleared. The suite spans L1–L32: the public
+homepage, the inner pages in both shells, the footer/cookie notice, the Explore assessment result, the static
+public surface, the channel-issued PO revision flow, the acknowledgement↔invoice price rule, the compliance
+document set, the delivery appointment, the acknowledgement duties, the ASN/confirmation verdicts, the pickup
+lead-time verdict, the ASN pallet structure, the fulfilment-track label, the contract closing controls, the
+founder closing path, the Mercenta-Brain absence, the platform-mode switch, the 3PL card + escalation, the
+custom 404/headers, the privacy policy and the enlarged catalogue.
+
+**TESTED — measured this session.** `verify:live` **276 PASS / 0 FAIL** (exit 0, live) ·
+`validate:no-stale-blockers` **58/58 PASS** · `validate:resume-state` **PASS (53 assertions)** ·
+`validate:plain-english` **PLAIN_ENGLISH_ENFORCEMENT_PASS (20/0)** · `validate:rules-application`
+**RULES_APPLICATION_PASS (30/0)**. (No application file changed, so typecheck/lint/build/`validate:all` are
+unchanged from the last checkpoint.)
+
+**§DEFECT FOUND THIS SESSION — FIXED at source (rule 07 / rule 08).** Editing the `NEXT TASK` line dropped the
+record that the closed picture-comparison job is CLOSED; the §9 ABSENCE GUARD in
+`scripts/validate-no-stale-blockers.mjs` caught it (**57/58, one FAIL**). **FIXED** by restoring the
+`CLOSED, NOT PENDING` clause in BOTH `PROJECT_STATUS.md` and `HANDOFF.md`; the guard is the class-wide protection
+and was NOT weakened.
+
+**Three-way status: VERIFIED COMMITTED CHECKPOINT — the demo leg NOT APPLICABLE for THIS increment (no
+application runtime change).** The APPLICATION-runtime three-way is now fully verified (live site serving
+`71c001f`, 276/0).
+
+**RESULT: DONE.** Blocker CLEARED. **NEXT: the OWNER'S two UX decisions** —
+`discovered-overview-vestigial-toolbar-strip` · `discovered-support-team-mobile-pane-overflow` — then the
+remaining business/legal decisions and the seven Phase-15 launch prerequisites (external input). No credential is
+needed for any of it.
+
+## §BATCH 10 — THE RECORD RECONCILIATION: NO BUILDABLE `not_started` ROW REMAINS (session 135, 2026-10-12) — SUPERSEDED BY THE LIFT OFF DEMO-LEG CLEARANCE
 
 **BUILT — the recorded next step was investigated, found STALE, and corrected at source (rule 10).** The
 resume block told the next session to close "the remaining code-only `not_started` rows". A `not_started`
