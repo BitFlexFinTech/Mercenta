@@ -299,6 +299,23 @@ check(
     read('src/components/shared/WorkWorkspace.tsx').includes('work-row-${w.id}')
 );
 
+/**
+ * §discovered-support-team-mobile-pane-overflow (2026-10-12) — the two-pane
+ * "Support & Team" surface must STACK below `md` (chat first, the team pane
+ * below) so a phone never needs a sideways scroll (measured 86–102px of
+ * horizontal overflow in the shell's `main` before this). Asserted POSITIVELY at
+ * the owner file, so the side-by-side layout cannot silently return.
+ */
+const teamSrc = read('src/components/brand/BrandTeamMessages.tsx');
+check(
+  '§support-team-mobile — the two-pane Support & Team layout stacks below md (side by side from md up)',
+  /flex-col[^"]*md:flex-row/.test(teamSrc)
+);
+check(
+  '§support-team-mobile — the team pane is full width on mobile and a fixed column from md up',
+  teamSrc.includes('w-full') && teamSrc.includes('md:w-56')
+);
+
 console.log(`\nWORKSPACE SHELL: ${pass} PASS / ${fail} FAIL`);
 console.log(`Legacy page-shell backlog: ${LEGACY_SHELL_BACKLOG.length} file(s) remaining`);
 if (fail > 0) {

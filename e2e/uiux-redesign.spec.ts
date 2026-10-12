@@ -6,7 +6,13 @@
  * contracts survived it:
  *
  *   - Operations Overview is a WORKSPACE (frame + context bar + header +
- *     sticky toolbar + metric band + pipeline + queue + context rail)
+ *     metric band + pipeline + queue + context rail). §REPOINTED (2026-10-12,
+ *     `discovered-overview-vestigial-toolbar-strip` option (a)): the Overview's
+ *     `sticky toolbar` slot was REMOVED — it held only an inert ⌘K hint and read
+ *     as an empty control bar, so the assertion on `[data-workspace-toolbar]` is
+ *     gone from test 1. The shared workspace shell still renders the toolbar slot
+ *     for the workspaces that own real controls (its guard lives in
+ *     `validate-uiux-redesign.mjs`).
  *   - the saturated palette is actually rendered (solid pipeline fills, metric
  *     accents, on-palette text)
  *   - real charts render and are ANIMATED (draw-in / arc / bar growth)
@@ -31,7 +37,7 @@ test.describe('UI/UX Wave 2 — Operations Overview workspace', () => {
 
     await expect(page.locator('[data-workspace-frame]').first()).toBeVisible();
     await expect(page.locator('[data-workspace-header]').first()).toBeVisible();
-    await expect(page.locator('[data-workspace-toolbar]').first()).toBeVisible();
+    // §REPOINTED — the Overview no longer renders a sticky toolbar (see the file header).
 
     await expect(page.getByTestId('kpi-value-pending-pos')).toBeVisible();
     await expect(page.getByTestId('kpi-value-gate')).toBeVisible();

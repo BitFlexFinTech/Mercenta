@@ -912,6 +912,16 @@ export function AdminDashboard({
   return (
     <div data-testid="dashboard-loaded">
       <WorkspaceFrame>
+        {/*
+          §discovered-overview-vestigial-toolbar-strip (option a) — the sticky
+          `toolbar` slot is REMOVED from this Overview. Its only remaining content
+          was the inert "⌘K for records and destinations" hint (now in the header
+          facts line), so the workspace rendered a bordered, backdrop-blurred strip
+          that read as an EMPTY control bar. The density / grouping controls it was
+          built for were removed in the 2026-09-22 §Dashboard-cleanup pass; the
+          overview is a read-only business view. Other workspaces that own real
+          toolbar controls (queues, tables) keep theirs.
+        */}
         <WorkspaceHeader
           eyebrow="Admin Hub · Portfolio"
           /**
@@ -945,26 +955,22 @@ export function AdminDashboard({
               <span className="font-mono text-ds-label text-zinc-500">
                 {renewalsDue.length} renewals in window
               </span>
+              {/*
+                §discovered-overview-vestigial-toolbar-strip — the ⌘K hint moved
+                here (the header facts line). It used to sit alone inside the
+                sticky `toolbar` slot, which rendered as an empty control bar
+                because its only other content (the Density / Group-rows Queue
+                options) was removed in the 2026-09-22 §Dashboard-cleanup pass.
+              */}
+              <span className="hidden font-mono text-ds-label text-zinc-600 sm:inline">
+                ⌘K for records and destinations
+              </span>
             </>
           }
           actions={
             <Button onClick={go('purchase_orders_admin')}>
               Review purchase orders <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-          }
-          toolbar={
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              {/*
-                §Dashboard-cleanup (2026-09-22) — the Density and Group-rows
-                controls were removed with the attention queue they only served
-                (both were `Queue` presentation options). The overview is a
-                read-only business view; row-density controls belong to the
-                surfaces that own a table (Work Management, Control Centre).
-              */}
-              <span className="hidden font-mono text-ds-micro text-zinc-600 sm:inline">
-                ⌘K for records and destinations
-              </span>
-            </div>
           }
         />
 

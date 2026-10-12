@@ -77,7 +77,10 @@ export function BrandTeamMessages() {
           <Users className="w-3.5 h-3.5 inline mr-1" /> Team Notes
         </button>
       </div>
-      <div className="flex-1 flex gap-4 min-h-0">
+      {/* §discovered-support-team-mobile-pane-overflow — STACKED below `md`. The two panes sit side by side
+          from `md` up; on a phone they stack (chat first, the team pane below) so the surface never needs a
+          sideways scroll (measured 86–102px of horizontal overflow before this). */}
+      <div className="flex-1 flex flex-col gap-4 min-h-0 md:flex-row">
         <div className="flex-1 flex flex-col min-h-0">
           {activeTab === 'support' && (
             <div className="flex-1 flex flex-col bg-ink-900/50 border border-white/[0.06] rounded-xl overflow-hidden">
@@ -144,7 +147,7 @@ export function BrandTeamMessages() {
             </div>
           )}
         </div>
-        <div className="w-56 flex-shrink-0 bg-ink-900/50 border border-white/[0.06] rounded-xl p-3">
+        <div className="w-full bg-ink-900/50 border border-white/[0.06] rounded-xl p-3 md:w-56 md:flex-shrink-0">
           <div className="flex items-center gap-2 mb-3">
             <Users className="w-3.5 h-3.5 text-zinc-500" />
             <span className="text-ds-micro font-medium text-zinc-400 uppercase">Team ({teamMembers.length})</span>

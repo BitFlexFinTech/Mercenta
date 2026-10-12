@@ -272,6 +272,21 @@ check(
   'Operations Overview no longer offers density/grouping controls (removed with the queue they served)',
   !OVERVIEW_SRC.includes('setDensity') && !OVERVIEW_SRC.includes('groupAttention')
 );
+/**
+ * §discovered-overview-vestigial-toolbar-strip (2026-10-12, option (a)) — the
+ * Overview's sticky `toolbar` slot is REMOVED. It held only the inert "⌘K for
+ * records and destinations" hint and rendered as an EMPTY control bar; the hint
+ * now lives in the header's own facts (`meta`) line. Asserted POSITIVELY, so the
+ * empty strip cannot silently return and the shortcut guidance is not lost with it.
+ */
+check(
+  'Operations Overview no longer renders the vestigial sticky toolbar strip (removed 2026-10-12)',
+  !OVERVIEW_SRC.includes('toolbar={')
+);
+check(
+  'the ⌘K shortcut hint lives in the Overview header facts line (not a toolbar strip)',
+  OVERVIEW_SRC.includes('⌘K for records and destinations')
+);
 check(
   'the Overview renders Portfolio at a glance before every other section',
   OVERVIEW_SRC.indexOf('title="Portfolio at a glance"') > -1 &&

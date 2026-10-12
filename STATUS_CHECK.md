@@ -26,7 +26,19 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 10 — THE LIFT OFF DEMO LEG CLEARED: THE APPLICATION IS THREE-WAY VERIFIED (session 136, 2026-10-12)
+## §BATCH 11 — THE LAST TWO APPLICATION-RUNTIME DECISIONS BUILT (session 136, 2026-10-12)
+
+**BUILT — the two recorded UX rows, each with a mutation-proved gate.** **(1) `discovered-overview-vestigial-toolbar-strip` (option (a)):** the Admin Overview's sticky `toolbar` slot held only an inert ⌘K hint and read as an empty control bar, so the prop is REMOVED from `src/components/admin/AdminDashboard.tsx` (the shared shell only renders `[data-workspace-toolbar]` when the prop is passed) and the hint moved into the header's `meta` facts line; `e2e/uiux-redesign.spec.ts` test 1 is repointed (documented §REPOINTED). **(2) `discovered-support-team-mobile-pane-overflow` (option (a)):** `src/components/brand/BrandTeamMessages.tsx` now uses `flex flex-col … md:flex-row` with the team pane `w-full … md:w-56`, so at 390px the panes STACK (chat first, team pane below) and the measured 86–102px sideways scroll is gone. Both rows are now `built_and_tested`; registry `not_started` **8 → 6**.
+
+**TESTED — measured this session.** typecheck **0** · lint **0** · build **ok** · `validate:all` **188 PASS / 0 FAIL** · `validate-uiux-redesign` **359/0** · `validate-workspace-shell` **93/0** · `no-stale-blockers` **58/58** · `registry-integrity` **7/0** · `built-rows` **2352/0** · `e2e/uiux-redesign.spec.ts` **13 passed** · `e2e/redesign-surfaces.spec.ts` **26 passed**. **BOTH NEW GATES MUTATION-PROVED:** with `toolbar={` reintroduced the uiux gate FAILED **358/1**; with `md:flex-row` removed the workspace-shell gate FAILED **92/1** — both files restored byte-identical (`AdminDashboard.tsx` sha256 `96b79591…`, `BrandTeamMessages.tsx` sha256 `6cfaf9dc…`) and both re-ran PASS.
+
+**§DEFECT FOUND THIS SESSION — FIXED at source.** The first edit put a JSX comment in the attribute position of `<WorkspaceHeader …>`, which is invalid JSX; typecheck/lint caught it (`TS1005`) and the comment was moved above the element. Also, editing the `NEXT TASK` line had dropped the "CLOSED, NOT PENDING" record; the §9 ABSENCE GUARD in `validate-no-stale-blockers.mjs` caught it and it was restored (see §BATCH 10 below).
+
+**Three-way status:** APPLICATION-runtime change → the three-way contract applies: demo deploy + live verification are performed at close (recorded in the resume block).
+
+**RESULT: DONE.** Both application-runtime UX decisions are closed. **NEXT: the OWNER’S six remaining `not_started` decisions**, then the seven Phase-15 launch prerequisites (external input). No credential is needed.
+
+## §BATCH 10 — THE LIFT OFF DEMO LEG CLEARED: THE APPLICATION IS THREE-WAY VERIFIED (session 136, 2026-10-12) — SUPERSEDED BY §BATCH 11
 
 **BUILT — the ONE recorded OUTSTANDING BLOCKER was executed on its own and cleared.** The resume block's
 outstanding blocker was the owed Lift Off demo-leg clean live run. `node scripts/verify-live-demo.mjs`
