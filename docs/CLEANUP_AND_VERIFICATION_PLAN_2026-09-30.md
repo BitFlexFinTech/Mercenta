@@ -83,11 +83,11 @@ REMOVED as obsolete (three later session logs call it a "false gap" — the two 
 is recorded for the Founder, NOT resolved silently); `workstreamBD-seed-expansion-deferred` is owner-DEFERRED (no
 invented brands); `phase0-extension-scheduler-activation`, the SLA half of
 `discovered-acquisition-revenue-floor-and-sla`, `discovered-representation-authority-record` and
-`uiux-wave3-visual-regression-gate` each need a **Founder DECISION**; `s0-discovered-pagination-and-error-boundary-coverage-gap`
+`uiux-wave3-visual-regression-gate` each need a **Founder DECISION** — **§CORRECTED 2026-10-12: `uiux-wave3-visual-regression-gate` NO LONGER DOES.** The owner closed it in his own words ("i still have no idea what this picture thing is man … i just want you to complete the build"): it is **NOT part of the build**, its baseline-policy question is **WITHDRAWN** rather than answered, its row is `deferred`, and no session may raise it again; `s0-discovered-pagination-and-error-boundary-coverage-gap`
 belongs to the PAUSED E2E programme; `uiux-wave3-part2..5` are order item 4; and `discovered-micro-typography-and-shim-debt`'s
 two open halves are BOTH already investigated (the shim file must NOT be deleted — its own row records ≈215 live call
 sites in the NEW design system). **Therefore the immediate next work is ORDER ITEM 3 — the E2E coverage programme,
-resumed at E2E-2 — unless the Founder first settles one of the decision-blocked rows.** Also reconciled this session:
+resumed at E2E-2 — unless the Founder first settles one of the decision-blocked rows.** **§REPOINTED 2026-10-12:** that sentence is the ORDER as it stood on 2026-09-30 and is NO LONGER the next step — the E2E coverage programme ran on to E2E-9, so **read this section as the ORDER, never as the current next task**; the live next task is `PROJECT_STATUS.md` → `CURRENT RESUME STATE` → `NEXT TASK`. Also reconciled this session:
 one inherited uncommitted registry edit (`redesign-legacy-page-shell-backlog` `not_started` → `removed`), the duplicate
 `PLAIN SUMMARY` line in `HANDOFF.md`, and the stale `BATCH n`/`S n`-only NEXT-TASK token vocabulary in
 `scripts/validate-resume-state.mjs` (now also accepts the renamed `E2E-n`, mutation-proved). No credential required.

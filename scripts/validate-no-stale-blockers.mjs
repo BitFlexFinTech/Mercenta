@@ -152,9 +152,21 @@ test(
   'the resume block does NOT still name the finished BATCH 8 = Part 6 as the NEXT TASK',
   !/NEXT TASK:[^\n]*BATCH 8 = Part 6/.test(resumeBlockNow)
 );
+/**
+ * §REPOINTED 2026-10-12 (rule 08 §2 — an assertion about a REMOVED thing becomes an ABSENCE GUARD: never deleted,
+ * never weakened). This assertion used to REQUIRE the resume block to name `WAVE 3 PART 6` (the visual-regression
+ * gate) as the work that follows the programme. That item was CLOSED BY THE OWNER on 2026-10-12 — "i still have no
+ * idea what this picture thing is man … i just want you to complete the build" — so the assertion that pinned it
+ * now pins its ABSENCE: the resume block must name the CURRENT work (BATCH 10 — finishing the build) and must
+ * record the closed item as CLOSED, never present it as the next task.
+ */
 test(
-  'the resume block names the work that FOLLOWS the programme (WAVE 3 PART 6)',
-  /NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow)
+  'the resume block names the work that FOLLOWS the programme (BATCH 10 — finishing the build)',
+  /NEXT TASK:[^\n]*BATCH 10/.test(resumeBlockNow)
+);
+test(
+  'the closed picture-comparison check is recorded as CLOSED, not presented as the next work (absence guard)',
+  /NEXT TASK:[^\n]*CLOSED, NOT PENDING/.test(resumeBlockNow) && !/NEXT TASK:[^\n]*WAVE 3 PART 6/.test(resumeBlockNow)
 );
 /**
  * §9 — THE PICTURE-COMPARISON JOB'S PREMISE, CORRECTED (2026-10-11, rule 07).
@@ -201,6 +213,31 @@ test(
 test(
   'that row states the pictures are NOT kept, so no baseline set exists in the project',
   /NEVER-TRACKED list/.test(rowText) && /NONE of them is kept in the project/.test(rowText)
+);
+/**
+ * §CLOSED 2026-10-12 — THE OWNER'S CLOSURE OF THE PICTURE-CHECK, PINNED.
+ *
+ * The owner closed this item in his own words ("i still have no idea what this picture thing is man … i just
+ * want you to complete the build"). Recording that in the registry ALONE would be a hope, not a fact: a later
+ * session could quietly re-open it and put the same question to him AGAIN — which is exactly the drift rule 10
+ * exists to stop. So the closure is pinned here, AND in the script that REGENERATES the row, so a re-run cannot
+ * reopen it either. Both assertions were proved able to fail.
+ */
+test(
+  "the row records the OWNER'S CLOSURE (2026-10-12): not part of the build, question withdrawn, never raised again",
+  /§CLOSED 2026-10-12 BY THE OWNER/.test(rowText) &&
+    /NOT PART OF THE BUILD/.test(rowText) &&
+    /NO SESSION MAY RAISE IT WITH THE OWNER AGAIN/.test(rowText)
+);
+test(
+  `the picture row is DEFERRED, not outstanding work (status: ${(regressionRow || {}).status || 'MISSING'})`,
+  Boolean(regressionRow) && regressionRow.status === 'deferred'
+);
+const reconcileGenLines = read('scripts/reconcile-uiux-wave3-registry.cjs').split('\n');
+const genClosureIdx = reconcileGenLines.findIndex((l) => /§CLOSED 2026-10-12 BY THE OWNER/.test(l));
+test(
+  'the script that REGENERATES the row makes it deferred at once, so a re-run cannot reopen it',
+  genClosureIdx !== -1 && (reconcileGenLines[genClosureIdx + 1] || '').trim() === "'deferred',"
 );
 const gapAnalysisText = read('docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md');
 test(

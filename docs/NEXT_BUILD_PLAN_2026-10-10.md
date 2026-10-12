@@ -257,7 +257,7 @@ and the §6b coverage gate of `scripts/validate-typecheck-coverage.mjs`). **Batc
 TOO (session 131, 2026-10-11): the five state sources were reconciled onto this plan and `PART 6` above carries its
 before/after evidence. THE WHOLE EXECUTION ORDER IS THEREFORE COMPLETE AND NOTHING HERE REMAINS.** The work that
 follows this programme is NOT in this plan — it is named by `PROJECT_STATUS.md` → `CURRENT RESUME STATE` →
-`NEXT TASK` (`WAVE 3 PART 6`, the visual-regression gate, which waits on ONE Founder decision).
+`NEXT TASK` in the resume block. **§CORRECTED 2026-10-12:** this sentence used to name `WAVE 3 PART 6`, the visual-regression gate, as the work that follows AND as waiting on ONE Founder decision — **the OWNER CLOSED IT that day**: "i still have no idea what this picture thing is man, its really annoying and seems to be going off the actual build. you are making things complicated for nothing. i told you im not technical and i just want you to complete the build." It is **NOT part of the build**, its baseline-policy question is **WITHDRAWN**, its row is `deferred`, and no session may raise it with him again.
 
 Each batch ends with its own BUILT / TESTED / RESULT / NEXT and real command output, and updates
 `PROJECT_STATUS.md`, so a session that stops mid-way resumes from the checklist and never from memory.
