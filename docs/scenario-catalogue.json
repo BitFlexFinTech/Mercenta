@@ -1,5 +1,5 @@
 {
-  "_comment": "§BATCH 0 — THE ONE OWNER of the end-to-end SCENARIO CATALOGUE. docs/E2E_SCENARIO_CATALOGUE.md is GENERATED from this file (do NOT edit the doc by hand). The gate is scripts/validate-e2e-scenarios.mjs. Regenerate the doc with: node scripts/e2e-catalogue.mjs --doc",
+  "_comment": "§BATCH 0 — THE ONE OWNER of the end-to-end SCENARIO CATALOGUE. §CORRECTED 2026-10-12: this comment used to name docs/E2E_SCENARIO_CATALOGUE.md, which was DELETED when the generated document took the established name — the generated document is docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md (also given in meta.generatedDoc below and asserted by the gate), so the two halves of this file now agree. Nothing else changed. docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md is GENERATED from this file (do NOT edit the doc by hand). The gate is scripts/validate-e2e-scenarios.mjs. Regenerate the doc with: node scripts/e2e-catalogue.mjs --doc",
   "meta": {
     "owner": "docs/scenario-catalogue.json",
     "generatedDoc": "docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md",

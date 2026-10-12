@@ -65,7 +65,28 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 **Three-way status: VERIFIED COMMITTED CHECKPOINT — the demo leg NOT APPLICABLE (no application runtime change).** Nothing under `src/`, `e2e/` or the built app changed, so `operating-model.md` §10.4 applies and there was nothing to deploy; the demo still carries the last verified product commit `c026524` (2026-10-11).
 
-**RESULT: PARTIAL, AND HONESTLY SO.** Batch A is DONE and proved; Batch B has verified **one** of the 19 other projects (`policy-nexus`). **17 remain, and the checker names every one of them.** **NEXT:** continue the sweep; then WAVE 3 PART 6, which waits on ONE plain-English Owner decision (what may change a stored baseline picture, and who approves it).
+**RESULT: the sweep was STOPPED by the owner's scope correction; the part that belongs to THIS project is DONE and proved.** Batch A is built and proved, Batch B verified **one** of the 19 other projects before stopping, and **nothing outside Mercenta is work owed.** **ALSO DONE THIS SESSION, INSIDE THIS PROJECT:** the end-to-end catalogue's retired-name defect (recorded immediately below). **NEXT: WAVE 3 PART 6** — waiting on ONE plain-English Owner decision — or, if that is deferred, the ONE row that needs no decision, `s0-discovered-pagination-and-error-boundary-coverage-gap`. **§CORRECTED 2026-10-12:** the next task used to list THREE rows as needing no decision; re-read against their own recorded text, only that one does.
+
+### §ALSO THIS SESSION — INSIDE THIS PROJECT: THE E2E CATALOGUE'S RETIRED-NAME DEFECT (session 132, 2026-10-12)
+
+**BUILT — a real defect found and fixed at source (rule 07), plus the gate that refuses it.** This project's own
+end-to-end files named TWO things that no longer exist: the catalogue's OLD LOCATION (it moved from `e2e/` to
+`docs/`) and the DELETED generated document (it took the established name
+`docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`). **Eleven live citations**, including two that mattered: the
+generator's own string that it WRITES into the owner, and the gate's SEARCH-THE-DOC ERROR MESSAGE, which sent a
+reader to a file that does not exist. All corrected at source, and the error message now DERIVES both names from
+the constants above it so it can never retype a wrong one.
+
+**TESTED — measured this session.** `scripts/validate-e2e-scenarios.mjs` now runs **18/18 checks, PASS**, having
+scanned **829 live files** (`src/`, `scripts/`, `e2e/`, `docs/`, `.github/`) and found **0 stale**. The new
+**section 8** DISCOVERS the retired pair itself and fails on a live mention, while allowing a line that carries a
+dated `§CORRECTED` / `§REPOINTED` marker (history is preserved, never hidden) and skipping `docs/archive/**`;
+the discovery is asserted **not vacuous** (829 > 20), because a scan that finds nothing and reports green is
+exactly what rule 10 §5 forbids. **PROVED ABLE TO FAIL TWICE, each file restored byte-identical:** (A) the
+generator writing the deleted document's name again → 1 failure, exit 1; (B) a correction note losing its dated
+marker → 1 failure. `npm run validate:all` = **187 PASS / 0 FAIL**.
+
+**RESULT — DONE.** No defect left standing, none blocked.
 
 ## §BATCH 8 (PART 6) — THE PROGRAMME CLOSE-OUT (session 131, 2026-10-11) — SUPERSEDED BY §BATCH 9 (THE RULE-10 MACHINE-WIDE SWEEP)
 

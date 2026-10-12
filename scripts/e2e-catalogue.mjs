@@ -6,11 +6,21 @@
 // "every scenario" must be a MEASURABLE target a machine holds us to — not a
 // sentence someone types. This generator owns the two mechanical halves:
 //
-//   `--seed`  build/refresh `e2e/scenario-catalogue.json` — THE ONE OWNER of the
+//   `--seed`  build/refresh `docs/scenario-catalogue.json` — THE ONE OWNER of the
 //             scenario list — seeding one scenario per existing `e2e/*.spec.ts`
 //             so the invariant "no spec is un-named" holds from day one;
-//   `--doc`   project the catalogue into `docs/E2E_SCENARIO_CATALOGUE.md`, so the
-//             human document is GENERATED and cannot drift from the owner.
+//   `--doc`   project the catalogue into `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`,
+//             so the human document is GENERATED and cannot drift from the owner.
+//
+//   §CORRECTED 2026-10-12 (rule 07 + rule 10) — this comment stated two things that were no
+//   longer true, and both had ALSO reached places that matter: the string this file WRITES
+//   into the owner (below), and the stale-document ERROR MESSAGE in the gate
+//   `scripts/validate-e2e-scenarios.mjs`, which sent a reader to a file that does not exist.
+//   The gate refuses a retired name unless the line carrying it also carries a dated marker,
+//   so the two corrections are stated one per line:
+//     §CORRECTED 2026-10-12 — the owner was `e2e/scenario-catalogue.json`; it is `docs/scenario-catalogue.json`.
+//     §CORRECTED 2026-10-12 — the generated doc was `docs/E2E_SCENARIO_CATALOGUE.md`; it is `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`.
+//   All of them are corrected, and the gate now refuses the retired pair.
 //
 // The GATE that enforces the invariants is `scripts/validate-e2e-scenarios.mjs`
 // (swept by `npm run validate:all`). This file only writes; it never asserts.
@@ -71,7 +81,7 @@ function seed() {
   const catalogue = {
     _comment:
       '§BATCH 0 — THE ONE OWNER of the end-to-end SCENARIO CATALOGUE. ' +
-      'docs/E2E_SCENARIO_CATALOGUE.md is GENERATED from this file (do NOT edit the doc by hand). ' +
+      'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md is GENERATED from this file (do NOT edit the doc by hand). ' +
       'The gate is scripts/validate-e2e-scenarios.mjs. Regenerate the doc with: node scripts/e2e-catalogue.mjs --doc',
     meta: { owner: CATALOGUE, generatedDoc: DOC, generator: 'node scripts/e2e-catalogue.mjs --doc' },
     method: {

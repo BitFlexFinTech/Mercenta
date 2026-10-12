@@ -2273,8 +2273,8 @@ const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
  *
  * The end-to-end suite must cover EVERY scenario for the ENTIRE platform, and
  * that must be machine-held rather than claimed. This phase adds the ONE owner of
- * the scenario list (`e2e/scenario-catalogue.json`), the generator that projects
- * it to `docs/E2E_SCENARIO_CATALOGUE.md` (`scripts/e2e-catalogue.mjs`), and the
+ * the scenario list (`docs/scenario-catalogue.json`), the generator that projects
+ * it to `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` (`scripts/e2e-catalogue.mjs`), and the
  * gate `scripts/validate-e2e-scenarios.mjs` (swept by `npm run validate:all`,
  * because the corpus globs `scripts/validate-*.mjs`) which refuses an orphan test,
  * a missing test, an uncovered capability, or a doc that has drifted from the

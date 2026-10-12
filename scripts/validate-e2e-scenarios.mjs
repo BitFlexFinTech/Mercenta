@@ -14,12 +14,20 @@
 //   4. every capability has at least one scenario      (no capability left untested);
 //   5. no scenario id is duplicated;
 //   6. every `e2e/*.spec.ts` is named by at least one scenario   (no ORPHAN test);
-//   7. the generated document `docs/E2E_SCENARIO_CATALOGUE.md` MATCHES the owner
-//      (the human doc can never drift from e2e/scenario-catalogue.json).
+//   7. the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` MATCHES
+//      the owner (the human doc can never drift from `docs/scenario-catalogue.json`).
+//   8. NO LIVE FILE NAMES THE RETIRED PAIR  (added 2026-10-12, below)
 //
-// The ONE owner is `e2e/scenario-catalogue.json`; the doc is GENERATED from it by
+// The ONE owner is `docs/scenario-catalogue.json`; the doc is GENERATED from it by
 // `scripts/e2e-catalogue.mjs` (whose pure `renderDoc` this gate reuses, so there
 // is exactly one renderer and one source of truth).
+//
+// §CORRECTED 2026-10-12 (rule 07 + rule 10). Items 7 and 8's names were WRONG in this
+// file's own text: the owner was called `e2e/scenario-catalogue.json` (it moved to
+// `docs/`) and the generated document `docs/E2E_SCENARIO_CATALOGUE.md` (deleted when the
+// document took the established name). Worse, the stale-document ERROR MESSAGE below sent
+// a reader to that deleted file. Corrected here, and section 8 added so the pair cannot
+// come back.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { renderDoc } from './e2e-catalogue.mjs';
 
@@ -215,9 +223,76 @@ if (c) {
     test(
       'the generated document MATCHES the owner (no drift — run: node scripts/e2e-catalogue.mjs --doc)',
       want === have,
-      want === have ? undefined : 'docs/E2E_SCENARIO_CATALOGUE.md is stale relative to e2e/scenario-catalogue.json'
+      /* §CORRECTED 2026-10-12 — the message DERIVES its two names from the constants
+         above instead of retyping them, so it can never again send a reader to a file
+         that does not exist (it used to name the deleted docs/E2E_SCENARIO_CATALOGUE.md). */
+      want === have ? undefined : `${DOC} is stale relative to ${CATALOGUE} — run: node scripts/e2e-catalogue.mjs --doc`
     );
   }
+
+  /* ── 8. NO LIVE FILE NAMES THE RETIRED PAIR (added 2026-10-12) ─────────────── *
+   * WHY. This gate's own prose called the owner `e2e/scenario-catalogue.json` (it moved to
+   * `docs/`) and the generated document `docs/E2E_SCENARIO_CATALOGUE.md` (deleted when the
+   * document took the established name) — and its stale-document message sent a reader to
+   * that deleted file. A name that outlives the thing it names is a FALSE STATEMENT about
+   * this project, not background noise, so the pair is now DISCOVERED and refused.
+   *
+   * How it stays honest:
+   *   · the scan READS the files (src/, scripts/, e2e/, docs/, .github/) — no retyped list;
+   *   · a line carrying a dated `§CORRECTED` / `§REPOINTED` marker is ALLOWED, because history
+   *     must be preserved rather than hidden (rule 10 §3);
+   *   · `docs/archive/**` is skipped (superseded material, kept on purpose);
+   *   · the discovery is asserted NOT to be vacuous, because a scan that finds nothing and
+   *     reports green certifies the wrong state (rule 10 §5);
+   *   · this gate excludes ITSELF — it must contain the tokens in order to search for them.
+   */
+  const RETIRED_NAMES = [
+    ['the deleted generated document', 'docs/E2E_SCENARIO_CATALOGUE.md'],
+    ['the catalogue\'s old location', 'e2e/scenario-catalogue.json'],
+  ];
+  const scanFiles = [];
+  const collect = (rel) => {
+    if (!existsSync(abs(rel))) return;
+    let entries;
+    try {
+      entries = readdirSync(abs(rel), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const child = `${rel}/${e.name}`;
+      if (e.isDirectory()) {
+        if (['node_modules', 'dist', 'archive', '.git'].includes(e.name)) continue;
+        collect(child);
+      } else if (/\.(mjs|js|cjs|ts|tsx|json|md|sh|yml|yaml|html)$/.test(e.name)) {
+        scanFiles.push(child);
+      }
+    }
+  };
+  for (const r of ['src', 'scripts', 'e2e', 'docs', '.github']) collect(r);
+  const scanned = scanFiles.filter((f) => f !== 'scripts/validate-e2e-scenarios.mjs');
+  const staleHits = [];
+  for (const f of scanned) {
+    read(f)
+      .split('\n')
+      .forEach((line, i) => {
+        for (const [label, token] of RETIRED_NAMES) {
+          if (!line.includes(token)) continue;
+          if (/§CORRECTED|§REPOINTED/.test(line)) continue; // dated history — allowed, and required
+          staleHits.push(`${f}:${i + 1} [${label}] ${line.trim().slice(0, 110)}`);
+        }
+      });
+  }
+  test(
+    `the retired names are DISCOVERED, not assumed (${scanned.length} live file(s) scanned)`,
+    scanned.length > 20,
+    scanned.length > 20 ? undefined : 'the scan found almost nothing — every verdict below would be vacuous'
+  );
+  test(
+    `no live file names a retired name without a dated correction (${scanned.length} scanned, ${staleHits.length} stale)`,
+    staleHits.length === 0,
+    staleHits.slice(0, 12).join('  ·  ')
+  );
 
   console.log(
     `\n[e2e-scenarios] ${checks - failures}/${checks} checks pass · ${(c.scenarios ?? []).length} scenarios (${withTest.length} traceable to a test) · ${(c.capabilities ?? []).length} capabilities`
