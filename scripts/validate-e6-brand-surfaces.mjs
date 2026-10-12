@@ -4225,6 +4225,27 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §BATCH 10 — E2E COVERAGE CLOSURE (2026-10-12). Declared set for the phase that
+   * closes registry row `s0-discovered-pagination-and-error-boundary-coverage-gap`
+   * by adding the two browser specs the S0 audit found missing (pagination
+   * behaviour; ErrorBoundary containment) and the catalogue scenarios that name
+   * them, plus the regenerated coverage document. The F5/F5b/F6 contract is
+   * UNCHANGED: a changed SOURCE file outside EVERY declared set still fails. No
+   * PROTECTED path is touched.
+   */
+  const BATCH10_E2E_COVERAGE_SCOPE = new Set([
+    'e2e/pagination.spec.ts',                          /* NEW — the pagination spec */
+    'e2e/error-boundary.spec.ts',                      /* NEW — the containment spec */
+    'docs/scenario-catalogue.json',                    /* the two new scenarios */
+    'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',      /* the regenerated document */
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -4262,6 +4283,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §LIFT OFF — the launch programme's declared surface (see above). */
           LIFT_OFF_SCOPE.has(p) ||
           [...LIFT_OFF_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 10 — the E2E coverage closure's declared surface (see above). */
+          BATCH10_E2E_COVERAGE_SCOPE.has(p) ||
+          [...BATCH10_E2E_COVERAGE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P6 — the PO-document-pack phase's declared surface (see above). */
           P6_PO_DOCUMENT_PACK_SCOPE.has(p) ||
           [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

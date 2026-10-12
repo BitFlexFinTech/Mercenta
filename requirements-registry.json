@@ -374,10 +374,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-12 (session 132), AFTER the owner corrected the scope of the rule-10 row. Two rows are involved: rule10-machine-wide-sweep-tooling was added (built_and_tested — the files exist and are proved), and rule10-machine-wide-describer-sweep moved not_started -> in_progress -> deferred (built while chasing a per-project sweep the owner has said he did not ask for; it is NOT REQUESTED and NOT owed). Recomputed against the entries themselves: built_and_tested:320, built:180, not_started:10, removed:33, deferred:10, blocked:7, complete:1 — total 561 = _meta.total_entries, and there is NO in_progress row. The previous snapshot (2026-10-11, the §BATCH 8 = Part 6 close-out) was 560 entries with not_started 11, no in_progress row and no tooling row.",
-      "built_and_tested": 320,
-      "built": 180,
-            "not_started": 9,
+      "_note": "Recomputed 2026-10-12 (session 133, BATCH 10), against the entries themselves. BATCH 10 closed the S0 coverage-gap row s0-discovered-pagination-and-error-boundary-coverage-gap (not_started -> built_and_tested) by adding e2e/pagination.spec.ts + e2e/error-boundary.spec.ts. The previous snapshot (session 132) was ALSO stale: it recorded built:180 while the entries held built:181 (the lift-off-launch-programme row). Correct counts now: built_and_tested:321, built:181, not_started:8, removed:33, deferred:11, blocked:7, complete:1 — total 562 = _meta.total_entries; there is NO in_progress row.",
+      "built_and_tested": 321,
+      "built": 181,
+      "not_started": 8,
       "removed": 33,
       "deferred": 11,
       "blocked": 7,
@@ -4826,11 +4826,11 @@
     },
     {
       "id": "s0-discovered-pagination-and-error-boundary-coverage-gap",
-      "description": "DISCOVERED (S0): no browser spec asserts pagination behaviour (page switching, page size, totals) and no spec asserts that an ErrorBoundary actually contains a real render fault, even though six ErrorBoundary sites and six pagination-bearing modules exist. Recorded as a coverage gap, not a functional defect. Owner: S12",
-      "evidence": "docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md §10 rows 9 and 18 (68 specs scanned — no pagination or error-boundary assertion found)",
-      "status": "not_started",
-      "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "description": "DISCOVERED (S0): no browser spec asserts pagination behaviour (page switching, page size, totals) and no spec asserts that an ErrorBoundary actually contains a real render fault, even though six ErrorBoundary sites and six pagination-bearing modules exist. CLOSED 2026-10-12 (BATCH 10): two browser specs now assert both behaviours. Owner: S12",
+      "evidence": "e2e/pagination.spec.ts (drives the canonical Pagination primitive — src/components/ui.tsx:605 — across four pages, and the search/filter/sort/pagination DataTable layer — src/components/shared/DataTable.tsx:241 — on the admin Global Catalog after a LARGER catalogue is injected in flight, asserting page switching, the page-size control and the header-consistent total); e2e/error-boundary.spec.ts (injects a real render fault into the admin overview and asserts the ErrorBoundary at src/components/shared/ErrorBoundary.tsx contains it — the fallback names the section, the shell navigation survives, the reset control is offered — plus a fault-free control); docs/scenario-catalogue.json rows spec-pagination + spec-error-boundary; scripts/validate-e2e-scenarios.mjs 18/18 PASS (407 scenarios, no orphan test)",
+      "status": "built_and_tested",
+      "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20); closed by BATCH 10 (2026-10-12).",
+      "last_verified": "2026-10-12",
       "superseded_by": null
     },
     {

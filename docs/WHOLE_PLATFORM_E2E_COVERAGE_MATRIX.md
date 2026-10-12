@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 405 · **Capabilities:** 8
+**Scenarios:** 407 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -31,7 +31,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | integrations | 10 |
 | onboarding_acquisition | 58 |
 | operations | 47 |
-| platform | 78 |
+| platform | 80 |
 
 ## Scenarios
 
@@ -383,6 +383,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-document-verification | platform | mixed | happy | `e2e/document-verification.spec.ts` | — |
 | spec-domain-acceptance | platform | mixed | happy | `e2e/domain-acceptance.spec.ts` | — |
 | spec-domain-persistence | platform | mixed | happy | `e2e/domain-persistence.spec.ts` | — |
+| spec-error-boundary | platform | mixed | happy | `e2e/error-boundary.spec.ts` | — |
 | spec-founder-investor-centre | founder | mixed | happy | `e2e/founder-investor-centre.spec.ts` | — |
 | spec-founder-operating-system | founder | mixed | happy | `e2e/founder-operating-system.spec.ts` | — |
 | spec-fulfillment-tracks | commerce_logistics | mixed | happy | `e2e/fulfillment-tracks.spec.ts` | — |
@@ -409,6 +410,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-opportunity-discovery | onboarding_acquisition | mixed | happy | `e2e/opportunity-discovery.spec.ts` | — |
 | spec-outreach-provider-hardening | platform | mixed | happy | `e2e/outreach-provider-hardening.spec.ts` | — |
 | spec-p12-channel-operations | platform | mixed | happy | `e2e/p12-channel-operations.spec.ts` | — |
+| spec-pagination | platform | mixed | happy | `e2e/pagination.spec.ts` | — |
 | spec-po-ack-duties | commerce_logistics | mixed | happy | `e2e/po-ack-duties.spec.ts` | — |
 | spec-po-admin-ack-surface | commerce_logistics | mixed | happy | `e2e/po-admin-ack-surface.spec.ts` | — |
 | spec-po-brand-ack-surface | commerce_logistics | mixed | happy | `e2e/po-brand-ack-surface.spec.ts` | — |

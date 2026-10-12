@@ -4039,6 +4039,24 @@
       "type": "happy",
       "spec": "e2e/state-coverage.spec.ts",
       "expects": "The state coverage journey renders and behaves as its spec asserts: no data-backed surface tells the operator it has no data while the data is still loading."
+    },
+    {
+      "id": "spec-pagination",
+      "capability": "platform",
+      "journey": "pagination",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/pagination.spec.ts",
+      "expects": "The pagination journey renders and behaves as its spec asserts: the canonical Pagination primitive switches pages and reports its page count, and the search/filter/sort/pagination table layer switches pages, honours the page-size control and reports a total consistent with the header."
+    },
+    {
+      "id": "spec-error-boundary",
+      "capability": "platform",
+      "journey": "error boundary",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/error-boundary.spec.ts",
+      "expects": "The error-boundary journey renders and behaves as its spec asserts: a real render fault in a portal view is contained by its ErrorBoundary (the fallback renders and names the section, the shell navigation survives and the reset control is offered) while a healthy render shows no fallback."
     }
   ]
 }
