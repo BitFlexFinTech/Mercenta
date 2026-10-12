@@ -26,7 +26,44 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
-## §BATCH 9 — THE RULE-10 MACHINE-WIDE SWEEP: BATCH A BUILT AND PROVED, BATCH B BEGUN (session 132, 2026-10-12)
+## §BATCH 10 — THE RECORD RECONCILIATION: NO BUILDABLE `not_started` ROW REMAINS (session 135, 2026-10-12)
+
+**BUILT — the recorded next step was investigated, found STALE, and corrected at source (rule 10).** The
+resume block told the next session to close "the remaining code-only `not_started` rows". A `not_started`
+STATUS says only that a row is not done — never WHY — so a session opening the matrix saw eight such rows and
+could not tell which (if any) was ordinary build work. NONE is: SEVEN wait on an Owner decision and ONE is a
+record of decisions already taken. Each row now carries a machine-readable `_disposition` (a tag plus an
+explanation) in `requirements-registry.json`, so the reason lives WITH the row: `OWNER DECISION` —
+`batch-4-zod-validation` · `workstreamBD-seed-expansion-deferred` · `phase0-extension-scheduler-activation` ·
+`discovered-acquisition-revenue-floor-and-sla` · `discovered-representation-authority-record` ·
+`discovered-support-team-mobile-pane-overflow` · `discovered-overview-vestigial-toolbar-strip`; `RECORD` —
+`discovered-micro-typography-and-shim-debt`. The `NEXT TASK` was corrected in `PROJECT_STATUS.md` and
+`HANDOFF.md`.
+
+**THE GATE (rule 07 §4 / rule 10 §4 and §8 — the CLASS, not the instance).** `scripts/validate-no-stale-blockers.mjs`
+gained a §12 that DISCOVERS the `not_started` rows from the registry (never a retyped list) and REFUSES a vacuous
+discovery, requires a tagged `_disposition` on every row, ties `_meta.status_counts.not_started` to the rows, and
+carries an ABSENCE GUARD for the retired claim.
+
+**TESTED — measured this session.** `validate-no-stale-blockers` **58/58 PASS** — it was seen to **FAIL on the live
+defect BEFORE the fix** (the absence guard) and to pass after it, so the guard provably catches the real thing.
+`validate:registry-integrity` **7 PASS / 0 FAIL** (562 entries) · `validate:resume-state` **PASS (54 assertions)** ·
+typecheck **0** · lint **0** · build **ok** · `validate:all` **188 PASS / 0 FAIL**.
+
+**§DEFECT FOUND THIS SESSION — FIXED at source (rule 07): THIS FILE WAS TWO SESSIONS STALE.** Its current section
+still read §BATCH 9 (session 132), while sessions 133–134 had already shipped (the pagination + error-boundary
+coverage closure). **FIXED** by inserting this section and marking §BATCH 9 SUPERSEDED; the session 133–134
+checkpoint is recorded in `PROJECT_STATUS.md` → `PREVIOUS PLATFORM POSITION`.
+
+**Three-way status: VERIFIED COMMITTED CHECKPOINT — the demo leg NOT APPLICABLE (no application runtime change).**
+Nothing under `src/`, `e2e/` or the built app changed.
+
+**RESULT: DONE.** No buildable `not_started` row remains. **NEXT: the OWNER'S two UX decisions** —
+`discovered-overview-vestigial-toolbar-strip` · `discovered-support-team-mobile-pane-overflow` — then the remaining
+business/legal decisions and the seven Phase-15 launch prerequisites (external input). No credential is needed for
+any of it.
+
+## §BATCH 9 — THE RULE-10 MACHINE-WIDE SWEEP: BATCH A BUILT AND PROVED, BATCH B BEGUN (session 132, 2026-10-12) — SUPERSEDED BY §BATCH 10 (THE RECORD RECONCILIATION)
 
 > **⚠ SCOPE CORRECTION, THE SAME DAY (2026-10-12).** Everything below was really done, and every figure in it is
 > true — but **the OWNER CORRECTED ITS SCOPE in the same session**: sweeping the other projects on this machine is

@@ -371,6 +371,70 @@ test(
 );
 
 
+/**
+ * §12 — NO `not_started` ROW WITHOUT A DISPOSITION, AND NO RESUME BLOCK PROMISING
+ * BUILD WORK THAT DOES NOT EXIST (2026-10-12, rule 10 §8 — the CLASS, not the instance).
+ *
+ * THE DEFECT THIS PINS. The resume block's `NEXT TASK` told the next session to close
+ * "the remaining code-only `not_started` rows". The trouble is that a `not_started`
+ * STATUS records only that a row is not done — never WHY. So a session opening the
+ * registry saw eight `not_started` rows and could not tell which (if any) was ordinary
+ * build work. In fact NONE of the eight is buildable: seven wait on an Owner decision
+ * and one is a record of decisions already taken. The block promised build work that
+ * does not exist — exactly the drift rule `10-describers-must-match-reality.md` forbids,
+ * and the kind that costs the Owner a session each time it is believed.
+ *
+ * THE FIX, AT ITS SOURCE. Every `not_started` row now carries a `_disposition` whose
+ * tag names its class (`BUILD` · `OWNER DECISION` · `EXTERNAL INPUT` · `RECORD`), so
+ * the reason lives WITH the row rather than in a session's memory. This section:
+ *   · DISCOVERS the rows from the registry (never a retyped list);
+ *   · refuses a VACUOUS discovery (rule 10 §5 — a check that finds nothing FAILS);
+ *   · requires a valid, tagged `_disposition` on every `not_started` row;
+ *   · ties `_meta.status_counts.not_started` to the rows, because that snapshot has
+ *     silently gone stale twice before and nothing checked it;
+ *   · and carries an ABSENCE GUARD (rule 08 §2) for the retired claim string, so the
+ *     stale promise cannot be typed back in.
+ * Mutation-proved: deleting one `_disposition`, and re-inserting the retired claim,
+ * each produced a FAILURE; both files were then restored byte-identical.
+ */
+const notStartedRows = (registry.entries || []).filter((e) => e.status === 'not_started');
+const DISPOSITION_TAGS = ['BUILD', 'OWNER DECISION', 'EXTERNAL INPUT', 'RECORD'];
+const dispositionTag = (row) => {
+  const m = /^(BUILD|OWNER DECISION|EXTERNAL INPUT|RECORD)\b/.exec(((row && row._disposition) || '').trim());
+  return m ? m[1] : '';
+};
+test(
+  `the not_started rows were discovered from the registry (${notStartedRows.length}) — a check that finds nothing is a FAILURE`,
+  notStartedRows.length > 0
+);
+const missingDisposition = notStartedRows.filter((e) => !((e._disposition || '').trim()));
+test(
+  `every not_started row declares WHY it is not started, via a _disposition (${notStartedRows.length - missingDisposition.length}/${notStartedRows.length})`,
+  missingDisposition.length === 0
+);
+const unknownTag = notStartedRows.filter((e) => !DISPOSITION_TAGS.includes(dispositionTag(e)));
+test(
+  `every _disposition starts with a declared tag (${DISPOSITION_TAGS.join(' · ')})`,
+  unknownTag.length === 0
+);
+test(
+  `_meta.status_counts.not_started (${(registry._meta || {}).status_counts ? registry._meta.status_counts.not_started : 'absent'}) equals the discovered count (${notStartedRows.length})`,
+  !!registry._meta && !!registry._meta.status_counts && registry._meta.status_counts.not_started === notStartedRows.length
+);
+test(
+  'the disposition-tag parser is self-checked (a known-good tag is read; an untagged value is not)',
+  dispositionTag({ _disposition: 'BUILD · x' }) === 'BUILD' &&
+    dispositionTag({ _disposition: 'OWNER DECISION · x' }) === 'OWNER DECISION' &&
+    dispositionTag({ _disposition: 'EXTERNAL INPUT · x' }) === 'EXTERNAL INPUT' &&
+    dispositionTag({ _disposition: 'RECORD · x' }) === 'RECORD' &&
+    dispositionTag({ _disposition: 'not started yet' }) === '' &&
+    dispositionTag({}) === ''
+);
+test(
+  'the resume block no longer promises a code-only not_started scope (ABSENCE GUARD for the retired claim)',
+  !/the remaining code-only/i.test(resume)
+);
+
 console.log(`\n${checks - failures}/${checks} checks passed`);
 if (failures > 0) {
   console.error(`✗ ${failures} stale-blocker check(s) FAILED`);
