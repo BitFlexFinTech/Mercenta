@@ -184,7 +184,7 @@ export const AUTOMATION_REGISTRY: Record<AutomationId, AutomationDefinition> = {
     id: PO_ACK_NOTIFICATION_AUTOMATION_ID,
     name: 'PO acknowledgement notification fan-out',
     description:
-      'Delivers the declared acknowledgement reminder schedule (12/6/2 hours remaining — Mercenta scheduling, never presented as a retail-channel rule) to the brand on every channel it can genuinely deliver on (in-app, email, and the instant-message seam, which fails closed on an unverified provider), records each delivery and refusal with its attribution, and at the FINAL stage produces Mercenta’s on-behalf rejection draft for the brand’s approval.',
+      'Delivers the declared acknowledgement reminder schedule (12/6/2 hours remaining — Mercenta scheduling, never presented as a retail-channel rule) to the brand on every channel it can genuinely deliver on (in-app and email), records each delivery and refusal with its attribution, and at the FINAL stage produces Mercenta’s on-behalf rejection draft for the brand’s approval.',
     domain: 'operations',
     cadence: 'at each declared notification stage (12h / 6h / 2h remaining) + on demand',
     cadenceDays: 1,
@@ -192,7 +192,7 @@ export const AUTOMATION_REGISTRY: Record<AutomationId, AutomationDefinition> = {
     scope: 'admin',
     deterministic: true,
     requiresAi: false,
-    externalProviders: ['twilio_whatsapp'],
+    externalProviders: [],
     idempotencyKey: '<automationId>|<demoDate>|<PO acknowledgement fingerprint>',
     approvalRequired: false,
     tenantScoped: true,

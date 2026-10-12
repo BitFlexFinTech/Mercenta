@@ -17,7 +17,7 @@ const VP = {
 };
 
 const BNAV = ['overview','onboarding','contracts','purchase_orders','catalog','logistics','compliance','returns','analytics','market','reports','documents','team','settings'];
-const ANAV = ['overview','crm','fulfillment_track','retail_pipeline','purchase_orders_admin','logistics','catalog','compliance','billing','contracts_admin','messages','helpdesk','returns_tracking','monitoring','marketing','brand_intelligence','super_admin','audit_log','integrations','usertour','whatsapp'];
+const ANAV = ['overview','crm','fulfillment_track','retail_pipeline','purchase_orders_admin','logistics','catalog','compliance','billing','contracts_admin','messages','helpdesk','returns_tracking','monitoring','marketing','brand_intelligence','super_admin','audit_log','integrations','usertour'];
 /* §P9 (programme decision 4) — REPOINTED: `const CNAV = ['manifest','bak','auditor']`
    is REMOVED with the carrier portal it enumerated, and `'carriers'` is removed from
    ANAV above because the admin Carrier Monitor destination no longer exists. */

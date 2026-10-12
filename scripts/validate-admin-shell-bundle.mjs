@@ -80,8 +80,9 @@ const SHELLS = [
     panels: [
       'AdminDashboard', 'LogisticsControl', 'BrandCRM', 'CatalogManagerAdmin',
       'ComplianceApprovals', 'MarketingHub', 'IntegrationsPanel', 'UsertourAdminPanel',
-      'WhatsAppAdminPanel', 'FulfillmentTrack', 'RetailPipeline',
+      'FulfillmentTrack', 'RetailPipeline',
       /* §BATCH 5 (2026-10-10) — 'PostizAdminPanel' left this list with the surface. */
+      /* §2026-10-12 — 'WhatsAppAdminPanel' left this list with the WhatsApp/Twilio feature. */
       'BillingPanel', 'ContractsAdminPanel', 'MessagesHub', 'HelpdeskDashboard',
       'ReturnsTrackingDashboard', 'MonitoringDashboard', 'AdminPurchaseOrderList',
       'SuperAdminPanel', 'AdminAuditLog', 'BrandIntelligencePanel',

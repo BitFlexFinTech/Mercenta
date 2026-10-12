@@ -3200,7 +3200,7 @@ export type NotificationEventType =
   | 'outage_about_to_start'
   | 'return_authorized';
 
-export type NotificationChannel = 'email' | 'in_app' | 'sms';
+export type NotificationChannel = 'email' | 'in_app';
 
 export interface NotificationPreference {
   id: string;

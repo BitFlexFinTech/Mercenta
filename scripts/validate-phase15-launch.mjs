@@ -14,7 +14,7 @@
 // For each gate it asserts what the REPOSITORY can prove on its own — the artefacts
 // and guarantees that must exist for local verification to be trustworthy. A gate
 // whose remaining work needs input the repository cannot supply (a production
-// database, a domain/DNS record, a legal sign-off, a business decision) is reported
+// database, a domain/DNS record, a business decision) is reported
 // BLOCKED with the EXACT missing input, never silently passed.
 //
 // CONTRACT
@@ -282,25 +282,26 @@ gates.push({
   },
 });
 
-/* 15. LEGAL / PRIVACY */
+/* 15. LEGAL / PRIVACY — §2026-10-12: CLEARED. The Owner gave the legal sign-off, so
+   this gate no longer needs external input. It reads the ONE declaration
+   (`DATA_PROCESSING_LEGAL_SIGNOFF`) and asserts it stands at `legal_sign_off_given`,
+   so the gate cannot be silently re-opened by flipping the declaration back. */
 gates.push({
   id: 'phase15-legal-privacy',
   label: 'Legal & privacy (privacy policy · terms · cookie consent · data inventory)',
-  blocked:
-    'BLOCKED — the privacy policy, terms, cookie notice AND the third-party data inventory ARE built (all ' +
-    'asserted here); the gate now needs LEGAL SIGN-OFF of the published wording and of the inventory — a ' +
-    'human/business decision, not a repository change.',
   check() {
     test('legal: privacy policy view exists', has('src/components/marketing/PrivacyPolicy.tsx'));
     test('legal: terms view exists', has('src/components/marketing/TermsOfService.tsx'));
     test('legal: cookie notice exists and is re-openable', /COOKIE_SETTINGS_EVENT/.test(read('src/components/marketing/CookieNotice.tsx')));
     test('legal: /privacy and /terms are declared public routes', /'privacy'/.test(read('src/lib/seo/publicRoutes.ts')) && /'terms'/.test(read('src/lib/seo/publicRoutes.ts')));
-    /* §PHASE 15 (2026-10-05) — the third-party data inventory owner + its gate. The
-       inventory is BUILT and gated; only legal sign-off remains (see the BLOCKED text). */
+    /* §PHASE 15 (2026-10-05) — the third-party data inventory owner + its gate. */
     test('legal: the third-party data inventory owner exists', has('src/config/dataProcessing.ts'));
     test('legal: the data-inventory gate exists', has('scripts/validate-data-inventory.mjs'));
     test('legal: the privacy policy derives its processor list from the inventory owner',
       /from ['"]@\/config\/dataProcessing['"]/.test(read('src/components/marketing/PrivacyPolicy.tsx')));
+    /* §2026-10-12 — the legal sign-off the gate used to wait for is now GIVEN. */
+    test('legal: the legal sign-off is declared GIVEN (the ONE owner)',
+      /legal_sign_off_given/.test(read('src/config/dataProcessing.ts')));
   },
 });
 

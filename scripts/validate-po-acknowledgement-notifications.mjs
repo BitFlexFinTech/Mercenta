@@ -1,12 +1,17 @@
 /**
- * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT + THE INSTANT-MESSAGE SEAM.
+ * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT (in-app + email).
+ *
+ * §2026-10-12 — REPOINTED: the external instant-message (WhatsApp/Twilio) channel was
+ * REMOVED with the WhatsApp/Twilio feature, so this gate no longer asserts a
+ * fail-closed provider channel; it asserts ABSENCE (no instant-message channel
+ * exists) and pins that the fan-out delivers on the brand's own in-app + email
+ * channels only.
  *
  * S1 declared the notification schedule (12/6/2h remaining — Mercenta OPERATIONAL
  * SCHEDULING, never a retail-channel rule) and S4 gave the S2 writer its producer.
  * S5 makes the schedule REACH the brand: every declared stage is delivered on every
- * channel the platform can genuinely deliver on, the FINAL stage produces Mercenta's
- * on-behalf rejection draft, and the EXTERNAL instant-message channel is declared and
- * FAILS CLOSED (an unverified provider is never treated as simulation).
+ * channel the platform can genuinely deliver on, and the FINAL stage produces
+ * Mercenta's on-behalf rejection draft.
  *
  * Proves, against the REAL modules (no mocks):
  *  1. ONE OWNER: the schedule, the stages, the window, the reason code and the rule
@@ -14,12 +19,9 @@
  *  2. The plan is PURE and derived, and fails closed (decided / unreadable / past the
  *     limit / no subscription).
  *  3. Destinations are the brand's DECLARED records — never fabricated.
- *  4. The INSTANT-MESSAGE seam: the authoritative mode is not simulation-safe, so the
- *     channel is refused WITH ITS REASON; the factory selects the mock for a
- *     positively-resolved simulation and the real adapter for a live connection.
- *  5. The seeded fan-out delivers the in-app and email channels, REFUSES the
- *     instant-message channel, and produces the on-behalf draft at the final stage —
- *     performing nothing.
+ *  4. ABSENCE: no instant-message channel, client, provider or `sms` channel exists.
+ *  5. The seeded fan-out delivers the in-app and email channels and produces the
+ *     on-behalf draft at the final stage — performing nothing.
  *  6. Idempotency, tenant isolation, attribution, audit and the automation seam.
  *  7. Zero network calls: `fetch` is sabotaged BEFORE any module loads.
  */
@@ -48,7 +50,6 @@ const cfg = await server.ssrLoadModule('/src/config/purchaseOrders.ts');
 const store = await server.ssrLoadModule('/src/data/demoStore.ts');
 const api = await server.ssrLoadModule('/src/data/api.ts');
 const automation = await server.ssrLoadModule('/src/lib/automation/registry.ts');
-const integrations = await server.ssrLoadModule('/src/integrations/registry.ts');
 const demoData = await server.ssrLoadModule('/src/data/demoData.ts');
 
 const NOW = new Date();
@@ -58,7 +59,6 @@ const HOURS_BACK = (h) => new Date(NOW.getTime() - h * HOUR).toISOString();
 /** The CANONICAL seed rows, captured before any fixture is pushed. */
 const SEED_POS = store.demoPurchaseOrders.map((p) => ({ ...p }));
 const SEED_IDS = new Set(SEED_POS.map((p) => p.id));
-const SEED_BRAND_IDS = new Set(store.demoBrands.map((b) => b.id));
 
 /** Fixtures are pushed through the REAL store — never a hand-built object. */
 function pushPo(over) {
@@ -249,66 +249,39 @@ test(
     demoData.ALL_DEMO_BRANDS.find((b) => b.id === 'brand-astonish').email
 );
 test(
-  'no instant-message number is on record for any demo brand (so the channel fails closed)',
-  demoData.ALL_DEMO_BRANDS.every((b) => fanout.poAckDestinationFor(b.id, 'sms') === null) &&
-    [...SEED_BRAND_IDS].every((id) => fanout.poAckDestinationFor(id, 'sms') === null)
+  '§2026-10-12 — ABSENCE: the fan-out exports no instant-message client, provider or factory',
+  !('PO_ACK_INSTANT_MESSAGE_PROVIDER' in fanout) &&
+    !('MockInstantMessageClient' in fanout) &&
+    !('RealInstantMessageClient' in fanout) &&
+    !('resolveInstantMessageClient' in fanout) &&
+    !('instantMessageRefusal' in fanout)
 );
 test(
-  'a brand’s channels come from its OWN declared preference (Astonish: email + in-app + instant)',
-  fanout.poAckChannelsFor('brand-astonish').join(',') === 'email,in_app,sms'
+  '§2026-10-12 — ABSENCE: the channel labels carry ONLY in-app and email (no instant message)',
+  Object.keys(fanout.PO_ACK_CHANNEL_LABELS).sort().join(',') === 'email,in_app' &&
+    !JSON.stringify(fanout.PO_ACK_CHANNEL_LABELS).toLowerCase().includes('sms') &&
+    !JSON.stringify(fanout.PO_ACK_CHANNEL_LABELS).toLowerCase().includes('instant')
+);
+test(
+  '§2026-10-12 — ABSENCE: the source imports no WhatsApp client and declares no twilio_whatsapp provider',
+  !/@\/lib\/whatsapp/.test(SRC) &&
+    !/twilio_whatsapp/.test(SRC) &&
+    !/\bMockWhatsAppClient\b/.test(SRC) &&
+    !/'sms'/.test(SRC)
+);
+test(
+  'a brand’s channels come from its OWN declared preference (Astonish: email + in-app)',
+  fanout.poAckChannelsFor('brand-astonish').join(',') === 'email,in_app'
 );
 test(
   'a brand with NO preference record gets NO channels (fail closed — no invented subscription)',
   fanout.poAckChannelsFor('brand-not-subscribed').length === 0
 );
-
-/* ── 4. THE INSTANT-MESSAGE SEAM — declared, and FAILING CLOSED ───────────────── */
-const authoritativeMode = integrations.defaultIntegrationMode(
-  fanout.PO_ACK_INSTANT_MESSAGE_PROVIDER
-);
 test(
-  'the authoritative instant-message provider mode is NOT simulation (so it must fail closed)',
-  authoritativeMode !== 'simulation',
-  authoritativeMode
-);
-const refusedInstant = fanout.resolvePoAckChannel('brand-astonish', 'sms');
-test(
-  'the instant-message channel is REFUSED, and the refusal NAMES the resolved mode',
-  refusedInstant.deliverable === false &&
-    (refusedInstant.refusal ?? '').includes(authoritativeMode),
-  refusedInstant.refusal
-);
-test(
-  'the refusal states the canonical rule — an unverified provider is never treated as simulation',
-  /NEVER treated as\s+simulation/.test(refusedInstant.refusal ?? '') &&
-    /fail-closed/.test(refusedInstant.refusal ?? '')
-);
-test(
-  'a positively-resolved SIMULATION selects the mock instant-message client',
-  (() => {
-    const r = fanout.resolveInstantMessageClient('simulation');
-    return r.ok === true && r.mode === 'simulation' && r.client.mode === 'simulation';
-  })()
-);
-test(
-  'a LIVE connection selects the REAL provider adapter (the Twilio-backed client)',
-  (() => {
-    const r = fanout.resolveInstantMessageClient('live');
-    return r.ok === true && r.mode === 'live' && r.client.mode === 'live';
-  })()
-);
-test(
-  'every OTHER mode refuses the factory (available / configuring / degraded / unknown / not_registered)',
-  ['available', 'configuring', 'degraded', 'error', 'disabled', 'unknown', 'not_registered'].every(
-    (m) => fanout.resolveInstantMessageClient(m).ok === false
+  'every demo brand’s declared preference names only the two remaining channels',
+  store.demoNotificationPrefs.every((p) =>
+    p.channels.every((c) => c === 'email' || c === 'in_app')
   )
-);
-test(
-  'with a simulation mode but NO number on record the channel still refuses (destination gate)',
-  (() => {
-    const r = fanout.resolvePoAckChannel('brand-astonish', 'sms', 'simulation');
-    return r.deliverable === false && /No instant-message number is on record/.test(r.refusal ?? '');
-  })()
 );
 
 /* ── 5. THE SEEDED FAN-OUT — the schedule actually REACHES the brand ─────────── */
@@ -336,16 +309,8 @@ test(
   `${closingRecords.filter((r) => r.state !== 'refused').length} vs ${expectedMessages}`
 );
 test(
-  'the INSTANT-MESSAGE channel is refused for the closing-window PO — one refusal per stage, with its reason',
-  closingRecords.filter((r) => r.state === 'refused').length === expectedRefusals &&
-    closingRecords
-      .filter((r) => r.state === 'refused')
-      .every(
-        (r) =>
-          r.channel === 'sms' &&
-          /NEVER treated as|No instant-message number/.test(r.reason ?? '')
-      ),
-  `${closingRecords.filter((r) => r.state === 'refused').length} vs ${expectedRefusals}`
+  '§2026-10-12 — no refusal is recorded on a removed channel (the instant-message channel is gone)',
+  closingRecords.every((r) => r.state !== 'refused' || r.channel !== 'sms')
 );
 test(
   'the in-app channel delivered the reminders (the brand sees the schedule Mercenta sent)',
@@ -435,18 +400,17 @@ test(
 test(
   'each delivery is audited ONCE, by the invoking actor, naming the sender',
   auditFor('purchase_order_ack_notification_sent', closingLive.id).length ===
-    closingRecords.filter((r) => r.channel !== 'sms').length &&
+    closingRecords.filter((r) => r.channel === 'in_app' || r.channel === 'email').length &&
     auditFor('purchase_order_ack_notification_sent', closingLive.id).every(
       (a) => a.actorId === 'staff:s5-gate' && a.metadata?.sentBy === cfg.PO_ACK_SYSTEM_ACTOR_ID
     ),
   String(auditFor('purchase_order_ack_notification_sent', closingLive.id).length)
 );
 test(
-  'each refusal is audited with its reason and the channel it refused',
-  auditFor('purchase_order_ack_notification_refused', closingLive.id).length === expectedRefusals &&
-    auditFor('purchase_order_ack_notification_refused', closingLive.id).every(
-      (a) => a.metadata?.channel === 'sms' && /fail-closed|treated as/.test(a.reason)
-    )
+  '§2026-10-12 — no refusal audit entry names the removed instant-message channel',
+  auditFor('purchase_order_ack_notification_refused', closingLive.id).every(
+    (a) => a.metadata?.channel !== 'sms'
+  )
 );
 const fanoutEvents = feed.queryEvents({ type: 'po_acknowledgement_notification' });
 test(
@@ -500,8 +464,9 @@ test(
     definition.approvalRequired === false
 );
 test(
-  'the automation declares the instant-message provider it would need, and its entry point',
-  definition.externalProviders.includes('twilio_whatsapp') &&
+  '§2026-10-12 — the automation declares NO external provider (the WhatsApp/Twilio one is gone) and its entry point',
+  definition.externalProviders.length === 0 &&
+    !definition.externalProviders.includes('twilio_whatsapp') &&
     definition.entryPoint.includes(fanout.PO_ACK_NOTIFICATION_AUTOMATION_ID) &&
     /12h \/ 6h \/ 2h/.test(definition.cadence)
 );
@@ -566,8 +531,9 @@ test(
   seam.cadence.includes(`${cfg.PO_ACK_NOTIFICATION_HOURS.join('/')}h`)
 );
 test(
-  'the INSTANT-MESSAGE seam declares its live path honestly (the one provider call)',
-  /positively resolves/.test(seam.liveInstantMessagePath)
+  '§2026-10-12 — the scheduler seam declares NO instant-message path and no external channel',
+  seam.liveInstantMessagePath === undefined &&
+    !/instant message/i.test(seam.channels)
 );
 test(
   'every assertion above ran with fetch sabotaged (zero network calls)',

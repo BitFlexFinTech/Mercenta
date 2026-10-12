@@ -100,9 +100,13 @@ const run = fanout.runPoAckNotificationFanout('brand', DEMO_BRAND, 'validate:s6'
 const views = fanout.poAckReminderViews('brand', DEMO_BRAND);
 
 test(
-  'the brand-scope run delivered reminders and recorded a refusal',
-  run.deliveries.length > 0 && run.refused.length > 0,
-  `${run.deliveries.length} / ${run.refused.length}`
+  'the brand-scope run delivered reminders (in-app + email)',
+  run.deliveries.length > 0,
+  `${run.deliveries.length} delivered / ${run.refused.length} refused`
+);
+test(
+  '§2026-10-12 — the run records NO refusal (the only refusing channel, the instant message, is gone)',
+  run.refused.length === 0
 );
 test(
   'every view is an IN-APP delivery on record (a dispatching live send is not presented)',
@@ -114,12 +118,16 @@ test(
   views.every((v) => v.delivery.stage === run.deliveries.find((d) => d.id === v.delivery.id)?.stage)
 );
 test(
-  'each view states EVERY channel attempted for that PO at that stage (the refusals included)',
+  'each view states EVERY channel attempted for that PO at that stage — none refused',
   views.every(
     (v) =>
-      v.channels.some((c) => c.state === 'delivered') &&
-      v.channels.some((c) => c.channel === 'sms' && c.state === 'refused')
+      v.channels.length > 0 &&
+      v.channels.every((c) => c.state !== 'refused' && c.state !== 'failed')
   )
+);
+test(
+  '§2026-10-12 — no view names an instant-message channel any more',
+  views.every((v) => v.channels.every((c) => c.channel !== 'sms'))
 );
 test(
   'the disposition states the DESTINATION each delivered channel actually reached',
@@ -129,23 +137,11 @@ test(
       .every((c) => c.destination === fanout.poAckDestinationFor(v.delivery.brandId, c.channel))
   )
 );
-test(
-  'the disposition states the fail-closed reason VERBATIM for the refused channel',
-  views.every((v) => {
-    const refusal = v.channels.find((c) => c.channel === 'sms' && c.state === 'refused');
-    const record = fanout
-      .getPoAckDeliveries('brand', DEMO_BRAND)
-      .find((r) => r.id === `po-ack-notify-${v.delivery.poId}-${v.delivery.stage}-sms`);
-    return !!refusal && !!record && refusal.reason === record.reason;
-  })
-);
 const sampleView = views[0];
 const sampleDetail = fanout.poAckReminderChannelDetail(sampleView);
 test(
-  'the ONE sentence names the delivered channels WITH their destinations, then the unusable one',
-  /\u2192/.test(sampleDetail) &&
-    /Instant message unavailable — /.test(sampleDetail) &&
-    sampleDetail.includes(sampleView.channels.find((c) => c.channel === 'sms').reason),
+  'the ONE sentence names the delivered channels WITH their destinations (the arrow sentence)',
+  /\u2192/.test(sampleDetail) && !/Instant message unavailable/i.test(sampleDetail),
   sampleDetail
 );
 test(
@@ -189,24 +185,34 @@ test(
   /meta\?: string/.test(CENTRE_CODE) && /data-notification-meta=/.test(CENTRE_CODE)
 );
 
-/* ── 4. THE SEAM'S SUCCESS PATH — a channel it could not use IS used, truthfully ─ */
+/* ── 4. §2026-10-12 — THE INSTANT-MESSAGE SEAM IS GONE (the WhatsApp/Twilio feature) ─ */
+test(
+  '§2026-10-12 — the domain view emits no "Instant message unavailable" copy any more',
+  !/Instant message unavailable/i.test(FANOUT_SRC)
+);
+test(
+  '§2026-10-12 — a fan-out run accepts NO instant-message provider-mode option',
+  !/instantMessageMode/.test(FANOUT_SRC) && !/instantMessageClient/.test(FANOUT_SRC)
+);
+
+/* A fixture brand with its own declared subscription, used by the tenant-isolation
+   test below. §2026-10-12 — the declaration names only the two remaining channels. */
 const FIXTURE_BRAND = 'brand-s6-fixture';
-const FIXTURE_NUMBER = '+44 7700 900123';
 store.demoBrands.push({
   id: FIXTURE_BRAND,
-  profile: { businessName: 'S6 Fixture Brand', phone: FIXTURE_NUMBER },
+  profile: { businessName: 'S6 Fixture Brand', phone: '+44 7700 900123' },
 });
 store.demoNotificationPrefs.push({
   id: `np-${FIXTURE_BRAND}-ack`,
   brandId: FIXTURE_BRAND,
   eventType: fanout.PO_ACK_EVENT_TYPE,
-  channels: ['in_app', 'sms'],
+  channels: ['in_app'],
   enabled: true,
 });
 const fixturePo = {
-  id: 'po-s6-instant-message',
+  id: 'po-s6-fixture',
   brandId: FIXTURE_BRAND,
-  poNumber: 'PO-S6-IM',
+  poNumber: 'PO-S6-FIX',
   status: 'received',
   poValue: 1000,
   commissionRate: 0.2,
@@ -223,63 +229,13 @@ const fixturePo = {
   ],
 };
 store.demoPurchaseOrders.push(fixturePo);
-
-fanout.runPoAckNotificationFanout('brand', FIXTURE_BRAND, 'validate:s6', {
-  now: NOW,
-  instantMessageMode: 'simulation',
-});
-const fixtureViews = fanout.poAckReminderViews('brand', FIXTURE_BRAND);
-const fixtureSms = fixtureViews[0]?.channels.find((c) => c.channel === 'sms');
+fanout.runPoAckNotificationFanout('brand', FIXTURE_BRAND, 'validate:s6', { now: NOW });
 test(
-  'a positively-resolved simulation DELIVERS the instant message to the record’s own number',
-  !!fixtureSms &&
-    fixtureSms.state === 'delivered' &&
-    fixtureSms.destination === FIXTURE_NUMBER &&
-    fixtureSms.simulated === true,
-  JSON.stringify(fixtureSms)
-);
-test(
-  'the sentence LABELS that send as simulated (never presented as a live provider call)',
-  /\(simulated\)/.test(fanout.poAckReminderChannelDetail(fixtureViews[0])),
-  fanout.poAckReminderChannelDetail(fixtureViews[0])
-);
-
-/* §4b — the SAME number, with a provider mode that is NOT provably safe: refused. */
-const UNSAFE_BRAND = 'brand-s6-unsafe';
-store.demoBrands.push({
-  id: UNSAFE_BRAND,
-  profile: { businessName: 'S6 Unsafe Brand', phone: FIXTURE_NUMBER },
-});
-store.demoNotificationPrefs.push({
-  id: `np-${UNSAFE_BRAND}-ack`,
-  brandId: UNSAFE_BRAND,
-  eventType: fanout.PO_ACK_EVENT_TYPE,
-  channels: ['in_app', 'sms'],
-  enabled: true,
-});
-store.demoPurchaseOrders.push({
-  ...fixturePo,
-  id: 'po-s6-unsafe',
-  brandId: UNSAFE_BRAND,
-  poNumber: 'PO-S6-UNSAFE',
-});
-fanout.runPoAckNotificationFanout('brand', UNSAFE_BRAND, 'validate:s6', {
-  now: NOW,
-  instantMessageMode: 'available',
-});
-const unsafeView = fanout.poAckReminderViews('brand', UNSAFE_BRAND)[0];
-const unsafeSms = unsafeView.channels.find((c) => c.channel === 'sms');
-test(
-  'an UNVERIFIED provider mode is refused even with a number on record, and NAMES the mode',
-  unsafeSms.state === 'refused' &&
-    unsafeSms.destination === null &&
-    /"available"/.test(unsafeSms.reason) &&
-    /never treated as/i.test(unsafeSms.reason),
-  unsafeSms.reason
-);
-test(
-  'the refusal reason reaches the brand’s own detail line (never a silent absence)',
-  /Instant message unavailable — /.test(fanout.poAckReminderChannelDetail(unsafeView))
+  '§2026-10-12 — the fixture brand receives its in-app reminder with no refusal',
+  fanout.poAckReminderViews('brand', FIXTURE_BRAND).length > 0 &&
+    fanout
+      .poAckReminderViews('brand', FIXTURE_BRAND)
+      .every((v) => v.channels.every((c) => c.state !== 'refused' && c.state !== 'failed'))
 );
 
 /* ── 5. TENANT ISOLATION — fail closed, at both accessors ───────────────────── */

@@ -46,7 +46,9 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     // §BATCH 5 (2026-10-10) — 'Social Media' was asserted VISIBLE here; the owner
     // removed Mercenta Social COMPLETELY, so it is now asserted ABSENT.
     await expect(nav.locator('text=Social Media')).toHaveCount(0);
-    await expect(nav.locator('text=WhatsApp').first()).toBeVisible();
+    // §2026-10-12 — 'WhatsApp' was asserted VISIBLE here; the owner removed the
+    // WhatsApp/Twilio feature, so it is now asserted ABSENT.
+    await expect(nav.locator('text=WhatsApp')).toHaveCount(0);
 
     // Admin still boots and renders the real dashboard.
     await expect(page.locator('text=POs awaiting action').first()).toBeVisible({ timeout: 6000 });
@@ -65,7 +67,8 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     // …while the non-super Integration-section entries remain reachable.
     // §BATCH 5 (2026-10-10) — REPOINTED to ABSENCE (Mercenta Social removed).
     await expect(nav.locator('text=Social Media')).toHaveCount(0);
-    await expect(nav.locator('text=WhatsApp').first()).toBeVisible();
+    // §2026-10-12 — REPOINTED to ABSENCE (the WhatsApp/Twilio feature removed).
+    await expect(nav.locator('text=WhatsApp')).toHaveCount(0);
     await expect(nav.locator('text=Brand CRM').first()).toBeVisible();
   });
   test('3. Integration Settings registry has no Rocket.Chat card', async ({ page }) => {
@@ -76,7 +79,9 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     await expect(page.locator(`text=${REMOVED_LABEL}`)).toHaveCount(0);
 
     // The remaining communications providers still render (removal was surgical).
-    await expect(page.locator('h3', { hasText: 'Twilio WhatsApp' }).first()).toBeVisible({ timeout: 6000 });
+    // §2026-10-12 — the 'Twilio WhatsApp' card was asserted VISIBLE here; it left the
+    // registry with the WhatsApp/Twilio feature, so it is now asserted ABSENT.
+    await expect(page.locator('h3', { hasText: 'Twilio WhatsApp' })).toHaveCount(0);
     await expect(page.locator('h3', { hasText: 'Usertour' }).first()).toBeVisible({ timeout: 6000 });
     // §BATCH 5 (2026-10-10) — the 'Postiz' card was asserted VISIBLE here; it left
     // the registry with Mercenta Social, so it is now asserted ABSENT.

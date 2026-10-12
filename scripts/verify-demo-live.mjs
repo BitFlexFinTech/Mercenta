@@ -1128,18 +1128,19 @@ check('§P13/S4 the deployed admin override records the approval AND its attribu
 check('no uncaught page error on the deployed §P13/S4 admin flow',
   adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
-/* ── §P13 / S5 — THE DEPLOYED NOTIFICATION FAN-OUT + THE INSTANT-MESSAGE SEAM ──
+/* ── §P13 / S5 — THE DEPLOYED NOTIFICATION FAN-OUT (in-app + email) ──
    S5's changed functionality is invoked through the EXISTING automation seam, so it
    must be exercised ON the deployed bundle: the deployed console must declare the
    fan-out (with the schedule it actually uses), RUNNING it must deliver the
    acknowledgement reminders on every channel the platform can genuinely deliver on,
-   must REFUSE the external instant-message channel with its fail-closed reason, and a
-   repeat run must deliver nothing twice. The delivered in-app reminders must then be
-   READABLE in the deployed notification centre — the in-app channel's whole point.
+   and a repeat run must deliver nothing twice. The delivered in-app reminders must
+   then be READABLE in the deployed notification centre — the in-app channel's whole
+   point. §2026-10-12 — the external instant-message (WhatsApp/Twilio) channel was
+   REMOVED, so the deployed drawer/reminder must name no instant-message channel.
    NOTE ON SCOPE: this page is the Super Admin session, and the §P13/S4 legs above
    already approved PO-9001's on-behalf rejection, so PO-9001 is closed here; the
-   fan-out's remaining open work in the seed is PO-9000 (Astonish — the tenant that
-   declares the instant-message subscription) and any PO the brand flow did not decide. */
+   fan-out's remaining open work in the seed is PO-9000 (Astonish) and any PO the
+   brand flow did not decide. */
 await superAdmin
   .locator('nav[aria-label="Primary"]')
   .locator('text=Control Centre')
@@ -1192,9 +1193,8 @@ check('§P13/S5 running the deployed fan-out DELIVERS the reminders on the chann
   /message\(s\) delivered on \d+ channel\(s\)/.test(s5DrawerText) &&
     !/message\(s\) delivered on 0 channel\(s\)/.test(s5DrawerText),
   s5DrawerText.replace(/\s+/g, ' ').slice(0, 200));
-check('§P13/S5 the deployed fan-out REFUSES the external instant-message channel, with its fail-closed reason',
-  /Instant message: \d+ refusal\(s\)/.test(s5DrawerText) &&
-    /NEVER treated as\s*simulation|No instant-message number/.test(s5DrawerText),
+check('§2026-10-12 the deployed fan-out names NO instant-message channel (it was removed)',
+  !/Instant message/i.test(s5DrawerText),
   s5DrawerText.replace(/\s+/g, ' ').slice(0, 240));
 /**
  * THE FINAL STAGE PRODUCED THE DRAFT. This page's seed carries the closing-window
@@ -1240,8 +1240,8 @@ check('§P13/S5 the deployed notification centre lists the delivered reminders (
  */
 check('§P13/S6 the deployed reminder states each channel’s DESTINATION (the domain’s own sentence)',
   /\u2192/.test(s5NotifyList), s5NotifyList.replace(/\s+/g, ' ').slice(0, 240));
-check('§P13/S6 the deployed reminder states WHY the instant-message channel could not be used',
-  /Instant message unavailable — /.test(s5NotifyList),
+check('§2026-10-12 the deployed reminder names NO instant-message channel (it was removed)',
+  !/Instant message/i.test(s5NotifyList),
   s5NotifyList.replace(/\s+/g, ' ').slice(0, 240));
 check('no uncaught page error on the deployed §P13/S5 fan-out flow',
   superAdminErrors.length === 0, superAdminErrors.slice(0, 2).join(' | '));

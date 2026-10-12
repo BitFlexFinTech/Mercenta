@@ -4,7 +4,7 @@
  *
  * Both the internal digest and the external Personal Assistant bot (in Grok Bot)
  * consume from this single feed. Events are tagged with severity so consumers
- * can decide what's WhatsApp-worthy vs. digest-only.
+ * can decide what's critical vs. digest-only.
  *
  * Threshold: PO value above £50k triggers a critical event.
  * Compliance: documents expiring within N days trigger an important event.
@@ -173,7 +173,7 @@ export function acknowledgeEvent(eventId: string): boolean {
 
 /**
  * Get unacknowledged events above a severity threshold.
- * Useful for the Personal Assistant bot to decide what's WhatsApp-worthy.
+ * Useful for the Personal Assistant bot to decide what's critical.
  */
 export function getUnacknowledgedAbove(severity: EventSeverity): PlatformEvent[] {
   const order: EventSeverity[] = ['critical', 'important', 'informational'];

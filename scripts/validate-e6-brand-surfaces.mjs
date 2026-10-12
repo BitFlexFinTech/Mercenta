@@ -4246,6 +4246,56 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §BATCH 12 — THE WHATSAPP/TWILIO REMOVAL (2026-10-13). Declared set for the phase
+   * that removes the WhatsApp-via-Twilio escalation feature COMPLETELY on the Owner's
+   * instruction ("WhatsApp is not needed"): the client + escalation module, the admin
+   * panel, its dedicated gate, the `twilio_whatsapp` provider (registry + types + the
+   * automation's `externalProviders`), the instant-message channel in the
+   * PO-acknowledgement fan-out, the brand notification-preference channel, the
+   * operating-cost line, the third-party data-inventory entry, and every gate/spec
+   * that asserted the channel — each REPOINTED to an ABSENCE assertion, never
+   * weakened. The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY
+   * declared set still fails. No PROTECTED path is touched.
+   */
+  const BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE = new Set([
+    'src/lib/whatsapp/',
+    'src/lib/whatsapp/whatsAppClient.ts',
+    'src/lib/whatsapp/whatsAppEscalation.ts',
+    'src/components/admin/WhatsAppAdminPanel.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/brand/BrandSettings.tsx',
+    'src/config/dataProcessing.ts',
+    'src/config/operatingCosts.ts',
+    'src/data/demoStore.ts',
+    'src/integrations/registry.ts',
+    'src/integrations/types.ts',
+    'src/lib/automation/digest.ts',
+    'src/lib/automation/registry.ts',
+    'src/lib/commerce/poAcknowledgementNotifications.ts',
+    'src/lib/events/eventFeed.ts',
+    'src/types.ts',
+    'scripts/validate-whatsapp.mjs',
+    'scripts/validate-admin-shell-bundle.mjs',
+    'scripts/validate-d4-persistence.mjs',
+    'scripts/validate-data-inventory.mjs',
+    'scripts/validate-operating-costs.mjs',
+    'scripts/validate-phase15-launch.mjs',
+    'scripts/validate-po-acknowledgement-brand-surfaces.mjs',
+    'scripts/validate-po-acknowledgement-notifications.mjs',
+    'scripts/validate-retired-platforms.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/verify-demo-live.mjs',
+    'scripts/e2e-catalogue.mjs',
+    'scripts/forensic-screenshots.mjs',
+    'scripts/reconcile-data-inventory-registry.cjs',
+    'scripts/reconcile-phase15-launch-registry.cjs',
+    'e2e/app-shell.spec.ts',
+    'e2e/integration-hub.spec.ts',
+    'e2e/po-notification-fanout.spec.ts',
+    'e2e/retired-platforms.spec.ts',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -4537,7 +4587,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 7 — the cleanup phase (see above). */
           BATCH7_CLEANUP_SCOPE.has(p) ||
-          [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 12 — the WhatsApp/Twilio removal (see above). */
+          BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE.has(p) ||
+          [...BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

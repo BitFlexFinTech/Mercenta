@@ -40,13 +40,13 @@ try {
   /* ── every cost line is labelled; nothing claims live billing ─────────── */
   const lines = cfg.OPERATING_COST_LINES;
   test('every provider cost line exists (AI, infra, data, comms, marketing, compliance)',
-    ['openrouter', 'supabase', 'hosting', 'email', 'firecrawl', 'keepa', 'hunter', 'instantly', 'whatsapp', 'google', 'companies_house', 'hmrc']
+    ['openrouter', 'supabase', 'hosting', 'email', 'firecrawl', 'keepa', 'hunter', 'instantly', 'google', 'companies_house', 'hmrc']
       .every((id) => lines.some((l) => l.id === id)), lines.map((l) => l.id).join(', '));
   test('every cost line carries an explicit source label',
     lines.every((l) => ['MANUAL', 'ESTIMATED', 'SIMULATED', 'NOT CONNECTED', 'LIVE'].includes(l.source)));
   test('NO cost line claims a LIVE billing integration', lines.every((l) => l.source !== 'LIVE'));
   test('an unconnected provider claims no figure at all',
-    lines.filter((l) => ['email', 'keepa', 'whatsapp', 'hmrc'].includes(l.id))
+    lines.filter((l) => ['email', 'keepa', 'hmrc'].includes(l.id))
       .every((l) => l.source === 'NOT CONNECTED' && l.fixedMonthlyGbp === 0 && l.usageBudgetGbp === 0));
   test('the AI line reuses the existing discovery budget ceiling (no second cap)',
     lines.find((l) => l.id === 'openrouter').usageBudgetGbp === 25);

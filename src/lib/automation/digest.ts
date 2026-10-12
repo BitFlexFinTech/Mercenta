@@ -151,7 +151,7 @@ export function buildDailyDigest(input: DailyDigestInput): DailyDigest {
 }
 
 /**
- * Format a digest as human-readable text (for email/WhatsApp rendering).
+ * Format a digest as human-readable text (for email rendering).
  * Cadence-aware: morning digests are more forward-looking, evening ones retrospective.
  */
 export function formatDigestAsText(digest: DailyDigest): string {

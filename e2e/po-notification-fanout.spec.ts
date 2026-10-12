@@ -3,9 +3,10 @@
  *
  * S1 declared the reminder schedule (12/6/2h remaining) and S4 gave the on-behalf
  * rejection its draft. S5 makes the schedule REACH the brand: every declared stage is
- * delivered on every channel the platform can genuinely deliver on, the FINAL stage
- * produces Mercenta's on-behalf draft, and the EXTERNAL instant-message channel is
- * declared and FAILS CLOSED (an unverified provider is never treated as simulation).
+ * delivered on every channel the platform can genuinely deliver on (in-app + email),
+ * and the FINAL stage produces Mercenta's on-behalf draft. §2026-10-12 — the external
+ * instant-message (WhatsApp/Twilio) channel was REMOVED, so the drawer no longer names
+ * a refused channel.
  *
  * This spec exercises the REAL surfaces end to end — the founder's Run control in the
  * automation console, the fan-out's own delivery ledger, and the brand's in-app
@@ -13,8 +14,8 @@
  * product, not merely proven by a script:
  *
  *   1. the founder RUNS the fan-out from the Control Centre and reads the outcome:
- *      messages delivered, the instant-message channel REFUSED with its reason, and
- *      Mercenta's on-behalf draft produced by the final stage (nothing performed);
+ *      messages delivered and Mercenta's on-behalf draft produced by the final stage
+ *      (nothing performed);
  *      a second run is suppressed (no duplicate notification);
  *   2. the BRAND's notification centre (same session, in-place account switch) shows
  *      the reminders Mercenta actually sent it, with the channel and the stage.
@@ -71,9 +72,8 @@ test.describe('Acknowledgement notification fan-out (§P13 / S5)', () => {
 
     /** Messages really went out, on the channels the platform can deliver on. */
     await expect(drawer).toContainText(/message\(s\) delivered on \d+ channel\(s\)/);
-    /** The EXTERNAL instant-message channel was refused, and the reason is stated. */
-    await expect(drawer).toContainText(/Instant message: \d+ refusal\(s\)/);
-    await expect(drawer).toContainText(/NEVER treated as\s+simulation|No instant-message number/);
+    /** §2026-10-12 — no instant-message refusal any more (the channel was removed). */
+    await expect(drawer).not.toContainText(/Instant message/);
     /** The FINAL stage produced Mercenta's on-behalf draft — and performed nothing. */
     await expect(drawer).toContainText(/on-behalf rejection draft/);
     await expect(drawer).toContainText(/nothing was performed/);
@@ -113,7 +113,8 @@ test.describe('Acknowledgement notification fan-out (§P13 / S5)', () => {
     const meta = list.locator('[data-notification-meta="po"]').first();
     await expect(meta).toBeVisible({ timeout: 6000 });
     await expect(meta).toContainText(/→/);
-    await expect(meta).toContainText(/Instant message unavailable — /);
+    /** §2026-10-12 — no "Instant message unavailable" copy any more (channel removed). */
+    await expect(meta).not.toContainText(/Instant message/);
     /** The final stage's reminder carries the severity the fan-out assigned it. */
     await expect(
       list.locator('[data-notification="po"]').filter({ hasText: /PO-9001/ }).first()

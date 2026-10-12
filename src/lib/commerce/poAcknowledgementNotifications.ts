@@ -1,6 +1,6 @@
 /**
- * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT (all channels) + the
- * instant-message seam.
+ * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT (in-app + email).
+ * §2026-10-12 — the instant-message (WhatsApp/Twilio) channel is REMOVED.
  *
  * WHAT THIS MODULE IS
  * -------------------
@@ -14,9 +14,8 @@
  *     notification preferences — the canonical record the brand edits in Settings);
  *   · WHERE each channel delivers (the brand's declared destinations, read from the
  *     canonical brand records — never invented);
- *   · WHETHER a channel may be used AT ALL (fail-closed: an unverified provider is
- *     never treated as simulation, and a channel with no destination is refused
- *     with its reason stated);
+ *   · WHETHER a channel may be used AT ALL (fail-closed: a channel with no
+ *     destination on record is refused with its reason stated);
  *   · WHAT the message says (derived from the window owner + the config-owned rule
  *     text — no surface writes its own copy);
  *   · WHAT WAS DELIVERED, to whom, on which channel, by whom, when, and with which
@@ -43,9 +42,9 @@
  * stage reached in the meantime is still owed and is delivered on the next run.
  *
  * A refusal is not permanent: it is re-evaluated on every run, so the moment a
- * channel becomes usable (a destination is put on record, the provider positively
- * resolves) the owed message IS delivered and the superseded refusal is named in the
- * audit entry. A refusal whose reason is unchanged is not re-recorded.
+ * channel becomes usable (a destination is put on record) the owed message IS
+ * delivered and the superseded refusal is named in the audit entry. A refusal whose
+ * reason is unchanged is not re-recorded.
  *
  * ATTRIBUTION AND AUDIT
  * ---------------------
@@ -70,32 +69,22 @@ import {
   type PoNotificationStage,
 } from '@/lib/commerce/poAcknowledgementWindow';
 import { draftOnBehalfRejection } from '@/data/api';
-import { demoAuditLog, demoBrands, demoNotificationPrefs, demoPurchaseOrders } from '@/data/demoStore';
+import { demoAuditLog, demoNotificationPrefs, demoPurchaseOrders } from '@/data/demoStore';
 import { ALL_DEMO_BRANDS } from '@/data/demoData';
-import { defaultIntegrationMode } from '@/integrations/registry';
-import { isProviderSimulationSafe, type ProviderResolutionMode } from '@/integrations/types';
+import type { ProviderResolutionMode } from '@/integrations/types';
 import { emitEvent } from '@/lib/events/eventFeed';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { createMailClient, type MailConnection } from '@/lib/mail/mail';
-import { getWhatsAppClient, type IWhatsAppClient } from '@/lib/whatsapp/whatsAppClient';
 import type { WorkScope } from '@/lib/work/types';
 import type { NotificationChannel, PurchaseOrder } from '@/types';
 
 /** The declared event type the fan-out emits (ONE event system, no second feed). */
 export const PO_ACK_NOTIFICATION_EVENT = 'po_acknowledgement_notification' as const;
 
-/**
- * The provider behind the INSTANT-MESSAGE channel. Declared ONCE, so the safety
- * gate, the client factory and the refusal text can never disagree about which
- * provider is being asked to send.
- */
-export const PO_ACK_INSTANT_MESSAGE_PROVIDER = 'twilio_whatsapp';
-
 /** Human labels for the channels a message can travel on. */
 export const PO_ACK_CHANNEL_LABELS: Record<NotificationChannel, string> = {
   in_app: 'In-app',
   email: 'Email',
-  sms: 'Instant message',
 };
 
 /** The in-app channel is INTERNAL — Mercenta operates it, so it needs no address. */
@@ -113,19 +102,14 @@ export const PO_ACK_EVENT_TYPE = 'po_acknowledgment_deadline' as const;
  *   · `in_app` — internal; the delivery IS the in-app notification.
  *   · `email`  — the brand's declared contact email (`DemoBrand.email`, the
  *                canonical brand declaration the brand rows are generated from).
- *   · `sms`    — the brand's declared instant-message number (the brand row's
- *                `profile.phone`). No demo brand has one on record, which is
- *                precisely why the instant-message channel fails CLOSED — see
- *                `resolvePoAckChannel`. Nothing is fabricated to make a channel
- *                look connected.
  *
- * A missing destination is returned as `null` and is NEVER defaulted to a plausible
- * fake address.
+ * §2026-10-12 — the `sms` (instant-message) destination is GONE with the
+ * WhatsApp/Twilio feature. A missing destination is returned as `null` and is NEVER
+ * defaulted to a plausible fake address.
  */
 export function poAckDestinationFor(brandId: string, channel: NotificationChannel): string | null {
   if (channel === 'in_app') return PO_ACK_IN_APP_DESTINATION;
-  if (channel === 'email') return ALL_DEMO_BRANDS.find((b) => b.id === brandId)?.email ?? null;
-  return demoBrands.find((b) => b.id === brandId)?.profile.phone ?? null;
+  return ALL_DEMO_BRANDS.find((b) => b.id === brandId)?.email ?? null;
 }
 
 /* ── Channel resolution — fail-closed ─────────────────────────────────────── */
@@ -143,28 +127,19 @@ export interface PoAckChannelResolution {
   mode: PoAckChannelMode;
 }
 
-/** The ONE refusal text for an instant-message provider that is not provably safe. */
-export function instantMessageRefusal(mode: ProviderResolutionMode): string {
-  return (
-    `The instant-message provider (${PO_ACK_INSTANT_MESSAGE_PROVIDER}) resolves "${mode}", which is neither a ` +
-    `positively-resolved simulation nor a configured live connection. An unverified provider is NEVER treated as ` +
-    `simulation, so no instant message is sent (fail-closed).`
-  );
-}
-
 /**
  * Resolve ONE channel for ONE brand at this instant.
  *
- * FAIL CLOSED, and never silently: an internal channel needs no credential, the
- * email channel needs the brand's declared contact email, and the INSTANT-MESSAGE
- * channel needs BOTH a positively-resolved provider mode (simulation or live — see
- * `src/integrations/types.ts → isProviderSimulationSafe`) AND a declared number on
- * record. Everything else is refused with its reason stated.
+ * FAIL CLOSED, and never silently: the in-app channel needs no address, and the
+ * email channel needs the brand's declared contact email. A channel with no
+ * destination on record is refused with its reason stated.
+ *
+ * §2026-10-12 — the instant-message branch is REMOVED with the WhatsApp/Twilio
+ * feature, so only the two internal channels remain and no provider mode is needed.
  */
 export function resolvePoAckChannel(
   brandId: string,
-  channel: NotificationChannel,
-  mode: ProviderResolutionMode = defaultIntegrationMode(PO_ACK_INSTANT_MESSAGE_PROVIDER)
+  channel: NotificationChannel
 ): PoAckChannelResolution {
   if (channel === 'in_app') {
     return {
@@ -176,35 +151,16 @@ export function resolvePoAckChannel(
     };
   }
 
-  if (channel === 'email') {
-    const destination = poAckDestinationFor(brandId, 'email');
-    return destination
-      ? { channel, deliverable: true, refusal: null, destination, mode: 'internal' }
-      : {
-          channel,
-          deliverable: false,
-          destination: null,
-          mode: 'internal',
-          refusal: `No contact email is on record for ${brandId}, so no email is sent (fail-closed).`,
-        };
-  }
-
-  /** The INSTANT-MESSAGE channel — external, so the safety gate runs FIRST. */
-  if (!isProviderSimulationSafe(mode) && mode !== 'live') {
-    return { channel, deliverable: false, destination: null, mode, refusal: instantMessageRefusal(mode) };
-  }
-  const destination = poAckDestinationFor(brandId, 'sms');
-  if (!destination) {
-    return {
-      channel,
-      deliverable: false,
-      destination: null,
-      mode,
-      refusal:
-        `No instant-message number is on record for ${brandId}, so no instant message is sent (fail-closed).`,
-    };
-  }
-  return { channel, deliverable: true, refusal: null, destination, mode };
+  const destination = poAckDestinationFor(brandId, 'email');
+  return destination
+    ? { channel, deliverable: true, refusal: null, destination, mode: 'internal' }
+    : {
+        channel,
+        deliverable: false,
+        destination: null,
+        mode: 'internal',
+        refusal: `No contact email is on record for ${brandId}, so no email is sent (fail-closed).`,
+      };
 }
 
 /**
@@ -243,11 +199,10 @@ export interface PoAckChannelSendResult {
 }
 
 /**
- * ONE contract for every channel. The IN-APP and EMAIL clients are synchronous /
- * internally mocked; the LIVE instant-message client returns a Promise because a
- * provider call is genuinely asynchronous — the fan-out records such a delivery as
- * `dispatching` and completes it when the provider answers, so a live send can
- * never block the sweep or be mistaken for a completed one.
+ * ONE contract for every remaining channel (in-app + email). Both are synchronous /
+ * internally mocked. §2026-10-12 — the live instant-message client (which returned a
+ * Promise) is REMOVED with the WhatsApp/Twilio feature; the contract still admits a
+ * Promise so a future asynchronous channel needs no change here.
  */
 export interface PoAckChannelClient {
   readonly channel: NotificationChannel;
@@ -293,61 +248,6 @@ export function createPoAckEmailClient(
       };
     },
   };
-}
-
-/**
- * The SIMULATED instant-message client — deterministic, synchronous, zero network
- * calls, and unmistakably simulated (`MOCK-IM-…`, never a plausible provider id).
- */
-export class MockInstantMessageClient implements PoAckChannelClient {
-  readonly channel: NotificationChannel = 'sms';
-  readonly mode = 'simulation' as const;
-  private readonly sent: { deliveryId: string; to: string; body: string }[] = [];
-
-  send(input: PoAckChannelMessage & { deliveryId: string }): PoAckChannelSendResult {
-    this.sent.push({ deliveryId: input.deliveryId, to: input.destination, body: input.body });
-    return { ok: true, reference: `MOCK-IM-${input.deliveryId}`, simulated: true };
-  }
-
-  /** What the simulated provider was asked to send (for the gate and the audit). */
-  sentMessages(): { deliveryId: string; to: string; body: string }[] {
-    return [...this.sent];
-  }
-}
-
-/**
- * The LIVE instant-message client — the REAL provider adapter
- * (`src/lib/whatsapp/whatsAppClient.ts`: the Twilio WhatsApp Business client, which
- * itself returns a mock only when no credentials are configured). Selected ONLY
- * when the provider positively resolves `live`.
- */
-export class RealInstantMessageClient implements PoAckChannelClient {
-  readonly channel: NotificationChannel = 'sms';
-  readonly mode = 'live' as const;
-
-  constructor(private readonly client: IWhatsAppClient = getWhatsAppClient()) {}
-
-  async send(input: PoAckChannelMessage): Promise<PoAckChannelSendResult> {
-    const result = await this.client.sendMessage(input.destination, input.body);
-    return { ok: result.ok, reference: result.messageSid, error: result.error, simulated: false };
-  }
-}
-
-/**
- * THE INSTANT-MESSAGE SEAM FACTORY. Swapping simulation → live is purely a matter
- * of the provider's mode POSITIVELY resolving — nothing outside this factory (and
- * the channel resolution above) knows or cares which client is active.
- */
-export function resolveInstantMessageClient(
-  mode: ProviderResolutionMode = defaultIntegrationMode(PO_ACK_INSTANT_MESSAGE_PROVIDER)
-):
-  | { ok: true; client: PoAckChannelClient; mode: 'simulation' | 'live' }
-  | { ok: false; mode: ProviderResolutionMode; refusal: string } {
-  if (isProviderSimulationSafe(mode)) {
-    return { ok: true, client: new MockInstantMessageClient(), mode: 'simulation' };
-  }
-  if (mode === 'live') return { ok: true, client: new RealInstantMessageClient(), mode: 'live' };
-  return { ok: false, mode, refusal: instantMessageRefusal(mode) };
 }
 
 /* ── The plan (pure: what the declared schedule owes at one instant) ──────── */
@@ -476,7 +376,7 @@ export function poAckNotificationCopy(input: {
 export function poAckNotificationPlan(
   po: PurchaseOrder,
   now: Date | string | number = new Date(),
-  opts: { instantMessageMode?: ProviderResolutionMode; channels?: readonly NotificationChannel[] } = {}
+  opts: { channels?: readonly NotificationChannel[] } = {}
 ): PoAckNotificationPlan {
   const window = poAcknowledgementWindow(po, now);
   const draftDue = poNeedsAutoRejection(po, now);
@@ -532,7 +432,7 @@ export function poAckNotificationPlan(
       draftDue,
     });
     for (const channel of channels) {
-      const resolution = resolvePoAckChannel(po.brandId, channel, opts.instantMessageMode);
+      const resolution = resolvePoAckChannel(po.brandId, channel);
       const deliveryId = poAckDeliveryId(po.id, stage, channel);
       if (!resolution.deliverable || !resolution.destination) {
         refusals.push({
@@ -665,14 +565,6 @@ function isThenable(
 export interface PoAckFanoutOptions {
   /** The caller clock — the same seam the window owner takes. */
   now?: Date | string | number;
-  /**
-   * Explicit provider mode for the INSTANT-MESSAGE channel (the safety gate).
-   * Defaults to the authoritative resolution
-   * (`defaultIntegrationMode(PO_ACK_INSTANT_MESSAGE_PROVIDER)`).
-   */
-  instantMessageMode?: ProviderResolutionMode;
-  /** Injected instant-message client (the seam `escalateViaWhatsApp` also takes). */
-  instantMessageClient?: PoAckChannelClient;
   /** Injected email client (the seam `createMailClient` returns). */
   emailClient?: PoAckChannelClient;
   /** Injected in-app client (the internal channel). */
@@ -708,11 +600,9 @@ export interface PoAckFanoutResult {
 
 /** The client for ONE channel — the declared seam, resolved for this run. */
 function clientFor(channel: NotificationChannel, opts: PoAckFanoutOptions): PoAckChannelClient {
-  if (channel === 'in_app') return opts.inAppClient ?? PO_ACK_IN_APP_CLIENT;
-  if (channel === 'email') return opts.emailClient ?? createPoAckEmailClient();
-  if (opts.instantMessageClient) return opts.instantMessageClient;
-  const resolved = resolveInstantMessageClient(opts.instantMessageMode);
-  return resolved.ok ? resolved.client : new MockInstantMessageClient();
+  return channel === 'in_app'
+    ? opts.inAppClient ?? PO_ACK_IN_APP_CLIENT
+    : opts.emailClient ?? createPoAckEmailClient();
 }
 
 /**
@@ -987,7 +877,7 @@ export function runPoAckNotificationFanout(
   let duplicatesSuppressed = 0;
 
   for (const po of pos) {
-    const plan = poAckNotificationPlan(po, at, { instantMessageMode: opts.instantMessageMode });
+    const plan = poAckNotificationPlan(po, at);
     if (!plan.due) continue;
 
     for (const message of plan.messages) {
@@ -1211,7 +1101,6 @@ export function describePoAckNotificationFanout(): {
   usesTimer: boolean;
   networkCalls: number;
   channels: string;
-  liveInstantMessagePath: string;
 } {
   return {
     cadence: `at each declared notification stage (${PO_ACK_NOTIFICATION_HOURS.join('/')}h remaining) + on demand`,
@@ -1221,10 +1110,7 @@ export function describePoAckNotificationFanout(): {
     deterministic: true,
     usesTimer: false,
     networkCalls: 0,
-    channels: 'in-app (internal) · email (internal adapter, mock-first) · instant message (external, fail-closed)',
-    liveInstantMessagePath:
-      'the REAL provider adapter, selected only when the provider positively resolves `live`; it is the one ' +
-      'asynchronous path and it is performed by the provider, never simulated',
+    channels: 'in-app (internal) · email (internal adapter, mock-first)',
   };
 }
 

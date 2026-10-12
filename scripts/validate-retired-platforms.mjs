@@ -353,14 +353,15 @@ try {
   test('no rocketchat id in INTEGRATION_ORDER', !reg.INTEGRATION_ORDER.includes('rocketchat'));
   test('no rocketchat key in INTEGRATION_META', !('rocketchat' in reg.INTEGRATION_META));
   test('no rocketchat key in INITIAL_INTEGRATIONS', !('rocketchat' in types.INITIAL_INTEGRATIONS));
-  test('other communications providers intact (usertour, twilio_whatsapp)',
-    ['usertour', 'twilio_whatsapp'].every((p) => ids.includes(p)));
+  test('other communications providers intact (usertour) and the WhatsApp/Twilio one is GONE',
+    ['usertour'].every((p) => ids.includes(p)) && !ids.includes('twilio_whatsapp'));
   /**
-   * §BATCH 5 (2026-10-10) — REPOINTED, not weakened. This list held THREE providers
-   * ('usertour', 'twilio_whatsapp', 'postiz'). `postiz` was the Mercenta Social
-   * engine and left the registry with the feature, so it moved to the §2c absence
-   * guard above (where its ABSENCE is asserted). The D1 contract is unchanged: the
-   * other communications providers survive and no over-removal happened.
+   * §2026-10-12 — REPOINTED, not weakened. This list held TWO providers
+   * ('usertour', 'twilio_whatsapp'). The WhatsApp/Twilio escalation feature was
+   * removed on the Owner's instruction (WhatsApp is not needed), so `twilio_whatsapp`
+   * left the registry and moved to the ABSENCE assertion just above; the other
+   * communications provider survives and no over-removal happened. The §BATCH 5 note
+   * below records the earlier Postiz removal the same way.
    */
   test('§BATCH5 postiz is gone from the registry (it left with Mercenta Social)',
     !ids.includes('postiz') && !reg.INTEGRATION_ORDER.includes('postiz'));

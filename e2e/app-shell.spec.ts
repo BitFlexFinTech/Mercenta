@@ -36,7 +36,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
       'Billing', 'Contract Cycle', 'Logistics Hub',
       'Compliance Approvals', 'Messages', 'Helpdesk', 'Monitoring',
       'Super Admin', 'Audit Log', 'Onboarding Tours',
-      'Integration Settings', 'WhatsApp']) {
+      'Integration Settings']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
     /* §P9 (programme decision 4) — REPOINTED: 'Carrier Monitor' was in the list
@@ -47,9 +47,17 @@ test.describe('App Shell — role coverage & grouped IA', () => {
   test('Admin — grouped IA renders', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub');
     const nav = page.locator('nav[aria-label="Primary"]');
-    for (const heading of ['Overview', 'Operations', 'Brands', 'Catalogue', 'Commerce', 'Finance', 'Compliance', 'Communications', 'Support', 'Monitoring', 'Administration', 'Integrations']) {
+    for (const heading of ['Overview', 'Operations', 'Brands', 'Catalogue', 'Commerce', 'Finance', 'Compliance', 'Communications', 'Support', 'Monitoring', 'Administration']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
     }
+    /* §2026-10-13 — REPOINTED (rule 07), not weakened. The 'Integrations' group used
+       to hold TWO items: 'Integration Settings' (Super-Admin-only) and 'WhatsApp'
+       (visible to every admin). The WhatsApp/Twilio feature was removed, so the
+       group's only remaining item is Super-Admin-only, and the shell — which never
+       renders an empty group — correctly drops the heading for a normal admin. The
+       heading is asserted ABSENT here and VISIBLE for the Super Admin in the test
+       above. */
+    await expect(nav.locator('text=Integrations')).toHaveCount(0);
     await expect(nav.locator('text=Brand CRM').first()).toBeVisible();
     await expect(nav.locator('text=Billing').first()).toBeVisible();
   });

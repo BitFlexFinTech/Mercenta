@@ -374,13 +374,13 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-12 (session 133, BATCH 10), against the entries themselves. BATCH 10 closed the S0 coverage-gap row s0-discovered-pagination-and-error-boundary-coverage-gap (not_started -> built_and_tested) by adding e2e/pagination.spec.ts + e2e/error-boundary.spec.ts. The previous snapshot (session 132) was ALSO stale: it recorded built:180 while the entries held built:181 (the lift-off-launch-programme row). Correct counts now: built_and_tested:321, built:181, not_started:8, removed:33, deferred:11, blocked:7, complete:1 — total 562 = _meta.total_entries; there is NO in_progress row. §ADDED 2026-10-12 (session 135, THE RECORD RECONCILIATION): the eight `not_started` rows were each given a machine-readable `_disposition` (a tag plus an explanation) — SEVEN `OWNER DECISION`, ONE `RECORD` — so the matrix states WHY each is not started, and §12 of `scripts/validate-no-stale-blockers.mjs` DISCOVERS them from these entries, requires a tagged disposition on every one, ties this `status_counts.not_started` figure to the rows, and carries an ABSENCE GUARD for the retired claim that they were code-only build work. The counts are unchanged. §UPDATED 2026-10-12 (session 136): the TWO discovered UX rows were BUILT and are no longer `not_started` — `discovered-overview-vestigial-toolbar-strip` (option (a): the empty sticky toolbar strip removed; the ⌘K hint moved into the header facts line) and `discovered-support-team-mobile-pane-overflow` (option (a): the two-pane Support & Team surface now stacks below `md`). Both carry gates (validate-uiux-redesign · validate-workspace-shell), each mutation-proved. Counts now: built_and_tested:323, built:181, not_started:6, removed:33, deferred:11, blocked:7, complete:1 — total 562.",
-      "built_and_tested": 323,
+      "_note": "Recomputed 2026-10-12 (session 133, BATCH 10), against the entries themselves. BATCH 10 closed the S0 coverage-gap row s0-discovered-pagination-and-error-boundary-coverage-gap (not_started -> built_and_tested) by adding e2e/pagination.spec.ts + e2e/error-boundary.spec.ts. The previous snapshot (session 132) was ALSO stale: it recorded built:180 while the entries held built:181 (the lift-off-launch-programme row). Correct counts now: built_and_tested:321, built:181, not_started:8, removed:33, deferred:11, blocked:7, complete:1 — total 562 = _meta.total_entries; there is NO in_progress row. §ADDED 2026-10-12 (session 135, THE RECORD RECONCILIATION): the eight `not_started` rows were each given a machine-readable `_disposition` (a tag plus an explanation) — SEVEN `OWNER DECISION`, ONE `RECORD` — so the matrix states WHY each is not started, and §12 of `scripts/validate-no-stale-blockers.mjs` DISCOVERS them from these entries, requires a tagged disposition on every one, ties this `status_counts.not_started` figure to the rows, and carries an ABSENCE GUARD for the retired claim that they were code-only build work. The counts are unchanged. §UPDATED 2026-10-12 (session 136): the TWO discovered UX rows were BUILT and are no longer `not_started` — `discovered-overview-vestigial-toolbar-strip` (option (a): the empty sticky toolbar strip removed; the ⌘K hint moved into the header facts line) and `discovered-support-team-mobile-pane-overflow` (option (a): the two-pane Support & Team surface now stacks below `md`). Both carry gates (validate-uiux-redesign · validate-workspace-shell), each mutation-proved. Counts now: built_and_tested:323, built:181, not_started:6, removed:33, deferred:11, blocked:7, complete:1 — total 562. §UPDATED 2026-10-12 (session 137, LEGAL SIGN-OFF CLEARED): the Owner gave legal sign-off, so `phase15-legal-privacy` moved blocked -> built_and_tested (the ONE owner `DATA_PROCESSING_LEGAL_SIGNOFF` now reads `legal_sign_off_given`; both the data-inventory gate and the launch gate pin it, each mutation-proved). Counts now: built_and_tested:324, deferred:11, built:181, not_started:6, removed:33, blocked:6, complete:1. §UPDATED 2026-10-13 (BATCH 12, WHATSAPP/TWILIO REMOVED): the WhatsApp-via-Twilio escalation feature was removed end to end on the Owner’s instruction, so `batchD-whatsapp-escalation` and `batchF-postiz-whatsapp-nav-wire` moved to `removed` (their evidence no longer names the deleted files). Counts now: built_and_tested:322, deferred:11, built:181, not_started:6, removed:35, blocked:6, complete:1.",
+      "built_and_tested": 322,
+      "deferred": 11,
       "built": 181,
       "not_started": 6,
-      "removed": 33,
-      "deferred": 11,
-      "blocked": 7,
+      "removed": 35,
+      "blocked": 6,
       "complete": 1
     },
     "dashboard_logistics_cleanup_programme": {
@@ -972,7 +972,6 @@
     "records_and_decisions_2026_10_04": "RECORDS & DECISIONS (2026-10-04), three founder-directed items. (1) OPTION A RECORDED AS A DEFERRED TASK: new entry `editor-typecheck-gap-e2e-and-functions` — the 121 TypeScript files outside src (e2e/, supabase/functions/, two config files) belong to no TypeScript project, so the editor invents ~178 problems and the project never type-checks them; fix by giving them proper projects and adding them to the checks. (2) SIX WRONG LABELS CORRECTED AT SOURCE, each recording its old value inline: `phase10-uk-opportunity-states` in_progress -> not_started; `ssot-work-layer-s6-ci-wiring` in_progress -> built_and_tested (its text said CI wiring was outstanding, but .github/workflows/ci.yml has existed since 2026-09-28); `phase14-live-integrations-activation` and `phase1-live-research-activation` blocked -> deferred (credentials are ACTIVATION-only, never a blocker); `s0-discovered-live-spapi-edge-functions-missing` blocked -> built_and_tested (the three SP-API routes now exist in supabase/functions/_shared/proxyRoutes.ts served by supabase/functions/spapi/index.ts); `batchC-rocketchat-integration` and `batchD-model-router` regressed -> removed (their own text says deliberately removed). The registry now holds ZERO in_progress, ZERO blocked and ZERO regressed rows, so it and PROJECT_STATUS.md ('IN PROGRESS — none') finally agree. (3) REVENUE-FLOOR DECISION RECORDED: `discovered-acquisition-revenue-floor-and-sla` now states the Founder decision of 2026-10-04 — there is NO revenue floor (volume strategy; the Brand engine's 100-point score + hard disqualifiers + ten-category rule is the quality mechanism); the response-SLA half remains open.",
     "option_a_typecheck_coverage": "§OPTION-A (2026-10-04) — THE EDITOR / TYPE-CHECK GAP CLOSED. 121 TypeScript files outside src (96 e2e, 23 supabase/functions, playwright.config.ts, scripts/brain-runtime-check.ts) belonged to NO TypeScript project, so the editor invented ~178 problems and `npm run typecheck` never checked them. NEW projects tsconfig.e2e.json (Playwright) and tsconfig.functions.json (Edge Functions); tsconfig.node.json extended to cover scripts/brain-runtime-check.ts; root tsconfig.json references all four; `npm run typecheck` now runs ALL FOUR. Browser-runtime imports (import('/src/...') inside page.evaluate) are mapped to the real source via `paths`; the Deno runtime surface is declared in supabase/functions/_types/edge-runtime.d.ts. REAL DEFECTS FIXED at source: multi-tenant.spec.ts used an invalid Playwright `exact` option on locator(); uiux-foundation.spec.ts used a double-prefixed KPI selector that made a test UNABLE TO FAIL; scripts/brain-runtime-check.ts read edge.label/edge.note (not on BrainEdge, so its channel-leak scan collected nothing) and had two duplicate report keys. NEW gate scripts/validate-typecheck-coverage.mjs (npm run validate:typecheck-coverage, 25 assertions as of 2026-10-11 — §6b added the rule-09 coverage gate; the count was 20 before that) MUTATION-PROVED (dropping tsconfig.e2e.json from typecheck => 1 failure; package.json restored byte-identical). validate:all 151/0; lint 0; build OK; the 9 affected browser specs 65 passed. No application runtime change => three-way NOT APPLICABLE.",
     "batch7_part5_removal_guards": "§BATCH 7 PART 5 (2026-10-11, session 130) — THE CONSOLIDATED ABSENCE RECORD + THE TYPE-CHECK COVERAGE GATE. (5.1) scripts/validate-retired-platforms.mjs is now the ONE place that guards EVERY removal the owner instructed on 2026-10-10: it gained §2d (the Consolidation card on BOTH logistics surfaces — the owner lib and the unmounted panel KEPT, decision 11), §2e (the interactive operational map on BOTH surfaces — the derivation KEPT, both surfaces still read buildOperationalMap), §2f (the Logistics Hero and its whole pipeline: 8 deleted files + .geo-cache + the two package.json scripts + the .gitignore block + a comment-stripped whole-src scan) and §2g (the Mercenta Brain) beside the existing §2b/§2c — 30 assertions, MUTATION-PROVED one mutation per group (mount ConsolidationPosturePanel => §2d FAIL; re-mount LogisticsMapCanvas => §2e FAIL; re-create src/data/logisticsHeroGeo.ts => §2f FAIL; re-add a 'brain' nav id to AdminShell => §2g FAIL), every file restored byte-identical (LogisticsControl 9ad9fb7a…, LogisticsHub 0895f1e7…, AdminShell 8fc5d024…). (5.3) scripts/validate-typecheck-coverage.mjs gained §6b — the rule-09 COVERAGE GATE: the covered roots are DISCOVERED from the four projects' own include arrays (app/node/e2e/functions) and it FAILS if any .ts/.tsx in the tree belongs to no project (573 files discovered, 0 uncovered); mutation-proved by creating scripts/coverage-probe.ts (1 FAIL) then deleting it. Tests: typecheck 0, lint 0, build ok, validate:all 187 PASS / 0 FAIL (of 187), the four browser absence-guard specs (retired-platforms, mercenta-brain, logistics-hub-map, logistics-providers) 28 passed / 0 failed. NO application runtime change => three-way NOT APPLICABLE.",
-
     "phase15_launch_gate": {
       "increment": "§PHASE 15 — THE LAUNCH GATE (2026-10-05)",
       "added": [
@@ -2121,11 +2120,11 @@
     },
     {
       "id": "batchD-whatsapp-escalation",
-      "description": "WhatsApp escalation via Twilio",
+      "description": "WhatsApp escalation via Twilio — REMOVED (§BATCH 12, 2026-10-13)",
       "source": "Batch D",
-      "status": "built_and_tested",
-      "evidence": "src/lib/whatsapp/; WhatsAppAdminPanel.tsx; registry.ts; validate-whatsapp.mjs; e2e/admin-operational-surfaces.spec.ts; wired in ADMIN_NAV ('whatsapp'/'WhatsApp Escalation') + App.tsx render condition",
-      "last_verified": "2026-09-01",
+      "status": "removed",
+      "evidence": "§2026-10-13 — REMOVED on the Owner’s instruction (\"WhatsApp is not needed\"). Deleted: src/lib/whatsapp/whatsAppClient.ts, src/lib/whatsapp/whatsAppEscalation.ts, src/components/admin/WhatsAppAdminPanel.tsx and scripts/validate-whatsapp.mjs. The twilio_whatsapp provider left src/integrations/registry.ts + src/integrations/types.ts, its nav entry and render condition left src/components/layout/AdminShell.tsx, its cost line left src/config/operatingCosts.ts, its processor left src/config/dataProcessing.ts, and the instant-message channel left the PO-acknowledgement fan-out (src/lib/commerce/poAcknowledgementNotifications.ts). ABSENCE is asserted by scripts/validate-retired-platforms.mjs (the provider is gone) · scripts/validate-po-acknowledgement-notifications.mjs (no sms channel, client, provider or id) · scripts/validate-data-inventory.mjs · e2e/retired-platforms.spec.ts (no WhatsApp nav entry or card).",
+      "last_verified": "2026-10-13",
       "superseded_by": null
     },
     {
@@ -2212,11 +2211,11 @@
     },
     {
       "id": "batchF-postiz-whatsapp-nav-wire",
-      "description": "PostizAdminPanel + WhatsAppAdminPanel wired into ADMIN_NAV with render conditions",
+      "description": "PostizAdminPanel + WhatsAppAdminPanel wired into ADMIN_NAV with render conditions — BOTH surfaces now REMOVED",
       "source": "Batch F",
-      "status": "built_and_tested",
-      "evidence": "src/App.tsx (ADMIN_NAV + import + render); e2e/admin-operational-surfaces.spec.ts",
-      "last_verified": "2026-09-01",
+      "status": "removed",
+      "evidence": "§2026-10-13 — both panels are GONE, so this wiring no longer exists (the evidence it used to name, src/App.tsx + e2e/admin-operational-surfaces.spec.ts, carries no reference to either). Postiz left with Mercenta Social (§BATCH 5, 2026-10-10); WhatsAppAdminPanel left with the WhatsApp/Twilio removal (§BATCH 12, 2026-10-13). ABSENCE is asserted by scripts/validate-retired-platforms.mjs §2c and e2e/retired-platforms.spec.ts.",
+      "last_verified": "2026-10-13",
       "superseded_by": null
     },
     {
@@ -4406,9 +4405,9 @@
       "id": "phase15-legal-privacy",
       "description": "Phase 15 — legal/privacy launch gate: privacy policy, terms & conditions, cookie consent and a third-party data inventory",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "blocked",
-      "evidence": "src/config/dataProcessing.ts; src/components/marketing/PrivacyPolicy.tsx · src/components/marketing/TermsOfService.tsx · src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs · scripts/validate-data-inventory.mjs. §Phase 15 (2026-10-05, was: blocked): the privacy policy, terms, cookie notice AND the third-party data inventory are now BUILT — the policy derives its processor list from the inventory owner, gated by `validate:data-inventory`. STILL BLOCKED on LEGAL SIGN-OFF of the published wording and of the inventory — a human/business decision, not a repository change.",
-      "last_verified": "2026-10-05",
+      "status": "built_and_tested",
+      "evidence": "src/config/positioning.ts; src/components/marketing/PrivacyPolicy.tsx · src/components/marketing/TermsOfService.tsx · src/components/marketing/CookieNotice.tsx · src/config/dataProcessing.ts · scripts/validate-phase15-launch.mjs · scripts/validate-data-inventory.mjs · e2e/public-pages.spec.ts. §2026-10-12 — CLEARED (was: blocked): the privacy policy, terms, cookie notice AND the third-party data inventory are built and asserted, and the Owner gave LEGAL SIGN-OFF of the published wording and of the inventory, so the gate moved from BLOCKED to CLEARED. The ONE declaration `DATA_PROCESSING_LEGAL_SIGNOFF` now reads `legal_sign_off_given`, and both gates pin that value so the gate cannot be silently re-opened.",
+      "last_verified": "2026-10-12",
       "superseded_by": null
     },
     {
@@ -6423,8 +6422,8 @@
       "description": "Phase 15 — the third-party data inventory (UK GDPR Article 30 register) as a single-owner module, plus the gate that keeps it complete against the integration registry and prevents a supplier name leaking into public copy",
       "source": "§Phase 15 legal/privacy gate (2026-10-05)",
       "status": "built",
-      "evidence": "src/config/dataProcessing.ts; scripts/validate-data-inventory.mjs; package.json · src/components/marketing/PrivacyPolicy.tsx. §Phase 15: 23 processors declared, 17 public-safe categories, 2 reasoned exclusions; the gate proves every registered provider is declared or consciously excluded, the legal sign-off stays PENDING, and no supplier name leaks into the public projection — proved able to fail (2 mutations, file restored byte-identical).",
-      "last_verified": "2026-10-05",
+      "evidence": "src/config/dataProcessing.ts; scripts/validate-data-inventory.mjs; package.json · src/components/marketing/PrivacyPolicy.tsx. §Phase 15: 23 processors declared, 17 public-safe categories, 2 reasoned exclusions; the gate proves every registered provider is declared or consciously excluded, the legal sign-off is DECLARED GIVEN (§2026-10-12), and no supplier name leaks into the public projection — proved able to fail (2 mutations, file restored byte-identical).",
+      "last_verified": "2026-10-12",
       "superseded_by": null
     },
     {

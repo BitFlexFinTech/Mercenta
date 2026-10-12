@@ -145,18 +145,6 @@ export const OPERATING_COST_LINES: OperatingCostLine[] = [
     note: 'Ceiling enforced by the existing discovery budget module.',
   },
   {
-    id: 'whatsapp',
-    name: 'WhatsApp / Twilio messaging',
-    providerId: 'twilio_whatsapp',
-    category: 'communications',
-    plan: 'Placeholder — not connected',
-    billing: 'usage',
-    fixedMonthlyGbp: 0,
-    usageBudgetGbp: 0,
-    source: 'NOT CONNECTED',
-    note: 'No Twilio messaging credential is configured for the platform.',
-  },
-  {
     id: 'google',
     name: 'Google (Drive/Docs/Sheets/Slides/Calendar)',
     providerId: 'google',

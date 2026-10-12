@@ -26,13 +26,14 @@ if (!legal) {
   console.error('MISSING ROW: phase15-legal-privacy');
   process.exit(1);
 }
-legal.status = 'blocked';
+legal.status = 'built_and_tested';
 legal.evidence =
   'src/config/dataProcessing.ts; src/components/marketing/PrivacyPolicy.tsx · src/components/marketing/TermsOfService.tsx · ' +
-  'src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs · scripts/validate-data-inventory.mjs. ' +
-  '§Phase 15 (2026-10-05, was: blocked): the privacy policy, terms, cookie notice AND the third-party data inventory are now ' +
-  'BUILT — the policy derives its processor list from the inventory owner, gated by `validate:data-inventory`. STILL BLOCKED on ' +
-  'LEGAL SIGN-OFF of the published wording and of the inventory — a human/business decision, not a repository change.';
+  'src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs · scripts/validate-data-inventory.mjs · ' +
+  'e2e/public-pages.spec.ts. §2026-10-12 — CLEARED (was: blocked): the privacy policy, terms, cookie notice AND the third-party ' +
+  'data inventory are BUILT — the policy derives its processor list from the inventory owner, gated by `validate:data-inventory`. ' +
+  'The Owner gave LEGAL SIGN-OFF of the published wording and of the inventory, so `DATA_PROCESSING_LEGAL_SIGNOFF` now reads ' +
+  '`legal_sign_off_given` and the gate is CLEARED; both gates pin that value so the gate cannot be silently re-opened.';
 legal.last_verified = DATE;
 legal.superseded_by = null;
 
@@ -48,9 +49,9 @@ const INVENTORY_ROW = {
   status: 'built',
   evidence:
     'src/config/dataProcessing.ts; scripts/validate-data-inventory.mjs; package.json · src/components/marketing/PrivacyPolicy.tsx. ' +
-    '§Phase 15: 23 processors declared, 17 public-safe categories, 2 reasoned exclusions; the gate proves every registered provider is ' +
-    'declared or consciously excluded, the legal sign-off stays PENDING, and no supplier name leaks into the public projection — ' +
-    'proved able to fail (2 mutations, file restored byte-identical).',
+    '§Phase 15: the gate proves every registered provider is declared or consciously excluded, the legal sign-off is DECLARED (and ' +
+    '§2026-10-12 reads `legal_sign_off_given` — the Owner gave it), and no supplier name leaks into the public projection — ' +
+    'proved able to fail (mutations, file restored byte-identical).',
   last_verified: DATE,
   superseded_by: null,
 };

@@ -40,8 +40,13 @@ gate, each printing **PASS** or **BLOCKED with the EXACT missing input** — so 
 silently stays blocked. Its repo-side assertions are **60/60**; the gate was proved able to fail (a file the 404 gate
 depends on was renamed, the validator exited 1, and the file was restored byte-identical).
 
-**Cleared this session (repository-side requirements met):** SEO · performance · accessibility · responsive ·
-conversion · reliability/degradation · website integrity. **Work done:** a REAL custom 404
+**Cleared (repository-side requirements met):** SEO · performance · accessibility · responsive ·
+conversion · reliability/degradation · website integrity. **§2026-10-12 — ALSO CLEARED: `phase15-legal-privacy`.**
+The Owner gave legal sign-off of the published privacy/terms wording and of the third-party data inventory, so the ONE
+declaration `DATA_PROCESSING_LEGAL_SIGNOFF` moved from `pending_legal_sign_off` to `legal_sign_off_given`, the gate left
+the BLOCKED set, and both `validate:data-inventory` and `validate:phase15-launch` now PIN that value (mutation-proved:
+mutating it back produced 1 failure; the file was restored byte-identical). The launch gate is now **8/15 cleared · 7/15
+BLOCKED · 69/69 repo-side**. **Work done earlier:** a REAL custom 404
 (`src/components/marketing/NotFound.tsx` + the `Home.tsx` wiring + an `e2e/public-pages.spec.ts` case) so an unknown
 address no longer renders the homepage; response security headers in `public/.htaccess` (HSTS, nosniff,
 X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency security-audit fix (`npm audit fix`,
@@ -53,7 +58,6 @@ X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency securi
 |---|---|
 | `phase15-security` | HTTPS/TLS enforcement is host/domain-level. **(b) is now RESOLVED (2026-10-05):** the `maplibre-gl` critical was a **DECLARED-BUT-UNUSED** dependency, so it was moved onto a **patched line** (`6.12.0`, clears GHSA-jrc7-96c5-q579) — **no map regression was needed because there is no map using it** — and the audit critical count is now **0** (asserted in the gate) |
 | `phase15-database-infrastructure` | a PRODUCTION Supabase project — backup schedule, restore rehearsal, DR drill |
-| `phase15-legal-privacy` | legal sign-off of the published privacy policy / terms + of the third-party data inventory — **the inventory is now BUILT** (`src/config/dataProcessing.ts`, gated by `validate:data-inventory`), so only the human sign-off remains |
 | `phase15-analytics` | a BUSINESS DECISION: which analytics provider (if any) and on what lawful basis. Until then NO analytics script is loaded (asserted) |
 | `phase15-production-data-cleanup` | the live database/domain for the PRODUCTION content audit (repo-side checks pass) |
 | `phase15-communications-email-auth` | SPF/DKIM/DMARC DNS records on the sending domain + the sending provider chosen |
@@ -79,9 +83,10 @@ DPA is required · the integration provider it corresponds to · active/planned)
 (`npm run validate:data-inventory`, **15 assertions**) EXECUTES the module and forces every provider registered in
 `src/integrations/types.ts` to be either declared or consciously EXCLUDED with a reason, so a new integration can never
 silently process personal data undeclared. The privacy policy's "who we share it with" section now READS the module's
-public-safe projection (supplier names never appear in public copy). **The gate is still BLOCKED on legal sign-off** — the
-one declaration `DATA_PROCESSING_LEGAL_SIGNOFF.state === 'pending_legal_sign_off'` is asserted, so the gate cannot be
-reported closed while it is open. The launch gate's repo-side assertions rose to **63/63**.
+public-safe projection (supplier names never appear in public copy). **§2026-10-12 — THE GATE IS NOW CLEARED.** The Owner gave legal sign-off, so
+`DATA_PROCESSING_LEGAL_SIGNOFF.state` reads `legal_sign_off_given`; both `validate:data-inventory` and
+`validate:phase15-launch` PIN that value, so the gate cannot be silently re-opened. (Repo-side assertions are
+now **69/69**.)
 
 
 **Status of the DASHBOARD + LOGISTICS CLEANUP PROGRAMME: COMPLETE.** Every phase — P0, P0.4, P1–P13 — is DONE, and the
@@ -555,7 +560,7 @@ never unlimited.
 | Postmark/SendGrid | `MockMailClient` (simulated hard-bounce on malformed recipients) | Free Postmark/SendGrid trial account + server API token | Integrations wizard → **Transactional Email** card (live test-call already implemented); factory `createMailClient` flips to real | Deploy `send-email` Edge Function + wire its Vault lookup (`resolveToken`) |
 | Hunter.io | Not connected | Free Hunter plan (25 verified emails/mo) suffices for dev | Integrations wizard → **Hunter.io** card (live ping implemented) | None |
 | OpenRouter | Not connected | OpenRouter account + API key (pay-per-use, no approval process) | Integrations wizard → **OpenRouter** card (live ping implemented) | None |
-| Instantly.ai | Reply webhook **SPECIFIED, NOT PRESENT IN THIS REPO** (§M10 correction): `instantly-reply-webhook` (classify → persist → hot-lead flag) is pinned contractually by `scripts/validate-edge-functions.mjs` but the Edge Function does not exist on disk — the client-side classifier (`src/lib/marketing.ts`) and the mocked outbound enrolment are built | Instantly Outreach plan + dedicated cold domain (**not** a subdomain of mercanta.co.uk — deliverability isolation per Stage 10 spec) | Integrations wizard → **Instantly.ai** card; webhook URL configured per-campaign in Instantly | Create + deploy the webhook function + set `INSTANTLY_WEBHOOK_SECRET` |
+| Instantly.ai | Reply webhook **EXISTS IN THIS REPO** (§2026-10-13 correction — supersedes the earlier "not present" note): `supabase/functions/instantly-reply-webhook/index.ts` (classify → persist → hot-lead flag) is contract-validated by `scripts/validate-edge-functions.mjs`; the client-side classifier (`src/lib/marketing.ts`) and the mocked outbound enrolment are built | Instantly Outreach plan + dedicated cold domain (**not** a subdomain of mercanta.co.uk — deliverability isolation per Stage 10 spec) | Integrations wizard → **Instantly.ai** card; webhook URL configured per-campaign in Instantly | **None** — deploy the existing function + set `INSTANTLY_WEBHOOK_SECRET` |
 | **Postiz → Mercenta Social** — ⛔ **REMOVED (§BATCH 5, 2026-10-10)** | The whole feature was deleted on the owner's instruction, so there is nothing to activate: the engine client, the admin control centre, the `social-session` bridge, the self-hosted Postiz services and the Caddy engine vhost are gone | **Nothing** — activation no longer applies | — | **None.** `scripts/validate-retired-platforms.mjs` §2c asserts the absence |
 
 **Summary:** only Amazon genuinely requires the admin's own account/approval process. Every other provider can become real today via a free sandbox/test-mode signup, entered through its existing wizard card.
@@ -591,7 +596,7 @@ never unlimited.
 
 ## Structural debt blocking production
 
-0. **Edge Functions (Stage 17 + 21 + 22) — SPECIFIED AND CONTRACT-VALIDATED, BUT NOT PRESENT IN THIS REPOSITORY.**
+0. **Edge Functions (Stage 17 + 21 + 22) — SPECIFIED, CONTRACT-VALIDATED, AND PRESENT IN THIS REPOSITORY (§M11, 2026-09-14).**
    **§M11 correction (2026-09-14) — SUPERSEDES the §M10 note below.** The six
    deploy-time functions NOW EXIST IN THIS REPOSITORY:
    `supabase/functions/payouts-transfer`, `catalog-import`,

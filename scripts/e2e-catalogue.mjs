@@ -46,7 +46,7 @@ function capabilityOf(journey) {
   if (/billing|invoic|payout|deduction|dispute|xero|finance|costs/.test(n)) return 'finance';
   if (/crm|brand-intelligence|marketing|amazon-ads|discovery/.test(n)) return 'brands_marketing';
   if (/work|command-centre|brain|monitoring|automation|notification|tour/.test(n)) return 'operations';
-  if (/integration|whatsapp|helpdesk|messaging|mail|google/.test(n)) return 'integrations';
+  if (/integration|helpdesk|mail|google/.test(n)) return 'integrations';
   if (/founder|investor|funding|partnership|company-control|operating-costs/.test(n)) return 'founder';
   return 'platform';
 }

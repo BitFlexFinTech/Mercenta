@@ -37,7 +37,6 @@ const ComplianceApprovals = lazy(() => import('@/components/admin/ComplianceAppr
 const MarketingHub = lazy(() => import('@/components/admin/MarketingHub').then((m) => ({ default: m.MarketingHub })));
 const IntegrationsPanel = lazy(() => import('@/components/admin/integrations/IntegrationsPanel').then((m) => ({ default: m.IntegrationsPanel })));
 const UsertourAdminPanel = lazy(() => import('@/components/admin/UsertourAdminPanel').then((m) => ({ default: m.UsertourAdminPanel })));
-const WhatsAppAdminPanel = lazy(() => import('@/components/admin/WhatsAppAdminPanel').then((m) => ({ default: m.WhatsAppAdminPanel })));
 const FulfillmentTrackPanel = lazy(() => import('@/components/admin/FulfillmentTrack').then((m) => ({ default: m.FulfillmentTrackPanel })));
 const RetailPipelinePanel = lazy(() => import('@/components/admin/RetailPipeline').then((m) => ({ default: m.RetailPipelinePanel })));
 const BillingPanel = lazy(() => import('@/components/admin/BillingPanel').then((m) => ({ default: m.BillingPanel })));
@@ -69,7 +68,7 @@ import {
   LayoutDashboard, Users, Gauge, Boxes, Package, Truck,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
-  Phone, ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
+  ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -163,7 +162,6 @@ const ADMIN_SECTIONS = [
     label: 'Integrations',
     items: [
       { id: 'integrations', label: 'Integration Settings', icon: <PlugZap className="w-4 h-4" /> },
-      { id: 'whatsapp', label: 'WhatsApp', icon: <Phone className="w-4 h-4" /> },
     ],
   },
   {
@@ -290,7 +288,7 @@ export default function AdminShell() {
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
     amazon_ads: 'Ad Spend',
     integrations: 'Integration Settings', usertour: 'Onboarding Tours',
-    whatsapp: 'WhatsApp Escalation', founder_centre: 'Founder Investor Centre',
+    founder_centre: 'Founder Investor Centre',
     partnerships: 'Partnerships & Fundraising',
     work: 'Work Management', calendar: 'Operations Calendar',
     control_centre: 'Control Centre',
@@ -376,7 +374,6 @@ export default function AdminShell() {
             {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
             {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
             {adminView === 'usertour' && <UsertourAdminPanel />}
-            {adminView === 'whatsapp' && <WhatsAppAdminPanel />}
           </Suspense>
         </IntegrationsProvider>
       </ErrorBoundary>

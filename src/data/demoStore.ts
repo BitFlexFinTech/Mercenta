@@ -2143,33 +2143,17 @@ const ALL_EVENT_TYPES: NotificationEventType[] = [
 const DEFAULT_CHANNELS: NotificationChannel[] = ['email', 'in_app'];
 
 /**
- * §P13 / S5 — ONE DECLARED INSTANT-MESSAGE SUBSCRIPTION.
- *
- * The acknowledgement notification fan-out can deliver on the in-app and email
- * channels, but the EXTERNAL instant-message channel is only ever attempted when
- * the brand has actually subscribed to it. If no brand did, the seam would be
- * declared but UNREACHABLE — and its fail-closed rule unprovable in the running
- * product.
- *
- * So exactly ONE brand subscribes to the instant-message channel for the
- * acknowledgement event, and the fan-out then genuinely ATTEMPTS it and REFUSES
- * it, stating why (no number on record; the provider does not positively resolve),
- * with the refusal attributed and audited. No demo brand or account is removed, and
- * every other brand keeps the default channels.
+ * §2026-10-12 — THE INSTANT-MESSAGE SUBSCRIPTION IS REMOVED. The WhatsApp/Twilio
+ * escalation feature was removed on the Owner's instruction (WhatsApp is not
+ * needed), so no brand subscribes to an instant-message channel. Every brand keeps
+ * the in-app and email channels (or email only, on the declared cadence).
  */
-const INSTANT_MESSAGE_DEMO_BRAND = 'brand-astonish';
-
 export const demoNotificationPrefs: NotificationPreference[] = ALL_DEMO_BRANDS.flatMap((b) =>
   ALL_EVENT_TYPES.map((et, i) => ({
     id: `np-${b.id}-${et}`,
     brandId: b.id,
     eventType: et,
-    channels:
-      b.id === INSTANT_MESSAGE_DEMO_BRAND && et === 'po_acknowledgment_deadline'
-        ? (['email', 'in_app', 'sms'] as NotificationChannel[])
-        : i % 5 === 0
-          ? (['email'] as NotificationChannel[])
-          : [...DEFAULT_CHANNELS],
+    channels: i % 5 === 0 ? (['email'] as NotificationChannel[]) : [...DEFAULT_CHANNELS],
     enabled: i % 7 !== 0,
   }))
 );

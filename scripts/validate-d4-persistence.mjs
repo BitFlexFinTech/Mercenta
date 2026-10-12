@@ -337,8 +337,10 @@ try {
   test('N1 the removed communications provider is absent from the registry',
     !Object.keys(registry.INTEGRATION_REGISTRY).includes(removedId) &&
     !registry.INTEGRATION_ORDER.includes(removedId));
-  test('N2 the other communications providers still survive (no over-removal)',
-    ['usertour', 'twilio_whatsapp'].every((p) => p in registry.INTEGRATION_REGISTRY));
+  test('N2 the other communications providers still survive, and the removed WhatsApp/Twilio provider is GONE', 
+    ['usertour'].every((p) => p in registry.INTEGRATION_REGISTRY) &&
+    !('twilio_whatsapp' in registry.INTEGRATION_REGISTRY) &&
+    !registry.INTEGRATION_ORDER.includes('twilio_whatsapp'));
 
   // ══ O. §BATCH 5 (2026-10-10) — Postiz is GONE (REPOINTED, not weakened) ══
   // O used to assert that Postiz REMAINED a registered capability and that an

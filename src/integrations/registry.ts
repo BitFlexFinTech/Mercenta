@@ -192,20 +192,6 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Fetch Usertour health endpoint to verify connectivity',
   },
-  twilio_whatsapp: {
-    id: 'twilio_whatsapp',
-    name: 'Twilio WhatsApp',
-    description:
-      'WhatsApp escalation channel for time-sensitive hot-lead notifications and support escalations. Sends brief, actionable alerts to the founder/team when a brand explicitly asks for a human. Additive to the existing in-app/email notification — never replaces it.',
-    authMethod: 'api_key',
-    fields: [
-      { key: 'account_sid', label: 'Twilio Account SID', placeholder: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', secret: true },
-      { key: 'auth_token', label: 'Twilio Auth Token', placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', secret: true },
-      { key: 'from_number', label: 'WhatsApp Sender Number', placeholder: 'whatsapp:+14155238886', secret: false },
-      { key: 'notify_phone', label: 'Notify Phone (E.164)', placeholder: '+447700900000', secret: false },
-    ],
-    testCallDescription: 'Ping Twilio API to verify the Account SID and Auth Token',
-  },
   // §Phase 4 — registered so their MODE is authoritative for scenario safety.
   // Deliberately NOT added to INTEGRATION_ORDER: they have dedicated
   // non-wizard integration paths (Xero: services/xero + AccountingPanel;
@@ -368,7 +354,6 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'keepa',
   'firecrawl',
   'usertour',
-  'twilio_whatsapp',
   // §Priority-1 — provider control-plane coverage: logistics + compliance +
   // finance providers with authoritative simulation defaults.
   'dhl',
@@ -415,7 +400,6 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   keepa: { category: 'data', defaultMode: 'available' },
   firecrawl: { category: 'data', defaultMode: 'available' },
   usertour: { category: 'communications', defaultMode: 'simulation' },
-  twilio_whatsapp: { category: 'communications', defaultMode: 'available' },
   // §Phase 4 — scenario-required providers. Docs-verified simulation state:
   // DHL waiting/simulation, Xero demo/simulation. Registered so every scenario
   // provider resolves authoritatively (never falls to UNKNOWN).

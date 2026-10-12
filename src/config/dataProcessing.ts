@@ -31,10 +31,13 @@
  *    CATEGORIES`), not the internal names.
  *  - No credential, token or secret is ever stored here.
  *
- * LEGAL SIGN-OFF IS PENDING — AND THAT IS DECLARED, NOT ASSUMED. Building the
- * inventory does NOT clear the gate: a human must still sign off the wording and
- * this register. `DATA_PROCESSING_LEGAL_SIGNOFF` is the ONE declaration of that
- * state, so nothing can claim the gate is closed while it is open.
+ * LEGAL SIGN-OFF IS DECLARED, NEVER ASSUMED. `DATA_PROCESSING_LEGAL_SIGNOFF` is
+ * the ONE declaration of that state. It read `pending_legal_sign_off` until the
+ * Owner confirmed on 2026-10-12 that the published privacy/terms wording and this
+ * register had received legal sign-off; it now reads `legal_sign_off_given`. The
+ * launch gate READS this value, so the gate cannot be reported closed while the
+ * declaration is absent or unrecognised, and cannot be reported open once the
+ * sign-off stands.
  *
  * IMPORT DISCIPLINE. This module is imported by a Node validator via TypeScript
  * type-stripping, so it carries NO runtime import — only a type-only one.
@@ -105,7 +108,6 @@ export type DataProcessorCategory =
   | 'fulfilment'
   | 'email'
   | 'esignature'
-  | 'messaging'
   | 'marketing'
   | 'research'
   | 'ai'
@@ -297,18 +299,6 @@ export const DATA_PROCESSORS: readonly DataProcessor[] = [
     status: 'active',
   },
   {
-    id: 'operational-messaging',
-    name: 'Twilio (WhatsApp Business)',
-    category: 'messaging',
-    purpose: 'Sending operational messages about a brand’s orders and account.',
-    dataCategories: ['contact', 'communications'],
-    lawfulBasis: 'contract',
-    location: 'United States / European Union',
-    dpaRequired: true,
-    provider: 'twilio_whatsapp',
-    status: 'active',
-  },
-  {
     id: 'market-research',
     name: 'Lead-sourcing providers (CSV import / Apollo / Instantly)',
     category: 'research',
@@ -447,7 +437,11 @@ export const PUBLIC_PROCESSING_CATEGORIES: readonly PublicProcessingCategory[] =
   { category: 'fulfilment', label: 'Warehousing and fulfilment', purpose: 'Storing, picking and dispatching your stock on your behalf.' },
   { category: 'email', label: 'Email delivery', purpose: 'Sending the messages and documents the service requires.' },
   { category: 'esignature', label: 'Contract signing', purpose: 'Sending and storing the agreements you sign with us.' },
-  { category: 'messaging', label: 'Messaging', purpose: 'Sending you operational messages about your orders and account.' },
+  /* §2026-10-12 — REMOVED: { category: 'messaging', label: 'Messaging', purpose: 'Sending you operational messages
+     about your orders and account.' }. The ONLY messaging-category processor was `operational-messaging` (Twilio
+     WhatsApp), which was deleted with the WhatsApp/Twilio feature, so this public row described processing the
+     platform no longer declares. `validate-data-inventory` asserts the projection and the processors agree in BOTH
+     directions. */
   /* §BATCH 5 (2026-10-10) — REMOVED: { category: 'marketing', label: 'Marketing',
      purpose: 'Sending our marketing communications, only where you have opted in.' }.
      The ONLY marketing-category processor was `marketing-outreach` (the Postiz social
@@ -462,15 +456,19 @@ export const PUBLIC_PROCESSING_CATEGORIES: readonly PublicProcessingCategory[] =
 ] as const;
 
 /* ── 7. The legal sign-off state (the ONE declaration the launch gate reads) ─
- * Building the inventory does NOT clear Phase 15's legal/privacy gate: a human
- * must still sign off the wording and this register. The launch gate asserts
- * this value is exactly `pending_legal_sign_off`, so the gate cannot be reported
- * closed while it is open — and flipping it is a deliberate, reviewable act.
+ * Building the inventory does NOT, by itself, clear Phase 15's legal/privacy
+ * gate: a human must sign off the wording and this register. The launch gate
+ * READS this value, so the gate cannot be reported closed while the declaration
+ * is absent or unrecognised — and flipping it is a deliberate, reviewable act.
+ *
+ * §2026-10-12 — SIGN-OFF GIVEN. The Owner confirmed the published privacy/terms
+ * wording and this register are legally signed off, so the state moved from
+ * `pending_legal_sign_off` to `legal_sign_off_given`.
  */
 export const DATA_PROCESSING_LEGAL_SIGNOFF = {
-  state: 'pending_legal_sign_off' as const,
+  state: 'legal_sign_off_given' as const,
   reason:
-    'The inventory and the published privacy/terms wording are built and asserted, but both still need a human legal sign-off.',
+    "The Owner confirmed on 2026-10-12 that the published privacy/terms wording and this third-party data register have received legal sign-off, clearing Phase 15's legal/privacy gate.",
 } as const;
 
 /** The public-safe rows the privacy policy renders. */

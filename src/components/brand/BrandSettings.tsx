@@ -43,7 +43,7 @@ import type {
 } from '@/types';
 import {
   Landmark, Shield, Users, AlertOctagon, MapPin, FileCheck,
-  Bell, FileText, Check, X, Plus, Trash2, Mail, Smartphone,
+  Bell, FileText, Check, X, Plus, Trash2, Mail,
   BookUser, Map,
 } from 'lucide-react';
 
@@ -508,9 +508,6 @@ function NotificationsSection({ brandId }: { brandId: string }) {
             </button>
             <button onClick={() => toggleChannel(p, 'in_app')} className={cn('p-1 rounded', p.channels.includes('in_app') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
               <Bell className="w-3 h-3" />
-            </button>
-            <button onClick={() => toggleChannel(p, 'sms')} className={cn('p-1 rounded', p.channels.includes('sms') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
-              <Smartphone className="w-3 h-3" />
             </button>
             <button onClick={() => toggleEnabled(p)} className={cn('p-1 rounded', p.enabled ? 'text-emerald-400' : 'text-zinc-600')}>
               {p.enabled ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}

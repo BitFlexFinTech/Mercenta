@@ -21,8 +21,10 @@
 //   4. the public-safe projection is COMPLETE (every category an ACTIVE processor
 //      uses has a public row) and HONEST (no public row for an unused category),
 //      and no supplier NAME leaks into it;
-//   5. the legal sign-off is still PENDING — the gate cannot be reported closed
-//      while it is open;
+//   5. the legal sign-off state is a DECLARED, recognised value pinning the exact
+//      current truth — the gate cannot be silently re-opened or mis-declared
+//      (§2026-10-12 — REPOINTED: the Owner gave the sign-off, so this now pins
+//      `legal_sign_off_given` rather than the old `pending_legal_sign_off`);
 //   6. the privacy policy READS the owner (it does not hold its own prose list).
 //
 // A change that engages a new processor, drops a field, breaks the provider link,
@@ -129,9 +131,19 @@ const leakedNames = DATA_PROCESSORS
   .filter((n) => publicText.includes(n.toLowerCase()));
 test('no supplier NAME leaks into the public-safe projection', leakedNames.length === 0, leakedNames.join(', '));
 
-/* ── 5. the legal sign-off is still PENDING ───────────────────────────────── */
-test('the legal sign-off is still declared PENDING (the gate is not silently closed)',
-  DATA_PROCESSING_LEGAL_SIGNOFF.state === 'pending_legal_sign_off',
+/* ── 5. the legal sign-off state is DECLARED and recognised ──────────────────
+ * §2026-10-12 — REPOINTED (rule 07: repoint, never weaken). This previously
+ * asserted the state was exactly `pending_legal_sign_off`. The Owner gave the
+ * legal sign-off on 2026-10-12, so the gate moved to `legal_sign_off_given`. The
+ * check now pins the CLOSED SET of declared states (so a typo or a blank state
+ * fails) AND the exact current value (so the gate cannot be silently re-opened or
+ * flipped without the declaration changing with it). */
+const LEGAL_SIGNOFF_STATES = ['pending_legal_sign_off', 'legal_sign_off_given'];
+test('the legal sign-off state is a declared, recognised value (never absent/typo)',
+  LEGAL_SIGNOFF_STATES.includes(DATA_PROCESSING_LEGAL_SIGNOFF.state),
+  DATA_PROCESSING_LEGAL_SIGNOFF.state);
+test('§2026-10-12 — the legal sign-off is declared GIVEN (the Owner gave it)',
+  DATA_PROCESSING_LEGAL_SIGNOFF.state === 'legal_sign_off_given',
   DATA_PROCESSING_LEGAL_SIGNOFF.state);
 
 /* ── 6. the privacy policy READS the owner ────────────────────────────────── */
