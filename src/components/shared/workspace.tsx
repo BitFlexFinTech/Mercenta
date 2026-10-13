@@ -91,9 +91,19 @@ export function WorkspaceFrame({
  *  - Title is `text-ds-page` (20px) on the display face, not `sm:text-2xl`
  *    (24px). A 24px serif h1 reads as a marketing headline; 20px reads as an
  *    enterprise entity title while keeping the Mercenta display identity.
- *  - Description drops from `text-sm` (14px) to `text-ds-body` (13px). At 14px
- *    the description competed with the title for the first glance; at 13px the
- *    title clearly wins.
+ *  - Description is `text-ds-body` — the canonical body step. §PHASE C4 moved
+ *    that step 13px → 14px (the Owner-approved body size), so the description is
+ *    now 14px and the earlier note here ("at 13px the title clearly wins") is no
+ *    longer the mechanism. The title still wins the first glance, but on SIZE
+ *    (20px), FACE (Fraunces display) and WEIGHT — not on the description being
+ *    deliberately smaller than the default. That claim was corrected with the
+ *    scale change rather than left standing (rules: describers must match
+ *    reality).
+ *  - The entity-bar `<h2>` below uses canonical steps only
+ *    (`text-ds-body` 14px → `sm:text-ds-title` 16px); an arbitrary 15px size,
+ *    which the scale does not name, was removed in §PHASE C4 (the gate forbids
+ *    any arbitrary size inside the 11–20px range, so this note deliberately
+ *    spells the class out nowhere).
  *  - Vertical rhythm tightened (mb-4→mb-3, entity mb-3→mb-2) so the first
  *    actionable row is reachable sooner on a 900px viewport.
  *  - STICKY TOOLBAR FIXED: the offset was `top-[52px]`, but the app bar is
@@ -232,7 +242,7 @@ export function WorkspaceSection({
             />
           )}
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold tracking-tight text-white sm:text-[15px]">
+            <h2 className="text-ds-body font-semibold tracking-tight text-white sm:text-ds-title">
               {title}
             </h2>
             {description && (

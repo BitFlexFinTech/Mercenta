@@ -192,7 +192,7 @@ export function BrandSupport() {
               <ul className="space-y-2">
                 {guidance.map((a) => (
                   <li key={a.id} className="border-t border-white/[0.05] pt-2 first:border-0 first:pt-0">
-                    <p className="text-[12px] font-medium text-zinc-200">{a.title}</p>
+                    <p className="text-ds-label font-medium text-zinc-200">{a.title}</p>
                     <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{a.summary}</p>
                   </li>
                 ))}
@@ -279,7 +279,7 @@ export function BrandSupport() {
         >
           <Card className="p-4 space-y-3" data-state="brand-case-list">
             {cases.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">You have not raised any cases yet.</p>
+              <p className="text-ds-label text-zinc-500">You have not raised any cases yet.</p>
             ) : (
               cases.map((c) => {
                 const sufficiency = evaluateCaseSufficiency(c);
@@ -291,7 +291,7 @@ export function BrandSupport() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-ds-label text-brass-300">{c.caseRef ?? c.id}</span>
-                      <span className="min-w-[160px] flex-1 text-[12px] text-zinc-200">{c.subject}</span>
+                      <span className="min-w-[160px] flex-1 text-ds-label text-zinc-200">{c.subject}</span>
                       <span className="text-ds-micro text-zinc-500">
                         {c.caseCategory ? CATEGORY_LABELS[c.caseCategory] : 'Support'}
                       </span>

@@ -24,18 +24,37 @@ export default {
        *
        *   ds-micro  11px  readable FLOOR — eyebrows, nav section labels, dense meta
        *   ds-label  12px  control labels, table headers, badges (= text-xs)
-       *   ds-body   13px  table cells, dense body copy
-       *   ds-title  15px  section / card titles
+       *   ds-body   14px  body copy, table cells (= text-sm)
+       *   ds-title  16px  section / card titles
        *   ds-page   20px  workspace page title (h1)
        *
-       * Nothing below 11px may be introduced. `npm run validate:typography`
-       * fails if an arbitrary micro size reappears anywhere in src/.
+       * §PHASE C4 (2026-10-13) — THE BODY STEP MOVED 13px → 14px, and the title
+       * step 15px → 16px. Measured reason: the canonical body step was SMALLER
+       * than the application's real body text. `text-sm` (Tailwind's own 14px)
+       * is used 258 times across 75 files, while `text-ds-body` was consumed in
+       * only 15 places in 5 files — so the design system declared a body size the
+       * app did not use, and a "body" token that rendered two steps BELOW the
+       * default read as a way to make text smaller, not as the body size. The
+       * Owner approved 14px body (D-2, docs/PHASE_C_TO_G_PLAN_2026-10-13.md).
+       * The title step moved with it: at 14px body a 15px title is a 1px step,
+       * which is not a hierarchy. The floor (11px), the label step (12px) and
+       * the page step (20px) are deliberately UNCHANGED — the instruction was a
+       * readable body, not a uniformly larger interface.
+       *
+       * Line-heights are unchanged (body 1.45, title 1.35): this is a dense
+       * professional tool, where 1.45 keeps operational rows scannable at the
+       * new size rather than spending vertical space.
+       *
+       * Nothing below 11px may be introduced, and no arbitrary px size inside the
+       * 11–20px range may bypass these names. `npm run validate:typography`
+       * fails on a micro size, on a missing/mis-sized token, on a floor below
+       * 11px, and on a document that states a stale token size.
        */
       fontSize: {
         'ds-micro': ['11px', { lineHeight: '1.3' }],
         'ds-label': ['12px', { lineHeight: '1.4' }],
-        'ds-body': ['13px', { lineHeight: '1.45' }],
-        'ds-title': ['15px', { lineHeight: '1.35' }],
+        'ds-body': ['14px', { lineHeight: '1.45' }],
+        'ds-title': ['16px', { lineHeight: '1.35' }],
         'ds-page': ['20px', { lineHeight: '1.25' }],
       },
       colors: {

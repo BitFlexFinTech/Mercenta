@@ -35,7 +35,9 @@ The canonical kit SHOULD use `state.*` for semantics.
 - `font-display` (Fraunces) — display / entity titles.
 - `font-sans` (IBM Plex Sans) — body, subtitle.
 - `font-mono` (IBM Plex Mono) — numeric / KPI / ids.
-- Hierarchy: Display (3xl) → Page title (2xl) → Section (lg) → Body (sm) → Label/caption (xs).
+- Hierarchy: Display (2xl/3xl, display face) → Page title (`ds-page`) → Section
+  (`ds-title`) → Body (`ds-body`) → Label/caption (`ds-label`) → Micro
+  (`ds-micro`, the floor).
 
 #### §UI/UX Wave 3 — the canonical operational type scale
 
@@ -50,19 +52,38 @@ individual mistakes.
 |---|---|---|
 | `text-ds-micro` | **11px** (floor) | eyebrows, nav section labels, dense meta, badges |
 | `text-ds-label` | 12px | control labels, table headers, form helpers (= `text-xs`) |
-| `text-ds-body` | 13px | table cells, dense body copy |
-| `text-ds-title` | 15px | section / card titles |
+| `text-ds-body` | 14px | body copy, table cells (= `text-sm`) |
+| `text-ds-title` | 16px | section / card titles |
 | `text-ds-page` | 20px | workspace page title (`h1`) |
+
+**§PHASE C4 (2026-10-13) — the body step is 14px, and the title step 16px.**
+Before this, the body step was one size *below* the application's own default:
+`text-sm` (14px) is used 258 times across 75 files while the token was consumed in
+15 places in 5 files, so the design system declared a body size the product did not
+use. The Owner approved 14px body (`docs/PHASE_C_TO_G_PLAN_2026-10-13.md`, D-2).
+The title step moved with it, because a 14px body under a 15px title is a 1px step
+— which is not a hierarchy. The floor (11px), the label step (12px) and the page
+step (20px) are deliberately unchanged: the decision was a readable body, not a
+uniformly larger interface.
 
 Rules:
 - **11px is the floor.** Nothing below it may be introduced in `src/`.
-- `text-xs` (12px) and `text-sm` (14px) remain canonical for label/body and are
-  unchanged — the scale names the sizes *below* them, which previously had no name.
+- `text-xs` (12px) is the same size as `text-ds-label`, and `text-sm` (14px) is the
+  same size as `text-ds-body` — the tokens NAME those sizes so the hierarchy is
+  explicit rather than implied by Tailwind's defaults.
+- **No arbitrary px size inside the 11–20px range.** Every step there has a name.
+  Sizes ABOVE 20px are display/metric figures, not operational text, and are still
+  expressed with Tailwind's own larger steps.
 - Migration is mechanical and idempotent:
   `npm run migrate:typography` (re-running is a no-op).
 - The gate is `npm run validate:typography` — it fails if an arbitrary
-  `text-[8px]`/`[9px]`/`[10px]`/`[11px]` reappears, if a token is missing, if the
-  floor drops below 11px, or if the tokens are declared but never consumed.
+  `text-[8px]`/`[9px]`/`[10px]`/`[11px]` reappears, if any arbitrary size inside the
+  11–20px range reappears, if a token is missing or mis-sized, if the floor drops
+  below 11px, if the body step drops below 14px, if the title step comes within
+  1px of the body step, if the tokens are declared but never consumed, **or if a
+  live describer of this scale states a size the scale does not declare** (this
+  document, the phase plan, the registry row and the `tailwind.config.js` comment
+  block are all compared against the declared scale).
 
 ### Spacing / Radius / Elevation
 - Spacing: default Tailwind scale is used intentionally (4/8/12/16/24/32).

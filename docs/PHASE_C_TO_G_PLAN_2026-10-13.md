@@ -58,9 +58,14 @@ management**. Conditions, all binding:
 - **If 14px causes genuine layout or density problems, document the evidence and make the smallest
   justified adjustment.**
 - The scale lives in `tailwind.config.js` → `fontSize`
-  (`ds-micro` 11 · `ds-label` 12 · `ds-body` 13 · `ds-title` 15 · `ds-page` 20) and is guarded by
-  `scripts/validate-typography-scale.mjs` (`npm run validate:typography`, 17 assertions).
+  (`ds-micro` 11 · `ds-label` 12 · `ds-body` 14 · `ds-title` 16 · `ds-page` 20) and is guarded by
+  `scripts/validate-typography-scale.mjs` (`npm run validate:typography`, 26 assertions).
   **Repoint that gate to the new scale — never delete or weaken it.**
+  **§EXECUTED 2026-10-13 (§PHASE C4):** the body step is now 14px and the title step
+  16px; the gate was repointed (17 → 26 assertions) and now fails if the body step
+  drops below 14px, if the title step comes within 1px of the body step, if any
+  arbitrary px size inside the 11–20px range reappears, or if a live describer of
+  the scale states a size the scale does not declare.
 
 ### Standing answers already given
 - **`bold` stays the colourful theme** (vivid violet `#7C3AED` on a violet-black canvas).

@@ -3569,6 +3569,61 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'PRODUCTION_READINESS.md',
     'package.json',
   ]);
+  /**
+   * §PHASE C4 (2026-10-13) — THE OPERATIONAL TYPE SCALE, declared (F5 + F6).
+   *
+   * WHY THIS DECLARATION EXISTS. The phase already reviewed and approved this work
+   * (`docs/PHASE_C_TO_G_PLAN_2026-10-13.md` §5 → C4, Owner decision D-2: the body
+   * step moves 13px → 14px, "subject to visual validation"). F6 refuses a
+   * working-tree change outside a declared surface, so the change is declared here
+   * rather than left undeclared — the documented, reviewable act its own rule
+   * requires. **It declares FILES, not powers**: no PROTECTED prefix is touched
+   * (no `src/lib/intelligence/`, `src/lib/postiz/`, `src/lib/spapi/client.ts`,
+   * `src/lib/dhl/client.ts`, `src/services/xero/`, `src/lib/billing/invoice.ts`,
+   * `supabase/migrations/`, `scripts/deploy`, `deploy/`), no RBAC, tenant,
+   * calculation or workflow behaviour changes, and the F5b exact-path check is
+   * untouched. It is declared BEFORE its first use (F5) on purpose: these scopes are
+   * read top-to-bottom, so a declaration below a use would be a temporal-dead-zone
+   * error rather than a scope.
+   *
+   *   · `tailwind.config.js` — `ds-body` 14px, `ds-title` 16px + the corrected doc block.
+   *   · `src/components/ui.tsx` — the one arbitrary `text-[13px]` repointed to the
+   *     token, and the Button `lg` note corrected (it claimed size hierarchy that a
+   *     14px body removes).
+   *   · `src/components/shared/workspace.tsx` — `sm:text-[15px]` repointed to
+   *     `sm:text-ds-title`, and the stale description note corrected.
+   *   · `src/components/brand/BrandSupport.tsx`, `src/components/admin/FounderControlCentre.tsx`
+   *     — five arbitrary `text-[12px]` sizes repointed to `text-ds-label` (the same 12px,
+   *     named).
+   *   · `scripts/validate-typography-scale.mjs` — REPOINTED, never weakened: 17 → 26
+   *     assertions (the declared sizes, a 14px body floor, a ≥2px body→title step, an
+   *     absence guard for any arbitrary size in the 11–20px range, and the describer
+   *     comparison against the owner).
+   *   · `scripts/validate-e6-brand-surfaces.mjs` — this declaration.
+   *   · `e2e/typography-scale.spec.ts` — the rendered gate for the scale.
+   *   · `docs/DESIGN_SYSTEM.md`, `docs/PHASE_C_TO_G_PLAN_2026-10-13.md`,
+   *     `requirements-registry.json`, `docs/scenario-catalogue.json` — the describers
+   *     of the scale, corrected in the same change.
+   */
+  const PHASE_C4_TYPOGRAPHY_SCOPE = new Set([
+    'tailwind.config.js',
+    'src/components/ui.tsx',
+    'src/components/shared/workspace.tsx',
+    'src/components/brand/BrandSupport.tsx',
+    'src/components/admin/FounderControlCentre.tsx',
+    'scripts/validate-typography-scale.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'e2e/typography-scale.spec.ts',
+    'e2e/uiux-redesign.spec.ts',
+    'e2e/design-system.spec.ts',
+    'docs/DESIGN_SYSTEM.md',
+    'docs/PHASE_C_TO_G_PLAN_2026-10-13.md',
+    'requirements-registry.json',
+    'docs/scenario-catalogue.json',
+    'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',
+  ]);
+
+
 
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
@@ -3756,7 +3811,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE B — the auth/secret-hardening phase (see the declaration above). First protected-path check (F5). */
         PHASE_B_AUTH_SCOPE.has(p) ||
-        [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE C4 (2026-10-13) — the operational type scale (see the declaration above). First protected-path check (F5). */
+        PHASE_C4_TYPOGRAPHY_SCOPE.has(p) ||
+        [...PHASE_C4_TYPOGRAPHY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -4747,7 +4805,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...HOMEPAGE_RESTRAINT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE B (2026-10-13) — the auth/secret-hardening phase (see the declaration above). */
           PHASE_B_AUTH_SCOPE.has(p) ||
-          [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE C4 (2026-10-13) — the operational type scale (see the declaration above). */
+          PHASE_C4_TYPOGRAPHY_SCOPE.has(p) ||
+          [...PHASE_C4_TYPOGRAPHY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -126,8 +126,33 @@ test.describe('Design System Showcase — responsive screenshots', () => {
       await openShowcase(page);
       await expect(page.locator('text=MERCENTA Design System').first()).toBeVisible({ timeout: 8000 });
       // No horizontal overflow on the showcase document.
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
-      expect(overflow).toBe(false);
+      /*
+       * §PHASE C4 (2026-10-13) — SAME CONDITION, DIAGNOSABLE ON FAILURE.
+       * This check reads the document's width at the moment it runs, and it failed
+       * ONCE in three identical full-suite runs of the same build (83 passed / 1
+       * failed) while passing 3/3 in isolation and 84/84 on a re-run — i.e. it is
+       * intermittent, and the failure reported only `false !== true`, so there was
+       * nothing to act on. The assertion is UNCHANGED (`scrollWidth > clientWidth +
+       * 1` is still the failure); its message now names the widest elements, so the
+       * next occurrence says WHAT is too wide instead of only that something is.
+       */
+      const measured = await page.evaluate(() => {
+        const limit = document.documentElement.clientWidth;
+        const offenders: string[] = [];
+        for (const el of document.querySelectorAll('body *')) {
+          if (!(el instanceof HTMLElement)) continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.width <= limit + 1) continue;
+          const cls = (el.className || '').toString().split(/\s+/).slice(0, 3).join('.');
+          offenders.push(`${el.tagName.toLowerCase()}${cls ? '.' + cls : ''} w=${Math.round(rect.width)}`);
+        }
+        return { limit, offenders: offenders.slice(0, 8), scrollWidth: document.documentElement.scrollWidth };
+      });
+      expect(
+        measured.scrollWidth > measured.limit + 1,
+        `horizontal overflow at ${vp.name}: clientWidth ${measured.limit}, scrollWidth ${measured.scrollWidth}` +
+          (measured.offenders.length ? ` — widest elements: ${measured.offenders.join(' | ')}` : ' — no single element wider than the viewport (an inline/offset cause)')
+      ).toBe(false);
       await page.screenshot({ path: `${SHOTS}/design-system-${vp.name}.png` });
     });
   }

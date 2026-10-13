@@ -19,7 +19,10 @@
  *   - the density + grouping controls genuinely change the rendered queue
  *   - ⌘K opens the real command palette, filters it, and closes on Escape
  *   - the palette inherits RBAC from the shell's own navigation
- *   - all five themes express the same palette with distinct saturated values
+ *   - every theme applies ITS OWN declared palette (§REPOINTED 2026-10-13: the
+ *     earlier claim here was "all five themes express the same palette with
+ *     distinct saturated values", which the §PHASE C theme work made false — see
+ *     test 8)
  *   - responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390
  *   - homepage: redesigned, TAM/SAM gone, tracker animation preserved
  *
@@ -27,6 +30,8 @@
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+import { THEMES } from '../src/config/themes';
+import type { ThemeId, ThemeMode } from '../src/config/themes';
 
 const SHOTS = 'test-screenshots/uiux-redesign';
 
@@ -179,7 +184,7 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
     await expect(page.locator('#app-sidebar')).toHaveAttribute('data-nav-compact', 'false');
   });
 
-  test('8. all five themes expose a distinct, saturated palette + one motion language', async ({ page }) => {
+  test('8. every theme applies ITS OWN declared palette, and one motion language', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page.locator('[data-testid="theme-selector"]').click();
     await page.waitForTimeout(400);
@@ -192,27 +197,72 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
       'minimal-light', 'professional', 'bold', 'fun', 'serious',
     ]);
 
-    const seen: Record<string, string> = {};
-    const HUES = ['indigo', 'cyan', 'green', 'amber', 'orange', 'pink', 'violet', 'red'];
-    for (const t of options) {
+    /*
+     * §REPOINTED 2026-10-13 (§PHASE C4) — the assertion that this test REPLACED.
+     *
+     * It required the five themes to render FIVE DIFFERENT palette signatures
+     * (`new Set(values).size === 5`) and failed with "Expected: 5, Received: 2".
+     * That expectation became false when the five themes were rebuilt in §PHASE C:
+     * the canonical contract in `src/config/themes.ts` is ONE hue → domain mapping
+     * (indigo=orders · cyan=intelligence · green=finance · amber=compliance ·
+     * orange=logistics · pink=communications · violet=catalogue · red=risk) whose
+     * EXPRESSION differs between a light theme (deeper fills, white on-palette
+     * text) and a dark theme (bright fills, near-black on-palette text) — so the
+     * palettes resolve to exactly two expressions, and the distinctness of the
+     * five themes lives in their IDENTITY tokens (accent, surfaces, text), which
+     * `scripts/validate-theme-distinctness.mjs` (33 arithmetic checks) and
+     * `e2e/theme-visual.spec.ts` (the COMPUTED `--mr-accent` per theme) gate.
+     *
+     * The replacement is STRICTER, not weaker: it reads the declared palette from
+     * the owner (`src/config/themes.ts`) and requires each theme's RENDERED
+     * values to equal ITS OWN declared values. The old form could pass if two
+     * themes silently swapped palettes (as long as five signatures existed); this
+     * one cannot. Identity distinctness is asserted here too, on rendered values.
+     */
+    const HUES = ['indigo', 'cyan', 'green', 'amber', 'orange', 'pink', 'violet', 'red'] as const;
+    const PROPS = [...HUES.map((h) => `--mr-palette-${h}`), '--mr-on-palette', '--mr-motion-base', '--mr-accent'];
+    const norm = (v: string) => v.trim().toLowerCase();
+
+    const rendered: Record<string, Record<string, string>> = {};
+    for (const t of options as ThemeId[]) {
       await page.locator(`[data-theme-option="${t}"]`).click();
       await page.waitForTimeout(420);
-      const vals = await page.evaluate((hues) => {
+      const vals = await page.evaluate((props) => {
         const s = getComputedStyle(document.documentElement);
         const out: Record<string, string> = {};
-        for (const h of hues) out[h] = s.getPropertyValue(`--mr-palette-${h}`).trim();
-        out.onPalette = s.getPropertyValue('--mr-on-palette').trim();
-        out.motion = s.getPropertyValue('--mr-motion-base').trim();
+        for (const p of props) out[p] = s.getPropertyValue(p);
         return out;
-      }, HUES);
-      for (const h of HUES) expect(vals[h], `${t} ${h}`).toMatch(/^#/);
-      expect(vals.onPalette).toMatch(/^#/);
-      expect(vals.motion).toBe('240ms');
-      seen[t] = HUES.map((h) => vals[h]).join('|') + vals.onPalette;
+      }, PROPS);
+      rendered[t] = vals;
+
+      const declared = THEMES[t].vars;
+      for (const p of PROPS) {
+        if (p === '--mr-motion-base') continue;
+        expect(norm(vals[p]), `${t} renders its DECLARED ${p}`).toBe(norm(declared[p]));
+      }
+      /* Motion is theme-invariant BY CONTRACT (one motion language everywhere). */
+      expect(norm(vals['--mr-motion-base']), `${t} motion`).toBe('240ms');
+
       await page.screenshot({ path: `${SHOTS}/theme-${t}.png` });
     }
-    // The five expressions are genuinely different (not a background swap only)
-    expect(new Set(Object.values(seen)).size).toBe(5);
+
+    /* The two EXPRESSIONS (light / dark) each apply one palette, and differ. */
+    const signature = (t: ThemeId) => HUES.map((h) => norm(rendered[t][`--mr-palette-${h}`])).join('|');
+    const byMode: Record<ThemeMode, Set<string>> = { light: new Set(), dark: new Set() };
+    for (const t of options as ThemeId[]) byMode[THEMES[t].mode].add(signature(t));
+    for (const mode of ['light', 'dark'] as const) {
+      expect(byMode[mode].size, `every ${mode} theme renders one ${mode} palette expression`).toBe(1);
+    }
+    expect(
+      [...byMode.light][0],
+      'the light and dark palette expressions must genuinely differ'
+    ).not.toBe([...byMode.dark][0]);
+
+    /* The five IDENTITIES stay distinct on the rendered page. */
+    expect(
+      new Set((options as ThemeId[]).map((t) => norm(rendered[t]['--mr-accent']))).size,
+      'the five themes must render five distinct identity accents'
+    ).toBe(5);
 
     await page.locator('[data-theme-option="minimal-light"]').click();
     await page.waitForTimeout(350);

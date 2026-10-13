@@ -130,11 +130,17 @@ export function Button({
   const sizes = {
     sm: 'px-3 py-1.5 text-ds-label',
     md: 'px-4 py-2 text-ds-body',
-    /* §PHASE C — REPOINTED. `lg` used to be `px-6 py-2.5 text-sm`, which is the
-       SAME text size as `md` (both 14px) — so the "large" button was only wider,
-       and a primary action never looked more important than a secondary one. It
-       now uses the canonical `ds-body` step (13px→ still body) with more generous
-       padding and a taller minimum, so size carries real hierarchy. */
+    /* §PHASE C — REPOINTED, and §PHASE C4 corrected the note below. `lg` used to
+       be `px-6 py-2.5 text-sm`. It now sits on the canonical body step
+       (`ds-body`, 14px since §PHASE C4) with more generous padding and a 44px
+       minimum height — the WCAG 2.5.5 touch-target size.
+       HONEST STATE: with `ds-body` at 14px, `lg` and `md` are the SAME text size
+       again, so the hierarchy of `lg` is carried by PADDING and HEIGHT, not by
+       font size (the earlier claim that "size carries real hierarchy" is no
+       longer true and was corrected rather than left standing). A button label
+       larger than body copy is deliberately NOT introduced here: that is a
+       visual decision for the application-wide pass, not a side effect of the
+       type scale. */
     lg: 'px-6 py-3 text-ds-body min-h-[44px]',
   } as const;
   const isDisabled = disabled || loading;
@@ -479,7 +485,7 @@ export function Alert({
   return (
     <div role="alert" className={cn('rounded-md border px-3.5 py-2.5 text-sm', ALERT_STYLES[tone], className)}>
       <p className="font-semibold">{title}</p>
-      {children && <div className="mt-1 text-[13px] opacity-90">{children}</div>}
+      {children && <div className="mt-1 text-ds-body opacity-90">{children}</div>}
     </div>
   );
 }

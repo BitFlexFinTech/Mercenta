@@ -4066,6 +4066,15 @@
       "type": "a11y",
       "spec": "e2e/theme-visual.spec.ts",
       "expects": "Every declared theme reaches the RENDERED document (data-mercenta-theme and the COMPUTED --mr-accent both match the declared value), still holds after navigation, raises no page error, and the five themes render five different accents."
+    },
+    {
+      "id": "spec-typography-scale",
+      "capability": "platform",
+      "journey": "typography scale",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/typography-scale.spec.ts",
+      "expects": "The operational type scale is asserted on the RENDERED document, not on the declaration: the workspace page title computes at the ds-page step (20px), the canonical DataTable computes at ds-body (14px) with ds-label (12px) headers, every canonical step that appears on a screen computes at its declared size, and NO text inside <main> falls below the 11px floor on the admin and brand screens."
     }
   ]
 }

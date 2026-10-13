@@ -2065,7 +2065,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 aria-label="Ask Mercenta a question"
-                className="min-w-[240px] flex-1 rounded-ds-md border border-white/[0.08] bg-ink-850 px-3 py-2 text-[12px] text-zinc-200 outline-none focus:border-white/[0.2]"
+                className="min-w-[240px] flex-1 rounded-ds-md border border-white/[0.08] bg-ink-850 px-3 py-2 text-ds-label text-zinc-200 outline-none focus:border-white/[0.2]"
               />
               <Button
                 variant="secondary"
@@ -2089,7 +2089,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   </span>
                   <Badge className="text-ds-micro">canonical</Badge>
                 </div>
-                <p className="mt-1 text-[12px] text-zinc-200">{answer.answer}</p>
+                <p className="mt-1 text-ds-label text-zinc-200">{answer.answer}</p>
                 <ul className="mt-1.5 space-y-0.5">
                   {answer.facts.slice(0, 6).map((f, i) => (
                     <li key={i} className="text-ds-label text-zinc-400">
