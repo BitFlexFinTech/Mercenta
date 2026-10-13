@@ -911,7 +911,7 @@ export function DataTable<T>({
       {/* ── Desktop (or mobile:'scroll'): the semantic table ── */}
       {showTable && (
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse" data-table={dataTable}>
+          <table className="w-full text-ds-body border-collapse" data-table={dataTable}>
             <caption className="sr-only">{caption}</caption>
             <thead>
               <tr className="border-b border-white/[0.08]">
@@ -919,13 +919,30 @@ export function DataTable<T>({
                   <th
                     key={c.key}
                     scope="col"
-                    className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c), c.className)}
+                    /* §PHASE C4 — REPOINTED to the canonical type scale and given a
+                       real header treatment. It used `text-xs` (12px, a raw
+                       Tailwind size outside the design system) with `py-2` (8px),
+                       which made the header cramped and visually level with the
+                       rows beneath it. Now: the `ds-label` step, generous padding,
+                       and uppercase micro-tracking — the standard premium-table
+                       convention for separating a column heading from its data.
+                       `uppercase` is CSS-only, so no DOM text changes and no
+                       selector or test is affected. */
+                    className={cn(
+                      'px-4 py-3 text-ds-label font-semibold uppercase tracking-wider text-zinc-500',
+                      alignClass(c),
+                      hideClass(c),
+                      c.className
+                    )}
                   >
                     {c.label}
                   </th>
                 ))}
                 {rowActions && (
-                  <th scope="col" className="px-3 py-2 text-right text-xs font-semibold text-zinc-400">
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-right text-ds-label font-semibold uppercase tracking-wider text-zinc-500"
+                  >
                     <span className="sr-only">Actions</span>
                   </th>
                 )}
@@ -936,15 +953,23 @@ export function DataTable<T>({
                 <tr
                   key={rowKey(r)}
                   onClick={onRowClick ? () => onRowClick(r) : undefined}
-                  className={cn('border-b border-white/[0.04] hover:bg-white/[0.02]', onRowClick && 'cursor-pointer', rowClassName?.(r))}
+                  /* §PHASE C4 — rows given room to breathe (`py-3`, was `py-2`) and a
+                     slightly stronger hover. At 8px of vertical padding a dense list
+                     reads as a wall of text; 12px makes each row scannable without
+                     changing the information density or any behaviour. */
+                  className={cn(
+                    'border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors',
+                    onRowClick && 'cursor-pointer',
+                    rowClassName?.(r)
+                  )}
                 >
                   {columns.map((c) => (
-                    <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c), c.className)}>
+                    <td key={c.key} className={cn('px-4 py-3 text-zinc-300', alignClass(c), hideClass(c), c.className)}>
                       {cell(c, r)}
                     </td>
                   ))}
                   {rowActions && (
-                    <td className="px-3 py-2 text-right">
+                    <td className="px-4 py-3 text-right">
                       <div className="flex flex-wrap items-center justify-end gap-1">{rowActions(r)}</div>
                     </td>
                   )}
