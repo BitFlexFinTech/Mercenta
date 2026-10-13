@@ -4296,6 +4296,53 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §DESIGN — THE HOMEPAGE RESTRAINT PASS + TWO DEFECTS FIXED AT SOURCE
+   * (Owner directive, 2026-10-13: refine the homepage; it should read as a premium
+   * business, not "a bunch of colors").
+   *
+   * Declared surface — every file this change set touches, named:
+   *   · `src/components/marketing/Home.tsx` — the decorative hue arrays / colour bars
+   *     (orange · amber · green · cyan on the service cards, indigo on the about
+   *     cards, indigo · amber · green in the visibility list, red on the protection
+   *     cards) are replaced by the ONE accent as a hairline outline, and the headline
+   *     no longer accent-colours a single italic word. The tracker animation is
+   *     UNTOUCHED (`animate-route-dot` + `animate-tracker-ping`, its green/orange
+   *     tokens), and both primary CTAs keep the gated `bg-palette-indigo` +
+   *     `text-on-palette` contract.
+   *   · `src/components/shared/WorkWorkspace.tsx` — DEFECT: the work-calendar's
+   *     "today" label wore `text-brass-200`, a step that does not exist in the brass
+   *     ramp (300–700) and has no shim, so Tailwind emitted NO colour rule and the
+   *     label silently lost its accent. Now `text-brass-300`.
+   *   · `src/components/admin/AcquisitionWorkflow.tsx` — the same dead step as an
+   *     alpha class; now `text-brass-300/90` (a ramp step that exists, with a shim).
+   *   · `scripts/layout-audit.mjs` — DEFECT IN THE CHECK: its empty-state pattern
+   *     could not match a two-word subject ("No audit entries match …"), so it
+   *     reported `AdminAuditLog`'s real, user-facing empty state as MISSING. The
+   *     pattern now also recognises the canonical `emptyMessage` prop and
+   *     `<EmptyState`; proved able to fail by removing the empty state.
+   *   · `scripts/validate-uiux-redesign.mjs` — §REPOINTED: the homepage-colour
+   *     contract is now STRICTER (the tracker's own two tokens are required; cyan ·
+   *     amber · violet · pink are forbidden as decorative hues on the page).
+   *   · `scripts/validate-rules-application.mjs` — NEW §5c: a change to what a user
+   *     SEES must NAME the design skill(s) applied in the session's
+   *     `RULES APPLIED THIS SESSION` line, so an undeclared UI change fails the build.
+   *
+   * The F5/F5b/F6 contract is UNCHANGED and NOT weakened: a working-tree path in NO
+   * declared set still fails, and no PROTECTED path appears in the change set (no RBAC
+   * or tenant scoping, no `src/config/themes.ts`, `src/lib/spapi/`, `src/lib/dhl/`,
+   * `src/services/xero/`, `src/lib/billing/`, migrations or deploy paths).
+   */
+  const HOMEPAGE_RESTRAINT_SCOPE = new Set([
+    'src/components/marketing/Home.tsx',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/components/admin/AcquisitionWorkflow.tsx',
+    'scripts/layout-audit.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-rules-application.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -4590,7 +4637,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 12 — the WhatsApp/Twilio removal (see above). */
           BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE.has(p) ||
-          [...BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §DESIGN — the homepage restraint pass + two defects fixed at source (see above). */
+          HOMEPAGE_RESTRAINT_SCOPE.has(p) ||
+          [...HOMEPAGE_RESTRAINT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

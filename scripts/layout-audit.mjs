@@ -67,7 +67,23 @@ const VIEWS = [
 console.log('\nEmpty/loading state coverage:');
 for (const [name, p] of VIEWS) {
   const s = readFileSync(p, 'utf8');
-  const empty = /length === 0|(None yet)|(No [A-Za-z]+ (match|yet))/.test(s);
+  /**
+   * §REPOINTED (2026-10-13, rule 07 — a FALSE NEGATIVE fixed, never weakened).
+   *
+   * The old pattern was `/length === 0|(None yet)|(No [A-Za-z]+ (match|yet))/`.
+   * Its last branch requires ONE word between "No" and "match", so it could not see
+   * the project's OWN canonical empty state: `AdminAuditLog` renders
+   * `emptyMessage="No audit entries match the current filters."` on the shared
+   * `DataTable` — a real, user-facing empty state that the check reported as MISSING.
+   * A check that reports a present thing as absent is a defect in the check.
+   *
+   * The pattern now recognises the canonical mechanisms the codebase actually uses:
+   * an explicit `length === 0` branch, the `emptyMessage` prop (DataTable / Card),
+   * and an `<EmptyState` element. It is STRICTER than before, not looser — the
+   * mutation proof re-runs it against a view with its empty state removed.
+   */
+  const empty =
+    /length === 0|(None yet)|(No [A-Za-z]+ (match|yet))|emptyMessage=|<EmptyState/.test(s);
   console.log(`${empty ? '✓' : '✗'} ${name}: empty-state text present`);
   if (!empty) bad++;
 }

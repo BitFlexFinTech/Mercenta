@@ -1017,7 +1017,7 @@ function CalendarBoard({
               <span
                 className={
                   'font-mono text-ds-micro ' +
-                  (date === today ? 'rounded bg-brass-500/25 px-1 text-brass-200' : 'text-zinc-600')
+                  (date === today ? 'rounded bg-brass-500/25 px-1 text-brass-300' : 'text-zinc-600')
                 }
               >
                 {date.slice(8)}

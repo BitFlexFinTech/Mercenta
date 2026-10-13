@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-12",
+    "last_updated": "2026-10-13",
     "status_enum": [
       "not_started",
       "built",
@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 562,
+    "total_entries": 563,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6568,6 +6568,15 @@
       "status": "built",
       "evidence": "src/config/liftOff.ts (the ONE owner: name, endorsement, rules, eligibility, statuses, public copy, named sources); src/lib/liftOff/eligibility.ts (deterministic, tenant-scoped, fail-closed eligibility); src/components/brand/LiftOffProgramme.tsx (the brand-portal section, its own 'Programme' nav section, lazy-loaded); src/components/marketing/LiftOff.tsx (the public outcome-only offer page feeding Explore UK Market Fit); src/lib/seo/publicRoutes.ts + src/config/positioning.ts + src/components/marketing/Home.tsx (the public route); public/robots.txt + public/sitemap.xml; scripts/validate-lift-off.mjs (31 checks, MUTATION-PROVED: LIFT_OFF_TERMS_VERIFIED flipped to true => FAIL, restored byte-identical sha256 32284806b13d10af28bc3a99d17648c83dd6442159c8b179bc2af22fbb90ddab); scripts/validate-e6-brand-surfaces.mjs F8 repointed to the 20-item brand nav AND its multi-line-item defect FIXED.",
       "last_verified": "2026-10-12",
+      "superseded_by": null
+    },
+    {
+      "id": "design-homepage-restraint-pass",
+      "description": "Homepage restraint pass (Owner directive 2026-10-13: refine the homepage; it should read as a premium business, not \"a bunch of colors\"). The four decorative hue arrays / colour bars on the marketing page (orange/amber/green/cyan service cards, indigo about cards, indigo/amber/green visibility list, red protection cards) are replaced by the ONE accent as a hairline outline; the headline no longer accent-colours a single italic word (a named AI-page tell). The tracker animation is UNTOUCHED (route-dot + tracker-ping, its green/orange tokens) and both primary CTAs keep the gated bg-palette-indigo + text-on-palette contract. TWO DEFECTS FIXED AT SOURCE: the dead `text-brass-200` brass-ramp step (a step that does not exist and has no shim, so Tailwind emitted NO colour rule and the work-calendar's today label silently lost its accent), and layout-audit's empty-state pattern which reported AdminAuditLog's real empty state as MISSING.",
+      "source": "Owner directive 2026-10-13 (homepage refinement) + project design skills",
+      "status": "built_and_tested",
+      "evidence": "src/components/marketing/Home.tsx; src/components/shared/WorkWorkspace.tsx; src/components/admin/AcquisitionWorkflow.tsx; scripts/validate-uiux-redesign.mjs (REPOINTED colour contract + ABSENCE guard for decorative hues, mutation-proved 2 FAIL); scripts/layout-audit.mjs (empty-state detection fixed, mutation-proved 1 FAIL); scripts/validate-rules-application.mjs section 5c (design-skill discipline: an undeclared UI change now fails the build); e2e/public-pages.spec.ts + e2e/public-chrome.spec.ts 21 passed; measured render at 1440px: route-dot + tracker ping present, horizontal overflow 0, palette hues painted in hero/services/visibility/protection 0, page errors 0",
+      "last_verified": "2026-10-13",
       "superseded_by": null
     }
   ]

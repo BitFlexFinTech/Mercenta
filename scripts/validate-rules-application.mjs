@@ -165,6 +165,83 @@ check(
   appliedMatch ? appliedMatch[1].slice(0, 120) : 'field missing'
 );
 
+/* ── 5c. UI WORK MUST NAME A DESIGN SKILL (Owner directive, 2026-10-13) ──────────────
+ *
+ * The owner's finding: the design skills were INSTALLED and the routing table already
+ * said which to load for which design problem — and the work still happened without
+ * them. "the designer should actually use the skills". Reading a rule had already
+ * proved insufficient, exactly as it did for the plain-English rule, so this is the
+ * mechanism instead of another instruction: if the working tree changes anything a
+ * user SEES, the session that made the change must NAME the design skill(s) it applied
+ * in its `RULES APPLIED THIS SESSION` line.
+ *
+ * It does not (and cannot) inspect the model's process. What it can do — and does — is
+ * make an undeclared UI change FAIL the build, so "I forgot to load the design skill"
+ * cannot pass unnoticed. */
+console.log('\n§ 5c. A change to what a user SEES names the design skill(s) it applied\n');
+const { execSync } = await import('node:child_process');
+/** Files whose change alters what a user sees or how the interface is styled. */
+const UI_FILE = /^(src\/components\/|src\/index\.css$|src\/theme-alpha-shims\.css$|tailwind\.config\.js$|src\/config\/themes\.ts$|src\/config\/homepageContent\.ts$)/;
+/** Every design skill this machine can load (installed upstream + the UX specialist). */
+const DESIGN_SKILLS = [
+  'frontend-design',
+  'design-review',
+  'ux-product-analyst',
+  'better-interface',
+  'better-layout',
+  'better-colors',
+  'better-typography',
+  'better-ui',
+  'beautiful-shadows',
+  'accessibility',
+  'interaction-design',
+  'apple-design',
+  'emil-design-eng',
+  'impeccable',
+  'make-interfaces-feel-better',
+  'interface-review',
+  'explain-interface',
+  'prototype',
+  'brandkit',
+  'web-design-guidelines',
+  'improve-animations',
+  'review-animations',
+  'find-animation-opportunities',
+];
+let changedFiles = [];
+try {
+  changedFiles = execSync('git status --porcelain', { cwd: ROOT, encoding: 'utf8' })
+    .split('\n')
+    .map((l) => l.slice(3).trim())
+    .filter(Boolean);
+} catch {
+  /* git unavailable — checked elsewhere; this check simply cannot apply */
+}
+const changedUi = changedFiles.filter((f) => UI_FILE.test(f));
+const expertsLower = applied.experts.join(' ').toLowerCase();
+const namedDesignSkill = DESIGN_SKILLS.filter((s) => expertsLower.includes(s));
+check(
+  `when the change set touches the interface (${changedUi.length} UI file(s)), the session names a design skill`,
+  changedUi.length === 0 || namedDesignSkill.length > 0,
+  changedUi.length
+    ? `UI files changed (${changedUi.slice(0, 4).join(', ')}${changedUi.length > 4 ? ', …' : ''}) but EXPERTS names none of: ${DESIGN_SKILLS.slice(0, 6).join(', ')}, …`
+    : ''
+);
+/** Self-check: the detector must be able to REJECT a session that skipped it. */
+check(
+  'the UI-change detector is self-checked (a UI path matches; a docs path does not)',
+  UI_FILE.test('src/components/marketing/Home.tsx') &&
+    UI_FILE.test('tailwind.config.js') &&
+    !UI_FILE.test('docs/DESIGN_SYSTEM.md') &&
+    !UI_FILE.test('scripts/validate-uiux-redesign.mjs')
+);
+check(
+  'the design-skill list is self-checked (a real skill is recognised; a made-up one is not)',
+  DESIGN_SKILLS.includes('frontend-design') &&
+    DESIGN_SKILLS.includes('design-review') &&
+    !DESIGN_SKILLS.includes('not-a-real-design-skill')
+);
+
 /* ── 5b. RULE 10's OWN REQUIREMENT: this project must HAVE a describer check ─────────
  *
  * Global rule `10-describers-must-match-reality.md` §4 forbids a project that "has none",

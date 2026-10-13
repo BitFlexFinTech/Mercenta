@@ -285,7 +285,7 @@ export function AcquisitionWorkflow({
       <div className="bg-brass-500/5 border border-brass-500/15 rounded-lg p-3" data-section="evidence">
         <p className="text-ds-micro font-semibold text-brass-300 uppercase mb-1">Why we are contacting this brand — BI evidence</p>
         {whyContact ? (
-          <pre className="text-ds-label text-brass-200/90 whitespace-pre-wrap font-sans leading-relaxed">{whyContact}</pre>
+          <pre className="text-ds-label text-brass-300/90 whitespace-pre-wrap font-sans leading-relaxed">{whyContact}</pre>
         ) : (
           <p className="text-ds-label text-zinc-500">
             Prepare a recommendation to attach the canonical Brand Intelligence evidence

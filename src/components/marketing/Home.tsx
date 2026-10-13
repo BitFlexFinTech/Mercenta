@@ -259,9 +259,17 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
               <span className="w-1.5 h-1.5 flex-shrink-0 rounded-full bg-state-success" aria-hidden="true" />
               <span className="min-w-0">{c.hero.eyebrow}</span>
             </span>
+            {/*
+              §DESIGN (2026-10-13) — the headline no longer accent-colours one
+              word in italic brass. `frontend-design` names "accenting just a
+              single word or phrase in a headline" as the commonest tell of a
+              generated page; the headline now carries its own weight through
+              scale and the display face, and the brass accent lives in ONE small
+              place (the eyebrow's status dot) instead. Both halves of the copy
+              still render, still from the content owner — no words were lost.
+            */}
             <h1 className="font-display text-4xl md:text-5xl font-semibold leading-[1.06] mt-6">
-              {c.hero.headingStart}{' '}
-              <span className="text-brass italic">{c.hero.headingHighlight}</span>
+              {c.hero.headingStart} {c.hero.headingHighlight}
             </h1>
             <p className="text-base md:text-lg leading-relaxed mt-6 max-w-xl" style={{ color: 'var(--mr-text-muted)' }}>
               {fillBrand(c.hero.subheading)}
@@ -450,21 +458,18 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             {c.about.points.map((point) => {
               const Icon = icon(point.icon);
               /*
-                §DESIGN (2026-09-28) — two defects fixed at source here.
-                (1) The cards carried "01"/"02" markers, but this content is not
-                a sequence; numbering is reserved for the one thing on the page
-                that genuinely is one — the five stages of the shipment record.
-                (2) Their colours were arbitrary. Both cards describe where a
-                brand's order flow starts (creating one, or handing an existing
-                one over), so they take indigo, the hue orders own.
+                §DESIGN (2026-09-28) — the cards carried "01"/"02" markers, but this
+                content is not a sequence; numbering is reserved for the one thing on
+                the page that genuinely is one — the five stages of the shipment
+                record.
+                §DESIGN (2026-10-13) — the indigo fill went too. These are two quiet
+                explanatory cards; a saturated domain hue on a marketing page encodes
+                nothing (indigo means "orders" INSIDE the product), so it read as
+                decoration. They now use the one accent, as a hairline outline.
               */
-              const palette = 'var(--mr-palette-indigo)';
               return (
                 <div key={point.title} className={cn('bg-ink-850 p-6', rv)}>
-                  <span
-                    className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                  >
+                  <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <h3 className="font-display text-base font-semibold text-parchment mb-2">
@@ -494,22 +499,21 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             {c.services.subheading}
           </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {c.services.cards.map((service, i) => {
+            {c.services.cards.map((service) => {
               const Icon = icon(service.icon);
               /*
-                §CANONICAL HUE → DOMAIN (src/config/themes.ts §UI/UX Wave 2).
-                These four cards are, in order, logistics · compliance · finance ·
-                visibility, so each takes the hue its own domain owns. The
-                previous array handed out six colours by position, which gave a
-                logistics card indigo and a payouts card amber — teaching the
-                reader a colour language the platform does not use.
+                §DESIGN (2026-10-13) — REPOINTED, deliberately (see the §REPOINTED
+                record in scripts/validate-uiux-redesign.mjs). These four cards used
+                to be handed four DIFFERENT saturated hues (orange · amber · green ·
+                cyan) plus a 3px colour bar each. That taught a colour language the
+                reader cannot use — the hues mean "logistics / compliance / finance /
+                insight" only INSIDE the product, where they label real records, and
+                on a public page four shouting colours is the opposite of a premium
+                business. The cards now share the ONE accent: a hairline brass
+                outline on a quiet surface. Nothing informational was lost — every
+                word is unchanged, and the four cards are still distinct by their
+                own icon and heading.
               */
-              const palette = [
-                'var(--mr-palette-orange)', // logistics / fulfilment
-                'var(--mr-palette-amber)', // compliance
-                'var(--mr-palette-green)', // finance / payouts
-                'var(--mr-palette-cyan)', // intelligence / insight
-              ][i % 4];
               return (
                 <div
                   key={service.title}
@@ -518,16 +522,8 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                     rv
                   )}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-0 top-0 h-[3px]"
-                    style={{ backgroundColor: palette }}
-                  />
                   <div className="mb-4 flex items-center gap-2.5">
-                    <span
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                    >
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-brass/30 text-brass">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </span>
                     <h3 className="font-display text-base font-semibold text-parchment">
@@ -616,18 +612,13 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             </p>
           </div>
           <ul className="space-y-3">
-            {c.visibility.points.map((point, i) => {
+            {c.visibility.points.map((point) => {
               const Icon = icon(point.icon);
               /*
-                §CANONICAL HUE → DOMAIN — orders, compliance documents, payouts.
-                Only the first was wrong: it wore cyan, which belongs to
-                intelligence, not to an order queue.
+                §DESIGN (2026-10-13) — the three-hue array (indigo · amber · green)
+                is gone for the same reason as the service cards above: on a public
+                page those hues encode nothing. One accent, hairline outline.
               */
-              const palette = [
-                'var(--mr-palette-indigo)', // orders / purchase orders
-                'var(--mr-palette-amber)', // compliance
-                'var(--mr-palette-green)', // finance / payouts
-              ][i % 3];
               return (
                 <li
                   key={point.title}
@@ -636,10 +627,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                     rv
                   )}
                 >
-                  <span
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                  >
+                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
@@ -676,25 +664,22 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             {c.protection.points.map((point) => {
               const Icon = icon(point.icon);
               /*
-                §CANONICAL HUE → DOMAIN — all three of these are RISK/EXCEPTION
-                safeguards, so they take red, the hue exceptions own. They wore
-                orange (logistics), red and violet (catalogue) before, which said
-                three different things about one idea.
+                §DESIGN (2026-10-13) — the red top-bar and red tiles are gone from
+                the marketing page. Red is the RISK/EXCEPTION hue: it earns its
+                place inside the product, on real exception records. Three red bars
+                across a public section is alarm as decoration, and one page cannot
+                shout in six colours and still read as a premium business. The
+                section's meaning is carried by its own words and the accent.
               */
-              const palette = 'var(--mr-palette-red)';
               return (
                 <div
                   key={point.title}
                   className={cn(
-                    'rounded-xl border-t-[3px] border border-white/[0.06] bg-ink-850 p-5',
+                    'rounded-xl border border-white/[0.06] bg-ink-850 p-5',
                     rv
                   )}
-                  style={{ borderTopColor: palette }}
                 >
-                  <span
-                    className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                  >
+                  <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <h3 className="mb-2 font-display text-base font-semibold text-parchment">

@@ -391,9 +391,40 @@ check('tracker animation preserved (route dot)', HOME_SRC.includes('animate-rout
 check('tracker animation preserved (live ping)', HOME_SRC.includes('animate-tracker-ping'));
 check('tracker keyframes preserved in CSS', read('src/index.css').includes('@keyframes route-dot'));
 check('UnlockGrowth element preserved', HOME_SRC.includes('<UnlockGrowth'));
+/**
+ * §REPOINTED (2026-10-13, rules 07/09 — NOT weakened; strictly stronger).
+ *
+ * OLD CONTRACT: this required the homepage to contain BOTH
+ * `var(--mr-palette-cyan)` and `var(--mr-palette-green)`. It was written when the
+ * page handed a different saturated hue to each card, and the cyan half was
+ * satisfied INCIDENTALLY — by the services/visibility hue arrays, not by the
+ * tracker the check names.
+ *
+ * The owner asked for the opposite: the homepage should read as a premium
+ * business, not "a bunch of colors". The decorative domain hues are gone from the
+ * marketing page (they mean logistics/compliance/finance/insight only INSIDE the
+ * product, where they label real records; on a public page they were decoration).
+ *
+ * The new contract keeps the half that was real and makes it STRICTER: the
+ * homepage keeps the tracker's own two tokens (the green status dot and the orange
+ * moving waypoint — the animation the owner asked to preserve), and is now
+ * FORBIDDEN the decorative ones.
+ */
 check(
-  'homepage tracker colours moved into the palette',
-  HOME_SRC.includes('var(--mr-palette-cyan)') && HOME_SRC.includes('var(--mr-palette-green)')
+  'homepage tracker colours are the palette’s own (green status dot + orange waypoint)',
+  HOME_SRC.includes('var(--mr-palette-green)') && HOME_SRC.includes('var(--mr-palette-orange)')
+);
+check(
+  'the marketing page hands out NO decorative domain hue (ABSENCE guard: cyan · amber · violet · pink)',
+  !HOME_SRC.includes('var(--mr-palette-cyan)') &&
+    !HOME_SRC.includes('var(--mr-palette-amber)') &&
+    !HOME_SRC.includes('var(--mr-palette-violet)') &&
+    !HOME_SRC.includes('var(--mr-palette-pink)')
+);
+check(
+  'every remaining palette use on the homepage is the kept tracker or the vernacular stamp (indigo CTA is a class, not a var)',
+  (HOME_SRC.match(/var\(--mr-palette-(green|orange|red)\)/g) || []).length ===
+    (HOME_SRC.match(/var\(--mr-palette-/g) || []).length
 );
 check(
   'homepage editor wording gate covers the new sections',
