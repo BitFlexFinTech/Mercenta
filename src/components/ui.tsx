@@ -29,7 +29,15 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-ink-850 border border-white/[0.06] rounded-xl',
+        /* §PHASE C — REPOINTED to the elevation scale. The card previously had a
+           hairline border and NO shadow, so on every theme it sat flat against the
+           canvas and the surfaces read as one undifferentiated mass — the single
+           biggest reason the product looked utilitarian rather than considered.
+           `shadow-ds-subtle` is theme-driven (`--mr-shadow-subtle`), so a light
+           theme gets a soft grey lift and a dark theme a deeper one, with no
+           per-theme branching here. The border is KEPT: on dark themes a shadow
+           alone is nearly invisible, so the pair carries the separation. */
+        'bg-ink-850 border border-white/[0.06] rounded-xl shadow-ds-subtle',
         className
       )}
       data-state={dataState}
@@ -39,12 +47,17 @@ export function Card({
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
             {title && (
-              <h3 className="text-sm font-semibold text-white tracking-tight">
+              /* §PHASE C — REPOINTED from `text-sm` (14px) to the canonical
+                 `ds-title` step (15px), so a card heading uses the design system's
+                 own type scale instead of a raw Tailwind size that sits outside
+                 it. Hierarchy, not decoration: the card title now reads a step
+                 above its own body copy rather than level with it. */
+              <h3 className="text-ds-title font-semibold text-white tracking-tight">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>
+              <p className="text-ds-label text-zinc-500 mt-1">{subtitle}</p>
             )}
           </div>
           {action}
@@ -115,9 +128,14 @@ export function Button({
     link: 'text-brass-400 hover:underline underline-offset-4 p-0 h-auto shadow-none',
   } as const;
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-2.5 text-sm',
+    sm: 'px-3 py-1.5 text-ds-label',
+    md: 'px-4 py-2 text-ds-body',
+    /* §PHASE C — REPOINTED. `lg` used to be `px-6 py-2.5 text-sm`, which is the
+       SAME text size as `md` (both 14px) — so the "large" button was only wider,
+       and a primary action never looked more important than a secondary one. It
+       now uses the canonical `ds-body` step (13px→ still body) with more generous
+       padding and a taller minimum, so size carries real hierarchy. */
+    lg: 'px-6 py-3 text-ds-body min-h-[44px]',
   } as const;
   const isDisabled = disabled || loading;
   return (
