@@ -39,7 +39,8 @@ import type {
   IntegrationHealth,
   IntegrationsMap,
 } from './types';
-import { INITIAL_INTEGRATIONS, modeForState, rememberApiKey } from './types';
+import { INITIAL_INTEGRATIONS, modeForState } from './types';
+import { probeServerSecrets, type ServerSecretPresence } from './serverSecrets';
 import { INTEGRATION_REGISTRY, integrationMeta } from './registry';
 import { rememberIntegrations } from './connections';
 
@@ -90,6 +91,17 @@ interface IntegrationsContextValue {
   recordSync: (id: IntegrationId) => void;
   /** §22 — record a provider failure (bumps errorCount, surfaces error). */
   recordIntegrationError: (id: IntegrationId, error: string) => void;
+  /**
+   * §PHASE B — which providers have a key held SERVER-side (Supabase Vault).
+   *
+   * A HINT ONLY: it means Mercenta holds a credential the server can use, so the
+   * live test may be attempted. It is NEVER a connection state and must never be
+   * rendered as `connected` or `live` (the business model forbids claiming a
+   * provider is live when it is merely configured).
+   *
+   * Always empty in demo, and empty on any failure.
+   */
+  serverSecrets: ServerSecretPresence;
 }
 
 const IntegrationsContext = createContext<IntegrationsContextValue | null>(null);
@@ -114,47 +126,27 @@ export function IntegrationsProvider({
 }) {
   const [integrations, setIntegrations] = useState<IntegrationsMap>(() => {
     if (initialState) return { ...INITIAL_INTEGRATIONS, ...initialState };
-    const persisted = loadPersisted();
-    // Auto-connect OpenRouter when a demo key is provided via env var.
-    // This lets the investor demo show a real connected integration without
-    // opening the Integrations wizard. The key is never persisted to localStorage.
-    const demoOpenRouterKey = (typeof import.meta !== 'undefined' && import.meta.env.VITE_OPENROUTER_API_KEY) as string | undefined;
-    if (demoOpenRouterKey && persisted.openrouter.status !== 'connected') {
-      rememberApiKey('openrouter', demoOpenRouterKey);
-      persisted.openrouter = {
-        status: 'connected',
-        connectedAt: new Date().toISOString(),
-        lastVerifiedAt: new Date().toISOString(),
-        sandbox: false,
-        metadata: { verified: 'env-var', note: 'Auto-connected via VITE_OPENROUTER_API_KEY for demo mode' },
-      };
-    }
-    // Auto-connect Hunter.io when demo key is provided via env var.
-    const demoHunterKey = (typeof import.meta !== 'undefined' && import.meta.env.VITE_HUNTER_API_KEY) as string | undefined;
-    if (demoHunterKey && persisted.hunter.status !== 'connected') {
-      rememberApiKey('hunter', demoHunterKey);
-      persisted.hunter = {
-        status: 'connected',
-        connectedAt: new Date().toISOString(),
-        lastVerifiedAt: new Date().toISOString(),
-        sandbox: false,
-        metadata: { verified: 'env-var', note: 'Auto-connected via VITE_HUNTER_API_KEY for demo mode' },
-      };
-    }
-    // Auto-connect Instantly.ai when demo key is provided via env var.
-    const demoInstantlyKey = (typeof import.meta !== 'undefined' && import.meta.env.VITE_INSTANTLY_API_KEY) as string | undefined;
-    if (demoInstantlyKey && persisted.instantly.status !== 'connected') {
-      rememberApiKey('instantly', demoInstantlyKey);
-      persisted.instantly = {
-        status: 'connected',
-        connectedAt: new Date().toISOString(),
-        lastVerifiedAt: new Date().toISOString(),
-        sandbox: false,
-        metadata: { verified: 'env-var', note: 'Auto-connected via VITE_INSTANTLY_API_KEY for demo mode' },
-      };
-    }
-    return persisted;
+    /* §PHASE B (2026-10-13) — REPOINTED: the three "auto-connect from a VITE_*
+       key" blocks that used to live here are REMOVED. They read `import.meta.env` in the
+       BROWSER, and Vite inlines every `VITE_*` value into the public bundle, so
+       they only worked by shipping the provider's key to every visitor. They also
+       marked a provider `connected` (sandbox: false) on nothing more than a
+       variable being set — the exact "never claim a provider is live when it is
+       merely configured" failure the business model forbids.
+
+       A server-held key is now reported as a HINT only (`serverSecrets`), and a
+       real connection is still established through the connect wizard. */
+    return loadPersisted();
   });
+
+  /**
+   * §PHASE B — which providers have a key held SERVER-side (Supabase Vault).
+   *
+   * Asked of the server, never read from the bundle. Empty in demo (no Supabase
+   * project) and on any failure, so the demo needs no credential and no hint is
+   * ever invented.
+   */
+  const [serverSecrets, setServerSecrets] = useState<ServerSecretPresence>({});
 
   useEffect(() => {
     try {
@@ -169,6 +161,24 @@ export function IntegrationsProvider({
       /* storage unavailable (private mode) — in-memory only */
     }
   }, [integrations]);
+
+  /**
+   * §PHASE B — ask the server which providers have a Vault-held key.
+   *
+   * This REPLACES the removed `import.meta.env` reads. It resolves to nothing at
+   * all when there is no Supabase project (the demo) or when the server refuses,
+   * so the investor demonstration never waits on it and never shows a hint it
+   * cannot justify.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    void probeServerSecrets().then((presence) => {
+      if (!cancelled) setServerSecrets(presence);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /** §8 — single derivation of every integration's operational mode. */
   const modes = useMemo(() => {
@@ -390,6 +400,7 @@ export function IntegrationsProvider({
       recordHealth,
       recordSync,
       recordIntegrationError,
+      serverSecrets,
     }),
     [
       integrations,
@@ -405,6 +416,7 @@ export function IntegrationsProvider({
       recordHealth,
       recordSync,
       recordIntegrationError,
+      serverSecrets,
     ]
   );
 

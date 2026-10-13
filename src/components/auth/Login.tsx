@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn';
 import type { Environment, SessionRole } from '@/types';
 import { environmentMode, subscribeEnvironment } from '@/config/environment';
 import { PartnerApplicationForm, ApplicationReceived } from './PartnerApplicationForm';
+import { RealSignIn } from './RealSignIn';
 import {
   ArrowLeft,
   Building2,
@@ -75,11 +76,13 @@ const OPS_LOGINS: {
 ];
 
 export function Login() {
-  const { signIn, setEnvironment, activateDemoBrand, activateOnboardingBrand } = useApp();
+  const { signIn, setEnvironment, activateDemoBrand, activateOnboardingBrand, authMode } =
+    useApp();
   const [showForm, setShowForm] = useState(false);
   const [appSubmitted, setAppSubmitted] = useState(false);
   const [isDemo, setIsDemo] = useState(() => environmentMode() === 'demo');
   useEffect(() => subscribeEnvironment(() => setIsDemo(environmentMode() === 'demo')), []);
+
 
   /**
    * §Phase E2 — brands whose tenant came from the CANONICAL onboarding record.
@@ -151,6 +154,21 @@ export function Login() {
         onboardingStatus: b.status,
       })),
   ];
+
+  /**
+   * §PHASE B — when REAL authentication is the required path (a Supabase project
+   * configured AND the platform in `live`), the role-picker below must NOT be
+   * shown: it would let anyone select "Super Admin". This guard sits AFTER every
+   * hook (Rules of Hooks) and leaves the demo path — where the investor
+   * demonstration runs — completely untouched.
+   */
+  if (authMode === 'real') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ink-950 px-6">
+        <RealSignIn />
+      </div>
+    );
+  }
 
   if (appSubmitted) {
     return <ApplicationReceived onBack={() => { setAppSubmitted(false); setShowForm(false); }} />;

@@ -26,6 +26,25 @@ function getOrCreateDemoToken(partnerId: string): DemoToken {
   return t;
 }
 
+/**
+ * §PHASE B (2026-10-13) — the Authorization header `xero-token` now REQUIRES.
+ *
+ * That function writes `xero_connections` with the service-role key and returns
+ * tokens, so it now demands a verified operator session (it previously accepted
+ * anonymous callers). Without this header it answers 403 — which is the correct
+ * outcome, so an absent session is deliberately not worked around here.
+ */
+async function authHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  try {
+    const session = supabase ? (await supabase.auth.getSession()).data.session : null;
+    if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+  } catch {
+    /* No session available — the Edge Function refuses, which is correct. */
+  }
+  return headers;
+}
+
 export function buildAuthorizationUrl(clientId: string, redirectUri: string, state: string): string {
   const scopes = ['openid', 'profile', 'email', 'accounting.transactions', 'accounting.contacts', 'accounting.settings', 'offline_access'];
   const params = new URLSearchParams({ response_type: 'code', client_id: clientId, redirect_uri: redirectUri, scope: scopes.join(' '), state });
@@ -45,7 +64,7 @@ export async function exchangeCodeForTokens(
   try {
     const res = await fetch(edgeUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({ partnerId, code, redirectUri, grantType: 'authorization_code' }),
     });
     if (!res.ok) { const text = await res.text(); return { accessToken: '', refreshToken: '', expiresAt: 0, error: text }; }
@@ -97,7 +116,7 @@ async function performTokenRefresh(partnerId: string, refreshToken: string): Pro
     try {
       const res = await fetch(edgeUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           partnerId,
           refreshToken,

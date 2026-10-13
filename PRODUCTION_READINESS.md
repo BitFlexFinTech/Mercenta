@@ -1,6 +1,37 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: 2026-10-05 (§BATCH10 — the health-check + daily-digest pair built and gated).**
+**Last updated: 2026-10-13 (§PHASE B — authentication + secret-handling hardening; five real defects fixed at source, four new gates).**
+
+## §PHASE B (2026-10-13) — WHAT ACTIVATION NOW REQUIRES, AND WHAT CHANGED
+
+Phase B closed the browser half of authentication and removed every path by which a provider secret
+could reach the browser. **None of it needs a credential to build, test or demonstrate** — the
+platform remains fully usable end-to-end in demo with no credential at all. What follows is the
+ACTIVATION list: the external inputs that turn already-built functionality on.
+
+| # | What is needed | Where it goes | What it turns on | Blocker? |
+|---|---|---|---|---|
+| B-1 | **A Supabase project** (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) | `.env.local` (browser-safe anon key only) | The real sign-in form (`src/components/auth/RealSignIn.tsx`) and the boot restore of a real session. **Without it the platform stays in `demo` mode and the existing one-click demo cards are used unchanged** — this is why it is not a blocker. | No |
+| B-2 | **Each user's `app_metadata.role` and `app_metadata.tenant_id`** | Supabase Auth → the user's *app* metadata (**never** user metadata, which the user can write) | Which session a signed-in person receives. `role` is `super_admin` \| `admin_staff` \| `brand` — the SAME vocabulary the Edge Functions already read. `tenant_id` is REQUIRED for a `brand`: a brand session with no tenant is refused outright rather than admitted unscoped. | No |
+| B-3 | **Provider keys moved into Supabase Vault** | Vault, via the Integrations connect wizard (server-side). The browser receives only `vault:<name>`. | The "server-side key present" hint and the live test call. **The three `VITE_*` keys are REMOVED and must not be reintroduced** — Vite inlines them into the published bundle, so they were downloadable by anyone and permanent in the build output. | No |
+| B-4 | **`XERO_WEBHOOK_SECRET`** | The Edge Function's environment **and** Xero's webhook settings (the same value) | `xero-webhook` now **refuses with 503** when this is unset, instead of accepting an unverified body. Previously it fell back to the published literal `'demo-webhook-secret'` and skipped signature verification entirely. | No |
+| B-5 | **`INSTANTLY_WEBHOOK_SECRET`** | The Edge Function's environment **and** the Instantly campaign's webhook configuration | `instantly-reply-webhook` now **refuses with 503** when this is unset. Previously the check was skipped when the variable was unset, so any anonymous caller could post a reply that was then classified, persisted and flagged as a hot lead. | No |
+| B-6 | **An operator session for `xero-token`** | Nothing to enter — the browser attaches the session token automatically (`src/services/xero/tokenManager.ts`) | Xero token exchange/refresh. `xero-token` now requires `super_admin` or `admin_staff` and **must be deployed with JWT verification ON** (never `--no-verify-jwt`). Previously it accepted anonymous callers and would write `xero_connections` for any `partner_id` with the service-role key. | No |
+
+**Deployment requirement (unchanged, and still the honest limit):** the Edge Functions are WRITTEN
+but **not deployed** — there is no Supabase project in this environment. `integration-secrets-status`
+is the one added by this phase; it is registered in the canonical rate-limit registry (60/min) and
+must be deployed **with JWT verification ON**:
+
+```
+supabase functions deploy integration-secrets-status     # never --no-verify-jwt
+supabase functions deploy xero-token                     # never --no-verify-jwt
+supabase functions deploy xero-webhook --no-verify-jwt   # correct ONLY here: Xero cannot hold a Supabase JWT, so the HMAC signature authenticates it
+supabase functions deploy instantly-reply-webhook --no-verify-jwt  # correct ONLY here, for the same reason (shared secret)
+```
+
+`scripts/validate-edge-function-auth.mjs` FAILS if any function is deployed with `--no-verify-jwt`
+without being a DECLARED third-party endpoint that proves its caller, so this cannot drift.
 
 ## §BATCH 5 (2026-10-10) — MERCENTA SOCIAL WAS REMOVED COMPLETELY
 

@@ -194,8 +194,16 @@ test('webhook: keyword parity with src/lib/marketing.ts (no classifier drift)',
   marketingKeywords.length > 0 &&
     marketingKeywords.every((k) => webhookKeywords.includes(k)) &&
     webhookKeywords.every((k) => marketingKeywords.includes(k)));
-test('webhook: optional shared-secret verification',
-  webhook.includes('INSTANTLY_WEBHOOK_SECRET') && webhook.includes('Invalid webhook secret'));
+// §PHASE B (2026-10-13) — REPOINTED. This was named "optional shared-secret
+// verification", which is exactly the defect: the check ran only `if
+// (expectedSecret)`, so an unset INSTANTLY_WEBHOOK_SECRET let ANY anonymous
+// caller POST a reply that was then classified, persisted and flagged as a hot
+// lead. The secret is now REQUIRED and an unconfigured deployment refuses (503).
+test('webhook: the shared secret is REQUIRED, not optional (fail-closed)',
+  webhook.includes('INSTANTLY_WEBHOOK_SECRET') &&
+    webhook.includes('Invalid webhook secret') &&
+    /if\s*\(!expectedSecret\)/.test(webhook) &&
+    !/if\s*\(expectedSecret\)\s*\{/.test(webhook));
 test('webhook: persists into messages with schema-valid columns per 0001_init',
   webhook.includes("from('messages')") && webhook.includes("sent_by: 'automation'") &&
     webhook.includes('requires_human') && !webhook.includes('sender_email'));

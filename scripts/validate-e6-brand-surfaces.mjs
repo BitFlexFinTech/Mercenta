@@ -3472,6 +3472,89 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'STATUS_CHECK.md',
   ]);
 
+  /**
+   * §PHASE B (2026-10-13) — AUTHENTICATION AND SECRET-HANDLING HARDENING.
+   *
+   * DECLARED, not widened — the same mechanism `BATCH4_BRAIN_REMOVAL_SCOPE` uses,
+   * for the same reason: `.clinerules/defect-remediation.md` states a fix whose
+   * file falls outside the declared surface is fixed by **declaring the surface
+   * (a documented, reviewable act)**, never by skipping the fix. F5b still pins
+   * the exact protected files, so this cannot smuggle an unrelated change through.
+   *
+   * FIVE DEFECTS FIXED, EACH WITH A GATE THAT CAN FAIL:
+   *  1. THE BROWSER HELD PROVIDER KEYS — `IntegrationsContext` auto-connected three
+   *     providers from `import.meta.env.VITE_*_API_KEY`, and `registry.ts →
+   *     hasLiveCredentialHint` read the same values. Vite INLINES every `VITE_*`
+   *     value into the published bundle, so such a key was downloadable by anyone
+   *     and permanent in the build output. Now Vault-only, server-side; the browser
+   *     learns a NAME and a BOOLEAN. Gate: validate-no-browser-secrets.mjs.
+   *  2. THE BROWSER HALF OF AUTH WAS MISSING — RLS and every Edge Function already
+   *     read `app_metadata.role`/`tenant_id`, but `signIn(env, role)` minted a
+   *     session from a role picker, so those checks were correct and never
+   *     exercised. A real Supabase sign-in now maps VERIFIED claims onto the
+   *     existing `DemoSession`, preserving every allowlist. Gate: validate-real-auth.mjs.
+   *  3. THREE EDGE FUNCTIONS AUTHENTICATED NOBODY — `xero-webhook` (published
+   *     fallback secret that skipped signature verification outright),
+   *     `instantly-reply-webhook` (secret check skipped when unset) and
+   *     `xero-token` (`--no-verify-jwt`, no caller check, able to write
+   *     `xero_connections` with the service-role key for any partner id).
+   *     Gate: validate-edge-function-auth.mjs.
+   *  4. LIVE DOCUMENTS DESCRIBED A REMOVED SHELL — four describers still presented
+   *     the 3PL carrier surface (§P9, 2026-09-23) as present, one claiming a
+   *     "Carrier Terminal" login card that exists nowhere in `Login.tsx`.
+   *     Gate: validate-describers-match-reality.mjs.
+   *  5. THE NEW EDGE FUNCTION HAD NO RATE-LIMIT POLICY — `_shared/rateLimit.ts`
+   *     extended so the ONE-OWNER check in validate-rate-limiting.mjs still holds.
+   *
+   * THE ONE PROTECTED PATH HERE, AND WHY IT IS UNAVOIDABLE:
+   *  `src/services/xero/tokenManager.ts` — the browser client that calls
+   *  `xero-token`. Defect 3 makes that function refuse anonymous callers, so the
+   *  client must ATTACH the session token; without this the authenticated function
+   *  would answer 403 to its only legitimate caller. The edit is one helper
+   *  (`authHeaders()`) plus the two `fetch` calls that now use it — no
+   *  token-lifecycle logic changed, and nothing else under `src/services/xero/`.
+   */
+  const PHASE_B_AUTH_SCOPE = new Set([
+    /* 1 — no provider secret may reach the browser */
+    'src/lib/auth/supabaseAuth.ts',
+    'src/components/auth/RealSignIn.tsx',
+    'src/integrations/serverSecrets.ts',
+    'src/context/GlobalStateContext.tsx',
+    'src/components/auth/Login.tsx',
+    'src/integrations/IntegrationsContext.tsx',
+    'src/integrations/registry.ts',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
+    '.env.example',
+    'supabase/functions/integration-secrets-status/index.ts',
+    'supabase/functions/_shared/integrationSecrets.ts',
+    'supabase/functions/_shared/vault.ts',
+    'scripts/validate-real-auth.mjs',
+    'scripts/validate-no-browser-secrets.mjs',
+    /* 2 — three Edge Functions that authenticated nobody */
+    'supabase/functions/xero-webhook/index.ts',
+    'supabase/functions/instantly-reply-webhook/index.ts',
+    'supabase/functions/xero-token/index.ts',
+    'supabase/functions/_shared/rateLimit.ts',
+    'scripts/validate-edge-functions.mjs',
+    'scripts/validate-edge-function-auth.mjs',
+    'scripts/validate-rate-limiting.mjs',
+    /* the ONE protected path (see the note above) */
+    'src/services/xero/tokenManager.ts',
+    /* 3 — the documents that described a removed shell */
+    'MERCENTA_ARCHITECTURE.md',
+    'MERCENTA_MASTER_CONTEXT.md',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'scripts/validate-describers-match-reality.mjs',
+    /* the phase's own declaration + project state */
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'PRODUCTION_READINESS.md',
+    'package.json',
+  ]);
+
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
   try {
@@ -3655,7 +3738,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 7 (2026-10-10) — the cleanup phase (see the declaration above). First protected-path check (F5). */
         BATCH7_CLEANUP_SCOPE.has(p) ||
-        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE B — the auth/secret-hardening phase (see the declaration above). First protected-path check (F5). */
+        PHASE_B_AUTH_SCOPE.has(p) ||
+        [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3805,7 +3891,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH5_SOCIAL_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 7 — the cleanup phase (see the F5 declaration). Second protected-path check (F5b). */
         BATCH7_CLEANUP_SCOPE.has(p) ||
-        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH7_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE B — same declaration, second protected-path check (F5b). */
+        PHASE_B_AUTH_SCOPE.has(p) ||
+        [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -4640,7 +4729,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH12_WHATSAPP_TWILIO_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §DESIGN — the homepage restraint pass + two defects fixed at source (see above). */
           HOMEPAGE_RESTRAINT_SCOPE.has(p) ||
-          [...HOMEPAGE_RESTRAINT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...HOMEPAGE_RESTRAINT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE B (2026-10-13) — the auth/secret-hardening phase (see the declaration above). */
+          PHASE_B_AUTH_SCOPE.has(p) ||
+          [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

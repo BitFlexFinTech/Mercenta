@@ -40,9 +40,17 @@ in `GlobalStateContext`):
 App.tsx
 ├── home/login → HomeShell   (marketing / auth / partner application)
 ├── brand     → BrandShell   (15 views; LiveChatWidget + TourLoader always mounted)
-├── admin     → AdminShell   (sections incl. Super Admin sub-tabs)
-└── carrier   → CarrierShell (3 views, IntegrationsProvider-wrapped)
+└── admin     → AdminShell   (sections incl. Super Admin sub-tabs)
 ```
+
+> **§PHASE B (2026-10-13) — CORRECTION.** This block previously listed a fourth
+> branch, `carrier → CarrierShell (3 views, IntegrationsProvider-wrapped)`, and
+> called the tree exhaustive. **That shell does not exist and has not since §P9
+> (programme decision 4).** `Environment` is exactly
+> `home | login | brand | admin` (`src/types.ts`), the carrier login was removed,
+> and `src/App.tsx` renders only `HomeShell`, `BrandShell` and `AdminShell` —
+> with an explicit comment there recording the removal. The stale row was a
+> describer that outlived the thing it described (`10-describers-must-match-reality`).
 
 ## 3. Domain Boundaries
 

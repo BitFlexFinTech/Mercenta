@@ -5,6 +5,43 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
+## §PHASE B — CURRENT STATUS (2026-10-13) — AUTHENTICATION + SECRET-HANDLING HARDENING
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Five real defects were fixed at
+source, each with a gate proved able to fail. Nothing here needed a credential.
+
+1. **The browser held provider keys.** `IntegrationsContext.tsx` auto-connected OpenRouter / Hunter /
+   Instantly from `import.meta.env.VITE_*_API_KEY`, and `registry.ts → hasLiveCredentialHint()` read
+   the same values. Vite INLINES every `VITE_*` value into the published bundle, so such a key was
+   downloadable by anyone with no login and permanent in the build output. Now Vault-only and
+   server-side; the browser learns a NAME and a BOOLEAN and can never read a value.
+2. **The browser half of authentication was missing.** RLS (34 tables) and 19 Edge Functions already
+   read `app_metadata.role` / `app_metadata.tenant_id`, but `signIn(env, role)` minted a session from
+   a ROLE PICKER, so every correct check was unexercised. A real Supabase sign-in now maps VERIFIED
+   claims onto the EXISTING `DemoSession`, so no shell, allowlist or tenant filter changed.
+3. **Three Edge Functions authenticated nobody.** `xero-webhook` fell back to the published literal
+   `'demo-webhook-secret'` and SKIPPED signature verification when it matched; `instantly-reply-webhook`
+   ran its secret check only when the secret was set; `xero-token` accepted anonymous callers and
+   would write `xero_connections` with the service-role key for any `partner_id`.
+4. **Live documents described a REMOVED shell.** Four describers presented the 3PL carrier surface
+   (§P9, 2026-09-23) as present — one promising a "Carrier Terminal" login card that exists nowhere
+   in `Login.tsx`.
+5. **The new Edge Function had no rate-limit policy.**
+
+**Evidence:** `npm run typecheck` **0** (all four projects) · `lint` **0** · `build` **ok**
+(`dist/assets/index-C4IbLkEk.js`, 393.81 kB / 120.73 kB gzip) · `validate:all` **191 PASS / 0 FAIL
+(of 191)** — up from 187/0, the increase being the four new gates · `e2e/app-shell` + `e2e/access-gate`
+**31 passed / 2 skipped** (IDENTICAL to the pre-change baseline) · `e2e/integration-hub` **5 passed** ·
+`verify-registry` **156 issues — exactly the pre-change count**, so the five new registry rows added
+none.
+
+**New gates:** `validate-real-auth` · `validate-no-browser-secrets` · `validate-edge-function-auth` ·
+`validate-describers-match-reality`. Each was mutation-proved (defect reintroduced → FAIL → restored
+byte-identical).
+
+**NOT done, honestly:** not committed, not pushed, not deployed, and therefore not live-verified.
+Phase C (the premium UI redesign) has not started.
+
 ## Operating rules — ACTIVE (2026-09-21 rule migration)
 
 The canonical operating model is **`.clinerules/operating-model.md`**: current Founder directive > that file >

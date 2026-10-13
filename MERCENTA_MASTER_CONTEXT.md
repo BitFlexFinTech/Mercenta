@@ -99,7 +99,13 @@ MERCENTA must keep working when any third party is unavailable.
 
 - No URL router: navigation is state-driven (`environment` + `view` in
   `GlobalStateContext`). Shells: `HomeShell` (marketing/auth), `BrandShell`,
-  `AdminShell`, `CarrierShell`.
+  `AdminShell`.
+
+  > **§PHASE B (2026-10-13) — CORRECTION.** This line previously also listed
+  > `CarrierShell`. **It does not exist and has not since §P9 (programme decision
+  > 4).** `Environment` is exactly `home | login | brand | admin` and
+  > `src/App.tsx` renders only the three shells above
+  > (`10-describers-must-match-reality`).
 - Domain libs under `src/lib/`: spapi, dhl, compliance, billing, crm, helpdesk,
   intelligence, discovery, research, postiz, whatsapp, mail,
   messaging, monitoring, automation, events, simulation, verification, shipping.

@@ -14,7 +14,7 @@
       "removed",
       "complete"
     ],
-    "total_entries": 563,
+    "total_entries": 568,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -1244,6 +1244,16 @@
       ],
       "obligations": "1 no claim outlives the thing it describes (every describer, including generated leftovers, updated in the same change) · 2 a written fact has ONE author read from the code, never re-typed · 3 dated is not historical (a document with no banner is a LIVE claim) · 4 every project must HAVE a describer check wired into its single standard command · 5 a check that finds NOTHING is a FAILURE (a vacuous green is worse than no check) · 6 every fix is proved able to fail (mutate, observe FAIL, restore byte-identical) · 7 an artefact is a describer and NO report may narrate a filename as behaviour · 8 the owner never reports the same drift twice — fix the CLASS, not the instance.",
       "compliance_in_this_project": "scripts/validate-no-stale-blockers.mjs section 11 does the class-wide job — every file the matrix calls DELETED must be absent (13 checked, 0 present) — with a vacuity guard that FAILS if the discovery finds fewer than 5 paths; scripts/validate-rules-application.mjs section 5b DISCOVERS that check (it does not name a file) and FAILS if the check is deleted or its vacuity guard is silenced (proved: 28/29 with found: NONE), and asserts the rule is installed in every rules folder. Both were mutation-proved (re-create a deleted file => FAIL; break both deletion conventions => the vacuity guard FAILS with found 0)."
+    },
+    "phase_b": {
+      "phase": "§PHASE B — authentication + secret-handling hardening (2026-10-13)",
+      "added": [
+        "phase-b-browser-provider-keys-removed",
+        "phase-b-describer-drift-class-gate",
+        "phase-b-rate-limit-and-scope-declaration",
+        "phase-b-real-browser-authentication",
+        "phase-b-three-edge-functions-authenticated-nobody"
+      ]
     }
   },
   "entries": [
@@ -6576,6 +6586,51 @@
       "source": "Owner directive 2026-10-13 (homepage refinement) + project design skills",
       "status": "built_and_tested",
       "evidence": "src/components/marketing/Home.tsx; src/components/shared/WorkWorkspace.tsx; src/components/admin/AcquisitionWorkflow.tsx; scripts/validate-uiux-redesign.mjs (REPOINTED colour contract + ABSENCE guard for decorative hues, mutation-proved 2 FAIL); scripts/layout-audit.mjs (empty-state detection fixed, mutation-proved 1 FAIL); scripts/validate-rules-application.mjs section 5c (design-skill discipline: an undeclared UI change now fails the build); e2e/public-pages.spec.ts + e2e/public-chrome.spec.ts 21 passed; measured render at 1440px: route-dot + tracker ping present, horizontal overflow 0, palette hues painted in hero/services/visibility/protection 0, page errors 0",
+      "last_verified": "2026-10-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phase-b-browser-provider-keys-removed",
+      "description": "§PHASE B (2026-10-13) — NO PROVIDER SECRET MAY REACH THE BROWSER. `IntegrationsContext.tsx` auto-connected OpenRouter / Hunter / Instantly by reading `import.meta.env.VITE_*_API_KEY` IN THE BROWSER, and `registry.ts -> hasLiveCredentialHint()` read the same values. Vite INLINES every `VITE_*` value into the published bundle, so such a key was downloadable by anyone with no login AND permanent in the build output — unsetting the variable does not withdraw it, the key must be rotated at the provider. FIXED AT SOURCE: the three auto-connect blocks and the env-var hint are REMOVED; the registry carries `serverSecretName` (a Vault NAME) instead of `demoKeyHint` (a browser env var); a NEW `supabase/functions/integration-secrets-status/index.ts` reads Supabase Vault server-side and returns ONLY a boolean per provider, behind an operator check that runs BEFORE any Vault read; a NEW `src/integrations/serverSecrets.ts` asks the server and fails closed to \"no secrets known\" on every failure path, so the demo needs no credential and no hint is invented. `.env.example` no longer declares the three keys and explains why. Gate: validate-no-browser-secrets.mjs — 17 assertions, PASS; it scans all 452 `src/` files for a secret-shaped `import.meta.env` read (comments stripped, so a REPOINTED note can neither satisfy nor break it), asserts the client registry and the server allowlist name the SAME providers (drift gate), asserts the function authorises before reading Vault and returns only a boolean, and EXECUTES the mapping. Mutation-proved: appending `import.meta.env.VITE_OPENROUTER_API_KEY` -> FAIL, restored byte-identical (sha256 6091520c066ef263490b0f00bcc7340efce8a0a1313b5c1e45a91e6f7fc5a51a) -> PASS. NO e2e spec exercises this path, so the status is `built`, not `built_and_tested`.",
+      "source": "§PHASE B — Owner switched to Act mode 2026-10-13; the audit had flagged the VITE_* reads as a latent exposure",
+      "status": "built",
+      "evidence": "scripts/validate-no-browser-secrets.mjs",
+      "last_verified": "2026-10-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phase-b-real-browser-authentication",
+      "description": "§PHASE B (2026-10-13) — THE BROWSER HALF OF AUTHENTICATION NOW EXISTS. The server side was already correct: 34 tables carry RLS scoped on `auth.jwt() ->> 'tenant_id'` (`002_create_brands.sql:18`), `payouts-transfer/index.ts:188-200` verifies the bearer token against Supabase `/auth/v1/user`, and 19 Edge Functions check 401-before-data. But `GlobalStateContext.tsx:59` exposed `signIn(env, role)` — a session minted from a ROLE PICKER with no credentials — so every one of those correct checks was unexercised. FIXED AT SOURCE: a NEW `src/lib/auth/supabaseAuth.ts` signs in with email+password and maps the VERIFIED `app_metadata.role` / `app_metadata.tenant_id` onto the EXISTING `DemoSession` shape, so no shell, view allowlist, nav filter or tenant filter changed. Fail-closed throughout: an unknown role becomes `Brand Partner` (never staff); a brand with no tenant is REFUSED; staff sessions carry no tenant; claims are read from `app_metadata` ONLY (never the user-writable `user_metadata`); and the form returns ONE message for a wrong password and an unknown address, so it cannot be used to enumerate accounts. `GlobalStateContext` gained `signInWithCredentials` + `authMode`, restores a real session on boot through the same allowlist, and ends the provider session on sign-out. A NEW `src/components/auth/RealSignIn.tsx` renders the form; `Login.tsx` shows it ONLY when `authMode === 'real'` (Supabase configured AND `live` mode), with the guard AFTER every hook (Rules of Hooks), so the demo path and its browser specs are untouched. Gate: validate-real-auth.mjs — 20 assertions, PASS, EXECUTING the mapping via Vite `ssrLoadModule`. Mutation-proved: making the default FAIL-OPEN -> 6 failures, restored byte-identical (sha256 a9c6c90231a7c2a5b9ed49bf3b122fedc980e692d9f7eb2d83decc4257c53d30) -> PASS. Browser proof the demo is unchanged: app-shell + access-gate 31 passed / 2 skipped, IDENTICAL to the pre-change baseline.",
+      "source": "§PHASE B — Owner switched to Act mode 2026-10-13; \"built properly now, not a disposable mock-up\"",
+      "status": "built_and_tested",
+      "evidence": "e2e/app-shell.spec.ts",
+      "last_verified": "2026-10-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phase-b-three-edge-functions-authenticated-nobody",
+      "description": "§PHASE B (2026-10-13) — THREE EDGE FUNCTIONS ACCEPTED ANY CALLER. (1) `xero-webhook` defaulted its secret to the PUBLISHED literal `'demo-webhook-secret'` and then computed `const isDemo = secret === 'demo-webhook-secret'`, SKIPPING signature verification when it matched — which is what happened whenever `XERO_WEBHOOK_SECRET` was unset, so anyone could post a forged Xero event body and have sync jobs created. (2) `instantly-reply-webhook` ran its shared-secret check only `if (expectedSecret)` and defaulted it to `''`, so an unset variable meant NO check on an endpoint that classifies, persists and hot-lead-flags replies. (3) `xero-token` was documented `--no-verify-jwt` with NO caller check, letting an ANONYMOUS caller exchange an arbitrary `authorization_code` using Mercenta's own `XERO_CLIENT_SECRET`, receive the access AND refresh tokens, and write them into `xero_connections` for an arbitrary `partnerId` with the SERVICE-ROLE key. ALL FIXED AT SOURCE: the published fallback is gone and `getWebhookSecret()` returns null when unset; both webhooks REFUSE (503) when their secret is not configured; `xero-token` requires a verified operator session checked BEFORE the Xero call and before any database write, with JWT verification staying ON; and the browser client (`src/services/xero/tokenManager.ts`) attaches the session token, without which the authenticated function would answer 403 to its only legitimate caller. Gate: validate-edge-function-auth.mjs — 30 assertions, PASS; it DISCOVERS every function folder (never a hand-maintained list) and fails the WHOLE CLASS: any secret falling back to a literal, any secret check optional-by-default, any `--no-verify-jwt` endpoint undeclared or proving no caller. Mutation-proved: reintroducing the fallback -> 2 failures, restored byte-identical (sha256 e159d5de167e013b8a3230e6cc0bad74308b018f25ca80d046e3b33931b188fb) -> PASS. NO e2e spec exercises these endpoints, so the status is `built`.",
+      "source": "§PHASE B (B3) — found by writing the class gate the phase required, not by guessing",
+      "status": "built",
+      "evidence": "scripts/validate-edge-function-auth.mjs",
+      "last_verified": "2026-10-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phase-b-describer-drift-class-gate",
+      "description": "§PHASE B (2026-10-13) — NO LIVE DOCUMENT MAY DESCRIBE A REMOVED THING. The 3PL carrier surface was REMOVED on 2026-09-23 (§P9, Founder decision T-2) and validate-conversion-gate.mjs has asserted ever since that `CarrierShell.tsx` / `src/components/carrier/` do not exist — so the CODE was guarded while the PROSE was not. FOUR live describers still presented it as present: `MERCENTA_ARCHITECTURE.md` (a fourth `carrier -> CarrierShell` branch, in a tree it called exhaustive), `MERCENTA_MASTER_CONTEXT.md` (listed `CarrierShell` among the shells), and `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md` (\"Shells: 4\", \"Environments: 5 … carrier\", \"Session roles: 4 … 3PL Carrier\", \"Carrier nav views: 3 ids\", and a `D01-01` row promising \"ops cards for Admin Hub / Carrier Terminal / Super Admin\" — no carrier string exists in `Login.tsx` at all). ALL CORRECTED, and the CLASS is now gated: a NEW `scripts/validate-describers-match-reality.mjs` DISCOVERS the truth from the owner of each fact (shells from the files in `src/components/layout/`; environments and session roles from `src/types.ts`), FAILS LOUDLY if the discovery returns nothing, joins multi-line correction blockquotes into one block so a banner covers its own quotation, and fails any live describer line presenting a removed shell, environment or role as present unless the line records the removal. It found THREE real stale claims beyond the one the audit named (including the non-existent \"Carrier Terminal\" login card) and two false positives in its own first draft, both fixed. Mutation-proved: restoring the `carrier -> CarrierShell` row -> FAIL, restored byte-identical (sha256 62245c194c2021214aac1f1b4d4ee5a83496bcbe6d1ac0db41fb6367dd5fa655) -> PASS. NO e2e spec exercises this path, so the status is `built`.",
+      "source": "§PHASE B (B4) — the stale carrier claim was recorded in the audit; the class gate is the rule-10 §8 obligation",
+      "status": "built",
+      "evidence": "scripts/validate-describers-match-reality.mjs",
+      "last_verified": "2026-10-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phase-b-rate-limit-and-scope-declaration",
+      "description": "§PHASE B (2026-10-13) — the new `integration-secrets-status` Edge Function was added to the canonical rate-limit registry (`supabase/functions/_shared/rateLimit.ts`): bucket + a declared policy (60/min, the operator-read budget, since it reads Vault secret NAMES and never values), so the ONE-OWNER check in validate-rate-limiting.mjs still holds (16 functions, 72 assertions). The phase's file surface is DECLARED in `scripts/validate-e6-brand-surfaces.mjs` as `PHASE_B_AUTH_SCOPE`, accepted by all three scope guards (F5, F5b, F6), following the project's own established precedent (`BATCH4_BRAIN_REMOVAL_SCOPE`) which cites `.clinerules/defect-remediation.md`: a fix whose file falls outside the declared surface is fixed by DECLARING the surface, never by skipping the fix. F5b still pins the exact protected files. The ONE protected path this phase touches is `src/services/xero/tokenManager.ts`, and it is unavoidable: `xero-token` now refuses anonymous callers, so its only legitimate caller must attach the session token or receive 403. The edit is one helper (`authHeaders()`) plus the two `fetch` calls that use it; no token-lifecycle logic changed. Also recorded: `npx tsc --noEmit -p tsconfig.functions.json` caught a duplicate `vaultSecretRef` introduced by the phase's own edit, since removed. NO e2e spec exercises this path, so the status is `built`.",
+      "source": "§PHASE B — consequence of the new Edge Function and of the xero-token fix",
+      "status": "built",
+      "evidence": "scripts/validate-rate-limiting.mjs",
       "last_verified": "2026-10-13",
       "superseded_by": null
     }

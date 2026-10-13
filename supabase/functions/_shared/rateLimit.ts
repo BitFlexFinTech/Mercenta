@@ -66,6 +66,7 @@ export const FUNCTION_BUCKETS: readonly string[] = [
   'dhl',
   'palletline',
   'integration-connect',
+  'integration-secrets-status',
   'spapi-token-exchange',
   'xero-token',
   'xero-webhook',
@@ -93,6 +94,10 @@ export const RATE_LIMIT_POLICIES: Record<string, RateLimitPolicy> = {
   dhl: { limit: 120, windowMs: 60_000 },
   palletline: { limit: 120, windowMs: 60_000 },
   'integration-connect': { limit: 30, windowMs: 60_000 },
+  /* §PHASE B (2026-10-13) — the secrets-status probe. It reads Vault secret
+     NAMES (never values) for an operator, so it is a cheap authenticated read:
+     the same 60/min as the other operator reads, not the tighter write budget. */
+  'integration-secrets-status': { limit: 60, windowMs: 60_000 },
   'spapi-token-exchange': { limit: 30, windowMs: 60_000 },
   'payouts-transfer': { limit: 30, windowMs: 60_000 },
   'xero-token': { limit: 60, windowMs: 60_000 },

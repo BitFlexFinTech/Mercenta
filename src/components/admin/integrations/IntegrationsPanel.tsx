@@ -13,7 +13,7 @@ import {
   type MetricTileData,
 } from '@/components/shared/workspace';
 import type { IntegrationCategory, IntegrationDefinition, IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
-import { INTEGRATION_ORDER, INTEGRATION_REGISTRY, hasLiveCredentialHint, integrationMeta } from '@/integrations/registry';
+import { INTEGRATION_ORDER, INTEGRATION_REGISTRY, integrationMeta, serverSecretNameFor } from '@/integrations/registry';
 import { Badge, Button, Card, EmptyState, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
@@ -639,7 +639,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
 }
 
 export function IntegrationsPanel() {
-  const { integrations, disconnect, modes, setMode } = useIntegrations();
+  const { integrations, disconnect, modes, setMode, serverSecrets } = useIntegrations();
   const [wizardFor, setWizardFor] = useState<IntegrationId | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<HubFilter>('all');
@@ -893,15 +893,23 @@ export function IntegrationsPanel() {
                 </div>
               )}
 
-              {/* §Phase B — truthful developer-key hint. An env demo key is a
-                  developer shortcut that lets the LIVE test call run; it is NOT
-                  a verified connection and is never presented as one. */}
-              {hasLiveCredentialHint(id) && mode !== 'live' && !connected && (
+              {/* §PHASE B (2026-10-13) — truthful SERVER-held-secret hint.
+
+                  REPOINTED. This used to read `hasLiveCredentialHint(id)`, which
+                  checked `import.meta.env['VITE_…_API_KEY']` IN THE BROWSER — a
+                  value Vite inlines into the public bundle, so the hint was only
+                  available by shipping the key to every visitor. It now reflects
+                  whether the SERVER holds a key in Vault (`serverSecrets`), which
+                  the browser learns as a boolean and can never read.
+
+                  It remains a HINT, never a status: Mercenta holding a key is not
+                  a verified connection, and it is never rendered as one. */}
+              {serverSecrets[id] === true && mode !== 'live' && !connected && (
                 <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
-                  <strong className="text-zinc-300">Developer demo key present.</strong>{' '}
-                  This environment holds a value for {integrationMeta(id).demoKeyHint}, so
-                  the live test call can run for {def.name}. That is a developer shortcut,
-                  not a verified connection — complete the connect flow for a real status.
+                  <strong className="text-zinc-300">Server-side key present.</strong>{' '}
+                  Mercenta holds a key for {def.name} on the server ({serverSecretNameFor(id) ?? 'a Vault secret'}),
+                  so the live test call can run. Holding a key is not a verified connection —
+                  complete the connect flow for a real status.
                 </div>
               )}
 

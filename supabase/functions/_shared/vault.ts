@@ -42,6 +42,39 @@ export function vaultSecretRef(name: string): string {
 }
 
 /**
+ * §PHASE B (2026-10-13) — the NAMES (never the values) of stored secrets whose
+ * name begins with `prefix`.
+ *
+ * Used by `integration-secrets-status` to answer "does Mercenta hold a key for
+ * this provider?" without knowing whether the connect wizard stored
+ * `integration_openrouter` or `integration_openrouter_<provider>`. A name with no
+ * plaintext attached is not a secret, so this is safe to compute server-side and
+ * only a BOOLEAN derived from it ever leaves the server.
+ *
+ * Returns an empty list — never throws — when Vault is not wired, so the caller
+ * fails closed rather than guessing.
+ */
+export async function listVaultSecretNames(prefix: string): Promise<string[]> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  if (!supabaseUrl || !serviceKey || !prefix) return [];
+  try {
+    const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    const { data } = await supabase
+      .schema('vault')
+      .from('decrypted_secrets')
+      .select('name')
+      .like('name', `${prefix}%`);
+    return ((data ?? []) as { name?: string }[])
+      .map((row) => row.name ?? '')
+      .filter((name) => name.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+
+/**
  * §BATCH1b — SUPABASE VAULT WRITE (server-side only).
  *
  * The connect flow's missing step 2: a real credential must be stored

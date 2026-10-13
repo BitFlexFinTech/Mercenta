@@ -5,11 +5,29 @@
  * Body: { partnerId: string; refreshToken: string; grantType: 'refresh_token' | 'authorization_code'; code?: string; redirectUri?: string }
  * Returns: { accessToken: string; refreshToken: string; expiresIn: number; error?: string }
  *
- * Deploy: supabase functions deploy xero-token --no-verify-jwt
+ * §PHASE B (2026-10-13) — THE ANONYMOUS-ACCESS DEFECT FIXED HERE.
+ *
+ * REPOINTED. This function was documented as `deploy … --no-verify-jwt` and had
+ * NO caller check of any kind. It therefore let an ANONYMOUS caller:
+ *   · exchange an arbitrary `authorization_code` using Mercenta's own
+ *     XERO_CLIENT_SECRET, and receive the resulting access AND refresh tokens in
+ *     the response body; and
+ *   · write those tokens into `xero_connections` for an arbitrary `partnerId`
+ *     using the SERVICE-ROLE key, bypassing row-level security entirely.
+ *
+ * It now requires a verified OPERATOR session (`super_admin` or `admin_staff`) —
+ * the same rule the provider proxies and `payouts-transfer` already apply —
+ * checked BEFORE the Xero token endpoint is contacted and before any database
+ * write. JWT verification must stay ON at deploy time.
+ *
+ * Deploy with JWT verification ON: `supabase functions deploy xero-token`
+ * (never `--no-verify-jwt`). The browser attaches the session token
+ * automatically — see `src/services/xero/tokenManager.ts`.
  */
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { rateLimitGuard } from '../_shared/rateLimit.ts';
+import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -34,6 +52,19 @@ serve(async (req: Request) => {
   if (limited) return limited;
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405, headers: corsHeaders });
+  }
+
+  /* §PHASE B — AUTHORISE BEFORE ANYTHING ELSE. No operator session means no
+     Xero call and no database write. */
+  const operator = operatorFromAuthorization(req.headers.get('Authorization'));
+  if (!operator) {
+    return new Response(
+      JSON.stringify({
+        error:
+          'OPERATOR_REQUIRED — exchanging or refreshing a Xero token requires a verified operator session (super_admin or admin_staff).',
+      }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 
   try {

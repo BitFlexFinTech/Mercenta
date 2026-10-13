@@ -48,6 +48,12 @@ import {
   toPersistedSession,
   writePersistedSession,
 } from '@/lib/runtime/sessionPersistence';
+import {
+  isRealAuthAvailable,
+  loadPlatformSession,
+  signInWithCredentials as requestCredentialSignIn,
+  signOutReal,
+} from '@/lib/auth/supabaseAuth';
 
 interface AppState {
   environment: Environment;
@@ -57,6 +63,19 @@ interface AppState {
   /** RBAC session — tier + tenant pinning for the active login. */
   session: DemoSession | null;
   signIn: (env: Environment, role: SessionRole) => void;
+  /**
+   * §PHASE B — REAL authentication (email + password) for the `live`
+   * environment. Available only when a Supabase project is configured AND the
+   * platform is in `live` mode. In `demo` the demo sign-in above remains the
+   * path and this returns a plain refusal, so nothing changes for an investor.
+   */
+  signInWithCredentials: (
+    email: string,
+    password: string
+  ) => Promise<{ ok: boolean; error?: string }>;
+  /** Which sign-in path this environment uses. */
+  authMode: 'demo' | 'real';
+
   /** One-click brand login pinned to a specific demo tenant. */
   activateDemoBrand: (brandId: string) => void;
   /**
@@ -337,6 +356,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [setEnvironment]);
 
   /**
+   * §PHASE B — REAL sign-in (email + password).
+   *
+   * The session it returns is the SAME `DemoSession` shape the demo path builds,
+   * so nothing downstream changes: `canAccessEnvironment`, `canAccessView`,
+   * `filterNavForTier`, `scopedBrandId` and every tenant filter keep working
+   * untouched. What changes is WHERE the role and tenant come from — a
+   * signature-verified Supabase token (`app_metadata`), not a role picker.
+   *
+   * Fail-closed: if the platform is not in `live` mode with a Supabase project,
+   * this refuses and the demo sign-in remains the path.
+   */
+  const signInWithCredentials = useCallback(
+    async (email: string, password: string) => {
+      if (!isRealAuthAvailable()) {
+        return {
+          ok: false,
+          error: 'Sign-in with credentials is not enabled in this environment.',
+        };
+      }
+      const result = await requestCredentialSignIn(email, password);
+      if (!result.ok || !result.session) {
+        return { ok: false, error: result.error ?? 'Sign-in failed.' };
+      }
+      const { tier, role: sessionRole, tenantId } = result.session;
+      if (!canAccessEnvironment(tier, tenantId ? 'brand' : 'admin')) {
+        return { ok: false, error: 'This account may not enter that environment.' };
+      }
+      setSession(result.session);
+      setRole(sessionRole);
+      setEnvironment(tenantId ? 'brand' : 'admin');
+      return { ok: true };
+    },
+    [setEnvironment]
+  );
+
+  /**
    * One-click demo login pinned to one specific brand tenant.
    * §Stage-20 fix #1 — hydrates the FULL brand state from a per-brand dossier
    * (products, shipments, financials, compliance, carrier tokens, onboarded
@@ -389,6 +444,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [setEnvironment]);
 
   const signOut = useCallback(() => {
+    /* §PHASE B — a REAL session must also be ended at the provider, or the
+       Supabase token would outlive the sign-out. In demo this is a no-op
+       (there is no Supabase session to end). */
+    signOutReal();
     clearPersistedSession();
     setRole(null);
     setSession(null);
@@ -806,11 +865,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     staff.find((s) => s.id === actingStaffId) ?? null;
   const canCurrentUserMutate = staffCanMutate(actingStaff);
 
+  /**
+   * §PHASE B — restore a REAL session on boot.
+   *
+   * Runs ONLY when real authentication is the required path (a Supabase project
+   * configured AND the platform in `live`). In `demo` it does nothing at all, so
+   * the existing persisted demo session and its re-validation remain the only
+   * boot path — the investor experience is byte-for-byte unchanged.
+   *
+   * A restored session is admitted through the SAME `canAccessEnvironment`
+   * allowlist every other path uses, so a token whose claims the tier may not
+   * enter is refused rather than trusted.
+   */
+  useEffect(() => {
+    if (!isRealAuthAvailable()) return;
+    let cancelled = false;
+    void loadPlatformSession().then((restored) => {
+      if (cancelled || !restored) return;
+      const target: Environment = restored.tenantId ? 'brand' : 'admin';
+      if (!canAccessEnvironment(restored.tier, target)) return;
+      setSession(restored);
+      setRole(restored.role);
+      setEnvironment(target);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setEnvironment]);
+
   const value: AppState = {
     environment,
     setEnvironment,
     role,
     signIn,
+    signInWithCredentials,
+    authMode: isRealAuthAvailable() ? 'real' : 'demo',
     signOut,
     shipments,
     updateShipmentStatus,

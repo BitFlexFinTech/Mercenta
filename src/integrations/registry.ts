@@ -381,10 +381,17 @@ export interface IntegrationMeta {
   category: IntegrationCategory;
   defaultMode: IntegrationMode;
   /**
-   * Prompt-visible to the operator, never a hard gate: real verified LIVE
-   * status only comes from a completed non-sandbox connection.
+   * §PHASE B (2026-10-13) — the NAME of the server-side Vault secret that holds
+   * this provider's key, or absent when the provider needs none.
+   *
+   * REPOINTED from `demoKeyHint`, which named a BROWSER environment variable
+   * (`VITE_OPENROUTER_API_KEY`, …). Every `VITE_*` value is inlined into the
+   * public bundle at build time, so naming one here and reading it in the browser
+   * meant a provider key would be readable by anyone who opened the site. The
+   * browser now never holds a provider secret: it asks the server whether one
+   * EXISTS (`integration-secrets-status`) and receives a name and a boolean.
    */
-  demoKeyHint?: string;
+  serverSecretName?: string;
 }
 
 export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
@@ -392,11 +399,11 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   amazon_ads: { category: 'marketing', defaultMode: 'available' },
   stripe: { category: 'finance', defaultMode: 'simulation' },
   esignature: { category: 'commerce', defaultMode: 'available' },
-  email: { category: 'communications', defaultMode: 'available', demoKeyHint: 'VITE_POSTMARK_API_KEY' },
+  email: { category: 'communications', defaultMode: 'available', serverSecretName: 'POSTMARK_API_KEY' },
   lead_sourcing: { category: 'marketing', defaultMode: 'available' },
-  openrouter: { category: 'ai', defaultMode: 'available', demoKeyHint: 'VITE_OPENROUTER_API_KEY' },
-  hunter: { category: 'data', defaultMode: 'available', demoKeyHint: 'VITE_HUNTER_API_KEY' },
-  instantly: { category: 'marketing', defaultMode: 'available', demoKeyHint: 'VITE_INSTANTLY_API_KEY' },
+  openrouter: { category: 'ai', defaultMode: 'available', serverSecretName: 'OPENROUTER_API_KEY' },
+  hunter: { category: 'data', defaultMode: 'available', serverSecretName: 'HUNTER_API_KEY' },
+  instantly: { category: 'marketing', defaultMode: 'available', serverSecretName: 'INSTANTLY_API_KEY' },
   keepa: { category: 'data', defaultMode: 'available' },
   firecrawl: { category: 'data', defaultMode: 'available' },
   usertour: { category: 'communications', defaultMode: 'simulation' },
@@ -449,14 +456,18 @@ export function defaultIntegrationMode(providerId: string): ProviderResolutionMo
 }
 
 /**
- * Truthful developer-key presence check. Returns true only if the hinted env
- * var actually has a non-empty value at runtime. This is a UI hint for the
- * Hub ("a demo key exists for this provider") — NOT a verified LIVE status.
+ * §PHASE B (2026-10-13) — the SERVER-side Vault secret NAME for a provider, or
+ * null when it needs none.
+ *
+ * REPOINTED from `hasLiveCredentialHint(id)`, which read `import.meta.env[hint]`
+ * in the BROWSER — a `VITE_*` value is inlined into the public bundle, so a
+ * provider key held that way was readable by anyone who opened the site.
+ *
+ * The browser can no longer observe a provider secret at all. Whether one EXISTS
+ * is asked of the server (`src/integrations/serverSecrets.ts` →
+ * `integration-secrets-status`), which answers with a boolean. This function is
+ * PURE and returns only the name, so it is safe to render.
  */
-export function hasLiveCredentialHint(id: IntegrationId): boolean {
-  const hint = INTEGRATION_META[id]?.demoKeyHint;
-  if (!hint) return false;
-  const env = (typeof import.meta !== 'undefined' && import.meta.env) as Record<string, string | undefined>;
-  const value = env[hint];
-  return typeof value === 'string' && value.length > 0;
+export function serverSecretNameFor(id: IntegrationId): string | null {
+  return INTEGRATION_META[id]?.serverSecretName ?? null;
 }

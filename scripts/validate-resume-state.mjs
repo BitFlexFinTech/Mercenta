@@ -138,10 +138,20 @@ for (const field of FIELDS) {
 }
 
 /* ── 4. The two files AGREE on the next task ─────────────────────────────── */
-/** The first `BATCH n[a-z]?` / `S<n>` token named by a NEXT TASK line, or ''. */
+/**
+ * The first `BATCH n[a-z]?` / `S<n>` / `E2E-n` / `WAVE n` / `PHASE <letter>`
+ * token named by a NEXT TASK line, or ''.
+ *
+ * §PHASE B (2026-10-13) — REPOINTED, vocabulary widened by ONE alternative.
+ * The regex accepted only numeric labels, so a NEXT TASK stated with the current
+ * programme's own naming (`PHASE C — …`, the letters the Owner's plan uses for
+ * Phases B→G) produced NO token and the mirror check failed even though both
+ * documents agreed. The contract is unchanged: a NEXT TASK must still name a
+ * recognisable work token, and the self-check below pins every accepted form.
+ */
 const firstTaskToken = (text) => {
   const value = fieldValue(text, 'NEXT TASK');
-  const m = value.match(/\b(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?\b/i);
+  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z])\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -154,11 +164,15 @@ test(
   `PROJECT_STATUS="${statusToken}" vs HANDOFF="${handoffToken}"`
 );
 test(
-  'the next-task token vocabulary accepts BATCH n, S n, the renamed E2E-n label AND the plan WAVE-n label (self-check)',
+  'the next-task token vocabulary accepts BATCH n, S n, the renamed E2E-n label, the plan WAVE-n label AND the programme PHASE-letter label (self-check)',
   firstTaskToken('NEXT TASK: BATCH 2 — x') === 'BATCH 2' &&
     firstTaskToken('NEXT TASK: S12 — x') === 'S12' &&
     firstTaskToken('NEXT TASK: resume at E2E-2 — x') === 'E2E-2' &&
     firstTaskToken('NEXT TASK: WAVE 3 PART 3 — x') === 'WAVE 3' &&
+    /** §PHASE B — the letter vocabulary the Owner's plan uses for Phases B→G. */
+    firstTaskToken('NEXT TASK: **PHASE C — the premium UI redesign** (…)') === 'PHASE C' &&
+    firstTaskToken('NEXT TASK: PHASE D — x') === 'PHASE D' &&
+    /* And a phrase with NO work token still yields nothing — the contract holds. */
     firstTaskToken('NEXT TASK: nothing to see here') === '',
 );
 

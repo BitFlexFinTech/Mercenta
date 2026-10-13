@@ -79,15 +79,33 @@ Deno.serve(async (req: Request) => {
   if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
-  // ── (1) OPTIONAL SHARED-SECRET VERIFICATION ─────────────────────────────
-  const expectedSecret = Deno.env.get('INSTANTLY_WEBHOOK_SECRET') ?? '';
-  if (expectedSecret) {
-    const supplied =
-      req.headers.get('X-Webhook-Secret') ??
-      (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-    if (supplied !== expectedSecret) {
-      return json({ error: 'Invalid webhook secret' }, 401);
-    }
+  // ── (1) SHARED-SECRET VERIFICATION — REQUIRED, NOT OPTIONAL ────────────
+  //
+  // §PHASE B (2026-10-13) — REPOINTED. This block used to run only `if
+  // (expectedSecret)`, and `expectedSecret` defaulted to `''`. With
+  // `INSTANTLY_WEBHOOK_SECRET` unset the whole check was therefore SKIPPED and
+  // any anonymous caller could POST a reply, have it classified, persisted and
+  // flagged as a hot lead. Fail-open authentication on an endpoint that writes to
+  // the database is not "optional auth"; it is no auth.
+  //
+  // The secret is now required. An unconfigured deployment REFUSES (503) rather
+  // than silently processing unauthenticated input.
+  const expectedSecret = (Deno.env.get('INSTANTLY_WEBHOOK_SECRET') ?? '').trim();
+  if (!expectedSecret) {
+    console.error('[instantly-reply-webhook] INSTANTLY_WEBHOOK_SECRET is not configured — refusing');
+    return json(
+      {
+        error:
+          'INSTANTLY_WEBHOOK_SECRET is not configured on the server, so this webhook cannot authenticate its caller and is refusing the request.',
+      },
+      503
+    );
+  }
+  const supplied =
+    req.headers.get('X-Webhook-Secret') ??
+    (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
+  if (supplied !== expectedSecret) {
+    return json({ error: 'Invalid webhook secret' }, 401);
   }
 
   let body: WebhookBody;

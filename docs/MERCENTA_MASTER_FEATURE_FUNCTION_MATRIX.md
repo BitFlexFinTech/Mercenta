@@ -5,6 +5,20 @@
 **HEAD at creation:** `19be002c4b3d6a64020b4740879c56ef1550e628`
 **Protected baseline:** `959b4d2` (tag `mercenta-baseline-before-redesign-20260907`)
 
+> **§PHASE B (2026-10-13) — CORRECTIONS APPLIED.** Three rows in the inventory below
+> asserted a **REMOVED** surface as present: the 3PL carrier shell and its
+> environment were retired on 2026-09-23 (§P9, Founder decision T-2), and
+> `CarrierShell.tsx` / `src/components/carrier/` have not existed since. This
+> document claimed **4** shells, **5** environments, **4** session roles, **3**
+> carrier nav views and *"ops cards for Admin Hub / Carrier Terminal / Super
+> Admin"*, and its `D01-02` row listed `carrier` among the environments. All of
+> those are corrected below to the measured truth: **3** shells, **4**
+> environments (`home`, `login`, `brand`, `admin`), **3** session roles, **0**
+> carrier views and **2** ops login cards (`OPS_LOGINS` in
+> `src/components/auth/Login.tsx`). No carrier-related string exists in
+> `Login.tsx` at all. `scripts/validate-describers-match-reality.mjs` now FAILS if
+> any of this drifts back.
+
 **Companion documents (must agree):**
 
 | Level | Document | Role |
@@ -73,12 +87,12 @@ Founder decides (see §7, which currently holds two open contradictions).
 
 | Dimension | Measured value | How it was measured |
 |---|---|---|
-| Shells | **4** — `HomeShell`, `BrandShell`, `AdminShell`, `CarrierShell`, all `React.lazy()` | `src/App.tsx` |
-| Environments | **5** — `home`, `login`, `brand`, `admin`, `carrier` | `src/types.ts` |
-| Canonical session roles | **4** — `Brand Partner`, `Mercenta Admin`, `Super Admin`, `3PL Carrier` | `src/types.ts` `SessionRole` |
+| Shells | **3** — `HomeShell`, `BrandShell`, `AdminShell`, all `React.lazy()` | `src/App.tsx` |
+| Environments | **4** — `home`, `login`, `brand`, `admin` | `src/types.ts` |
+| Canonical session roles | **3** — `Brand Partner`, `Mercenta Admin`, `Super Admin` | `src/types.ts` `SessionRole` |
 | Admin nav views | **30** ids | `grep -o "id: '…'" src/components/layout/AdminShell.tsx` |
 | Brand nav views | **19** ids (was 18 before S2a added `cases`) | same, `BrandShell.tsx` |
-| Carrier nav views | **3** ids — `manifest`, `bak`, `auditor` | same, `CarrierShell.tsx` |
+| Carrier nav views | **0 — REMOVED** (§P9, programme decision 4). `CarrierShell.tsx` and `src/components/carrier/` do not exist. | `scripts/validate-conversion-gate.mjs` |
 | Super Admin sub-tabs | **19** ids | `src/components/admin/SuperAdminPanel.tsx` |
 | Integration registry entries | **22** top-level registered providers (`INTEGRATION_ORDER` = 24 incl. non-ordered finance/logistics providers); **28** distinct `id:` strings once `providerOptions` choices are counted | `src/integrations/registry.ts` |
 | Source modules | **345** `.ts`/`.tsx` files under `src/` | `find src -name '*.ts' -o -name '*.tsx' \| wc -l` |
@@ -110,8 +124,8 @@ is unreadable and would be maintained badly, so the dimensions are split:
 
 | ID | Feature / function | Function (what it does) | Role / surface | Route / view | Status | E2E evidence | Increment |
 |---|---|---|---|---|---|---|---|
-| `D01-01` | Demo one-click sign-in | Renders every seeded brand card from `ALL_DEMO_BRANDS` via `activateDemoBrand(brandId)` (derived, never hardcoded); ops cards for Admin Hub / Carrier Terminal / Super Admin | all 4 roles | `HomeShell` → `Login.tsx` | **VERIFIED** | `e2e/access-gate.spec.ts`, `e2e/app-shell.spec.ts` | Batch 0 / Phase |
-| `D01-02` | Session + environment switch | Sets `environment` (`home`/`login`/`brand`/`admin`/`carrier`) and the RBAC `session` (`tier`, `tenantId`, `role`) | all | `GlobalStateContext` | **VERIFIED** | `e2e/app-shell.spec.ts` | Batch 0 |
+| `D01-01` | Demo one-click sign-in | Renders every seeded brand card from `ALL_DEMO_BRANDS` via `activateDemoBrand(brandId)` (derived, never hardcoded); ops cards for Admin Hub / Super Admin (`OPS_LOGINS`, 2 entries) | all 3 roles | `HomeShell` → `Login.tsx` | **VERIFIED** | `e2e/access-gate.spec.ts`, `e2e/app-shell.spec.ts` | Batch 0 / Phase |
+| `D01-02` | Session + environment switch | Sets `environment` (`home`/`login`/`brand`/`admin`) and the RBAC `session` (`tier`, `tenantId`, `role`) | all | `GlobalStateContext` | **VERIFIED** | `e2e/app-shell.spec.ts` | Batch 0 |
 | `D01-03` | Tenant pinning on writes | Refuses a catalogue/product write when no tenant session exists (`[rbac] product creation refused — no tenant session`) | brand | any write path | **VERIFIED** | `e2e/brand-operational-surfaces.spec.ts` #5 | Phase E6 |
 | `D01-04` | Cross-tenant read refusal | A brand never sees another tenant's POs, shipments, commerce records, cases, compliance or payouts | brand | all brand views | **VERIFIED** | `e2e/multi-tenant.spec.ts`, `e2e/brand-operational-surfaces.spec.ts` #5, `e2e/brand-case-workflow.spec.ts` #3 (S2a) | Phase E6 / S2a |
 | `D01-05` | Staff permission tiers | `StaffMember.permissionTier` — `full` may mutate admin state, `view_only` is read-only ops | Mercenta Admin | Super Admin `staff` tab | **PARTIALLY VERIFIED** | `e2e/admin-operational-surfaces.spec.ts` | Stage 25 |
