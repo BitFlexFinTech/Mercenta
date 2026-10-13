@@ -151,7 +151,7 @@ for (const field of FIELDS) {
  */
 const firstTaskToken = (text) => {
   const value = fieldValue(text, 'NEXT TASK');
-  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z])\b/i);
+  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z]\d?)\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -172,6 +172,12 @@ test(
     /** §PHASE B — the letter vocabulary the Owner's plan uses for Phases B→G. */
     firstTaskToken('NEXT TASK: **PHASE C — the premium UI redesign** (…)') === 'PHASE C' &&
     firstTaskToken('NEXT TASK: PHASE D — x') === 'PHASE D' &&
+    /* §PHASE C — the programme also uses SUB-phase labels (`C2`, `C4`). The
+       original letter form required a word boundary straight after the letter, so
+       `PHASE C2` produced NO token and the mirror check failed although both
+       documents agreed. The sub-phase form is now accepted too. */
+    firstTaskToken('NEXT TASK: §PHASE C2 → G — continue') === 'PHASE C2' &&
+    firstTaskToken('NEXT TASK: PHASE C4 — primitives') === 'PHASE C4' &&
     /* And a phrase with NO work token still yields nothing — the contract holds. */
     firstTaskToken('NEXT TASK: nothing to see here') === '',
 );
