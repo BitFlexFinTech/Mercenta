@@ -4057,6 +4057,15 @@
       "type": "happy",
       "spec": "e2e/error-boundary.spec.ts",
       "expects": "The error-boundary journey renders and behaves as its spec asserts: a real render fault in a portal view is contained by its ErrorBoundary (the fallback renders and names the section, the shell navigation survives and the reset control is offered) while a healthy render shows no fallback."
+    },
+    {
+      "id": "spec-theme-visual",
+      "capability": "platform",
+      "journey": "theme rendering",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/theme-visual.spec.ts",
+      "expects": "Every declared theme reaches the RENDERED document (data-mercenta-theme and the COMPUTED --mr-accent both match the declared value), still holds after navigation, raises no page error, and the five themes render five different accents."
     }
   ]
 }

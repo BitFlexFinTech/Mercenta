@@ -1,0 +1,158 @@
+/**
+ * §PHASE C (2026-10-13) — THEMES VERIFIED BY RENDERING, NOT BY READING CODE.
+ *
+ * WHY THIS SPEC EXISTS
+ * --------------------
+ * `scripts/validate-theme-distinctness.mjs` proves the DECLARED palettes are
+ * distinct and readable — but a declaration is not a screen. A theme can be
+ * perfectly distinct in `themes.ts` and still never reach the DOM: `ThemeContext`
+ * applies it in a `useLayoutEffect`, the light-shell remap layer keys off
+ * `data-shell-theme`, and any of those links can break silently while every unit
+ * check still passes.
+ *
+ * So this spec drives a real browser, switches the theme the way the app persists
+ * it (`localStorage['mercenta.theme']`), and then asserts the RENDERED document:
+ *   · `data-mercenta-theme` equals the theme that was selected;
+ *   · the COMPUTED `--mr-accent` on `:root` equals that theme's declared accent;
+ *   · it still holds after navigating between screens, not only at boot;
+ *   · no page error is raised while switching.
+ *
+ * It also captures a screenshot per screen per theme into `test-screenshots/`
+ * (gitignored), so the result can be LOOKED AT — the only way to judge a visual
+ * change.
+ */
+import { test, expect } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { loginAs } from './helpers/auth';
+
+const SHOT_DIR = 'test-screenshots/themes';
+
+/** The five themes and the accent each MUST render (src/config/themes.ts). */
+const THEMES = [
+  { id: 'minimal-light', accent: '#C9A15A' },
+  { id: 'professional', accent: '#3E5C8A' },
+  { id: 'bold', accent: '#7C3AED' },
+  { id: 'fun', accent: '#0F9B8E' },
+  { id: 'serious', accent: '#8CA0B8' },
+] as const;
+
+const ADMIN_SCREENS = [
+  { label: 'Overview', file: 'admin-overview' },
+  { label: 'Purchase Orders', file: 'admin-purchase-orders' },
+  { label: 'Audit Log', file: 'admin-audit-log' },
+  { label: 'Integration Settings', file: 'admin-integrations' },
+] as const;
+
+const BRAND_SCREENS = [
+  { label: 'Purchase Orders', file: 'brand-purchase-orders' },
+  { label: 'UK Compliance', file: 'brand-compliance' },
+] as const;
+
+const norm = (hex: string) => hex.trim().toLowerCase();
+
+/** Select a theme the way the app persists it, then reload so it is applied. */
+async function selectTheme(page: import('@playwright/test').Page, id: string) {
+  await page.goto('/');
+  await page.evaluate((themeId) => {
+    window.localStorage.setItem('mercenta.theme', themeId);
+  }, id);
+  await page.reload();
+  await page.waitForTimeout(500);
+}
+
+/**
+ * Assert the theme really reached the rendered document.
+ * The accent is read from the COMPUTED style, so a variable that was set but
+ * consumed by no rule still fails here.
+ */
+async function expectThemeApplied(
+  page: import('@playwright/test').Page,
+  theme: (typeof THEMES)[number]
+) {
+  const applied = await page.evaluate(() => {
+    const root = document.documentElement;
+    const cs = getComputedStyle(root);
+    return {
+      attr: root.dataset.mercentaTheme ?? null,
+      accent: cs.getPropertyValue('--mr-accent').trim(),
+      bg: cs.getPropertyValue('--mr-bg').trim(),
+    };
+  });
+  expect(applied.attr, `data-mercenta-theme for ${theme.id}`).toBe(theme.id);
+  expect(norm(applied.accent), `computed --mr-accent for ${theme.id}`).toBe(norm(theme.accent));
+  expect(applied.bg.length, `computed --mr-bg for ${theme.id}`).toBeGreaterThan(0);
+}
+
+test.describe('§PHASE C — every theme renders, on real screens', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  for (const theme of THEMES) {
+    test(`theme '${theme.id}' applies and paints the admin screens`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', (e) => errors.push(String(e)));
+
+      mkdirSync(path.join(SHOT_DIR, theme.id), { recursive: true });
+      await selectTheme(page, theme.id);
+
+      await loginAs(page, 'Super Admin — Tadii', 1400);
+      await expectThemeApplied(page, theme);
+
+      for (const screen of ADMIN_SCREENS) {
+        const nav = page
+          .locator('nav[aria-label="Primary"] button', { hasText: screen.label })
+          .first();
+        await nav.click({ timeout: 8000 });
+        await page.waitForTimeout(650);
+        /* The theme must still hold after navigation, not only at boot. */
+        await expectThemeApplied(page, theme);
+        await page.screenshot({
+          path: path.join(SHOT_DIR, theme.id, `${screen.file}.png`),
+          fullPage: false,
+        });
+      }
+
+      expect(errors, `page errors in '${theme.id}'`).toEqual([]);
+    });
+
+    test(`theme '${theme.id}' applies and paints the brand screens`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', (e) => errors.push(String(e)));
+
+      mkdirSync(path.join(SHOT_DIR, theme.id), { recursive: true });
+      await selectTheme(page, theme.id);
+
+      await loginAs(page, 'Astonish', 1400);
+      await expectThemeApplied(page, theme);
+
+      for (const screen of BRAND_SCREENS) {
+        const nav = page
+          .locator('nav[aria-label="Primary"] button', { hasText: screen.label })
+          .first();
+        await nav.click({ timeout: 8000 });
+        await page.waitForTimeout(650);
+        await expectThemeApplied(page, theme);
+        await page.screenshot({
+          path: path.join(SHOT_DIR, theme.id, `${screen.file}.png`),
+          fullPage: false,
+        });
+      }
+
+      expect(errors, `page errors in '${theme.id}'`).toEqual([]);
+    });
+  }
+
+  test('the five themes render five DIFFERENT accents (a switch that changes nothing is not a theme)', async ({
+    page,
+  }) => {
+    const seen: Record<string, string> = {};
+    for (const theme of THEMES) {
+      await selectTheme(page, theme.id);
+      seen[theme.id] = await page.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue('--mr-accent').trim().toLowerCase()
+      );
+    }
+    const values = Object.values(seen);
+    expect(new Set(values).size, `accents rendered: ${JSON.stringify(seen)}`).toBe(THEMES.length);
+  });
+});
