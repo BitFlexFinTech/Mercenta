@@ -5,7 +5,89 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §PHASE B — CURRENT STATUS (2026-10-13) — AUTHENTICATION + SECRET-HANDLING HARDENING
+## §PHASE C4 — CURRENT STATUS (2026-10-13) — THE OPERATIONAL TYPE SCALE MATCHES THE APPLICATION
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The Owner's approved 14px body
+decision (D-2 of `docs/PHASE_C_TO_G_PLAN_2026-10-13.md`) is executed, and every size that had
+escaped the design system's names is gone. NOT deployed and NOT live-verified — the Owner has
+withheld deployment approval, exactly as before. Nothing in this increment needed a credential.
+
+1. **WHY THE CHANGE WAS NEEDED, MEASURED.** The design system's own `ds-body` token was 13px while
+   the application's real body text was Tailwind's `text-sm` (14px) in **258 places across 75
+   files**; the token itself was consumed in only **15 places in 5 files**. The NAMED "body" step
+   therefore rendered SMALLER than the default: the app had two body sizes and no rule. `ds-body`
+   is now 14px and `ds-title` 16px (a 14px body under a 15px title is a 1px step, which is not a
+   hierarchy). The floor (11px), the label (12px) and the page step (20px) are deliberately
+   UNCHANGED — the decision was a readable body, not a uniformly larger interface — and the
+   line-heights are unchanged, because this is a dense professional tool.
+
+2. **SIX NAMED-SIZE ESCAPES REPOINTED.** `src/components/ui.tsx` `text-[13px]` → `text-ds-body`;
+   `src/components/brand/BrandSupport.tsx` ×3 and `src/components/admin/FounderControlCentre.tsx`
+   ×2 `text-[12px]` → `text-ds-label` (the same 12 pixels, now named); `src/components/shared/
+   workspace.tsx` `sm:text-[15px]` → `sm:text-ds-title`.
+
+3. **THE GATE WAS REPOINTED, NEVER WEAKENED — 17 → 26 ASSERTIONS, AND IT NOW READS THE OWNER.**
+   `scripts/validate-typography-scale.mjs` discovers the scale from `tailwind.config.js` and fails
+   if: an arbitrary px size inside the 11–20px range reappears; the body step drops below 14px; the
+   title step comes within 1px of the body step; the floor drops below 11px; or **a LIVE describer
+   of the scale states a size the scale does not declare** (the design-system doc, the phase plan,
+   the registry row and the tailwind comment block are all compared against the owner).
+   **MUTATION-PROVED THREE TIMES:** `ds-body` set back to 13px → 2 assertions red; the
+   DESIGN_SYSTEM table stating 13px → 1 red naming the mismatch; an arbitrary `text-[13px]`
+   reintroduced into `src/` → 1 red. Each restored byte-identical (`tailwind.config.js`
+   `7b83b4bb…`, `docs/DESIGN_SYSTEM.md` `2ccf3a41…`, `src/components/ui.tsx` `ef072a53…`).
+
+4. **A NEW RENDERED GATE — `e2e/typography-scale.spec.ts`, 5/5 PASS.** It asserts COMPUTED values
+   in a real browser, not declarations: the workspace page title renders at the `ds-page` step
+   (20px); the canonical DataTable renders at `ds-body` (14px) with `ds-label` (12px) headers; every
+   canonical step that appears on a screen renders at its declared size; and **NO text inside
+   `<main>` falls below the 11px floor** on three admin screens and one brand screen. **PROVED ABLE
+   TO FAIL:** a temporary `text-[9px]` description produced 8 offenders on the admin Overview
+   screen; restored byte-identical (`workspace.tsx` `ebdf2609…`).
+
+5. **A PRE-EXISTING FAILING TEST FOUND AND FIXED AT SOURCE.** `e2e/uiux-redesign.spec.ts` test 8
+   demanded that the five themes render FIVE different palette signatures and had been failing with
+   "Expected: 5, Received: 2" since the §PHASE C theme rework. The canonical contract is ONE
+   hue → domain palette whose EXPRESSION differs between light and dark; the distinctness of the
+   five themes lives in their identity tokens. The test was repointed to a STRICTER assertion (each
+   theme must render ITS OWN declared palette from `src/config/themes.ts`; the light/dark
+   expressions must differ; the five identities must stay distinct) and the stale claim in that
+   spec's own header was corrected with it.
+
+6. **DISCOVERED WORK RECORDED, NOT DROPPED.** 26 hand-rolled `<table>` elements exist, **24 outside
+   the canonical DataTable** (8 at `text-xs`, 6 at `text-ds-micro`, 4 at `text-ds-label`, 3 at
+   `text-sm`), so the same screen type renders its data at two different sizes depending on which
+   table it uses. Filed as the registry row
+   `discovered-hand-rolled-tables-outside-the-canonical-primitive` (not_started, tagged BUILD) for
+   the Phase D application-wide pass. The registry's own `_meta.status_counts` snapshot was ALSO
+   found stale by six entries and is now recomputed from the entries themselves (569 = 569).
+
+**VERIFICATION (this session, all measured):** `typecheck` **0** (four projects) · `lint` **0** ·
+`build` **ok** · `validate:all` **192 PASS / 0 FAIL** · `validate-typography-scale` **26/26** ·
+`validate-no-stale-blockers` **58/58** · `validate-registry-integrity` **7/0** ·
+`validate-e2e-scenarios` **18/18 (409 scenarios)** · `validate-e6-brand-surfaces` **PASS** ·
+`e2e/typography-scale.spec.ts` **5 passed** · `e2e/theme-visual.spec.ts` **11 passed** ·
+design-system + uiux batch **84 passed / 0 failed** · **30 of 30 screenshots changed** against a
+measured noise floor of 0–2 · pixel deltas **21.79% / 5.92% / 7.71%** on three sampled screens ·
+**four mutation proofs**, each restored byte-identical · `git status --porcelain` **EMPTY**.
+
+**ONE INTERMITTENT CHECK, RECORDED HONESTLY:** `e2e/design-system.spec.ts` → "screenshot 375x812
+(no horizontal overflow)" failed ONCE in three identical full-suite runs of the same build, passed
+3/3 in isolation and 84/84 on the re-run. It is therefore intermittent and not reproducible on
+demand — the missing input for a root-cause fix is a reliable reproduction. It was not waved away:
+the assertion is unchanged and its message now names the WIDEST element when it fails, so the next
+occurrence is actionable. Recorded for the Phase G acceptance pass.
+
+**FILES:** `tailwind.config.js` · `src/components/ui.tsx` · `src/components/shared/workspace.tsx` ·
+`src/components/brand/BrandSupport.tsx` · `src/components/admin/FounderControlCentre.tsx` ·
+`scripts/validate-typography-scale.mjs` · `e2e/typography-scale.spec.ts` (NEW) ·
+`e2e/uiux-redesign.spec.ts` · `e2e/design-system.spec.ts` · `docs/DESIGN_SYSTEM.md` ·
+`docs/PHASE_C_TO_G_PLAN_2026-10-13.md` · `requirements-registry.json` ·
+`docs/scenario-catalogue.json` + its generated matrix · `scripts/validate-e6-brand-surfaces.mjs`
+(the `PHASE_C4_TYPOGRAPHY_SCOPE` declaration).
+
+## §PHASE B — CURRENT STATUS (2026-10-13) — AUTHENTICATION + SECRET-HANDLING HARDENING — SUPERSEDED BY §PHASE C4
+
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Five real defects were fixed at
 source, each with a gate proved able to fail. Nothing here needed a credential.
