@@ -18,6 +18,8 @@
     "validate:typography": "node scripts/validate-typography-scale.mjs",
     "migrate:typography": "node scripts/migrate-micro-typography.mjs",
     "validate:radius-elevation": "node scripts/validate-radius-elevation-scale.mjs",
+    "validate:nav-destinations": "node scripts/validate-nav-destinations.mjs",
+    "validate:data-preservation": "node scripts/validate-data-preservation.mjs",
     "migrate:radius-elevation": "node scripts/migrate-radius-elevation.mjs",
     "validate:commercial-readiness": "node scripts/validate-commercial-readiness.mjs",
     "validate:brain": "node scripts/validate-mercenta-brain.mjs",
