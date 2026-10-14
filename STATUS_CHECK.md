@@ -5,7 +5,90 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §PHASE C4 — CURRENT STATUS (2026-10-13) — THE OPERATIONAL TYPE SCALE MATCHES THE APPLICATION
+## §PHASE C4 (PART 2) — CURRENT STATUS (2026-10-13) — THE RADIUS + ELEVATION SCALE
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The second half of the shared design
+system is executed: the app now renders ONE declared radius scale and ONE declared elevation scale,
+and the 642 class sites that had no place in either are gone. NOT deployed and NOT live-verified — the
+Owner has withheld deployment approval, exactly as before. Nothing in this increment needed a
+credential, and none was requested.
+
+1. **WHY THE CHANGE WAS NEEDED, MEASURED.** The design system declared four radius steps and the
+   product rendered five UNNAMED ones: `rounded-lg` **387** (8px) · `rounded-md` **97** (6px) · bare
+   `rounded` **85** (4px) · `rounded-xl` **58** (12px) · `rounded-full` **76** (pill) · `rounded-2xl`
+   **4** (16px) · `rounded-sm` **3** (2px) = **630 class sites with no place in the ramp** — while the
+   named steps were consumed almost nowhere (the control step 41, the container step 26, the inline
+   step 22). Same defect class as the type scale: a scale the product does not render is a scale every
+   author invents their own version of. On the elevation side the four roles already existed as
+   theme-driven tokens and **19 unnamed shadows** sat beside them — **15 of those `shadow-2xl` on
+   exactly the surfaces the OVERLAY role exists for** (modals, popovers, dropdowns, floating cards).
+
+2. **THE RAMP, AND WHY THE MIGRATION IS A RENAME RATHER THAN A REDESIGN.** `tailwind.config.js` now
+   declares `borderRadius.ds` = `sm` 6px (inline) · `md` 8px (controls) · `lg` 12px (containers) ·
+   `pill` 9999px, with 16px permitted ONLY on large marketing/hero blocks and Tailwind's own pill step
+   accepted as an alias for the pill role. **The two named steps were moved ONTO the geometry the app
+   already rendered** (the control step 10px → 8px, the container step 14px → 12px), so binding
+   `rounded-lg` → `ds-md` and `rounded-xl` → `ds-lg` moves **no pixels for 542 sites**; only 41 + 26
+   occurrences moved by 2px, in 20 shell/shared files. 4px (bare `rounded`) was folded into 6px,
+   because a 2px difference between two small steps is not a step.
+
+3. **FIVE REAL DEFECTS FIXED AT SOURCE (rule 07) — NOT REPORTED, NOT PARKED.**
+   (a) `src/index.css` `:focus-visible` forced `border-radius: 4px`, so focusing ANY control visibly
+   snapped its corners to a radius the ramp does not declare — removed, because an `outline` already
+   follows the element's own radius. (b) `[data-record-focused='true']` forced `6px` for the same
+   reason — removed. (c) The scrollbar thumb used a 4px radius on an **8px-wide** thumb (half its
+   width, i.e. a pill) — expressed as the pill step, pixel-identical. (d) `ds-focus` and
+   `ds-focus-danger` were DECLARED in `tailwind.config.js` and consumed **nowhere**, while
+   `docs/DESIGN_SYSTEM.md` claimed "focus rings `shadow-ds-focus`" — a live claim that was false. The
+   tokens were REMOVED and the claim corrected; the focus mechanism is the canonical `:focus-visible`
+   outline. (e) `Modal` sat on the CONTROL step while `Card` sat on the CONTAINER step, although a
+   dialog is a container and every other overlay in the app was already 12px — moved onto it.
+
+4. **THE GATE — 42 ASSERTIONS, DISCOVERED, MUTATION-PROVED.** `scripts/validate-radius-elevation-scale.mjs`
+   is wired automatically into `npm run validate:all` (which globs `scripts/validate-*.mjs`). It does
+   **not** retype the ramp: it DISCOVERS it from `tailwind.config.js` (the owner) and **fails loudly
+   when a discovery returns nothing** (rule 10 §5). It fails on a reappearing unnamed radius —
+   **including per-side forms such as `rounded-t-lg` and arbitrary radius values** — on `rounded-2xl`
+   escaping `src/components/marketing/`, on a reappearing unnamed OUTER shadow (an arbitrary shadow is
+   allowed only when it is `inset`), on a declared token with no consumer, on a theme missing an
+   elevation role, on a `border-radius` literal in CSS outside the ramp, on a live describer stating an
+   undeclared size, and on either program keeping its own copy of the class-list test.
+5. **THREE BLIND SPOTS FOUND BY THE TOOLS THEMSELVES — AND CLOSED.** (a) The first migration rule could
+   not see a per-side `rounded-t-lg` (one live site in `BrandSettings.tsx`); the gate's per-side check
+   found it and the migration was extended. (b) The first scanner read backtick-quoted class names
+   INSIDE this project's own §PHASE comments as code, reporting 2 false offenders in `ui.tsx` — a gate
+   punishing the documentation the rules require; the class-list test now lives in ONE module,
+   `scripts/lib/design-scale-scan.mjs`, imported by BOTH the migration and the gate so the two cannot
+   drift. (c) **The negative test found a hole in the gate itself:** the theme check counted
+   substrings, so a theme that had LOST an elevation role still passed, because the renamed
+   declaration `'--mr-shadow-raised-OLD':` contains the old name. It now matches the declaration.
+
+6. **MECHANICAL MIGRATION, PROVEN IDEMPOTENT.** `scripts/migrate-radius-elevation.mjs`
+   (`npm run migrate:radius-elevation`): 619 replacements across 107 files, then 2 blind-spot sites,
+   then 1 per-side site — and a re-run reports **0 changes**. It rewrites ONLY real class lists: never
+   comments (where this project records its changes) and never English prose.
+
+7. **DEPENDENTS UPDATED WITH THE RENAME (rule 08).** Three browser selectors depended on the old class
+   name (`e2e/crm.spec.ts` ×2, `e2e/onboarding.spec.ts` ×1, `button.rounded-xl`) and were updated; the
+   rename's **118-file surface is DECLARED, exact paths only**, in `PHASE_C4_DESIGN_SCALE_SCOPE` inside
+   `scripts/validate-e6-brand-surfaces.mjs` — files, not powers, and no protected prefix.
+
+8. **VERIFICATION.** `typecheck` **0** (four projects) · `lint` **0** · `build` **ok** ·
+   `validate:all` **193 PASS / 0 FAIL** (192 + the new gate) · `validate:radius-elevation` **42/42** ·
+   `validate-registry-integrity` **7 PASS / 0 FAIL** · `validate-no-stale-blockers` **58/58** ·
+   `validate-resume-state` **PASS** · `validate-e6-brand-surfaces` **PASS** · `e2e/theme-visual` +
+   `e2e/typography-scale` + `e2e/crm` + `e2e/onboarding` **28 passed** · the 30 rendered theme
+   baselines compared BEFORE/AFTER: **all 30 changed, median 0.041% of pixels, maximum 0.397%** — the
+   signature of a rename, not a redesign · **NEGATIVE TEST: 7 independent mutations (a drifted ramp
+   step, a returning unnamed radius, a returning unnamed outer shadow, a returning dead focus token, a
+   describer stating an undeclared size, a duplicated class-list test, a theme losing an elevation
+   role), each FAILED the gate, every file restored byte-identical.**
+
+9. **NEXT.** C4's two remaining items (Radix for `Modal`/`Select`/`Tabs` only where it materially
+   improves keyboard/ARIA behaviour, with each package and reason recorded; CVA variants behind the
+   EXISTING props), then D → E → F → G. All of it needs no credential.
+
+## §PHASE C4 (PART 1) — THE OPERATIONAL TYPE SCALE MATCHES THE APPLICATION (session 138, 2026-10-13) — SUPERSEDED BY §PHASE C4 PART 2 (THE RADIUS + ELEVATION SCALE)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The Owner's approved 14px body
 decision (D-2 of `docs/PHASE_C_TO_G_PLAN_2026-10-13.md`) is executed, and every size that had
