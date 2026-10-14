@@ -39,6 +39,35 @@ body {
   background-image: var(--mr-accent-image-hover, var(--mr-accent-image, none));
 }
 
+/* ── §OPENSHIP BATCH 4 — THE CARD / CONTAINER SURFACE TREATMENT ────────────
+   The reference makes a card BORDERLESS in all three of its designs
+   (`--th-card-bd: transparent`, spec §2.3–§2.5, and §2.7: "the borderless-card
+   rule is the heart of the look"). The value lives in the theme
+   (`--mr-card-border`), so `bold` keeps the border it draws today.
+
+   Two rules, deliberately in DIFFERENT layers:
+
+   · `.ds-card` sits in the `components` layer, so a caller's own border utility
+     still WINS where a screen supplies one (26 call sites do — dialog shells).
+     Those hardcoded sites are the legacy-styling migration's work (spec §12,
+     the programme's "Batch 10"), not this batch's; they must not be silently
+     overridden here.
+
+   · the NESTED rule must beat the element's own `bg-ink-850` utility, so it sits
+     outside the layers (equal specificity, later source order). Without it an
+     inner card is the SAME fill as its outer card and, with the outer border now
+     transparent, it would VANISH on the four themes — the reference states this
+     rule for exactly that reason (spec §2.7). `bold`'s token reproduces its own
+     card fill, so the rule is a no-op there. */
+@layer components {
+  .ds-card {
+    border-color: var(--mr-card-border);
+  }
+}
+.ds-card .ds-card {
+  background-color: var(--mr-card-nested);
+}
+
 ::selection {
   background: var(--mr-accent-300, #E2C98F);
   color: var(--mr-text-strong, #16181D);

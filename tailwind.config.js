@@ -136,6 +136,20 @@ export default {
           hover: 'var(--mr-surface-hover)',
         },
         /**
+         * §OPENSHIP BATCH 4 (2026-10-15) — the FLOATING-SURFACE hover tint.
+         *
+         * A row on a floating surface (a dropdown menu item) must show a hover that
+         * is visible on ANY fill — the reference uses a tint of the foreground
+         * colour (`hover:bg-foreground/[0.06]`, spec §7.6). The legacy
+         * `hover:bg-white/[0.04]` remaps to `--mr-surface-tint`, which is a
+         * near-WHITE value on the light shells, so the hover was invisible exactly
+         * where the new translucent menus are lightest. ONE named role, one owner
+         * (`src/config/themes.ts` → `--mr-hover-tint`), consumed as `bg-tint`.
+         */
+        tint: {
+          DEFAULT: 'var(--mr-hover-tint)',
+        },
+        /**
          * §UI/UX Wave 2 — the SATURATED feature palette. Hue → domain mapping is
          * canonical (src/config/themes.ts doc header): indigo=orders ·
          * cyan=intelligence · green=finance · amber=compliance · orange=logistics

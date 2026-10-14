@@ -4658,6 +4658,49 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §OPENSHIP BATCH 4 (2026-10-15) — THE SHARED SURFACES AND CONTROLS.
+   *
+   * Declared surface — every file this change set touches, named:
+   *   · `src/config/themes.ts` — three new ROLE tokens on all five themes
+   *     (`--mr-card-border`, `--mr-card-nested`, `--mr-hover-tint`). The four
+   *     non-Bold themes take the reference's values; `bold` reproduces what it
+   *     renders today.
+   *   · `src/index.css` — the `.ds-card` treatment (in the `components` layer, so a
+   *     caller's own border still wins) + the NESTED-card rule (outside the layers,
+   *     so it beats the element's own `bg-ink-*` utility — without it an inner card
+   *     vanishes on the four themes).
+   *   · `tailwind.config.js` — the named `tint` colour for the floating-surface
+   *     hover (`--mr-hover-tint`).
+   *   · `src/components/ui.tsx` — `Card` (borderless via the token), `Input`/`Select`
+   *     (44px control + the reference's 14px label; `Textarea` shares the label
+   *     step), `Modal` (the theme-token scrim with a backdrop blur + a real close
+   *     target).
+   *   · `src/components/layout/Header.tsx`, `src/components/shared/ThemeSelector.tsx`,
+   *     `src/components/marketing/PublicNav.tsx` — the three DROPDOWN surfaces
+   *     (translucent + blurred) and their rows' hover.
+   *   · `scripts/validate-shared-surfaces.mjs` — NEW: this batch's gate.
+   *   · `scripts/validate-e6-brand-surfaces.mjs` — this declaration.
+   *   · `e2e/theme-visual.spec.ts` — the DOM proof of the four treatments.
+   *
+   * The F5/F5b/F6 contract is UNCHANGED and NOT weakened: a working-tree path in NO
+   * declared set still fails, and no PROTECTED path appears in the change set (no
+   * RBAC or tenant scoping, no `src/lib/spapi/`, `src/lib/dhl/`, `src/services/xero/`,
+   * `src/lib/billing/`, no migrations, no deploy path).
+   */
+  const OPENSHIP_BATCH4_SURFACES_SCOPE = new Set([
+    'src/config/themes.ts',
+    'src/index.css',
+    'tailwind.config.js',
+    'src/components/ui.tsx',
+    'src/components/layout/Header.tsx',
+    'src/components/shared/ThemeSelector.tsx',
+    'src/components/marketing/PublicNav.tsx',
+    'scripts/validate-shared-surfaces.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'e2e/theme-visual.spec.ts',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -4956,6 +4999,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §DESIGN — the homepage restraint pass + two defects fixed at source (see above). */
           HOMEPAGE_RESTRAINT_SCOPE.has(p) ||
           [...HOMEPAGE_RESTRAINT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §OPENSHIP BATCH 4 (2026-10-15) — the shared surfaces and controls (see above). */
+          OPENSHIP_BATCH4_SURFACES_SCOPE.has(p) ||
+          [...OPENSHIP_BATCH4_SURFACES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE B (2026-10-13) — the auth/secret-hardening phase (see the declaration above). */
           PHASE_B_AUTH_SCOPE.has(p) ||
           [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

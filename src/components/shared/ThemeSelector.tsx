@@ -59,7 +59,10 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
           id="theme-menu"
           role="menu"
           aria-label="Visual theme"
-          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-900 border border-white/[0.08] shadow-ds-overlay animate-fade-in p-2"
+          /* §OPENSHIP BATCH 4 — the dropdown surface: TRANSLUCENT (`bg-ink-800/70`,
+             the theme's own flyout token at 70%) with the reference's
+             `backdrop-blur-xl` (spec §7.6). */
+          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] shadow-ds-overlay animate-fade-in p-2"
         >
           <p className="px-3 py-1.5 text-ds-micro uppercase tracking-wider text-zinc-500">
             Visual theme · {shellMode === 'light' ? 'light' : 'dark'} mode
@@ -77,9 +80,14 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
                 onClick={() => setTheme(id)}
                 className={cn(
                   'w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs rounded-ds-sm transition-colors',
+                  /* §OPENSHIP BATCH 4 — the row STATES come off the theme rather than
+                     the legacy near-white `bg-white/[0.0x]` shims, which are invisible
+                     on the now-translucent (lightest-case white) menu: the selected row
+                     takes the theme's `--mr-surface-hover` step at 60%, and hover takes
+                     the canonical foreground tint (`bg-tint`). */
                   active
-                    ? 'bg-white/[0.07] text-white'
-                    : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
+                    ? 'bg-ink-700/60 text-white'
+                    : 'text-zinc-400 hover:bg-tint hover:text-white'
                 )}
               >
                 <span

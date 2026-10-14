@@ -969,12 +969,52 @@ INVERTED scrim `rgb(20 20 20 / 60%)`, cards shadowless). `bold` is unchanged. Di
    design. Its one distinctive feature that CAN be honoured is: the lime accent, which is
    where `fun`'s accent comes from. Recorded as a deliberate divergence rather than a
    silent one.
-3. **The card's BORDER is still drawn.** The reference makes a card borderless and
-   shadowless in the dark designs and borderless in `light`. The shadow half is done (all
-   four non-Bold themes declare `--mr-shadow-subtle: none`); the border half is the
-   component change scheduled for **BATCH 4 (shared surfaces and controls)**, because
-   removing a utility class from `src/components/ui.tsx` is a component change, not a token
-   change. Stated here so the gap is not mistaken for a completed treatment.
+3. **The card's BORDER was still drawn — CLOSED by BATCH 4 (2026-10-15).** This item is
+   kept because it recorded a real, open gap; it is now a record of what was outstanding,
+   not a claim about the product. The border half was the component change BATCH 4 owns,
+   and it is DONE: the four non-Bold themes declare `--mr-card-border: transparent` and
+   the `Card` primitive carries `.ds-card` (`src/index.css`), so a card is borderless as
+   well as shadowless — the reference's own rule (`--th-card-bd: transparent`, §2.3–§2.5,
+   and §2.7, "the borderless-card rule is the heart of the look"). BATCH 4's own record,
+   including five divergences, is the block below.
+
+**§EXECUTED 2026-10-15 (§OPENSHIP BATCH 4) — THE SHARED SURFACES AND CONTROLS, AND WHERE IT
+DIVERGES FROM THE REFERENCE.** Built: the card (borderless in the four non-Bold themes, plus
+the reference's NESTED-CARD rule, without which an inner card is the same fill as its outer and
+VANISHES once the border is transparent), the input and the label (44px control, 14px padding,
+the reference's 14px label — and the `Select` takes the same height so a form row cannot mix
+38px and 44px), the modal (the scrim is the THEME's own token — the reference's own mechanism —
+with its defining backdrop blur, replacing a hardcoded `bg-black/70` that ignored the theme
+entirely, which matters most in `serious` where the reference INVERTS the veil), and the
+dropdown (translucent at 70% of the theme's flyout surface with a backdrop blur, on all three
+dropdown surfaces). `bold` is preserved BY MECHANISM: all three new tokens reproduce what that
+theme renders today. What BATCH 5–8 and the legacy migration still own is listed with each
+divergence below. Divergences, stated rather than left silent:
+
+1. **The card's HOVER-BORDER trait (`.th-card:has(a:hover)` → `--th-card-bd-hover`) is NOT
+   implemented.** The reference lightens a card's edge when a link inside it is hovered. In
+   Mercenta a `:has()` rule would win over the border that 26 call sites deliberately supply
+   (dialog shells built from `Card`), silently discarding a screen's explicit intent. A
+   clickable-card affordance belongs with the per-screen pass that decides which cards are
+   links — not with the primitive.
+2. **Cards that supply their OWN border keep it.** 26 `<Card>` call sites pass
+   `border-white/[0.06]` or `[0.08]`; `.ds-card` is deliberately declared in the `components`
+   layer so those still win, rather than being silently overridden. Repointing hardcoded
+   `white`/`ink` class sites is the LEGACY-STYLING MIGRATION's work (§12, the programme's
+   "Batch 10"), which is where they are scheduled and recorded.
+3. **The modal panel keeps its opaque fill and its 1px edge.** The reference's panel is a 96%
+   `color-mix` of its surface with `backdrop-blur-2xl`. The named trait this batch was scoped
+   to (the blurred THEME-TOKEN scrim, and the 16px radius BATCH 3 already applied) IS built;
+   the 4%-translucent fill is not, because a 96%-opaque panel behind a blur buys a
+   near-invisible effect at a real compositing cost in a dense operational tool.
+4. **The floating PANELS are not menus.** `NotificationCenter` and `LiveChatWidget` keep their
+   opaque surface: the reference's translucency trait is evidenced for its DROPDOWN only
+   (§7.6), and its popover styling is not evidenced at all (§15.1/§15.3) — so copying the
+   dropdown treatment onto panels would be invention, not replication. They are the shared
+   surface BATCH 8 (component states) and the migration pass will reach.
+5. **`Select` keeps the canonical 12px control radius, not the reference's 8px.** The
+   reference's own select contradicts its own input (8px against 12px, §7.4); Mercenta's ramp
+   is the single owner of radii, so the control step wins and the inconsistency is not copied.
 
 ---
 

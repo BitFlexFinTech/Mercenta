@@ -35,9 +35,25 @@ export function Card({
            biggest reason the product looked utilitarian rather than considered.
            `shadow-ds-subtle` is theme-driven (`--mr-shadow-subtle`), so a light
            theme gets a soft grey lift and a dark theme a deeper one, with no
-           per-theme branching here. The border is KEPT: on dark themes a shadow
-           alone is nearly invisible, so the pair carries the separation. */
-        'bg-ink-850 border border-white/[0.06] rounded-ds-lg shadow-ds-subtle',
+           per-theme branching here.
+
+           §OPENSHIP BATCH 4 (2026-10-15) — REPOINTED AGAIN, and the §PHASE C
+           sentence that read "The border is KEPT: on dark themes a shadow alone is
+           nearly invisible, so the pair carries the separation" is SUPERSEDED here
+           rather than left standing (a live describer must not outlive the thing it
+           describes). The reference makes a container BORDERLESS in all three of
+           its designs (`--th-card-bd: transparent`, spec §2.3–§2.5, §2.7), and the
+           colour is now the theme's own token, applied by `.ds-card` in
+           `src/index.css`:
+
+             'ds-card bg-ink-850 border rounded-ds-lg shadow-ds-subtle'
+
+           `border` (the 1px width) is KEPT deliberately: the border BOX is
+           unchanged, so no card moves by a pixel, and a caller that supplies its own
+           border utility still wins (the token is applied in the `components`
+           layer). `bold`'s token reproduces exactly the colour it draws today, so
+           that theme is preserved by mechanism. */
+        'ds-card bg-ink-850 border rounded-ds-lg shadow-ds-subtle',
         className
       )}
       data-state={dataState}
@@ -237,7 +253,13 @@ export function Input({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={inputId} className="block text-xs font-medium text-zinc-400 mb-1.5">
+        /* §OPENSHIP BATCH 4 — the label step is the reference's measured 14px
+           (spec §7.4: `text-sm font-medium`; the measured gap is "input label
+           12px → 14px", spec §12). It is the canonical `ds-body` step — the same
+           14px by name, not a raw Tailwind size — because the reference labels a
+           control at its body size. The label's own association, id derivation,
+           `required` marker, helper and error wiring are UNCHANGED. */
+        <label htmlFor={inputId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
           {label} {required && <span className="text-state-danger">*</span>}
         </label>
       )}
@@ -256,7 +278,14 @@ export function Input({
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
+        /* §OPENSHIP BATCH 4 — the reference's control METRICS (spec §7.3, and the
+           measured gaps in §12: height +8px, radius already 12px, padding 14px):
+           a 44px control (`h-11`, which is also the WCAG 2.5.5 touch target), the
+           14px horizontal padding of `px-3.5`, and the SAME radius step the ramp
+           already declares (`ds-md` = 12px, spec §2.2). No prop, id, ARIA or
+           behaviour changes; the focus treatment stays the product's own
+           accent-tinted border + ring. */
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md h-11 px-3.5 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
       />
       {helper && !error && (
         <p id={`${inputId}-helper`} className="text-ds-label text-zinc-500 mt-1">{helper}</p>
@@ -305,7 +334,9 @@ export function Select({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={selectId} className="block text-xs font-medium text-zinc-400 mb-1.5">
+        /* §OPENSHIP BATCH 4 — the same 14px label step as `Input` (the reference
+           labels a control at its body size, spec §7.4). */
+        <label htmlFor={selectId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
           {label} {required && <span className="text-crimson-accent">*</span>}
         </label>
       )}
@@ -315,7 +346,13 @@ export function Select({
         onChange={onChange}
         aria-label={ariaLabel}
         aria-required={required || undefined}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
+        /* §OPENSHIP BATCH 4 — DERIVED, and stated as such: the reference pins a
+           height on its INPUT (44px) but not on its SELECT, whose own radius it
+           also contradicts (8px there against 12px on the input, spec §7.4). A
+           form row cannot mix a 44px field with a 38px field, so this control
+           takes the ONE control height the ramp and the reference's input already
+           agree on (`h-11`). The radius stays on the canonical control step. */
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md h-11 px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-ink-900">
@@ -362,7 +399,9 @@ export function Textarea({
   return (
     <div className={className}>
       {label && (
-        <label htmlFor={areaId} className="block text-xs font-medium text-zinc-400 mb-1.5">
+        /* §OPENSHIP BATCH 4 — the same 14px label step as `Input` and `Select`: the
+           three controls share ONE label treatment, so they cannot drift apart. */
+        <label htmlFor={areaId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
           {label}
         </label>
       )}
@@ -592,7 +631,20 @@ export function Modal({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} aria-hidden="true" />
+      {/* §OPENSHIP BATCH 4 (2026-10-15) — THE SCRIM IS THE THEME'S OWN TOKEN, by the
+          reference's own mechanism (`style={{ background: "var(--th-overlay)" }}`,
+          spec §7.5) plus its defining backdrop BLUR. The value was hardcoded
+          `bg-black/70`, which ignored the theme completely — and `serious` (whose
+          page is pure BLACK) needs the reference's INVERTED scrim, or a black veil
+          over a black page dims nothing and the dialog reads as floating with no
+          separation (spec §2.3, "the `--th-overlay` inversion — do not miss this").
+          The same pattern is already used by `CommandPalette` and `workspace.tsx`. */}
+      <div
+        className="absolute inset-0 backdrop-blur-lg"
+        style={{ background: 'var(--mr-overlay-tint)' }}
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <div
         role="dialog"
         aria-modal="true"
@@ -613,7 +665,14 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="text-zinc-500 hover:text-white text-lg leading-none"
+            /* §OPENSHIP BATCH 4 — the reference's own close control (a surfaced
+               chip: `p-1.5 rounded-lg bg-card hover:bg-muted text-muted-foreground
+               hover:text-foreground`, spec §7.5). The visible glyph is unchanged;
+               what this adds is a real TARGET (≈30px instead of the ~18px a bare
+               `×` gave, which was below every touch-target guideline) and a
+               hover state that reads. Tokens, so it follows the theme; `text-lg`
+               is kept so the glyph stays the same size. */
+            className="rounded-ds-sm bg-ink-800 hover:bg-ink-700 p-1.5 text-lg text-zinc-500 hover:text-white leading-none transition-colors"
           >
             ×
           </button>

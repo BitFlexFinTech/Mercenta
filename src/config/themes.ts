@@ -170,6 +170,40 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-shadow-overlay': '0 16px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06)',
       '--mr-scrollbar': '#D0D0D0',
       '--mr-overlay-tint': 'rgba(0,0,0,0.45)',
+      /* §OPENSHIP BATCH 4 (2026-10-15) — THE SHARED-SURFACE ROLE TOKENS.
+         THE FULL CONTRACT LIVES HERE, ONCE; the four other themes carry the short
+         pointer comment and their own values.
+
+         `--mr-card-border` — the border of a CONTAINER surface (`Card`). The
+         reference makes a card BORDERLESS in all three of its designs
+         (`--th-card-bd: transparent` — spec §2.3/§2.4/§2.5), which is the other
+         half of the treatment BATCH 3 began when it set `--mr-shadow-subtle: none`
+         on these four themes. Consumed by `.ds-card` in `src/index.css`.
+
+         `--mr-card-nested` — the fill of a card INSIDE a card. The reference
+         states the rule ("a card nested inside a card is recessed … because
+         otherwise the inner card is the same colour as the outer and vanishes
+         once the border is gone" — spec §2.7) and this is why it is part of THIS
+         batch: the moment the outer border is transparent, an un-recessed inner
+         card is invisible on these themes. The value is the theme's own tint step
+         (`--mr-surface-tint`), i.e. the token system's existing subtle-surface
+         value, not a new colour. The `--th-sf-03` step the reference names was NOT
+         extracted (§15.4), so this is DERIVED, not copied.
+
+         `--mr-hover-tint` — the hover fill for an item on a FLOATING surface
+         (a dropdown row). The reference uses a tint of the FOREGROUND colour
+         (`hover:bg-foreground/[0.06]`, spec §7.6), which is visible on any
+         surface — the legacy `hover:bg-white/[0.04]` remaps to the near-white
+         `--mr-surface-tint` on light shells, so a row hover is invisible there.
+         Consumed by `hover:bg-tint` (tailwind.config.js → `tint`).
+
+         `bold` carries values that REPRODUCE what it renders today (border
+         `rgba(255,255,255,0.06)`, nested fill `--mr-surface-raised`, hover
+         `rgba(255,255,255,0.04)`), so the Owner's "Bold is preserved exactly"
+         holds BY MECHANISM rather than by value alone. */
+      '--mr-card-border': 'transparent',
+      '--mr-card-nested': '#FAFAFA',
+      '--mr-hover-tint': 'rgba(0,0,0,0.05)',
       '--mr-tracker-route': '#8A93A2',
       '--mr-tracker-dot': '#7E22CE',
       '--mr-tracker-live': '#1FA45B',
@@ -270,6 +304,11 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-shadow-overlay': '0 16px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06)',
       '--mr-scrollbar': '#D0D0D0',
       '--mr-overlay-tint': 'rgba(0,0,0,0.45)',
+      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
+         declared once, in `minimal-light`. */
+      '--mr-card-border': 'transparent',
+      '--mr-card-nested': '#FAFAFA',
+      '--mr-hover-tint': 'rgba(0,0,0,0.05)',
       '--mr-tracker-route': '#8490A2',
       '--mr-tracker-dot': '#2563EB',
       '--mr-tracker-live': '#1D9C5D',
@@ -366,6 +405,15 @@ bold: {
       '--mr-shadow-overlay': '0 16px 48px rgba(0,0,0,0.62)',
       '--mr-scrollbar': '#3A3D47',
       '--mr-overlay-tint': 'rgba(0,0,0,0.6)',
+      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
+         declared once, in `minimal-light`. BOLD IS PRESERVED BY MECHANISM: these
+         three values reproduce exactly what `bold` renders today (the `Card`
+         border `rgba(255,255,255,0.06)`, the card fill `--mr-surface-raised`, and
+         the menu-row hover `rgba(255,255,255,0.04)`), so this batch changes nothing
+         in this theme unless a future value is set deliberately. */
+      '--mr-card-border': 'rgba(255,255,255,0.06)',
+      '--mr-card-nested': '#17181D',
+      '--mr-hover-tint': 'rgba(255,255,255,0.04)',
       '--mr-tracker-route': '#6E7582',
       '--mr-tracker-dot': '#D4B36A',
       '--mr-tracker-live': '#2FBF71',
@@ -463,6 +511,11 @@ bold: {
       '--mr-shadow-overlay': '0 16px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06)',
       '--mr-scrollbar': '#D0D0D0',
       '--mr-overlay-tint': 'rgba(0,0,0,0.45)',
+      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
+         declared once, in `minimal-light`. */
+      '--mr-card-border': 'transparent',
+      '--mr-card-nested': '#FAFAFA',
+      '--mr-hover-tint': 'rgba(0,0,0,0.05)',
       '--mr-tracker-route': '#948C96',
       '--mr-tracker-dot': '#A9F04D',
       '--mr-tracker-live': '#21B573',
@@ -560,6 +613,12 @@ bold: {
       '--mr-shadow-overlay': '0 20px 48px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.32)',
       '--mr-scrollbar': '#2A2A2A',
       '--mr-overlay-tint': 'rgb(20 20 20 / 60%)',
+      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
+         declared once, in `minimal-light`. `serious` carries the reference's own
+         DARK design values: a borderless card and the inverted scrim (spec §2.3). */
+      '--mr-card-border': 'transparent',
+      '--mr-card-nested': '#080808',
+      '--mr-hover-tint': 'rgba(255,255,255,0.06)',
       '--mr-tracker-route': '#757575',
       '--mr-tracker-dot': '#F97316',
       '--mr-tracker-live': '#34D399',

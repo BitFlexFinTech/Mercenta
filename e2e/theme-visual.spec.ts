@@ -40,11 +40,36 @@ const SHOT_DIR = 'test-screenshots/themes';
  * as any theme value: it is the only gate that proves a theme reaches the DOM.
  */
 const THEMES = [
-  { id: 'minimal-light', accent: '#7E22CE' },
-  { id: 'professional', accent: '#2563EB' },
-  { id: 'bold', accent: '#7C3AED' },
-  { id: 'fun', accent: '#A9F04D' },
-  { id: 'serious', accent: '#F97316' },
+  {
+    id: 'minimal-light',
+    accent: '#7E22CE',
+    /* §OPENSHIP BATCH 4 — the theme's own SCRIM (spec §2.5) and its hover tint
+       (the reference's foreground tint, spec §7.6): asserted from the COMPUTED
+       style, so a token that never reaches the DOM fails here. */
+    scrim: [0, 0, 0],
+    tint: [0, 0, 0],
+    cardBorder: 'none' as const,
+  },
+  { id: 'professional', accent: '#2563EB', scrim: [0, 0, 0], tint: [0, 0, 0], cardBorder: 'none' as const },
+  {
+    id: 'bold',
+    accent: '#7C3AED',
+    scrim: [0, 0, 0],
+    tint: [255, 255, 255],
+    /* The Owner's instruction: `bold` is preserved exactly — so its card keeps the
+       border it draws today (its token reproduces the old rgba(255,255,255,0.06)). */
+    cardBorder: 'hairline' as const,
+  },
+  { id: 'fun', accent: '#A9F04D', scrim: [0, 0, 0], tint: [0, 0, 0], cardBorder: 'none' as const },
+  {
+    id: 'serious',
+    accent: '#F97316',
+    /* The INVERTED scrim: on a pure-black page the reference LIGHTENS the veil
+       (`rgb(20 20 20 / 60%)`, spec §2.3) — the trap this assertion pins. */
+    scrim: [20, 20, 20],
+    tint: [255, 255, 255],
+    cardBorder: 'none' as const,
+  },
 ] as const;
 
 const ADMIN_SCREENS = [
@@ -197,5 +222,106 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
     }
     const values = Object.values(seen);
     expect(new Set(values).size, `accents rendered: ${JSON.stringify(seen)}`).toBe(THEMES.length);
+  });
+
+  /**
+   * §OPENSHIP BATCH 4 (2026-10-15) — THE SHARED SURFACES, VERIFIED IN THE DOM.
+   *
+   * `scripts/validate-shared-surfaces.mjs` proves the WIRING in the source. This
+   * proves what the browser COMPUTES, per theme, for the four surfaces the batch
+   * changes — including the two traits it exists for: a BORDERLESS card, and a
+   * nested card that cannot VANISH inside it (with `bold`, whose token reproduces
+   * today's rendering, deliberately unchanged).
+   *
+   * The probes are the primitive's own class strings (the same technique the CTA
+   * test above uses), so a token that is declared but never reaches the DOM fails.
+   */
+  test('the shared-surface treatments reach the DOM (card · nested card · scrim · dropdown)', async ({
+    page,
+  }) => {
+    const alphaOf = (color: string) => {
+      const body = color.replace(/^rgba?\(/, '').replace(/\)$/, '');
+      if (body.includes('/')) return Number(body.split('/')[1].trim());
+      const parts = body.split(',');
+      return parts.length >= 4 ? Number(parts[3]) : 1;
+    };
+    const rgbOf = (color: string) => {
+      const body = color.replace(/^rgba?\(/, '').replace(/\)$/, '').split('/')[0].trim();
+      return body.split(/[\s,]+/).slice(0, 3).map(Number);
+    };
+
+    for (const theme of THEMES) {
+      await selectTheme(page, theme.id);
+      const probe = await page.evaluate(() => {
+        const mk = (cls: string, parent: HTMLElement = document.body) => {
+          const el = document.createElement('div');
+          el.className = cls;
+          parent.appendChild(el);
+          return el;
+        };
+        // The primitive's own shape: BOTH cards carry the card fill, so the nested
+        // rule has to beat the element's own utility — which is its whole point.
+        const outer = mk('ds-card bg-ink-850');
+        const inner = mk('ds-card bg-ink-850', outer);
+        const menu = mk('bg-ink-800/70 backdrop-blur-xl');
+        const scrim = mk('absolute inset-0 backdrop-blur-lg');
+        scrim.style.background = 'var(--mr-overlay-tint)';
+        const tint = mk('bg-tint');
+        const cs = (el: HTMLElement) => getComputedStyle(el);
+        const out = {
+          cardBorder: cs(outer).borderTopColor,
+          outerBg: cs(outer).backgroundColor,
+          innerBg: cs(inner).backgroundColor,
+          menuBg: cs(menu).backgroundColor,
+          menuBlur: cs(menu).backdropFilter,
+          scrimBg: cs(scrim).backgroundColor,
+          scrimBlur: cs(scrim).backdropFilter,
+          tintBg: cs(tint).backgroundColor,
+        };
+        outer.remove();
+        menu.remove();
+        scrim.remove();
+        tint.remove();
+        return out;
+      });
+
+      if (theme.cardBorder === 'none') {
+        expect(alphaOf(probe.cardBorder), `${theme.id}: the card must be BORDERLESS`).toBe(0);
+      } else {
+        expect(alphaOf(probe.cardBorder), `${theme.id}: bold keeps the card border it draws today`).toBeGreaterThan(0);
+      }
+
+      if (theme.id === 'bold') {
+        expect(probe.innerBg, 'bold: a nested card keeps its own fill — the rule is a NO-OP there').toBe(probe.outerBg);
+      } else {
+        expect(probe.innerBg, `${theme.id}: a nested card must NOT vanish (its fill differs)`).not.toBe(probe.outerBg);
+      }
+
+      expect(alphaOf(probe.menuBg), `${theme.id}: the dropdown is TRANSLUCENT`).toBeLessThan(1);
+      expect(probe.menuBlur, `${theme.id}: the dropdown carries a real backdrop blur`).toContain('blur(');
+      expect(probe.scrimBlur, `${theme.id}: the modal scrim carries a real backdrop blur`).toContain('blur(');
+      expect(alphaOf(probe.scrimBg), `${theme.id}: the modal scrim is a real veil`).toBeGreaterThan(0);
+      expect(rgbOf(probe.scrimBg), `${theme.id}: the theme's OWN scrim colour`).toEqual([...theme.scrim]);
+      expect(alphaOf(probe.tintBg), `${theme.id}: the floating-surface hover tint is a real colour`).toBeGreaterThan(0);
+      expect(rgbOf(probe.tintBg), `${theme.id}: the hover tint is the foreground tint`).toEqual([...theme.tint]);
+    }
+
+    /* And on a REAL screen: a REAL card, rendered by the primitive, must actually be
+       borderless in a non-Bold theme — the batch's whole point, proven where a user
+       sees it rather than in a probe. `minimal-light` is chosen because it is the
+       default theme an operator first meets, and an explicitly-bordered dialog card
+       is excluded (26 call sites keep their own border by design, spec §13 Batch-4
+       divergence 2). */
+    await selectTheme(page, 'minimal-light');
+    await loginAs(page, 'Super Admin — Tadii', 1400);
+    await page
+      .locator('nav[aria-label="Primary"] button', { hasText: 'Purchase Orders' })
+      .first()
+      .click({ timeout: 8000 });
+    await page.waitForTimeout(650);
+    const realCard = page.locator('.ds-card:not([class*="border-white"])').first();
+    await expect(realCard).toBeVisible({ timeout: 8000 });
+    const realBorder = await realCard.evaluate((el) => getComputedStyle(el).borderTopColor);
+    expect(alphaOf(realBorder), `a real card on a real screen must be BORDERLESS (${realBorder})`).toBe(0);
   });
 });

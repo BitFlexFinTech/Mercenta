@@ -225,7 +225,17 @@ export function Header({
             <div
               id="profile-menu"
               role="menu"
-              className="absolute right-0 top-full mt-2 w-56 bg-ink-850 border border-white/[0.08] rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
+              /* §OPENSHIP BATCH 4 (2026-10-15) — THE DROPDOWN SURFACE. The reference's
+                 dropdown is TRANSLUCENT with a BACKDROP BLUR — `bg-popover/70
+                 backdrop-blur-xl`, 16px radius, "the single largest visual
+                 difference from Mercenta's current opaque menus" (spec §7.6, and its
+                 §12 measured gap). `bg-ink-800/70` is the same 70% of the theme's
+                 own dropdown/flyout surface token (`--mr-surface-overlay`, which
+                 BATCH 3 set to the reference's `#161616` for `serious` and `#FFFFFF`
+                 for the light designs); the shim already generates that mix, so no
+                 value is duplicated here. Radius was already the container step
+                 (16px) after BATCH 3. */
+              className="absolute right-0 top-full mt-2 w-56 bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
             >
               <div className="px-4 py-2 border-b border-white/[0.06]">
                 <div className="text-sm font-medium text-white">{identity.name}</div>
@@ -242,7 +252,7 @@ export function Header({
                       key={label}
                       role="menuitem"
                       onClick={onClick}
-                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-tint transition-colors"
                     >
                       <span className="text-zinc-600">{icon}</span>
                       {label}
@@ -252,7 +262,7 @@ export function Header({
                 <button
                   role="menuitem"
                   onClick={signOut}
-                  className="w-full text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.04] transition-colors border-t border-white/[0.06] mt-1 pt-2"
+                  className="w-full text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-tint transition-colors border-t border-white/[0.06] mt-1 pt-2"
                 >
                   Sign Out
                 </button>

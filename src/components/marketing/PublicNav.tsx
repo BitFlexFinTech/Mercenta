@@ -83,14 +83,16 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                 <ChevronDown className={cn('w-3 h-3 transition-transform', openDropdown === item.page && 'rotate-180')} />
               </button>
               {openDropdown === item.page && (
-                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-850 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay py-2 animate-fade-in">
+                /* §OPENSHIP BATCH 4 — the same translucent + blurred dropdown
+                   surface as the shell menus (spec §7.6). */
+                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] rounded-ds-lg shadow-ds-overlay py-2 animate-fade-in">
                   {item.children.map((child) => (
                     <a
                       key={child.page}
                       href={`/${child.page}`}
                       onClick={(e) => { e.preventDefault(); handleNav(child.page); }}
                       className={cn(
-                        'block px-4 py-2 text-xs text-zinc-400 hover:text-brass-400 hover:bg-white/[0.04] transition-colors',
+                        'block px-4 py-2 text-xs text-zinc-400 hover:text-brass-400 hover:bg-tint transition-colors',
                         currentPage === child.page && 'text-brass-400'
                       )}
                     >
