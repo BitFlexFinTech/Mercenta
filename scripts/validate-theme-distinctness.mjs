@@ -33,6 +33,9 @@
  */
 import { createServer } from 'vite';
 import { fileURLToPath } from 'node:url';
+/* §OPENSHIP BATCH 3 — §6 reads two source files directly (the stylesheet that
+   defines the CTA utility and the component that applies it). */
+import { readFileSync } from 'node:fs';
 
 let failures = 0;
 let checks = 0;
@@ -381,6 +384,36 @@ try {
       );
     }
   }
+
+  /* ── 6. THE CTA TREATMENT IS WIRED, not merely declared. ──────────────────
+     A token nothing consumes is the defect pattern this project has already been
+     bitten by (the two declared-but-never-consumed focus-shadow tokens removed in
+     §PHASE C4). So the utility must exist in the stylesheet AND the `primary`
+     variant must actually apply it. Rendering is proven separately, in
+     e2e/theme-visual.spec.ts (computed background-image per theme). */
+  console.log('\n§ 6. The primary-action treatment is wired to the primary Button\n');
+  const readSrc = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
+  const CSS = readSrc('src/index.css');
+  const UI = readSrc('src/components/ui.tsx');
+  test(
+    'src/index.css defines the `.ds-btn-accent` utility (rest and hover)',
+    /\.ds-btn-accent\s*\{/.test(CSS) && /\.ds-btn-accent:hover/.test(CSS)
+  );
+  test(
+    'src/index.css consumes both tokens (rest uses --mr-accent-image, hover uses --mr-accent-image-hover)',
+    CSS.includes('var(--mr-accent-image') && CSS.includes('var(--mr-accent-image-hover')
+  );
+  const primaryVariant = (UI.match(/primary:\s*\n?\s*'([^']+)'/) ?? [])[1] ?? '';
+  test(
+    'the `primary` Button variant applies `.ds-btn-accent` (the wiring, not just the tokens)',
+    primaryVariant.includes('ds-btn-accent'),
+    primaryVariant || 'primary variant not found'
+  );
+  test(
+    'the `primary` variant KEEPS its flat background class as the fallback (a browser without `in oklab`)',
+    primaryVariant.includes('bg-brass-500'),
+    primaryVariant || 'primary variant not found'
+  );
 
   console.log(
     failures === 0

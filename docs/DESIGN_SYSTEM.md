@@ -156,6 +156,13 @@ invents their own version of.
 | raised | `shadow-ds-raised` | primary controls, hover lifts |
 | overlay | `shadow-ds-overlay` | modals, popovers, dropdowns, floating cards |
 
+> **§OPENSHIP BATCH 3 (2026-10-14) — THE `resting` ROLE IS NOW LITERALLY `none` IN FOUR THEMES.**
+> The reference's cards carry **no shadow in any of its designs** (`--th-card-shadow: none`), so
+> `minimal-light`, `professional`, `fun` and `serious` now declare `--mr-shadow-subtle: none` and a
+> card is defined by its border and its fill instead of a lift. The role itself is unchanged, and
+> `bold` keeps the soft shadow it always had. The reference also makes cards **borderless**; that
+> half is the component change scheduled for BATCH 4 (`docs/OPENSHIP_REFERENCE_SPEC.md` §13).
+
 - Every role reads `--mr-shadow-subtle` / `--mr-shadow-raised` / `--mr-shadow-overlay` from
   `src/config/themes.ts`, so all five themes carry their own lighting — and the gate fails
   if a theme is missing one. 19 unnamed shadows used to sit beside these roles (15 of them

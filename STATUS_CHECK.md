@@ -38,7 +38,7 @@ given. No credential was needed or requested.
    design CANNOT be a sixth theme: the foundation gate pins the selectable set to exactly five. (c)
    The card's BORDER is still drawn — the reference makes cards borderless as well as shadowless; the
    shadow half is done, the border half is the component change scheduled for BATCH 4.
-4. **GATES REPOINTED, NEVER WEAKENED.** `validate-theme-distinctness` **33 → 69 checks** (a shared
+4. **GATES REPOINTED, NEVER WEAKENED.** `validate-theme-distinctness` **33 → 73 checks** (a shared
    page background is now permitted ONLY for the declared OpenShip light page; the accent rule still
    applies to every pair at ≥30; at least three distinct page backgrounds must survive; the reference
    surfaces and `bold`'s values are pinned value-by-value; each of the four themes must carry a REAL
@@ -49,7 +49,7 @@ given. No credential was needed or requested.
    §PHASE C4 registry row, tailwind's own comments, ARCHITECTURE.md, MERCENTA_ARCHITECTURE.md,
    MERCENTA_PRODUCT_CONTRACT.md, the user-visible copy in DesignSystemShowcase.tsx, ErrorBoundary.
 5. **MEASURED THIS SESSION.** `typecheck` **0** (four projects) · `lint` **0** · `build` ok ·
-   `validate:all` **195 PASS / 0 FAIL** (exit 0) · `e2e/theme-visual` **11 passed** · the 30 rendered
+   `validate:all` **195 PASS / 0 FAIL** (exit 0) · `e2e/theme-visual` **12 passed** · the 30 rendered
    baselines compared BEFORE/AFTER with Pillow: **median 13.369% of pixels moved, max 66.650%, min
    5.738%** — a real visual change, as a foundations batch must be.
 6. **NEXT.** **BATCH 4** — shared surfaces and controls (card border, input/label, modal scrim +

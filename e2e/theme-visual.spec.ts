@@ -152,6 +152,39 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
     });
   }
 
+  /**
+   * §OPENSHIP BATCH 3 — THE PRIMARY-ACTION GRADIENT, VERIFIED IN THE DOM.
+   *
+   * Declaring a token is not rendering it. This asserts the COMPUTED
+   * `background-image` of an element carrying the utility the `primary` Button
+   * variant now uses, under each theme: the four non-bold themes must compute a
+   * real gradient (the radial highlight layer plus the three-stop gradient), and
+   * `bold` must compute `none` — which is what makes "bold is preserved" a fact
+   * about the browser rather than a claim about the config.
+   */
+  test('the primary-action gradient reaches the DOM (and is ABSENT in bold)', async ({ page }) => {
+    for (const theme of THEMES) {
+      await selectTheme(page, theme.id);
+      const computed = await page.evaluate(() => {
+        const el = document.createElement('button');
+        el.className = 'ds-btn-accent';
+        el.textContent = 'probe';
+        document.body.appendChild(el);
+        const value = getComputedStyle(el).backgroundImage;
+        el.remove();
+        return value;
+      });
+      if (theme.id === 'bold') {
+        expect(computed, 'bold must paint NO image, so its button keeps its flat accent').toBe('none');
+      } else {
+        expect(computed, `${theme.id} must paint a real gradient`).toContain('linear-gradient');
+        expect(computed, `${theme.id} must also paint the radial highlight layer`).toContain(
+          'radial-gradient'
+        );
+      }
+    }
+  });
+
   test('the five themes render five DIFFERENT accents (a switch that changes nothing is not a theme)', async ({
     page,
   }) => {
