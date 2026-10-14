@@ -5,7 +5,59 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCHES 1+2 — CURRENT STATUS (session 140, 2026-10-14) — THE VERIFIED REFERENCE SPECIFICATION, TWO PROTECTION GATES, AND TWO RECORD DEFECTS FIXED AT SOURCE
+## §OPENSHIP BATCH 3 — CURRENT STATUS (session 141, 2026-10-14) — THE DESIGN FOUNDATIONS, AND `bold` PROVEN UNCHANGED
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `3c30735` (19 files,
++567/−197). The four non-Bold themes now carry OpenShip's actual design; `bold` is untouched.
+**NOT deployed and NOT live-verified** — this batch changes what every screen looks like, so the
+three-way gate APPLIES and is UNSATISFIED; publishing needs the Owner's approval and none has been
+given. No credential was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", after confirming BATCH 3 = the design
+   foundations and the full sequence, and directing that batches 1+2 be recorded and published first.
+2. **WHAT WAS BUILT.** `src/config/themes.ts`: the three light slots take OpenShip's single LIGHT
+   design (page `#F9F9F9` · card `#FFFFFF` · border `#E8E8E8` · scrim `rgba(0,0,0,.45)` · cards
+   shadowless) and `serious` takes its DARK design (page `#000000` · card `#0D0D0D`, the OPAQUE
+   COMPOSITE of the reference's `rgba(255,255,255,.05)` · dropdown `#161616` · the INVERTED scrim
+   `rgb(20 20 20 / 60%)` · cards shadowless). The text hierarchy moves onto the reference's measured
+   steps except `--mr-text-muted`, which takes the reference's `secondary` step because Mercenta's
+   muted is real text and the reference's `muted` step measures 4.19:1 against the page — below the
+   project's 4.5:1 floor. Status families aligned to the reference. Accents come from OpenShip's OWN
+   palette (violet `#7E22CE` · blue `#2563EB` · lime `#A9F04D` · orange `#F97316`), `bold` unchanged.
+   `tailwind.config.js`: the radius ramp moves onto the reference's measured radii (small 8 · control
+   12 · container 16, `ds-pill` unchanged) — a REAL +4px, and the config says so, because it is the
+   OPPOSITE direction to the §PHASE C4 rename. Typography: Plus Jakarta Sans (OFL 1.1) replaces IBM
+   Plex Sans, because the reference's own Gellix is "Personal Use Only". Primary action: the
+   reference's per-theme CTA (radial highlight over a three-stop gradient, `in oklab`) via two new
+   theme tokens consumed by `.ds-btn-accent`; `bold` declares both `none`, so its button keeps its
+   flat accent AND its own hover BY MECHANISM, not merely by value.
+3. **THREE DIVERGENCES FROM THE PLAN, RECORDED IN `docs/OPENSHIP_REFERENCE_SPEC.md` §13 — NOT LEFT
+   SILENT.** (a) The three light slots keep DIFFERENT accents: making them identical (as the plan's
+   "OpenShip light, exactly" implied) would re-create the defect the Owner reported in §PHASE C1 — a
+   theme switch that changes nothing — and would fail the distinctness gate. (b) OpenShip's `dim`
+   design CANNOT be a sixth theme: the foundation gate pins the selectable set to exactly five. (c)
+   The card's BORDER is still drawn — the reference makes cards borderless as well as shadowless; the
+   shadow half is done, the border half is the component change scheduled for BATCH 4.
+4. **GATES REPOINTED, NEVER WEAKENED.** `validate-theme-distinctness` **33 → 69 checks** (a shared
+   page background is now permitted ONLY for the declared OpenShip light page; the accent rule still
+   applies to every pair at ≥30; at least three distinct page backgrounds must survive; the reference
+   surfaces and `bold`'s values are pinned value-by-value; each of the four themes must carry a REAL
+   gradient WITH its own hover state). `validate-radius-elevation-scale` RAMP_EXPECTED repointed to
+   {8,12,16,9999} with the old contract inline as §REPOINTED; `validate-design-tokens` repointed from
+   IBM Plex Sans; `e2e/theme-visual.spec.ts`'s five pinned accents repointed with `bold` left as the
+   control. Every DESCRIBER moved in the same change (rule 10): DESIGN_SYSTEM.md, the phase plan, the
+   §PHASE C4 registry row, tailwind's own comments, ARCHITECTURE.md, MERCENTA_ARCHITECTURE.md,
+   MERCENTA_PRODUCT_CONTRACT.md, the user-visible copy in DesignSystemShowcase.tsx, ErrorBoundary.
+5. **MEASURED THIS SESSION.** `typecheck` **0** (four projects) · `lint` **0** · `build` ok ·
+   `validate:all` **195 PASS / 0 FAIL** (exit 0) · `e2e/theme-visual` **11 passed** · the 30 rendered
+   baselines compared BEFORE/AFTER with Pillow: **median 13.369% of pixels moved, max 66.650%, min
+   5.738%** — a real visual change, as a foundations batch must be.
+6. **NEXT.** **BATCH 4** — shared surfaces and controls (card border, input/label, modal scrim +
+   radius, translucent blurred dropdown), then the sidebar → top bar → page layouts → component
+   states → the legacy-styling migration → full acceptance testing, in the order recorded in
+   `docs/OPENSHIP_REFERENCE_SPEC.md` §16.
+
+## §OPENSHIP BATCHES 1+2 (session 140, 2026-10-14) — THE VERIFIED REFERENCE SPECIFICATION, TWO PROTECTION GATES, AND TWO RECORD DEFECTS FIXED AT SOURCE — SUPERSEDED BY §OPENSHIP BATCH 3
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** BATCH 1 (the reference specification) and
 BATCH 2 (the two protection gates) of the Owner-approved OpenShip replication are committed and pushed.
