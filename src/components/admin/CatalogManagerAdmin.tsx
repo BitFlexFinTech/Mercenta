@@ -114,7 +114,7 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
   function hp() { if (!canMutate) return; updateProductCost(product.sku, ep); setSv('Price updated.'); setTimeout(function() { setSv(null); }, 3000); }
   return (
     <div className='fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4'>
-      <div className='bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
+      <div className='bg-ink-850 border border-white/[0.08] rounded-ds-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
         <div className='flex items-center justify-between px-5 py-4 border-b border-white/[0.06]'>
           <div className='flex items-center gap-3'><Package className='w-5 h-5 text-brass-400' /><div><h2 className='text-sm font-semibold text-white'>{product.name}</h2><p className='text-ds-micro text-zinc-500 font-mono'>{product.sku} · {product.barcode}</p></div></div>
           <button onClick={onClose} className='text-zinc-400 hover:text-white'><X className='w-4 h-4' /></button>
@@ -150,13 +150,13 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                 <div className='flex items-center gap-4'>
                   <label className='flex items-center gap-2 text-zinc-300'>
                     <input type='checkbox' checked={av} onChange={function(e) { setAv(e.target.checked); }}
-                      className='rounded border-white/[0.2] bg-ink-900 accent-brass-500' />
+                      className='rounded-ds-sm border-white/[0.2] bg-ink-900 accent-brass-500' />
                     Available for new POs
                   </label>
                   <div className='flex items-center gap-2'>
                     <span className='text-zinc-500 text-ds-micro'>Lead time:</span>
                     <input type='number' value={lt} min={1} max={90} onChange={function(e) { setLt(parseInt(e.target.value) || 1); }}
-                      className='w-16 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-1 text-xs text-white text-center' /> days
+                      className='w-16 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-1 text-xs text-white text-center' /> days
                   </div>
                   <Button className='text-ds-micro' data-state="catalog-save-availability" disabled={!canMutate}
                     title={canMutate ? undefined : 'View-only staff cannot change product availability'} onClick={ha}>Save Availability</Button>
@@ -212,7 +212,7 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
               <div>
                 <label className='text-ds-micro text-zinc-500 font-medium block mb-1'>Ex-Works Price (GBP)</label>
                 <input type='number' step='0.01' value={ep} onChange={function(e) { setEp(Number(e.target.value)); }}
-                  className='w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-sm text-white' />
+                  className='w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-sm text-white' />
               </div>
               <div className='text-ds-micro text-zinc-500 space-y-1'>
                 <p>UK Retail: <span className='font-mono text-zinc-300'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
@@ -261,10 +261,10 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                 <div className='flex flex-wrap gap-2'>
                   <input value={overrideAsin} onChange={function(e) { setOverrideAsin(e.target.value); }}
                     placeholder='Identifier (10 alphanumeric)' disabled={!canMutate}
-                    className='bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white' />
+                    className='bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white' />
                   <input value={overrideReason} onChange={function(e) { setOverrideReason(e.target.value); }}
                     placeholder='Reason (required)' disabled={!canMutate}
-                    className='bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white flex-1 min-w-[12rem]' />
+                    className='bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white flex-1 min-w-[12rem]' />
                   <Button className='text-xs' data-state="catalog-override-identifier" disabled={!canMutate}
                     title={canMutate ? undefined : 'View-only staff cannot override the identifier'}
                     onClick={handleOverrideAsin}>Record identifier</Button>
@@ -494,7 +494,7 @@ export function CatalogManagerAdmin() {
             <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
             <button onClick={function() { setCategoryFilter('all'); }}
               data-testid="catalog-cat-all"
-              className={cn('px-2.5 py-1 rounded-lg text-ds-label font-medium transition-colors',
+              className={cn('px-2.5 py-1 rounded-ds-md text-ds-label font-medium transition-colors',
                 categoryFilter === 'all' ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
               )}>
               All ({products.length})
@@ -505,7 +505,7 @@ export function CatalogManagerAdmin() {
               return (
                 <button key={cat} onClick={function() { setCategoryFilter(cat); }}
                   data-testid={`catalog-cat-${cat}`}
-                  className={cn('px-2.5 py-1 rounded-lg text-ds-label font-medium transition-colors',
+                  className={cn('px-2.5 py-1 rounded-ds-md text-ds-label font-medium transition-colors',
                     categoryFilter === cat ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
                   )}>
                   {cat} ({count})

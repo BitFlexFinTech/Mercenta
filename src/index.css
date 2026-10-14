@@ -27,10 +27,17 @@ body {
 }
 
 /* ── §Phase 5 — canonical focus-visible (accessibility foundation) ──────── */
+/* §PHASE C4 (2026-10-13) — THE FOCUS RING NOW FOLLOWS THE ELEMENT'S OWN RADIUS.
+   This rule used to add `border-radius: 4px`, which is not a step of the radius
+   scale (`rounded-ds-sm` 6 · `ds-md` 8 · `ds-lg` 12): focusing an 8px control or a
+   12px card visibly snapped its corners to a radius the design system does not
+   declare. An `outline` already follows whatever radius the element has, so the
+   override is removed rather than re-tokenised — one radius scale, and no hidden
+   second one applied only while a control is focused.
+   Guarded by `npm run validate:radius-elevation`. */
 :focus-visible {
   outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 /* Legacy focus treatment: keep inputs' existing custom focus, but always
@@ -78,7 +85,10 @@ textarea:focus-visible {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--mr-scrollbar, #C9CFD9);
-  border-radius: 4px;
+  /* §PHASE C4 — this was `4px`, a radius the ramp does not declare. The thumb is
+     8px wide, so a 4px radius IS half its width: the intent was a pill. Expressed
+     as the pill step (9999px) it is pixel-identical and inside the scale. */
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--mr-hairline-strong, #C9CFD9);
@@ -410,8 +420,12 @@ textarea:focus-visible {
  * notice's destination is visible, not merely scrolled to. The ring uses the
  * existing focus token, so it follows the active theme.
  */
+/* §PHASE C4 — the `border-radius: 6px` this rule used to carry is REMOVED, for the
+   same reason as the `:focus-visible` override above: it snapped the focused
+   record's corners to the inline step regardless of what the element was (a 12px
+   card, an 8px tile). The outline follows the element's own radius from the ramp,
+   so the ring still shows and the geometry stops contradicting the scale. */
 [data-record-focused='true'] {
   outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
   outline-offset: 2px;
-  border-radius: 6px;
 }

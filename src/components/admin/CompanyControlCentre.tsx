@@ -183,7 +183,7 @@ export function CompanyControlCentre() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-red-400" />
           </div>
           <div>
@@ -250,21 +250,21 @@ export function CompanyControlCentre() {
           </p>
         )}
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Company number</p>
             <p className="text-sm font-bold text-white font-mono">{COMPANY_REGISTRATION.companyNumber}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Registrar status</p>
             <p className="text-sm font-bold text-white">{record?.status ?? COMPANY_REGISTRATION.registrarStatusLabel}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Last read</p>
             <p className="text-sm font-bold text-white">
               {snapshot.readAt ? new Date(snapshot.readAt).toLocaleString() : 'never'}
             </p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Audit entries</p>
             <p className="text-sm font-bold text-white">{auditCount}</p>
           </div>
@@ -273,27 +273,27 @@ export function CompanyControlCentre() {
 
       <Card className="p-5" title="Company record" subtitle="Every value is labelled with the source that produced it">
         <div className="grid gap-2 sm:grid-cols-2 text-ds-label" data-testid="company-record">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Legal name</p>
             <p className="text-xs text-white">{COMPANY_REGISTRATION.legalName}</p>
             <p className="text-ds-micro text-zinc-600">founder_supplied</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Jurisdiction</p>
             <p className="text-xs text-white">{COMPANY_REGISTRATION.jurisdiction}</p>
             <p className="text-ds-micro text-zinc-600">founder_supplied</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Incorporation date</p>
             <p className="text-xs text-white">{record?.incorporationDate ?? 'not read from the register'}</p>
             <SourceBadge source={snapshot.dataSource} />
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Registered office</p>
             <p className="text-xs text-white">{record?.registeredOfficeAddress ?? 'not read from the register'}</p>
             <SourceBadge source={snapshot.dataSource} />
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2 sm:col-span-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2 sm:col-span-2">
             <p className="text-ds-micro text-zinc-500">SIC codes</p>
             <p className="text-xs text-white font-mono">
               {record ? (record.sicCodes.length ? record.sicCodes.join(', ') : 'none returned') : 'not read from the register'}
@@ -378,7 +378,7 @@ export function CompanyControlCentre() {
 
       <Card className="p-5" title="Company compliance deadlines" subtitle="Real day counts from the registrar-read dates">
         <div className="space-y-2" data-testid="company-deadlines">
-          <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline">
+          <div className="flex items-center justify-between rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline">
             <div>
               <p className="text-xs text-white">Confirmation statement</p>
               <p className="text-ds-micro text-zinc-500">
@@ -398,7 +398,7 @@ export function CompanyControlCentre() {
               {csDue.state}
             </Badge>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline-accounts">
+          <div className="flex items-center justify-between rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline-accounts">
             <div>
               <p className="text-xs text-white">Annual accounts</p>
               <p className="text-ds-micro text-zinc-500">
@@ -584,7 +584,7 @@ export function CompanyControlCentre() {
           {GOVERNMENT_SECRET_KINDS.map((spec) => {
             const rec = getGovernmentSecret(spec.id as GovernmentSecretKind);
             return (
-              <div key={spec.id} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid={`gov-credential-${spec.id}`}>
+              <div key={spec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid={`gov-credential-${spec.id}`}>
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <p className="text-xs text-white flex items-center gap-1">

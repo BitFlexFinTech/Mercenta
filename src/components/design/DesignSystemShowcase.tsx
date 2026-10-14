@@ -207,7 +207,7 @@ export function DesignSystemShowcase() {
                   dark: false,
                 }).url ?? undefined}
                 alt="Demo identity — Manchester United"
-                className="h-10 w-10 rounded-lg border border-white/[0.1]"
+                className="h-10 w-10 rounded-ds-md border border-white/[0.1]"
               />
               <p className="text-xs text-zinc-500">
                 Brand logo identity seam — deterministic demo resolution (Manchester United → monogram), tenant-scoped override ahead.

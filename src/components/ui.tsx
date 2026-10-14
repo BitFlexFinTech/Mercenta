@@ -37,7 +37,7 @@ export function Card({
            theme gets a soft grey lift and a dark theme a deeper one, with no
            per-theme branching here. The border is KEPT: on dark themes a shadow
            alone is nearly invisible, so the pair carries the separation. */
-        'bg-ink-850 border border-white/[0.06] rounded-xl shadow-ds-subtle',
+        'bg-ink-850 border border-white/[0.06] rounded-ds-lg shadow-ds-subtle',
         className
       )}
       data-state={dataState}
@@ -125,7 +125,7 @@ export function Button({
     // `danger` retained for backward compatibility; `destructive` is canonical.
     danger: 'bg-crimson-accent hover:bg-red-700 text-white',
     destructive: 'bg-state-danger hover:bg-red-700 text-white',
-    link: 'text-brass-400 hover:underline underline-offset-4 p-0 h-auto shadow-none',
+    link: 'text-brass-400 hover:underline underline-offset-4 p-0 h-auto shadow-ds-none',
   } as const;
   const sizes = {
     sm: 'px-3 py-1.5 text-ds-label',
@@ -155,7 +155,7 @@ export function Button({
       data-testid={dataTestId}
       data-state={dataState ?? (loading ? 'loading' : disabled ? 'disabled' : undefined)}
       className={cn(
-        'rounded-lg inline-flex items-center justify-center gap-2 font-medium',
+        'rounded-ds-md inline-flex items-center justify-center gap-2 font-medium',
         'transition-ds duration-200',
         variant === 'link' ? 'h-auto leading-none' : 'min-h-[36px]',
         variants[variant],
@@ -251,7 +251,7 @@ export function Input({
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
       />
       {helper && !error && (
         <p id={`${inputId}-helper`} className="text-ds-label text-zinc-500 mt-1">{helper}</p>
@@ -310,7 +310,7 @@ export function Select({
         onChange={onChange}
         aria-label={ariaLabel}
         aria-required={required || undefined}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-ink-900">
@@ -368,7 +368,7 @@ export function Textarea({
         placeholder={placeholder}
         rows={rows}
         aria-label={ariaLabel}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
       />
     </div>
   );
@@ -398,7 +398,7 @@ export function Checkbox({
         />
         <span
           className={cn(
-            'w-4 h-4 rounded border transition-all flex items-center justify-center',
+            'w-4 h-4 rounded-ds-sm border transition-all flex items-center justify-center',
             checked
               ? 'bg-brass-500 border-brass-500'
               : 'border-white/[0.15] group-hover:border-white/[0.3]'
@@ -483,7 +483,7 @@ export function Alert({
   className?: string;
 }) {
   return (
-    <div role="alert" className={cn('rounded-md border px-3.5 py-2.5 text-sm', ALERT_STYLES[tone], className)}>
+    <div role="alert" className={cn('rounded-ds-sm border px-3.5 py-2.5 text-sm', ALERT_STYLES[tone], className)}>
       <p className="font-semibold">{title}</p>
       {children && <div className="mt-1 text-ds-body opacity-90">{children}</div>}
     </div>
@@ -594,7 +594,13 @@ export function Modal({
         aria-label={title}
         tabIndex={-1}
         ref={panelRef}
-        className="relative w-full max-w-lg bg-ink-850 border border-white/[0.08] rounded-lg shadow-ds-overlay"
+        /* §PHASE C4 — REPOINTED from the CONTROL step to the CONTAINER step. The
+           rename onto the scale preserved pixels, and in doing so preserved a
+           pre-existing inconsistency: `Card` was `rounded-xl` (12px) while `Modal`
+           was `rounded-lg` (8px), although both are containers — and every OTHER
+           overlay in the app (drawers, popovers, floating cards) was already 12px.
+           A dialog is a container, so it now sits on `ds-lg` with the rest. */
+        className="relative w-full max-w-lg bg-ink-850 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <h3 className="text-sm font-semibold text-white">{title}</h3>
@@ -626,13 +632,13 @@ export function Pagination({
   if (pageCount <= 1) return null;
   return (
     <nav aria-label="Pagination" className="flex items-center gap-2 text-xs">
-      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-2.5 py-1 rounded border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
+      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-2.5 py-1 rounded-ds-sm border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
         Previous
       </button>
       <span className="text-zinc-400" data-testid="pagination-page">
         Page {page} of {pageCount}
       </span>
-      <button type="button" disabled={page >= pageCount} onClick={() => onPage(page + 1)} className="px-2.5 py-1 rounded border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
+      <button type="button" disabled={page >= pageCount} onClick={() => onPage(page + 1)} className="px-2.5 py-1 rounded-ds-sm border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
         Next
       </button>
     </nav>
@@ -658,7 +664,7 @@ export function EmptyState({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden="true" className={cn('animate-pulse rounded-md bg-white/[0.06]', className)} />;
+  return <div aria-hidden="true" className={cn('animate-pulse rounded-ds-sm bg-white/[0.06]', className)} />;
 }
 
 /**

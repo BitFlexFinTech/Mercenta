@@ -73,8 +73,8 @@ return<WorkspaceFrame className="space-y-4">
     </>}
     toolbar={<div className="flex flex-wrap items-center gap-2">
       <Input value={q} onChange={e=>sQ(e.target.value)} placeholder="Search..." className="text-xs py-1 w-40" dataTestid="bi-search"/>
-      <select aria-label="Category filter" value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select>
-      <select aria-label="Tier filter" value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">Tier 1</option><option value="tier_2">Tier 2</option><option value="tier_3">Tier 3</option><option value="tier_4">Tier 4</option></select>
+      <select aria-label="Category filter" value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded-ds-sm px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select>
+      <select aria-label="Tier filter" value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded-ds-sm px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">Tier 1</option><option value="tier_2">Tier 2</option><option value="tier_3">Tier 3</option><option value="tier_4">Tier 4</option></select>
       <span className="text-xs text-zinc-600">{filtered.length} of {pros.length}</span>
       <button type="button" onClick={()=>{sQ('');sCf('');sTf('');}} className="text-ds-label text-brass-400 hover:text-brass-300" data-testid="bi-clear-filters">Clear</button>
     </div>}
@@ -118,7 +118,7 @@ return<WorkspaceFrame className="space-y-4">
     <h3 className="text-xs font-semibold text-white uppercase flex items-center gap-2"><ShieldBan className="w-3.5 h-3.5 text-amber-400" />Disqualified <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{dqPros.length}</Badge></h3>
     <p className="text-ds-micro text-zinc-500 mt-1">Manually or engine-disqualified prospects remain tracked and can be re-qualified. Disqualifications survive re-runs.</p>
     {dqPros.length===0?<p className="text-xs text-zinc-600 mt-2">None.</p>:
-    <div className="mt-1.5 space-y-1">{dqPros.map((p:any)=><div key={p.id} className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-lg px-2 py-1.5">
+    <div className="mt-1.5 space-y-1">{dqPros.map((p:any)=><div key={p.id} className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-ds-md px-2 py-1.5">
       <div className="min-w-0 flex-1"><span className="text-xs font-medium text-zinc-300">{p.brand}</span><p className="text-ds-micro text-amber-300/80 font-mono truncate">{p.disqualificationReason||'Disqualified'}</p></div>
       <Button variant="tertiary" className="text-ds-micro px-2 py-1" onClick={()=>handleRequalify(p.id,p.brand)}>Requalify</Button>
     </div>)}</div>}
@@ -137,7 +137,7 @@ return<WorkspaceFrame className="space-y-4">
       <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.distributionOpenness}</td>
       <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.acceptanceProbability}</td>
       <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.mercentaFit}</td>
-      <td className="px-2 py-1"><span className={cn('text-ds-micro px-1 py-0.5 rounded',bs(p)==='DIRECT_AMAZON_RETAIL'?'bg-emerald-500/15 text-emerald-300':bs(p)==='AMAZON_PRESENT_BUT_UNCLEAR'?'bg-amber-500/15 text-amber-300':'bg-zinc-500/10 text-zinc-500')}>{bs(p).slice(0,10).replace(/_/g,' ')}</span></td>
+      <td className="px-2 py-1"><span className={cn('text-ds-micro px-1 py-0.5 rounded-ds-sm',bs(p)==='DIRECT_AMAZON_RETAIL'?'bg-emerald-500/15 text-emerald-300':bs(p)==='AMAZON_PRESENT_BUT_UNCLEAR'?'bg-amber-500/15 text-amber-300':'bg-zinc-500/10 text-zinc-500')}>{bs(p).slice(0,10).replace(/_/g,' ')}</span></td>
       <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.distributors[0]?.company?.slice(0,12)||'\u2014'}</td>
       <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.contacts[0]?.name?.split(' ')[0]||'\u2014'}</td>
     </tr>)}

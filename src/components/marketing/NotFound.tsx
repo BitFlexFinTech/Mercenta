@@ -59,7 +59,7 @@ export function NotFound({
             type="button"
             onClick={onNavigate}
             className={cn(
-              'inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-5 py-2.5 text-sm font-semibold text-on-palette',
+              'inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-5 py-2.5 text-sm font-semibold text-on-palette',
               'transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass'
             )}
           >
@@ -70,7 +70,7 @@ export function NotFound({
             type="button"
             onClick={onOpenPortal}
             className={cn(
-              'inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold',
+              'inline-flex items-center gap-2 rounded-ds-md border px-5 py-2.5 text-sm font-semibold',
               'border-white/[0.12] text-parchment transition-colors hover:bg-white/[0.04]',
               'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass'
             )}

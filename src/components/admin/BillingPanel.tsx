@@ -124,7 +124,7 @@ export function BillingPanel() {
   return (
     <WorkspaceFrame className="space-y-4">
       <DemoBanner />
-      {!stripeLive && (<div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
+      {!stripeLive && (<div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
 
       {/* §Sprint — workspace header + interactive metric band over the SAME
           canonical billing functions; the metric tiles are real drill-downs
@@ -193,7 +193,7 @@ export function BillingPanel() {
           const brandLineItems = brandComms.map(function(c) { return ({ poNumber: c.purchaseOrderId, grossValue: c.poValue, commission: c.commissionAmount, deductions: deductionTotals.rows.filter(function(d) { return d.brandId === b.id && d.purchaseOrderId === c.purchaseOrderId; }).map(function(d) { return ({ type: d.type, amountGbp: d.amountGbp }); }), }); });
           const stmt = generateRemittanceStatement({ brandName: b.profile.businessName, periodStart: '2026-08-01', periodEnd: '2026-08-31', statementNumber: 'RS-2026-08-' + b.id.slice(0, 8), lines: brandLineItems });
           const empty = stmt.lines.length === 0;
-          return (<div key={b.id} className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-lg px-4 py-2.5">
+          return (<div key={b.id} className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-ds-md px-4 py-2.5">
             <div><div className="text-xs font-medium text-white">{b.profile.businessName}</div><div className="text-ds-micro text-zinc-500 font-mono">{stmt.statementNumber} &middot; net paid <span className={empty ? 'text-zinc-600' : 'text-emerald-300'}>&pound;{stmt.netPaid.toFixed(2)}</span>{empty && ' &middot; no settled POs'}</div></div>
             <Button variant="ghost" className="text-ds-label text-brass" disabled={empty}
               onClick={function() { const w = window.open('', '_blank'); if (w) { w.document.write(stmt.html); w.document.close(); } }}>View statement</Button>

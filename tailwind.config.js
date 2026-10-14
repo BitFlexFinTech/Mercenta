@@ -149,21 +149,91 @@ export default {
           ops: 'var(--mr-feature-ops)',
         },
       },
+      /**
+       * §PHASE C4 (2026-10-13) — THE ONE RADIUS SCALE (inline · control · container · pill).
+       *
+       * WHY THIS BLOCK WAS REPOINTED
+       * ----------------------------
+       * The scale declared FOUR named steps and the product rendered FIVE unnamed
+       * ones. Measured in `src/` before this change:
+       *
+       *     rounded-lg    387   (8px,  unnamed)   |  rounded-ds-md   41  (10px)
+       *     rounded-md     97   (6px,  unnamed)   |  rounded-ds-lg   26  (14px)
+       *     rounded       85    (4px,  unnamed)   |  rounded-ds-sm   22  (6px)
+       *     rounded-xl     58   (12px, unnamed)   |  rounded-2xl      4  (16px)
+       *     rounded-full   76   (pill, Tailwind's own step)
+       *
+       * So 630 class sites had no place in the named scale, and the two steps that
+       * DID carry names (10px, 14px) were rendered almost nowhere. That is the same
+       * defect class the type scale had: a design system declaring values the
+       * product does not use, which is how every author invents their own.
+       *
+       * WHAT CHANGED — and what deliberately did NOT
+       * -------------------------------------------
+       * REPOINTED — the two moving steps are `ds-md` (10px → 8px) and `ds-lg` (14px → 12px).
+       * They moved ONTO the geometry the application already renders for its
+       * dominant controls (`rounded-lg` = 8px, 387 sites) and containers
+       * (`rounded-xl` = 12px, 58 sites), which is what makes the migration a
+       * RENAME rather than a redesign: binding `rounded-lg` → `ds-md` and
+       * `rounded-xl` → `ds-lg` moves no pixels for 542 sites. Measured cost of the
+       * repoint: 41 + 26 occurrences move by 2px each, in 20 shell/shared files.
+       * `ds-sm` (6px) and `ds-pill` are unchanged.
+       *
+       * The DENSE, professional tool rule: 4px (bare `rounded`) is folded into
+       * 6px, because a 2px difference between two small steps is not a step — it
+       * is noise, and it was being used inconsistently on chips and `<code>`.
+       *
+       * Two values are deliberately OUTSIDE this ramp, each with a stated reason:
+       *   · `rounded-2xl` (16px) — permitted ONLY on LARGE MARKETING / hero blocks
+       *     (`src/components/marketing/**`), the same way the type scale permits
+       *     Tailwind's larger sizes above the 20px page step.
+       *   · `rounded-full` — Tailwind's own step and the SAME VALUE as `ds-pill`
+       *     (9999px), so it is an accepted alias for the pill role, not a
+       *     second scale.
+       *
+       * This block is the SINGLE OWNER of the radii. `npm run validate:radius`
+       * (`scripts/validate-radius-elevation-scale.mjs`) READS THIS BLOCK, then
+       * fails if an unnamed radius or an unnamed shadow reappears anywhere in
+       * `src/`, if `rounded-2xl` escapes the marketing folder, or if a live
+       * describer of the scale states a value this block does not declare.
+       * The migration onto it is mechanical and idempotent:
+       * `npm run migrate:radius` (re-running is a no-op).
+       */
       borderRadius: {
         ds: {
-          sm: '6px',
-          md: '10px',
-          lg: '14px',
-          pill: '9999px',
+          sm: '6px',      // inline — chips, tags, kbd/<code>, thumbnails, micro icon buttons
+          md: '8px',      // controls — buttons, inputs, selects, textareas, tabs, nav items
+          lg: '12px',     // containers — cards, panels, modals, popovers, tables
+          pill: '9999px', // pills · avatars · dots · status badges (`rounded-full` is the same value)
         },
       },
+      /**
+       * §PHASE C4 (2026-10-13) — THE ELEVATION SCALE, and ONE REMOVAL.
+       *
+       * Four roles, each a THEME-DRIVEN token (`--mr-shadow-*` in
+       * `src/config/themes.ts`, so a light theme gets a soft grey lift and a dark
+       * theme a deeper one):
+       *   `ds-none`    no lift        — a control that must sit flat (link button)
+       *   `ds-subtle`  resting        — cards, panels, active segmented pills
+       *   `ds-raised`  interactive    — a primary control, a hover lift
+       *   `ds-overlay` floating       — modals, popovers, dropdowns, floating cards
+       *
+       * REMOVED: `ds-focus` and `ds-focus-danger` (they were
+       * `0 0 0 2px var(--mr-focus)` / `0 0 0 2px rgba(229,83,63,0.5)`). Both were
+       * declared here and consumed NOWHERE in `src/`, while the focus mechanism the
+       * product actually uses is the canonical `:focus-visible` OUTLINE in
+       * `src/index.css`, which every interactive element receives. A
+       * declared-but-unconsumed token is the exact defect this scale exists to end
+       * (the same reason the type scale has a "declared but never consumed" check),
+       * so it was removed rather than kept "for later".
+       * `npm run validate:radius-elevation` carries the ABSENCE GUARD: a focus
+       * shadow token that is declared WITHOUT a consumer fails the gate.
+       */
       boxShadow: {
         'ds-none': 'none',
         'ds-subtle': 'var(--mr-shadow-subtle)',
         'ds-raised': 'var(--mr-shadow-raised)',
         'ds-overlay': 'var(--mr-shadow-overlay)',
-        'ds-focus': '0 0 0 2px var(--mr-focus)',
-        'ds-focus-danger': '0 0 0 2px rgba(229,83,63,0.5)',
       },
       transitionProperty: {
         ds: 'background-color, border-color, color, box-shadow, opacity, transform',

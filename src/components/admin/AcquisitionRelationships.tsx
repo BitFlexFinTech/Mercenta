@@ -121,7 +121,7 @@ export function AcquisitionRelationships() {
         )}
 
         {open && (
-          <div className="border border-white/[0.06] rounded-lg p-3" data-section="crm-acquisition-relationship">
+          <div className="border border-white/[0.06] rounded-ds-md p-3" data-section="crm-acquisition-relationship">
             <div className="flex items-center justify-between pb-2">
               <p className="text-ds-micro font-semibold text-zinc-400 uppercase">
                 Relationship — {open.prospect.brand}

@@ -550,7 +550,7 @@ export function WorkWorkspace({
               value={priority}
               onChange={(e) => setPriority(e.target.value as 'all' | WorkPriority)}
               data-testid="work-priority-filter"
-              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Priority: all</option>
               <option value="critical">Critical</option>
@@ -562,7 +562,7 @@ export function WorkWorkspace({
               value={source}
               onChange={(e) => setSource(e.target.value as 'all' | WorkSource)}
               data-testid="work-source-filter"
-              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Source: all</option>
               {/*
@@ -1017,7 +1017,7 @@ function CalendarBoard({
               <span
                 className={
                   'font-mono text-ds-micro ' +
-                  (date === today ? 'rounded bg-brass-500/25 px-1 text-brass-300' : 'text-zinc-600')
+                  (date === today ? 'rounded-ds-sm bg-brass-500/25 px-1 text-brass-300' : 'text-zinc-600')
                 }
               >
                 {date.slice(8)}
@@ -1031,7 +1031,7 @@ function CalendarBoard({
                       title={`${e.title} — ${WORK_PRIORITY_LABELS[e.priority]}`}
                       data-testid={`work-calendar-entry-${e.workItemId}`}
                       className={
-                        'block w-full truncate rounded-sm px-1 py-0.5 text-left text-ds-micro ' +
+                        'block w-full truncate rounded-ds-sm px-1 py-0.5 text-left text-ds-micro ' +
                         (e.resolved ? 'text-zinc-600 line-through' : 'text-zinc-200')
                       }
                       style={{
@@ -1096,14 +1096,14 @@ export function NewTaskPanel({
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             data-testid="work-new-due"
-            className="flex-1 rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="flex-1 rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
           />
           <select
             aria-label="Priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value as WorkPriority)}
             data-testid="work-new-priority"
-            className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
           >
             <option value="normal">Normal</option>
             <option value="high">High</option>

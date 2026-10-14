@@ -81,29 +81,29 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
   };
 
   return(<div className="space-y-4">
-    {err&&<div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">{err}</div>}
+    {err&&<div className="bg-red-500/10 border border-red-500/30 rounded-ds-md p-3 text-sm text-red-400">{err}</div>}
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="Brand legal name"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="Primary contact"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="Brand legal name"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="Primary contact"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="brand@example.com"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="e.g. Zimbabwe"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="brand@example.com"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="e.g. Zimbabwe"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="0"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="0"/></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="https://..."/></div>
+    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://..."/></div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="https://instagram.com/..."/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="https://facebook.com/..."/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://instagram.com/..."/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://facebook.com/..."/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>
+    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>
     <div className="flex gap-2"><Button onClick={submit} disabled={busy}><UserPlus className="w-4 h-4"/>{busy?'Creating...':'Create Brand Account'}</Button><Button variant="ghost" onClick={onDone}>Cancel</Button></div>
   </div>);
 }
@@ -163,7 +163,7 @@ return(<div className="space-y-4">
       <h2 className="text-sm font-semibold text-white">Brand Applications ({demoApplications.length})</h2>
       <Button onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
     </div>
-    {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-400">{msg}</div>}
+    {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-ds-md p-3 text-sm text-emerald-400">{msg}</div>}
     {/* §Phase D — decision queue. Counts are DERIVED from the store (never
         hand-written) and every tile drills into the list below: a static number
         with no drill-down is incomplete. */}
@@ -185,7 +185,7 @@ return(<div className="space-y-4">
     <div className="relative">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600"/>
       <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by company name..."
-        className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"/>
+        className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"/>
     </div>
     {apps.length===0?(<div className="text-center py-12 text-zinc-500 text-sm">No applications found.</div>):(
       <div className="space-y-3">{apps.map(app=>(
@@ -218,7 +218,7 @@ return(<div className="space-y-4">
             </div>
             {app.referralSource&&<p className="text-ds-micro text-zinc-600 mb-3">Heard via: {app.referralSource}</p>}
             {app.adminNotes&&(
-              <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-2 mb-3">
+              <div className="bg-amber-500/5 border border-amber-500/20 rounded-ds-md p-2 mb-3">
                 <p className="text-ds-micro text-amber-300/80 font-medium mb-0.5">Admin notes:</p>
                 <p className="text-xs text-zinc-400">{app.adminNotes}</p>
               </div>

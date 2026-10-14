@@ -282,7 +282,7 @@ export function AcquisitionWorkflow({
       {error && <p className="text-ds-label text-red-300" data-notice="error">{error}</p>}
 
       {/* Why we are contacting this brand (BI evidence) -------------------- */}
-      <div className="bg-brass-500/5 border border-brass-500/15 rounded-lg p-3" data-section="evidence">
+      <div className="bg-brass-500/5 border border-brass-500/15 rounded-ds-md p-3" data-section="evidence">
         <p className="text-ds-micro font-semibold text-brass-300 uppercase mb-1">Why we are contacting this brand — BI evidence</p>
         {whyContact ? (
           <pre className="text-ds-label text-brass-300/90 whitespace-pre-wrap font-sans leading-relaxed">{whyContact}</pre>
@@ -296,7 +296,7 @@ export function AcquisitionWorkflow({
 
       {/* Canonical BI intelligence — read live by reference (Phase D2) ------- */}
       <div
-        className="border border-white/[0.06] rounded-lg p-3 space-y-2"
+        className="border border-white/[0.06] rounded-ds-md p-3 space-y-2"
         data-section="intelligence"
         data-asin-count={intel.digest.asinCount}
         data-contact-count={intel.digest.contactCount}
@@ -320,7 +320,7 @@ export function AcquisitionWorkflow({
             <span
               key={f.key}
               data-score-factor={f.key}
-              className="text-ds-micro bg-white/[0.04] border border-white/[0.06] rounded px-1.5 py-0.5 text-zinc-400"
+              className="text-ds-micro bg-white/[0.04] border border-white/[0.06] rounded-ds-sm px-1.5 py-0.5 text-zinc-400"
             >
               {f.label} <span className="text-zinc-200 font-mono">{intel.digest.scoreFactors[f.key]}</span>
             </span>
@@ -436,7 +436,7 @@ export function AcquisitionWorkflow({
 
       {/* Contact / targeting ---------------------------------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" data-section="targeting">
-        <div className="bg-ink-850 border border-white/[0.06] rounded-lg p-2.5">
+        <div className="bg-ink-850 border border-white/[0.06] rounded-ds-md p-2.5">
           <p className="text-ds-micro text-zinc-500 uppercase">Contact / decision-maker</p>
           <p className="text-xs text-zinc-200 mt-0.5">
             {contact ? `${contact.name}${contact.jobTitle ? `, ${contact.jobTitle}` : ''}` : 'Not identified in the BI record'}
@@ -445,7 +445,7 @@ export function AcquisitionWorkflow({
             {contact?.email ?? 'hello@….example placeholder until a contact email is verified'}
           </p>
         </div>
-        <div className="bg-ink-850 border border-white/[0.06] rounded-lg p-2.5">
+        <div className="bg-ink-850 border border-white/[0.06] rounded-ds-md p-2.5">
           <p className="text-ds-micro text-zinc-500 uppercase">Channel</p>
           <p className="text-xs text-zinc-200 mt-0.5">
             {current?.channel ?? 'email'} · {describeOutreachProvider(resolved.providerState)}
@@ -455,7 +455,7 @@ export function AcquisitionWorkflow({
       </div>
 
       {/* Recommendation + human approval ---------------------------------- */}
-      <div className="border border-white/[0.06] rounded-lg p-3 space-y-2" data-section="recommendation">
+      <div className="border border-white/[0.06] rounded-ds-md p-3 space-y-2" data-section="recommendation">
         <div className="flex items-center justify-between">
           <p className="text-ds-micro font-semibold text-zinc-400 uppercase">Outreach recommendation</p>
           {current && (
@@ -474,7 +474,7 @@ export function AcquisitionWorkflow({
               onChange={(e) => setBodyDraft(e.target.value)}
               disabled={!canApprove}
               rows={8}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 disabled:opacity-70"
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 disabled:opacity-70"
             />
           </>
         ) : (
@@ -500,7 +500,7 @@ export function AcquisitionWorkflow({
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="Rejection reason"
-                className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-ds-label text-white"
+                className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-ds-label text-white"
               />
               <Button className="text-xs" variant="danger" data-state="reject" onClick={handleReject} disabled={!canCurrentUserMutate}>
                 <XCircle className="w-3.5 h-3.5 mr-1.5" />Reject
@@ -529,14 +529,14 @@ export function AcquisitionWorkflow({
       </div>
 
       {/* Responses -------------------------------------------------------- */}
-      <div className="border border-white/[0.06] rounded-lg p-3" data-section="responses">
+      <div className="border border-white/[0.06] rounded-ds-md p-3" data-section="responses">
         <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Responses ({responses.length})</p>
         {responses.length === 0 ? (
           <p className="text-ds-label text-zinc-600">No response recorded yet.</p>
         ) : (
           <div className="space-y-1.5">
             {responses.map((r) => (
-              <div key={r.id} className="bg-ink-850 border border-white/[0.06] rounded-lg p-2">
+              <div key={r.id} className="bg-ink-850 border border-white/[0.06] rounded-ds-md p-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className={cn('text-ds-micro', r.wantsHuman ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.05] text-zinc-300')}>
                     {r.wantsHuman ? 'hot lead' : 'reply'}
@@ -557,7 +557,7 @@ export function AcquisitionWorkflow({
       </div>
 
       {/* Opportunity ------------------------------------------------------ */}
-      <div className="border border-white/[0.06] rounded-lg p-3" data-section="opportunity">
+      <div className="border border-white/[0.06] rounded-ds-md p-3" data-section="opportunity">
         <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Opportunity</p>
         {!opportunity ? (
           <p className="text-ds-label text-zinc-600">No opportunity yet — it is created from a qualified brand response.</p>
@@ -597,7 +597,7 @@ export function AcquisitionWorkflow({
       </div>
 
       {/* §Phase E1 — onboarding (opportunity → operational brand tenant) ---- */}
-      <div className="border border-white/[0.06] rounded-lg p-3" data-section="onboarding">
+      <div className="border border-white/[0.06] rounded-ds-md p-3" data-section="onboarding">
         <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Brand onboarding</p>
         {!opportunity ? (
           <p className="text-ds-label text-zinc-600">Onboarding starts from a qualified opportunity.</p>
@@ -691,7 +691,7 @@ export function AcquisitionWorkflow({
 
       {/* Relationship timeline + the ONE canonical message thread --------- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2" data-section="relationship">
-        <div className="border border-white/[0.06] rounded-lg p-3">
+        <div className="border border-white/[0.06] rounded-ds-md p-3">
           <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Acquisition timeline ({events.length})</p>
           {events.length === 0 ? (
             <p className="text-ds-label text-zinc-600">No acquisition events yet.</p>
@@ -707,7 +707,7 @@ export function AcquisitionWorkflow({
             </div>
           )}
         </div>
-        <div className="border border-white/[0.06] rounded-lg p-3">
+        <div className="border border-white/[0.06] rounded-ds-md p-3">
           <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1 flex items-center gap-1">
             <Mail className="w-3 h-3" /> Canonical conversation ({messages.length})
           </p>
@@ -719,7 +719,7 @@ export function AcquisitionWorkflow({
                 <div
                   key={m.id}
                   className={cn(
-                    'rounded-md px-2 py-1.5 text-ds-label',
+                    'rounded-ds-sm px-2 py-1.5 text-ds-label',
                     m.direction === 'outbound' ? 'bg-brass-500/10 text-zinc-300' : 'bg-white/[0.04] text-zinc-400'
                   )}
                 >

@@ -221,7 +221,7 @@ export function PartnershipsCentre() {
             <p className="text-ds-label text-zinc-400">
               <span className="text-zinc-500">Subject:</span> {draft.subject}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-white/[0.06] rounded-lg p-3">
+            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-white/[0.06] rounded-ds-md p-3">
               {draft.text}
             </pre>
             <p className="text-ds-micro text-zinc-500">

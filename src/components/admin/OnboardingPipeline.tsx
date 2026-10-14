@@ -130,7 +130,7 @@ export function OnboardingPipeline() {
               data-pipeline-filter={chip.key}
               onClick={() => setFilter(chip.key)}
               className={cn(
-                'px-2 py-1 rounded-md border transition-colors',
+                'px-2 py-1 rounded-ds-sm border transition-colors',
                 filter === chip.key
                   ? 'bg-brass-500/15 text-brass border-brass/30'
                   : 'text-zinc-400 border-white/[0.08] hover:text-white'
@@ -240,7 +240,7 @@ function OnboardingDetail({
 }) {
   const o = row.onboarding;
   return (
-    <div className="border border-white/[0.06] rounded-lg p-3 mb-2 space-y-2" data-section="onboarding-detail">
+    <div className="border border-white/[0.06] rounded-ds-md p-3 mb-2 space-y-2" data-section="onboarding-detail">
       {row.opportunity && (
         <p className="text-ds-micro text-zinc-400">
           Originating opportunity{' '}

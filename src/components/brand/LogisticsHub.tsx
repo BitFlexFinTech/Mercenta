@@ -554,11 +554,11 @@ function ShipmentTrackingTimeline({
                   <div className="truncate text-ds-body font-medium text-zinc-200">{p.name}</div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-zinc-500">
                     <span>
-                      SKU: <code className="rounded bg-white/[0.06] px-1 font-mono">{p.sku}</code>
+                      SKU: <code className="rounded-ds-sm bg-white/[0.06] px-1 font-mono">{p.sku}</code>
                     </span>
                     <span>
                       EAN:{' '}
-                      <code className="rounded bg-white/[0.06] px-1 font-mono">
+                      <code className="rounded-ds-sm bg-white/[0.06] px-1 font-mono">
                         {p.barcode || '—'}
                       </code>
                     </span>

@@ -49,7 +49,7 @@ export function ShippingCostEstimate(props: ShippingEstimateProps) {
 
   return (
     <div className={cn(
-      'bg-ink-900 rounded-lg border border-white/[0.06]',
+      'bg-ink-900 rounded-ds-md border border-white/[0.06]',
       props.compact ? 'p-2.5' : 'p-3',
     )}>
       <div className="flex items-center gap-1.5 mb-1.5">

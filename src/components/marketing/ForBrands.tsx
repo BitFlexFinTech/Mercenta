@@ -68,7 +68,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
               {PUBLIC_BRAND_SPLIT.map((row, i) => (
                 <div
                   key={row.keep}
-                  className="rounded-xl border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
                   style={{ borderTopColor: CARRIED_DOMAIN[i % CARRIED_DOMAIN.length] }}
                 >
                   <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">You keep</p>
@@ -98,7 +98,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
             </p>
             <button
               onClick={() => onNavigate('explore-uk-market-fit')}
-              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
             >
               {EXPLORE_UK_MARKET_FIT_CTA}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

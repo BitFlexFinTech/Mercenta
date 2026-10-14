@@ -230,7 +230,7 @@ function HealthPanel({
   }
 
   return (
-    <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-1 text-ds-label">
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 space-y-1 text-ds-label">
       <div className="flex items-center justify-between">
         <span className="text-zinc-500">Auth</span>
         <span className={health.authValid ? 'text-emerald-300' : 'text-red-300'}>
@@ -524,7 +524,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
                   key={opt.id}
                   onClick={() => setProvider(opt.id)}
                   className={cn(
-                    'text-left text-sm px-3 py-2.5 rounded-lg border transition-colors',
+                    'text-left text-sm px-3 py-2.5 rounded-ds-md border transition-colors',
                     provider === opt.id
                       ? 'border-brass-500/50 bg-brass-500/10 text-white'
                       : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
@@ -546,12 +546,12 @@ function ConnectWizard({ id, onClose }: WizardProps) {
               placeholder="Public application/client ID — not a secret"
             />
             {state?.status === 'code_received' && receivedCode ? (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-200 leading-relaxed">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-xs text-amber-200 leading-relaxed">
                 <strong>Authorization code received.</strong> Exchange it for
                 tokens via the server-side Edge Function to complete the connection.
               </div>
             ) : (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200 leading-relaxed">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-blue-200 leading-relaxed">
                 Clicking connect opens the provider's real consent screen in a
                 popup. The authorization code is exchanged server-side by the
                 <strong> spapi-token-exchange</strong> function and stored encrypted
@@ -584,7 +584,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
         )}
 
         {stepError && (
-          <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-300 flex items-start gap-2">
+          <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300 flex items-start gap-2">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             <span>{stepError}</span>
           </div>
@@ -745,7 +745,7 @@ export function IntegrationsPanel() {
         }
       />
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200 flex items-start gap-2">
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-blue-200 flex items-start gap-2">
         <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live OAuth exchanges and test calls run as server-side Edge Functions with
@@ -791,7 +791,7 @@ export function IntegrationsPanel() {
       {attentionIds.length > 0 && (
         <div
           role="alert"
-          className="bg-red-500/10 border border-red-500/25 rounded-lg p-3 text-xs text-red-200 flex items-start gap-2"
+          className="bg-red-500/10 border border-red-500/25 rounded-ds-md p-3 text-xs text-red-200 flex items-start gap-2"
         >
           <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>
@@ -867,7 +867,7 @@ export function IntegrationsPanel() {
               </div>
 
               {state.status === 'connected' && (
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 mb-3 space-y-1">
+                <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 mb-3 space-y-1">
                   {Object.entries(state.metadata ?? {})
                     .filter(([k]) => k !== 'sandbox')
                     .map(([k, v]) => (
@@ -888,7 +888,7 @@ export function IntegrationsPanel() {
               )}
 
               {state.error && (
-                <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 text-ds-label text-red-300">
+                <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-ds-md p-2.5 text-ds-label text-red-300">
                   {state.error}
                 </div>
               )}
@@ -905,7 +905,7 @@ export function IntegrationsPanel() {
                   It remains a HINT, never a status: Mercenta holding a key is not
                   a verified connection, and it is never rendered as one. */}
               {serverSecrets[id] === true && mode !== 'live' && !connected && (
-                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
                   <strong className="text-zinc-300">Server-side key present.</strong>{' '}
                   Mercenta holds a key for {def.name} on the server ({serverSecretNameFor(id) ?? 'a Vault secret'}),
                   so the live test call can run. Holding a key is not a verified connection —
@@ -915,13 +915,13 @@ export function IntegrationsPanel() {
 
               {/* §Priority-1 — provider control plane: simulation mode + safe mock config */}
               {mode === 'simulation' && (
-                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-ds-micro text-amber-200 leading-relaxed">
+                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-micro text-amber-200 leading-relaxed">
                   <strong>Simulation mode.</strong> No live call is made and no real credential is
                   used or stored. Safe mock configuration: {SIM_MOCK_LABELS[`${id}:${state.provider ?? ''}`] ?? 'deterministic mock adapter (see workflow surfaces)'}. Enter real credentials below to switch to LIVE later — no code change.
                 </div>
               )}
               {state.disabled && (
-                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-lg p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
                   <strong>Disabled.</strong> Configuration kept; no workflow uses this provider.
                 </div>
               )}

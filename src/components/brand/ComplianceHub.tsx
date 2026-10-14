@@ -122,7 +122,7 @@ export function ComplianceHub() {
       {/* Importer of Record — handled by Mercenta, never the brand */}
       <Card title="Importer of Record — handled by Mercenta">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-1 pb-1">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span className="text-xs font-medium text-white">UK EORI Number</span>
@@ -132,7 +132,7 @@ export function ComplianceHub() {
               You never need to register.
             </p>
           </div>
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span className="text-xs font-medium text-white">UK VAT Registration</span>
@@ -174,7 +174,7 @@ export function ComplianceHub() {
         )}
         <div className="space-y-4">
           {!posQuery.isPending && docBundles.map(({ po, brandName, docs }) => (
-            <div key={po.id} className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-4">
+            <div key={po.id} className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-4">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <span className="font-mono text-xs text-brass">{po.poNumber}</span>
@@ -192,7 +192,7 @@ export function ComplianceHub() {
                       key={doc.type + confirmTick}
                       onClick={() => { setPreviewDoc(doc); setPreviewPoId(po.id); }}
                       className={cn(
-                        'text-left bg-ink-900 border rounded-lg p-3 transition-colors group',
+                        'text-left bg-ink-900 border rounded-ds-md p-3 transition-colors group',
                         confirmed ? 'border-emerald-500/30' : 'border-white/[0.06] hover:border-brass/40'
                       )}
                     >
@@ -393,7 +393,7 @@ function ComplianceUploadCard({
   return (
     <Card title="Compliance Documents" subtitle="Upload required documents to clear the compliance gate">
       <div className="space-y-3 p-1">
-        <div className={cn('rounded-lg p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-emerald-200 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-200 border border-amber-500/20')}>
+        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-emerald-200 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-200 border border-amber-500/20')}>
           {gate.cleared ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>

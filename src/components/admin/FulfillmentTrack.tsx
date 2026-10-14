@@ -158,12 +158,12 @@ export function FulfillmentTrackPanel() {
       />
 
       {/* Tab bar */}
-      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-xl p-1">
+      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-ds-lg p-1">
         {TABS.map(function(tab) {
           const Icon = tab.icon;
           return (
             <button key={tab.id} onClick={function() { setActiveTab(tab.id); }}
-              className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors',
+              className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md text-xs font-medium transition-colors',
                 activeTab === tab.id ? 'bg-brass-500 text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]')}>
               <Icon className="w-3.5 h-3.5" /> {tab.label}
             </button>
@@ -172,7 +172,7 @@ export function FulfillmentTrackPanel() {
         <div className="ml-auto flex items-center gap-2">
           {recalcMsg && <span className="text-ds-label text-emerald-400">{recalcMsg}</span>}
           <button onClick={handleRecalc}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-colors">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-ds-md text-xs font-medium bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-colors">
             <RefreshCw className="w-3.5 h-3.5" /> Bulk Recalculate
           </button>
         </div>
@@ -185,7 +185,7 @@ export function FulfillmentTrackPanel() {
         <select
           value={trackFilter}
           onChange={(e) => setTrackFilter(e.target.value as FulfillmentTrack | 'all')}
-          className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-white cursor-pointer"
+          className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1.5 text-xs text-white cursor-pointer"
         >
           {TRACK_FILTERS.map((f) => (
             <option key={f.value} value={f.value}>
@@ -200,7 +200,7 @@ export function FulfillmentTrackPanel() {
             value={minScore}
             onChange={(e) => setMinScore(e.target.value)}
             placeholder="0"
-            className="w-16 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white"
+            className="w-16 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white"
           />
         </label>
         <label className="text-xs text-zinc-500 flex items-center gap-1.5">
@@ -210,7 +210,7 @@ export function FulfillmentTrackPanel() {
             value={maxScore}
             onChange={(e) => setMaxScore(e.target.value)}
             placeholder="100"
-            className="w-16 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white"
+            className="w-16 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white"
           />
         </label>
         <span className="text-ds-label text-zinc-600 ml-auto">
@@ -385,7 +385,7 @@ function DetailView({
           );
         })()}
         {borderline && (
-          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2">
+          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
             <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             Score falls in the 55–74 borderline band — auto-assignment is held for
             manual review and batched into the daily digest rather than applied silently.
@@ -404,7 +404,7 @@ function DetailView({
             <select
               value={overrideTrack}
               onChange={(e) => setOverrideTrack(e.target.value as FulfillmentTrack)}
-              className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer"
+              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white cursor-pointer"
             >
               <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
               <option value="financed">{fulfillmentTrackLabel('financed')}</option>
@@ -415,14 +415,14 @@ function DetailView({
               value={overrideReason}
               onChange={(e) => setOverrideReason(e.target.value)}
               placeholder="Reason (required — logged to audit trail)"
-              className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white"
+              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white"
             />
           </div>
           <button
             onClick={() => onOverride(overrideTrack, overrideReason)}
             disabled={!overrideReason.trim()}
             className={cn(
-              'text-xs font-medium px-4 py-2 rounded-lg transition-colors',
+              'text-xs font-medium px-4 py-2 rounded-ds-md transition-colors',
               overrideReason.trim()
                 ? 'bg-brass-500 hover:bg-brass-400 text-white'
                 : 'bg-white/[0.05] text-zinc-600 cursor-not-allowed'
@@ -537,7 +537,7 @@ function WhatIfSimulator() {
           <div>
             <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Years Exporting</label>
             <input type="number" value={inputs.yearsExporting} onChange={function(e) { set('yearsExporting', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white" />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={inputs.priorUkEuExport} onChange={function(e) { set('priorUkEuExport', e.target.checked); }} />
@@ -550,17 +550,17 @@ function WhatIfSimulator() {
           <div>
             <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Annual Revenue (GBP)</label>
             <input type="number" value={inputs.annualRevenueGbp} onChange={function(e) { set('annualRevenueGbp', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white" />
           </div>
           <div>
             <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Catalog Size (SKUs)</label>
             <input type="number" value={inputs.catalogSize} onChange={function(e) { set('catalogSize', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white" />
           </div>
           <div>
             <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Working Capital</label>
             <select value={inputs.workingCapitalAnswer} onChange={function(e) { set('workingCapitalAnswer', e.target.value as any); }}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer">
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white cursor-pointer">
               <option value="yes">Yes</option><option value="partially">Partially</option><option value="no">No</option>
             </select>
           </div>
@@ -607,14 +607,14 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
     <Card title="Score History" subtitle="Score changes tracked over time">
       <div className="space-y-3 p-1">
         <select value={selectedBrandId ?? ''} onChange={function(e) { setSelectedBrandId(e.target.value || null); }}
-          className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-white cursor-pointer">
+          className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1.5 text-xs text-white cursor-pointer">
           <option value="">Select a brand...</option>
           {rows.map(function(r) {
             return <option key={r.score.brandId} value={r.score.brandId}>{r.brand?.profile.businessName ?? r.score.brandId}</option>;
           })}
         </select>
         {selected && (
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 space-y-3">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-semibold text-white">{selected.brand?.profile.businessName ?? selected.score.brandId}</span>
@@ -626,14 +626,14 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-ds-micro">
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Track:</span> <span className="text-white">{selected.score.track.replace(/_/g, ' ')}</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Override:</span> <span className="text-white">{selected.score.manualOverride ? 'Yes' : 'No'}</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">History:</span> <span className="text-white">{selected.score.tradingHistoryScore}/20</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Export:</span> <span className="text-white">{selected.score.exportExperienceScore}/15</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Scale:</span> <span className="text-white">{selected.score.scaleScore}/20</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Working Cap:</span> <span className="text-white">{selected.score.workingCapitalScore}/20</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Category:</span> <span className="text-white">{selected.score.categoryRiskScore}/15</span></div>
-              <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Reliability:</span> <span className="text-white">{selected.score.reliabilityScore}/10</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Track:</span> <span className="text-white">{selected.score.track.replace(/_/g, ' ')}</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Override:</span> <span className="text-white">{selected.score.manualOverride ? 'Yes' : 'No'}</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">History:</span> <span className="text-white">{selected.score.tradingHistoryScore}/20</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Export:</span> <span className="text-white">{selected.score.exportExperienceScore}/15</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Scale:</span> <span className="text-white">{selected.score.scaleScore}/20</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Working Cap:</span> <span className="text-white">{selected.score.workingCapitalScore}/20</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Category:</span> <span className="text-white">{selected.score.categoryRiskScore}/15</span></div>
+              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Reliability:</span> <span className="text-white">{selected.score.reliabilityScore}/10</span></div>
             </div>
           </div>
         )}

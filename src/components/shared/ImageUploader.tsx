@@ -44,7 +44,7 @@ function ImageUploader({
 
   if (compact) {
     return (
-      <div className={cn('flex items-center gap-2 bg-ink-900 rounded-lg p-2', editable && 'hover:bg-white/[0.04]')}>
+      <div className={cn('flex items-center gap-2 bg-ink-900 rounded-ds-md p-2', editable && 'hover:bg-white/[0.04]')}>
         <span className="text-lg">{currentImage?.url ?? '—'}</span>
         <div className="flex-1 min-w-0">
           <span className="text-ds-micro font-medium text-zinc-300">{label}</span>
@@ -61,7 +61,7 @@ function ImageUploader({
   }
 
   return (
-    <div className={cn('bg-ink-900 border rounded-lg p-3', compliant ? 'border-white/[0.06]' : 'border-amber-500/20')}>
+    <div className={cn('bg-ink-900 border rounded-ds-md p-3', compliant ? 'border-white/[0.06]' : 'border-amber-500/20')}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-lg">{currentImage?.url ?? '—'}</span>

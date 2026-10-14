@@ -83,7 +83,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                 <ChevronDown className={cn('w-3 h-3 transition-transform', openDropdown === item.page && 'rotate-180')} />
               </button>
               {openDropdown === item.page && (
-                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-850 border border-white/[0.08] rounded-xl shadow-2xl py-2 animate-fade-in">
+                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-850 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay py-2 animate-fade-in">
                   {item.children.map((child) => (
                     <a
                       key={child.page}
@@ -104,7 +104,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           <button
             onClick={onOpenPortal}
             data-testid={PRE_AUDIT_TESTIDS.headerUtility}
-            className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-lg transition-colors"
+            className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-ds-md transition-colors"
           >
             Partner Login
           </button>
@@ -143,7 +143,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           )}
           <button
             onClick={() => { setMobileOpen(false); onOpenPortal(); }}
-            className="w-full text-sm font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-2 rounded-lg transition-colors"
+            className="w-full text-sm font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-2 rounded-ds-md transition-colors"
           >
             Partner Login
           </button>

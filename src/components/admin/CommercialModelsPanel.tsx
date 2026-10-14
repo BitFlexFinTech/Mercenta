@@ -109,7 +109,7 @@ export function CommercialModelsPanel() {
           are always audited.
         </p>
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-lg border border-white/[0.08] p-3" data-testid="model-a-illustration">
+          <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="model-a-illustration">
             <div className="flex items-center gap-2 mb-1.5">
               <Badge className="bg-emerald-500/15 text-emerald-300">Model A</Badge>
               <span className="text-xs font-medium text-white">
@@ -125,7 +125,7 @@ export function CommercialModelsPanel() {
             <p className="text-ds-micro text-zinc-500 mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
           </div>
 
-          <div className="rounded-lg border border-white/[0.08] p-3" data-testid="model-b-illustration">
+          <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="model-b-illustration">
             <div className="flex items-center gap-2 mb-1.5">
               <Badge className="bg-blue-500/15 text-blue-300">Model B</Badge>
               <span className="text-xs font-medium text-white">
@@ -151,7 +151,7 @@ export function CommercialModelsPanel() {
           </div>
         </div>
 
-        <div className="mt-3 rounded-lg border border-white/[0.08] p-3" data-testid="shipping-economics">
+        <div className="mt-3 rounded-ds-md border border-white/[0.08] p-3" data-testid="shipping-economics">
           <p className="text-xs font-medium text-white mb-1">
             Shipping economics — canonical terms, derived (never hardcoded)
           </p>

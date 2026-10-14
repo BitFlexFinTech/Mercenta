@@ -151,7 +151,7 @@ export function MarketingHub() {
         description="Lead sourcing, ICP fit scoring and outreach sequencing."
       />
 
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2">
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live automated sourcing is not wired yet — CSV import is the
@@ -262,7 +262,7 @@ export function MarketingHub() {
             )}
           </div>
           {discoveryResult && discoveryResult.leads.length > 0 && (
-            <div className="border border-white/[0.06] rounded-lg divide-y divide-white/[0.04] max-h-48 overflow-y-auto">
+            <div className="border border-white/[0.06] rounded-ds-md divide-y divide-white/[0.04] max-h-48 overflow-y-auto">
               {discoveryResult.leads.map((l, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-2">
                   <span className="text-xs text-zinc-300">{l.name}</span>
@@ -346,7 +346,7 @@ export function MarketingHub() {
               (l) => (l.outreachStatus as PipelineStage) === stage
             );
             return (
-              <div key={stage} className="bg-ink-900 border border-white/[0.05] rounded-lg p-2.5">
+              <div key={stage} className="bg-ink-900 border border-white/[0.05] rounded-ds-md p-2.5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-ds-micro font-medium text-zinc-400">{stage}</span>
                   <span className="font-mono text-ds-micro text-zinc-600">
@@ -357,7 +357,7 @@ export function MarketingHub() {
                   {stageLeads.map((lead) => (
                     <div
                       key={lead.id}
-                      className="bg-white/[0.03] rounded-md px-2 py-1.5 border border-white/[0.04]"
+                      className="bg-white/[0.03] rounded-ds-sm px-2 py-1.5 border border-white/[0.04]"
                     >
                       <div className="text-ds-label font-medium text-white truncate">
                         {lead.company}
@@ -375,7 +375,7 @@ export function MarketingHub() {
             );
           })}
         </div>
-        <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-2.5 text-ds-micro text-blue-200 flex items-start gap-1.5">
+        <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-2.5 text-ds-micro text-blue-200 flex items-start gap-1.5">
           <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
           Sequence pauses automatically the moment a lead replies — replied and
           booked leads never receive automated follow-ups.

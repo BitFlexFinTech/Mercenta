@@ -68,7 +68,7 @@ return (
 
       {phase === 'idle' && (
         <div>
-          <div className={cn('border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-brass-500/60 bg-brass-500/5' : 'border-white/[0.12] hover:border-white/[0.2]')}
+          <div className={cn('border-2 border-dashed rounded-ds-md p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-brass-500/60 bg-brass-500/5' : 'border-white/[0.12] hover:border-white/[0.2]')}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) void handleFile(e.dataTransfer.files[0]); }}
@@ -104,7 +104,7 @@ return (
             )}
           </div>
 
-          <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-lg">
+          <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-ds-md">
             <table className="w-full text-ds-micro">
               <thead className="sticky top-0 bg-ink-850">
                 <tr className="border-b border-white/[0.06] text-zinc-500">
@@ -157,7 +157,7 @@ return (
       )}
 
       {phase === 'done' && summary?.commit?.ok && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-center gap-2">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span className="text-xs text-emerald-200">Successfully imported {summary.commit.imported} product(s) into the catalog.</span>
         </div>

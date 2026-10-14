@@ -69,12 +69,12 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
           {/* Col 1 — Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <img src={logoLockup} alt={BRAND_NAME} className="h-8 rounded-md" />
+              <img src={logoLockup} alt={BRAND_NAME} className="h-8 rounded-ds-sm" />
             </div>
             <p className="text-ds-label text-steel leading-relaxed mb-4">
               {PUBLIC_PROMISE}
             </p>
-            <button onClick={onOpenPortal} className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-lg transition-colors">
+            <button onClick={onOpenPortal} className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-ds-md transition-colors">
               Request Partner Access
             </button>
           </div>

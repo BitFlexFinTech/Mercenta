@@ -148,7 +148,7 @@ function UnlockedPipeline() {
                   {new Date(sub.submittedAt).toLocaleDateString()}
                 </div>
                 {sub.status === 'rejected' && sub.rejectionReason && (
-                  <div className="mt-1.5 bg-red-500/10 border border-red-500/20 rounded p-2 text-ds-label text-red-300 flex items-start gap-1.5">
+                  <div className="mt-1.5 bg-red-500/10 border border-red-500/20 rounded-ds-sm p-2 text-ds-label text-red-300 flex items-start gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                     <span>
                       {sub.rejectionReason}
@@ -170,7 +170,7 @@ function UnlockedPipeline() {
                 </StatusBadge>
                 {/* §Phase E5 (G2) — truthful provenance on the admin submission list. */}
                 {sub.simulated && (
-                  <span className="text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                  <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
                 )}
                 {/* §Phase E5 (G9) — ONE canonical latest-submission derivation: the
                     SAME `demoStore.latestSubmissionForProduct` the E3 domain and the
@@ -199,7 +199,7 @@ function UnlockedPipeline() {
                   <span className="font-mono text-xs text-white">{po.poNumber}</span>
                   {/* §Phase E5 (G2) — simulated POs are identified, never implied real. */}
                   {po.simulated === true && (
-                    <span className="text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                    <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
                   )}
                   <span className="text-ds-micro text-zinc-500">{brandNames.get(po.brandId) ?? po.brandId}</span>
                 </div>
@@ -358,7 +358,7 @@ function UnlockedPipeline() {
 
         {/* Dispute note entry */}
         {disputingId && (
-          <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
+          <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
             <p className="text-ds-label text-blue-200">
               Opening a dispute marks this deduction as disputed and records your
               pushback notes for tracking against the retail channel.
@@ -368,7 +368,7 @@ function UnlockedPipeline() {
               onChange={(e) => setDisputeNotes(e.target.value)}
               rows={2}
               placeholder="Evidence / grounds for the dispute…"
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white"
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white"
             />
             <Button className="text-xs" disabled={!disputeNotes.trim()} onClick={() => void openDispute(disputingId)}>
               Record dispute
@@ -447,7 +447,7 @@ export function DeliveryReconciliation({
                 setReceived({});
                 setResult(null);
               }}
-              className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300"
+              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="">Select a PO…</option>
               {eligible.map((p) => (
@@ -478,7 +478,7 @@ export function DeliveryReconciliation({
                           setReceived((prev) => ({ ...prev, [li.sku]: Number(e.target.value) }))
                         }
                         disabled={!canCurrentUserMutate}
-                        className="w-28 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-ds-label text-white disabled:opacity-50"
+                        className="w-28 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-label text-white disabled:opacity-50"
                       />
                     </div>
                   );
@@ -502,7 +502,7 @@ export function DeliveryReconciliation({
             {result && (
               <div
                 className={cn(
-                  'rounded-lg p-3 text-ds-label border',
+                  'rounded-ds-md p-3 text-ds-label border',
                   result.shortfalls.length === 0
                     ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
                     : 'bg-amber-500/10 border-amber-500/20 text-amber-200'

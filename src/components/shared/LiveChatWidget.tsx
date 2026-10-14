@@ -101,7 +101,7 @@ export function LiveChatWidget() {
           role="dialog"
           aria-label="Mercenta support chat"
           data-testid="live-chat-panel"
-          className="absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-ink-850 shadow-2xl animate-fade-in"
+          className="absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-ds-lg border border-white/[0.08] bg-ink-850 shadow-ds-overlay animate-fade-in"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-ink-900">
@@ -130,7 +130,7 @@ export function LiveChatWidget() {
             )}
             {threadMessages.map((m) => (
               <div key={m.id} className={cn('flex', m.direction === 'outbound' ? 'justify-start' : 'justify-end')}>
-                <div className={cn('max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed',
+                <div className={cn('max-w-[85%] rounded-ds-lg px-3 py-2 text-xs leading-relaxed',
                   m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-brass-500 text-white'
                 )}>
                   <p className="whitespace-pre-wrap">{m.body}</p>
@@ -155,12 +155,12 @@ export function LiveChatWidget() {
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder="Type your message…"
-                className="flex-1 bg-ink-850 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                className="flex-1 bg-ink-850 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
               />
               <button
                 onClick={handleSend}
                 disabled={!draft.trim()}
-                className="w-8 h-8 rounded-lg bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center transition-colors flex-shrink-0"
+                className="w-8 h-8 rounded-ds-md bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-white flex items-center justify-center transition-colors flex-shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>

@@ -258,7 +258,7 @@ export function FounderInvestorCentre() {
         <Card title="Difficult questions — practice list">
           <div className="space-y-2" data-testid="founder-questions">
             {FOUNDER_DIFFICULT_QUESTIONS.map((q) => (
-              <div key={q.id} className="border border-white/[0.06] rounded-lg">
+              <div key={q.id} className="border border-white/[0.06] rounded-ds-md">
                 <button
                   type="button"
                   data-testid={`founder-question-${q.id}`}

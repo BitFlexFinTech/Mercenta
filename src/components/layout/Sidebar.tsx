@@ -268,7 +268,7 @@ export function Sidebar({
                       aria-expanded={!isCollapsed}
                       aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${section.label}`}
                       data-testid={`nav-collapse-${section.label}`}
-                      className="mb-0.5 rounded p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
+                      className="mb-0.5 rounded-ds-sm p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
                     >
                       <ChevronDown
                         className={cn(
@@ -352,7 +352,7 @@ export function Sidebar({
                           }
                           data-testid={`nav-pin-${item.id}`}
                           className={cn(
-                            'absolute right-1 top-1/2 -translate-y-1/2 rounded p-0.5 transition-ds duration-ds-fast',
+                            'absolute right-1 top-1/2 -translate-y-1/2 rounded-ds-sm p-0.5 transition-ds duration-ds-fast',
                             itemPinned
                               ? 'text-zinc-300 hover:text-white'
                               : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'

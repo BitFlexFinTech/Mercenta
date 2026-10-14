@@ -44,7 +44,7 @@ export function getCategoryNetPpmTarget(category?: ApprovedCategory): number {
 function CasePackSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
@@ -70,7 +70,7 @@ function CasePackSection() {
             packed in multi-packs for wholesale, configure the inner pack correctly —
             otherwise the system may calculate incorrect landed costs.
           </p>
-          <div className="bg-ink-900 rounded p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
+          <div className="bg-ink-900 rounded-ds-sm p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
             <p><span className="text-zinc-400">Example:</span> Marula Oil 50ml</p>
             <p className="pl-3">Inner pack: 6 units</p>
             <p className="pl-3">Case pack: 4 inners × 6 = <strong className="text-zinc-300">24 units per case</strong></p>
@@ -89,7 +89,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
   const target = getCategoryNetPpmTarget(category);
 
   return (
-    <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
@@ -115,7 +115,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
             It is the margin the channel makes on your products, and the number Mercenta
             negotiates your wholesale pricing against.
           </p>
-          <div className="bg-ink-900 rounded p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
+          <div className="bg-ink-900 rounded-ds-sm p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
             <p className="text-zinc-300 font-medium text-ds-label">Net PPM Formula</p>
             <p>Net PPM = ((ASP − COGS − Channel Fees) ÷ ASP) × 1000</p>
             <p className="text-zinc-600 mt-1.5">Where:</p>
@@ -150,7 +150,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
           </div>
 
           {/* ⚠ Cost-price lock-in warning — prominently flagged */}
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -184,7 +184,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
 function PackagingSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
       <button onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors">
         <span className="flex items-center gap-2 text-xs font-medium text-white">
@@ -195,7 +195,7 @@ function PackagingSection() {
       </button>
       {open && (
         <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
-          <div className="bg-ink-900 rounded p-2.5 space-y-2">
+          <div className="bg-ink-900 rounded-ds-sm p-2.5 space-y-2">
             <div>
               <p className="text-xs text-zinc-300 font-medium mb-1">Carton Marking</p>
               <ul className="list-disc list-inside text-ds-micro space-y-0.5">
@@ -237,7 +237,7 @@ function PackagingSection() {
 function PORejectionSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-lg overflow-hidden">
+    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
       <button onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors">
         <span className="flex items-center gap-2 text-xs font-medium text-white">
@@ -270,7 +270,7 @@ function PORejectionSection() {
             account, so it reviews avoidable rejections with the brand — stated as
             Mercenta's process and never as a channel rule.
           */}
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -286,7 +286,7 @@ function PORejectionSection() {
             `src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT.amendmentText`
             rather than re-typed here.
           */}
-          <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3">
+          <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3">
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -334,7 +334,7 @@ function PORejectionSection() {
 
 function RequiredReadingAck({ ack, setAck }: { ack: boolean; setAck: (v: boolean) => void }) {
   return (
-    <label className="flex items-start gap-2.5 cursor-pointer bg-ink-900 rounded-lg p-3 border border-white/[0.06] hover:border-brass-500/30 transition-colors">
+    <label className="flex items-start gap-2.5 cursor-pointer bg-ink-900 rounded-ds-md p-3 border border-white/[0.06] hover:border-brass-500/30 transition-colors">
       <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)}
         className="mt-0.5 accent-brass-500" />
       <div>

@@ -402,7 +402,7 @@ export function MercentaDoughnut({
               <li key={s.label} className="flex items-center gap-2 text-ds-label">
                 <span
                   aria-hidden="true"
-                  className="h-2 w-2 flex-shrink-0 rounded-sm"
+                  className="h-2 w-2 flex-shrink-0 rounded-ds-sm"
                   style={{ backgroundColor: color }}
                 />
                 <span className="min-w-0 flex-1 truncate text-zinc-300">{s.label}</span>

@@ -353,7 +353,7 @@ return (
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tickets…"
                 aria-label="Search tickets"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             {/* §Wave-3 Part 4 — the filter chip rows WRAP. They were single-line
                 `flex` rows inside a `p-0 overflow-hidden` card, so at 768px the
@@ -362,7 +362,7 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'open', 'pending', 'resolved'] as const).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
-                  className={'px-2 py-1 rounded-md ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
                   {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
@@ -370,7 +370,7 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'urgent', 'high', 'medium', 'low'] as const).map((p) => (
                 <button key={p} onClick={() => setPriorityFilter(p)}
-                  className={'px-2 py-1 rounded-md ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
                   {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
@@ -389,8 +389,8 @@ return (
                   </div>
                   <p className="text-ds-micro text-zinc-500 truncate">{t.lastMessagePreview}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className={'text-ds-micro px-1.5 py-0.5 rounded ' + SC[t.status]}>{t.status}</span>
-                    <span className={'text-ds-micro px-1.5 py-0.5 rounded ' + PB[t.priority]}>{t.priority}</span>
+                    <span className={'text-ds-micro px-1.5 py-0.5 rounded-ds-sm ' + SC[t.status]}>{t.status}</span>
+                    <span className={'text-ds-micro px-1.5 py-0.5 rounded-ds-sm ' + PB[t.priority]}>{t.priority}</span>
                     {sla && <span className={'text-ds-micro ' + sla.cls}>{sla.label}</span>}
                     {!t.seenByStaff && <span className="w-1.5 h-1.5 rounded-full bg-brass-500" />}
                   </div>
@@ -414,7 +414,7 @@ return (
                 </div>
                 <select value={selectedTicket.status} onChange={(e) => { updateTicketStatus(selectedTicket.id, e.target.value as TicketStatus, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket status"
-                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
                   {(['open', 'pending', 'resolved'] as const).map((s) => (<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>))}
                 </select>
               </div>
@@ -422,14 +422,14 @@ return (
                 <User className="w-3 h-3 text-zinc-500" />
                 <select value={selectedTicket.assignedToStaffId ?? ''} onChange={(e) => { assignTicket(selectedTicket.id, e.target.value, actingStaff?.id); bumpStore(); }}
                   aria-label="Assign ticket to"
-                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
                   <option value="">Unassigned</option>
                   {staff.filter((s: any) => s.active).map((s: any) => (<option key={s.id} value={s.id}>{s.name}</option>))}
                 </select>
                 <Filter className="w-3 h-3 text-zinc-500" />
                 <select value={selectedTicket.priority} onChange={(e) => { setTicketPriority(selectedTicket.id, e.target.value as TicketPriority, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket priority"
-                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
                   {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (<option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>))}
                 </select>
                 {selectedTicket.slaDeadline && (() => {
@@ -444,7 +444,7 @@ return (
                 {!helpdeskPending && ticketMessages.length === 0 && <p className="text-xs text-zinc-600 py-4">No messages yet.</p>}
                 {ticketMessages.map((m: any) => (
                   <div key={m.id} className={'flex ' + (m.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
-                    <div className={'max-w-[80%] rounded-xl px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-white/[0.04] text-zinc-300')}>
+                    <div className={'max-w-[80%] rounded-ds-lg px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-white/[0.04] text-zinc-300')}>
                       <p className="whitespace-pre-wrap">{m.body}</p>
                       <p className="mt-1 text-ds-micro text-zinc-500 font-mono">{new Date(m.createdAt).toLocaleString()}</p>
                     </div>
@@ -452,7 +452,7 @@ return (
                 ))}
               </div>
               {aiSuggestion && (
-                <div className="border border-brass-500/20 bg-brass-500/5 rounded-lg p-2.5">
+                <div className="border border-brass-500/20 bg-brass-500/5 rounded-ds-md p-2.5">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Bot className="w-3 h-3 text-brass-400" />
                     <span className="text-ds-micro font-medium text-brass-300">AI Suggested Reply</span>
@@ -466,7 +466,7 @@ return (
               <div className="space-y-2 pt-2 border-t border-white/[0.06]">
                 <textarea value={replyDraft} onChange={(e) => setReplyDraft(e.target.value)}
                   rows={3} placeholder="Type a reply…"
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40" />
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40" />
                 <div className="flex items-center justify-between">
                   {replyNote && <span className="text-ds-micro text-zinc-500">{replyNote}</span>}
                   <Button className="text-xs ml-auto" disabled={!replyDraft.trim()} onClick={handleSendReply}>

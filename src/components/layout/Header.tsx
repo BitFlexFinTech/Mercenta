@@ -194,7 +194,7 @@ export function Header({
       >
         <Search className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate text-left">Search records, destinations…</span>
-        <kbd className="flex-shrink-0 rounded border border-white/[0.12] px-1 py-0.5 font-mono text-ds-micro text-zinc-500">
+        <kbd className="flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1 py-0.5 font-mono text-ds-micro text-zinc-500">
           ⌘K
         </kbd>
       </button>

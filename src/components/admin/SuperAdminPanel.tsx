@@ -268,9 +268,9 @@ export function SuperAdminPanel() {
                   onClick={() => setActiveTab(tab.id)}
                   data-testid={`super-admin-tab-${tab.id}`}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    'flex items-center gap-2 px-3 py-1.5 rounded-ds-md text-xs font-medium transition-colors',
                     activeTab === tab.id
-                      ? 'bg-brass-500 text-white shadow-sm'
+                      ? 'bg-brass-500 text-white shadow-ds-subtle'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
                   )}
                 >
@@ -385,7 +385,7 @@ export function SuperAdminPanel() {
       <Card className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-ds-md bg-white/[0.04] flex items-center justify-center">
               <Globe2 className={cn('w-5 h-5', EU_MARKET_ENABLED ? 'text-emerald-400' : 'text-zinc-600')} />
             </div>
             <div>
@@ -418,7 +418,7 @@ export function SuperAdminPanel() {
         </p>
         <div className="space-y-2">
           {demoCarrierMarkup.map((cfg) => (
-            <div key={cfg.id} className="flex items-center gap-3 bg-ink-900 rounded-lg p-2.5">
+            <div key={cfg.id} className="flex items-center gap-3 bg-ink-900 rounded-ds-md p-2.5">
               <Truck className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <span className="text-xs font-medium text-white">{cfg.label}</span>
@@ -440,7 +440,7 @@ export function SuperAdminPanel() {
                     // Force re-render
                     setMarkupVersion((v) => v + 1);
                   }}
-                  className="w-20 bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-xs text-white text-right font-mono focus:outline-none focus:border-brass-500/40"
+                  className="w-20 bg-ink-850 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white text-right font-mono focus:outline-none focus:border-brass-500/40"
                 />
                 <span className="text-ds-micro text-zinc-500 w-4">%</span>
                 <button
@@ -449,7 +449,7 @@ export function SuperAdminPanel() {
                     setMarkupVersion((v) => v + 1);
                   }}
                   className={cn(
-                    'p-1 rounded text-ds-micro border transition-colors',
+                    'p-1 rounded-ds-sm text-ds-micro border transition-colors',
                     cfg.active
                       ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
                       : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
@@ -478,7 +478,7 @@ export function SuperAdminPanel() {
           <select
             value={actingStaffId}
             onChange={(e) => setActingStaffId(e.target.value)}
-            className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-white cursor-pointer"
+            className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1.5 text-xs text-white cursor-pointer"
           >
             {staff.map((s) => (
               <option key={s.id} value={s.id}>
@@ -610,7 +610,7 @@ export function SuperAdminPanel() {
                   value={member.role}
                   aria-label={`Role for ${member.name}`}
                   onChange={(e) => updateStaffRole(member.id, e.target.value as StaffRole)}
-                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
                 >
                   {ROLE_OPTIONS.map((r) => (
                     <option key={r.value} value={r.value} className="bg-ink-900">
@@ -628,7 +628,7 @@ export function SuperAdminPanel() {
                   value={member.channel}
                   aria-label={`Channel for ${member.name}`}
                   onChange={(e) => updateStaffChannel(member.id, e.target.value)}
-                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
                 >
                   {CHANNEL_OPTIONS.map((c) => (
                     <option key={c} value={c} className="bg-ink-900">
@@ -649,7 +649,7 @@ export function SuperAdminPanel() {
                     updateStaffTier(member.id, e.target.value as StaffMember['permissionTier'])
                   }
                   className={cn(
-                    'bg-ink-900 border rounded-md px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
+                    'bg-ink-900 border rounded-ds-sm px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
                     member.permissionTier === 'full'
                       ? 'border-emerald-500/30 text-emerald-300'
                       : 'border-amber-500/30 text-amber-300'
@@ -685,7 +685,7 @@ export function SuperAdminPanel() {
                 <span className="flex items-center justify-end gap-2">
                   <button
                     onClick={() => toggleStaffActive(member.id)}
-                    className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-400 transition-colors"
+                    className="p-1.5 rounded-ds-sm hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-400 transition-colors"
                     title={member.active ? 'Deactivate' : 'Activate'}
                     aria-label={member.active ? `Deactivate ${member.name}` : `Activate ${member.name}`}
                   >
@@ -693,7 +693,7 @@ export function SuperAdminPanel() {
                   </button>
                   <button
                     onClick={() => removeStaff(member.id)}
-                    className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-colors"
+                    className="p-1.5 rounded-ds-sm hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-colors"
                     title="Delete"
                     aria-label={`Delete ${member.name}`}
                   >

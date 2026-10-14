@@ -109,7 +109,7 @@ export function BrandIntelligenceStrategyPanel() {
             return (
               <div
                 key={id}
-                className="rounded-lg border border-white/[0.08] p-3"
+                className="rounded-ds-md border border-white/[0.08] p-3"
                 data-testid={`strategy-card-${id}`}
               >
                 <div className="flex items-center gap-2 mb-1.5">
@@ -291,7 +291,7 @@ export function BrandIntelligenceStrategyPanel() {
 
             {estimate && (
               <div
-                className="rounded-lg border border-white/[0.08] p-3 text-ds-label"
+                className="rounded-ds-md border border-white/[0.08] p-3 text-ds-label"
                 data-testid="admin-sales-estimate"
               >
                 <p className="text-xs font-medium text-white mb-1">

@@ -120,7 +120,7 @@ return (
 
       <Card title={chartTab === "revenue" ? "Monthly Revenue Trend" : "Monthly Volume Trend"}
         action={<div className="flex gap-1">{( ["revenue","volume"] as const).map((t) => (
-          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-md text-ds-micro font-medium transition-colors " + (chartTab === t ? "bg-brass-500/20 text-brass-400" : "text-zinc-500 hover:text-zinc-300")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
+          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-ds-sm text-ds-micro font-medium transition-colors " + (chartTab === t ? "bg-brass-500/20 text-brass-400" : "text-zinc-500 hover:text-zinc-300")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
         ))}</div>}>
         <div className="h-[280px]" onClick={() => setDrillCard("monthly")}>
           <ResponsiveContainer width="100%" height="100%">
@@ -173,7 +173,7 @@ function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
       <Card className={"p-4 " + (onClick ? "cursor-pointer hover:border-white/[0.14] transition-colors" : "")}>
         <div className="flex items-start justify-between mb-2">
           <span className="text-ds-micro text-zinc-500 font-medium">{label}</span>
-          <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">{icon}</div>
+          <div className="w-7 h-7 rounded-ds-md bg-white/[0.04] flex items-center justify-center text-zinc-400">{icon}</div>
         </div>
         <div className="text-lg font-bold text-white tracking-tight">{value}</div>
         <div className={"flex items-center gap-1 text-ds-micro mt-0.5 " + (trendUp !== undefined ? (trendUp ? "text-emerald-400" : "text-zinc-500") : "")}>
@@ -195,7 +195,7 @@ function DrillModal({ card, onClose, data, onNavigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-[540px] max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[540px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white">{title}</h3>
           <button onClick={onClose} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
@@ -204,10 +204,10 @@ function DrillModal({ card, onClose, data, onNavigate }: {
           <div className="space-y-3">
             <p className="text-xs text-zinc-400">Revenue across {data.accepted.length} fulfilled POs</p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Total Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Avg per PO</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{data.totalUnits.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">SKUs</p><p className="text-lg font-semibold text-white font-mono">{data.skuCount}</p></div>
+              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Total Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Avg per PO</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{data.totalUnits.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">SKUs</p><p className="text-lg font-semibold text-white font-mono">{data.skuCount}</p></div>
             </div>
             <button onClick={() => { onClose(); onNavigate?.("purchase_orders"); }} className="text-ds-micro text-brass-400 hover:text-brass-300 flex items-center gap-1">View all POs <ArrowUpRight className="w-3 h-3" /></button>
           </div>
@@ -229,11 +229,11 @@ function DrillModal({ card, onClose, data, onNavigate }: {
           const sku = data.skuStats.find((x: any) => x.name === card.slice(4));
           if (!sku) return <p className="text-xs text-zinc-600">SKU not found.</p>;
           return (<div className="grid grid-cols-2 gap-3">
-            <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{sku.units.toLocaleString()}</p></div>
-            <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
+            <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{sku.units.toLocaleString()}</p></div>
+            <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
           </div>);
         })()}
-        {card === "avg" && <div className="bg-ink-900 rounded-lg p-4 text-center"><p className="text-ds-micro text-zinc-500">Average Order Value</p><p className="text-3xl font-bold text-brass-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-ds-micro text-zinc-600 mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
+        {card === "avg" && <div className="bg-ink-900 rounded-ds-md p-4 text-center"><p className="text-ds-micro text-zinc-500">Average Order Value</p><p className="text-3xl font-bold text-brass-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-ds-micro text-zinc-600 mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
       </div>
     </div>
   );

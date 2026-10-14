@@ -109,7 +109,7 @@ export function SalesEstimatorCard() {
         />
       </div>
 
-      <div className="rounded-lg border border-white/[0.08] p-3" data-testid="sales-estimate-result">
+      <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="sales-estimate-result">
         <div className="flex items-center gap-2 mb-2">
           <Calculator className="w-3.5 h-3.5 text-brass-400" />
           <span className="text-xs font-medium text-white">Estimated monthly sales</span>
@@ -164,7 +164,7 @@ export function SalesEstimatorCard() {
         </Button>
         {bornToRun && (
           <div
-            className="mt-2 rounded-lg border border-white/[0.08] p-3 text-ds-label"
+            className="mt-2 rounded-ds-md border border-white/[0.08] p-3 text-ds-label"
             data-testid="born-to-run-result"
           >
             <p className="text-xs font-medium text-white mb-1">Launch modelling — simulation only</p>

@@ -48,7 +48,7 @@ export function AmazonTab({ p }: { p: BrandProspect }) {
   const AB: Record<string, string> = { DIRECT_AMAZON_RETAIL: 'bg-emerald-500/15 text-emerald-300', AMAZON_PRESENT_BUT_UNCLEAR: 'bg-amber-500/15 text-amber-300', MARKETPLACE_HEAVY: 'bg-blue-500/15 text-blue-300', MARKETPLACE_ONLY_OBSERVED: 'bg-zinc-500/15 text-zinc-300', NO_CURRENT_OFFER: 'bg-red-500/15 text-red-300', UNKNOWN: 'bg-zinc-500/10 text-zinc-500' };
   return <div className="space-y-2">
     <h4 className="text-xs font-semibold text-zinc-400 uppercase">{p.asins.length} ASIN{p.asins.length !== 1 ? 's' : ''}</h4>
-    {p.asins.map(a => <div key={a.asin} className="bg-ink-850 rounded-lg p-2.5 space-y-1">
+    {p.asins.map(a => <div key={a.asin} className="bg-ink-850 rounded-ds-md p-2.5 space-y-1">
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-white">{a.title}</span>
         <Badge className={cn('text-ds-micro border', AB[a.amazonOfferClass] ?? '')}>{a.amazonOfferClass.replace(/_/g, ' ')}</Badge>
@@ -77,7 +77,7 @@ export function CommercialTab({ p }: { p: BrandProspect }) {
     </div>
     <div className="space-y-2">
       <h4 className="text-xs font-semibold text-zinc-400 uppercase">Distributors</h4>
-      {p.distributors.length === 0 ? <p className="text-xs text-zinc-600">None identified</p> : p.distributors.map((d, i) => <div key={i} className="bg-ink-850 rounded-lg p-2 space-y-1">
+      {p.distributors.length === 0 ? <p className="text-xs text-zinc-600">None identified</p> : p.distributors.map((d, i) => <div key={i} className="bg-ink-850 rounded-ds-md p-2 space-y-1">
         <div className="text-xs font-medium text-white">{d.company}</div>
         <div className="text-ds-micro text-zinc-500">{d.territory}{d.exclusive ? ' · Exclusive' : ''}</div>
         {d.suggestedApproach ? <div className="text-ds-micro text-brass-400">Approach: {d.suggestedApproach.replace(/_/g, ' ')}</div> : null}
@@ -88,7 +88,7 @@ export function CommercialTab({ p }: { p: BrandProspect }) {
 export function PeopleTab({ p }: { p: BrandProspect }) {
   return <div className="space-y-2">
     <h4 className="text-xs font-semibold text-zinc-400 uppercase">{p.contacts.length} Decision-maker{p.contacts.length !== 1 ? 's' : ''}</h4>
-    {p.contacts.length === 0 ? <p className="text-xs text-zinc-600">No contacts identified</p> : p.contacts.map((c, i) => <div key={i} className="bg-ink-850 rounded-lg p-2.5 space-y-1">
+    {p.contacts.length === 0 ? <p className="text-xs text-zinc-600">No contacts identified</p> : p.contacts.map((c, i) => <div key={i} className="bg-ink-850 rounded-ds-md p-2.5 space-y-1">
       <div className="text-xs font-medium text-white">{c.name}</div>
       <div className="text-ds-micro text-zinc-400">{c.jobTitle} · {c.company}</div>
       {c.linkedInUrl ? <div className="text-ds-micro"><a href={c.linkedInUrl} target="_blank" rel="noreferrer" className="text-brass-400">LinkedIn <ExternalLink className="w-3 h-3 inline" /></a></div> : null}
@@ -111,14 +111,14 @@ export function MercentaFitTab({ p, tierColors: colors }: { p: BrandProspect; ti
     <div className="space-y-2">
       <h4 className="text-xs font-semibold text-zinc-400 uppercase">Recommendation</h4>
       {p.disqualified
-        ? <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3"><p className="text-xs text-red-400 font-medium">Disqualified</p><p className="text-ds-micro text-red-300/70 mt-1">{p.disqualificationReason}</p></div>
+        ? <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3"><p className="text-xs text-red-400 font-medium">Disqualified</p><p className="text-ds-micro text-red-300/70 mt-1">{p.disqualificationReason}</p></div>
         : <div className="space-y-1.5">
-            <div className="bg-ink-850 rounded-lg p-2.5 text-xs">
+            <div className="bg-ink-850 rounded-ds-md p-2.5 text-xs">
               <p className="text-zinc-300">Score: <span className={cn('font-bold', colors[p.score.tier])}>{p.score.total}/100</span></p>
               <p className="text-zinc-500 mt-1 capitalize">{p.score.tier.replace(/_/g, ' ')}</p>
             </div>
             {p.contacts.length > 0
-              ? <div className="bg-brass-500/5 border border-brass-500/10 rounded-lg p-2.5">
+              ? <div className="bg-brass-500/5 border border-brass-500/10 rounded-ds-md p-2.5">
                   <p className="text-ds-micro text-brass-300">Contact <span className="font-medium">{p.contacts[0].name}</span> ({p.contacts[0].jobTitle})</p></div>
               : null}
           </div>}
@@ -140,7 +140,7 @@ export function HistoryTab({ p }: { p: BrandProspect }) {
   if (events.length === 0) return <p className="text-xs text-zinc-600">No change events recorded yet.</p>;
   return <div className="space-y-1.5">
     {events.slice(-10).reverse().map((e) => (
-      <div key={e.id} className="flex items-start gap-2 bg-ink-850 border border-white/[0.06] rounded-lg p-2">
+      <div key={e.id} className="flex items-start gap-2 bg-ink-850 border border-white/[0.06] rounded-ds-md p-2">
         <Badge className={cn('text-ds-micro px-1.5 py-0.5 font-mono', CT_COLORS[e.changeType] ?? 'text-zinc-500')}>{e.changeType}</Badge>
         <div className="flex-1 min-w-0">
           <p className="text-ds-label text-zinc-300">{e.summary}</p>
@@ -192,7 +192,7 @@ export function NotesTab({ p, onChanged }: { p: BrandProspect; onChanged?: () =>
         <StickyNote className="w-3 h-3 text-brass-400" /> Internal Notes / Acquisition Rationale
       </h4>
       {p.whyInteresting && (
-        <div className="bg-brass-500/5 border border-brass-500/15 rounded-lg p-2">
+        <div className="bg-brass-500/5 border border-brass-500/15 rounded-ds-md p-2">
           <p className="text-ds-micro text-brass-300 uppercase">Why this prospect</p>
           <p className="text-ds-label text-brass-300 leading-relaxed">{p.whyInteresting}</p>
         </div>
@@ -202,7 +202,7 @@ export function NotesTab({ p, onChanged }: { p: BrandProspect; onChanged?: () =>
         onChange={(e) => setDraft(e.target.value)}
         placeholder="Internal notes: evidence, acquisition rationale, next-step rationale… (never shown to the brand)"
         rows={6}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-brass-500/40"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-brass-500/40"
         aria-label="Internal notes"
       />
       <div className="flex items-center gap-2">

@@ -155,7 +155,7 @@ export function BrandCommPanel({
           <div
             key={m.id}
             className={cn(
-              'rounded-lg px-3 py-2 text-ds-label leading-relaxed',
+              'rounded-ds-md px-3 py-2 text-ds-label leading-relaxed',
               m.direction === 'outbound'
                 ? 'bg-brass-500/10 text-zinc-300'
                 : 'bg-white/[0.04] text-zinc-400'
@@ -174,7 +174,7 @@ export function BrandCommPanel({
         <button
           onClick={() => setTab('message')}
           className={cn(
-            'flex items-center gap-1 px-2 py-1 rounded-md text-ds-label',
+            'flex items-center gap-1 px-2 py-1 rounded-ds-sm text-ds-label',
             tab === 'message' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
           )}
         >
@@ -183,7 +183,7 @@ export function BrandCommPanel({
         <button
           onClick={() => setTab('call')}
           className={cn(
-            'flex items-center gap-1 px-2 py-1 rounded-md text-ds-label',
+            'flex items-center gap-1 px-2 py-1 rounded-ds-sm text-ds-label',
             tab === 'call' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
           )}
         >
@@ -211,7 +211,7 @@ export function BrandCommPanel({
             onChange={(e) => setBody(e.target.value)}
             rows={compact ? 2 : 3}
             placeholder="Write a reply…"
-            className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+            className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
           />
           <Button className="text-xs" disabled={!body.trim()} onClick={() => void handleSend()}>
             <Send className="w-3.5 h-3.5 mr-1.5" />
@@ -225,7 +225,7 @@ export function BrandCommPanel({
             onChange={(e) => setCallNote(e.target.value)}
             rows={compact ? 2 : 3}
             placeholder="What was discussed on the call?"
-            className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+            className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
           />
           <Button
             className="text-xs"

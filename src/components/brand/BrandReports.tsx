@@ -176,7 +176,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           const Icon = m.icon;
           return (
             <button key={m.label} type="button" onClick={() => setDrillCard(m.label)}
-              className="bg-ink-850 border border-white/[0.06] hover:border-white/[0.12] rounded-xl p-4 text-left transition-all">
+              className="bg-ink-850 border border-white/[0.06] hover:border-white/[0.12] rounded-ds-lg p-4 text-left transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 text-zinc-500" />
                 <span className="text-ds-micro text-zinc-500 font-medium">{m.label}</span>
@@ -232,7 +232,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             const pct = rp.length > 0 ? Math.round((count/rp.length)*100) : 0;
             if (count === 0) return null;
             return (
-              <div key={s} className="bg-ink-850 border border-white/[0.06] rounded-lg px-3 py-2 text-center min-w-[80px]">
+              <div key={s} className="bg-ink-850 border border-white/[0.06] rounded-ds-md px-3 py-2 text-center min-w-[80px]">
                 <div className="text-lg font-bold text-white">{count}</div>
                 <div className="text-ds-micro text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
                 <div className="text-ds-micro text-zinc-600">{pct}%</div>
@@ -245,7 +245,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
       {/* Drill-down modal */}
       {drillCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
               <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>

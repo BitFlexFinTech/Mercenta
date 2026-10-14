@@ -601,7 +601,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
             id="notification-panel"
             role="dialog"
             aria-label={ariaSummary}
-            className="absolute right-0 top-9 z-50 w-[380px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-xl overflow-hidden"
+            className="absolute right-0 top-9 z-50 w-[380px] bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
               <span className="text-xs font-semibold text-white">Needs attention</span>

@@ -285,7 +285,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
               <button
                 onClick={() => navigate('explore-uk-market-fit')}
                 data-testid={PRE_AUDIT_TESTIDS.cta}
-                className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette shadow-ds-subtle transition-colors hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette shadow-ds-subtle transition-colors hover:opacity-90"
               >
                 {c.hero.primaryCta}
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -372,7 +372,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <span style={{ color: 'var(--mr-palette-orange)' }}>UK Arrival</span>
               </div>
 
-              <div className="bg-ink rounded-xl border border-white/[0.05] divide-y divide-white/[0.05]">
+              <div className="bg-ink rounded-ds-lg border border-white/[0.05] divide-y divide-white/[0.05]">
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="font-mono text-xs text-steel">
                     {c.tracker.reference} · {c.tracker.cargoLabel}
@@ -469,7 +469,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
               */
               return (
                 <div key={point.title} className={cn('bg-ink-850 p-6', rv)}>
-                  <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg border border-brass/30 text-brass">
+                  <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-ds-md border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <h3 className="font-display text-base font-semibold text-parchment mb-2">
@@ -518,12 +518,12 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <div
                   key={service.title}
                   className={cn(
-                    'relative overflow-hidden rounded-xl border border-white/[0.06] bg-ink-850 p-5 transition-colors hover:border-white/[0.16]',
+                    'relative overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5 transition-colors hover:border-white/[0.16]',
                     rv
                   )}
                 >
                   <div className="mb-4 flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-brass/30 text-brass">
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ds-md border border-brass/30 text-brass">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </span>
                     <h3 className="font-display text-base font-semibold text-parchment">
@@ -577,7 +577,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <li
                   key={step.title}
                   className={cn(
-                    'relative rounded-lg border border-white/[0.06] bg-ink-850 p-4',
+                    'relative rounded-ds-md border border-white/[0.06] bg-ink-850 p-4',
                     rv
                   )}
                 >
@@ -623,11 +623,11 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <li
                   key={point.title}
                   className={cn(
-                    'flex gap-3.5 rounded-xl border border-white/[0.06] bg-ink-850 p-4',
+                    'flex gap-3.5 rounded-ds-lg border border-white/[0.06] bg-ink-850 p-4',
                     rv
                   )}
                 >
-                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-brass/30 text-brass">
+                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ds-md border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
@@ -675,11 +675,11 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <div
                   key={point.title}
                   className={cn(
-                    'rounded-xl border border-white/[0.06] bg-ink-850 p-5',
+                    'rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5',
                     rv
                   )}
                 >
-                  <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg border border-brass/30 text-brass">
+                  <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-ds-md border border-brass/30 text-brass">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <h3 className="mb-2 font-display text-base font-semibold text-parchment">
@@ -705,7 +705,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           */}
           <div aria-hidden="true" className="mb-6 flex justify-center md:justify-end">
             <div
-              className="rotate-[8deg] select-none rounded-md border-[3px] px-4 py-2 font-mono text-ds-label uppercase tracking-[0.2em] shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]"
+              className="rotate-[8deg] select-none rounded-ds-sm border-[3px] px-4 py-2 font-mono text-ds-label uppercase tracking-[0.2em] shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]"
               style={{ borderColor: 'var(--mr-palette-red)', color: 'var(--mr-palette-red)' }}
             >
               {/*
@@ -717,7 +717,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 one.
               */}
               <div
-                className="rounded-sm border px-3 py-1.5 text-center leading-relaxed"
+                className="rounded-ds-sm border px-3 py-1.5 text-center leading-relaxed"
                 style={{ borderColor: 'color-mix(in srgb, var(--mr-palette-red) 70%, transparent)' }}
               >
                 {c.finalCta.stampLine1}
@@ -734,7 +734,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           </p>
           <button
             onClick={() => navigate('explore-uk-market-fit')}
-            className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
           >
             {c.finalCta.buttonLabel}
             <ArrowRight className="w-4 h-4" />

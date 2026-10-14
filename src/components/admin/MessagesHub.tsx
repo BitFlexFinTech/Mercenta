@@ -70,7 +70,7 @@ function MessageBubble({ m }: { m: Message }) {
     <div className={cn('flex', outbound ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[75%] rounded-xl px-4 py-3 text-xs leading-relaxed',
+          'max-w-[75%] rounded-ds-lg px-4 py-3 text-xs leading-relaxed',
           outbound
             ? 'bg-brass-500/15 text-zinc-200'
             : 'bg-white/[0.04] text-zinc-300'
@@ -274,7 +274,7 @@ export function MessagesHub() {
               onClick={() => setNeedsHumanOnly((v) => !v)}
               data-testid="messages-needs-human-filter"
               className={cn(
-                'rounded-lg px-2.5 py-1 text-ds-label font-medium transition-colors',
+                'rounded-ds-md px-2.5 py-1 text-ds-label font-medium transition-colors',
                 needsHumanOnly
                   ? 'bg-red-500/20 text-red-200'
                   : 'bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-white'
@@ -289,7 +289,7 @@ export function MessagesHub() {
       <MetricBand items={metrics} columns={4} />
 
       {!emailLive && !emailSandbox && (
-        <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-ds-label text-zinc-500 flex items-start gap-2">
+        <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 text-ds-label text-zinc-500 flex items-start gap-2">
           <Lock className="w-3.5 h-3.5 mt-0.5 text-zinc-600 flex-shrink-0" />
           Power sending is disabled — connect Postmark or SendGrid in Integration
           Settings. Viewing threads and logging notes still works.
@@ -417,7 +417,7 @@ function ComposeBox({
         onChange={(e) => setDraftBody(e.target.value)}
         rows={3}
         placeholder="Write a reply…"
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
       />
       <div className="flex items-center justify-between">
         {sendNote && <span className="text-ds-label text-zinc-400">{sendNote}</span>}

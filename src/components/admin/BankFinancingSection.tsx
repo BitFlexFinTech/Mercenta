@@ -68,15 +68,15 @@ export function BankFinancingSection() {
       </p>
 
       <div className="grid grid-cols-3 gap-2 text-ds-micro mb-4">
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">Total UK Import TAM</p>
           <p className="font-semibold text-white">GBP {report.totalTamGbp.toFixed(0)}B</p>
         </div>
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">Serviceable SAM</p>
           <p className="font-semibold text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B</p>
         </div>
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">Categories</p>
           <p className="font-semibold text-white">{report.categories.length}</p>
         </div>
@@ -88,7 +88,7 @@ export function BankFinancingSection() {
             <p className="text-ds-label font-medium text-white mb-1.5">{REGION_LABELS[region]}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {getFinancingPartnerForRegion(region).map(function(p: FinancingPartner) { return (
-                <div key={p.id} className="bg-ink-900 rounded-lg border border-white/[0.06] p-2.5">
+                <div key={p.id} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-ds-label font-medium text-white">{p.name}</span>
                     {p.isMock && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>}
@@ -111,7 +111,7 @@ export function BankFinancingSection() {
         );})}
       </div>
 
-      <div className="mt-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-2.5">
+      <div className="mt-4 bg-emerald-500/5 border border-emerald-500/20 rounded-ds-md p-2.5">
         <div className="flex items-center gap-1.5 mb-1">
           <AlertTriangle className="w-3 h-3 text-emerald-400" />
           <span className="text-ds-micro font-medium text-emerald-300">Notable Partner — Africa</span>

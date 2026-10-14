@@ -78,7 +78,7 @@ test.describe('Brand CRM', () => {
   test('4. Fulfilment override logs the admin-on-behalf reason', async ({ page }) => {
     await openCrm(page);
     await selectAstonish(page);
-    await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
+    await page.locator('button.rounded-ds-lg').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=Admin action on behalf of brand').first()).toBeVisible({ timeout: 4000 });
     const select = page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first();
@@ -109,7 +109,7 @@ test.describe('Brand CRM', () => {
     await page.click('nav[aria-label="Primary"] >> text=Brand CRM');
     await page.waitForTimeout(900);
     await selectAstonish(page);
-    await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
+    await page.locator('button.rounded-ds-lg').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(400);
     await page.locator('input[placeholder="Override reason"]').fill('Phase 7D on-behalf audit');
     await page.locator('button', { hasText: 'Override' }).first().click();

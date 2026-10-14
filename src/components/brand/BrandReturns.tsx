@@ -98,21 +98,21 @@ export function BrandReturns() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           onClick={() => setDrillCard('Total returned units')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Total returned units</p>
           <p className="text-lg font-semibold text-white">{totalUnits}</p>
         </button>
         <button
           onClick={() => setDrillCard('Quality/compliance flags')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Quality/compliance flags</p>
           <p className="text-lg font-semibold text-white">{qualityIssues.length}</p>
         </button>
         <button
           onClick={() => setDrillCard('Deductions linked')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Deductions linked</p>
           <p className="text-lg font-semibold text-white">{deductedReturns.length}</p>
@@ -130,7 +130,7 @@ export function BrandReturns() {
               aria-label="Search returns by PO, product or reason"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
             />
           </div>
           {/* §Phase D — canonical DataTable: labelled cards below md (every
@@ -211,7 +211,7 @@ export function BrandReturns() {
       {/* §Batch-3 — Summary card drill-down modals */}
       {drillCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
               <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white transition-colors">

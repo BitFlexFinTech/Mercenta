@@ -87,8 +87,60 @@ Rules:
 
 ### Spacing / Radius / Elevation
 - Spacing: default Tailwind scale is used intentionally (4/8/12/16/24/32).
-- Radius: `rounded-ds-sm` (6) / `rounded-ds-md` (10) / `rounded-ds-lg` (14) / `rounded-ds-pill`.
-- Elevation: `shadow-ds-subtle` / `shadow-ds-raised` / `shadow-ds-overlay`; focus rings `shadow-ds-focus`.
+
+#### §PHASE C4 — the canonical radius + elevation scale
+
+Declared ONCE in `tailwind.config.js` (`theme.extend.borderRadius.ds`, `theme.extend.boxShadow`),
+which `npm run validate:radius-elevation` reads as the OWNER. The scale exists because
+the design system declared four steps while the product rendered five UNNAMED ones —
+**630 class sites had no place in the ramp** (`rounded-lg` 387 · `rounded-md` 97 ·
+bare `rounded` 85 · `rounded-xl` 58 · `rounded-full` 76 · `rounded-2xl` 4 · `rounded-sm` 3)
+while the named steps that existed were consumed almost nowhere — 41, 26 and 22 uses for
+the control, container and inline steps respectively, across the whole product. Same defect
+class as the type scale: a scale the product does not render is a scale every author
+invents their own version of.
+
+| Token | Size | Role |
+|---|---|---|
+| `rounded-ds-sm` | **6px** | inline — chips, tags, `kbd`/`<code>`, thumbnails, micro icon buttons |
+| `rounded-ds-md` | 8px | controls — buttons, inputs, selects, textareas, tabs, nav items |
+| `rounded-ds-lg` | 12px | containers — cards, panels, modals, popovers, tables |
+| `rounded-ds-pill` | 9999px | pills · avatars · dots · status badges |
+| `rounded-2xl` | 16px | **large marketing / hero blocks only** (`src/components/marketing/`) — the display exception |
+
+- `rounded-full` is Tailwind's own step and the **same value** as `rounded-ds-pill`, so it
+  is an accepted alias for the pill role — a documented alias, not a second scale.
+- 4px (bare `rounded`) is folded into 6px: a 2px difference between two small steps is not
+  a step, it is noise — and it was being used inconsistently on chips and `<code>`.
+- `rounded-ds-md` (8px) and `rounded-ds-lg` (12px) sit **on the geometry the app already
+  rendered**, which is what made the migration a RENAME rather than a redesign: binding
+  `rounded-lg` → `ds-md` and `rounded-xl` → `ds-lg` moves no pixels for 542 sites. The
+  repoint moved 41 + 26 occurrences by 2px, in 20 shell/shared files.
+- The gate fails on an unnamed radius reappearing (including **per-side** forms such as
+  `rounded-t-lg` and arbitrary `rounded-[…]`), on `rounded-2xl` escaping the marketing
+  folder, and on a `border-radius` literal in CSS that the ramp does not declare.
+- Migration is mechanical and idempotent: `npm run migrate:radius-elevation`
+  (re-running is a no-op).
+
+| Elevation role | Token (theme-driven) | Used for |
+|---|---|---|
+| none | `shadow-ds-none` | a control that must sit flat (the link-variant button) |
+| resting | `shadow-ds-subtle` | cards, panels, active segmented pills |
+| raised | `shadow-ds-raised` | primary controls, hover lifts |
+| overlay | `shadow-ds-overlay` | modals, popovers, dropdowns, floating cards |
+
+- Every role reads `--mr-shadow-subtle` / `--mr-shadow-raised` / `--mr-shadow-overlay` from
+  `src/config/themes.ts`, so all five themes carry their own lighting — and the gate fails
+  if a theme is missing one. 19 unnamed shadows used to sit beside these roles (15 of them
+  `shadow-2xl` on exactly the surfaces OVERLAY exists for); they are all migrated onto the
+  role that matches what they are.
+- **Focus is the `:focus-visible` OUTLINE** in `src/index.css` (brass, 2px, offset 2px) —
+  the mechanism every interactive element receives, and an outline follows the element's
+  OWN radius. Two rules used to override geometry on focus (`:focus-visible` forcing
+  `border-radius: 4px`, and `[data-record-focused]` forcing `6px`), snapping a focused
+  control's corners to a radius the ramp does not declare; both overrides are removed.
+- **§REPOINTED — the focus-shadow tokens were REMOVED: `shadow-ds-focus` and `shadow-ds-focus-danger` were declared in `tailwind.config.js` and consumed NOWHERE, while this document used to claim "focus rings `shadow-ds-focus`" — a live claim that was false. A declared-but-unconsumed token is the defect this whole scale exists to end, so the tokens went and the claim is corrected here. The gate carries an absence guard: a focus-shadow token declared without a consumer fails it.**
+
 ### Motion
 - `transition-ds` property set; restrained durations (150–200ms).
 - `prefers-reduced-motion` globally disables transitions/animations.

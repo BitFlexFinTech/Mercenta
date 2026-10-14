@@ -130,6 +130,23 @@ complete when **all** of these hold, with evidence:
   `Modal`, `Select` and `Tabs` in `src/components/ui.tsx`. **Record each package and why it is needed.**
 - **CVA** (per D-1): introduce variants **behind the existing props** — no call site may need to change.
 - **One documented radius/elevation scale** (containers `xl`, controls `lg` — currently implicit).
+  **§EXECUTED 2026-10-13 (§PHASE C4):** the scale is now declared ONCE in `tailwind.config.js`
+  (`borderRadius.ds` — `ds-sm` 6px inline · `ds-md` 8px controls · `ds-lg` 12px containers ·
+  `ds-pill` 9999px — and `boxShadow` — none · subtle · raised · overlay) and documented in
+  `docs/DESIGN_SYSTEM.md`. The measurement that drove it: the product rendered FIVE unnamed
+  radii (630 class sites) while the named steps were consumed almost nowhere (41, 26 and 22
+  uses). The two named steps were moved ONTO the geometry the app already rendered — the
+  control step 10px to 8px and the container step 14px to 12px — which is what made the
+  migration a RENAME rather than a redesign (542 sites move no pixels; only 41 + 26
+  occurrences moved by 2px). The 16px step is permitted only on large marketing/hero blocks
+  and Tailwind's own pill step is an accepted alias for the pill role. Gate:
+  `npm run validate:radius-elevation` (42 assertions, reading the ramp from `tailwind.config.js`
+  as its owner and failing loudly on an empty discovery), migration
+  `npm run migrate:radius-elevation` (idempotent). Five real defects were fixed at source
+  inside this increment: two focus rules that overrode an element's radius (a 4px and a 6px
+  literal), a 4px scrollbar-thumb radius on an 8px-wide thumb, two declared-but-never-consumed
+  focus-shadow tokens, and `Modal` sitting on the control step while `Card` sat on the
+  container step (a dialog is a container).
 - **Gate**: `typecheck` 0 · `lint` 0 · `build` ok · the 19 primitives' **APIs unchanged** · the 102
   consuming files still compile and render · screenshots inspected · existing tests pass.
 

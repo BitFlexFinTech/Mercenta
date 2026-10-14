@@ -224,7 +224,7 @@ return (
                 ['ACOS', pct(selectedCampaignRow.acos)],
                 ['Budget', gbp(selectedCampaignRow.monthlyBudgetGbp)],
               ].map(([k, v]) => (
-                <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
+                <div key={String(k)} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
                   <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
                   <div className="mt-1 font-medium text-white">{v}</div>
                 </div>
@@ -254,7 +254,7 @@ return (
             </p>
             <div className="space-y-3">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-xs font-medium text-white">{rec.month}</span>

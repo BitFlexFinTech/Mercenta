@@ -209,10 +209,10 @@ function formatReport(r: GrantsInvestorsReport): string {
         automatically</strong>. Requires an explicit internal approval — Mercenta never sends.
       </p>
 
-      {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-300 mb-3">{error}</div>}
+      {error && <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300 mb-3">{error}</div>}
 
       {draftNotice && (
-        <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3 text-xs text-brass-300 mb-3 flex items-center justify-between">
+        <div className="bg-brass-500/10 border border-brass-500/20 rounded-ds-md p-3 text-xs text-brass-300 mb-3 flex items-center justify-between">
           <span>{draftNotice}</span>
           <button onClick={() => setDraftNotice(null)} className="text-brass-400 hover:text-brass-300"><X className="w-3 h-3" /></button>
         </div>
@@ -233,15 +233,15 @@ function formatReport(r: GrantsInvestorsReport): string {
       {report && (
         <>
           <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-ink-900 rounded-lg p-2">
+            <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Grants</p>
               <p className="text-sm font-semibold text-white">{report.grants.length}</p>
             </div>
-            <div className="bg-ink-900 rounded-lg p-2">
+            <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Investors</p>
               <p className="text-sm font-semibold text-white">{report.investors.length}</p>
             </div>
-            <div className="bg-ink-900 rounded-lg p-2">
+            <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Drafts</p>
               <p className="text-sm font-semibold text-brass-400">{grantsDrafts.length + investorDrafts.length}</p>
             </div>
@@ -257,7 +257,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               {report.grants.map((g) => {
                 const isSelected = selectedGrant === g.id;
                 return (
-                  <div key={g.id} className={cn('rounded-lg border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
+                  <div key={g.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
                     onClick={() => setSelectedGrant(isSelected ? null : g.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -298,7 +298,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               {report.investors.map((inv) => {
                 const isSelected = selectedInvestor === inv.id;
                 return (
-                  <div key={inv.id} className={cn('rounded-lg border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
+                  <div key={inv.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
                     onClick={() => setSelectedInvestor(isSelected ? null : inv.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -339,7 +339,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                 <p className="text-xs text-zinc-600 text-center py-4">No drafts yet. Click &quot;Apply&quot; or &quot;Reach Out&quot; on a grant or investor to create a draft.</p>
               )}
               {grantsDrafts.map((d) => (
-                <div key={d.grantId} className="bg-ink-900 rounded-lg border border-white/[0.06] p-2.5">
+                <div key={d.grantId} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.grantTitle}</span>
@@ -358,7 +358,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                 </div>
               ))}
               {investorDrafts.map((d) => (
-                <div key={d.investorId} className="bg-ink-900 rounded-lg border border-white/[0.06] p-2.5">
+                <div key={d.investorId} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.investorName}</span>
@@ -381,7 +381,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
           {draftContent && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setDraftContent(null)}>
-              <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-white">Draft Preview</h3>
                   <button onClick={() => setDraftContent(null)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
@@ -403,7 +403,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
         {fundingNotice && (
           <div
-            className="bg-ink-900 border border-white/[0.06] rounded-lg p-2.5 text-ds-label text-zinc-300"
+            className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-2.5 text-ds-label text-zinc-300"
             data-testid="funding-notice"
           >
             {fundingNotice}
@@ -417,7 +417,7 @@ function formatReport(r: GrantsInvestorsReport): string {
           return (
             <div
               key={o.id}
-              className="bg-ink-900 rounded-lg border border-white/[0.06] p-3"
+              className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-3"
               data-testid={`funding-opportunity-${o.id}`}
             >
               <div className="flex items-start justify-between gap-2">
@@ -484,7 +484,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input
-                  className="bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-ds-micro text-zinc-200 w-44"
+                  className="bg-ink-850 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-zinc-200 w-44"
                   placeholder="Programme reference"
                   value={submissionRefs[o.id] ?? ''}
                   onChange={(e) =>
@@ -527,7 +527,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
         {fundingDraft && (
           <div
-            className="bg-ink-900 border border-white/[0.06] rounded-lg p-3"
+            className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-3"
             data-testid="funding-draft"
           >
             <p className="text-ds-label text-zinc-300">
@@ -535,7 +535,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               {fundingDraft.lintPassed ? 'PASS' : `FAIL (${fundingDraft.lintReasons.join('; ')})`} ·
               basis: {fundingDraft.basis}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-lg p-2 mt-2 max-h-60 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-ds-md p-2 mt-2 max-h-60 overflow-y-auto">
               {fundingDraft.content}
             </pre>
           </div>

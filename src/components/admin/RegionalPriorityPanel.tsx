@@ -82,7 +82,7 @@ export function RegionalPriorityPanel() {
 
       <div className="space-y-3 mt-2" data-section="regional-priority">
         {views.map((v) => (
-          <div key={v.region} className="bg-ink-900 border border-white/[0.08] rounded-lg p-2.5">
+          <div key={v.region} className="bg-ink-900 border border-white/[0.08] rounded-ds-md p-2.5">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-semibold text-white flex items-center gap-1.5"><Globe className="w-3 h-3 text-zinc-400" />{REGION_LABELS[v.region]}</h4>
               <span className="font-mono text-ds-micro text-zinc-500">{v.prospects.length} prospect(s)</span>

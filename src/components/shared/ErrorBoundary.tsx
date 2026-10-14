@@ -61,7 +61,7 @@ function ErrorFallback({ sectionLabel, error, onReset }: {
 }) {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px] w-full">
-      <div className="bg-ink-850 border border-white/[0.06] rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
+      <div className="bg-ink-850 border border-white/[0.06] rounded-ds-lg p-8 max-w-md mx-4 text-center shadow-ds-overlay">
         <AlertTriangle className="w-10 h-10 text-crimson-accent mx-auto mb-4" />
         <h2 className="text-base font-semibold text-white mb-1">
           {sectionLabel ? `${sectionLabel} — something went wrong` : 'Something went wrong'}
@@ -71,7 +71,7 @@ function ErrorFallback({ sectionLabel, error, onReset }: {
           is unaffected.
         </p>
         {error && (
-          <details className="text-left mb-4 bg-black/30 rounded-lg p-3">
+          <details className="text-left mb-4 bg-black/30 rounded-ds-md p-3">
             <summary className="text-ds-micro text-zinc-600 cursor-pointer hover:text-zinc-400">
               Technical details
             </summary>
@@ -84,7 +84,7 @@ function ErrorFallback({ sectionLabel, error, onReset }: {
         )}
         <button
           onClick={onReset}
-          className="text-xs bg-brass-500 hover:bg-brass-600 text-white font-medium rounded-lg px-4 py-2 transition-colors"
+          className="text-xs bg-brass-500 hover:bg-brass-600 text-white font-medium rounded-ds-md px-4 py-2 transition-colors"
         >
           Try again
         </button>

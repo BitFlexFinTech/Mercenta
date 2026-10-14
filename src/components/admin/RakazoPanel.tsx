@@ -91,7 +91,7 @@ return (
         <div className="flex items-center gap-2">
           <button
             onClick={openInNewTab}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
                        bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
                        transition-colors"
           >
@@ -100,7 +100,7 @@ return (
           </button>
           <button
             onClick={handleRefresh}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
                        bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
                        transition-colors"
           >
@@ -113,7 +113,7 @@ return (
       {/* ── Iframe (or error fallback) ──────────────────────────── */}
       <div className="flex-1 relative min-h-[300px]">
         {loadState === 'loading' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-ink-800/50 rounded-lg z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-ink-800/50 rounded-ds-md z-10">
             <div className="flex flex-col items-center gap-3">
               <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
               <span className="text-sm text-zinc-400">Connecting to Rakazo droplet…</span>
@@ -123,21 +123,21 @@ return (
 
         {loadState === 'error' ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 p-8 rounded-xl border border-red-500/20 bg-red-500/5 max-w-md text-center">
+            <div className="flex flex-col items-center gap-4 p-8 rounded-ds-lg border border-red-500/20 bg-red-500/5 max-w-md text-center">
               <AlertTriangle className="w-10 h-10 text-red-400" />
               <div>
                 <h3 className="text-base font-semibold text-red-300 mb-1">
                   Unable to reach Rakazo droplet
                 </h3>
                 <p className="text-sm text-zinc-400">
-                  The bot dashboard at <code className="text-xs bg-ink-700 px-1.5 py-0.5 rounded">{RAKAZO_URL}</code>{' '}
+                  The bot dashboard at <code className="text-xs bg-ink-700 px-1.5 py-0.5 rounded-ds-sm">{RAKAZO_URL}</code>{' '}
                   did not respond within {TIMEOUT_MS / 1000} seconds.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={openInNewTab}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
                              bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
                              transition-colors"
                 >
@@ -146,7 +146,7 @@ return (
                 </button>
                 <button
                   onClick={retry}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
                              bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-emerald-200
                              transition-colors"
                 >
@@ -166,7 +166,7 @@ return (
             title="Rakazo Bot Dashboard"
             allowFullScreen
             onLoad={handleLoad}
-            className="rounded-lg"
+            className="rounded-ds-md"
           />
         )}
       </div>

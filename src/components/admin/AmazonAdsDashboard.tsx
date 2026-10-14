@@ -355,8 +355,8 @@ export function AmazonAdsDashboard() {
                 data-testid={`ads-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -366,7 +366,7 @@ export function AmazonAdsDashboard() {
               type="button"
               onClick={() => setSortByUtil((v) => !v)}
               data-testid="ads-sort-utilisation"
-              className="rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white"
+              className="rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white"
             >
               {sortByUtil ? 'Sort: default' : 'Sort: utilisation'}
             </button>
@@ -374,7 +374,7 @@ export function AmazonAdsDashboard() {
         }
       />
 
-      <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2.5 text-ds-label text-zinc-400">
+      <div className="flex items-start gap-2 rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2.5 text-ds-label text-zinc-400">
         <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-zinc-500" />
         <span>
           {isLive
@@ -459,7 +459,7 @@ export function AmazonAdsDashboard() {
                 ['ACOS', pct(selectedRow.acos)],
                 ['TACOS', pct(selectedRow.tacos)],
               ].map(([k, v]) => (
-                <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
+                <div key={String(k)} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
                   <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
                   <div className="mt-1 font-medium text-white">{v}</div>
                 </div>
@@ -543,7 +543,7 @@ export function AmazonAdsDashboard() {
                   {recNotice && <p className="text-ds-label text-emerald-400" data-testid="ad-rec-notice">{recNotice}</p>}
                   {recError && <p className="text-ds-label text-rose-400" data-testid="ad-rec-error">{recError}</p>}
                   {recs.map((rec) => (
-                    <div key={rec.id} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ad-recommendation-row-${rec.id}`}>
+                    <div key={rec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ad-recommendation-row-${rec.id}`}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           <span className="text-xs font-medium text-white">{rec.month}</span>

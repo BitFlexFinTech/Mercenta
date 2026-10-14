@@ -119,19 +119,19 @@ export function LaunchCentre() {
           </Button>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Platforms</p>
             <p className="text-sm font-bold text-white">{summary.total}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Accounts created</p>
             <p className="text-sm font-bold text-white">{summary.accountsCreated}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Profiles prepared</p>
             <p className="text-sm font-bold text-white">{summary.prepared}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Submitted</p>
             <p className="text-sm font-bold text-white">{summary.submitted}</p>
           </div>
@@ -150,14 +150,14 @@ export function LaunchCentre() {
             />
             <label className="text-ds-micro text-zinc-500">Short description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-ink-850 border border-white/[0.08] rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
               rows={2}
               value={profile.shortDescription}
               onChange={(e) => setProfile({ ...profile, shortDescription: e.target.value })}
             />
             <label className="text-ds-micro text-zinc-500">Long description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-ink-850 border border-white/[0.08] rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
               rows={5}
               value={profile.longDescription}
               onChange={(e) => setProfile({ ...profile, longDescription: e.target.value })}
@@ -327,7 +327,7 @@ export function LaunchCentre() {
           </div>
 
           <p className="text-ds-micro text-zinc-500 mt-2">Submission package (copyable)</p>
-          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-white/[0.06] rounded-lg p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
+          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-white/[0.06] rounded-ds-md p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
             {buildSubmissionPackage(selected, profile)}
           </pre>
         </Card>

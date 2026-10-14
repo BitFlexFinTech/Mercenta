@@ -152,7 +152,7 @@ return (
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search return tracking"
                 placeholder="Search by brand, tracking number, or return…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             <SegmentedControl
               ariaLabel="Filter by stage"
@@ -184,7 +184,7 @@ return (
         }
       />
 
-      {notice && <div role="status" className="mb-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-emerald-300">{notice}</div>}
+      {notice && <div role="status" className="mb-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-xs text-emerald-300">{notice}</div>}
 
       <MetricBand
         columns={4}

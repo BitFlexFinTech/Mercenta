@@ -15,7 +15,7 @@ export function DemoBanner() {
   useEffect(() => subscribeEnvironment(() => setIsDemo(environmentMode() === 'demo')), []);
   if (isDemo === false) return null;
   return (
-    <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-ds-label text-sky-200 flex items-start gap-2">
+    <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-sky-200 flex items-start gap-2">
       <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
       <span>{DEMO_BANNER_TEXT}</span>
     </div>

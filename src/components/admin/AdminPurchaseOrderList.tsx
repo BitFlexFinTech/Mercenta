@@ -382,11 +382,11 @@ return (
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search purchase orders"
                 placeholder="Search by PO number or brand…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             <select value={statusFilter} onChange={function(e) { setStatusFilter(e.target.value); }}
               aria-label="Filter by status"
-              className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brass-500/40">
+              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brass-500/40">
               <option value="all">All Statuses</option>
               {STATUS_ORDER.map(function(s) { return (<option key={s} value={s}>{s.replace(/_/g, ' ')}</option>); })}
             </select>
@@ -528,7 +528,7 @@ return (
                 </span>
               </span>
               {ingestResult?.mode === 'mock' && (
-                <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
+                <span className="rounded-ds-sm border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
                   Simulated read — no live channel call was made
                 </span>
               )}
@@ -680,7 +680,7 @@ return (
                             <span
                               data-status={o.status}
                               className={cn(
-                                'rounded px-1.5 py-0.5 text-ds-micro capitalize',
+                                'rounded-ds-sm px-1.5 py-0.5 text-ds-micro capitalize',
                                 o.status === 'ingested'
                                   ? 'bg-emerald-500/15 text-emerald-300'
                                   : o.status === 'already_present'
@@ -729,9 +729,9 @@ return (
                       <span className="font-mono text-xs text-white font-medium">{po.poNumber}</span>
                       {/* §Phase E5 (G2) — truthful provenance on the admin PO list. */}
                       {po.simulated === true && (
-                        <span className="text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                        <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
                       )}
-                      <span className={cn('text-ds-micro px-1.5 py-0.5 rounded capitalize',
+                      <span className={cn('text-ds-micro px-1.5 py-0.5 rounded-ds-sm capitalize',
                         po.status === 'received' ? 'bg-blue-500/15 text-blue-300' :
                         po.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
                         po.status === 'rejected' ? 'bg-red-500/15 text-red-300' :
@@ -886,7 +886,7 @@ function PoPreviewBody({
           </span>
         )}
         {po.simulated === true && (
-          <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
+          <span className="rounded-ds-sm border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
             (sim)
           </span>
         )}

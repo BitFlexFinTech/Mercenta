@@ -143,7 +143,7 @@ export function CommandPalette({
             className="w-full bg-transparent text-sm text-white placeholder-zinc-600 outline-none"
             data-testid={`${testId}-input`}
           />
-          <kbd className="hidden flex-shrink-0 rounded border border-white/[0.12] px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
+          <kbd className="hidden flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
             ESC
           </kbd>
         </div>

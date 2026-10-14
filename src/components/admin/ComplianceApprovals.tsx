@@ -283,7 +283,7 @@ export function ComplianceApprovals() {
         const pending = brandDocs.filter(function(d) { return d.status === 'under_review' || d.status === 'uploaded'; }).length;
         const approved = brandDocs.filter(function(d) { return d.status === 'approved'; }).length;
         const isExpanded = expandedBrandId === brandId;
-        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-white/[0.06] rounded-xl overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-white/[0.12]')}>
+        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-white/[0.06] rounded-ds-lg overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-white/[0.12]')}>
           <button onClick={function() { setExpandedBrandId(isExpanded ? null : brandId); }} className="w-full text-left p-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-white">{brandName}</div><div className="text-ds-micro text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
             <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>

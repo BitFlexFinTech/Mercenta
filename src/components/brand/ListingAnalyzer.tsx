@@ -133,7 +133,7 @@ export function ListingAnalyzer() {
 return (
     <div className="space-y-4" data-testid="listing-analyzer">
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-ds-lg bg-brass-500/15 flex items-center justify-center">
           <ScanSearch className="w-5 h-5 text-brass-400" />
         </div>
         <div className="flex-1 min-w-[220px]">
@@ -214,7 +214,7 @@ return (
               ['Demand signal', analysis.estimates.demandSignal],
               ['Category position', analysis.estimates.categoryPosition],
             ].map(([k, v]) => (
-              <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
+              <div key={String(k)} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
                 <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
                 <div className="mt-1 text-ds-label font-medium text-white">{v}</div>
               </div>
@@ -233,7 +233,7 @@ return (
           ) : (
             <div className="space-y-3 px-4 py-3" data-testid="la-recommendations">
               {analysis.recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`la-rec-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`la-rec-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-xs font-medium text-white flex items-center gap-1.5">
@@ -278,7 +278,7 @@ return (
                         rows={3}
                         aria-label="Your edited improvement"
                         data-testid={`la-edit-input-${rec.id}`}
-                        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50"
+                        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button variant="primary" size="sm" disabled={busyId === rec.id} onClick={() => void decide(rec, 'edited')}>

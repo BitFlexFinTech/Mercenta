@@ -159,7 +159,7 @@ function EnvironmentSwitch() {
 
   return (
     <Card className="p-4" data-testid="environment-switch">
-      <div data-environment-banner={mode} className="mt-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-2 text-ds-label text-zinc-300 flex items-start gap-2">
+      <div data-environment-banner={mode} className="mt-3 rounded-ds-md border border-white/[0.08] bg-white/[0.03] p-2 text-ds-label text-zinc-300 flex items-start gap-2">
         <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
         <span>{isDemo ? 'DEMO MODE: you are viewing demo data. No real data or API calls.' : 'LIVE MODE: some integrations are not yet connected. Connect them in Settings.'}</span>
       </div>
@@ -285,7 +285,7 @@ export function SimulationControl() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-red-400" />
           </div>
           <div>
@@ -412,7 +412,7 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
     : result.status === 'safety_refused' ? 'Safety refused' : 'Error';
 
   return (
-    <div className="mt-3 bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-2">
+    <div className="mt-3 bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Badge className={cn('text-ds-micro border', statusCls)}>
@@ -427,13 +427,13 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
       </div>
 
       {result.safetyReason && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-md px-2.5 py-1.5 text-ds-label text-red-300">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-red-300">
           {result.safetyReason}
         </div>
       )}
 
       {result.error && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-md px-2.5 py-1.5 text-ds-label text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-amber-200">
           {result.error}
         </div>
       )}

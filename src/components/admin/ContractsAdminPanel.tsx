@@ -110,13 +110,13 @@ export function ContractsAdminPanel() {
       />
 
       {lastEnvelope && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 text-ds-label text-emerald-200">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-emerald-200">
           Last e-sign envelope sent: <code className="font-mono">{lastEnvelope}</code>
         </div>
       )}
 
       {!esignLive && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
           <Lock className="w-3.5 h-3.5 mt-0.5 text-amber-300 flex-shrink-0" />
           <span>
             E-signature runs in <strong>(Mock) mode</strong> — envelopes are
@@ -308,7 +308,7 @@ function GenerateModal({
             <select
               value={track}
               onChange={(e) => setTrack(e.target.value as FulfillmentTrack)}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer"
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white cursor-pointer"
             >
               <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
               <option value="financed">{fulfillmentTrackLabel('financed')}</option>
@@ -317,12 +317,12 @@ function GenerateModal({
           </div>
         </div>
 
-        <pre className="bg-ink rounded-lg border border-white/[0.05] p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
+        <pre className="bg-ink rounded-ds-md border border-white/[0.05] p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
           {previewText}
         </pre>
 
         {!esignLive && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-ds-label text-amber-200 mb-3 flex items-start gap-1.5">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-amber-200 mb-3 flex items-start gap-1.5">
             <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             No verified e-sign connection — the envelope will be SIMULATED
             (mock client, id like mock:env-…).

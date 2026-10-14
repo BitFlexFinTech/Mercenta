@@ -99,7 +99,7 @@ export function RoutingRequestIndicator({
    */
   if (routing?.raised) {
     return (
-      <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+      <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md px-3 py-2">
         <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
         <span className="text-ds-label text-emerald-200 font-medium" data-testid="routing-raised-by-mercenta">
           Routing step raised by Mercenta · {routingCarrierLabel(routing)} · {routing.reference}
@@ -110,7 +110,7 @@ export function RoutingRequestIndicator({
 
   return (
     <div className={cn(
-      'flex items-center gap-2 rounded-lg px-3 py-2 border',
+      'flex items-center gap-2 rounded-ds-md px-3 py-2 border',
       countdown.overdue ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-amber-500/20'
     )}>
       <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-amber-400')} />
@@ -124,7 +124,7 @@ export function RoutingRequestIndicator({
         </p>
       </div>
       <div className={cn(
-        'text-ds-micro font-mono px-2 py-0.5 rounded',
+        'text-ds-micro font-mono px-2 py-0.5 rounded-ds-sm',
         countdown.overdue ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-amber-300'
       )}>
         <Clock className="w-3 h-3 inline mr-1" />{countdown.label}
@@ -166,7 +166,7 @@ export function RoutingRequestStatus({
   const isOverdue = !!deadline && deadline.getTime() < Date.now();
 
   return (
-    <div className="border border-white/[0.08] rounded-lg p-3 space-y-2">
+    <div className="border border-white/[0.08] rounded-ds-md p-3 space-y-2">
       <div className="flex items-center gap-2">
         <Truck className="w-4 h-4 text-brass-400" />
         <span className="text-xs font-medium text-white">Routing step — raised by Mercenta</span>

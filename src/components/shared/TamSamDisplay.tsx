@@ -33,12 +33,12 @@ export function TamSamAggregate({ compact = false }: { compact?: boolean }) {
         <Badge className="text-ds-micro bg-brass-500/15 text-brass-400">{report.categories[0].dataYear} Data</Badge>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-ink-900 rounded-lg p-3 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-md p-3 border border-white/[0.06]">
           <p className="text-ds-micro text-zinc-500">Total Addressable Market</p>
           <p className="text-2xl font-bold font-mono text-white mt-1">GBP {report.totalTamGbp.toFixed(0)}B</p>
           <p className="text-ds-micro text-zinc-600 mt-1">All UK import value across {report.categories.length} categories</p>
         </div>
-        <div className="bg-ink-900 rounded-lg p-3 border border-brass-500/20">
+        <div className="bg-ink-900 rounded-ds-md p-3 border border-brass-500/20">
           <p className="text-ds-micro text-zinc-500">Serviceable Addressable Market</p>
           <p className="text-2xl font-bold font-mono text-brass-400 mt-1">GBP {report.totalSamGbp.toFixed(1)}B</p>
           <p className="text-ds-micro text-zinc-600 mt-1">Realistic reach given wholesale model and sourcing regions</p>
@@ -84,15 +84,15 @@ export function TamSamBreakdown() {
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-ds-micro">
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">{report.categories.length} Categories</p>
           <p className="font-semibold text-white">GBP {report.totalTamGbp.toFixed(0)}B TAM</p>
         </div>
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">Addressable</p>
           <p className="font-semibold text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B SAM</p>
         </div>
-        <div className="bg-ink-900 rounded p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
           <p className="text-zinc-500">Avg. Penetration</p>
           <p className="font-semibold text-white">{Math.round(report.totalSamGbp / report.totalTamGbp * 100)}%</p>
         </div>
@@ -143,7 +143,7 @@ export function TamSamCategoryCard({ category }: { category: ApprovedCategory })
   }
 
   return (
-    <div className="bg-ink-900 rounded-lg border border-white/[0.06] p-2.5">
+    <div className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
       <div className="flex items-center gap-2 mb-1">
         <BarChart3 className="w-3 h-3 text-brass-400" />
         <span className="text-ds-micro font-medium text-white">{data.category}</span>

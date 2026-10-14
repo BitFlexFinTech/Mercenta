@@ -62,10 +62,10 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
           <div className="mx-auto max-w-4xl">
             <ol className="space-y-4">
               {PUBLIC_HOW_IT_WORKS.map((step, i) => (
-                <li key={step.title} className="flex gap-4 rounded-xl border border-white/[0.06] bg-ink-850 p-5">
+                <li key={step.title} className="flex gap-4 rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5">
                   <span
                     aria-hidden="true"
-                    className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg font-mono text-ds-label"
+                    className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ds-md font-mono text-ds-label"
                     style={{ backgroundColor: 'var(--mr-palette-indigo)', color: 'var(--mr-on-palette)' }}
                   >
                     {String(i + 1).padStart(2, '0')}
@@ -111,7 +111,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
             </p>
             <button
               onClick={() => onNavigate('explore-uk-market-fit')}
-              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
             >
               {EXPLORE_UK_MARKET_FIT_CTA}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

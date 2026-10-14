@@ -54,7 +54,7 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
         <section className="border-t border-white/[0.06] px-6 py-12">
           <div className="mx-auto max-w-3xl space-y-3">
             {PUBLIC_FAQ.map((item) => (
-              <details key={item.q} className="overflow-hidden rounded-xl border border-white/[0.06] bg-ink-850">
+              <details key={item.q} className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850">
                 <summary className="cursor-pointer px-6 py-4 font-display text-base font-semibold text-parchment transition-colors hover:bg-white/[0.02]">
                   {item.q}
                 </summary>
@@ -72,7 +72,7 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
             </p>
             <button
               onClick={() => onNavigate('explore-uk-market-fit')}
-              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
             >
               Explore UK Market Fit
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

@@ -225,7 +225,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       isDone
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : isActive
-                        ? 'bg-brass-500 text-white shadow-lg shadow-brass-500/30'
+                        ? 'bg-brass-500 text-white shadow-ds-raised'
                         : 'bg-ink-850 text-zinc-600 border border-white/[0.08]'
                     )}
                   >
@@ -258,7 +258,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
         </div>
 
         {/* Step Content */}
-        <div className="bg-ink-850 border border-white/[0.06] rounded-xl p-6 min-h-[340px]">
+        <div className="bg-ink-850 border border-white/[0.06] rounded-ds-lg p-6 min-h-[340px]">
           {step === 1 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-white mb-1">Brand Profile</h2>
@@ -281,7 +281,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       type="button"
                       onClick={() => update('category', cat)}
                       className={cn(
-                        'text-ds-micro px-2.5 py-2 rounded-lg border transition-colors text-left',
+                        'text-ds-micro px-2.5 py-2 rounded-ds-md border transition-colors text-left',
                         brandProfile.category === cat
                           ? 'border-brass-500/50 bg-brass-500/10 text-white'
                           : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
@@ -344,7 +344,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               <p className="text-xs text-zinc-500 mb-2">
                 Review and accept the terms below
               </p>
-              <div className="bg-ink-900 border border-white/[0.06] rounded-lg p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+              <div className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                 <p className="mb-3">
                   This Master Wholesale & Distribution Agreement ("Agreement") is entered
                   into between {BRAND_LEGAL_NAME} ("Mercenta"), acting as the Exclusive UK
@@ -437,7 +437,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                           setBrandProfile({ ...brandProfile, commercialModel: id })
                         }
                         className={cn(
-                          'text-left rounded-lg border px-3 py-2.5 transition-colors',
+                          'text-left rounded-ds-md border px-3 py-2.5 transition-colors',
                           selected
                             ? 'border-brass-500/50 bg-brass-500/10'
                             : 'border-white/[0.08] hover:border-white/20'
@@ -491,7 +491,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       <select
                         value={brandProfile.bic}
                         onChange={(e) => update('bic', e.target.value)}
-                        className="w-full bg-ink-800 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 appearance-none"
+                        className="w-full bg-ink-800 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 appearance-none"
                         required
                       >
                         <option value="">-- Select bank --</option>
@@ -500,7 +500,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         ))}
                       </select>
                       {selectedBank && (
-                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-lg p-3 mt-2 text-ds-micro text-zinc-400 space-y-1">
+                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-ds-md p-3 mt-2 text-ds-micro text-zinc-400 space-y-1">
                           <p><span className="text-zinc-500">Account format:</span> {selectedBank.accountFormat}</p>
                           {selectedBank.routingLabel && <p><span className="text-zinc-500">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
                           <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-white font-mono">{selectedBank.swift}</span> (pre-filled)</p>
@@ -518,7 +518,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 onChange={(e) => update('payoutCurrency', e.target.value)}
                 options={CURRENCIES_BY_REGION[brandProfile.region]}
               />
-              <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3 text-xs text-zinc-400">
+              <div className="bg-brass-500/10 border border-brass-500/20 rounded-ds-md p-3 text-xs text-zinc-400">
                 Payouts are processed bi-weekly. Available currencies are based on your
                 region selection ({REGIONS.find((r) => r.value === brandProfile.region)?.label}).
                 GBP is always available for UK retail reconciliation.
@@ -545,7 +545,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       type="button"
                       onClick={() => update('workingCapitalAnswer', opt.value)}
                       className={cn(
-                        'text-xs px-3 py-2 rounded-lg border transition-colors',
+                        'text-xs px-3 py-2 rounded-ds-md border transition-colors',
                         brandProfile.workingCapitalAnswer === opt.value
                           ? 'border-brass-500/50 bg-brass-500/10 text-white'
                           : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
@@ -575,7 +575,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 never a silent edit.
               </p>
 
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-zinc-400">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-xs text-zinc-400">
                 System recommendation:{' '}
                 <span className="text-white font-medium">
                   {fulfillmentTrackLabel(recommendedTrack)}
@@ -602,14 +602,14 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     type="button"
                     onClick={() => update('fulfillmentTrack', opt.value)}
                     className={cn(
-                      'text-left px-3 py-2.5 rounded-lg border transition-colors relative',
+                      'text-left px-3 py-2.5 rounded-ds-md border transition-colors relative',
                       brandProfile.fulfillmentTrack === opt.value
                         ? 'border-brass-500/50 bg-brass-500/10'
                         : 'border-white/[0.08] hover:border-white/20'
                     )}
                   >
                     {recommendedTrack === opt.value && (
-                      <span className="absolute top-1.5 right-1.5 text-ds-micro px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                      <span className="absolute top-1.5 right-1.5 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
                         Recommended
                       </span>
                     )}
@@ -625,7 +625,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 const partners = getFinancingPartnerForRegion(region);
                 if (partners.length === 0) return null;
                 return (
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
+                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-ds-md p-3">
                     <p className="text-ds-micro font-medium text-emerald-300 mb-1.5">Your Region's Financing Partner</p>
                     {partners.map(function(p) {
                       return (
@@ -663,7 +663,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               </p>
 
               {/* 4.1 — Logistics SLAs & Carrier Alignment */}
-              <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+              <div className="border border-white/[0.06] rounded-ds-md overflow-hidden">
                 <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
                   <h3 className="text-xs font-semibold text-white">
                     4.1 — Logistics SLAs & Carrier Alignment
@@ -698,7 +698,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               </div>
 
               {/* 4.2 — Automated Chargeback Remediation & Financial Indemnity */}
-              <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+              <div className="border border-white/[0.06] rounded-ds-md overflow-hidden">
                 <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
                   <h3 className="text-xs font-semibold text-white">
                     4.2 — Automated Chargeback Remediation & Financial Indemnity

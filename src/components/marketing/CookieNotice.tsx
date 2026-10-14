@@ -104,7 +104,7 @@ export function CookieNotice({ onNavigate }: { onNavigate: (page: PublicLinkPage
       aria-live="polite"
       className={cn(
         'fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-ink-850',
-        'md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md md:rounded-xl md:border md:shadow-2xl'
+        'md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md md:rounded-ds-lg md:border md:shadow-ds-overlay'
       )}
     >
       <div className="mx-auto max-w-6xl px-6 py-5 md:px-5">
@@ -116,7 +116,7 @@ export function CookieNotice({ onNavigate }: { onNavigate: (page: PublicLinkPage
           <button
             type="button"
             onClick={acknowledge}
-            className="rounded-lg bg-palette-indigo px-4 py-2 text-xs font-semibold text-on-palette transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+            className="rounded-ds-md bg-palette-indigo px-4 py-2 text-xs font-semibold text-on-palette transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
           >
             {PUBLIC_COOKIE_NOTICE.acknowledgeLabel}
           </button>

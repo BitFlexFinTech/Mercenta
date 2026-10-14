@@ -73,7 +73,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
               {PUBLIC_BARRIERS.map((barrier, i) => (
                 <div
                   key={barrier.title}
-                  className="rounded-xl border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
                   style={{ borderTopColor: BARRIER_DOMAIN[i % BARRIER_DOMAIN.length] }}
                 >
                   <h3 className="mb-2 font-display text-base font-semibold text-parchment">{barrier.title}</h3>
@@ -130,7 +130,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
             </p>
             <button
               onClick={() => onNavigate('explore-uk-market-fit')}
-              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
             >
               {EXPLORE_UK_MARKET_FIT_CTA}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

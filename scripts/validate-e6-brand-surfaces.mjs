@@ -3623,6 +3623,159 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
     'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',
   ]);
 
+  /**
+   * §PHASE C4 (2026-10-13) — THE RADIUS + ELEVATION SCALE (the geometry half of the
+   * same design-system phase as PHASE_C4_TYPOGRAPHY_SCOPE above).
+   *
+   * WHY A SCOPE IS NEEDED AT ALL: this increment REPOINTED the named radius ramp onto
+   * the geometry the application already rendered (the control step 10px -> 8px, the
+   * container step 14px -> 12px) and then RENAMED 622 unnamed radius classes and 20
+   * unnamed shadows onto the tokens. A RENAME is a change to every file that renders
+   * one, so it necessarily reaches brand, admin, shared, layout and marketing class
+   * strings. Leaving those undeclared would either fail F6 for honest work or tempt a
+   * future session to bypass the guard; declaring them is the documented, reviewable
+   * act `defect-remediation.md` requires.
+   *
+   * **It declares FILES, not powers**, exactly like PHASE_C4_TYPOGRAPHY_SCOPE: every
+   * path below is named IN FULL — no directory prefix is used, so this set cannot be
+   * used to move a different file (the lesson recorded for F5b). No PROTECTED prefix
+   * is touched (no `src/lib/intelligence/`, `src/lib/postiz/`, `src/lib/spapi/client.ts`,
+   * `src/lib/dhl/client.ts`, `src/services/xero/`, `src/lib/billing/invoice.ts`,
+   * `supabase/migrations/`, `scripts/deploy`, `deploy/`). No business logic, RBAC,
+   * tenant isolation, calculation or workflow behaviour changes: the component edits
+   * are class names only.
+   *
+   * WHAT THE CLASS-NAME EDITS ARE: `rounded-xl`, `rounded-lg`, `rounded-md`, `rounded-sm`
+   * and bare `rounded` -> the named step carrying the SAME pixel value, so 542 sites move
+   * no pixels; and 19 unnamed shadows -> the elevation role that matches what they are.
+   * The real defects fixed inside the same change are in `src/index.css` (two focus
+   * rules that overrode an element's own radius, plus a 4px scrollbar-thumb radius
+   * expressing a pill) and `src/components/ui.tsx` (the `Modal` role mismatch).
+   *
+   * DECLARED BEFORE ITS FIRST USE (F5): these scopes are read top-to-bottom, so a
+   * declaration below a use would be a temporal-dead-zone error, not a scope.
+   */
+  const PHASE_C4_DESIGN_SCALE_SCOPE = new Set([
+    'docs/DESIGN_SYSTEM.md',
+    'docs/PHASE_C_TO_G_PLAN_2026-10-13.md',
+    'e2e/crm.spec.ts',
+    'e2e/onboarding.spec.ts',
+    'package.json',
+    'requirements-registry.json',
+    'scripts/lib/design-scale-scan.mjs',
+    'scripts/migrate-radius-elevation.mjs',
+    'scripts/validate-radius-elevation-scale.mjs',
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/admin/AcquisitionPipeline.tsx',
+    'src/components/admin/AcquisitionRelationships.tsx',
+    'src/components/admin/AcquisitionWorkflow.tsx',
+    'src/components/admin/AdminAuditLog.tsx',
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'src/components/admin/AmazonAdsDashboard.tsx',
+    'src/components/admin/ApplicationsPanel.tsx',
+    'src/components/admin/BankFinancingSection.tsx',
+    'src/components/admin/BillingPanel.tsx',
+    'src/components/admin/BrandCRM.tsx',
+    'src/components/admin/BrandCrmDepth.tsx',
+    'src/components/admin/BrandIntelligencePanel.tsx',
+    'src/components/admin/BrandIntelligenceStrategyPanel.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'src/components/admin/CommerceOperationsPanel.tsx',
+    'src/components/admin/CommercialModelsPanel.tsx',
+    'src/components/admin/CompanyControlCentre.tsx',
+    'src/components/admin/ComplianceApprovals.tsx',
+    'src/components/admin/CompliancePanel.tsx',
+    'src/components/admin/ContractsAdminPanel.tsx',
+    'src/components/admin/FounderControlCentre.tsx',
+    'src/components/admin/FounderInvestorCentre.tsx',
+    'src/components/admin/FulfillmentTrack.tsx',
+    'src/components/admin/GoogleSetupWizard.tsx',
+    'src/components/admin/GrantsInvestorsSection.tsx',
+    'src/components/admin/HelpdeskDashboard.tsx',
+    'src/components/admin/HomepageEditor.tsx',
+    'src/components/admin/InvestorPitchSection.tsx',
+    'src/components/admin/LaunchCentre.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/ManufacturerSourcingSection.tsx',
+    'src/components/admin/MarketingHub.tsx',
+    'src/components/admin/MessagesHub.tsx',
+    'src/components/admin/OnboardingPipeline.tsx',
+    'src/components/admin/OperatingCostsPanel.tsx',
+    'src/components/admin/OpportunityDiscoveryPanel.tsx',
+    'src/components/admin/PartnershipsCentre.tsx',
+    'src/components/admin/ProductResearchSection.tsx',
+    'src/components/admin/ProspectDetailPanel.tsx',
+    'src/components/admin/ProspectDetailTabs.tsx',
+    'src/components/admin/RakazoPanel.tsx',
+    'src/components/admin/RegionalPriorityPanel.tsx',
+    'src/components/admin/RetailPipeline.tsx',
+    'src/components/admin/ReturnsTrackingDashboard.tsx',
+    'src/components/admin/SuperAdminPanel.tsx',
+    'src/components/admin/UsertourAdminPanel.tsx',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
+    'src/components/admin/integrations/InvestorDemoPanel.tsx',
+    'src/components/admin/integrations/SimulationControl.tsx',
+    'src/components/auth/Login.tsx',
+    'src/components/auth/PartnerApplicationForm.tsx',
+    'src/components/auth/RealSignIn.tsx',
+    'src/components/brand/BrandAdvertising.tsx',
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/components/brand/BrandInventory.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/brand/BrandReports.tsx',
+    'src/components/brand/BrandReturns.tsx',
+    'src/components/brand/BrandSelfService.tsx',
+    'src/components/brand/BrandSettings.tsx',
+    'src/components/brand/BrandTeamMessages.tsx',
+    'src/components/brand/ComplianceHub.tsx',
+    'src/components/brand/DeductionsLedger.tsx',
+    'src/components/brand/ListingAnalyzer.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/brand/OnboardingSummary.tsx',
+    'src/components/brand/OnboardingWizard.tsx',
+    'src/components/brand/ProductCatalog.tsx',
+    'src/components/brand/SalesAnalytics.tsx',
+    'src/components/brand/SalesEstimatorCard.tsx',
+    'src/components/design/DesignSystemShowcase.tsx',
+    'src/components/layout/AppShell.tsx',
+    'src/components/layout/Header.tsx',
+    'src/components/layout/Sidebar.tsx',
+    'src/components/marketing/CookieNotice.tsx',
+    'src/components/marketing/ExploreUkMarketFit.tsx',
+    'src/components/marketing/FAQ.tsx',
+    'src/components/marketing/ForBrands.tsx',
+    'src/components/marketing/Home.tsx',
+    'src/components/marketing/HowItWorks.tsx',
+    'src/components/marketing/LiftOff.tsx',
+    'src/components/marketing/NotFound.tsx',
+    'src/components/marketing/PublicFooter.tsx',
+    'src/components/marketing/PublicNav.tsx',
+    'src/components/marketing/UKMarketAccess.tsx',
+    'src/components/shared/BrandComm.tsx',
+    'src/components/shared/BrandGuidance.tsx',
+    'src/components/shared/CommandPalette.tsx',
+    'src/components/shared/CommerceSimulationPanel.tsx',
+    'src/components/shared/CsvCatalogImport.tsx',
+    'src/components/shared/DataTable.tsx',
+    'src/components/shared/DemoBanner.tsx',
+    'src/components/shared/ErrorBoundary.tsx',
+    'src/components/shared/ImageUploader.tsx',
+    'src/components/shared/LiveChatWidget.tsx',
+    'src/components/shared/NotificationCenter.tsx',
+    'src/components/shared/RoutingRequest.tsx',
+    'src/components/shared/ShippingCostEstimate.tsx',
+    'src/components/shared/TamSamDisplay.tsx',
+    'src/components/shared/ThemeSelector.tsx',
+    'src/components/shared/TourEngine.tsx',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/components/shared/charts/MercentaCharts.tsx',
+    'src/components/ui.tsx',
+    'src/index.css',
+    'tailwind.config.js',
+  ]);
+
 
 
   /** Working-tree scope proof (read-only `git status`). */
@@ -4808,7 +4961,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE C4 (2026-10-13) — the operational type scale (see the declaration above). */
           PHASE_C4_TYPOGRAPHY_SCOPE.has(p) ||
-          [...PHASE_C4_TYPOGRAPHY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE_C4_TYPOGRAPHY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE C4 (2026-10-13) — the radius + elevation scale (see the declaration above). */
+          PHASE_C4_DESIGN_SCALE_SCOPE.has(p) ||
+          [...PHASE_C4_DESIGN_SCALE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

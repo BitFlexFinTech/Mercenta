@@ -56,7 +56,7 @@ export function LiftOff({
         <section className="border-t border-white/[0.06] px-6 py-16">
           <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
             {LIFT_OFF_PUBLIC_POINTS.map((p) => (
-              <div key={p.title} className="rounded-xl border border-white/[0.06] bg-ink-850 p-5">
+              <div key={p.title} className="rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5">
                 <p className="font-display text-base font-semibold text-parchment">{p.title}</p>
                 <p className="mt-2 text-sm leading-relaxed text-steel">{p.body}</p>
               </div>
@@ -74,7 +74,7 @@ export function LiftOff({
               type="button"
               data-testid={LIFT_OFF_TESTIDS.publicCta}
               onClick={() => onNavigate('explore-uk-market-fit')}
-              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
             >
               {EXPLORE_UK_MARKET_FIT_CTA}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

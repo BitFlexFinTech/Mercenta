@@ -222,7 +222,7 @@ export function Login() {
                   brand.canonical ? activateOnboardingBrand(brand.id) : activateDemoBrand(brand.id)
                 }
                 className={cn(
-                  'bg-ink-900 border rounded-xl p-4 text-left transition-all group',
+                  'bg-ink-900 border rounded-ds-lg p-4 text-left transition-all group',
                   ACCENTS[i % ACCENTS.length]
                 )}
               >
@@ -270,12 +270,12 @@ export function Login() {
                 key={login.label}
                 onClick={() => signIn(login.environment, login.role)}
                 className={cn(
-                  'w-full bg-ink-900 border rounded-xl p-4 text-left transition-all group',
+                  'w-full bg-ink-900 border rounded-ds-lg p-4 text-left transition-all group',
                   login.color
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-ds-md bg-white/[0.04] flex items-center justify-center">
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
@@ -293,7 +293,7 @@ export function Login() {
         <div className="mt-8 text-center">
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-ds-md transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Request Partner Access

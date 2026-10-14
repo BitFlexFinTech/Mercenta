@@ -95,7 +95,7 @@ export function AcquisitionPipeline() {
               aria-pressed={metricFilter === m.key}
               title={`Show the ${m.label.toLowerCase()}`}
               className={cn(
-                'bg-ink-850 border rounded-lg px-2 py-1.5 text-left transition-colors',
+                'bg-ink-850 border rounded-ds-md px-2 py-1.5 text-left transition-colors',
                 metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-white/[0.06] hover:border-white/[0.16]'
               )}
             >

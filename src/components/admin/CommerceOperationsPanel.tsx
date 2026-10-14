@@ -204,7 +204,7 @@ export function CommerceOperationsPanel() {
           const cancelledInvoice = journal.find((i) => i.status === 'cancelled');
           const reason = cancelReason[po.id] ?? '';
           return (
-            <div key={po.id} className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
+            <div key={po.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
                 <span className="text-ds-micro text-zinc-500">{po.brandId}</span>
@@ -256,7 +256,7 @@ export function CommerceOperationsPanel() {
                 <select
                   data-state="admin-commerce-terms-select"
                   aria-label={`Payment terms for ${po.poNumber} — carried on the invoice raised at receipt`}
-                  className="text-ds-label rounded-md border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
+                  className="text-ds-label rounded-ds-sm border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
                   value={chosenTerms}
                   disabled={busy || !!activeInvoice || !(n.receive || n.invoice)}
                   onChange={(e) =>
@@ -350,7 +350,7 @@ export function CommerceOperationsPanel() {
                     <input
                       data-state="admin-commerce-cancel-reason"
                       aria-label={`Cancellation reason for ${activeInvoice.number}`}
-                      className="text-ds-label rounded-md border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
+                      className="text-ds-label rounded-ds-sm border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
                       placeholder="Cancellation reason (required)"
                       value={reason}
                       disabled={busy}
@@ -395,10 +395,10 @@ export function CommerceOperationsPanel() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label text-red-200">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-red-200">{error}</div>
       )}
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-ds-label text-sky-200">{notice}</div>
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-sky-200">{notice}</div>
       )}
 
       {activityRows.length === 0 ? (

@@ -112,7 +112,7 @@ export function InvestorDemoPanel() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-red-400" />
           </div>
           <div>
@@ -256,7 +256,7 @@ export function InvestorDemoPanel() {
               <li
                 key={stage.id}
                 data-state={`investor-demo-stage-${stage.id}`}
-                className="border border-white/[0.05] rounded-lg p-2.5 bg-white/[0.02]"
+                className="border border-white/[0.05] rounded-ds-md p-2.5 bg-white/[0.02]"
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="min-w-0 flex items-start gap-2">

@@ -156,7 +156,7 @@ export function CommerceSimulationPanel() {
           <select
             value={effectiveSku}
             onChange={(e) => setSku(e.target.value)}
-            className="block mt-1 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 max-w-[280px]"
+            className="block mt-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 max-w-[280px]"
           >
             {products.length === 0 && <option value="">No catalog products</option>}
             {products.map((p) => (
@@ -173,7 +173,7 @@ export function CommerceSimulationPanel() {
             min={1}
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="block mt-1 w-24 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-white"
+            className="block mt-1 w-24 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-white"
           />
         </label>
       </div>
@@ -300,7 +300,7 @@ export function CommerceSimulationPanel() {
       {eligibility && (
         <div
           className={cn(
-            'rounded-lg p-3 text-ds-label border',
+            'rounded-ds-md p-3 text-ds-label border',
             eligibility.eligible
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
               : 'bg-amber-500/10 border-amber-500/20 text-amber-200'
@@ -321,18 +321,18 @@ export function CommerceSimulationPanel() {
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label text-red-200">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-red-200">
           {error}
         </div>
       )}
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-ds-label text-sky-200">
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-sky-200">
           {notice}
         </div>
       )}
 
       {po && (
-        <div className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-1">
+        <div className="rounded-ds-md border border-white/[0.06] bg-ink-850/60 p-3 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
             <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">{po.status}</Badge>
@@ -355,7 +355,7 @@ export function CommerceSimulationPanel() {
       )}
 
       {commerceInvoice && (
-        <div className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 text-ds-label space-y-1">
+        <div className="rounded-ds-md border border-white/[0.06] bg-ink-850/60 p-3 text-ds-label space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn(MONO, 'text-brass')}>{commerceInvoice.number}</span>
             <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">

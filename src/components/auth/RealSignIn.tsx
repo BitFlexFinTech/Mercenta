@@ -93,7 +93,7 @@ export function RealSignIn() {
             id="sign-in-error"
             role="alert"
             data-testid="sign-in-error"
-            className="rounded-lg border border-state-danger/40 bg-state-danger/10 px-3 py-2 text-ds-label text-state-danger"
+            className="rounded-ds-md border border-state-danger/40 bg-state-danger/10 px-3 py-2 text-ds-label text-state-danger"
           >
             {error}
           </p>

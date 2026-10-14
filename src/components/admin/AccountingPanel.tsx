@@ -508,35 +508,35 @@ export function AccountingPanel() {
           </div>
         </div>
 {error && (
-          <div className="mt-3 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 text-ds-label text-red-300">{error}</div>
+          <div className="mt-3 bg-red-500/10 border border-red-500/20 rounded-ds-md p-2.5 text-ds-label text-red-300">{error}</div>
         )}
         {seedMessage && (
-          <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 text-ds-label text-emerald-300">{seedMessage}</div>
+          <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-emerald-300">{seedMessage}</div>
         )}
 
         {showCredentialForm && (
-          <div className="mt-4 space-y-3 border border-white/[0.06] rounded-lg p-4">
+          <div className="mt-4 space-y-3 border border-white/[0.06] rounded-ds-md p-4">
             <h4 className="text-xs font-medium text-zinc-400">Xero API Credentials</h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Client ID</label>
                 <input value={credClientId} onChange={(e) => setCredClientId(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white" placeholder="xero-client-id" />
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-client-id" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Client Secret</label>
                 <input value={credClientSecret} onChange={(e) => setCredClientSecret(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white" placeholder="xero-client-secret" />
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-client-secret" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Tenant ID</label>
                 <input value={credTenantId} onChange={(e) => setCredTenantId(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white" placeholder="xero-tenant-id" />
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-tenant-id" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Access Token</label>
                 <input value={credAccessToken} onChange={(e) => setCredAccessToken(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white" placeholder="xero-access-token" />
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-access-token" />
               </div>
             </div>
             <Button onClick={handleSaveCredentials} size="sm" disabled={!credClientId || !credAccessToken}>
@@ -582,21 +582,21 @@ export function AccountingPanel() {
       <Card title="Financial Summary" className="p-5">
         {summary ? (
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white/[0.03] rounded-lg p-3">
+            <div className="bg-white/[0.03] rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Revenue</span>
               </div>
               <span className="text-lg font-semibold text-white">£{summary.revenue.toLocaleString()}</span>
             </div>
-            <div className="bg-white/[0.03] rounded-lg p-3">
+            <div className="bg-white/[0.03] rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-rose-400 mb-1">
                 <TrendingDown className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Expenses</span>
               </div>
               <span className="text-lg font-semibold text-white">£{summary.expenses.toLocaleString()}</span>
             </div>
-            <div className="bg-white/[0.03] rounded-lg p-3">
+            <div className="bg-white/[0.03] rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-brass-400 mb-1">
                 <DollarSign className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Net Profit</span>
@@ -647,7 +647,7 @@ export function AccountingPanel() {
               onClick={() => setPayoutFilter(m.key)}
               aria-pressed={payoutFilter === m.key}
               className={cn(
-                'rounded-lg border p-2.5 text-left transition-colors',
+                'rounded-ds-md border p-2.5 text-left transition-colors',
                 payoutFilter === m.key
                   ? 'border-brass-500/40 bg-brass-500/10'
                   : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.14]'
@@ -675,12 +675,12 @@ export function AccountingPanel() {
           </span>
         </div>
         {payoutNotice && (
-          <div className="mb-3 mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-ds-label text-emerald-300">
+          <div className="mb-3 mt-3 rounded-ds-md border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-ds-label text-emerald-300">
             {payoutNotice}
           </div>
         )}
         {payoutError && (
-          <div className="mb-3 mt-3 rounded-lg border border-red-500/20 bg-red-500/10 p-2.5 text-ds-label text-red-300">
+          <div className="mb-3 mt-3 rounded-ds-md border border-red-500/20 bg-red-500/10 p-2.5 text-ds-label text-red-300">
             {payoutError}
           </div>
         )}

@@ -67,7 +67,7 @@ export function OperatingCostsPanel() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5 text-red-400" />
           </div>
           <div>
@@ -118,23 +118,23 @@ export function OperatingCostsPanel() {
           </div>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Fixed monthly (MANUAL)</p>
             <p className="text-sm font-bold text-white" data-testid="cost-fixed">
               {money(summary.monthlyFixedGbp)}
             </p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">AI usage this month (ESTIMATED)</p>
             <p className="text-sm font-bold text-white" data-testid="cost-ai-month">
               {money(summary.ai.monthlySpendGbp)}
             </p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Projected month (ESTIMATED)</p>
             <p className="text-sm font-bold text-white">{money(summary.projectedMonthGbp)}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Total this month</p>
             <p className="text-sm font-bold text-white" data-testid="cost-total-month">
               {money(summary.monthlyTotalGbp)}
@@ -148,7 +148,7 @@ export function OperatingCostsPanel() {
           {summary.providers.map((p) => (
             <div
               key={p.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2"
               data-testid="cost-provider"
             >
               <div className="min-w-[220px]">
@@ -183,21 +183,21 @@ export function OperatingCostsPanel() {
         subtitle={`Runtime policy: FREE models only (${FREE_RUNTIME_MODELS.join(', ')}). Ceilings £${AI_SPEND_CEILINGS.dailyGbp}/day, £${AI_SPEND_CEILINGS.monthlyGbp}/month.`}
       >
         <div className="grid gap-2 sm:grid-cols-4 text-ds-label">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Calls</p>
             <p className="text-sm font-bold text-white" data-testid="ai-calls">{summary.ai.calls}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Tokens</p>
             <p className="text-sm font-bold text-white">{summary.ai.tokens}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cache hit / miss</p>
             <p className="text-sm font-bold text-white">
               {summary.ai.cacheHits} / {summary.ai.cacheMisses}
             </p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Refused by budget</p>
             <p className="text-sm font-bold text-white" data-testid="ai-refused">{summary.ai.refused}</p>
           </div>
@@ -275,17 +275,17 @@ export function OperatingCostsPanel() {
 
         <Card className="p-5" title="Contribution" subtitle="Provisional while any input still requires founder approval">
           <div className="grid gap-2 sm:grid-cols-3 text-ds-label">
-            <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Gross contribution</p>
               <p className="text-sm font-bold text-white" data-testid="contribution-gross">
                 {money(summary.contribution.grossGbp)}
               </p>
             </div>
-            <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Margin</p>
               <p className="text-sm font-bold text-white">{summary.contribution.marginPct}%</p>
             </div>
-            <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Status</p>
               <p className="text-sm font-bold text-white">
                 {summary.contribution.provisional ? 'provisional' : 'confirmed'}
@@ -301,19 +301,19 @@ export function OperatingCostsPanel() {
 
       <Card className="p-5" title="Unit economics" subtitle="What each unit of the platform costs at the current run-rate">
         <div className="grid gap-2 sm:grid-cols-4 text-ds-label" data-testid="unit-economics">
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per brand ({summary.units.brands})</p>
             <p className="text-sm font-bold text-white">{money(summary.perUnit.perBrandGbp)}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per opportunity ({summary.units.opportunities})</p>
             <p className="text-sm font-bold text-white">{money(summary.perUnit.perOpportunityGbp)}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per lead ({summary.units.leads})</p>
             <p className="text-sm font-bold text-white">{money(summary.perUnit.perLeadGbp)}</p>
           </div>
-          <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per AI operation ({summary.units.aiOperations})</p>
             <p className="text-sm font-bold text-white">{money(summary.perUnit.perAiOperationGbp)}</p>
           </div>

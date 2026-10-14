@@ -50,7 +50,7 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
 
 function TourCard({ tour }: { tour: TourDefinition }) {
   return (
-    <div className="relative flex flex-col rounded-xl bg-ink-850 border border-white/[0.06] overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)]">
+    <div className="relative flex flex-col rounded-ds-lg bg-ink-850 border border-white/[0.06] overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-ds-raised">
       {/* Preview area — step count summary */}
       <div className="flex min-h-0 flex-1 items-center justify-center bg-white/[0.02] border-b border-white/[0.06] px-4 py-6">
         <div className="text-center">
@@ -141,7 +141,7 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
       <div
-        className="w-[460px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden"
+        className="w-[460px] bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -169,7 +169,7 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
           <p className="text-xs text-zinc-400 leading-relaxed mb-4">{step.description}</p>
 
           {/* Target selector info */}
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 mb-4">
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md px-3 py-2 mb-4">
             <div className="text-ds-micro text-zinc-500">Target element</div>
             <code className="text-ds-micro text-brass-300 font-mono">{step.targetSelector}</code>
           </div>
@@ -326,14 +326,14 @@ export function UsertourAdminPanel() {
               onChange={(e) => setTourQuery(e.target.value)}
               placeholder="Search tours"
               data-testid="tours-search"
-              className="w-48 bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white"
+              className="w-48 bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-1.5 text-xs text-white"
             />
             <select
               aria-label="Tour status filter"
               value={tourStatus}
               onChange={(e) => setTourStatus(e.target.value as 'all' | 'published' | 'draft' | 'required')}
               data-testid="tours-status-filter"
-              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Status: all</option>
               <option value="published">Published</option>

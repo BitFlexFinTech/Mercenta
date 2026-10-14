@@ -77,7 +77,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                'px-2 py-1 rounded-md text-ds-label capitalize',
+                'px-2 py-1 rounded-ds-sm text-ds-label capitalize',
                 tab === t ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
               )}
             >
@@ -92,7 +92,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
         </div>
 
         {error && (
-          <p className="text-ds-label text-red-300 bg-red-500/10 border border-red-500/20 rounded-md px-2 py-1 mb-2">
+          <p className="text-ds-label text-red-300 bg-red-500/10 border border-red-500/20 rounded-ds-sm px-2 py-1 mb-2">
             {error}
           </p>
         )}
@@ -131,7 +131,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                 <select
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300"
+                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
                 >
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -193,7 +193,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       }}
                       disabled={!canCurrentUserMutate}
                       className={cn(
-                        'text-ds-micro px-2 py-0.5 rounded-md border',
+                        'text-ds-micro px-2 py-0.5 rounded-ds-sm border',
                         canCurrentUserMutate
                           ? 'border-white/[0.1] text-zinc-400 hover:text-white hover:border-brass-500/40'
                           : 'border-white/[0.05] text-zinc-700 cursor-not-allowed'
@@ -215,7 +215,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               onChange={(e) => setNoteBody(e.target.value)}
               rows={2}
               placeholder="Internal note (timestamped, attributed — never shown to the brand)…"
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
             />
             <Button
               className="text-xs"
@@ -260,7 +260,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       bump();
                     }}
                     className={cn(
-                      'text-ds-micro px-1 py-1.5 rounded-lg border capitalize transition-colors',
+                      'text-ds-micro px-1 py-1.5 rounded-ds-md border capitalize transition-colors',
                       meta.lifecycleStage === stage
                         ? 'border-brass-500/50 bg-brass-500/10 text-white'
                         : 'border-white/[0.08] text-zinc-400',
@@ -312,7 +312,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                   setBrandAccountOwner(brandId, e.target.value || null, actingStaffId);
                   bump();
                 }}
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 disabled:opacity-50"
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 disabled:opacity-50"
               >
                 <option value="">(unassigned)</option>
                 {staff.map((s) => (

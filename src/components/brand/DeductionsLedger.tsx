@@ -143,7 +143,7 @@ export function DeductionsLedger() {
             {categories.map(([type, c]) => (
               <span
                 key={type}
-                className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-ds-micro text-zinc-300"
+                className="inline-flex items-center gap-1.5 rounded-ds-sm border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-ds-micro text-zinc-300"
               >
                 <span>{deductionTypeLabel(type)}</span>
                 <span className="text-zinc-500">·</span>
@@ -269,7 +269,7 @@ export function DeductionsLedger() {
             </div>
           )}
           {disputingId && (
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
               <p className="text-ds-label text-blue-200">
                 {DEDUCTION_DISPUTE_WINDOW.attributionNote} Provide the evidence
                 that supports your claim — shipping documents, proof of delivery, or carton photos.
@@ -279,7 +279,7 @@ export function DeductionsLedger() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
                 placeholder="Evidence / grounds for the dispute…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white"
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white"
               />
               <div className="flex gap-2">
                 <Button

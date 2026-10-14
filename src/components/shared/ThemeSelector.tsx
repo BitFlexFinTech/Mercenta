@@ -84,7 +84,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
               >
                 <span
                   aria-hidden="true"
-                  className="w-4 h-4 rounded-md border border-white/[0.2] shrink-0"
+                  className="w-4 h-4 rounded-ds-sm border border-white/[0.2] shrink-0"
                   style={{
                     background: `linear-gradient(135deg, ${t.vars['--mr-bg']} 50%, ${t.vars['--mr-accent']} 50%)`,
                   }}

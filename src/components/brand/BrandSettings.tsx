@@ -156,7 +156,7 @@ function BankSection({ brandId }: { brandId: string }) {
     <Card title={`Bank Information — ${bankInfo.currency}`}>
       <div className="space-y-2">
         {bankInfo.status === 'pending_approval' && bankInfo.requestedChange && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-ds-label text-amber-300 mb-2">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2 text-ds-label text-amber-300 mb-2">
             Pending approval: {bankInfo.requestedChange.field} → {bankInfo.requestedChange.requestedValue}
           </div>
         )}
@@ -169,7 +169,7 @@ function BankSection({ brandId }: { brandId: string }) {
               onChange={(e) => updateField(key, e.target.value)}
               placeholder="New value..."
               aria-label={`New value for ${label}`}
-              className="w-28 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-0.5 text-ds-micro text-zinc-300"
+              className="w-28 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-0.5 text-ds-micro text-zinc-300"
             />
           </div>
         ))}
@@ -178,7 +178,7 @@ function BankSection({ brandId }: { brandId: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for change..."
-            className="flex-1 bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-ds-micro"
+            className="flex-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro"
           />
           <Button className="text-ds-micro" onClick={() => {
             const active = fields.find((f) => requested[f.key]?.trim());
@@ -282,7 +282,7 @@ function PermissionsSection({ brandId }: { brandId: string }) {
           <Input label="Name" value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} />
           <Input label="Email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} />
           <select value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value as BrandPermissionRole })}
-            className="w-full bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-xs text-zinc-300">
+            className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-zinc-300">
             <option value="Owner">Owner</option><option value="Shipping">Shipping</option><option value="Accounts">Accounts</option><option value="Compliance">Compliance</option>
           </select>
           <div className="flex gap-2">
@@ -503,13 +503,13 @@ function NotificationsSection({ brandId }: { brandId: string }) {
             <span className={cn('text-xs', p.enabled ? 'text-zinc-300' : 'text-zinc-600')}>{EVENT_LABELS[p.eventType]}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => toggleChannel(p, 'email')} className={cn('p-1 rounded', p.channels.includes('email') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
+            <button onClick={() => toggleChannel(p, 'email')} className={cn('p-1 rounded-ds-sm', p.channels.includes('email') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
               <Mail className="w-3 h-3" />
             </button>
-            <button onClick={() => toggleChannel(p, 'in_app')} className={cn('p-1 rounded', p.channels.includes('in_app') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
+            <button onClick={() => toggleChannel(p, 'in_app')} className={cn('p-1 rounded-ds-sm', p.channels.includes('in_app') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
               <Bell className="w-3 h-3" />
             </button>
-            <button onClick={() => toggleEnabled(p)} className={cn('p-1 rounded', p.enabled ? 'text-emerald-400' : 'text-zinc-600')}>
+            <button onClick={() => toggleEnabled(p)} className={cn('p-1 rounded-ds-sm', p.enabled ? 'text-emerald-400' : 'text-zinc-600')}>
               {p.enabled ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
             </button>
           </div>
@@ -572,7 +572,7 @@ function ToursSection({ brandId }: { brandId: string }) {
         Re-run any onboarding tour whenever you need a refresher. Restarting a tour resumes it from its first
         step and never touches your account, products, or orders.
       </p>
-      <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+      <ul className="divide-y divide-white/[0.05] rounded-ds-md border border-white/[0.06] bg-ink-850">
         {ALL_TOUR_DEFINITIONS.map((t) => {
           const completed = isTourCompleted(brandId, t.id);
           const skipped = isTourSkipped(brandId, t.id);
@@ -625,7 +625,7 @@ export function BrandSettings() {
             key={id}
             onClick={() => setActiveTab(id)}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors',
+              'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-ds-md transition-colors',
               activeTab === id
                 ? 'text-white border-b-2 border-brass-500 bg-white/[0.03]'
                 : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]'

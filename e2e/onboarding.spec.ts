@@ -61,7 +61,7 @@ test.describe('Onboarding Wizard', () => {
     await page.waitForTimeout(900);
     await page.locator('text=Astonish').first().click();
     await page.waitForTimeout(400);
-    await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
+    await page.locator('button.rounded-ds-lg').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);
     // The override panel exposes a track select (the reason input is beside it).
     const select = page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first();

@@ -216,7 +216,7 @@ export function BrandInventory() {
             ].map((tile) => (
               <div
                 key={tile.label}
-                className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3"
+                className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3"
               >
                 <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</div>
                 <div className="text-lg font-semibold text-white tabular-nums">{tile.value}</div>
@@ -230,7 +230,7 @@ export function BrandInventory() {
       {error && (
         <div
           data-testid="inventory-error"
-          className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-300"
+          className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300"
         >
           {error}
         </div>
@@ -238,7 +238,7 @@ export function BrandInventory() {
       {notice && (
         <div
           data-testid="inventory-notice"
-          className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 text-xs text-zinc-300"
+          className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3 text-xs text-zinc-300"
         >
           {notice}
         </div>
@@ -267,7 +267,7 @@ export function BrandInventory() {
                         (`ProductThumb`, §Wave-3 Part 3) like every other surface,
                         so a URL becomes an <img> and a missing image becomes the
                         neutral icon — never text. */}
-                    <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-lg" />
+                    <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-ds-md" />
                     <div>
                       <div className="text-sm font-medium text-white">{p?.name ?? r.sku}</div>
                       <div className={cn(MONO, 'text-zinc-500')}>{r.sku}</div>

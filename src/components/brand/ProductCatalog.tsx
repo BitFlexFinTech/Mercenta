@@ -202,7 +202,7 @@ export function ProductCatalog() {
       />
 
       {!gateCleared && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-sm text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-4 text-sm text-amber-200">
           <div className="flex items-center gap-2 mb-2 font-medium">
             <ShieldAlert className="w-4 h-4" />
             Catalog Sync Disabled — Compliance Gate{' '}
@@ -228,14 +228,14 @@ export function ProductCatalog() {
       )}
 
       {gateError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-300">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300">
           {gateError}
         </div>
       )}
 
       {/* §Phase E3 — catalog readiness, derived from the existing rules only. */}
       {gateCleared && (
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-xs">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-4 text-xs">
           <div className="flex items-center justify-between gap-3">
             <div className="text-zinc-300">
               <span className="font-medium text-white">Catalog readiness</span>{' '}
@@ -269,7 +269,7 @@ export function ProductCatalog() {
       )}
 
       {submissionNotice && (
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 text-xs text-zinc-300">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3 text-xs text-zinc-300">
           {submissionNotice}
         </div>
       )}
@@ -301,7 +301,7 @@ export function ProductCatalog() {
                       this catalogue thumbnail 32px → 64px. It renders through the
                       ONE owner (`ProductThumb`), whose placeholder glyph/icon now
                       scale with the box; nothing else in the cell moved. */}
-                  <ProductThumb product={p} size={64} className="rounded-lg" />
+                  <ProductThumb product={p} size={64} className="rounded-ds-md" />
                   <span className="text-sm font-medium text-white">{p.name}</span>
                 </div>
               ),
@@ -767,7 +767,7 @@ function AddProductPanel({
               type="checkbox"
               checked={form.hazmat}
               onChange={(e) => setForm({ ...form, hazmat: e.target.checked })}
-              className="rounded border-white/[0.15] bg-ink-900 text-brass-500 focus:ring-brass-500/30"
+              className="rounded-ds-sm border-white/[0.15] bg-ink-900 text-brass-500 focus:ring-brass-500/30"
             />
             <span className="text-xs text-zinc-400">Contains hazardous materials</span>
           </label>
@@ -824,7 +824,7 @@ function CostEditPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-80 shadow-2xl">
+      <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-80 shadow-ds-overlay">
         <h3 className="text-sm font-semibold text-white mb-1">Edit Item Cost</h3>
         <p className="text-ds-micro text-zinc-500 mb-4">
           {product.name} · {product.sku}

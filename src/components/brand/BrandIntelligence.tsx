@@ -159,8 +159,8 @@ export function BrandIntelligence() {
                 data-testid={`bi-detail-${d}`}
                 className={
                   detail === d
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {d === 'none' ? 'Overview' : d === 'competitors' ? 'Competitors' : d === 'products' ? 'Your products' : 'Insights'}
@@ -221,7 +221,7 @@ export function BrandIntelligence() {
           {productPerformance.length === 0 ? (
             <p className="text-xs text-zinc-600">No catalogue products yet — add products to see estimated performance.</p>
           ) : (
-            <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            <ul className="divide-y divide-white/[0.05] rounded-ds-md border border-white/[0.06] bg-ink-850">
               {productPerformance.map(({ product: p, analysis: a }) => (
                 <li key={p.sku} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5" data-testid={`bi-sku-${p.sku}`}>
                   <div className="min-w-0 flex-1">

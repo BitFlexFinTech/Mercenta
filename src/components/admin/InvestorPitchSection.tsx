@@ -47,7 +47,7 @@ export function InvestorPitchSection() {
         <TamSamBreakdown />
       </div>
 
-      <div className="mt-4 bg-ink-900 border border-white/[0.06] rounded-lg p-3">
+      <div className="mt-4 bg-ink-900 border border-white/[0.06] rounded-ds-md p-3">
         <div className="flex items-center gap-2 mb-1.5">
           <TrendingUp className="w-3.5 h-3.5 text-brass-400" />
           <span className="text-ds-label font-medium text-white">Positioning Frame</span>

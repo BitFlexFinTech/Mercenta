@@ -162,7 +162,7 @@ export function BrandSelfService() {
               <select
                 value={field}
                 onChange={(e) => setField(e.target.value as (typeof CHANGE_FIELDS)[number])}
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300"
+                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
               >
                 {CHANGE_FIELDS.map((f) => (
                   <option key={f} value={f}>{f}</option>

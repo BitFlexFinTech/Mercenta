@@ -93,7 +93,7 @@ export function OpportunityDiscoveryPanel() {
               <span className="text-zinc-600">{PO_POTENTIAL_FORMULA}</span>
             </p>
           </div>
-          <span className="text-ds-micro text-amber-300/90 border border-amber-400/20 rounded px-2 py-1 whitespace-nowrap">
+          <span className="text-ds-micro text-amber-300/90 border border-amber-400/20 rounded-ds-sm px-2 py-1 whitespace-nowrap">
             {CLAIM_LABELS.estimate}
           </span>
         </div>
@@ -108,7 +108,7 @@ export function OpportunityDiscoveryPanel() {
                 type="button"
                 onClick={() => setVertical(vertical === v ? '' : v)}
                 className={cn(
-                  'text-left rounded-lg border px-2.5 py-2 transition-colors',
+                  'text-left rounded-ds-md border px-2.5 py-2 transition-colors',
                   vertical === v
                     ? 'border-emerald-400/40 bg-emerald-500/[0.08]'
                     : 'border-white/[0.06] bg-ink-850 hover:bg-white/[0.03]'
@@ -207,7 +207,7 @@ export function OpportunityDiscoveryPanel() {
             {ineligible.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-lg px-2 py-1.5"
+                className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-ds-md px-2 py-1.5"
               >
                 <div className="min-w-0 flex-1">
                   <span className="text-xs font-medium text-zinc-300">{r.brand}</span>
@@ -236,7 +236,7 @@ export function OpportunityDiscoveryPanel() {
           {sports.map((s) => (
             <div
               key={s.id}
-              className="rounded-lg border border-white/[0.08] p-2.5 text-ds-label cursor-pointer hover:bg-white/[0.03]"
+              className="rounded-ds-md border border-white/[0.08] p-2.5 text-ds-label cursor-pointer hover:bg-white/[0.03]"
               onClick={() => setSelected(s.id)}
             >
               <div className="flex items-center justify-between gap-2">

@@ -435,8 +435,8 @@ export function LogisticsControl({
                 data-testid={`logistics-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -577,7 +577,7 @@ export function LogisticsControl({
                   <span className="font-mono text-brass">
                     {s.poNumber}
                     {poFor(s.poNumber)?.simulated === true && (
-                      <span className="ml-2 text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">
+                      <span className="ml-2 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">
                         (sim)
                       </span>
                     )}
@@ -800,7 +800,7 @@ export function LogisticsControl({
                           });
                         }
                       }}
-                      className="w-full cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2.5 py-1.5 text-xs text-white transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
+                      className="w-full cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2.5 py-1.5 text-xs text-white transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
                     >
                       {CARRIER_MILESTONES.map((opt) => (
                         <option key={opt} value={opt} className="bg-ink-900">
@@ -846,7 +846,7 @@ export function LogisticsControl({
               {apiLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="rounded-md border border-white/[0.06] p-2 font-mono text-ds-label text-zinc-400"
+                  className="rounded-ds-sm border border-white/[0.06] p-2 font-mono text-ds-label text-zinc-400"
                 >
                   <span className="text-zinc-600">{log.timestamp}</span>{' '}
                   <span className="text-brass-400">{log.method}</span> {log.endpoint}

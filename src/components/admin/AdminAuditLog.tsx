@@ -177,7 +177,7 @@ export function AdminAuditLog() {
               onChange={(e) => setActionFilter(e.target.value)}
               aria-label="Action filter"
               data-testid="audit-action-filter"
-              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Action: all</option>
               {actions.map((a) => (
