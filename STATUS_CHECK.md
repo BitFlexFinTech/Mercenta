@@ -5,7 +5,57 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §PHASE C4 (PART 2) — CURRENT STATUS (2026-10-13) — THE RADIUS + ELEVATION SCALE
+## §OPENSHIP BATCHES 1+2 — CURRENT STATUS (session 140, 2026-10-14) — THE VERIFIED REFERENCE SPECIFICATION, TWO PROTECTION GATES, AND TWO RECORD DEFECTS FIXED AT SOURCE
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** BATCH 1 (the reference specification) and
+BATCH 2 (the two protection gates) of the Owner-approved OpenShip replication are committed and pushed.
+**NOT deployed and NOT live-verified** — and, for this increment, that is correct rather than pending: a
+document plus two check scripts change no application runtime behaviour, so the three-way gate is
+**NOT APPLICABLE (no application runtime change)** for them. The Owner has withheld deployment approval as
+before; BATCH 3 (the design foundations) is application-runtime work and will need it.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch." The batch plan for the OpenShip replication had
+   been agreed in conversation and was recorded in the project **nowhere** — the only batch number anywhere in
+   it was the reference spec's own "(Batch 10)" note — so this session asked ONE question, the Owner confirmed
+   **BATCH 3 = the design foundations** and the full sequence, and directed that batches 1+2 be recorded and
+   published FIRST. That is what this checkpoint is.
+2. **BATCH 1 — THE REFERENCE SPECIFICATION, `docs/OPENSHIP_REFERENCE_SPEC.md`.** 1,012 lines / 15 sections at
+   the time of the commit (now 1,058 / 16, with §16 added this session). Every claim carries an evidence tier
+   — SOURCE / SCREENSHOT / DERIVED / UNVERIFIED — so an untagged claim is unverified by definition. The
+   reference is `oblien/openship` (Apache-2.0 deployment platform), NOT the same-named
+   `openshiporg/openship` (AGPL e-commerce router). OpenShip's components **cannot** be copied into Mercenta
+   (Next.js 16 / React 19 / Tailwind v4 `@theme` against React 18.3.1 / Vite 5.4.2 / Tailwind 3.4.1): the
+   design LANGUAGE is reproduced inside Mercenta's own architecture. Two radii coexist in the reference
+   (`.th-card` 16px against the shadcn `--radius` 12px bridge); the official docs disagree with the source in
+   four places and the source is the authority; the reference's own legacy overview components are hardcoded
+   light and are **defects, not mirrored**; Gellix is personal-use-only, so Plus Jakarta Sans (OFL 1.1,
+   licence verified at source) replaces it.
+3. **BATCH 2 — THE TWO GATES, EACH PROVED ABLE TO FAIL.** `scripts/validate-nav-destinations.mjs`
+   (**16 assertions**): the navigation inventory is pinned by PARSING the declaration block (13 admin groups /
+   27 destinations, 7 brand groups / 20 destinations, the 7-id RBAC hidden set), comments are stripped first so
+   a comment naming an id cannot be counted as one, and an empty discovery **fails loudly**.
+   `scripts/validate-data-preservation.mjs` (**15 assertions**): every protected path (`supabase`, `src/lib`,
+   `src/services`, `src/data`, the five named config files) is diffed against a frozen baseline commit, and the
+   migration count (28) and edge-function directory count (18) are pinned. **PROOF, mutate → FAIL → restore
+   byte-identical:** `AdminShell.tsx` with one destination renamed → exit 1 / 3 failures → restored (sha256
+   `c1747667…` identical) → PASS; a migration with two appended lines → exit 1 / 1 failure → restored (sha256
+   `db688fa4…` identical) → PASS.
+4. **TWO REAL RECORD DEFECTS, FIXED AT SOURCE (rules 07 + 10) — NOT PARKED.** (a) The batch plan lived only in
+   the conversation; it is now recorded in `docs/OPENSHIP_REFERENCE_SPEC.md` **§16**, including the honest note
+   that the intervening batch numbers (9, 11 …) are not evidenced anywhere in the project, so the ORDER is
+   recorded and no number is invented. (b) `ec0c991` had been committed by the previous session but **never
+   pushed** (`origin/redesign/foundation` sat at `21ba4b8`); it is pushed now, verified with
+   `git rev-parse origin/redesign/foundation`.
+5. **MEASURED THIS SESSION (re-run here, not copied from the previous one).** `scripts/validate-all.sh`
+   **195 PASS / 0 FAIL** (exit 0) · `npm run typecheck` **0** · `npm run lint` **0** · `npm run build` **ok** ·
+   `git status --porcelain` **EMPTY**.
+6. **NEXT.** **BATCH 3** — the design foundations: OpenShip's colours, theme surfaces, corners, shadows,
+   typography and primary-action styling across the four non-Bold themes, with `bold` preserved exactly and
+   `minimal-light` remaining the default. Then BATCH 4 (shared surfaces and controls) → 5 (sidebar) → 6 (top
+   bar) → 7 (page layouts) → 8 (component states) → the legacy-styling migration → full acceptance testing, in
+   the order recorded in `docs/OPENSHIP_REFERENCE_SPEC.md` §16.
+
+## §PHASE C4 (PART 2) — THE RADIUS + ELEVATION SCALE (session 139, 2026-10-13) — SUPERSEDED BY §OPENSHIP BATCHES 1+2
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The second half of the shared design
 system is executed: the app now renders ONE declared radius scale and ONE declared elevation scale,
