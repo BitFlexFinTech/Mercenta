@@ -25,7 +25,7 @@
 | State | React Context (`GlobalStateContext`) + TanStack Query 5 |
 | Charts | Recharts 3.10 (lazy vendor chunk) |
 | Icons | Lucide 0.446 |
-| Fonts | IBM Plex Sans, Fraunces (display), IBM Plex Mono |
+| Fonts | Plus Jakarta Sans (UI), Fraunces (display), IBM Plex Mono |
 | Validation | Zod 4.5 |
 | Monitoring | Sentry (deferred / non-blocking) |
 | Backend | Supabase 2.57 (partial; demoStore fallback) |

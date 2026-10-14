@@ -7,7 +7,10 @@
 ## Principles
 
 - Premium wholesale-operations platform, NOT a generic dark SaaS template.
-- Dark theme + brass/gold accent identity; serious B2B tone; IBM Plex Sans + Fraunces.
+- Surfaces built on OpenShip's design language (one light design for the three light slots,
+  its dark design for `serious`) with a PER-THEME accent — violet · blue · lime · orange;
+  `bold` keeps its own violet-black identity and is deliberately unchanged.
+  Serious B2B tone; Plus Jakarta Sans + Fraunces.
 - Meaningful hierarchy, whitespace, purposeful density, operational clarity.
 - Semantic states are machine + human readable — never colour-only.
 - Restrained motion: motion communicates state/transition/feedback, not decoration.
@@ -15,25 +18,38 @@
 ## Tokens (source: `tailwind.config.js`)
 
 ### Colour
-| Token | Value | Purpose |
+Every colour token maps to a **theme CSS variable** (`--mr-*`, declared once in
+`src/config/themes.ts` and applied by `ThemeContext`), never to a literal hex — so one
+class renders differently in each of the five themes, and no page may hardcode a colour.
+
+| Token | Maps to | Purpose |
 |---|---|---|
-| `ink-950` | `#000000` | application background |
-| `ink-900/850` | `#0A0A0B` / `#121214` | base surfaces |
-| `surface.raised` | `#161618` | elevated surface |
-| `surface.overlay` | `#1C1C1E` | overlay/elevated |
-| `brass-500` | `#C9A15A` | brand accent (primary CTA) |
-| `state.success` | `#2FBF71` | success |
-| `state.warning` | `#F2A93B` | warning |
-| `state.danger` | `#E5533F` | danger/error |
-| `state.info` | `#6AA6FF` | information |
-| `state.muted` | `#8A93A0` | muted text |
+| `ink-950` / `ink-900` | `var(--mr-bg-deep)` / `var(--mr-surface)` | deepest background · cards and panels |
+| `ink-850` / `ink-800` | `var(--mr-surface-raised)` / `var(--mr-surface-overlay)` | raised surface · overlays and dropdowns |
+| `ink-700` / `ink-600` / `ink-500` | `var(--mr-surface-hover)` | hover fills |
+| `surface.raised` / `surface.overlay` | `var(--mr-surface-raised)` / `var(--mr-surface-overlay)` | elevated surfaces |
+| `brass-500` (`brass.DEFAULT`) | `var(--mr-accent)` | **the per-theme accent** — the primary CTA |
+| `brass-300` / `400` / `600` / `700` | `var(--mr-accent-300…700)` | accent tints (300/400) and shades (600/700) |
+| `zinc-100…600` | `var(--mr-text-200…faint)` | the text hierarchy |
+| `state.success` … `state.muted` | `var(--mr-state-*)` | semantics |
 
 Legacy tokens retained for backward compatibility (`amber.accent`, `crimson.accent`, etc.).
 The canonical kit SHOULD use `state.*` for semantics.
 
+> **§OPENSHIP BATCH 3 (2026-10-14) — THE ACCENT IS PER THEME, NOT ONE GOLD.**
+> The four non-Bold themes now carry OpenShip's own accent hues
+> (`docs/OPENSHIP_REFERENCE_SPEC.md` §13): `minimal-light` violet `#7E22CE` ·
+> `professional` blue `#2563EB` · `fun` lime `#A9F04D` (which takes DARK text on it) ·
+> `serious` orange `#F97316`. `bold` keeps its violet `#7C3AED` and is unchanged.
+> The token NAME `brass` is retained as the accent's class alias — thousands of call
+> sites use `bg-brass-500` and none had to change — so **a class called `brass` can now
+> render violet: it means "the accent", not "gold".** The brass/gold identity survives
+> only where it is brand rather than theme: the logo marks in `src/assets/`.
+
 ### Typography
 - `font-display` (Fraunces) — display / entity titles.
-- `font-sans` (IBM Plex Sans) — body, subtitle.
+- `font-sans` (Plus Jakarta Sans, OFL 1.1) — body, subtitle. §OPENSHIP BATCH 3 (2026-10-14):
+  the reference's Gellix is "Personal Use Only" and is not shipped.
 - `font-mono` (IBM Plex Mono) — numeric / KPI / ids.
 - Hierarchy: Display (2xl/3xl, display face) → Page title (`ds-page`) → Section
   (`ds-title`) → Body (`ds-body`) → Label/caption (`ds-label`) → Micro
@@ -100,22 +116,33 @@ the control, container and inline steps respectively, across the whole product. 
 class as the type scale: a scale the product does not render is a scale every author
 invents their own version of.
 
+> **§OPENSHIP BATCH 3 (2026-10-14) — THE SIZES MOVED ONTO THE REFERENCE'S RADII.**
+> The three named steps now carry OpenShip's measured geometry
+> (`docs/OPENSHIP_REFERENCE_SPEC.md` §2.2 — container 16px · control 12px · small
+> control 8px), because the four non-Bold themes are built on that design. This was
+> a deliberate **+4px on every control and container** (the reference's own "radius
+> +4px" rows in its §12 table) — the opposite of the §PHASE C4 repoint below, which
+> moved the NAMES onto geometry the app already drew. `ds-pill` did not move.
+
 | Token | Size | Role |
 |---|---|---|
-| `rounded-ds-sm` | **6px** | inline — chips, tags, `kbd`/`<code>`, thumbnails, micro icon buttons |
-| `rounded-ds-md` | 8px | controls — buttons, inputs, selects, textareas, tabs, nav items |
-| `rounded-ds-lg` | 12px | containers — cards, panels, modals, popovers, tables |
+| `rounded-ds-sm` | **8px** | small controls — in-row chips, tags, `kbd`/`<code>`, thumbnails, micro icon buttons |
+| `rounded-ds-md` | 12px | controls — buttons, inputs, selects, textareas, tabs, nav items |
+| `rounded-ds-lg` | 16px | containers — cards, panels, modals, popovers, dropdowns, tables |
 | `rounded-ds-pill` | 9999px | pills · avatars · dots · status badges |
-| `rounded-2xl` | 16px | **large marketing / hero blocks only** (`src/components/marketing/`) — the display exception |
+| `rounded-2xl` | 16px | the SAME value as the container step; it remains gated to `src/components/marketing/` as a display-only alias |
 
 - `rounded-full` is Tailwind's own step and the **same value** as `rounded-ds-pill`, so it
   is an accepted alias for the pill role — a documented alias, not a second scale.
-- 4px (bare `rounded`) is folded into 6px: a 2px difference between two small steps is not
-  a step, it is noise — and it was being used inconsistently on chips and `<code>`.
-- `rounded-ds-md` (8px) and `rounded-ds-lg` (12px) sit **on the geometry the app already
-  rendered**, which is what made the migration a RENAME rather than a redesign: binding
-  `rounded-lg` → `ds-md` and `rounded-xl` → `ds-lg` moves no pixels for 542 sites. The
-  repoint moved 41 + 26 occurrences by 2px, in 20 shell/shared files.
+- 4px (bare `rounded`) is folded into the small step: a 2px difference between two small
+  steps is not a step, it is noise — and it was being used inconsistently on chips and
+  `<code>`.
+- §REPOINTED (historical, kept for the record): under §PHASE C4 the control step was 8px
+  and the container step was 12px, i.e. **the geometry the app already rendered** — which
+  is what made THAT migration a RENAME rather than a redesign (binding `rounded-lg` →
+  `ds-md` and `rounded-xl` → `ds-lg` moved no pixels for 542 sites, and 41 + 26
+  occurrences moved by 2px in 20 shell/shared files). §OPENSHIP BATCH 3 then moved both
+  steps onto the reference's values; the gate still refuses a silent move of either one.
 - The gate fails on an unnamed radius reappearing (including **per-side** forms such as
   `rounded-t-lg` and arbitrary `rounded-[…]`), on `rounded-2xl` escaping the marketing
   folder, and on a `border-radius` literal in CSS that the ramp does not declare.

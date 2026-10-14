@@ -91,7 +91,8 @@ staff may mutate admin state (`staffCanMutate`).
 ## 8. UI principles
 
 - Premium wholesale-operations platform, not generic SaaS dashboard.
-- Dark theme + brass/gold accent identity; IBM Plex Sans + Fraunces.
+- OpenShip-based light/dark surfaces with a per-theme accent (`bold` keeps its own
+  violet-black identity); Plus Jakarta Sans + Fraunces.
 - Prioritize exceptions/actions/next-steps over KPI-card walls.
 - All screens answer: WHERE AM I? WHAT MATTERS? WHAT HAPPENED? WHAT NEEDS
   ATTENTION? WHAT CAN I DO? WHAT SHOULD I DO NEXT?

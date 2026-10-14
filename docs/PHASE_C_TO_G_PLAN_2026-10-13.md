@@ -130,9 +130,16 @@ complete when **all** of these hold, with evidence:
   `Modal`, `Select` and `Tabs` in `src/components/ui.tsx`. **Record each package and why it is needed.**
 - **CVA** (per D-1): introduce variants **behind the existing props** — no call site may need to change.
 - **One documented radius/elevation scale** (containers `xl`, controls `lg` — currently implicit).
+  **§OPENSHIP BATCH 3 (2026-10-14) — THE SIZES WERE REPOINTED AGAIN, DELIBERATELY:** the same
+  three steps now carry the REFERENCE's measured radii (`docs/OPENSHIP_REFERENCE_SPEC.md` §2.2)
+  — small control 8px · control 12px · container 16px — because the four non-Bold themes are
+  built on OpenShip's design. `ds-pill` did not move, no class name changed, and the gate's
+  discipline is unchanged (it still discovers the ramp and still refuses a silent move). The
+  sizes recorded in the §PHASE C4 paragraph below are therefore **§REPOINTED history**, kept
+  for the record because they are what made that earlier migration a rename.
   **§EXECUTED 2026-10-13 (§PHASE C4):** the scale is now declared ONCE in `tailwind.config.js`
-  (`borderRadius.ds` — `ds-sm` 6px inline · `ds-md` 8px controls · `ds-lg` 12px containers ·
-  `ds-pill` 9999px — and `boxShadow` — none · subtle · raised · overlay) and documented in
+  (`borderRadius.ds` — §REPOINTED, the §PHASE C4 sizes for `ds-sm` / `ds-md` / `ds-lg` were
+  6 / 8 / 12px with `ds-pill` 9999px — and `boxShadow` — none · subtle · raised · overlay) and documented in
   `docs/DESIGN_SYSTEM.md`. The measurement that drove it: the product rendered FIVE unnamed
   radii (630 class sites) while the named steps were consumed almost nowhere (41, 26 and 22
   uses). The two named steps were moved ONTO the geometry the app already rendered — the

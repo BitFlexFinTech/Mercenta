@@ -28,13 +28,23 @@ import { loginAs } from './helpers/auth';
 
 const SHOT_DIR = 'test-screenshots/themes';
 
-/** The five themes and the accent each MUST render (src/config/themes.ts). */
+/**
+ * The five themes and the accent each MUST render (src/config/themes.ts).
+ *
+ * §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED, NOT WEAKENED. Four accents moved
+ * because the four non-Bold themes now carry OpenShip's designs (spec §13) and
+ * OpenShip's own accent hues: the light design's violet→blue pair, its `dim`
+ * design's lime, and the dark design's orange. `bold` is deliberately unchanged
+ * (#7C3AED) — the Owner's instruction is that it is preserved exactly — so it is
+ * still pinned here as the control. This spec must be updated in the SAME change
+ * as any theme value: it is the only gate that proves a theme reaches the DOM.
+ */
 const THEMES = [
-  { id: 'minimal-light', accent: '#C9A15A' },
-  { id: 'professional', accent: '#3E5C8A' },
+  { id: 'minimal-light', accent: '#7E22CE' },
+  { id: 'professional', accent: '#2563EB' },
   { id: 'bold', accent: '#7C3AED' },
-  { id: 'fun', accent: '#0F9B8E' },
-  { id: 'serious', accent: '#8CA0B8' },
+  { id: 'fun', accent: '#A9F04D' },
+  { id: 'serious', accent: '#F97316' },
 ] as const;
 
 const ADMIN_SCREENS = [

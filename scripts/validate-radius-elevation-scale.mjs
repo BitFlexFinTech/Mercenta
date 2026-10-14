@@ -93,26 +93,44 @@ check(
   `steps=${Object.keys(RAMP).join('/') || 'none'}`
 );
 
-const RAMP_EXPECTED = { sm: 6, md: 8, lg: 12, pill: 9999 };
+/**
+ * §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED, NOT WEAKENED.
+ *
+ * The §PHASE C4 contract was { sm 6 · md 8 · lg 12 } — the geometry the app
+ * ALREADY rendered, which is what made that migration a RENAME. The canonical
+ * source of the radii is now OpenShip's measured design
+ * (docs/OPENSHIP_REFERENCE_SPEC.md §2.2: container 16px · control 12px · small
+ * control 8px), so the ramp is { sm 8 · md 12 · lg 16 } and the +4px on every
+ * control and container is DELIBERATE, not an accident to be caught.
+ *
+ * The gate keeps its whole strength and its whole purpose:
+ *   · the ramp is still DISCOVERED from tailwind.config.js, never retyped;
+ *   · all four steps are still BOUND to exact values, so moving one silently
+ *     still fails here and has to be re-argued in the open (that is how this
+ *     change is being made: deliberately, with the reference as the reason);
+ *   · `ds-pill` is still pinned to Tailwind's own pill step;
+ *   · every DESCRIBER of the ramp is still checked for a stale size.
+ */
+const RAMP_EXPECTED = { sm: 8, md: 12, lg: 16, pill: 9999 };
 check(
-  'the declared ramp is the rename-safe scale: sm 6 · md 8 · lg 12 · pill 9999',
+  'the declared ramp carries the REFERENCE radii: sm 8 · md 12 · lg 16 · pill 9999 (spec §2.2)',
   JSON.stringify(RAMP) === JSON.stringify(RAMP_EXPECTED),
   `declared ${JSON.stringify(RAMP)}`
 );
 
 /**
- * The values are BOUND, not merely described: `md` 8px and `lg` 12px are the
- * geometry the application already rendered for its dominant controls
- * (`rounded-lg`) and containers (`rounded-xl`), which is what made the migration a
- * RENAME rather than a redesign. Moving either one silently re-renders hundreds of
- * surfaces, so the gate refuses it and the move has to be re-argued deliberately.
+ * The values are BOUND, not merely described. Since §OPENSHIP BATCH 3 they are
+ * bound to the REFERENCE's measurement (container 16 · control 12 · small 8)
+ * rather than to the app's former geometry; moving any one of them still
+ * re-renders hundreds of surfaces, so the gate still refuses it and the move has
+ * to be re-argued deliberately — which is exactly what happened here.
  */
 check(
-  'the control step (md) is 8px and the container step (lg) is 12px',
-  RAMP.md === 8 && RAMP.lg === 12,
+  'the control step (md) is 12px and the container step (lg) is 16px',
+  RAMP.md === 12 && RAMP.lg === 16,
   `md=${RAMP.md}px lg=${RAMP.lg}px`
 );
-check('the inline step (sm) is 6px', RAMP.sm === 6, `sm=${RAMP.sm}px`);
+check('the small-control step (sm) is 8px', RAMP.sm === 8, `sm=${RAMP.sm}px`);
 check(
   'the pill step (pill) equals Tailwind `rounded-full`, so the alias is safe',
   RAMP.pill === 9999,

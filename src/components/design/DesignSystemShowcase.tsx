@@ -58,7 +58,7 @@ export function DesignSystemShowcase() {
         <p className="font-display text-3xl font-semibold text-white">Display — Fraunces</p>
         <p className="text-2xl font-semibold text-white">Page title</p>
         <p className="text-lg font-semibold text-white">Section title</p>
-        <p className="text-sm text-zinc-300">Body — IBM Plex Sans. Regular reading copy.</p>
+        <p className="text-sm text-zinc-300">Body — Plus Jakarta Sans. Regular reading copy.</p>
         <p className="text-xs text-zinc-500">Label / caption — secondary info and meta.</p>
         <p className="font-mono text-sm text-brass-300">Numeric / KPI — 12,480.50</p>
       </section>

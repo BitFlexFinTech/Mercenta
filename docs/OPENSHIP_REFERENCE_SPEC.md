@@ -938,10 +938,43 @@ was corrected rather than left standing.
 **On the 4-slots-to-3-designs arithmetic, recorded honestly.** OpenShip has three designs
 (light / dim / dark) and Mercenta has four non-Bold slots, three of which are light. So
 OpenShip's single `light` design covers all three light slots and its `dark` covers the one
-dark slot. **OpenShip's `dim` design is implemented in the theme contract** (page `#141414`,
-card fill `rgba(255,255,255,.03)`, dropdown `#282828`, lime accent) so it exists and is
-available; with `bold` exempt there is no fourth dark slot for it to occupy. **No Mercenta
-accent hue is retained in `professional` or `fun`.**
+dark slot.
+
+**§EXECUTED 2026-10-14 (§OPENSHIP BATCH 3) — WHAT WAS ACTUALLY BUILT, AND THE THREE PLACES IT
+DIVERGES FROM THE PLAN ABOVE. Recorded here because this section is a LIVE describer, and a
+plan that survives its implementation as though it were still the plan is a false statement
+about the product (rule 10).** The four non-Bold themes now carry OpenShip's SURFACES
+exactly as tabled above — one light design across `minimal-light`, `professional` and `fun`
+(page `#F9F9F9`, card `#FFFFFF`, border `#E8E8E8`, scrim `rgba(0,0,0,.45)`, cards
+shadowless) and OpenShip's dark design for `serious` (page `#000000`, card fill
+`rgba(255,255,255,.05)` rendered as its opaque composite `#0D0D0D`, dropdown `#161616`, the
+INVERTED scrim `rgb(20 20 20 / 60%)`, cards shadowless). `bold` is unchanged. Divergences:
+
+1. **The three light slots carry DIFFERENT accents, not one.** The plan said
+   `professional` and `fun` would be "OpenShip light, exactly". Making all three identical
+   would have re-created the exact defect the Owner reported in §PHASE C1 — a theme switch
+   that changes nothing — and would have failed `scripts/validate-theme-distinctness.mjs`,
+   whose purpose is that a user switching themes sees a measurable change. So each light
+   slot takes a **different accent from OpenShip's OWN palette**, and no Mercenta accent hue
+   is retained: `minimal-light` violet `#7E22CE` (the light design's violet→blue gradient),
+   `professional` blue `#2563EB`, `fun` lime `#A9F04D` (the `dim` design's hero hue, which
+   takes dark text on it). `serious` takes the dark design's amber→orange→rose, i.e. orange
+   `#F97316`. Every accent pair is ≥ 39 in straight-RGB distance and every contrast floor is
+   measured, not estimated, by the theme gate.
+2. **OpenShip's `dim` design is NOT implemented as a sixth theme.** The plan above said it
+   would be "implemented in the theme contract"; in the event it cannot be, because
+   `scripts/validate-theme-foundation.mjs` pins the selectable set to EXACTLY five
+   (`minimal-light · professional · bold · fun · serious`, with the retired `current` theme
+   forbidden by an absence guard), and with `bold` exempt there is no slot for a fourth dark
+   design. Its one distinctive feature that CAN be honoured is: the lime accent, which is
+   where `fun`'s accent comes from. Recorded as a deliberate divergence rather than a
+   silent one.
+3. **The card's BORDER is still drawn.** The reference makes a card borderless and
+   shadowless in the dark designs and borderless in `light`. The shadow half is done (all
+   four non-Bold themes declare `--mr-shadow-subtle: none`); the border half is the
+   component change scheduled for **BATCH 4 (shared surfaces and controls)**, because
+   removing a utility class from `src/components/ui.tsx` is a component change, not a token
+   change. Stated here so the gap is not mistaken for a completed treatment.
 
 ---
 

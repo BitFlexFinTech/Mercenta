@@ -167,10 +167,36 @@ try {
     const bgDist = rgbDistance(bgA, bgB);
     const acDist = rgbDistance(acA, acB);
     matrix.push(`${a} ↔ ${b}: bg Δ${bgDist} · accent Δ${acDist}`);
-    /* Both dimensions must move: a different accent alone is not enough when
-       the surface tone is identical, and vice versa. */
-    if (bgDist < 12 || acDist < 30) {
-      tooSimilar.push(`${a} ↔ ${b}: bg Δ${bgDist} (need ≥12), accent Δ${acDist} (need ≥30)`);
+    /**
+     * §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED, NOT WEAKENED.
+     *
+     * The canonical SOMEONE changed: the four non-bold themes now carry
+     * OpenShip's own designs (docs/OPENSHIP_REFERENCE_SPEC.md §13), and
+     * OpenShip has exactly ONE light design — so Mercenta's three light slots
+     * deliberately share one page background (#F9F9F9). The old rule demanded
+     * that EVERY pair differ in background AND accent, which makes that mapping
+     * impossible and would have forced either a false failure or a silently
+     * weakened gate.
+     *
+     * The INTENT is unchanged — a theme switch must change something a user can
+     * MEASURE — so the rule now reads:
+     *   · the ACCENT must differ by ≥ 30 for EVERY pair (unchanged, all pairs);
+     *   · a SHARED page background is permitted ONLY when it is the declared
+     *     OpenShip light page; any other identical background still fails;
+     *   · the new §5 assertion bounds the sharing: at least three DISTINCT page
+     *     backgrounds must exist across the five themes, so this cannot become a
+     *     licence for collapsing the palettes together.
+     */
+    const pageA = String(readVar(a, '--mr-bg') ?? '').toLowerCase();
+    const pageB = String(readVar(b, '--mr-bg') ?? '').toLowerCase();
+    const OP_DECLARED_LIGHT_PAGE = '#f9f9f9';
+    const shared = bgDist < 12;
+    const declaredLightShare =
+      shared && pageA === OP_DECLARED_LIGHT_PAGE && pageB === OP_DECLARED_LIGHT_PAGE;
+    if (acDist < 30 || (shared && !declaredLightShare)) {
+      tooSimilar.push(
+        `${a} ↔ ${b}: bg Δ${bgDist} (a shared background must be the declared OpenShip light page ${OP_DECLARED_LIGHT_PAGE}), accent Δ${acDist} (need ≥30)`
+      );
     }
   }
   test(
@@ -233,6 +259,127 @@ try {
       ok,
       `L=${round(L, 3)} is not a '${mode}' surface`
     );
+  }
+
+  /* ── 5. §OPENSHIP BATCH 3 — THE REFERENCE DESIGN IS ACTUALLY IN PLACE, AND ──
+        `bold` IS ACTUALLY UNTOUCHED.
+
+     Both assertions are REQUIRED by the Owner's BATCH 3 instruction
+     ("implement OpenShip's actual colours … across the four non-Bold themes"
+     and "Preserve the existing Bold theme exactly"). They are pinned HERE
+     rather than described in a document, so a later session cannot drift from
+     either one without this gate failing.
+
+     The reference VALUES are owned by docs/OPENSHIP_REFERENCE_SPEC.md §2.3/§2.5;
+     they are repeated as constants here the same way e2e/theme-visual.spec.ts
+     repeats the accent values — and a change to the spec must change them here. */
+
+  console.log('\n§ 5. The OpenShip reference design is in place, and `bold` is preserved\n');
+
+  const OP = {
+    lightPage: '#f9f9f9',
+    lightCard: '#ffffff',
+    lightBorder: '#e8e8e8',
+    lightOverlay: 'rgba(0,0,0,0.45)',
+    darkPage: '#000000',
+    darkCardOnPage: '#0d0d0d',
+    darkOverlay: 'rgb(20 20 20 / 60%)',
+  };
+  const LIGHT_SLOTS = ['minimal-light', 'professional', 'fun'];
+  const eq = (v, want) => String(v ?? '').trim().toLowerCase() === want;
+
+  const distinctPages = new Set(ids.map((id) => String(readVar(id, '--mr-bg') ?? '').toLowerCase()));
+  test(
+    `at least three DISTINCT page backgrounds exist across the ${ids.length} themes (measured ${distinctPages.size}: ${[...distinctPages].join(', ')})`,
+    distinctPages.size >= 3,
+    `only ${distinctPages.size} distinct page backgrounds — the themes have collapsed together`
+  );
+
+  for (const id of LIGHT_SLOTS) {
+    test(
+      `${id}: carries OpenShip's light page ${OP.lightPage} (spec §2.5)`,
+      eq(readVar(id, '--mr-bg'), OP.lightPage),
+      String(readVar(id, '--mr-bg'))
+    );
+    test(
+      `${id}: carries OpenShip's light card ${OP.lightCard} and border ${OP.lightBorder}`,
+      eq(readVar(id, '--mr-surface'), OP.lightCard) && eq(readVar(id, '--mr-hairline'), OP.lightBorder),
+      `card ${readVar(id, '--mr-surface')}, border ${readVar(id, '--mr-hairline')}`
+    );
+    test(
+      `${id}: carries OpenShip's light scrim ${OP.lightOverlay}`,
+      eq(readVar(id, '--mr-overlay-tint'), OP.lightOverlay),
+      String(readVar(id, '--mr-overlay-tint'))
+    );
+    test(
+      `${id}: cards are SHADOWLESS like the reference (--mr-shadow-subtle is none)`,
+      eq(readVar(id, '--mr-shadow-subtle'), 'none'),
+      String(readVar(id, '--mr-shadow-subtle'))
+    );
+  }
+  test(
+    `serious: carries OpenShip's dark page ${OP.darkPage} with the composited card ${OP.darkCardOnPage}`,
+    eq(readVar('serious', '--mr-bg'), OP.darkPage) && eq(readVar('serious', '--mr-surface'), OP.darkCardOnPage),
+    `page ${readVar('serious', '--mr-bg')}, surface ${readVar('serious', '--mr-surface')}`
+  );
+  test(
+    `serious: carries the reference's INVERTED scrim ${OP.darkOverlay} (on a black page a black scrim is invisible)`,
+    eq(readVar('serious', '--mr-overlay-tint'), OP.darkOverlay),
+    String(readVar('serious', '--mr-overlay-tint'))
+  );
+  test(
+    'serious: cards are SHADOWLESS like the reference (--mr-shadow-subtle is none)',
+    eq(readVar('serious', '--mr-shadow-subtle'), 'none'),
+    String(readVar('serious', '--mr-shadow-subtle'))
+  );
+
+  /* `bold` is NOT one of the four: its measured values must be EXACTLY the ones
+     it carried before BATCH 3, so "preserved exactly" is a fact, not a claim. */
+  const BOLD_UNTOUCHED = {
+    '--mr-bg': '#120b1f',
+    '--mr-surface': '#121318',
+    '--mr-accent': '#7c3aed',
+    '--mr-on-accent': '#ffffff',
+    '--mr-text-strong': '#f5f6f8',
+    '--mr-shadow-subtle': '0 1px 3px rgba(0,0,0,0.4)',
+    '--mr-shadow-raised': '0 6px 20px rgba(0,0,0,0.5)',
+    '--mr-accent-300': '#a98bf5',
+    '--mr-accent-600': '#6a2bd6',
+    '--mr-accent-image': 'none',
+    '--mr-accent-image-hover': 'none',
+  };
+  for (const [name, want] of Object.entries(BOLD_UNTOUCHED)) {
+    test(`bold: ${name} is unchanged (${want})`, eq(readVar('bold', name), want), String(readVar('bold', name)));
+  }
+
+  /* The CTA gradient must be REAL for the four non-bold themes and ABSENT for
+     `bold` (`none`), so its primary button keeps both its flat accent and its
+     own hover colour. Both tokens are complete `background-image` values, so
+     the hover state is carried inside the same property the rest state uses —
+     an image layer paints over the flat colour, which is exactly why the hover
+     cannot be left to `hover:bg-brass-600` alone on those four themes. */
+  for (const id of ids) {
+    const image = String(readVar(id, '--mr-accent-image') ?? '');
+    const hover = String(readVar(id, '--mr-accent-image-hover') ?? '');
+    if (id === 'bold') {
+      test(
+        'bold: the CTA gradient is ABSENT (both tokens are none), so its primary button is untouched',
+        eq(image, 'none') && eq(hover, 'none'),
+        `${image} / ${hover}`
+      );
+    } else {
+      const isGradient = (v) => v.includes('linear-gradient(') && v.includes('radial-gradient(');
+      test(
+        `${id}: the CTA carries a REAL gradient (highlight + gradient, spec §2.6)`,
+        isGradient(image),
+        image.slice(0, 90)
+      );
+      test(
+        `${id}: the CTA has its OWN hover state (the gradient must not swallow the hover)`,
+        isGradient(hover) && hover !== image,
+        hover.slice(0, 90)
+      );
+    }
   }
 
   console.log(

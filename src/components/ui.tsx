@@ -117,8 +117,13 @@ export function Button({
   title,
 }: ButtonProps) {
   const variants = {
+    /* §OPENSHIP BATCH 3 — `ds-btn-accent` paints the reference's per-theme CTA
+       gradient (radial highlight over a three-stop gradient). It is ADDITIVE:
+       `bg-brass-500` stays as the flat colour, which is both the fallback for a
+       browser without `in oklab` support AND the whole treatment in `bold`,
+       whose two gradient tokens are `none`. No prop, size or API changed. */
     primary:
-      'bg-brass-500 hover:bg-brass-600 text-ink font-semibold shadow-ds-raised',
+      'ds-btn-accent bg-brass-500 hover:bg-brass-600 text-ink font-semibold shadow-ds-raised',
     secondary: 'bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/[0.08]',
     tertiary: 'bg-ink-800 hover:bg-ink-700 text-zinc-300 border border-white/[0.06]',
     ghost: 'hover:bg-white/[0.04] text-zinc-400 hover:text-white',

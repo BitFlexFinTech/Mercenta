@@ -6,7 +6,7 @@
  * portal, individual heavy views).
  *
  * Design-system consistent: dark ink background, brass accents, stamp-red
- * error icon, Fraunces/IBM Plex typography via Tailwind.
+ * error icon, Fraunces display + Plus Jakarta Sans UI typography via Tailwind.
  */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';

@@ -237,7 +237,7 @@ be treated as accepted.** The honest position this increment reached:
 
 | Evidence | Result |
 |---|---|
-| `docs/DESIGN_SYSTEM.md` | canonical tokens (ink/brass/state), typography ramp (Fraunces/IBM Plex Sans/Mono), radius/shadow/motion tokens, focus rules, component inventory |
+| `docs/DESIGN_SYSTEM.md` | canonical tokens (ink/brass/state), typography ramp (Fraunces display / Plus Jakarta Sans UI / IBM Plex Mono — the UI face changed in §OPENSHIP BATCH 3, 2026-10-14), radius/shadow/motion tokens, focus rules, component inventory |
 | `e2e/uiux-redesign.spec.ts` re-run in Chromium **this session** | **13 / 13 passed** — workspace architecture (frame/header/toolbar/metrics/pipeline/queue/context), saturated palette actually rendered, charts animated, density/grouping controls change the queue, ⌘K palette with RBAC, six themes, no horizontal overflow at 1440/1280/1024/390, homepage redesigned with TAM/SAM absent and tracker animation preserved |
 | `scripts/validate-uiux-redesign.mjs` | the 10-point redesign contract (palette saturation, one motion/density language, brass not dominant, workspace primitives, animated charts, colour SSOT, homepage, findability, navigation, reduced motion) |
 | `src/index.css` (372 lines) + `src/theme-alpha-shims.css` (691 lines) + `tailwind.config.js` | token foundation + legacy shim layer |

@@ -10,11 +10,33 @@ html, body, #root {
    ThemeContext applies the canonical variable set from src/config/themes.ts
    on <html data-mercenta-theme="..."> at boot and on switch. */
 body {
-  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  /* §OPENSHIP BATCH 3 — the UI typeface is Plus Jakarta Sans (OFL 1.1). Gellix,
+     the reference's own face, is "Personal Use Only" and is NOT shipped. */
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   background-color: var(--mr-bg, #F6F7F9);
   color: var(--mr-text, #232731);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) TREATMENT ────────────────
+   The reference's accent CTA is not a flat fill: it is a radial highlight over
+   a three-stop gradient, differing per theme (spec §2.6, and the orange-to-pink
+   button in the supplied screenshot). The two tokens are COMPLETE
+   `background-image` values so the state pair (rest + hover) lives inside the
+   same property an image layer would otherwise swallow.
+
+   `bold` declares both tokens as `none`, so `background-image` is not painted
+   and its primary button is untouched — flat accent, its own hover colour.
+
+   `in oklab` is the reference's own interpolation space. A browser that does not
+   support it ignores the declaration and falls back to the button's flat
+   `bg-brass-500` colour, so the degradation is graceful rather than broken. */
+.ds-btn-accent {
+  background-image: var(--mr-accent-image, none);
+}
+.ds-btn-accent:hover:not(:disabled) {
+  background-image: var(--mr-accent-image-hover, var(--mr-accent-image, none));
 }
 
 ::selection {

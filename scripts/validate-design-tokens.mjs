@@ -1,5 +1,5 @@
 // §11 — validates the design system is applied app-wide:
-//   zero neon (purple) class refs · brass ramp defined · IBM Plex Sans is
+//   zero neon (purple) class refs · brass ramp defined · Plus Jakarta Sans is
 //   the sans/body font · hexagon mark present in Header, Sidebar, wizard
 // §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
 // contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
@@ -19,11 +19,15 @@ const tw = read('tailwind.config.js');
 test('neon palette removed from tailwind config', !/neon\s*:/.test(tw));
 test('brass full ramp (300-700) defined',
   ['300', '400', '500', '600', '700'].every((sh) => new RegExp(`brass:[\\s\\S]*${sh}:`).test(tw)));
-test('font-sans is IBM Plex Sans', /sans:\s*\['"IBM Plex Sans"/.test(tw));
+/* §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED: the UI face is now Plus Jakarta
+   Sans (OFL 1.1). Gellix, the reference's own face, is "Personal Use Only" and
+   is deliberately NOT shipped; the licence position is in
+   docs/OPENSHIP_REFERENCE_SPEC.md §8. */
+test('font-sans is Plus Jakarta Sans', /sans:\s*\['"Plus Jakarta Sans"/.test(tw));
 test('display font stays Fraunces', /display:\s*\['Fraunces'/.test(tw));
 
 const css = read('src/index.css');
-test('body font is IBM Plex Sans', css.includes("font-family: 'IBM Plex Sans'"));
+test('body font is Plus Jakarta Sans', css.includes("font-family: 'Plus Jakarta Sans'"));
 test('glow keyframes use brass RGB (201,161,90)', !css.includes('168, 85, 247'));
 
 let neonRefs = 0;

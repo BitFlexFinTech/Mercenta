@@ -3,10 +3,27 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      /**
+       * §OPENSHIP BATCH 3 (2026-10-14) — THE UI TYPEFACE IS NOW PLUS JAKARTA SANS.
+       *
+       * The reference declares Gellix (Displaay), whose free version is
+       * "Personal Use Only" — so it is NOT shipped (docs/OPENSHIP_REFERENCE_SPEC.md
+       * §8.1/§8.2). Plus Jakarta Sans is the substitute: SIL Open Font License 1.1,
+       * verified at source, variable weight, geometric-humanist like Gellix and with
+       * a generous x-height, which matters because this is a dense operational UI
+       * that runs at 11-14px.
+       *
+       * `plex` is kept as an alias name (many call sites use `font-plex`) but points
+       * at the same family, so no component had to change: the typeface swap is ONE
+       * value here plus the load in index.html.
+       * `display` (Fraunces) is the MARKETING display serif and is deliberately NOT
+       * part of this change — it is not a theme token and the reference says nothing
+       * about a serif. `mono` stays IBM Plex Mono (the reference's `kbd` is mono too).
+       */
       fontFamily: {
-        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['Fraunces', 'Georgia', 'serif'],
-        plex: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+        plex: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       /**
@@ -177,7 +194,8 @@ export default {
        * RENAME rather than a redesign: binding `rounded-lg` → `ds-md` and
        * `rounded-xl` → `ds-lg` moves no pixels for 542 sites. Measured cost of the
        * repoint: 41 + 26 occurrences move by 2px each, in 20 shell/shared files.
-       * `ds-sm` (6px) and `ds-pill` are unchanged.
+       * `ds-sm` and `ds-pill` were left alone by §PHASE C4 — §REPOINTED 2026-10-14, when
+       * §OPENSHIP BATCH 3 moved all three named steps onto the reference's radii.
        *
        * The DENSE, professional tool rule: 4px (bare `rounded`) is folded into
        * 6px, because a 2px difference between two small steps is not a step — it
@@ -199,11 +217,26 @@ export default {
        * The migration onto it is mechanical and idempotent:
        * `npm run migrate:radius` (re-running is a no-op).
        */
+      /* §OPENSHIP BATCH 3 (2026-10-14) — THE RAMP NOW CARRIES THE REFERENCE'S RADII.
+       *
+       * SUPERSEDES the geometry stated in the §PHASE C4 note above (6 / 8 / 12).
+       * OpenShip's MEASURED radii (docs/OPENSHIP_REFERENCE_SPEC.md §2.2) are
+       * container 16px · control 12px · small control 8px, so the three named
+       * steps move onto exactly those: ds-sm 6 → 8, ds-md 8 → 12, ds-lg 12 → 16.
+       *
+       * This is a REAL 4px change on every control and container — the reference's
+       * own "radius +4px" rows in §12 — and NOT a rename like §PHASE C4 was, which
+       * moved the NAMES onto geometry the app already drew. It is stated plainly
+       * here because the two changes look alike and are not: same block, opposite
+       * direction. `ds-pill` is unchanged, and no class name changes, so the
+       * migration script (`npm run migrate:radius`) needs no update: it maps class
+       * NAMES, not values.
+       */
       borderRadius: {
         ds: {
-          sm: '6px',      // inline — chips, tags, kbd/<code>, thumbnails, micro icon buttons
-          md: '8px',      // controls — buttons, inputs, selects, textareas, tabs, nav items
-          lg: '12px',     // containers — cards, panels, modals, popovers, tables
+          sm: '8px',      // small controls — in-row chips, tags, kbd/<code>, thumbnails, micro icon buttons
+          md: '12px',     // controls — buttons, inputs, selects, textareas, tabs, nav items
+          lg: '16px',     // containers — cards, panels, modals, popovers, dropdowns, tables
           pill: '9999px', // pills · avatars · dots · status badges (`rounded-full` is the same value)
         },
       },
