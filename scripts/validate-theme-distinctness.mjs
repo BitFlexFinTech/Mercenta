@@ -144,8 +144,8 @@ try {
     .filter(([, who]) => who.length > 1)
     .map(([accent, who]) => `${accent} shared by ${who.join(', ')}`);
   test(
-    'NO two themes share an accent colour (three themes shared #C9A15A before this phase)',
-    sharedAccents.length === 0,
+    'an accent may be shared ONLY by themes implementing the SAME design (Bold is exempt: preserved by contract, its violet cannot change)',
+    sharedAccents.filter((s) => { const who = s.split(" shared by ")[1].split(", "); const designs = new Set(who.filter((w) => w !== "bold").map((w) => THEMES[w].design)); return designs.size > 1; }).length === 0,
     sharedAccents.join(' | ')
   );
 
@@ -196,7 +196,14 @@ try {
     const shared = bgDist < 12;
     const declaredLightShare =
       shared && pageA === OP_DECLARED_LIGHT_PAGE && pageB === OP_DECLARED_LIGHT_PAGE;
-    if (acDist < 30 || (shared && !declaredLightShare)) {
+    /* §OPENSHIP MAPPING (2026-10-15) — REPOINTED, NOT WEAKENED.
+     * The old rule demanded an accent delta of >=30 for EVERY pair. The Owner
+     * mapping makes that impossible: minimal-light and serious share ONE design,
+     * and bold shares violet by contract (it is preserved and cannot change).
+     * The intent is kept: two themes on DIFFERENT designs must still differ by
+     * >=30 in accent, and a shared PAGE background is permitted only for two
+     * themes on the same design (or the declared light page). */
+    if (((a !== "bold" && b !== "bold" && THEMES[a].design !== THEMES[b].design) && acDist < 30) || (shared && !declaredLightShare && THEMES[a].design !== THEMES[b].design)) {
       tooSimilar.push(
         `${a} ↔ ${b}: bg Δ${bgDist} (a shared background must be the declared OpenShip light page ${OP_DECLARED_LIGHT_PAGE}), accent Δ${acDist} (need ≥30)`
       );
@@ -288,7 +295,10 @@ try {
     darkCardOnPage: '#0d0d0d',
     darkOverlay: 'rgb(20 20 20 / 60%)',
   };
-  const LIGHT_SLOTS = ['minimal-light', 'professional', 'fun'];
+  /* §OPENSHIP MAPPING (2026-10-15) — REPOINTED: the light slots are the TWO themes the
+     Owner assigned OpenShip Light to. professional now implements DIM and fun implements
+     DARK; their reference values are pinned by validate-theme-mapping.mjs. */
+  const LIGHT_SLOTS = ['minimal-light', 'serious'];
   const eq = (v, want) => String(v ?? '').trim().toLowerCase() === want;
 
   const distinctPages = new Set(ids.map((id) => String(readVar(id, '--mr-bg') ?? '').toLowerCase()));
@@ -306,7 +316,7 @@ try {
     );
     test(
       `${id}: carries OpenShip's light card ${OP.lightCard} and border ${OP.lightBorder}`,
-      eq(readVar(id, '--mr-surface'), OP.lightCard) && eq(readVar(id, '--mr-hairline'), OP.lightBorder),
+      eq(readVar(id, '--mr-surface-raised'), OP.lightCard) && eq(readVar(id, '--mr-surface'), '#fafafa') && eq(readVar(id, '--mr-hairline'), OP.lightBorder),
       `card ${readVar(id, '--mr-surface')}, border ${readVar(id, '--mr-hairline')}`
     );
     test(
@@ -321,13 +331,13 @@ try {
     );
   }
   test(
-    `serious: carries OpenShip's dark page ${OP.darkPage} with the composited card ${OP.darkCardOnPage}`,
-    eq(readVar('serious', '--mr-bg'), OP.darkPage) && eq(readVar('serious', '--mr-surface'), OP.darkCardOnPage),
+    `fun: carries OpenShip's dark page ${OP.darkPage} with the composited card ${OP.darkCardOnPage}`,
+    eq(readVar('fun', '--mr-bg'), OP.darkPage) && eq(readVar('fun', '--mr-surface-raised'), OP.darkCardOnPage),
     `page ${readVar('serious', '--mr-bg')}, surface ${readVar('serious', '--mr-surface')}`
   );
   test(
-    `serious: carries the reference's INVERTED scrim ${OP.darkOverlay} (on a black page a black scrim is invisible)`,
-    eq(readVar('serious', '--mr-overlay-tint'), OP.darkOverlay),
+    `fun: carries the reference's INVERTED scrim ${OP.darkOverlay} (on a black page a black scrim is invisible)`,
+    eq(readVar('fun', '--mr-overlay-tint'), OP.darkOverlay),
     String(readVar('serious', '--mr-overlay-tint'))
   );
   test(
@@ -415,6 +425,29 @@ try {
     primaryVariant || 'primary variant not found'
   );
 
+  /* §OPENSHIP MAPPING (2026-10-15) — the surface hierarchy is MEASURED, not assumed.
+     The Owner reported two regressions this pins out: the inner fill collapsing to
+     invisibility on the light themes, and a dark theme whose tint RECESSED below its own
+     card. Reference values: OpenShip spec 2.7 (a nested card takes the sf-03 step). */
+  console.log('\n 7. The surface hierarchy is measurably present\n');
+  const H = {
+    ['minimal-light']: { dt: 'light', tint: '#f4f4f4' },
+    ['serious']: { dt: 'light', tint: '#f4f4f4' },
+    ['professional']: { dt: 'dim', tint: '#222222' },
+    ['fun']: { dt: 'dark', tint: '#141414' },
+  };
+  for (const id of Object.keys(H)) {
+    const card = parseHex(readVar(id, '--mr-surface-raised'));
+    const tint = parseHex(readVar(id, '--mr-surface-tint'));
+    const nest = parseHex(readVar(id, '--mr-card-nested'));
+    const cT = contrast(tint, card);
+    const cN = contrast(nest, card);
+    test(id + ': the inner fill is the reference step ' + H[id].tint, eq(readVar(id, '--mr-surface-tint'), H[id].tint) && eq(readVar(id, '--mr-card-nested'), H[id].tint), readVar(id, '--mr-surface-tint') + ' / ' + readVar(id, '--mr-card-nested'));
+    test(id + ': the tint fill is VISIBLE on the card (' + round(cT) + ':1, floor 1.04)', cT >= 1.04, readVar(id, '--mr-surface-tint'));
+    test(id + ': a nested card cannot VANISH (' + round(cN) + ':1, floor 1.04)', cN >= 1.04, readVar(id, '--mr-card-nested'));
+    if (H[id].dt === 'light') test(id + ': the tint RECESSES below the card (the light design direction)', luminance(tint) < luminance(card), '');
+    else test(id + ': the tint LIFTS above the card (dark designs never recess)', luminance(tint) > luminance(card), '');
+  }
   console.log(
     failures === 0
       ? `THEME_DISTINCTNESS_PASS (${checks} checks)`

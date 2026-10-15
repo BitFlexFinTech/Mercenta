@@ -90,26 +90,17 @@ const surfaceRaised = (id) => tokenValue(id, '--mr-surface-raised');
 /* ── 2. The contract: reference values for the four non-Bold themes, `bold`
        unchanged by mechanism ─────────────────────────────────────────────── */
 
+/* §OPENSHIP MAPPING (2026-10-15) — REPOINTED, NOT WEAKENED. The same four tokens, now
+   resolved from each theme PLACE in the Owner mapping rather than from the old grouping of
+   three light slots plus serious: minimal-light and serious implement OpenShip Light,
+   professional implements DIM, fun implements DARK, and bold is preserved exactly. */
 const CONTRACT = {
-  '--mr-card-border': (id) => (id === 'bold' ? 'rgba(255,255,255,0.06)' : 'transparent'),
-  '--mr-card-nested': (id) => (id === 'bold' ? '#17181D' : id === 'serious' ? '#080808' : '#FAFAFA'),
-  '--mr-hover-tint': (id) =>
-    id === 'bold'
-      ? 'rgba(255,255,255,0.04)'
-      : id === 'serious'
-        ? 'rgba(255,255,255,0.06)'
-        : 'rgba(0,0,0,0.05)',
-  /**
-   * §OPENSHIP BATCH 8 — the card's hover edge (§9.4's first interaction row).
-   * The reference gives it per design class (`rgba(255,255,255,.12)` dark ·
-   * `.14` dim · `#e0e0e0` light — spec §2.3–§2.5), so the three light themes
-   * share its single light value and `serious` takes the dark-family value.
-   * `bold`'s value IS bold's own card border: the hover is a no-op there, which
-   * is how "Bold is preserved" holds BY MECHANISM (asserted functionally below).
-   */
-  '--mr-card-border-hover': (id) =>
-    id === 'bold' ? 'rgba(255,255,255,0.06)' : id === 'serious' ? 'rgba(255,255,255,0.12)' : '#E0E0E0',
+  ['--mr-card-border']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.06)' : 'transparent'),
+  ['--mr-card-nested']: (id) => (id === 'bold' ? '#17181D' : id === 'professional' ? '#222222' : id === 'fun' ? '#141414' : '#F4F4F4'),
+  ['--mr-hover-tint']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.04)' : id === 'minimal-light' || id === 'serious' ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)'),
+  ['--mr-card-border-hover']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.06)' : id === 'professional' ? 'rgba(255,255,255,0.14)' : id === 'fun' ? 'rgba(255,255,255,0.12)' : '#E0E0E0'),
 };
+
 
 for (const [token, expected] of Object.entries(CONTRACT)) {
   for (const id of IDS) {
