@@ -5,7 +5,60 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCH 4 — CURRENT STATUS (session 142, 2026-10-15) — THE SHARED SURFACES AND CONTROLS, AND `bold` PRESERVED BY MECHANISM
+## §OPENSHIP BATCH 5 — CURRENT STATUS (session 143, 2026-10-15) — THE NAVIGATION RAIL AS A FLOATING CARD, AND THE RADIUS SCALE THAT HAD NEVER BEEN EMITTED
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `203a463` (12 files,
++731/−181). The rail is a floating card (12px inset, 16px corners, 260px / 72px), its nav rows
+take the reference's geometry, and — found by this batch's own rendered check — the entire
+named radius ramp is FIXED: it had never emitted a single utility. **NOT deployed and NOT
+live-verified** — this batch changes what every screen looks like, so the three-way gate
+APPLIES and is UNSATISFIED; publishing needs the Owner's approval and none has been given. No
+credential was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", where the recorded NEXT TASK was
+   BATCH 5 — the sidebar, the reference's biggest single visual change — whose scope is fixed
+   in `docs/OPENSHIP_REFERENCE_SPEC.md` §16 and measured in its §3.2–§3.3.
+2. **WHAT WAS BUILT.** The rail is a FLOATING CARD (`my-3 ms-3`, the 16px container radius,
+   `overflow-hidden`, its own edge), the shell wrapper no longer paints the full-height border,
+   fill or shadow behind it, `.ds-rail` derives its edge as 50% of the theme's own hairline with
+   a full-strength fallback, the widths move to the reference's **260px / 72px** (carried by
+   272 / 84 wrappers, because the 12px inset is the card's margin), and the nav rows, section
+   gap, header, scroll region (with the reference's 56px fade) and account area all take the
+   reference's measured geometry. Every destination, route, RBAC filter, accent, pin, collapse,
+   the filter, the compact rail, the `#app-sidebar` hook and the demo switcher are preserved.
+3. **THE BIGGER FIND, FIXED AT SOURCE.** The rendered check reported `border-radius: 0px` on an
+   element carrying `rounded-ds-lg`. Cause: `tailwind.config.js` declared the ramp as a NESTED
+   object, and **Tailwind 3.4 silently emits no utility for a nested scale object** — proved by
+   isolation (a minimal config with the same shape emitted nothing; with flat keys it emitted
+   `border-radius: 16px`) and in the built stylesheet (**zero** `rounded-ds` rules against
+   **714** class sites: 195 + 431 + 88). Inert since §PHASE C4, through BATCH 3 and BATCH 4.
+   Keys are now flat (same class names, no call site moved) and the gate COMPILES the config and
+   fails if the steps do not really emit their value.
+4. **TWO FURTHER DEFECTS FIXED (rule 07).** The environment switcher's grid declared three
+   columns holding two entries (so a third of the card was empty) and its rows' hover was
+   invisible on the light shells; the rail's wrapper and its `<nav>` both carried
+   `aria-label="Primary"`, so the landmark list offered the same name twice.
+5. **GATES EXTENDED, EACH PROVED ABLE TO FAIL.** `validate-shared-surfaces` **48 → 90**;
+   `validate-radius-elevation-scale` **42 → 46** assertions (flat-key discovery + in-memory
+   compilation proving emission); `validate-uiux-redesign` REPOINTED so its single-`<aside>`
+   guard reads CODE, not prose. Mutation proofs: full-height rail **5** · grid back to three
+   columns **1** · `.ds-rail` not deriving **2** · duplicate landmark label **1** · nested radius
+   config **0 bytes emitted + 3** · a second real `<aside>` **1** — every file restored
+   byte-identical.
+6. **RENDER VERIFIED.** A new browser test reads the computed truth: 16px radius, 12px insets,
+   a real 1px edge, 260px wide, nothing painted behind it, a 12px/14px row at least 40px tall,
+   the fade present, 72px collapsed — plus the landmark contract from the accessibility tree.
+7. **MEASURED.** `typecheck` 0 · `lint` 0 · `build` ok · `validate:all` **196 PASS / 0 FAIL** ·
+   theme-visual + app-shell + design-system + accessibility **66 passed** · the 30 baselines
+   BEFORE/AFTER: **median 13.513% of pixels moved** (max 20.078%, min 8.748%) — the first
+   measurement in this programme that contains REAL corners.
+8. **SIX DIVERGENCES** recorded in `docs/OPENSHIP_REFERENCE_SPEC.md` rather than left silent
+   (the two that matter most: the rail keeps the project's 14px body step rather than the
+   reference's 15px, and the account avatar keeps the design system's own step and form).
+9. **NEXT.** BATCH 6, the top bar — DERIVED, because OpenShip has no desktop top bar to copy
+   (§3.1, §15.3). Deployment remains PENDING the Owner's approval.
+
+## §OPENSHIP BATCH 4 (session 142, 2026-10-15) — THE SHARED SURFACES AND CONTROLS, AND `bold` PRESERVED BY MECHANISM — SUPERSEDED BY §OPENSHIP BATCH 5
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `5122b76` (12 files,
 +434/−33). The card is borderless, the control is 44px with one 14px label step, the modal scrim
