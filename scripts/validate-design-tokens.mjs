@@ -24,7 +24,7 @@ test('brass full ramp (300-700) defined',
    is deliberately NOT shipped; the licence position is in
    docs/OPENSHIP_REFERENCE_SPEC.md §8. */
 test('font-sans is Plus Jakarta Sans', /sans:\s*\['"Plus Jakarta Sans"/.test(tw));
-test('display font stays Fraunces', /display:\s*\['Fraunces'/.test(tw));
+test('the display role is the ONE interface family, and the serif and second download are gone (OPENSHIP MAPPING 2026-10-15 - REPOINTED: the reference declares two faces and no serif)', tw.split('display:')[1].slice(0, 60).indexOf('Plus Jakarta Sans') >= 0 && !/Fraunces|Inter/.test(read('index.html')));
 
 const css = read('src/index.css');
 test('body font is Plus Jakarta Sans', css.includes("font-family: 'Plus Jakarta Sans'"));

@@ -16,13 +16,17 @@ export default {
        * `plex` is kept as an alias name (many call sites use `font-plex`) but points
        * at the same family, so no component had to change: the typeface swap is ONE
        * value here plus the load in index.html.
-       * `display` (Fraunces) is the MARKETING display serif and is deliberately NOT
-       * part of this change — it is not a theme token and the reference says nothing
-       * about a serif. `mono` stays IBM Plex Mono (the reference's `kbd` is mono too).
+       * The marketing serif face has been RETIRED by the OPENSHIP MAPPING (2026-10-15): the
+       * display role is the ONE interface family, because the reference declares two faces and
+       * no serif at all. The mono face stays IBM Plex Mono (the reference uses mono too).
        */
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'serif'],
+        /* §OPENSHIP MAPPING (2026-10-15) — REPOINTED: the reference has TWO faces and NO serif
+         (spec 8.1), so the display role is the ONE interface family. Every font-display site
+         becomes the sans face; Fraunces and the unused Inter download are removed from
+         index.html in the same change. */
+        display: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         plex: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
