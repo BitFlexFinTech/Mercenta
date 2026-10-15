@@ -5,7 +5,55 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCH 5 — CURRENT STATUS (session 143, 2026-10-15) — THE NAVIGATION RAIL AS A FLOATING CARD, AND THE RADIUS SCALE THAT HAD NEVER BEEN EMITTED
+## §OPENSHIP BATCH 6 — CURRENT STATUS (session 144, 2026-10-15) — THE TOP BAR: SURFACE AND TYPE ONLY, DERIVED RATHER THAN COPIED
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `dc151a9` (9 files,
++339/−19). The bar sits on the page with no fill of its own, separated only by a DERIVED bottom
+edge at 40% of the theme's border token; the command bar takes the reference's 40px/14px control
+and every chrome control is now the reference's 36px one, with one theme-driven hover. **NOT
+deployed and NOT live-verified** — it changes what every screen's chrome looks like, so the
+three-way gate APPLIES and is UNSATISFIED; publishing needs the Owner's approval and none has
+been given. No credential was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", where the recorded NEXT TASK was
+   BATCH 6 — the top bar — whose scope is fixed in `docs/OPENSHIP_REFERENCE_SPEC.md` §16:
+   every control kept; only its surface and type change.
+2. **PROVENANCE IS PART OF THE RESULT.** The reference has NO desktop top bar (§3.1 — a
+   mobile-only `h-14` header plus the sidebar), so this batch is DERIVED from that one header
+   and the reference's control primitives, and is never described as a copy.
+3. **WHAT WAS BUILT.** Surface: no fill of its own (it sits on the page) + `.ds-bar`, a derived
+   40% bottom edge with a full-strength fallback; padding takes the reference's container ladder
+   at `px-4 sm:px-6`. Type: a 40px/14px command bar, and both the exit label and the `kbd` hint
+   at the 12px small-meta step. Controls: 36px square icon controls (drawer toggle, bell, theme
+   trigger) and a 36px-high account control, all hovering with the ONE floating-surface tint.
+4. **DEFECTS FIXED AT SOURCE (rules 07/10).** The theme trigger carried `transition-color` — a
+   class that does not exist — so it had no transition; corrected. And TWO FALSE LIVE CLAIMS in
+   `docs/DESIGN_SYSTEM.md` (the active nav item described as a brass icon with a
+   `bg-white/[0.08]` fill; sections described as never `aria-expanded`) were repointed with a
+   `§REPOINTED` note plus a new "Chrome surfaces" sub-section; the two `§12` gap rows BATCH 5
+   closed are now annotated CLOSED.
+5. **GATES EXTENDED, EACH PROVED ABLE TO FAIL.** `validate-shared-surfaces` **90 → 125**
+   (the bar's class string, `.ds-bar`'s derivation and fallback, the reference's control
+   language, one hover mechanism with an absence guard, no unnamed size, a fifteen-item
+   preservation list). Mutations: the old fill/edge/padding ⇒ **3 failures**; `.ds-bar` not
+   deriving ⇒ **2**; the old pill ⇒ **1** — files restored byte-identical.
+6. **RENDER VERIFIED.** A new browser test reads the computed truth: 56px bar, 24px padding,
+   `rgba(0,0,0,0)` background, a 1px edge the browser itself resolves to
+   `color(srgb 0.909804 0.909804 0.909804 / 0.4)` (the theme's #E8E8E8 at 40%), a 40px/14px
+   command bar, 36px controls, and a 36×36 toggle below `lg`.
+7. **MEASURED.** `typecheck` 0 · `lint` 0 · `build` ok · `validate:all` **196 PASS / 0 FAIL** ·
+   `theme-visual + app-shell + design-system + accessibility` **67 passed** · the 30 baselines
+   BEFORE/AFTER: **median 0.788% of pixels moved** (max 5.890%, min 0.397%) — `serious` 5.860%
+   (a dark bar over a black page), the three light designs 0.768%, `bold` 0.821%.
+8. **FIVE DIVERGENCES** recorded in `docs/OPENSHIP_REFERENCE_SPEC.md` rather than left silent
+   (the bar keeps its 56px height; it stays a full-bleed band rather than a floating card; its
+   `lg:px-8` step is left to BATCH 7; the `kbd` stays at 12px rather than the reference's 10px;
+   and the two repointed doc claims).
+9. **NEXT.** BATCH 7, the page layouts (the shared container, page headers, the per-screen
+   340px right rail — and the header's `lg:px-8` alignment). Deployment remains PENDING the
+   Owner's approval.
+
+## §OPENSHIP BATCH 5 (session 143, 2026-10-15) — THE NAVIGATION RAIL AS A FLOATING CARD, AND THE RADIUS SCALE THAT HAD NEVER BEEN EMITTED — SUPERSEDED BY §OPENSHIP BATCH 6
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `203a463` (12 files,
 +731/−181). The rail is a floating card (12px inset, 16px corners, 260px / 72px), its nav rows
