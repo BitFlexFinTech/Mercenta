@@ -31,6 +31,11 @@ const SHOT_DIR = 'test-screenshots/themes';
 /**
  * The five themes and the accent each MUST render (src/config/themes.ts).
  *
+ * §OPENSHIP MAPPING (2026-10-15) — REPOINTED AGAIN: minimal-light and serious implement
+ * OpenShip Light (violet #7C3AED), professional implements DIM (lime #B7ED5A), fun implements
+ * DARK (orange #F97316), and bold stays preserved exactly. Three distinct accents are rendered
+ * ON PURPOSE, and each theme takes the scrim and tint of the design it implements.
+ *
  * §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED, NOT WEAKENED. Four accents moved
  * because the four non-Bold themes now carry OpenShip's designs (spec §13) and
  * OpenShip's own accent hues: the light design's violet→blue pair, its `dim`
@@ -42,7 +47,7 @@ const SHOT_DIR = 'test-screenshots/themes';
 const THEMES = [
   {
     id: 'minimal-light',
-    accent: '#7E22CE',
+    accent: '#7C3AED',
     /* §OPENSHIP BATCH 4 — the theme's own SCRIM (spec §2.5) and its hover tint
        (the reference's foreground tint, spec §7.6): asserted from the COMPUTED
        style, so a token that never reaches the DOM fails here. */
@@ -50,7 +55,7 @@ const THEMES = [
     tint: [0, 0, 0],
     cardBorder: 'none' as const,
   },
-  { id: 'professional', accent: '#2563EB', scrim: [0, 0, 0], tint: [0, 0, 0], cardBorder: 'none' as const },
+  { id: 'professional', accent: '#B7ED5A', scrim: [0, 0, 0], tint: [255, 255, 255], cardBorder: 'none' as const },
   {
     id: 'bold',
     accent: '#7C3AED',
@@ -60,14 +65,14 @@ const THEMES = [
        border it draws today (its token reproduces the old rgba(255,255,255,0.06)). */
     cardBorder: 'hairline' as const,
   },
-  { id: 'fun', accent: '#A9F04D', scrim: [0, 0, 0], tint: [0, 0, 0], cardBorder: 'none' as const },
+  { id: 'fun', accent: '#F97316', scrim: [20, 20, 20], tint: [255, 255, 255], cardBorder: 'none' as const },
   {
     id: 'serious',
-    accent: '#F97316',
-    /* The INVERTED scrim: on a pure-black page the reference LIGHTENS the veil
+    accent: '#7C3AED',
+    /* The scrim now DARKENS (this theme implements the LIGHT design): on a pure-black page the reference LIGHTENS the veil
        (`rgb(20 20 20 / 60%)`, spec §2.3) — the trap this assertion pins. */
-    scrim: [20, 20, 20],
-    tint: [255, 255, 255],
+    scrim: [0, 0, 0],
+    tint: [0, 0, 0],
     cardBorder: 'none' as const,
   },
 ] as const;
@@ -221,7 +226,7 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
       );
     }
     const values = Object.values(seen);
-    expect(new Set(values).size, `accents rendered: ${JSON.stringify(seen)}`).toBe(THEMES.length);
+    expect(new Set(values).size, `accents rendered: ${JSON.stringify(seen)}`).toBeGreaterThanOrEqual(3); /* OPENSHIP MAPPING 2026-10-15: minimal-light and serious share the Light accent by the Owner instruction, so the floor is the three DESIGNS (light violet, dim lime, dark orange). The old five-distinct rule would forbid the mapping. */
   });
 
   /**
