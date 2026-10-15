@@ -21,6 +21,7 @@
  */
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
+import { EmptyState } from '@/components/ui';
 import { useMessages } from '@/data/queries';
 import { logMessage } from '@/data/api';
 import { findOrCreateTicketForBrand, appendMessageToTicket } from '@/lib/helpdesk/ticketStore';
@@ -89,7 +90,7 @@ export function LiveChatWidget() {
         aria-label={open ? 'Close support chat' : 'Open support chat'}
         title="Support chat"
         data-testid="live-chat-trigger"
-        className="relative flex h-8 w-8 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-zinc-300"
+        className="relative flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-200"
       >
         <MessageSquare className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -101,7 +102,7 @@ export function LiveChatWidget() {
           role="dialog"
           aria-label="Mercenta support chat"
           data-testid="live-chat-panel"
-          className="absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-ds-lg border border-white/[0.08] bg-ink-850 shadow-ds-overlay animate-fade-in"
+          className="ds-card absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-ds-lg border bg-ink-850 shadow-ds-overlay animate-fade-in"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-ink-900">
@@ -120,13 +121,11 @@ export function LiveChatWidget() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {threadMessages.length === 0 && sentCount === 0 && (
-              <div className="text-center py-8">
-                <Bot className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                <p className="text-xs text-zinc-500">Hi! How can we help you today?</p>
-                <p className="text-ds-micro text-zinc-600 mt-1">
-                  Ask about your POs, shipments, compliance status, or anything else.
-                </p>
-              </div>
+              <EmptyState
+                icon={<Bot className="h-5 w-5" aria-hidden="true" />}
+                title="Hi! How can we help you today?"
+                description="Ask about your POs, shipments, compliance status, or anything else."
+              />
             )}
             {threadMessages.map((m) => (
               <div key={m.id} className={cn('flex', m.direction === 'outbound' ? 'justify-start' : 'justify-end')}>

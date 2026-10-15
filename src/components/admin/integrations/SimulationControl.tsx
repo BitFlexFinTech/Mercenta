@@ -44,7 +44,7 @@ import {
   type EnvironmentMode,
 } from '@/config/environment';
 import type { IntegrationId } from '@/integrations/types';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   listScenarios,
@@ -282,20 +282,9 @@ export function SimulationControl() {
   }
 
   if (!isSuperAdmin) {
+    /* §OPENSHIP BATCH 8 — the refusal renders THROUGH the one owner. */
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Simulation controls are restricted to the Super Admin tier. This view is not authorized for your session.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="Simulation controls are restricted to the Super Admin tier. This view is not authorized for your session." />
     );
   }
 

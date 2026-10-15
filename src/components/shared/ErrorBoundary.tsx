@@ -5,11 +5,16 @@
  * white-screening the entire app. Wraps major sections (admin portal, brand
  * portal, individual heavy views).
  *
- * Design-system consistent: dark ink background, brass accents, stamp-red
- * error icon, Fraunces display + Plus Jakarta Sans UI typography via Tailwind.
+ * §OPENSHIP BATCH 8 — the fallback's TREATMENT is no longer declared here: it
+ * renders the canonical `ErrorState` (`src/components/ui.tsx`), so the previous
+ * sentence describing this file as "dark ink background, brass accents,
+ * stamp-red error icon" is SUPERSEDED rather than left standing — those were the
+ * pre-theme values, and the state now takes the theme's card token, its danger
+ * token and the canonical control. What this file owns is the CONTAINMENT
+ * behaviour: catching the fault, reporting it, and offering the reset.
  */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { ErrorState } from '@/components/ui';
 import { sentryCaptureException } from '@/lib/monitoring/sentry';
 
 interface Props {
@@ -53,42 +58,26 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-/** Styled fallback UI matching the project's ink/brass/stamp-red design system. */
+/**
+ * Styled fallback UI. §OPENSHIP BATCH 8 — it now renders THROUGH the canonical
+ * `ErrorState` owner (`src/components/ui.tsx`) instead of carrying the only copy
+ * of the treatment, so the error state has ONE implementation and takes its
+ * surface edge from the theme (`ds-card` → `--mr-card-border`) rather than the
+ * hardcoded `border-white/[0.06]` it used to declare. The copy is unchanged on
+ * purpose: two browser specs and an operator's muscle memory both name it.
+ */
 function ErrorFallback({ sectionLabel, error, onReset }: {
   sectionLabel?: string;
   error: Error | null;
   onReset: () => void;
 }) {
   return (
-    <div className="flex items-center justify-center h-full min-h-[200px] w-full">
-      <div className="bg-ink-850 border border-white/[0.06] rounded-ds-lg p-8 max-w-md mx-4 text-center shadow-ds-overlay">
-        <AlertTriangle className="w-10 h-10 text-crimson-accent mx-auto mb-4" />
-        <h2 className="text-base font-semibold text-white mb-1">
-          {sectionLabel ? `${sectionLabel} — something went wrong` : 'Something went wrong'}
-        </h2>
-        <p className="text-xs text-zinc-500 mb-4">
-          This section encountered an unexpected error. The rest of the platform
-          is unaffected.
-        </p>
-        {error && (
-          <details className="text-left mb-4 bg-black/30 rounded-ds-md p-3">
-            <summary className="text-ds-micro text-zinc-600 cursor-pointer hover:text-zinc-400">
-              Technical details
-            </summary>
-            <pre className="mt-2 text-ds-micro text-zinc-500 font-mono whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
-              {error.message}
-              {'\n'}
-              {error.stack}
-            </pre>
-          </details>
-        )}
-        <button
-          onClick={onReset}
-          className="text-xs bg-brass-500 hover:bg-brass-600 text-white font-medium rounded-ds-md px-4 py-2 transition-colors"
-        >
-          Try again
-        </button>
-      </div>
-    </div>
+    <ErrorState
+      className="h-full min-h-[200px]"
+      title={sectionLabel ? `${sectionLabel} — something went wrong` : 'Something went wrong'}
+      description="This section encountered an unexpected error. The rest of the platform is unaffected."
+      details={error ? `${error.message}\n${error.stack ?? ''}` : undefined}
+      onRetry={onReset}
+    />
   );
 }

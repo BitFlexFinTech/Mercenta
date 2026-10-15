@@ -95,6 +95,26 @@ body {
     border-bottom-color: var(--mr-hairline);
     border-bottom-color: color-mix(in srgb, var(--mr-hairline) 40%, transparent);
   }
+  /* ── §OPENSHIP BATCH 8 — THE CARD'S HOVER EDGE ──────────────────────────────
+     §9.4's first interaction row is the reference's ONLY treatment on a card:
+     `.th-card:has(a:hover) { border-color: var(--th-card-bd-hover) }`, carried
+     over its own `transition: border-color .2s` (spec §2.7). It sits in the SAME
+     `components` layer as `.ds-card` deliberately: a caller that supplies its own
+     border colour still wins, exactly as it does today (26 call sites do).
+
+     TWO selectors, ONE token, because this project writes a link two ways:
+     `:has(a:hover)` is the reference's own mechanism and is REACHABLE here (four
+     surfaces render an `<a>` inside a card), while `.ds-card-interactive` is the
+     same edge for a card that is a click target without an anchor. Both consume
+     `--mr-card-border-hover`, whose `bold` value IS bold's card border — so that
+     theme is unchanged by MECHANISM, not by promise. */
+  .ds-card {
+    transition: border-color 0.2s;
+  }
+  .ds-card:has(a:hover),
+  .ds-card-interactive:hover {
+    border-color: var(--mr-card-border-hover);
+  }
 }
 .ds-card .ds-card {
   background-color: var(--mr-card-nested);

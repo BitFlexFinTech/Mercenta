@@ -99,6 +99,16 @@ const CONTRACT = {
       : id === 'serious'
         ? 'rgba(255,255,255,0.06)'
         : 'rgba(0,0,0,0.05)',
+  /**
+   * §OPENSHIP BATCH 8 — the card's hover edge (§9.4's first interaction row).
+   * The reference gives it per design class (`rgba(255,255,255,.12)` dark ·
+   * `.14` dim · `#e0e0e0` light — spec §2.3–§2.5), so the three light themes
+   * share its single light value and `serious` takes the dark-family value.
+   * `bold`'s value IS bold's own card border: the hover is a no-op there, which
+   * is how "Bold is preserved" holds BY MECHANISM (asserted functionally below).
+   */
+  '--mr-card-border-hover': (id) =>
+    id === 'bold' ? 'rgba(255,255,255,0.06)' : id === 'serious' ? 'rgba(255,255,255,0.12)' : '#E0E0E0',
 };
 
 for (const [token, expected] of Object.entries(CONTRACT)) {
@@ -685,6 +695,102 @@ check(
 check(
   'the rail keeps its COMPLEMENTARY landmark (never a second `<aside>` — the shell asserts exactly one)',
   /role="complementary"/.test(WORKSPACE_CODE)
+);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   §OPENSHIP BATCH 8 (2026-10-15) — COMPONENT STATES.
+
+   The state OWNERS live in `src/components/ui.tsx` and are gated by
+   `validate-state-coverage.mjs` (§C) — that gate owns "one owner per state" and
+   "the owner is wired". This section owns what belongs to THIS contract: the
+   one INTERACTION trait the batch added (the card's hover edge), and the two
+   floating panels BATCH 4 and BATCH 6 deliberately left to it. Without it,
+   reverting a panel to `border-white/[0.08]`, or dropping the hover token from
+   one theme, would leave every screen looking pre-batch while every other check
+   still passed.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** The hover edge is a no-op in `bold` — asserted FUNCTIONALLY, not by promise. */
+check(
+  'bold: the card hover edge IS its own card border, so the theme is preserved BY MECHANISM (the hover changes nothing)',
+  tokenValue('bold', '--mr-card-border-hover') === tokenValue('bold', '--mr-card-border'),
+  `hover=${tokenValue('bold', '--mr-card-border-hover')} border=${tokenValue('bold', '--mr-card-border')}`
+);
+for (const id of IDS) {
+  if (id === 'bold') continue;
+  check(
+    `${id}: the card hover edge is a VISIBLE change from its borderless card (the reference's own interaction state)`,
+    tokenValue(id, '--mr-card-border-hover') !== tokenValue(id, '--mr-card-border'),
+    `hover=${tokenValue(id, '--mr-card-border-hover')}`
+  );
+}
+
+check(
+  "src/index.css applies the hover through the reference's own mechanism (`.ds-card:has(a:hover)`)",
+  /\.ds-card:has\(a:hover\)/.test(CSS)
+);
+check(
+  'the hover edge has a SECOND selector for a click target without an anchor (this project writes links both ways)',
+  /\.ds-card-interactive:hover/.test(CSS)
+);
+check(
+  'both selectors consume the ONE token (no second border value is declared for a hover)',
+  /\.ds-card:has\(a:hover\),\s*\n?\s*\.ds-card-interactive:hover\s*\{\s*border-color:\s*var\(--mr-card-border-hover\)/.test(
+    CSS
+  )
+);
+check(
+  "the card carries the reference's own transition for that edge (`border-color .2s`, spec §2.7)",
+  /\.ds-card\s*\{\s*transition:\s*border-color 0\.2s;/.test(CSS)
+);
+check(
+  'the hand-rolled card hover is GONE from the surfaces (it declared a legacy colour of its own)',
+  !read('src/components/brand/SalesAnalytics.tsx').includes('hover:border-white/[0.14]') &&
+    read('src/components/brand/SalesAnalytics.tsx').includes('ds-card-interactive')
+);
+
+/** ── The two floating PANELS (§9's surfaces BATCH 4/6 left open) ─────────── */
+const PANELS = [
+  ['src/components/shared/NotificationCenter.tsx', 'the notification panel', 'w-[380px]'],
+  ['src/components/shared/LiveChatWidget.tsx', 'the live-chat panel', 'w-[360px]'],
+];
+for (const [file, label, width] of PANELS) {
+  const src = read(file);
+  const cls = (src.match(new RegExp(`className="[^"]*${width.replace(/[[\]]/g, '\\$&')}[^"]*"`)) ?? [''])[0];
+  check(
+    `${label}'s surface class string was DISCOVERED (a check that finds nothing is a FAILURE)`,
+    cls.length > 0,
+    file
+  );
+  check(
+    `${label} takes its edge from the THEME (\`.ds-card\`) instead of a hardcoded near-white border`,
+    cls.includes('ds-card') && !/border-white\//.test(cls),
+    cls
+  );
+  check(
+    `${label} keeps the container radius and the theme's overlay elevation`,
+    cls.includes('rounded-ds-lg') && cls.includes('shadow-ds-overlay'),
+    cls
+  );
+  check(
+    `ABSENCE GUARD — ${label} is NOT given the dropdown's translucency (the reference evidences it for its dropdown only; copying it onto a panel would be invention)`,
+    !/backdrop-blur/.test(cls) && !/bg-ink-800\/70/.test(cls),
+    cls
+  );
+}
+check(
+  "the notification panel's rows take their hover from the ONE theme tint (no legacy near-white hover remains)",
+  !read('src/components/shared/NotificationCenter.tsx').includes('hover:bg-white/[0.05]')
+);
+check(
+  'the live-chat trigger is the SAME 36px chrome control as its neighbours (it was 32px beside three 36px controls)',
+  read('src/components/shared/LiveChatWidget.tsx').includes(
+    'flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint'
+  )
+);
+check(
+  'an actionable queue row takes the list-row hover, and a non-actionable row does NOT advertise one (spec §9.4)',
+  /r\.onOpen && 'hover:bg-tint'/.test(WORKSPACE_CODE)
 );
 
 console.log(

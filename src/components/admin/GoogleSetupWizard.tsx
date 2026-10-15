@@ -16,7 +16,7 @@
  * RBAC: mounted inside SuperAdminPanel; the Super Admin tier is re-checked here.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
@@ -44,7 +44,7 @@ import {
   type GoogleOAuthRecord,
   type GoogleSetupRun,
 } from '@/data/googleStore';
-import { ExternalLink, FolderPlus, ShieldCheck, Link2, PlayCircle } from 'lucide-react';
+import { ExternalLink, FolderPlus, Link2, PlayCircle } from 'lucide-react';
 
 const GOOGLE_EDGE_BASE = '/functions/v1/google';
 
@@ -153,20 +153,9 @@ export function GoogleSetupWizard() {
   };
 
   if (!isSuperAdmin) {
+    /* §OPENSHIP BATCH 8 — the refusal renders THROUGH the one owner. */
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              The Google connection and workspace setup are restricted to the Super Admin tier.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="The Google connection and workspace setup are restricted to the Super Admin tier." />
     );
   }
 const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];

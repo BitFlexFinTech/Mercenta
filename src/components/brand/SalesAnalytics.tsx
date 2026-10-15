@@ -170,7 +170,7 @@ function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
 }) {
   return (
     <button type="button" onClick={onClick} disabled={!onClick} className="w-full text-left disabled:cursor-default">
-      <Card className={"p-4 " + (onClick ? "cursor-pointer hover:border-white/[0.14] transition-colors" : "")}>
+      <Card className={"p-4 " + (onClick ? "cursor-pointer ds-card-interactive" : "")}>
         <div className="flex items-start justify-between mb-2">
           <span className="text-ds-micro text-zinc-500 font-medium">{label}</span>
           <div className="w-7 h-7 rounded-ds-md bg-white/[0.04] flex items-center justify-center text-zinc-400">{icon}</div>

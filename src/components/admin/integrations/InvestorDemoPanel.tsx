@@ -19,7 +19,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { resolveProviderMode } from '@/integrations/types';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   INVESTOR_DEMO_STAGES,
@@ -36,7 +36,6 @@ import {
   FlaskConical,
   Play,
   RotateCcw,
-  ShieldCheck,
   WifiOff,
 } from 'lucide-react';
 
@@ -108,22 +107,10 @@ export function InvestorDemoPanel() {
 
   const replayIdentical = run && previousDigest ? run.digest === previousDigest : null;
 
+  /* §OPENSHIP BATCH 8 — the refusal renders THROUGH the one owner. */
   if (!isSuperAdmin) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              The investor demonstration is restricted to the Super Admin tier. This view is not
-              authorized for your session.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="The investor demonstration is restricted to the Super Admin tier. This view is not authorized for your session." />
     );
   }
 

@@ -13,6 +13,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { useApp } from '@/context/GlobalStateContext';
+import { EmptyState } from '@/components/ui';
 import { demoCommerceInvoices, demoCommercePayments, demoPurchaseOrders } from '@/data/demoStore';
 import {
   useBrands,
@@ -601,7 +602,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
             id="notification-panel"
             role="dialog"
             aria-label={ariaSummary}
-            className="absolute right-0 top-9 z-50 w-[380px] bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay overflow-hidden"
+            className="ds-card absolute right-0 top-9 z-50 w-[380px] overflow-hidden rounded-ds-lg border bg-ink-900 shadow-ds-overlay"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
               <span className="text-xs font-semibold text-white">Needs attention</span>
@@ -622,9 +623,10 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
             </div>
             <div className="max-h-[420px] overflow-y-auto divide-y divide-white/[0.04]" data-testid="notification-list">
               {items.length === 0 && (
-                <p className="text-xs text-zinc-600 text-center py-8">
-                  No open exceptions across the portfolio. Everything is being tracked.
-                </p>
+                <EmptyState
+                  title="Everything is tracked"
+                  description="No open exceptions across the portfolio."
+                />
               )}
               {items.map((n) => {
                 const Icon = KIND_ICON[n.kind];
@@ -645,7 +647,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                     data-record-kind={n.record.kind}
                     data-record-view={n.record.view}
                     data-record-id={n.record.id}
-                    className="w-full flex items-start gap-2.5 px-4 py-2.5 hover:bg-white/[0.05] text-left transition-colors"
+                    className="w-full flex items-start gap-2.5 px-4 py-2.5 hover:bg-tint text-left transition-colors"
                   >
                     <span
                       aria-hidden="true"

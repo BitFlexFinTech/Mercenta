@@ -14,7 +14,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { isProviderSimulationSafe, resolveProviderMode } from '@/integrations/types';
 import type { IntegrationId } from '@/integrations/types';
-import { Badge, Button, Card, DataTable } from '@/components/ui';
+import { Badge, Button, Card, DataTable, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { demoCompanyVerifications, demoHmrcFilings } from '@/data/demoStore';
 import { ALL_DEMO_BRANDS } from '@/data/demoData';
@@ -41,19 +41,7 @@ export function CompliancePanel() {
   const isSuperAdmin = session?.tier === 'super_admin';
   if (!isSuperAdmin) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Compliance controls are restricted to the Super Admin tier.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="Compliance controls are restricted to the Super Admin tier." />
     );
   }
 

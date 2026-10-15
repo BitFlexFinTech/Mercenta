@@ -197,6 +197,18 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
          `--mr-surface-tint` on light shells, so a row hover is invisible there.
          Consumed by `hover:bg-tint` (tailwind.config.js → `tint`).
 
+         `--mr-card-border-hover` — the edge a card shows while it is being
+         POINTED AT (§OPENSHIP BATCH 8). The reference states exactly this one
+         interaction state on a card (`--th-card-bd-hover`: `.12` in dark, `.14`
+         in dim, `#e0e0e0` in light — spec §2.3/§2.4/§2.5, applied by
+         `.th-card:has(a:hover)` in §2.7 and listed as §9.4's card-hover row).
+         The three light designs share the reference's single light value and
+         `serious` takes its dark-family value, because `serious` carries the
+         reference's DARK design throughout. `bold` declares its own border
+         value, so the hover is a no-op there and Bold is preserved by mechanism.
+         Consumed by `.ds-card:has(a:hover)` / `.ds-card-interactive:hover` in
+         `src/index.css`.
+
          `bold` carries values that REPRODUCE what it renders today (border
          `rgba(255,255,255,0.06)`, nested fill `--mr-surface-raised`, hover
          `rgba(255,255,255,0.04)`), so the Owner's "Bold is preserved exactly"
@@ -204,6 +216,7 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-card-border': 'transparent',
       '--mr-card-nested': '#FAFAFA',
       '--mr-hover-tint': 'rgba(0,0,0,0.05)',
+      '--mr-card-border-hover': '#E0E0E0',
       '--mr-tracker-route': '#8A93A2',
       '--mr-tracker-dot': '#7E22CE',
       '--mr-tracker-live': '#1FA45B',
@@ -309,6 +322,7 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-card-border': 'transparent',
       '--mr-card-nested': '#FAFAFA',
       '--mr-hover-tint': 'rgba(0,0,0,0.05)',
+      '--mr-card-border-hover': '#E0E0E0',
       '--mr-tracker-route': '#8490A2',
       '--mr-tracker-dot': '#2563EB',
       '--mr-tracker-live': '#1D9C5D',
@@ -414,6 +428,7 @@ bold: {
       '--mr-card-border': 'rgba(255,255,255,0.06)',
       '--mr-card-nested': '#17181D',
       '--mr-hover-tint': 'rgba(255,255,255,0.04)',
+      '--mr-card-border-hover': 'rgba(255,255,255,0.06)',
       '--mr-tracker-route': '#6E7582',
       '--mr-tracker-dot': '#D4B36A',
       '--mr-tracker-live': '#2FBF71',
@@ -516,6 +531,7 @@ bold: {
       '--mr-card-border': 'transparent',
       '--mr-card-nested': '#FAFAFA',
       '--mr-hover-tint': 'rgba(0,0,0,0.05)',
+      '--mr-card-border-hover': '#E0E0E0',
       '--mr-tracker-route': '#948C96',
       '--mr-tracker-dot': '#A9F04D',
       '--mr-tracker-live': '#21B573',
@@ -619,6 +635,7 @@ bold: {
       '--mr-card-border': 'transparent',
       '--mr-card-nested': '#080808',
       '--mr-hover-tint': 'rgba(255,255,255,0.06)',
+      '--mr-card-border-hover': 'rgba(255,255,255,0.12)',
       '--mr-tracker-route': '#757575',
       '--mr-tracker-dot': '#F97316',
       '--mr-tracker-live': '#34D399',

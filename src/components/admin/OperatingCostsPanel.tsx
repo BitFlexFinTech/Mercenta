@@ -15,7 +15,7 @@
  * Nothing here claims live spend: no billing API is connected.
  */
 import { useCallback, useState } from 'react';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import {
@@ -27,7 +27,7 @@ import {
 import { operatingCostSummary, type OperatingCostSummary } from '@/lib/costs/costSummary';
 import { FREE_RUNTIME_MODELS, RUNTIME_TASKS, selectRuntimeModel } from '@/lib/costs/modelPolicy';
 import { aiUsageEntries, resetAiUsageLog, type AiUsageEntry } from '@/lib/costs/usageLog';
-import { ShieldCheck, Wallet, RefreshCw } from 'lucide-react';
+import { Wallet, RefreshCw } from 'lucide-react';
 
 function sourceClass(source: CostSourceLabel): string {
   switch (source) {
@@ -64,20 +64,9 @@ export function OperatingCostsPanel() {
   }, []);
 
   if (!isSuperAdmin) {
+    /* §OPENSHIP BATCH 8 — the refusal renders THROUGH the one owner. */
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Platform costs and AI spend controls are restricted to the Super Admin tier.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="Platform costs and AI spend controls are restricted to the Super Admin tier." />
     );
   }
 

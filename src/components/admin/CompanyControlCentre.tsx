@@ -15,7 +15,7 @@
  * RBAC: mounted only inside SuperAdminPanel tabs; the tier is re-checked here.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, NoPermissionState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
@@ -59,7 +59,7 @@ import {
   type ConfirmationStatementState,
   type RegistrarSnapshot,
 } from '@/data/companyStore';
-import { ExternalLink, RefreshCw, ShieldCheck, Building2, KeyRound } from 'lucide-react';
+import { ExternalLink, RefreshCw, Building2, KeyRound } from 'lucide-react';
 
 const HOOK_EDGE_BASE = '/functions/v1/companies-house';
 
@@ -180,20 +180,9 @@ export function CompanyControlCentre() {
   const readError = snapshot.lastError;
 
   if (!isSuperAdmin) {
+    /* §OPENSHIP BATCH 8 — the refusal renders THROUGH the one owner. */
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-ds-md bg-red-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Company and government compliance controls are restricted to the Super Admin tier.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <NoPermissionState description="Company and government compliance controls are restricted to the Super Admin tier." />
     );
   }
 

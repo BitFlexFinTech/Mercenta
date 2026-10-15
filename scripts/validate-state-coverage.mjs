@@ -50,6 +50,13 @@ const test = (name, cond) => {
   if (!cond) failures++;
 };
 
+/**
+ * An ABSENCE GUARD must read CODE, not prose: the project's convention is to
+ * RECORD a retired contract in a `§… REPOINTED` comment, so a raw-source search
+ * would forbid the very record the rules require. This strips comments only.
+ */
+const codeOf = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
 /** User-visible text of a rendered tree (script tags and markup removed). */
 const strip = (html) =>
   html
@@ -244,6 +251,122 @@ try {
   walk('src');
   test(`no file outside ${OWNER} hand-rolls a loading label` + (offenders.length ? ` :: OFFENDERS ${offenders.join(', ')}` : ''),
     offenders.length === 0);
+
+  console.log('\n── C. ONE owner per STATE, and every owner is WIRED (§OPENSHIP BATCH 8) ──');
+  const uiOwner = readFileSync(OWNER, 'utf8');
+  const boundarySrc = codeOf(readFileSync('src/components/shared/ErrorBoundary.tsx', 'utf8'));
+  const shellSrc = readFileSync('src/components/layout/AdminShell.tsx', 'utf8');
+  const notifySrc = readFileSync('src/components/shared/NotificationCenter.tsx', 'utf8');
+  const chatSrc = readFileSync('src/components/shared/LiveChatWidget.tsx', 'utf8');
+  const wsSrc2 = readFileSync('src/components/shared/workspace.tsx', 'utf8');
+
+  /**
+   * The five named states of spec §9 each have ONE owner, and it is the same file
+   * — so a surface renders a state instead of hand-rolling its own markup (the
+   * defect this section exists for: the no-permission state had been copied into
+   * SEVEN files, and the error treatment existed in exactly one private copy).
+   */
+  for (const owner of ['EmptyState', 'LoadingState', 'ErrorState', 'NoPermissionState']) {
+    test(`${owner} has its ONE owner in ${OWNER}`, new RegExp(`export function ${owner}\\(`).test(uiOwner));
+  }
+
+  /* The reference's own metrics (§9.1 empty, §9.2 loading). */
+  test(
+    "the empty state takes the reference's block (`py-16`, spec §9.1) and a named title step",
+    /className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center"/.test(uiOwner) &&
+      /text-ds-title font-medium tracking-tight text-zinc-200/.test(uiOwner)
+  );
+  test(
+    "the loading row has the reference's anatomy — a leading TILE and two bars (§9.2)",
+    /<Skeleton className="h-6 w-6 flex-shrink-0" \/>/.test(uiOwner) &&
+      /<Skeleton className="h-3 w-2\/3" \/>/.test(uiOwner) &&
+      /<Skeleton className="h-2\.5 w-1\/3" \/>/.test(uiOwner)
+  );
+  test(
+    'ABSENCE GUARD — the skeleton no longer paints the legacy near-white fill (invisible on the light themes)',
+    /animate-pulse rounded-ds-sm bg-tint/.test(uiOwner) && !/animate-pulse rounded-ds-sm bg-white/.test(uiOwner)
+  );
+
+  /* §9.3 and §9.5 — the two states that had no owner at all. */
+  test(
+    'the ERROR state is announced and hookable (role=alert + data-testid="error-state")',
+    /export function ErrorState\(/.test(uiOwner) &&
+      /role="alert"/.test(uiOwner) &&
+      /data-testid="error-state"/.test(uiOwner)
+  );
+  test(
+    'the ERROR state renders its recovery control THROUGH the canonical control',
+    /onRetry && <Button onClick=\{onRetry\}>/.test(uiOwner)
+  );
+  test(
+    'the NO-PERMISSION state is announced, hookable, and names itself in TEXT (colour is never the only signal)',
+    /export function NoPermissionState\(/.test(uiOwner) &&
+      /data-testid="no-permission-state"/.test(uiOwner) &&
+      /Super Admin access required/.test(uiOwner)
+  );
+
+  /* WIRED — an owner nothing renders through is not a fix. */
+  test(
+    'ABSENCE GUARD — the ErrorBoundary no longer declares the treatment itself (no hardcoded border remains)',
+    !/border-white\/\[0\.06\]/.test(boundarySrc)
+  );
+  test(
+    'the ErrorBoundary renders THROUGH ErrorState and still offers its reset control',
+    /<ErrorState[\s\S]{0,400}onRetry=\{onReset\}/.test(boundarySrc)
+  );
+  test(
+    'the shell refusal renders THROUGH NoPermissionState (page variant)',
+    /<NoPermissionState[\s\S]{0,240}variant="page"/.test(shellSrc)
+  );
+
+  /**
+   * ABSENCE GUARD — no file may hand-roll the refusal again. The old copies all
+   * carried the same `<h3>Super Admin access required</h3>`; if one comes back,
+   * the consolidation has silently un-happened.
+   */
+  const reRolled = [];
+  const walkRefusals = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      const p = `${dir}/${entry}`;
+      if (statSync(p).isDirectory()) walkRefusals(p);
+      else if (/\.tsx?$/.test(entry) && p !== OWNER && />Super Admin access required</.test(codeOf(readFileSync(p, 'utf8')))) reRolled.push(p);
+    }
+  };
+  walkRefusals('src');
+  test(
+    'ABSENCE GUARD — no surface outside the owner hand-rolls the no-permission state' +
+      (reRolled.length ? ` :: OFFENDERS ${reRolled.join(', ')}` : ''),
+    reRolled.length === 0
+  );
+
+  /* The two floating panels BATCH 4/6 left: their EMPTY state goes through the owner too. */
+  test(
+    'the notification panel renders its empty state through the ONE empty-state owner',
+    /<EmptyState/.test(notifySrc)
+  );
+  test(
+    'the live-chat panel renders its empty state through the ONE empty-state owner',
+    /<EmptyState/.test(chatSrc)
+  );
+
+  /* §9.4 — the list-row hover, on the ONE tint, and only where the row ACTS. */
+  test(
+    'an actionable queue row takes the list-row hover from the theme tint (a non-actionable row does not)',
+    /r\.onOpen && 'hover:bg-tint'/.test(wsSrc2)
+  );
+
+  /**
+   * SELF-CHECK — the predicates added above must be able to FAIL. Each is applied
+   * to a deliberately broken sample: the reverted skeleton fill, the re-rolled
+   * refusal heading and the boundary's old hardcoded border must all be caught.
+   */
+  test(
+    'SELF-CHECK the BATCH 8 predicates flag the pre-batch sources',
+    !/animate-pulse rounded-ds-sm bg-tint/.test("<div className=\"animate-pulse rounded-ds-sm bg-white/[0.06]\" />") &&
+      />Super Admin access required</.test('<h3 className="text-sm">Super Admin access required</h3>') &&
+      /border-white\/\[0\.06\]/.test('<div className="border border-white/[0.06]">') &&
+      !/<ErrorState[\s\S]{0,400}onRetry=\{onReset\}/.test('<div className="border border-white/[0.06]"><button>Try again</button></div>')
+  );
 
   /**
    * SELF-CHECK — the gate above must be able to FAIL. The same predicates are

@@ -115,3 +115,86 @@ test.describe('State coverage — no surface denies data while it is still loadi
     for (const view of ADMIN_VIEWS) await assertNoFalseDenial(page, 'admin', view);
   });
 });
+test.describe('§OPENSHIP BATCH 8 — the state treatments, measured in a real browser', () => {
+  /**
+   * THE DEFECT THIS MEASURES. `Skeleton` used to paint `bg-white/[0.06]`, whose
+   * light-shell shim resolves to `--mr-surface-tint` — `#FAFAFA` in the three
+   * light designs, on a `#FFFFFF` card. That is a **1.02:1** difference: a loading
+   * state that is effectively INVISIBLE, which matters because the skeleton is the
+   * only signal that a slow surface has not yet answered (the false-denial defect
+   * the rest of this spec covers). The fix is the theme's own tint
+   * (`--mr-hover-tint`), and this test reads the BROWSER's composited result:
+   * the skeleton's own fill composited over whatever surface it sits on must differ
+   * from that surface by a measurable amount.
+   */
+  test('1. the loading skeleton is VISIBLE against the surface behind it (light design)', async ({ page }) => {
+    test.setTimeout(120000);
+    await delayDataSource(page);
+    await loginAs(page, 'Astonish', 1500);
+
+    await page.locator('nav[aria-label="Primary"]').getByText('Analytics', { exact: true }).first().click();
+    const skeleton = page.locator('[data-testid="loading-state"] .animate-pulse').first();
+    await expect(skeleton, 'the surface must show the canonical loading state while its data resolves').toBeVisible({
+      timeout: 8000,
+    });
+
+    const measured = await skeleton.evaluate((el) => {
+      const parse = (c: string) => (c.match(/[\d.]+/g) ?? []).map(Number);
+      const sk = parse(getComputedStyle(el).backgroundColor);
+      let node: HTMLElement | null = el.parentElement;
+      let behind: number[] = [255, 255, 255];
+      while (node && node !== document.documentElement) {
+        const bg = parse(getComputedStyle(node).backgroundColor);
+        if (bg.length >= 3 && (bg.length < 4 || bg[3] > 0)) {
+          // composite that surface over white, then composite the skeleton over it
+          const a = bg.length === 4 ? bg[3] : 1;
+          behind = [0, 1, 2].map((i) => bg[i] * a + 255 * (1 - a));
+          break;
+        }
+        node = node.parentElement;
+      }
+      const sa = sk.length === 4 ? sk[3] : 1;
+      const effective = [0, 1, 2].map((i) => sk[i] * sa + behind[i] * (1 - sa));
+      return {
+        effective,
+        behind,
+        delta: Math.max(...[0, 1, 2].map((i) => Math.abs(effective[i] - behind[i]))),
+        shell: document.documentElement.getAttribute('data-mercenta-theme'),
+      };
+    });
+
+    expect(
+      Math.round(measured.delta),
+      `the skeleton must be perceivable: effective ${measured.effective.map(Math.round).join(',')} vs surface ` +
+        `${measured.behind.map(Math.round).join(',')} on ${measured.shell} (a delta of 5 or less is the pre-batch, ` +
+        `effectively invisible skeleton)`
+    ).toBeGreaterThanOrEqual(8);
+  });
+
+  /**
+   * §9.4's card interaction state, read from the browser rather than the class
+   * list: the hover edge must actually APPEAR, and it must come from the theme
+   * token (asserting the token's own value would prove nothing about the render).
+   */
+  test('2. a card that is a click target takes the theme hover edge when pointed at', async ({ page }) => {
+    test.setTimeout(120000);
+    await loginAs(page, 'Astonish', 1500);
+    await page.locator('nav[aria-label="Primary"]').getByText('Analytics', { exact: true }).first().click();
+
+    const card = page.locator('.ds-card-interactive').first();
+    await expect(card).toBeVisible({ timeout: 10000 });
+    const rest = await card.evaluate((el) => getComputedStyle(el).borderTopColor);
+    await card.hover();
+    await page.waitForTimeout(400); // the reference's own 200ms border transition
+    const hovered = await card.evaluate((el) => getComputedStyle(el).borderTopColor);
+    const token = await page.evaluate(
+      () => getComputedStyle(document.documentElement).getPropertyValue('--mr-card-border-hover').trim()
+    );
+
+    expect(rest, 'a card at rest shows no edge on the light designs (the reference borderless-card rule)').not.toBe(
+      hovered
+    );
+    expect(hovered, `the hover edge is the theme token (${token}), not a class-level colour`).not.toBe(rest);
+  });
+});
+

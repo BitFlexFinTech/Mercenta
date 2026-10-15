@@ -207,8 +207,11 @@ invents their own version of.
 | `Breadcrumb` | items | `aria-current` on last |
 | `Modal` | open / onClose / title / footer | labelled, backdrop + ESC |
 | `Pagination` | page / pageCount | prev/next |
-| `EmptyState` | title / description / action | |
-| `Skeleton` | className | shimmer |
+| `EmptyState` | icon / title / description / action | §BATCH 8 — the ONE owner of "this region has no data" (`py-16`, the reference's block, spec §9.1) |
+| `LoadingState` | rows / label | §BATCH 8 — the ONE owner of "this region's data is still resolving"; the reference's row anatomy (a leading tile + two bars), `role="status"`, `aria-busy`, `data-testid="loading-state"` |
+| `ErrorState` | title / description / details / onRetry / retryLabel / action | §BATCH 8 — the ONE owner of "this region crashed": `role="alert"`, `data-testid="error-state"`, theme card edge, the canonical recovery control; rendered by `ErrorBoundary` |
+| `NoPermissionState` | title / description / action / variant (inline · page) / icon | §BATCH 8 — the ONE owner of the RBAC refusal (spec §9.5, DERIVED there as UNVERIFIED): `data-testid="no-permission-state"`, danger token + a text label, never colour alone |
+| `Skeleton` | className | §BATCH 8 — the fill is the THEME's tint (`bg-tint` → `--mr-hover-tint`); the legacy `bg-white/[0.06]` resolved to `#FAFAFA` on a `#FFFFFF` card on the light designs, i.e. an invisible loading state |
 | `PageHeader` / `EntityHeader` | title, description, actions, status | |
 | `DataTable` | columns / rows / loading / empty / error | semantic `<table>`, sr-only caption, loading skeleton, empty & error states |
 

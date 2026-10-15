@@ -1257,5 +1257,77 @@ followed; no number is invented to fill a gap.
 
 ---
 
+---
+
+**§EXECUTED 2026-10-15 (§OPENSHIP BATCH 8) — COMPONENT STATES: ONE OWNER PER STATE, THE CARD'S HOVER
+EDGE, AND THE TWO PANELS BATCH 4 AND 6 LEFT OPEN.** Built: **the five named states of §9 now each have
+ONE owner** in `src/components/ui.tsx`, so a surface renders a state instead of hand-rolling its own
+markup.
+
+- **EMPTY (§9.1).** `EmptyState` takes the reference's block (`py-16 text-center`, a `max-w-sm`
+  description under a title, then the actions) and gains an optional `icon`.
+- **LOADING (§9.2).** `LoadingState` takes the reference's ROW ANATOMY — a leading square tile plus a
+  wide bar and a short bar — inside the project's own 36px row box, so the skeleton has the shape of the
+  row that is coming without breaking the documented `rows` height contract (19 call sites depend on it).
+- **ERROR (§9.3 — DERIVED, and stated as derived).** A NEW `ErrorState` owner: `role="alert"`,
+  `data-testid="error-state"`, the theme's card edge (`ds-card` → `--mr-card-border`) instead of the
+  hardcoded `border-white/[0.06]` it used to declare, and the CANONICAL recovery control (so the retry
+  carries the reference's per-theme CTA gradient BATCH 3 built). `ErrorBoundary` now renders THROUGH it;
+  its copy is unchanged, which is why `e2e/error-boundary.spec.ts` still passes untouched.
+- **NO-PERMISSION (§9.5 — DERIVED, and UNVERIFIED in the reference).** A NEW `NoPermissionState` owner,
+  `variant="inline"` for a panel and `variant="page"` for a shell, replacing **SEVEN** hand-rolled copies
+  of the same refusal (`AdminShell`'s whole-view refusal plus six panels: SimulationControl,
+  InvestorDemoPanel, OperatingCostsPanel, CompliancePanel, CompanyControlCentre, GoogleSetupWizard).
+  **NO permission, role, gate or visible result was added, removed or widened** — this is presentation
+  only, and the danger token still arrives with an always-readable text label.
+- **INTERACTION (§9.4).** The one missing trait — the card's hover edge — is now real:
+  `--mr-card-border-hover` in all five themes, applied by the reference's own
+  `.ds-card:has(a:hover)` (`spec §2.7`) plus `.ds-card-interactive:hover` for a click target written
+  without an anchor (this project's idiom), over the reference's own `transition: border-color .2s`. An
+  actionable queue row now takes the list-row hover from the ONE theme tint.
+
+**TWO REAL DEFECTS FIXED AT SOURCE (rule 07), both caught by this batch's own evidence:**
+1. **The loading skeleton was INVISIBLE on all three light designs.** `Skeleton` painted
+   `bg-white/[0.06]`, whose light-shell shim resolves to `--mr-surface-tint` — `#FAFAFA` on a `#FFFFFF`
+   card, a **1.02:1** difference. The skeleton is the only signal that a slow surface has not yet
+   answered, so an invisible one is the visual half of the false-denial defect the rest of §9 warns
+   about. It is now the theme's own tint (`bg-tint` → `--mr-hover-tint`, the value BATCH 5 established
+   as the visible one on light surfaces), and the browser test MEASURES the composited result rather
+   than the class name.
+2. **The live-chat trigger was a 32px control standing beside three 36px ones** in the same header
+   (bell, theme, account). It is now the same 36px/12px-radius control as its neighbours.
+
+**THE TWO FLOATING PANELS** BATCH 4 and BATCH 6 deliberately left (`NotificationCenter`,
+`LiveChatWidget`) now take the theme's container edge (`.ds-card`) instead of a hardcoded near-white
+border, keep the container radius and the theme's overlay elevation, use the ONE hover tint on their
+rows, and render their empty states through the empty-state owner. **Their translucency is deliberately
+NOT adopted**: the reference evidences that trait for its DROPDOWN only (§7.6), so copying it onto a
+panel would be invention rather than replication — the same reasoning BATCH 4 recorded.
+
+**DIVERGENCES, stated rather than left silent:**
+1. **The empty-state title stays on the project's named 16px step.** The reference's is 24px, which is
+   above this project's PAGE title (20px) — an empty REGION would out-rank the page it sits on, and the
+   named scale is the single owner of type sizes.
+2. **The reference's four-tile feature row and its `⌘K` hint are NOT adopted into the empty state.**
+   They are OpenShip's HOME-PAGE composition (§5.4/§5.5), not part of a general empty state; Mercenta's
+   empty states are per-region inside dense operational surfaces, where a 2×4 feature grid would be
+   wrong at that scale. Nothing was invented to match it.
+3. **The row skeleton keeps the project's measured 36px row box** rather than the reference's ~72px row
+   with its 40px tile: a skeleton taller than the row it replaces is a layout shift, not fidelity.
+4. **Error and no-permission keep Mercenta's copy, semantics and RBAC behaviour**, restyled with the
+   verified tokens — both traits are recorded as DERIVED in the spec (§9.3/§9.5, §15.3), and neither is
+   described as a copy of a reference component.
+5. **The focus ring, the disabled step and the control durations keep the project's token-driven
+   values.** The reference uses `ring-2 + ring-offset-2`, `opacity-50` and 150/200/300ms; this project
+   uses a token-driven `outline` that follows the element's own radius (a §PHASE C4 decision),
+   `opacity-60` on the canonical control, and the theme's motion tokens. Each is within a few
+   pixels/milliseconds of the reference and the token remains the single owner.
+6. **The three inline "Researching …" pulse texts** (`GrantsInvestorsSection`,
+   `ManufacturerSourcingSection`, `ProductResearchSection`) are NOT migrated to `LoadingState`: they are
+   in-flight PROGRESS MESSAGES for a long AI call, not a region's loading state, and a skeleton bar
+   cannot carry their sentence. Recorded so the omission is a decision rather than an oversight.
+
+---
 *End of specification.*
+
 

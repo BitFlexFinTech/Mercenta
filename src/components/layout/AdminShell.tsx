@@ -6,7 +6,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
-import { LoadingState } from '@/components/ui';
+import { Button, LoadingState, NoPermissionState } from '@/components/ui';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
@@ -409,20 +409,13 @@ function AccessDenied() {
         title="Super Admin Access Required"
         description="This view is restricted to authenticated Super Admin sessions."
       />
-      <div className="mx-auto max-w-md rounded-ds-lg border border-red-500/20 bg-ink-850 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/15">
-          <ShieldCheck className="h-6 w-6 text-red-400" />
-        </div>
-        <p className="mb-6 text-sm text-zinc-400">
-          This view is restricted to authenticated Super Admin sessions.
-        </p>
-        <button
-          onClick={() => setEnvironment('login')}
-          className="inline-flex items-center gap-2 rounded-ds-md bg-brass-500 px-4 py-2 font-medium text-white transition-ds duration-ds-fast hover:bg-brass-400"
-        >
-          Return to Login
-        </button>
-      </div>
+      <NoPermissionState
+        variant="page"
+        description="This view is restricted to authenticated Super Admin sessions."
+        action={
+          <Button onClick={() => setEnvironment('login')}>Return to Login</Button>
+        }
+      />
     </WorkspaceFrame>
   );
 }

@@ -636,6 +636,10 @@ export function Queue({
         data-testid={r.testId ?? `queue-${r.id}`}
         className={cn(
           'relative flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5',
+          /* §OPENSHIP BATCH 8 — §9.4's list-row hover, on the ONE tint the
+             project resolved for a hovered row. Only an ACTIONABLE row takes it:
+             a row with no destination must not advertise one. */
+          r.onOpen && 'hover:bg-tint',
           density === 'compact' ? 'py-2' : 'py-2.5'
         )}
       >

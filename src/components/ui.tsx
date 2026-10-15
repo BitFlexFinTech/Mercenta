@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { AlertTriangle, ShieldCheck } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface CardProps {
@@ -709,26 +710,74 @@ export function Pagination({
   );
 }
 
+/**
+ * §OPENSHIP BATCH 8 — THE EMPTY STATE, to the reference's own metrics (spec §9.1:
+ * `py-16 text-center`, a title, a `max-w-sm` description, then the actions).
+ *
+ * Two divergences, both stated rather than left silent:
+ *
+ *  · the TITLE stays on the project's own named type step (`ds-title`, 16px).
+ *    The reference's empty-state title is 24px, which is ABOVE this project's
+ *    page title (`ds-page`, 20px) — an empty region would out-rank the page it
+ *    sits on, and the named scale is the single owner of type sizes.
+ *  · the reference's four-tile feature row and its `⌘K` hint are its HOME-PAGE
+ *    composition (spec §5.4/§5.5), not part of a general empty state. Mercenta's
+ *    empty states are per-REGION inside dense operational surfaces, where a 2×4
+ *    feature grid would be wrong at that scale, so nothing was invented to
+ *    match it.
+ *
+ * Like `LoadingState`, this is the ONE owner of its state: a surface renders
+ * through it rather than hand-rolling its own centred block.
+ */
 export function EmptyState({
+  icon,
   title,
   description,
   action,
 }: {
+  /** Optional glyph — the reference's empty state carries an illustration (spec §9.1). */
+  icon?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
-      <p className="text-sm font-medium text-zinc-300">{title}</p>
-      {description && <p className="text-xs text-zinc-500 max-w-sm">{description}</p>}
+    <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
+      {icon && (
+        <span
+          aria-hidden="true"
+          className="mb-1 flex h-10 w-10 items-center justify-center rounded-ds-md bg-tint text-zinc-500"
+        >
+          {icon}
+        </span>
+      )}
+      <p className="text-ds-title font-medium tracking-tight text-zinc-200">{title}</p>
+      {description && (
+        <p className="mx-auto max-w-sm text-ds-body leading-relaxed text-zinc-500">{description}</p>
+      )}
       {action}
     </div>
   );
 }
 
+/**
+ * §OPENSHIP BATCH 8 — THE SKELETON FILL IS NOW THE THEME'S OWN TINT.
+ *
+ * It was `bg-white/[0.06]`, whose light-shell shim maps to `--mr-surface-tint`
+ * (`#FAFAFA` in `minimal-light`/`professional`/`fun`) while the card behind it
+ * is `#FFFFFF` — a **1.02:1** difference, i.e. a loading indicator that is
+ * measurably invisible on all three light designs. `bg-tint` is
+ * `--mr-hover-tint`, the ONE subtle fill this project already resolved as the
+ * visible one on light surfaces (BATCH 5 moved the rail's hover to it for
+ * exactly this reason: the near-white legacy hover "is invisible on the light
+ * designs"). One token, five themes, and the skeleton reads on every one.
+ *
+ * Guarded by `scripts/validate-state-coverage.mjs` (an absence guard for
+ * `bg-white/[0.06]` in this owner) and measured in a browser by
+ * `e2e/state-coverage.spec.ts` (the fill must differ from the surface behind it).
+ */
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden="true" className={cn('animate-pulse rounded-ds-sm bg-white/[0.06]', className)} />;
+  return <div aria-hidden="true" className={cn('animate-pulse rounded-ds-sm bg-tint', className)} />;
 }
 
 /**
@@ -747,13 +796,22 @@ export function Skeleton({ className }: { className?: string }) {
  * owner, so there is exactly one implementation of it. Announced to assistive
  * technology (`role="status"` + `aria-busy`) because "the data is still
  * arriving" is information an operator needs.
+ *
+ * §OPENSHIP BATCH 8 — THE ROW ANATOMY IS THE REFERENCE'S (spec §9.2: a skeleton
+ * row carries a leading square TILE plus a wide bar and a short bar, so the
+ * skeleton has the shape of the row that is coming rather than being a blank
+ * block). The `rows` prop still means "match the region's rough height", so the
+ * row BOX stays the project's measured 36px — the dense operational row it
+ * stands in for — and the tile is scaled to fit it; the reference's 40px tile
+ * belongs to its own roomier list rows, and a skeleton taller than the row it
+ * replaces is a layout shift rather than fidelity.
  */
 export function LoadingState({
   rows = 3,
   label = 'Loading…',
   className,
 }: {
-  /** Number of skeleton bars; match the region's rough height. */
+  /** Number of skeleton rows; match the region's rough height. */
   rows?: number;
   label?: string;
   className?: string;
@@ -768,8 +826,177 @@ export function LoadingState({
     >
       <span className="sr-only">{label}</span>
       {Array.from({ length: rows }, (_, i) => (
-        <Skeleton key={i} className="h-9 w-full" />
+        <div key={i} className="flex h-9 items-center gap-3">
+          <Skeleton className="h-6 w-6 flex-shrink-0" />
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <Skeleton className="h-3 w-2/3" />
+            <Skeleton className="h-2.5 w-1/3" />
+          </span>
+        </div>
       ))}
+    </div>
+  );
+}
+
+/**
+ * §OPENSHIP BATCH 8 — THE ERROR STATE (§9.3).
+ *
+ * The spec is explicit that this trait is **DERIVED, not copied**: the
+ * reference's error views (`error-view.tsx`, `resource-not-found.tsx`,
+ * `api-unavailable.tsx`) were never extracted (spec §9.3, §15.3), so Mercenta's
+ * existing error treatment is RETAINED and restyled with the VERIFIED tokens —
+ * it is never presented as a copy of a reference component.
+ *
+ * It exists because the treatment lived in exactly one place (`ErrorBoundary`'s
+ * private `ErrorFallback`) and nowhere else, so any second error surface had
+ * nothing to render through and would have hand-rolled its own. One owner now,
+ * and the boundary renders THROUGH it.
+ *
+ * What the verified tokens change:
+ *  · the surface takes its edge from the THEME (`ds-card` → `--mr-card-border`)
+ *    instead of the hardcoded `border-white/[0.06]`, so `bold` keeps the border
+ *    it draws today while the four replaced themes take the reference's
+ *    borderless container rule (BATCH 4);
+ *  · the recovery control is the CANONICAL control, so it carries the reference's
+ *    per-theme CTA gradient (BATCH 3) and the canonical metrics rather than a
+ *    one-off flat brass button;
+ *  · `role="alert"` — a region that has crashed is an interruption an operator
+ *    must hear, and the previous fallback announced nothing.
+ */
+export function ErrorState({
+  title,
+  description,
+  details,
+  onRetry,
+  retryLabel = 'Try again',
+  action,
+  className,
+}: {
+  title: string;
+  description?: string;
+  /** Technical detail (message + stack). Rendered collapsed, never dropped. */
+  details?: string;
+  onRetry?: () => void;
+  retryLabel?: string;
+  /** Any additional recovery control. */
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn('flex w-full items-center justify-center', className)}
+      role="alert"
+      data-testid="error-state"
+    >
+      <div className="ds-card mx-4 max-w-md rounded-ds-lg border bg-ink-850 p-8 text-center shadow-ds-overlay">
+        <span
+          aria-hidden="true"
+          className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-ds-md bg-state-danger/15 text-state-danger"
+        >
+          <AlertTriangle className="h-5 w-5" />
+        </span>
+        <h2 className="mb-1 text-ds-title font-semibold tracking-tight text-white">{title}</h2>
+        {description && <p className="mb-4 text-ds-body leading-relaxed text-zinc-500">{description}</p>}
+        {details && (
+          <details className="mb-4 rounded-ds-md bg-black/30 p-3 text-left">
+            <summary className="cursor-pointer text-ds-micro text-zinc-600 hover:text-zinc-400">
+              Technical details
+            </summary>
+            <pre className="mt-2 max-h-[200px] overflow-y-auto whitespace-pre-wrap break-all font-mono text-ds-micro text-zinc-500">
+              {details}
+            </pre>
+          </details>
+        )}
+        <span className="flex flex-wrap items-center justify-center gap-2">
+          {onRetry && <Button onClick={onRetry}>{retryLabel}</Button>}
+          {action}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * §OPENSHIP BATCH 8 — THE NO-PERMISSION STATE (§9.5).
+ *
+ * **DERIVED, and stated as derived.** The spec records this trait as UNVERIFIED
+ * in the reference (§9.5, §15.3) — "Mercenta's existing RBAC-hidden behaviour is
+ * retained". What this owner changes is not the behaviour: NO permission, role
+ * or gate was added, removed or widened anywhere. It changes the fact that the
+ * same state had been hand-rolled SEVEN times, each with its own copy of the
+ * same icon tile and wording, so no two were identical and none was gated.
+ *
+ * `variant="page"` is a shell's whole-view refusal; `variant="inline"` is a
+ * panel's refusal card. Both carry the danger token AND an always-readable text
+ * label, so colour is never the only signal.
+ *
+ * `title` is OPTIONAL for the page variant on purpose: the shell that owns the
+ * view already renders the page `<h1>` naming the refusal, and repeating it as a
+ * second heading produced two headings with the same accessible name (which is
+ * both a duplicate announcement and an ambiguous landmark for a browser spec).
+ * Omitted, the page variant renders the description and the action only.
+ */
+export function NoPermissionState({
+  title,
+  description,
+  action,
+  variant = 'inline',
+  className,
+  icon,
+}: {
+  /** Defaults to the canonical refusal label for the inline variant only. */
+  title?: string;
+  description: string;
+  action?: ReactNode;
+  variant?: 'inline' | 'page';
+  className?: string;
+  icon?: ReactNode;
+}) {
+  const heading = title ?? (variant === 'page' ? null : 'Super Admin access required');
+  const glyph = icon ?? <ShieldCheck className={variant === 'page' ? 'h-6 w-6' : 'h-5 w-5'} />;
+  if (variant === 'page') {
+    return (
+      <div
+        role="status"
+        data-testid="no-permission-state"
+        className={cn(
+          'mx-auto max-w-md rounded-ds-lg border border-state-danger/20 bg-ink-850 p-8 text-center',
+          className
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-state-danger/15 text-state-danger"
+        >
+          {glyph}
+        </span>
+        {heading && (
+          <h2 className="mb-2 text-ds-title font-semibold tracking-tight text-white">{heading}</h2>
+        )}
+        <p className="mb-6 text-ds-body leading-relaxed text-zinc-400">{description}</p>
+        {action && <span className="inline-flex items-center gap-2">{action}</span>}
+      </div>
+    );
+  }
+  return (
+    <div
+      role="status"
+      data-testid="no-permission-state"
+      className={cn('ds-card rounded-ds-lg border bg-ink-850 p-6', className)}
+    >
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-ds-md bg-state-danger/15 text-state-danger"
+        >
+          {glyph}
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-ds-body font-semibold text-white">{heading}</h3>
+          <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{description}</p>
+        </div>
+      </div>
+      {action && <div className="mt-4 flex items-center gap-2">{action}</div>}
     </div>
   );
 }
