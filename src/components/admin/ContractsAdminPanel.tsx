@@ -100,6 +100,7 @@ export function ContractsAdminPanel() {
         description="Full CRM — generate from template, send for e-signature, track renewals."
         actions={
           <Button
+            variant="accent"
             onClick={() => setGenerateFor(brands[0] ?? null)}
             className="text-xs"
             disabled={brands.length === 0}

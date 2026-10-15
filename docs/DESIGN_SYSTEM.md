@@ -7,10 +7,13 @@
 ## Principles
 
 - Premium wholesale-operations platform, NOT a generic dark SaaS template.
-- Surfaces built on OpenShip's design language (one light design for the three light slots,
-  its dark design for `serious`) with a PER-THEME accent — violet · blue · lime · orange;
+- Surfaces built on OpenShip's design language — **§OPENSHIP MAPPING (2026-10-15):**
+  `minimal-light` and `serious` implement its **LIGHT** design, `professional` its **DIM**
+  design and `fun` its **DARK** design — with a PER-DESIGN accent, violet · lime · orange.
   `bold` keeps its own violet-black identity and is deliberately unchanged.
-  Serious B2B tone; Plus Jakarta Sans + Fraunces.
+  Serious B2B tone; ONE interface family, **Plus Jakarta Sans** (OFL 1.1).
+  The display **serif was REMOVED** by §OPENSHIP MAPPING BATCH 2 (2026-10-15), because the
+  reference declares one family and no serif.
 - Meaningful hierarchy, whitespace, purposeful density, operational clarity.
 - Semantic states are machine + human readable — never colour-only.
 - Restrained motion: motion communicates state/transition/feedback, not decoration.
@@ -28,13 +31,23 @@ class renders differently in each of the five themes, and no page may hardcode a
 | `ink-850` / `ink-800` | `var(--mr-surface-raised)` / `var(--mr-surface-overlay)` | raised surface · overlays and dropdowns |
 | `ink-700` / `ink-600` / `ink-500` | `var(--mr-surface-hover)` | hover fills |
 | `surface.raised` / `surface.overlay` | `var(--mr-surface-raised)` / `var(--mr-surface-overlay)` | elevated surfaces |
-| `brass-500` (`brass.DEFAULT`) | `var(--mr-accent)` | **the per-theme accent** — the primary CTA |
+| `brass-500` (`brass.DEFAULT`) | `var(--mr-accent)` | **the per-theme accent** — the CREATE-style CTA (`accent` Button variant; see the button note below) |
 | `brass-300` / `400` / `600` / `700` | `var(--mr-accent-300…700)` | accent tints (300/400) and shades (600/700) |
 | `zinc-100…600` | `var(--mr-text-200…faint)` | the text hierarchy |
 | `state.success` … `state.muted` | `var(--mr-state-*)` | semantics |
 
 Legacy tokens retained for backward compatibility (`amber.accent`, `crimson.accent`, etc.).
 The canonical kit SHOULD use `state.*` for semantics.
+
+> **§REPOINTED 2026-10-15 (§OPENSHIP MAPPING BATCHES 1–2) — SUPERSEDED, kept as history.**
+> The hues below were BATCH 3's assignment for its three-light-plus-one-dark mapping. The Owner's
+> 2026-10-15 instruction REPLACED that assignment: each slot now implements the design it was
+> assigned — `minimal-light` and `serious` take LIGHT (violet `#7C3AED`), `professional` takes
+> DIM (lime `#B7ED5A`), `fun` takes DARK (orange `#F97316`) — so `blue #2563EB` and
+> `#A9F04D`'s slot are no longer live values. `bold` keeps `#7C3AED` exactly.
+> **A live claim must not outlive the thing it describes** (rule 10), so the current assignment
+> is stated above and pinned by `scripts/validate-theme-distinctness.mjs` and
+> `e2e/theme-visual.spec.ts`, which both read/write the REAL values.
 
 > **§OPENSHIP BATCH 3 (2026-10-14) — THE ACCENT IS PER THEME, NOT ONE GOLD.**
 > The four non-Bold themes now carry OpenShip's own accent hues
@@ -47,7 +60,10 @@ The canonical kit SHOULD use `state.*` for semantics.
 > only where it is brand rather than theme: the logo marks in `src/assets/`.
 
 ### Typography
-- `font-display` (Fraunces) — display / entity titles.
+- `font-display` — display / entity titles. **§OPENSHIP MAPPING BATCH 2 (2026-10-15):** the role
+  now resolves to the ONE interface family (Plus Jakarta Sans); Fraunces was removed from the
+  project entirely, because the reference declares no serif (§8.1 of the spec). The class name is
+  retained, so no call site changed its markup.
 - `font-sans` (Plus Jakarta Sans, OFL 1.1) — body, subtitle. §OPENSHIP BATCH 3 (2026-10-14):
   the reference's Gellix is "Personal Use Only" and is not shipped.
 - `font-mono` (IBM Plex Mono) — numeric / KPI / ids.
@@ -198,7 +214,7 @@ invents their own version of.
 ## Canonical components (`src/components/ui.tsx`)
 | Component | Variants | Notes |
 |---|---|---|
-| `Button` | primary / secondary / tertiary / ghost / danger(legacy) / destructive / link; sizes sm/md/lg; `loading` + `disabled` | min touch height 36px; `data-state`; `aria-busy` |
+| `Button` | **primary (the SOLID theme button)** / **accent (the gradient CTA — create-style actions only)** / secondary / tertiary / ghost / danger(legacy) / destructive / link; sizes sm/md/lg; `loading` + `disabled` | min touch height 36px; `data-state`; `aria-busy`. **§OPENSHIP MAPPING BATCH 3 (2026-10-15): see the two button treatments below** |
 | `Input` / `Select` / `Textarea` | label, helper, error, required, id | `aria-invalid`, `aria-describedby` |
 | `Checkbox` | label, checked | custom svg check |
 | `StatusBadge` | success / warning / danger / info / neutral / brass | dot + text; `role="status"`, `data-status` |
@@ -214,6 +230,24 @@ invents their own version of.
 | `Skeleton` | className | §BATCH 8 — the fill is the THEME's tint (`bg-tint` → `--mr-hover-tint`); the legacy `bg-white/[0.06]` resolved to `#FAFAFA` on a `#FFFFFF` card on the light designs, i.e. an invisible loading state |
 | `PageHeader` / `EntityHeader` | title, description, actions, status | |
 | `DataTable` | columns / rows / loading / empty / error | semantic `<table>`, sr-only caption, loading skeleton, empty & error states |
+
+### The two button treatments (BATCH 3, 2026-10-15)
+
+The reference keeps two buttons apart, and Mercenta now matches it:
+
+| Treatment | Class | Where it belongs | Per design |
+|---|---|---|---|
+| **Solid** — the page primary action | `.ds-btn` (on `variant="primary"`) | the ordinary primary action of a page, panel or form | near-black `rgba(0,0,0,.92)` with white text on the two LIGHT designs; WHITE with black text on DIM and DARK (spec §2.5 · §2.4 · §2.3) |
+| **Accent** — the gradient CTA | `.ds-btn-accent` (on `variant="accent"`) | **create-style actions only** — the button that brings a NEW record into existence ("Create …", "New …", "Add …", "Invite …", "Import …") | the per-theme gradient (violet→blue · lime · orange); `bold` paints no image and keeps its flat accent |
+
+**Why the split exists:** before this batch EVERY primary action (274 call sites) carried the
+accent gradient, which is the one thing the reference does not do — an accent on every button is
+no accent at all (spec §2.6/§2.7). The reservation is not a convention here: it is GATED by
+`scripts/validate-theme-distinctness.mjs` §8, which DISCOVERS every button whose own label begins
+with a creation verb and fails if one of them is the plain solid primary action, and by
+`e2e/theme-visual.spec.ts`, which MEASURES the computed colour per theme in a real browser.
+`bold` is preserved BY VALUE: its three tokens reproduce exactly what its button computed before
+the swap, and the browser spec pins those numbers.
 
 ## Semantics / AX
 - `data-status` on statuses/buttons where meaningful.

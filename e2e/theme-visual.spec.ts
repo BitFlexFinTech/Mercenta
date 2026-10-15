@@ -93,6 +93,14 @@ const norm = (hex: string) => hex.trim().toLowerCase();
 
 /** Select a theme the way the app persists it, then reload so it is applied. */
 async function selectTheme(page: import('@playwright/test').Page, id: string) {
+  /* §OPENSHIP MAPPING BATCH 3 — REPRODUCIBILITY. Two identical runs of this spec
+     were MEASURED to differ by up to 2.921% of their pixels on 6 of the 30 screens,
+     because the app scrolls a target into view (the onboarding tour) and smooth
+     scrolling lands at a different offset depending on elapsed time — so the
+     comparison could not tell a real change from run-to-run noise. Under
+     `prefers-reduced-motion: reduce` the browser scrolls instantly, so the captured
+     frame no longer depends on how long the page has been settling. */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await page.evaluate((themeId) => {
     window.localStorage.setItem('mercenta.theme', themeId);
@@ -213,6 +221,76 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
         );
       }
     }
+  });
+
+  /**
+   * §OPENSHIP MAPPING BATCH 3 (2026-10-15) — THE SOLID PRIMARY ACTION, MEASURED IN THE DOM.
+   *
+   * `scripts/validate-theme-distinctness.mjs` proves the tokens are declared, wired and
+   * design-matched in the SOURCE. This proves what the BROWSER computes: the page primary
+   * action (the `primary` variant's `.ds-btn`) takes the design's own button fill — near-black
+   * with white text on the two LIGHT designs, WHITE with black text on dim and dark (spec
+   * §2.3–§2.5, §2.7) — while `bold`, which is preserved by contract, computes exactly the flat
+   * accent its button painted before this batch (rgb(124,58,237) = its #7C3AED accent, with its
+   * own surface token as the label colour).
+   */
+  test('the solid primary action computes the design\'s own button colour', async ({ page }) => {
+    const EXPECTED: Record<string, { bg: string; color: string }> = {
+      'minimal-light': { bg: 'rgba(0, 0, 0, 0.92)', color: 'rgb(255, 255, 255)' },
+      serious: { bg: 'rgba(0, 0, 0, 0.92)', color: 'rgb(255, 255, 255)' },
+      professional: { bg: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' },
+      fun: { bg: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' },
+      bold: { bg: 'rgb(124, 58, 237)', color: 'rgb(18, 19, 24)' },
+    };
+    for (const theme of THEMES) {
+      await selectTheme(page, theme.id);
+      const computed = await page.evaluate(() => {
+        const el = document.createElement('button');
+        el.className = 'ds-btn';
+        el.textContent = 'probe';
+        document.body.appendChild(el);
+        const cs = getComputedStyle(el);
+        const out = { bg: cs.backgroundColor, color: cs.color };
+        el.remove();
+        return out;
+      });
+      expect(computed, `${theme.id}: the solid primary action's computed colour`).toEqual(
+        EXPECTED[theme.id]
+      );
+    }
+  });
+
+  /**
+   * §OPENSHIP MAPPING BATCH 3 (2026-10-15) — A CALL SITE'S OWN COLOUR STILL WINS.
+   *
+   * The `.ds-btn` default is a DEFAULT, not an override: it is declared inside the
+   * `components` layer so a caller's own utility beats it, exactly as `.ds-card`
+   * states for the card border. A real call site depends on this —
+   * `src/components/shared/TourEngine.tsx:372` gives the "Skip Tour" confirm button
+   * its own neutral `bg-zinc-700` / `hover:bg-zinc-600` / `text-white`, because a
+   * full-strength primary action is wrong inside that modal.
+   *
+   * This probe is the discriminator: the theme's own fill on `minimal-light` is
+   * `rgba(0, 0, 0, 0.92)`, so if the default were UNLAYERED the computed background
+   * would be that — not the caller's opaque black. It therefore fails if the rule
+   * ever moves out of the layer.
+   */
+  test("a call site's own colour utility still wins over the `.ds-btn` default", async ({ page }) => {
+    await selectTheme(page, 'minimal-light');
+    const computed = await page.evaluate(() => {
+      const el = document.createElement('button');
+      el.className = 'ds-btn bg-black text-white';
+      document.body.appendChild(el);
+      const cs = getComputedStyle(el);
+      const out = { bg: cs.backgroundColor, color: cs.color };
+      el.remove();
+      return out;
+    });
+    expect(
+      computed.bg,
+      'a call-site utility must beat the component default (the components-layer contract)'
+    ).toBe('rgb(0, 0, 0)');
+    expect(computed.color, 'the same holds for the label colour').toBe('rgb(255, 255, 255)');
   });
 
   test('the five themes render five DIFFERENT accents (a switch that changes nothing is not a theme)', async ({

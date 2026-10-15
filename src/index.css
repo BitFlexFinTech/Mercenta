@@ -39,6 +39,36 @@ body {
   background-image: var(--mr-accent-image-hover, var(--mr-accent-image, none));
 }
 
+/* ── §OPENSHIP MAPPING BATCH 3 — THE SOLID PRIMARY-ACTION TREATMENT ────────
+   The reference has TWO button treatments, and they are not the same thing:
+
+   · `.th-btn` — the SOLID fill (`--th-btn-bg` with `--th-btn-text` on it,
+     spec §2.7). This is the PAGE's primary action: near-black in the light
+     design (`rgba(0,0,0,.92)`), WHITE in the dim and dark designs.
+   · `.th-btn-accent` — the per-theme GRADIENT CTA above (`.ds-btn-accent`),
+     which the reference uses for create-style actions (its empty state's
+     "Create project" button, spec §5.4; its header CTA, §5.1).
+
+   Before this batch the `primary` Button variant carried ONLY the gradient, so
+   every primary action in the product — 274 call sites — was an accent CTA.
+   That is what the reference does not do: an accent everywhere is no accent at
+   all. The gradient therefore moves onto an `accent` variant reserved for
+   create-style actions, and the solid treatment takes these three tokens.
+
+   The values live in the theme (`--mr-btn-*`), so `bold` reproduces exactly
+   what its button computed before the swap (its own flat accent) and moves no
+   pixel — preserved BY VALUE, which the browser spec measures.
+
+   THE RULES THEMSELVES LIVE IN THE `components` LAYER (below), NOT here — this
+   project's own convention for a themed DEFAULT, exactly as `.ds-card` states it:
+   a caller that supplies its own colour still wins (26 call sites supply their own
+   border colour for that reason). One call site depends on it here —
+   `src/components/shared/TourEngine.tsx:372` gives the "Skip Tour" confirm button
+   `bg-zinc-700` / `hover:bg-zinc-600` / `text-white`, a deliberate NEUTRAL inside a
+   modal, beside a ghost "Continue Tour". An unlayered rule would silently beat those
+   utilities; the layer placement prevents it, and §6 of
+   `scripts/validate-theme-distinctness.mjs` asserts the placement so it cannot drift. */
+
 /* ── §OPENSHIP BATCH 4 — THE CARD / CONTAINER SURFACE TREATMENT ────────────
    The reference makes a card BORDERLESS in all three of its designs
    (`--th-card-bd: transparent`, spec §2.3–§2.5, and §2.7: "the borderless-card
@@ -114,6 +144,17 @@ body {
   .ds-card:has(a:hover),
   .ds-card-interactive:hover {
     border-color: var(--mr-card-border-hover);
+  }
+  /* ── §OPENSHIP MAPPING BATCH 3 — THE SOLID PRIMARY ACTION'S DEFAULT ────────
+     In the SAME layer as `.ds-card` and for the SAME reason (see the batch's
+     comment above): this is the theme's DEFAULT fill and label for the `primary`
+     Button variant, and a caller's own utility must still win over it. */
+  .ds-btn {
+    background-color: var(--mr-btn-bg);
+    color: var(--mr-btn-text);
+  }
+  .ds-btn:hover:not(:disabled) {
+    background-color: var(--mr-btn-bg-hover);
   }
 }
 .ds-card .ds-card {

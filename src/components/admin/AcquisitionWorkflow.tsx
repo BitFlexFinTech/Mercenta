@@ -518,7 +518,7 @@ export function AcquisitionWorkflow({
             </Button>
           )}
           {canCreateOpportunity && (
-            <Button className="text-xs" data-state="create-opportunity" onClick={handleCreateOpportunity} disabled={!canCurrentUserMutate}>
+            <Button variant="accent" className="text-xs" data-state="create-opportunity" onClick={handleCreateOpportunity} disabled={!canCurrentUserMutate}>
               <Trophy className="w-3.5 h-3.5 mr-1.5" />Create opportunity
             </Button>
           )}

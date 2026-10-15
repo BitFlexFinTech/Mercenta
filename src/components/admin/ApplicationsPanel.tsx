@@ -161,7 +161,7 @@ export function ApplicationsPanel() {
 return(<div className="space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-sm font-semibold text-white">Brand Applications ({demoApplications.length})</h2>
-      <Button onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
+      <Button variant="accent" onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
     </div>
     {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-ds-md p-3 text-sm text-emerald-400">{msg}</div>}
     {/* §Phase D — decision queue. Counts are DERIVED from the store (never

@@ -192,6 +192,77 @@ for (const p of backticked) {
   test(`the cited starting point exists on disk: ${p}`, exists(p));
 }
 
+/* ── 5b. The mirror agrees BY VALUE, not only by token (session 147) ─────── */
+/**
+ * WHY THIS EXISTS. On 2026-10-15 (session 146) commit `bb18c3c` rewrote
+ * `PROJECT_STATUS.md`'s resume block, touched NOTHING else, and claimed a
+ * "HANDOFF mirror" update in its own message. `HANDOFF.md` kept the PREVIOUS
+ * session's `LAST VERIFIED COMMIT` (`53cabaa`) and its last-completed task, and
+ * THIS gate printed PASS — because assertion 4 above compares only the NEXT-TASK
+ * token. A mirror a whole session behind on every other field is exactly what
+ * assertion 4 says it exists to catch, so the fix belongs HERE, not in a note
+ * (rule 10 §8: gate the whole class, not the instance).
+ *
+ * WHAT IT PROVES. The two files must name the SAME commit hash in
+ * `LAST VERIFIED COMMIT`, and the SAME batch/stage token in
+ * `LAST COMPLETED TASK`. A commit hash is the strongest available identity for
+ * "the state this record describes", so two files describing two different states
+ * can no longer claim to mirror each other.
+ *
+ * Proved able to fail (session 147): `HANDOFF.md`'s hash reverted to the stale
+ * `53cabaa` ⇒ FAIL (1 of 59) → restored byte-identical ⇒ PASS.
+ */
+console.log('\n§ 5b. HANDOFF mirrors PROJECT_STATUS BY VALUE (commit hash + task token)\n');
+const hashesOf = (text) =>
+  (fieldValue(text, 'LAST VERIFIED COMMIT').match(/\b[0-9a-f]{7,40}\b/gi) ?? []).map((h) =>
+    h.toLowerCase()
+  );
+const statusHashes = hashesOf(status);
+const handoffHashes = hashesOf(handoff);
+test(
+  'both resume blocks name a LAST VERIFIED COMMIT hash (a check that finds nothing is a FAILURE)',
+  statusHashes.length > 0 && handoffHashes.length > 0,
+  `PROJECT_STATUS: ${statusHashes.join(',') || 'none'} · HANDOFF: ${handoffHashes.join(',') || 'none'}`
+);
+test(
+  'HANDOFF names the SAME verified commit as PROJECT_STATUS (the mirror is not a session behind)',
+  /* The FIRST hash on the line is the headline commit — the checkpoint the record
+     describes. An "any shared hash" test was tried first and PROVED TOO WEAK by this
+     section's own mutation proof: the line also names the commits it sits over, so a
+     stale headline could hide behind a shared ancestor and the check still passed. */
+  statusHashes.length > 0 && handoffHashes.length > 0 && statusHashes[0] === handoffHashes[0],
+  `PROJECT_STATUS: ${statusHashes.join(',') || 'none'} · HANDOFF: ${handoffHashes.join(',') || 'none'}`
+);
+const taskTokenOf = (text) => {
+  const m = fieldValue(text, 'LAST COMPLETED TASK').match(
+    /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|PHASE)\s?-?(\d+[a-z]?)\b/i
+  );
+  return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
+};
+const statusTaskToken = taskTokenOf(status);
+const handoffTaskToken = taskTokenOf(handoff);
+test(
+  'both resume blocks name the SAME last-completed task token',
+  statusTaskToken.length > 0 && statusTaskToken === handoffTaskToken,
+  `PROJECT_STATUS="${statusTaskToken}" · HANDOFF="${handoffTaskToken}"`
+);
+test(
+  'the last-completed-task token parser is self-checked (a known-good label parses; prose yields nothing)',
+  (() => {
+    const probe = (v) => {
+      const m = v.match(
+        /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|PHASE)\s?-?(\d+[a-z]?)\b/i
+      );
+      return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
+    };
+    return (
+      probe('OPENSHIP MAPPING BATCH 3 (2026-10-15) — x') === 'OPENSHIP MAPPING BATCH 3' &&
+      probe('§OPENSHIP BATCH 8 — x') === 'OPENSHIP BATCH 8' &&
+      probe('nothing to see here') === ''
+    );
+  })()
+);
+
 /* ── Verdict ─────────────────────────────────────────────────────────────── */
 console.log('');
 if (failures > 0) {

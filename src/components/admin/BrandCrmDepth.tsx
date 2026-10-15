@@ -139,6 +139,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                 </select>
               </div>
               <Button
+                variant="accent"
                 className="text-xs"
                 disabled={!taskTitle.trim() || !taskDue}
                 onClick={() => {
@@ -218,6 +219,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
             />
             <Button
+              variant="accent"
               className="text-xs"
               disabled={!noteBody.trim()}
               onClick={() => {
@@ -288,6 +290,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                   <Input label="" value={tagDraft} onChange={(e) => setTagDraft(e.target.value)} placeholder="VIP, at-risk, new…" />
                 </div>
                 <Button
+                  variant="accent"
                   className="text-xs"
                   disabled={!tagDraft.trim()}
                   onClick={() => {

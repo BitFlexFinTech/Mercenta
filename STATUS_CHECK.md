@@ -4,8 +4,79 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §OPENSHIP MAPPING BATCH 3 — CURRENT STATUS (session 147, 2026-10-15) — THE SOLID PRIMARY ACTION: THE PAGE PRIMARY ACTION IS NOW THE THEME'S OWN BUTTON, THE ACCENT GRADIENT IS RESERVED FOR THE 18 CREATE-STYLE ACTIONS, `bold` IS PRESERVED BY MEASURED VALUE — AND THE PREVIOUS SESSION'S INCOMPLETE CLOSE-OUT WAS REPAIRED AT SOURCE
 
-## §OPENSHIP BATCH 8 — CURRENT STATUS (session 146, 2026-10-15) — COMPONENT STATES: ONE OWNER PER STATE, THE CARD'S HOVER EDGE, AND THE TWO FLOATING PANELS BATCH 4/6 LEFT
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `typecheck` **0** (four tsconfig
+projects) · `lint` **0** · `build` ok · `validate:all` **196 PASS / 0 FAIL** (exit 0 — and **195
+PASS / 1 FAIL before this session's record repair**, which is how the previous close-out was
+caught) · `e2e/theme-visual` **15 passed** (was 13) · `design-system + app-shell + accessibility +
+state-coverage` **59 passed**. **NOT deployed and NOT live-verified** — this
+batch changes the primary button on every screen that has one, so the three-way gate APPLIES and is
+UNSATISFIED; publishing needs the Owner's approval and none has been given. No credential was needed
+or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue where you left off." The recorded `NEXT TASK` was BATCH 10
+   (the legacy-styling migration), **preceded by the small remainder of the design-foundations
+   batch: the primary-action (button) treatment**.
+2. **WHAT WAS BUILT.** The reference keeps TWO buttons apart; the product had one. `.th-btn` is a
+   SOLID fill from `--th-btn-bg` with `--th-btn-text` on it (spec §2.7), and `.th-btn-accent` is the
+   per-theme GRADIENT (§2.6) the reference reserves for CREATE-style actions. Mercenta had wired the
+   gradient to `primary`, so **every** primary action — 274 call sites — was an accent CTA. Now
+   `primary` carries the SOLID theme button through a new `.ds-btn` utility plus three tokens in each
+   of the five themes, and the gradient moved onto a new `accent` variant carried by the **18**
+   buttons whose own label begins with a creation verb (create · new · add · invite · import).
+   Measured values from the reference's own designs: LIGHT = near-black `rgba(0,0,0,.92)` + white
+   text (hover `.80`); DIM and DARK = the INVERSE, white + black text. **NO page, route, workflow,
+   data contract, permission, integration or business rule changed.**
+3. **THE PREVIOUS SESSION'S CLOSE-OUT WAS INCOMPLETE — REPAIRED AT SOURCE (rules 07 + 10).**
+   `bb18c3c` claimed a HANDOFF mirror in its message but touched ONLY `PROJECT_STATUS.md`, and the
+   rewrite dropped two true statements the project's own gates require. Consequences, all
+   machine-checkable: `validate:all` printed **195/1**; `HANDOFF.md` still carried the BATCH 8 values
+   (`53cabaa`) against `PROJECT_STATUS.md`'s mapping values (`d07a5cd`) while the resume-state gate
+   still passed; the mapping batches had no platform-position section, STATUS_CHECK section, registry
+   row or spec record. All are written or corrected now.
+4. **THREE LIVE DESCRIBERS WERE FALSE — repointed with the change, not parked.** `docs/DESIGN_SYSTEM.md`
+   said "one light design for the three light slots, its dark design for `serious`" and listed the
+   retired accent hues, and carried a `font-display (Fraunces)` bullet for a face removed by MAPPING
+   BATCH 2; spec §13 still tabled `professional`/`fun` as light and `serious` as dark. Each is now
+   corrected at source, with the superseded text kept as dated `§REPOINTED` history.
+5. **GATES EXTENDED, EACH PROVED ABLE TO FAIL.** `validate-theme-distinctness` **73 → 113**: §6
+   repointed to the split (with an ABSENCE GUARD against the retired gradient wiring), §6b MEASURES
+   every button pair's contrast, and §8 is NEW and DISCOVERS its subject — it walks `src/**/*.tsx`,
+   extracts each `<Button>`'s own label, and fails if a create-labelled button sits on the plain SOLID
+   variant, with a non-vacuity floor. It found a REAL instance on its first run
+   (`ApplicationsPanel.tsx:164` "+ Add Brand Manually") which was FIXED. `validate-resume-state` now
+   compares the mirror **by VALUE** (commit hash + task token). **MUTATIONS, each restored
+   BYTE-IDENTICAL:** the gradient back on `primary` ⇒ FAIL 1 of 103 (sha256 `b2845282…` unchanged);
+   one create-style button back on solid ⇒ FAIL 1 of 103 naming `BrandInventory.tsx:484`
+   (sha256 `849f561f…` unchanged); `HANDOFF`'s hash reverted to the stale `53cabaa` ⇒ resume-state
+   FAIL → restored byte-identical → PASS.
+6. **MEASURED, AND `bold` PRESERVED AS A MEASUREMENT RATHER THAN A CLAIM.** The browser spec reads the
+   COMPUTED colour of a `.ds-btn` probe per theme (18.36:1 / 12.63:1 on the two light designs, 21:1 /
+   17.17:1 and 21:1 / 16.95:1 on dim and dark, floor 4.5:1) and pins `bold`'s pair at
+   `rgb(124,58,237)` + `rgb(18,19,24)`. Across the 30 rendered baselines, `bold` moved **0.000% of
+   its pixels on 5 of 6 screens**; the sixth's 0.0044% is a **live countdown ticking "20d 3h" →
+   "20d 2h"** (the 6×10px region cropped and inspected). The four mapped designs moved
+   0.303%–1.850%.
+7. **HELD FOR THE OWNER, MEASURED AND REPORTED, NOT REPAINTED.** `bold`'s preserved button pair
+   measures **3.26:1 on its fill and 2.59:1 on hover — below the 4.5:1 AA floor**. It is pre-existing
+   (that button was already `bg-brass-500` + `text-ink`) and the Owner's instruction is that `bold` is
+   preserved EXACTLY, so changing it would be a design decision, not a fix; the gate now PRINTS the
+   measurement so it cannot be lost. Recorded as an OWNER DECISION, never as a blocker.
+7b. **THE EVIDENCE INSTRUMENT WAS BROKEN AND IS NOW FIXED (measured, not suspected).** Two identical
+   runs of `e2e/theme-visual.spec.ts` on identical code differed by up to **2.396% of their pixels on
+   6 of the 30 screens** — larger than several deltas earlier batches reported as their effect — so
+   the before/after comparison could not tell a change from noise. Cause, found by cropping the frames
+   and looking: the app smoothly scrolls a tour target into view, so the captured scroll offset depends
+   on elapsed time. `selectTheme()` now sets `prefers-reduced-motion: reduce`; the re-measured noise
+   floor is **min 0.000% · median 0.000% · max 0.002%**, with **26 of 30 screens byte-identical**.
+   Every figure above is read with that floor stated.
+8. **NEXT.** BATCH 10, the legacy-styling migration — **step 1 is a RE-MEASUREMENT of both class
+   families** (the spec §12 figures predate batches 3–8), after which the `src/index.css` light-shell
+   force-patch block is deleted with an absence guard proved able to fail — then the full acceptance
+   testing.
+
+## §OPENSHIP BATCH 8 — PREVIOUS STATUS (session 146, 2026-10-15) — COMPONENT STATES: ONE OWNER PER STATE, THE CARD'S HOVER EDGE, AND THE TWO FLOATING PANELS BATCH 4/6 LEFT
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `53cabaa` (20 files,
 +730/−161). The five states of spec §9 each have ONE owner in `src/components/ui.tsx` now:

@@ -35,7 +35,7 @@ import { createServer } from 'vite';
 import { fileURLToPath } from 'node:url';
 /* §OPENSHIP BATCH 3 — §6 reads two source files directly (the stylesheet that
    defines the CTA utility and the component that applies it). */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 
 let failures = 0;
 let checks = 0;
@@ -395,13 +395,23 @@ try {
     }
   }
 
-  /* ── 6. THE CTA TREATMENT IS WIRED, not merely declared. ──────────────────
+  /* ── 6. BOTH BUTTON TREATMENTS ARE WIRED, not merely declared. ────────────
      A token nothing consumes is the defect pattern this project has already been
      bitten by (the two declared-but-never-consumed focus-shadow tokens removed in
-     §PHASE C4). So the utility must exist in the stylesheet AND the `primary`
-     variant must actually apply it. Rendering is proven separately, in
-     e2e/theme-visual.spec.ts (computed background-image per theme). */
-  console.log('\n§ 6. The primary-action treatment is wired to the primary Button\n');
+     §PHASE C4). So the utilities must exist in the stylesheet AND the variants must
+     actually apply them. Rendering is proven separately, in e2e/theme-visual.spec.ts
+     (the COMPUTED background colour per theme, and the gradient per theme).
+
+     §REPOINTED (2026-10-15, OPENSHIP MAPPING BATCH 3) — NOT weakened, and the old
+     contract is kept as an ABSENCE GUARD. This section used to require the `primary`
+     variant to carry `.ds-btn-accent`, because the gradient WAS the primary
+     treatment. The reference keeps TWO buttons apart (spec §2.7 `.th-btn`, a solid
+     fill from `--th-btn-bg`; §2.6 `.th-btn-accent`, the gradient) and reserves the
+     gradient for create-style actions, so the assertions now pin the SPLIT: the page
+     primary action carries the SOLID theme button, the `accent` variant carries the
+     gradient. An accent applied to every primary action therefore FAILS here — it
+     cannot quietly come back. */
+  console.log('\n§ 6. Both button treatments are wired to their Button variants\n');
   const readSrc = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
   const CSS = readSrc('src/index.css');
   const UI = readSrc('src/components/ui.tsx');
@@ -413,19 +423,205 @@ try {
     'src/index.css consumes both tokens (rest uses --mr-accent-image, hover uses --mr-accent-image-hover)',
     CSS.includes('var(--mr-accent-image') && CSS.includes('var(--mr-accent-image-hover')
   );
-  const primaryVariant = (UI.match(/primary:\s*\n?\s*'([^']+)'/) ?? [])[1] ?? '';
   test(
-    'the `primary` Button variant applies `.ds-btn-accent` (the wiring, not just the tokens)',
-    primaryVariant.includes('ds-btn-accent'),
+    'src/index.css defines the SOLID `.ds-btn` utility (rest and hover)',
+    /\.ds-btn\s*\{/.test(CSS) && /\.ds-btn:hover/.test(CSS)
+  );
+  /* The DEFAULT must sit in the `components` layer, so a call site's own utility
+     still wins — the project's own convention, stated by `.ds-card`, and relied on
+     by a real call site (`TourEngine.tsx:372` gives the "Skip Tour" button its own
+     neutral greys inside a modal). An unlayered rule would beat those silently. */
+  const componentsLayer = (CSS.match(/@layer components\s*\{([\s\S]*?)\n\}/) ?? [])[1] ?? '';
+  test(
+    'the `.ds-btn` default lives INSIDE the `components` layer (a caller utility still wins)',
+    componentsLayer.includes('.ds-btn') && componentsLayer.includes('--mr-btn-bg'),
+    componentsLayer ? `components layer is ${componentsLayer.length} chars and ${componentsLayer.includes('.ds-btn') ? 'contains' : 'does NOT contain'} .ds-btn` : 'no @layer components block found'
+  );
+  test(
+    'the `.ds-btn` utility consumes all three theme tokens (--mr-btn-bg, -hover, -text)',
+    CSS.includes('var(--mr-btn-bg') &&
+      CSS.includes('var(--mr-btn-bg-hover') &&
+      CSS.includes('var(--mr-btn-text')
+  );
+  const variantOf = (name) =>
+    (UI.match(new RegExp('\\b' + name + ":\\s*\\n?\\s*'([^']+)'")) ?? [])[1] ?? '';
+  const primaryVariant = variantOf('primary');
+  const accentVariant = variantOf('accent');
+  test(
+    'the `primary` Button variant applies `.ds-btn` (the page primary action is the SOLID theme button)',
+    primaryVariant.includes('ds-btn'),
     primaryVariant || 'primary variant not found'
   );
   test(
-    'the `primary` variant KEEPS its flat background class as the fallback (a browser without `in oklab`)',
-    primaryVariant.includes('bg-brass-500'),
+    'the `primary` variant does NOT apply the accent gradient (ABSENCE GUARD for the retired contract)',
+    !primaryVariant.includes('ds-btn-accent'),
     primaryVariant || 'primary variant not found'
+  );
+  test(
+    'the `accent` Button variant applies `.ds-btn-accent` (the gradient is RESERVED for create-style actions)',
+    accentVariant.includes('ds-btn-accent'),
+    accentVariant || 'accent variant not found'
+  );
+  test(
+    'the `accent` variant KEEPS its flat background class as the fallback (a browser without `in oklab`)',
+    accentVariant.includes('bg-brass-500'),
+    accentVariant || 'accent variant not found'
+  );
+  test(
+    'the Button prop union offers the `accent` variant (the API, not only the class map)',
+    /variant\?:\s*'primary'\s*\|\s*'accent'/.test(UI)
   );
 
+  /* Every theme must declare the three solid-button tokens. Their VALUES are
+     design-driven, not literal: the reference's two LIGHT designs use a near-black
+     button and its dim/dark designs use a white one (spec §2.3–§2.5), so the
+     assertion follows the theme's own `design` field instead of a copied list. */
+  const DESIGN_BTN = { light: 'rgba(0,0,0,0.92)', dim: '#FFFFFF', dark: '#FFFFFF' };
+  for (const id of ids) {
+    const design = THEMES[id].design;
+    const bg = readVar(id, '--mr-btn-bg');
+    const hover = readVar(id, '--mr-btn-bg-hover');
+    const text = readVar(id, '--mr-btn-text');
+    test(
+      `${id}: declares --mr-btn-bg / -hover / -text (design '${design}')`,
+      typeof bg === 'string' && typeof hover === 'string' && typeof text === 'string',
+      `${bg} / ${hover} / ${text}`
+    );
+    test(
+      `${id}: its button fill is the design's own`,
+      design === 'preserved' ? bg === 'var(--mr-accent)' : bg === DESIGN_BTN[design],
+      `${bg} (design ${design}, expected ${design === 'preserved' ? 'var(--mr-accent)' : DESIGN_BTN[design]})`
+    );
+  }
+
+  /* ── 6b. THE NEW BUTTON PAIRS ARE MEASURED, NOT ESTIMATED. ────────────────
+     A fill and its label are a PAIR, and a pair has an exact contrast answer, so
+     this computes it from the DECLARED tokens — resolving one level of `var()` and
+     compositing any alpha over the card the button actually sits on — rather than
+     trusting the eye. Floor 4.5:1, the WCAG AA floor for the 14px text this
+     project's `ds-body` step renders at.
+     `bold` is EXEMPT FROM THE FLOOR AND NOT FROM MEASUREMENT: the Owner's
+     instruction is that its button is preserved EXACTLY, so the check pins the
+     pair and PRINTS the measured ratio. A shortfall in a value the Owner has
+     protected is reported and held for the Owner — never silently repainted
+     (rule 07: fix at source, or state the exact blocker). */
+  console.log('\n§ 6b. The solid button pair (fill · label) is measured per theme\n');
+  const resolveVar = (id, value) => {
+    const m = /^var\((--[\w-]+)\)$/.exec(String(value).trim());
+    return m ? readVar(id, m[1]) : value;
+  };
+  const parseColor = (value) => {
+    const v = String(value).trim();
+    const hex = parseHex(v);
+    if (hex) return { ...hex, a: 1 };
+    const m = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)$/.exec(v);
+    if (!m) return null;
+    return { r: +m[1], g: +m[2], b: +m[3], a: m[4] === undefined ? 1 : +m[4] };
+  };
+  const over = (fg, bg) => ({
+    r: fg.r * fg.a + bg.r * (1 - fg.a),
+    g: fg.g * fg.a + bg.g * (1 - fg.a),
+    b: fg.b * fg.a + bg.b * (1 - fg.a),
+  });
+  for (const id of ids) {
+    const design = THEMES[id].design;
+    const fillRaw = parseColor(resolveVar(id, readVar(id, '--mr-btn-bg')));
+    const text = parseColor(resolveVar(id, readVar(id, '--mr-btn-text')));
+    const card = parseColor(readVar(id, '--mr-surface-raised'));
+    const hoverRaw = parseColor(resolveVar(id, readVar(id, '--mr-btn-bg-hover')));
+    test(
+      `${id}: the button fill, label, card and hover were all parsed (a check that finds nothing is a FAILURE)`,
+      !!fillRaw && !!text && !!card && !!hoverRaw,
+      `${readVar(id, '--mr-btn-bg')} · ${readVar(id, '--mr-btn-text')} · ${readVar(id, '--mr-btn-bg-hover')}`
+    );
+    if (!fillRaw || !text || !card || !hoverRaw) continue;
+    const fill = fillRaw.a < 1 ? over(fillRaw, card) : fillRaw;
+    const hover = hoverRaw.a < 1 ? over(hoverRaw, card) : hoverRaw;
+    const ratio = contrast(text, fill);
+    const hoverRatio = contrast(text, hover);
+    test(
+      design === 'preserved'
+        ? `${id}: PRESERVED pair measured — label on fill ${round(ratio)}:1, on hover ${round(hoverRatio)}:1 (held for the Owner, never repainted here)`
+        : `${id}: label on fill ${round(ratio)}:1 and on hover ${round(hoverRatio)}:1 (floor 4.5:1)`,
+      design === 'preserved' ? ratio > 1 && hoverRatio > 1 : ratio >= 4.5 && hoverRatio >= 4.5,
+      `${readVar(id, '--mr-btn-text')} on ${readVar(id, '--mr-btn-bg')} (design ${design})`
+    );
+  }
+
+  /* ── 8. THE ACCENT IS RESERVED FOR CREATE-STYLE ACTIONS (DISCOVERED). ─────
+     The reservation is the point of this batch, so it is checked against the
+     SOURCE rather than against a copied list: every `<Button>` whose OWN LABEL
+     begins with a creation verb must not be sitting on the plain SOLID primary
+     variant. It may carry the accent, or any explicitly non-primary variant (a
+     ghost link that adds something is fine); what it may not be is the page's
+     ordinary primary action. A check that finds nothing is a FAILURE (rule 10 §5),
+     so the discovery carries a floor. */
+  console.log('\n§ 8. The accent gradient is reserved for create-style actions\n');
+  const CREATE_VERBS = ['create', 'new', 'add', 'invite', 'import'];
+  const tsxFiles = [];
+  (function walk(dir) {
+    for (const entry of readdirSync(dir)) {
+      const full = dir + '/' + entry;
+      if (statSync(full).isDirectory()) walk(full);
+      else if (full.endsWith('.tsx')) tsxFiles.push(full);
+    }
+  })('src');
+  const createStyle = [];
+  for (const file of tsxFiles) {
+    const src = readFileSync(new URL('../' + file, import.meta.url), 'utf8');
+    const re = /<Button\b/g;
+    let m;
+    while ((m = re.exec(src))) {
+      const i = m.index;
+      let depth = 0;
+      let j = i;
+      while (j < src.length) {
+        const c = src[j];
+        if (c === '{') depth++;
+        else if (c === '}') depth--;
+        else if (c === '>' && depth === 0) break;
+        j++;
+      }
+      const opening = src.slice(i, j + 1);
+      const close = src.indexOf('</Button>', j);
+      const body = close > 0 ? src.slice(j + 1, close) : '';
+      const label = body
+        .replace(/<[^>]+>/g, '')
+        .replace(/\{[^{}]*\}/g, '')
+        .trim()
+        .toLowerCase();
+      const first = (label.match(/[a-z]+/) ?? [''])[0];
+      if (!CREATE_VERBS.includes(first)) continue;
+      const vm = /variant="([a-z]+)"/.exec(opening);
+      createStyle.push({
+        file,
+        line: src.slice(0, i).split('\n').length,
+        label: label.slice(0, 40),
+        variant: vm ? vm[1] : 'primary (SOLID)',
+      });
+    }
+  }
+  test(
+    'create-style buttons were DISCOVERED from the source (a check that finds nothing is a FAILURE)',
+    createStyle.length >= 10,
+    `found ${createStyle.length}`
+  );
+  const onSolid = createStyle.filter((b) => b.variant.startsWith('primary'));
+  test(
+    `every create-style button is off the plain SOLID variant (${createStyle.length} checked, ${onSolid.length} on solid)`,
+    onSolid.length === 0,
+    onSolid.map((b) => `${b.file}:${b.line} "${b.label}"`).join(' · ')
+  );
+  const onAccent = createStyle.filter((b) => b.variant === 'accent');
+  test(
+    'real call sites carry the accent (the variant is not declared-only / vacuous)',
+    onAccent.length >= 10,
+    `${onAccent.length} accent site(s) of ${createStyle.length} create-style`
+  );
+
+
   /* §OPENSHIP MAPPING (2026-10-15) — the surface hierarchy is MEASURED, not assumed.
+
      The Owner reported two regressions this pins out: the inner fill collapsing to
      invisibility on the light themes, and a dark theme whose tint RECESSED below its own
      card. Reference values: OpenShip spec 2.7 (a nested card takes the sf-03 step). */

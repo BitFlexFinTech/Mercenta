@@ -1111,7 +1111,7 @@ export function NewTaskPanel({
           </select>
         </div>
         <Button
-          variant="primary"
+          variant="accent"
           className="w-full text-ds-label"
           data-testid="work-new-submit"
           onClick={() => {

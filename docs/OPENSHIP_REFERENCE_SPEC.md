@@ -890,6 +890,18 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
+> **§METHOD NOT RECORDED (added 2026-10-15, §OPENSHIP MAPPING BATCH 3) — the last row cannot be
+> re-measured as it stands.** The `2,812` / `857` class counts name no METHOD anywhere in the
+> repository: no script, no regex, no definition of "grey family" or of which files were walked. So
+> the next session's **STEP 1 — a re-measurement — cannot reproduce these numbers**, and two counts
+> produced by two different methods sitting side by side would be exactly the drift rule 10 §2
+> forbids (a written fact must be reproducible, not merely written). **The fix, in the migration's
+> own first step:** either recover the original method, or choose one, REPLACE this row with a count
+> that states its method AND its date, and let the migration's gate read the same method. The shorter
+> class gates already in the repository (`scripts/validate-typography-scale.mjs`,
+> `scripts/validate-radius-elevation-scale.mjs`) are the pattern to follow: they DISCOVER their
+> subject rather than trusting a figure typed into a document.
+
 | Element | Mercenta today | OpenShip | Delta |
 |---|---|---|---|
 | **Sidebar container** | `border-r border-white/[0.06] bg-ink-900 shadow-ds-raised`, full height | floating card `my-3 ms-3 rounded-2xl border-border/50 bg-card`, no border | **the biggest single visual change** — **CLOSED by BATCH 5 (2026-10-15)**: the rail is now that floating card (`.ds-rail`), and the wrapper paints nothing |
@@ -919,6 +931,16 @@ Every row below was measured in this repository this session.
 
 **Mercenta's five theme options are preserved. Their four non-Bold designs are REPLACED with
 OpenShip's designs. `bold` is untouched. `minimal-light` remains the default.**
+
+> **§REPOINTED 2026-10-15 (§OPENSHIP MAPPING BATCHES 1–2) — THE TABLE BELOW IS SUPERSEDED HISTORY.**
+> It records BATCH 3's assignment (three light slots + one dark slot). **The Owner's 2026-10-15
+> instruction replaced the assignment:** `minimal-light` and `serious` implement the reference's
+> **LIGHT** design, `professional` its **DIM** design and `fun` its **DARK** design — so
+> `professional` and `fun` are now `mode: 'dark'` and `serious` is `mode: 'light'`, and the accents
+> are violet `#7C3AED` (light), lime `#B7ED5A` (dim) and orange `#F97316` (dark). `bold` stays
+> unchanged. The current assignment is stated in §EXECUTED below and PINNED by
+> `scripts/validate-theme-distinctness.mjs` and `e2e/theme-visual.spec.ts`, which read the real
+> values rather than a list typed into a document (rule 10 §2).
 
 | Mercenta option | Mode (measured) | OpenShip design applied | Accent |
 |---|---|---|---|
@@ -1326,6 +1348,55 @@ panel would be invention rather than replication — the same reasoning BATCH 4 
    `ManufacturerSourcingSection`, `ProductResearchSection`) are NOT migrated to `LoadingState`: they are
    in-flight PROGRESS MESSAGES for a long AI call, not a region's loading state, and a skeleton bar
    cannot carry their sentence. Recorded so the omission is a decision rather than an oversight.
+
+**§EXECUTED 2026-10-15 (§OPENSHIP MAPPING BATCHES 1–2) — THE FOUR NON-BOLD THEMES IMPLEMENT THE
+DESIGN EACH WAS ASSIGNED.** Built in `src/config/themes.ts` (169 values), with `bold` left
+byte-identical: `minimal-light` and `serious` → the reference's **LIGHT** design (page `#F9F9F9` ·
+card `#FFFFFF` · tint `#F4F4F4` · hairline `#E8E8E8` · accent violet `#7C3AED`), `professional` →
+**DIM** (page `#141414` · card `#1B1B1B` · tint `#222222` · accent lime `#B7ED5A`), `fun` →
+**DARK** (page `#000000` · card `#0D0D0D` · tint `#141414` · accent orange `#F97316`). **The theme
+`mode` moved with the design** (`professional`/`fun` dark, `serious` light) because the design IS
+dark and §2's own mode/luminance agreement would otherwise fail. **Two real appearance faults were
+fixed at source:** the collapsed inner fill had become `#FAFAFA` on a `#FFFFFF` card (**1.02:1**,
+invisible across 289 class sites) and the dark design's tint **recessed below its own card**
+(`#080808` under a `#0D0D0D` card). **Typography:** the reference declares one family and no serif, so
+the display role now resolves to the interface face and Fraunces plus the unused Inter download were
+removed from `index.html`.
+
+**§EXECUTED 2026-10-15 (§OPENSHIP MAPPING BATCH 3) — THE SOLID PRIMARY ACTION, AND THE ACCENT
+RESERVED FOR CREATION.** §2.7's `.th-btn` (a SOLID fill from `--th-btn-bg` with `--th-btn-text`) and
+§2.6's `.th-btn-accent` (the per-theme GRADIENT) are two different buttons, and Mercenta had wired
+only the gradient — to `primary`, i.e. to **274 call sites**. Now the page primary action carries the
+design's own solid button through a new `.ds-btn` utility plus `--mr-btn-bg` / `--mr-btn-bg-hover` /
+`--mr-btn-text` in all five themes (near-black `rgba(0,0,0,.92)` + white on LIGHT, white + black on
+DIM and DARK — §2.5/§2.4/§2.3), and the gradient moved onto a new `accent` variant applied to the
+**18** buttons whose own label begins with a creation verb. `bold`'s three tokens reproduce exactly
+what its button computed before, so that theme is unchanged **by value**, and the browser spec
+measures it: `rgb(124,58,237)` fill with `rgb(18,19,24)` label, and 0.000% of its pixels moved on 5
+of its 6 rendered baselines. **Divergences and a held decision, stated rather than left silent:**
+(1) the Button's HEIGHT stays `min-h-[36px]` against the reference's 40px (§12's own row) — the
+recorded task was the treatment, and a height change moves 371 call sites' layout; (2) `bold`'s
+preserved button pair measures **3.26:1 on its fill and 2.59:1 on hover, below the 4.5:1 AA floor**;
+it is pre-existing and protected by the instruction that `bold` is preserved exactly, so it is
+MEASURED, REPORTED and HELD for the Owner rather than repainted; (3) which buttons count as
+create-style is a REVIEWED SET, not a guess — the rule is "the label's first word is create · new ·
+add · invite · import", it is discovered from the source by `validate-theme-distinctness.mjs` §8, and
+the sites it excludes (Start onboarding, Generate application, Send reply, Send Invite, Request
+change, Send packing correction) are flow-and-communication actions rather than record creation.
+
+**AN INSTRUMENT DEFECT, FOUND AND FIXED IN THE SAME BATCH (2026-10-15).** §16's guardrails call for
+before/after screenshots as each batch's evidence, and that instrument was not reproducible: running
+`e2e/theme-visual.spec.ts` TWICE on identical code produced frames differing by up to **2.396% of
+their pixels on 6 of the 30 screens**, which is larger than several of the deltas earlier batches
+reported as their effect. The cause was found by cropping the frames and looking: the app smoothly
+scrolls a tour target into view, so the captured scroll offset depends on elapsed time.
+`selectTheme()` now sets `prefers-reduced-motion: reduce`, under which the browser scrolls instantly;
+the re-measured noise floor is **min 0.000% · median 0.000% · max 0.002%**, with 26 of 30 screens
+byte-identical across two runs. **Every figure in this section was therefore read with the noise
+floor stated**: on the 24 screens that were stable under the old capture the deltas are real
+(`bold` 0.000% on 5 of 6; the four mapped designs 0.303%–1.850%), and on the six that were not, the
+deltas are NOT cited as this batch's effect. A residual limit: the live countdown text still ticks
+between runs, so its 6×10px region can differ by ~0.005% and is excluded from every claim.
 
 ---
 *End of specification.*

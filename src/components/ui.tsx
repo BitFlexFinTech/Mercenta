@@ -106,7 +106,7 @@ export function Badge({ children, className }: BadgeProps) {
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'destructive' | 'link';
+  variant?: 'primary' | 'accent' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'destructive' | 'link';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   disabled?: boolean;
@@ -134,12 +134,25 @@ export function Button({
   title,
 }: ButtonProps) {
   const variants = {
-    /* §OPENSHIP BATCH 3 — `ds-btn-accent` paints the reference's per-theme CTA
-       gradient (radial highlight over a three-stop gradient). It is ADDITIVE:
-       `bg-brass-500` stays as the flat colour, which is both the fallback for a
-       browser without `in oklab` support AND the whole treatment in `bold`,
-       whose two gradient tokens are `none`. No prop, size or API changed. */
-    primary:
+    /* §OPENSHIP MAPPING BATCH 3 — THE PAGE PRIMARY ACTION IS THE SOLID BUTTON.
+       The reference's own `.th-btn` is a solid fill from `--th-btn-bg` with
+       `--th-btn-text` on it (spec §2.7) — near-black with white text on its two
+       LIGHT designs, white with black text on dim and dark (§2.3–§2.5). Those
+       values live in the theme (`--mr-btn-*`, one set per design) and reach the
+       button through the `.ds-btn` utility in src/index.css. `bold`'s three
+       tokens reproduce exactly what this variant painted before, so that theme
+       moves no pixel. */
+    primary: 'ds-btn font-semibold shadow-ds-raised',
+    /* §OPENSHIP MAPPING BATCH 3 — THE ACCENT GRADIENT CTA, RESERVED FOR
+       CREATE-STYLE ACTIONS. This is the treatment `primary` used to carry, moved
+       onto its own variant: the reference keeps its gradient for actions that
+       CREATE something (its empty state's "Create project", spec §5.4, and its
+       header CTA, §5.1) rather than for every primary action, because an accent
+       on every button is no accent at all. `bg-brass-500` STAYS as the flat
+       colour, which is both the fallback for a browser without `in oklab`
+       support AND the whole treatment in `bold`, whose two gradient tokens are
+       `none`. No prop, size or API changed. */
+    accent:
       'ds-btn-accent bg-brass-500 hover:bg-brass-600 text-ink font-semibold shadow-ds-raised',
     secondary: 'bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/[0.08]',
     tertiary: 'bg-ink-800 hover:bg-ink-700 text-zinc-300 border border-white/[0.06]',

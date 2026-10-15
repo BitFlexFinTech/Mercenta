@@ -291,7 +291,7 @@ function PermissionsSection({ brandId }: { brandId: string }) {
           </div>
         </div>
       ) : (
-        <Button className="text-xs mt-2" onClick={() => setShowInvite(true)}>
+        <Button variant="accent" className="text-xs mt-2" onClick={() => setShowInvite(true)}>
           <Plus className="w-3 h-3 mr-1" /> Invite Team Member
         </Button>
       )}
@@ -413,12 +413,12 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
             <Input label="Contact phone" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} />
           </div>
           <div className="flex gap-2">
-            <Button className="text-ds-micro" onClick={handleAdd}>Add Address</Button>
+            <Button variant="accent" className="text-ds-micro" onClick={handleAdd}>Add Address</Button>
             <Button className="text-ds-micro" variant="secondary" onClick={() => setShowNew(false)}>Cancel</Button>
           </div>
         </div>
       ) : (
-        <Button className="text-xs mt-2" onClick={() => setShowNew(true)}>
+        <Button variant="accent" className="text-xs mt-2" onClick={() => setShowNew(true)}>
           <Plus className="w-3 h-3 mr-1" /> Add Return Address
         </Button>
       )}

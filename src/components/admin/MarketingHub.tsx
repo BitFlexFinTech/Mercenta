@@ -468,6 +468,7 @@ function CsvImport({ onImport }: { onImport: (csv: string) => void }) {
         placeholder={'Acme Organics,Jane Doe,jane@acme.com,Austin TX,us,Organic Food'}
       />
       <Button
+        variant="accent"
         onClick={async () => {
           await onImport(csv);
           setResult('CSV imported into pipeline.');

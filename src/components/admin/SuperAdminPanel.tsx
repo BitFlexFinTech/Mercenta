@@ -558,7 +558,7 @@ export function SuperAdminPanel() {
               />
             </div>
             <div className="flex items-center gap-3 pt-1">
-              <Button onClick={handleAddStaff}>
+              <Button variant="accent" onClick={handleAddStaff}>
                 <UserPlus className="w-3.5 h-3.5" />
                 Create Profile
               </Button>
@@ -569,7 +569,7 @@ export function SuperAdminPanel() {
           </div>
         </Card>
       ) : (
-        <Button onClick={() => setShowForm(true)}>
+        <Button variant="accent" onClick={() => setShowForm(true)}>
           <UserPlus className="w-3.5 h-3.5" />
           Add Staff Member
         </Button>

@@ -142,7 +142,7 @@ return (
 
           <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
             {phase === 'preview' && validCount > 0 && !summary.commit?.attempted && (
-              <Button className="text-xs" onClick={handleCommit}>
+              <Button variant="accent" className="text-xs" onClick={handleCommit}>
                 <Database className="w-3.5 h-3.5 mr-1" /> Import {validCount} product(s)
               </Button>
             )}

@@ -717,7 +717,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
             <EmptyState
               title="Nothing in fulfilment right now"
               description="Accepted and ready-to-fulfil POs appear in the purchase-order section above; download its shipping documents from the Logistics Hub once a PO is accepted."
-              action={<Button size="sm" onClick={go('logistics')}>Create a shipment</Button>}
+              action={<Button variant="accent" size="sm" onClick={go('logistics')}>Create a shipment</Button>}
             />
           }
         />

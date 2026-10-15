@@ -250,6 +250,23 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
          `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
       '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 70%), linear-gradient(to right in oklab, #7C3AED, #111111, #2563EB)',
       '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.28) 0%, transparent 70%), linear-gradient(to right in oklab, #6D28D9, #0D0D0D, #1D4ED8)',
+      /* §OPENSHIP MAPPING BATCH 3 (2026-10-15) — THE SOLID PRIMARY-ACTION TOKENS.
+         THE FULL CONTRACT LIVES HERE, ONCE; the four other themes carry the short
+         pointer comment and their own values.
+
+         The reference's page primary action is NOT the accent gradient. It is the
+         SOLID `.th-btn` (`background: var(--th-btn-bg)`, `color: var(--th-btn-text)`
+         — spec §2.7), while the gradient above is the separate `th-btn-accent` CTA
+         (§2.6) the reference reserves for create-style actions (its empty state's
+         "Create project" button, spec §5.4). Consumed by `.ds-btn` in src/index.css.
+
+         Measured values, taken from the reference's own LIGHT design (spec §2.5):
+         a near-black `rgba(0,0,0,.92)` button with white text, hover
+         `rgba(0,0,0,.80)`. The dim and dark designs are the INVERSE — white with
+         black text (§2.3/§2.4) — which is why these are per-design, not literal. */
+      '--mr-btn-bg': 'rgba(0,0,0,0.92)',
+      '--mr-btn-bg-hover': 'rgba(0,0,0,0.80)',
+      '--mr-btn-text': '#FFFFFF',
       /* §UI/UX Wave 2 — motion + density language. Theme-invariant by contract
          (the foundation validator enforces identical declaration in all five). */
       '--mr-motion-fast': '140ms',
@@ -355,6 +372,12 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
          `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
       '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.30) 0%, transparent 70%), linear-gradient(to right in oklab, hsl(86 84% 74%), hsl(82 80% 64%), hsl(74 74% 54%))',
       '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.36) 0%, transparent 70%), linear-gradient(to right in oklab, hsl(86 84% 80%), hsl(82 80% 70%), hsl(74 74% 60%))',
+      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
+         contract is on `minimal-light`. This theme implements the reference's
+         DIM design, whose button is WHITE with black text (spec §2.4). */
+      '--mr-btn-bg': '#FFFFFF',
+      '--mr-btn-bg-hover': 'rgba(255,255,255,0.90)',
+      '--mr-btn-text': '#000000',
       /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
@@ -462,6 +485,16 @@ bold: {
          `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
       '--mr-accent-image': 'none',
       '--mr-accent-image-hover': 'none',
+      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens, and this is
+         the theme that PROVES they are a re-naming rather than a redesign: they
+         are set to the values `bold`'s primary button ALREADY computed —
+         `bg-brass-500` (this theme's own accent), `hover:bg-brass-600`, and
+         `text-ink` (its surface token) — so the variant swap moves NO pixel here.
+         Stated as var() references, not re-typed literals, so the values cannot
+         drift from the tokens they came from. */
+      '--mr-btn-bg': 'var(--mr-accent)',
+      '--mr-btn-bg-hover': 'var(--mr-accent-600)',
+      '--mr-btn-text': 'var(--mr-surface)',
       /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
@@ -566,6 +599,12 @@ bold: {
          `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
       '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.25) 0%, transparent 70%), linear-gradient(to right in oklab, #FBBF24, #F97316, #F43F5E)',
       '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.32) 0%, transparent 70%), linear-gradient(to right in oklab, #FCD34D, #FB923C, #FB7185)',
+      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
+         contract is on `minimal-light`. This theme implements the reference's
+         DARK design, whose button is WHITE with black text (spec §2.3). */
+      '--mr-btn-bg': '#FFFFFF',
+      '--mr-btn-bg-hover': 'rgba(255,255,255,0.90)',
+      '--mr-btn-text': '#000000',
       /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
@@ -671,6 +710,12 @@ bold: {
          `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
       '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 70%), linear-gradient(to right in oklab, #7C3AED, #111111, #2563EB)',
       '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.28) 0%, transparent 70%), linear-gradient(to right in oklab, #6D28D9, #0D0D0D, #1D4ED8)',
+      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
+         contract is on `minimal-light`. This theme also implements the reference's
+         LIGHT design, so its button is near-black with white text (spec §2.5). */
+      '--mr-btn-bg': 'rgba(0,0,0,0.92)',
+      '--mr-btn-bg-hover': 'rgba(0,0,0,0.80)',
+      '--mr-btn-text': '#FFFFFF',
       /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',

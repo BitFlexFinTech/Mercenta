@@ -481,7 +481,7 @@ export function BrandInventory() {
                 checked={existsOnChannel}
                 onChange={setExistsOnChannel}
               />
-              <Button className="text-xs" onClick={handleDeclareAsin}>
+              <Button variant="accent" className="text-xs" onClick={handleDeclareAsin}>
                 Add ASIN
               </Button>
               <p className="text-ds-label text-zinc-500">
