@@ -140,7 +140,15 @@ export function Header({
      * is the hairline. Every control, its test id, its aria wiring and its
      * behaviour are unchanged.
      */
-    <header className="ds-bar flex h-14 flex-shrink-0 items-center gap-3 border-b px-4 sm:px-6">
+    <header className="ds-bar flex h-14 flex-shrink-0 border-b">
+      {/* §OPENSHIP BATCH 7 — THE BAR'S INNER ROW SHARES THE PAGE CONTAINER.
+          The reference caps and centres its page content
+          (`max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8`, spec §4.1); the bar now
+          carries the SAME cap and padding on an inner row, so the first control in
+          the bar sits on the same leading edge as the page title below it at every
+          width instead of only below 1600px. This is the `lg:px-8` step BATCH 6
+          deliberately deferred so the two could be aligned in ONE change. */}
+      <div className="mx-auto flex w-full max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:px-8">
       {/*
         §UI/UX Wave 3 — CONTEXT ZONE.
         The mislabelled "Home" control was REMOVED. It rendered the text "Home"
@@ -292,6 +300,7 @@ export function Header({
             </div>
           )}
         </div>
+      </div>
       </div>
     </header>
   );

@@ -526,7 +526,17 @@ test.describe('§OPENSHIP BATCH 6 — the top bar is surface and type only', () 
       };
     });
     expect(style.height, "the bar keeps the reference's 56px band height").toBe('56px');
-    expect(style.padLeft, "the bar takes the reference's container padding at `sm`").toBe('24px');
+    /*
+     * §OPENSHIP BATCH 7 — REPOINTED, not weakened. The padding moved from the bar element onto
+     * its INNER ROW so the bar and the page content share one leading edge; the measured
+     * requirement is unchanged (24px at `sm`) and the bar element itself now carries none.
+     */
+    const rowPadLeft = await page
+      .locator('header > div')
+      .first()
+      .evaluate((el) => getComputedStyle(el).paddingLeft);
+    expect(rowPadLeft, "the bar's inner row takes the reference's LARGE padding step at `lg`").toBe('32px');
+    expect(style.padLeft, 'the bar element itself carries no padding — its inner row owns it').toBe('0px');
     expect(style.bg, 'the bar paints NO fill of its own — it sits on the page').toBe('rgba(0, 0, 0, 0)');
     expect(style.borderBottomWidth, 'the derivative edge is a real 1px hairline').toBe('1px');
 
@@ -569,7 +579,68 @@ test.describe('§OPENSHIP BATCH 6 — the top bar is surface and type only', () 
     const toggleBox = await toggle.boundingBox();
     expect(Math.round(toggleBox!.width), 'the drawer toggle is the 36px icon control').toBe(36);
     expect(Math.round(toggleBox!.height), 'the drawer toggle is the 36px icon control').toBe(36);
+    /* §BATCH 7 — and the bar's inner row steps DOWN one rung of the reference's ladder here. */
+    expect(
+      await page.locator('header > div').first().evaluate((el) => getComputedStyle(el).paddingLeft),
+      "below `lg` the bar's inner row takes the reference's MEDIUM padding step"
+    ).toBe('24px');
   });
 });
 
+/**
+ * §OPENSHIP BATCH 7 — THE SHARED PAGE CONTAINER, THE ALIGNED BAR AND THE 340px RAIL,
+ * verified where it RENDERS.
+ *
+ * The source gate proves both class strings and that they share one cap and one ladder;
+ * only a browser can prove the RESULT — that the page content is really capped at 1600px and
+ * centred in its column, that the app bar's first control sits on the SAME left edge as the
+ * page title above it, and that a screen with a context column really renders a 340px rail.
+ */
+test.describe('§OPENSHIP BATCH 7 — the shared page container, the aligned bar and the 340px rail', () => {
+  test('the content is capped and centred, the bar shares its edge, and the rail is 340px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await loginAs(page, 'Super Admin — Tadii');
+    const frame = page.locator('[data-workspace-frame]').first();
+    await expect(frame).toBeVisible({ timeout: 8000 });
+    const row = page.locator('header > div').first();
+
+    const read = async () => ({
+      frame: await frame.boundingBox(),
+      row: await row.boundingBox(),
+      main: await page.locator('#main-content').boundingBox(),
+      padLeft: await frame.evaluate((el) => getComputedStyle(el).paddingLeft),
+      padTop: await frame.evaluate((el) => getComputedStyle(el).paddingTop),
+    });
+
+    const narrow = await read();
+    expect(narrow.padLeft, "the container takes the reference's large padding step").toBe('32px');
+    expect(narrow.padTop, "the container takes the reference's 24px vertical step").toBe('24px');
+    expect(
+      Math.round(narrow.row!.x),
+      "the app bar's first control sits on the page container's own leading edge"
+    ).toBe(Math.round(narrow.frame!.x));
+
+    /* Above 1600px the content is CAPPED and centred IN ITS COLUMN, and the bar follows it. */
+    await page.setViewportSize({ width: 1920, height: 900 });
+    await expect.poll(async () => Math.round((await frame.boundingBox())!.width)).toBe(1600);
+    const wide = await read();
+    expect(Math.round(wide.frame!.width), "the page content is capped at the reference's 1600px").toBe(1600);
+    const leftGap = Math.round(wide.frame!.x - wide.main!.x);
+    const rightGap = Math.round(wide.main!.x + wide.main!.width - (wide.frame!.x + wide.frame!.width));
+    expect(Math.abs(leftGap - rightGap), `the capped content is CENTRED in its column (gaps ${leftGap}/${rightGap})`)
+      .toBeLessThanOrEqual(1);
+    expect(
+      Math.round(wide.row!.x),
+      'the bar is contained with it rather than stretched across the window'
+    ).toBe(Math.round(wide.frame!.x));
+
+    /* The context rail (spec §4.3) on a screen that genuinely has one. */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.click('nav >> text=Super Admin');
+    const rail = page.locator('[role="complementary"][aria-label="Context"]').first();
+    await expect(rail).toBeVisible({ timeout: 8000 });
+    expect(Math.round((await rail.boundingBox())!.width), "the context rail is the reference's 340px").toBe(340);
+    await page.screenshot({ path: `${SHOTS}/openship-batch7-page-container.png` });
+  });
+});
 });

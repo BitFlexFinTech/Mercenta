@@ -286,6 +286,17 @@ canonical way to mount navigation around an environment. Conventions:
 - While open: a `z-40` backdrop closes on click; `Escape` closes and returns
   focus to the toggle; selecting a nav item closes the drawer (focus unchanged).
 
+### Page container + context rail (BATCH 7, 2026-10-15)
+- Every workspace surface composes `WorkspaceFrame`, which IS the page container:
+  `max-w-[1600px] mx-auto px-4 py-6 sm:px-6 lg:px-8` — capped at 1600px, centred, with the
+  reference's padding ladder and 24px vertical step (`docs/OPENSHIP_REFERENCE_SPEC.md` §4.1).
+- The **app bar carries the same cap and ladder on its inner row**, so the first control in the
+  bar shares one leading edge with the page title at every width. A change to one without the
+  other is caught by `scripts/validate-shared-surfaces.mjs`, which compares the two class strings.
+- A surface that genuinely needs a second column composes `WorkspaceGrid` with a **340px** rail
+  and a **24px** gap (§4.3), and that rail is a `role="complementary"` region — never a second
+  `<aside>`, because the navigation rail is the shell's single one.
+
 ### Accessibility conventions
 - Skip link is the first tab stop → `#main-content` (`<main tabIndex={-1}>`).
 - Global Phase 5 `:focus-visible` outline provides keyboard focus on all nav

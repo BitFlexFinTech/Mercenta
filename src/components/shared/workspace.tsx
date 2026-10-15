@@ -63,7 +63,20 @@ export function WorkspaceFrame({
   return (
     <div
       className={cn(
-        'w-full px-4 py-4 sm:px-5 sm:py-5 lg:px-6',
+        /*
+         * §OPENSHIP BATCH 7 — THE SHARED PAGE CONTAINER, to the reference's own
+         * metrics (spec §4.1, its `components/ui/PageContainer.tsx`):
+         *
+         *     max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6
+         *
+         * The CAP and the CENTRING are the part that was missing: without them a
+         * 1920px window stretched every operational table edge to edge, and the
+         * page title sat on a different left edge from the app bar above it. The
+         * app bar now carries the same inner cap (see `Header.tsx`), so the two
+         * share one leading edge at every width — which is why BATCH 6 deliberately
+         * left its `lg:px-8` step to this batch rather than taking it alone.
+         */
+        'mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8',
         width === 'reading' && 'mx-auto max-w-3xl',
         density === 'compact' && 'px-3 py-3 sm:px-4',
         className
@@ -159,7 +172,7 @@ export function WorkspaceHeader({
             {status}
           </div>
           {description && (
-            <p className="mt-1 max-w-3xl text-ds-body leading-snug text-zinc-500">{description}</p>
+            <p className="mt-1.5 max-w-3xl text-ds-body leading-snug text-zinc-500">{description}</p>
           )}
           {meta && <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">{meta}</div>}
         </div>
@@ -192,8 +205,20 @@ export function WorkspaceGrid({
   className?: string;
 }) {
   if (!rail) return <div className={cn('space-y-4', className)}>{children}</div>;
+  /*
+   * §OPENSHIP BATCH 7 — the rail's METRICS are the reference's own (spec §4.3,
+   * `overview/HomeSidebar.tsx` + its grid): a **340px** rail with a **24px** gap
+   * (`gap-6`), not the 320px/16px this used to declare.
+   *
+   * The BREAKPOINT is deliberately NOT the reference's `lg`. It switches at `xl`
+   * (1280px) because at 1024px a 340px rail would leave ~350px for a dense
+   * operational table — the reference's own two-column screens are project lists,
+   * not ops tables, so its `lg` is not transferable. `better-layout`'s own rule is
+   * that breakpoints come from the content; recorded as a divergence rather than
+   * copied.
+   */
   return (
-    <div className={cn('grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]', className)}>
+    <div className={cn('grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]', className)}>
       <div className="min-w-0 space-y-4">{children}</div>
       {/*
         NOTE: the context rail is a `role="complementary"` region rather than an

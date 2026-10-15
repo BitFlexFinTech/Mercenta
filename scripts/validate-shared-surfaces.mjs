@@ -503,10 +503,22 @@ check(
   headerClass.includes('ds-bar') && /\bborder-b\b/.test(headerClass),
   headerClass
 );
+/*
+ * §OPENSHIP BATCH 7 (2026-10-15) — REPOINTED, not weakened. This check used to read the
+ * padding from the `<header>` itself; BATCH 7 moved it (with the cap) onto the bar's INNER
+ * ROW so the bar and the page content share one leading edge at every width, and the
+ * measured requirement is unchanged — `px-4 sm:px-6 lg:px-8`, now the FULL reference ladder.
+ */
+const barRowClass = (HEADER_CODE.match(/<div className="mx-auto flex w-full max-w-\[1600px\][^"]*"/) ?? [''])[0];
 check(
-  "the bar takes the reference's container padding ladder at its first two steps (`px-4 sm:px-6`)",
-  headerClass.includes('px-4') && headerClass.includes('sm:px-6'),
-  headerClass
+  "the bar's INNER ROW was DISCOVERED in the shell source (a check that finds nothing is a FAILURE)",
+  barRowClass.length > 0,
+  barRowClass || 'no capped inner row found in Header.tsx'
+);
+check(
+  "the bar's inner row takes the reference's FULL container ladder (`px-4 sm:px-6 lg:px-8`)",
+  barRowClass.includes('px-4') && barRowClass.includes('sm:px-6') && barRowClass.includes('lg:px-8'),
+  barRowClass
 );
 check(
   '`.ds-bar` sits in the `components` layer, like `.ds-card` and `.ds-rail`',
@@ -604,6 +616,76 @@ const HEADER_PRESERVED = [
   ['shell-supplied chrome actions still render', '{extraActions}'],
 ];
 for (const [name, needle] of HEADER_PRESERVED) check(name, HEADER_CODE.includes(needle));
+
+/* ══════════════════════════════════════════════════════════════════════════
+   §OPENSHIP BATCH 7 (2026-10-15) — PAGE LAYOUTS: THE SHARED CONTAINER, THE
+   HEADERS AND THE 340px RAIL.
+
+   The reference caps and centres its page content and defines a per-screen right
+   rail (spec §4.1–§4.3). Nothing above checks either: a surface could reintroduce
+   an edge-to-edge container, or a 320px rail, and every other gate would still pass
+   while pages drifted apart from the chrome above them.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const WORKSPACE = read('src/components/shared/workspace.tsx');
+const WORKSPACE_CODE = code(WORKSPACE);
+
+const frameClass = (WORKSPACE_CODE.match(/'mx-auto w-full max-w-\[1600px\][^']*'/) ?? [''])[0];
+check(
+  'the page container class string was DISCOVERED in the workspace primitives (a check that finds nothing is a FAILURE)',
+  frameClass.length > 0,
+  frameClass || 'no capped container found in src/components/shared/workspace.tsx'
+);
+check(
+  "the page container is the reference's own (spec §4.1): capped at 1600px and centred",
+  frameClass.includes('max-w-[1600px]') && frameClass.includes('mx-auto')
+);
+check(
+  "the page container takes the reference's padding ladder (`px-4 sm:px-6 lg:px-8`) and its 24px vertical step (`py-6`)",
+  frameClass.includes('px-4') &&
+    frameClass.includes('sm:px-6') &&
+    frameClass.includes('lg:px-8') &&
+    frameClass.includes('py-6')
+);
+check(
+  'ABSENCE GUARD — the retired ladder (`sm:px-5`, `lg:px-6`, `py-4 sm:py-5`) is gone from the frame',
+  !/sm:px-5|lg:px-6|px-4 py-4/.test(frameClass),
+  frameClass
+);
+
+/*
+ * THE ALIGNMENT IS DERIVED, not retyped: the bar's inner row and the page container must
+ * carry the SAME cap and the SAME padding ladder, or the page title and the first control in
+ * the bar sit on different leading edges. Comparing the two class strings is what makes the
+ * "one leading edge" claim checkable instead of a comment.
+ */
+const sharedTokens = ['max-w-[1600px]', 'mx-auto'];
+const ladderTokens = ['px-4', 'sm:px-6', 'lg:px-8'];
+const missingShared = [...sharedTokens, ...ladderTokens].filter(
+  (t) => !(frameClass.includes(t) && barRowClass.includes(t))
+);
+check(
+  'the app bar and the page container share ONE cap and ONE padding ladder (the leading edges cannot drift apart)',
+  missingShared.length === 0,
+  `missing in one of the two: ${missingShared.join(', ')}`
+);
+
+check(
+  "the context rail takes the reference's 340px measure with its 24px gap (spec §4.3)",
+  /xl:grid-cols-\[minmax\(0,1fr\)_340px\]/.test(WORKSPACE_CODE) && /grid-cols-1 gap-6 xl:grid/.test(WORKSPACE_CODE)
+);
+check(
+  'the context rail KEEPS the project\'s `xl` switch (the reference\'s `lg` is not transferable to a dense ops table)',
+  WORKSPACE_CODE.includes('xl:grid-cols-[minmax(0,1fr)_340px]')
+);
+check(
+  "the page description takes the reference's 6px gap under the title (`mt-1.5`, spec §4.2)",
+  /<p className="mt-1\.5[^"]*text-ds-body/.test(WORKSPACE_CODE)
+);
+check(
+  'the rail keeps its COMPLEMENTARY landmark (never a second `<aside>` — the shell asserts exactly one)',
+  /role="complementary"/.test(WORKSPACE_CODE)
+);
 
 console.log(
   failures === 0

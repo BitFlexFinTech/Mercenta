@@ -1112,6 +1112,39 @@ gate lists all fifteen of them). Divergences, stated rather than left silent:
 
 ---
 
+**§EXECUTED 2026-10-15 (§OPENSHIP BATCH 7) — PAGE LAYOUTS: THE SHARED CONTAINER, THE ALIGNED APP
+BAR AND THE 340px RAIL.** Built: **the page container** is now the reference's own
+(`WorkspaceFrame`, spec §4.1): `max-w-[1600px] mx-auto px-4 py-6 sm:px-6 lg:px-8` — capped and
+centred, with the reference's padding ladder and its 24px vertical step, replacing the retired
+`px-4 py-4 sm:px-5 sm:py-5 lg:px-6`. **The app bar carries the SAME container on an inner row**
+(`mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8`), so the first control in the bar sits on the same
+leading edge as the page title below it at EVERY width — which is exactly why BATCH 6 deferred its
+`lg:px-8` step to this batch. **The page description** takes the reference's 6px gap (`mt-1.5`).
+**The context rail** takes the reference's measurements (§4.3): **340px** with a **24px** gap
+(was 320px / 16px), still rendered as a `role="complementary"` region rather than a second
+`<aside>` (the shell asserts exactly one). Divergences, stated rather than left silent:
+
+1. **The rail KEEPS the project's `xl` switch (1280px), not the reference's `lg`.** At 1024px a
+   340px rail would leave ~350px for a dense operational table; the reference's own two-column
+   screens are project lists, so its breakpoint is not transferable and `better-layout`'s rule is
+   that breakpoints come from the content. The MEASUREMENTS are adopted; the breakpoint is not.
+2. **The page header keeps the project's `mb-3` rhythm, not the reference's `mb-8`.** The
+   primitive records a deliberate tightening (a 900px viewport reaches its first actionable row
+   sooner), and an operational tool outranks a project-list page here. The reference's own type
+   metrics for that header (20px, semibold, `tracking-tight`) were ALREADY matched.
+3. **The page title keeps the Mercenta display face.** The reference's page title is the sans at
+   the same size, weight and tracking; the face is a stated identity decision in the primitive,
+   not an oversight.
+4. **The frame keeps its `reading` width (`max-w-3xl`) and `compact` density steps.** Both are
+   project affordances for surfaces that genuinely need them; the reference has no equivalent, so
+   nothing was invented to match it.
+5. **ONE DEFECT INTRODUCED AND FIXED INSIDE THIS SESSION, recorded rather than hidden:** an edit
+   of the browser spec deleted the file's top-level `describe` closing brace (it looked like a
+   stray after a previous edit). The suite's own typecheck caught it immediately and it was
+   restored; the three OPENSHIP rendered tests then passed.
+
+---
+
 ## 14. VISUAL IMPLEMENTATION DECISIONS
 
 | # | Decision | Tier | Reason |
