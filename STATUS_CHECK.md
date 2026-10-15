@@ -5,7 +5,63 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCH 7 — CURRENT STATUS (session 145, 2026-10-15) — PAGE LAYOUTS: THE SHARED CONTAINER, THE ALIGNED APP BAR AND THE 340px RAIL
+## §OPENSHIP BATCH 8 — CURRENT STATUS (session 146, 2026-10-15) — COMPONENT STATES: ONE OWNER PER STATE, THE CARD'S HOVER EDGE, AND THE TWO FLOATING PANELS BATCH 4/6 LEFT
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `53cabaa` (20 files,
++730/−161). The five states of spec §9 each have ONE owner in `src/components/ui.tsx` now:
+`EmptyState` on the reference's block, `LoadingState` on the reference's row anatomy, and TWO
+NEW owners — `ErrorState` (which `ErrorBoundary` renders through) and `NoPermissionState`
+(which replaced SEVEN hand-rolled copies of the same refusal). The card's hover edge is real in
+all five themes, with `bold` preserved BY MECHANISM. **NOT deployed and NOT live-verified** —
+this batch changes every surface that renders a state, so the three-way gate APPLIES and is
+UNSATISFIED; publishing needs the Owner's approval and none has been given. No credential was
+needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", where the recorded NEXT TASK was
+   BATCH 8 — component states — scoped in `docs/OPENSHIP_REFERENCE_SPEC.md` §16 and specified
+   in §9.1–§9.5.
+2. **WHAT WAS BUILT.** One owner per state (empty · loading · error · no-permission); the error
+   and no-permission owners are NEW; seven hand-rolled refusals migrated onto the one owner with
+   NO permission, role or gate touched; the card hover edge added as `--mr-card-border-hover`
+   in five themes with the reference's own `.ds-card:has(a:hover)` mechanism; the actionable
+   queue-row hover; and the two floating panels BATCH 4/6 left open.
+3. **TWO REAL DEFECTS FIXED AT SOURCE.** (a) The loading skeleton was `bg-white/[0.06]`, which
+   the light-shell shim resolves to `#FAFAFA` on a `#FFFFFF` card — a **1.02:1**, i.e.
+   invisible, loading state on all three light designs; it is now the theme's tint. (b) The
+   live-chat trigger was a 32px control standing beside three 36px ones in the same header.
+4. **GATES EXTENDED, EACH PROVED ABLE TO FAIL.** `validate-shared-surfaces` **135 → 161**
+   (the hover token in five themes with `bold` proven a no-op FUNCTIONALLY, the two CSS
+   selectors on ONE token, the transition, and both panels' discovered class strings with
+   absence guards for the legacy border, the legacy row hover, the 32px trigger and the
+   dropdown's translucency being copied onto a panel); `validate-state-coverage` gains
+   **§C** (one owner per state, each rendered through, plus absence guards for the reverted
+   skeleton fill and for any re-rolled refusal). **FOUR MUTATIONS, each restored
+   BYTE-IDENTICAL**: the skeleton fill reverted ⇒ `STATE_COVERAGE_FAIL`; a re-rolled refusal
+   heading added ⇒ `STATE_COVERAGE_FAIL` (naming the offending file); a light hover value
+   changed ⇒ 3 failures; the panel's hardcoded edge restored ⇒ 1 failure.
+5. **MEASURED.** typecheck **0** (four projects) · eslint **0** on all 14 changed source files ·
+   build ok · `validate:all` **196 PASS / 0 FAIL** (exit 0) · `e2e/state-coverage.spec.ts` **4 passed**
+   (including the two long false-denial sweeps, so the state-owner work did not reintroduce a
+   false denial) · `e2e/error-boundary.spec.ts` **2 passed** · `e2e/runtime-entry.spec.ts` test 7 **passed** ·
+   `e2e/notifications.spec.ts` + `e2e/typography-scale.spec.ts` **9 passed**. Two NEW rendered tests MEASURE
+   the claims: the skeleton's fill composited over the surface behind it must differ by ≥ 8/255
+   (the pre-batch value would have measured 5), and a clickable card's computed border colour
+   must CHANGE when pointed at.
+6. **DIVERGENCES, recorded in the spec rather than left silent.** The empty-state title stays on
+   the project's named 16px step (the reference's 24px would out-rank the page title); the
+   reference's four-tile feature row is its HOME-page composition and was not invented into a
+   per-region empty state; the row skeleton keeps the project's 36px row box; the error and
+   no-permission traits are DERIVED (the reference's error views were never extracted, §9.3);
+   and the focus ring, disabled step and control durations keep the project's token-driven
+   values (each within a few pixels/milliseconds of the reference).
+7. **NEXT.** The LEGACY-STYLING MIGRATION (the spec's own "Batch 10") — repointing the hardcoded
+   grey/ink/surface/brass class sites onto the theme tokens, after which the `src/index.css`
+   light-shell force-patch block is deleted with an absence guard proved able to fail. **Step 1
+   is a RE-MEASUREMENT of both class families**, because §12's figures predate BATCHES 3–8.
+
+---
+
+## §OPENSHIP BATCH 7 (session 145, 2026-10-15) — PAGE LAYOUTS: THE SHARED CONTAINER, THE ALIGNED APP BAR AND THE 340px RAIL — SUPERSEDED BY §OPENSHIP BATCH 8
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `b099b4f` (7 files,
 +252/−13). The page container is capped at 1600px, centred and on the reference's padding
