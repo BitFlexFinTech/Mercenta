@@ -412,4 +412,86 @@ test('app bar fits a mobile viewport: no header control is pushed off screen', a
   ).toBeLessThanOrEqual(fit.viewport + 1);
 });
 
+/**
+ * §OPENSHIP BATCH 5 — THE RAIL IS A FLOATING CARD, verified where it RENDERS.
+ *
+ * `scripts/validate-shared-surfaces.mjs` proves the rail's class strings. Only a
+ * browser can prove the RESULT — that the rail really is inset, rounded, 260px
+ * wide, that nothing paints a full-height column behind it, and that its rows
+ * carry the reference's geometry. Every value below is read from
+ * `getComputedStyle`/`getBoundingClientRect`, so a class that resolves to nothing
+ * (the silent-no-op failure mode this project has recorded before) fails HERE.
+ */
+test.describe('§OPENSHIP BATCH 5 — the navigation rail is a floating card', () => {
+  test('the rail floats, is 260px wide, and its rows carry the reference geometry', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await loginAs(page, 'Super Admin — Tadii');
+    await expect(page.locator('text=Admin Overview').first()).toBeVisible({ timeout: 8000 });
+
+    const rail = page.locator('#app-sidebar');
+    const box = await rail.boundingBox();
+    expect(box, 'the rail renders').not.toBeNull();
+
+    const style = await rail.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        radius: s.borderTopLeftRadius,
+        marginLeft: s.marginLeft,
+        marginTop: s.marginTop,
+        borderTopWidth: s.borderTopWidth,
+        borderTopColor: s.borderTopColor,
+      };
+    });
+    expect(style.radius, "the rail takes the reference's 16px container radius").toBe('16px');
+    expect(style.marginLeft, "the rail floats with the reference's 12px start inset").toBe('12px');
+    expect(style.marginTop, "the rail floats with the reference's 12px top inset").toBe('12px');
+    expect(style.borderTopWidth, 'the rail draws its own 1px edge').toBe('1px');
+    expect(
+      style.borderTopColor,
+      'the edge resolves to a REAL theme colour (derived, not transparent)'
+    ).not.toBe('rgba(0, 0, 0, 0)');
+    expect(Math.round(box!.width), "the card is the reference's 260px").toBe(260);
+
+    const parent = await rail.evaluate((el) => {
+      const p = getComputedStyle(el.parentElement as HTMLElement);
+      return { bg: p.backgroundColor, borderRight: p.borderRightWidth };
+    });
+    expect(parent.bg, 'no full-height column is painted behind the card').toBe('rgba(0, 0, 0, 0)');
+    expect(parent.borderRight, 'the full-height edge border is gone').toBe('0px');
+
+    const row = page.locator('nav[aria-label="Primary"] button[data-state]').first();
+    const rowStyle = await row.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { radius: s.borderTopLeftRadius, size: s.fontSize };
+    });
+    expect(rowStyle.radius, "the nav row takes the reference's 12px radius").toBe('12px');
+    expect(
+      rowStyle.size,
+      'the nav row takes the canonical 14px body step (the type scale is the single owner)'
+    ).toBe('14px');
+    expect(
+      (await row.boundingBox())!.height,
+      'the row is a full-height target (the reference raises the rail rows by ~12px)'
+    ).toBeGreaterThanOrEqual(40);
+
+    await expect(page.getByTestId('nav-scroll-fade')).toHaveCount(1);
+
+    /*
+     * §OPENSHIP BATCH 5 — ACCESSIBILITY (better-accessibility, "one landmark, one name").
+     * Read from the ACCESSIBILITY TREE, not the source: the rail's navigation landmark must
+     * be reachable by exactly ONE name, and the complementary wrapper must not repeat it.
+     */
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(1);
+    await expect(page.getByRole('complementary', { name: 'Primary' })).toHaveCount(0);
+
+    await page.screenshot({ path: `${SHOTS}/openship-batch5-rail-floating.png` });
+
+    /* Collapsed: the reference's 72px card (and the inset still applies). */
+    await page.getByTestId('nav-compact-toggle').click();
+    await expect(rail).toHaveAttribute('data-nav-compact', 'true');
+    await expect.poll(async () => Math.round((await rail.boundingBox())!.width)).toBe(72);
+    await page.screenshot({ path: `${SHOTS}/openship-batch5-rail-collapsed.png` });
+  });
+});
+
 });

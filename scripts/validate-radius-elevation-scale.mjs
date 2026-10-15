@@ -85,7 +85,16 @@ check(
 const TW = read('tailwind.config.js');
 const radiusBlock = TW.slice(TW.indexOf('borderRadius: {'), TW.indexOf('boxShadow: {'));
 const RAMP = {};
-for (const m of radiusBlock.matchAll(/(sm|md|lg|pill):\s*'(\d+)px'/g)) RAMP[m[1]] = Number(m[2]);
+/*
+ * §OPENSHIP BATCH 5 (2026-10-15) — REPOINTED, not weakened. This discovery used to
+ * read the keys WITHOUT their prefix (`/(sm|md|lg|pill):\s*'(\d+)px'/`), which
+ * accepted the NESTED form `borderRadius: { ds: { sm: … } }` as valid. That shape
+ * is the defect this gate now catches: Tailwind 3.4 silently emits NO utility for a
+ * nested scale object, so the ramp was declared, documented, consumed 714 times —
+ * and rendered as 0px everywhere. The prefix is now REQUIRED, so the inert shape
+ * fails here as an EMPTY DISCOVERY rather than passing as a healthy ramp.
+ */
+for (const m of radiusBlock.matchAll(/'ds-(sm|md|lg|pill)':\s*'(\d+)px'/g)) RAMP[m[1]] = Number(m[2]);
 
 check(
   'the radius ramp was DISCOVERED from tailwind.config.js (empty discovery = FAILURE)',
@@ -263,6 +272,43 @@ check(
   Object.values(radiusUse).every((c) => c > 0),
   JSON.stringify(radiusUse)
 );
+
+/* ── 3b. DECLARED AND CONSUMED IS STILL NOT EMITTED ─────────────────────── */
+/*
+ * §OPENSHIP BATCH 5 (2026-10-15). This is the assertion that was missing, and it is
+ * why the ramp could be declared, documented and consumed 714 times while EVERY one
+ * of those sites rendered `border-radius: 0px`: Tailwind 3.4 silently drops a NESTED
+ * scale object (`borderRadius: { ds: { sm: … } }` emits no utility at all). Every
+ * other check in this file — and in the whole corpus — reads the BLOCK or the
+ * SOURCE. None read what Tailwind actually generates.
+ *
+ * So the config is COMPILED here, in memory, with a raw class list, and the three
+ * steps the app uses must come out with their declared value. A check that finds
+ * nothing is a FAILURE (rule 10 §5): an empty compile fails every assertion below.
+ */
+const twPlugin = (await import('tailwindcss')).default;
+const postcss = (await import('postcss')).default;
+const projectConfig = (await import(new URL('../tailwind.config.js', import.meta.url))).default;
+const probe = await postcss([
+  twPlugin({
+    ...projectConfig,
+    content: [{ raw: '<div class="rounded-ds-sm rounded-ds-md rounded-ds-lg"></div>' }],
+  }),
+]).process('@tailwind utilities;', { from: undefined });
+const EMITTED = probe.css;
+check(
+  'the config COMPILED and produced real utilities (an empty compile is a FAILURE, not a pass)',
+  EMITTED.length > 50 && /border-radius:\s*\d/.test(EMITTED),
+  `emitted ${EMITTED.length} bytes: ${JSON.stringify(EMITTED.slice(0, 120))}`
+);
+for (const step of ['sm', 'md', 'lg']) {
+  const px = RAMP[step];
+  check(
+    `\`rounded-ds-${step}\` really EMITS ${px}px from this config (a declared-but-inert scale is a silent no-op)`,
+    new RegExp(`\\.rounded-ds-${step}\\s*\\{[^}]*border-radius:\\s*${px}px`).test(EMITTED),
+    EMITTED.includes(`rounded-ds-${step}`) ? 'the rule is present with the WRONG value' : 'NO rule was emitted'
+  );
+}
 
 const elevUse = Object.fromEntries(
   ['none', 'subtle', 'raised', 'overlay'].map((r) => [r, n(SRC_TEXT, new RegExp(`shadow-ds-${r}`, 'g'))])

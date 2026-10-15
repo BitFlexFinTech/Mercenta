@@ -251,6 +251,222 @@ for (const [file, label] of DROPDOWNS) {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   §OPENSHIP BATCH 5 (2026-10-15) — THE NAVIGATION RAIL IS A FLOATING CARD.
+
+   BATCH 4's contract covered the SHARED surfaces; the rail is a surface of its
+   own — the reference's biggest single visual change (spec §3.2/§3.3, §12) — and
+   nothing above checks it. Without this section, reverting the rail to
+   `h-full w-full border-r` or dropping the 12px inset would leave every screen
+   looking like the old shell while every other check still passed.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const RAIL = read('src/components/layout/Sidebar.tsx');
+const RAIL_CODE = code(RAIL);
+const SHELL = read('src/components/layout/AppShell.tsx');
+const ENV = read('src/components/layout/EnvironmentRouter.tsx');
+const ENV_CODE = code(ENV);
+/** The legacy hardcoded hover this batch repointed (its remap is invisible on light). */
+const LEGACY_HOVER = 'hover:bg-white/[0.04]';
+
+/** DISCOVER the card's own class string rather than retyping it. */
+const railCardClass = (RAIL_CODE.match(/className="ds-rail[^"]*"/) ?? [''])[0];
+check(
+  'the rail card class string was DISCOVERED in the shell source (a check that finds nothing is a FAILURE)',
+  railCardClass.length > 0,
+  'no `ds-rail` class string found in src/components/layout/Sidebar.tsx'
+);
+check(
+  'the rail FLOATS: a 12px inset on the top and start sides (the reference `my-3 ms-3`, spec §3.2)',
+  railCardClass.includes('my-3') && railCardClass.includes('ms-3'),
+  railCardClass
+);
+check(
+  'the rail is a CONTAINER: the 16px radius step and its own edge',
+  railCardClass.includes('rounded-ds-lg') && /\bborder\b/.test(railCardClass),
+  railCardClass
+);
+check(
+  'the rail CLIPS its own corners, so the navigation scrolls inside the rounded card',
+  railCardClass.includes('overflow-hidden'),
+  railCardClass
+);
+check(
+  'the rail keeps the theme surface role as its fill (no new colour role was invented)',
+  railCardClass.includes('bg-ink-900'),
+  railCardClass
+);
+check(
+  'ABSENCE GUARD — the rail is no longer a FULL-HEIGHT rail: no `h-full`, no `w-full`, no `border-r`',
+  !/\bh-full\b/.test(railCardClass) && !/\bw-full\b/.test(railCardClass) && !/\bborder-r\b/.test(railCardClass),
+  railCardClass
+);
+const drawerClasses = SHELL.match(/fixed top-0 z-50 flex h-full flex-col[^']*'/g) ?? [];
+check(
+  'the rail WRAPPER class string was DISCOVERED (exactly one)',
+  drawerClasses.length === 1,
+  drawerClasses.join(' | ')
+);
+check(
+  'ABSENCE GUARD — the wrapper paints nothing: no full-height fill, edge border or raised shadow behind the card',
+  drawerClasses.every((c) => !/border-r|bg-ink-900|shadow-ds-raised/.test(c)),
+  drawerClasses.join(' | ')
+);
+
+/**
+ * The widths are DERIVED, not retyped: the reference's CARD is 260px / 72px
+ * (spec §3.2) and the wrapper carries it plus the 12px start inset, so 272 / 84
+ * are the only correct wrapper values. Declaring 260 would render a 248px card.
+ */
+const lgWidths = [...SHELL.matchAll(/lg:w-\[(\d+)px\]/g)].map((m) => Number(m[1]));
+check(
+  'the shell declares exactly TWO lg rail widths (expanded + collapsed)',
+  lgWidths.length === 2,
+  `found ${lgWidths.join(', ') || 'none'}`
+);
+check(
+  "the EXPANDED card is the reference's 260px (the wrapper is 260 + the 12px inset)",
+  lgWidths.includes(260 + 12),
+  `widths=${lgWidths.join(', ')}`
+);
+check(
+  "the COLLAPSED card is the reference's 72px (the wrapper is 72 + the 12px inset)",
+  lgWidths.includes(72 + 12),
+  `widths=${lgWidths.join(', ')}`
+);
+
+/** The edge: the theme's own border token, halved — with ONE owner and a fallback. */
+check(
+  '`.ds-rail` sits in the `components` layer, like `.ds-card`',
+  /@layer components\s*\{[\s\S]*?\.ds-rail\s*\{/.test(CSS)
+);
+check(
+  '`.ds-rail` DERIVES its edge from the theme (50% of `--mr-hairline`) instead of declaring a second border value',
+  /\.ds-rail\s*\{[^}]*color-mix\(in srgb, var\(--mr-hairline\) 50%, transparent\)/.test(CSS)
+);
+check(
+  '`.ds-rail` declares the full-strength hairline FIRST, so a browser without `color-mix` degrades to a real edge (not `currentColor`)',
+  /\.ds-rail\s*\{\s*border-color:\s*var\(--mr-hairline\);\s*border-color:\s*color-mix/.test(CSS)
+);
+const themesWithoutHairline = IDS.filter((id) => !blocks[id].includes("'--mr-hairline'"));
+check(
+  "every one of the five themes declares `--mr-hairline`, so the rail's derived edge is a real value in all of them",
+  themesWithoutHairline.length === 0,
+  `missing in: ${themesWithoutHairline.join(', ')}`
+);
+
+/** The measured nav geometry (spec §3.3) — each value from the reference's table. */
+const RAIL_GEOMETRY = [
+  [
+    "the nav row is the reference's 12px radius, 12px gap, 15px-equivalent body step and 12/10px padding",
+    RAIL_CODE.includes(
+      "'flex w-full items-center gap-3 rounded-ds-md text-ds-body font-medium transition-ds duration-ds-fast'"
+    ),
+  ],
+  [
+    'the nav row keeps ONE padding rule for both modes (compact is icon-only, centred)',
+    RAIL_CODE.includes("compact ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5'"),
+  ],
+  [
+    "the nav row's hover is the floating-surface tint from the theme (`hover:bg-tint`)",
+    RAIL_CODE.includes("'text-zinc-500 hover:bg-tint hover:text-zinc-200'"),
+  ],
+  ['ABSENCE GUARD — no legacy `hover:bg-white/[0.04]` remains in the rail', !RAIL_CODE.includes(LEGACY_HOVER)],
+  ["the nav icon takes the reference's 20px step", RAIL_CODE.includes('className="h-5 w-5 flex-shrink-0"')],
+  [
+    "the rail introduces NO unnamed text size (the type scale is the single owner — the reference's 15px is NOT adopted)",
+    (RAIL_CODE.match(/text-\[(1[1-9]|20)px\]/g) ?? []).length === 0,
+  ],
+  ["the section gap is the reference's 20px (`mt-5`)", RAIL_CODE.includes('className="mt-5 first:mt-0"')],
+  ["the item list takes the reference's 4px rhythm (`gap-1`)", RAIL_CODE.includes('className="flex flex-col gap-1"')],
+  [
+    "the nav scroll region takes the reference's padding (`px-3 pb-12 pt-3`)",
+    RAIL_CODE.includes('className="h-full overflow-y-auto px-3 pb-12 pt-3"'),
+  ],
+  [
+    "the header takes the reference's `px-5` / `pt-6` geometry and its 26px mark",
+    RAIL_CODE.includes("'flex items-center gap-3 px-5 pt-6'") && RAIL_CODE.includes('h-[26px] w-[26px]'),
+  ],
+  [
+    "the account area takes the reference's type pair (a 14px name over a 12px second line)",
+    RAIL_CODE.includes('text-ds-body font-semibold leading-tight text-white') &&
+      RAIL_CODE.includes('text-ds-label leading-tight text-zinc-500'),
+  ],
+  [
+    'the scroll fade is present, never intercepts a pointer and is hidden from assistive tech',
+    RAIL_CODE.includes('data-testid="nav-scroll-fade"') &&
+      RAIL_CODE.includes('pointer-events-none absolute inset-x-0 bottom-0 h-14') &&
+      /data-testid="nav-scroll-fade"[\s\S]{0,120}from-ink-900/.test(RAIL_CODE),
+  ],
+];
+for (const [name, ok] of RAIL_GEOMETRY) check(name, ok);
+
+/**
+ * NOTHING MAY BE LOST BY A STYLING BATCH (spec §16 guardrail 1). Every affordance
+ * the rail carried before this batch still exists, by its own test id or contract.
+ */
+const RAIL_PRESERVED = [
+  ['the rail keeps the id the tour engine and the header both target', 'id="app-sidebar"'],
+  ['the compact state is still announced', 'data-nav-compact='],
+  ['the collapse control still exists', 'data-testid="nav-compact-toggle"'],
+  ['the navigation filter still exists', 'data-testid="nav-filter"'],
+  ['the empty-filter message still exists', 'data-testid="nav-filter-empty"'],
+  ['pinning a destination still exists', 'data-testid={`nav-pin-'],
+  ['the active destination is still exposed to assistive tech', 'aria-current='],
+  ['the rail still renders its shell-supplied footer slot', '{footer}'],
+];
+for (const [name, needle] of RAIL_PRESERVED) check(name, RAIL_CODE.includes(needle));
+
+/*
+ * §OPENSHIP BATCH 5 — ACCESSIBILITY (better-accessibility, "one landmark, one name").
+ * The `<aside>` and the `<nav>` inside it BOTH carried `aria-label="Primary"`, so the
+ * landmark list offered the SAME name twice — ambiguous to navigate by a screen reader.
+ * The label now belongs to the navigation landmark alone. This asserts exactly one.
+ */
+check(
+  'exactly ONE "Primary" landmark label exists in the rail (a duplicate name makes the landmark ambiguous)',
+  (RAIL_CODE.match(/aria-label="Primary"/g) || []).length === 1,
+  `found ${(RAIL_CODE.match(/aria-label="Primary"/g) || []).length}`
+);
+check(
+  'the surviving "Primary" label sits on the `<nav>` landmark, not on the `<aside>` wrapper',
+  /<nav aria-label="Primary"/.test(RAIL_CODE)
+);
+check(
+  'the demo environment switcher is still MOUNTED in the footer slot (by the shell, which owns it)',
+  code(SHELL).includes('footer={<EnvironmentRouter'),
+  'src/components/layout/AppShell.tsx no longer passes EnvironmentRouter as the rail footer'
+);
+
+/**
+ * A REAL DEFECT, FIXED AT SOURCE AND HELD SHUT BY A DERIVATION (rule 07): the
+ * environment grid declared THREE columns while its own list holds TWO entries, so
+ * a third of the card sat empty. It was a leftover of §P9 (the carrier entry was
+ * removed and the grid was not). The count is read from the ENTRIES, so the two
+ * cannot drift again: adding a third environment without a third column fails
+ * here, and so does re-hardcoding 3.
+ */
+const envEntries = (ENV_CODE.match(/^\s*\{\s*id:\s*'(brand|admin)'/gm) ?? []).length;
+const gridCols = Number((ENV_CODE.match(/grid-cols-(\d+)/) ?? [])[1] ?? 0);
+check(
+  'the environment list was DISCOVERED (a check that finds nothing is a FAILURE)',
+  envEntries > 0,
+  'no environment entries parsed from EnvironmentRouter.tsx'
+);
+check(
+  "the environment grid's column count EQUALS the number of environments it renders",
+  gridCols === envEntries,
+  `entries=${envEntries} grid-cols=${gridCols}`
+);
+check(
+  'the environment rows take their hover from the theme (`hover:bg-tint`) — the legacy near-white hover was invisible on the light shells',
+  ENV_CODE.includes('hover:bg-tint') && !ENV_CODE.includes(LEGACY_HOVER)
+);
+check(
+  'the ACTIVE environment uses a theme surface step (`bg-ink-700`), so it stays legible on all five themes',
+  ENV_CODE.includes('bg-ink-700')
+);
+
 console.log(
   failures === 0
     ? `SHARED_SURFACES_VALIDATION_PASS (${checks} checks)`

@@ -160,23 +160,49 @@ export function Sidebar({
         : userEmail;
 
   return (
+    /*
+     * §OPENSHIP BATCH 5 — ACCESSIBILITY FIX FOUND BY THE BATCH'S OWN REVIEW (better-accessibility,
+     * "one landmark, one name"): this `<aside>` and the `<nav>` inside it BOTH carried
+     * `aria-label="Primary"`, so a screen reader's landmark list offered "Primary" twice —
+     * two navigation landmarks with the SAME accessible name, which is ambiguous to navigate
+     * by. The label belongs to the navigation landmark, not to the complementary wrapper
+     * around it, so it is removed here and kept on the `<nav>`. `#app-sidebar` (the tour
+     * engine's hook) and the complementary role are unchanged. Pinned by
+     * `scripts/validate-shared-surfaces.mjs`, which now requires exactly ONE "Primary" label
+     * in this file.
+     */
     <aside
       id="app-sidebar"
-      aria-label="Primary"
       data-nav-compact={compact ? 'true' : 'false'}
-      className="flex h-full w-full flex-col border-r border-white/[0.06] bg-ink-900"
+      /*
+       * §OPENSHIP BATCH 5 — THE RAIL IS A FLOATING CARD (spec §3.2/§3.3, the
+       * reference's `my-3 ms-3 rounded-2xl border-border/50 bg-card`, and its
+       * biggest single visual change). It is no longer a full-height rail with an
+       * edge border: it floats with a 12px inset on the top and start sides, has a
+       * 16px radius (`rounded-ds-lg`, the container step) and is clipped so the
+       * navigation scrolls INSIDE the rounded corners.
+       *
+       * `.ds-rail` is the edge (it derives the theme's own hairline — see
+       * `src/index.css`); the fill stays `bg-ink-900` (the theme's surface role),
+       * which is exactly what this element draws today in `bold` and equals the
+       * card role in the other four themes, so no theme's rail changes colour.
+       */
+      className="ds-rail my-3 ms-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-ds-lg border bg-ink-900"
     >
-      {/* Brand block + rail controls */}
-      <div className="border-b border-white/[0.06] px-3 py-3">
-        <div className="flex items-center gap-2.5">
+      {/* Brand block + rail controls — §BATCH 5 geometry: `px-5 py-6`, a 26px mark
+          and the reference's 16px tracking-tight wordmark (spec §3.3). Collapsed,
+          the header stacks (a 72px card cannot hold a 26px mark and a 32px control
+          side by side). */}
+      <div className="border-b border-white/[0.06]">
+        <div className={cn('flex items-center gap-3 px-5 pt-6', compact ? 'flex-col pb-3' : 'pb-6')}>
           <img
             src={brandMark}
             alt="Mercenta Partners hexagon mark"
-            className="h-8 w-8 flex-shrink-0"
+            className="h-[26px] w-[26px] flex-shrink-0"
           />
           {!compact && (
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold tracking-tight text-white">Mercenta</div>
+              <div className="truncate text-ds-title font-semibold tracking-tight text-white">Mercenta</div>
               <div className="truncate text-ds-micro uppercase tracking-wider text-zinc-500">
                 {envLabel}
               </div>
@@ -189,7 +215,7 @@ export function Sidebar({
               aria-label={compact ? 'Expand navigation' : 'Collapse navigation'}
               aria-pressed={compact}
               data-testid="nav-compact-toggle"
-              className="flex-shrink-0 rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-zinc-200"
+              className="flex size-8 flex-shrink-0 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-200"
             >
               {compact ? (
                 <PanelLeft className="h-4 w-4" aria-hidden="true" />
@@ -203,7 +229,7 @@ export function Sidebar({
 
       {/* §UI/UX Wave 3 — find a destination without scrolling the whole rail. */}
       {!compact && (
-        <div className="border-b border-white/[0.06] px-3 py-2">
+        <div className="border-b border-white/[0.06] px-3 py-2.5">
           <div className="relative">
             <Search
               className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600"
@@ -216,181 +242,198 @@ export function Sidebar({
               placeholder="Filter navigation…"
               aria-label="Filter navigation"
               data-testid="nav-filter"
-              className="w-full rounded-ds-sm border border-white/[0.06] bg-white/[0.02] py-1.5 pl-7 pr-2 text-ds-label text-zinc-300 transition-ds duration-ds-fast placeholder:text-zinc-600 focus:border-white/[0.16] focus:outline-none"
+              className="w-full rounded-ds-md border border-white/[0.06] bg-white/[0.02] py-1.5 pl-7 pr-2 text-ds-label text-zinc-300 transition-ds duration-ds-fast placeholder:text-zinc-600 focus:border-white/[0.16] focus:outline-none"
             />
           </div>
         </div>
       )}
 
-      {/* Primary navigation */}
-      <nav aria-label="Primary" className="flex-1 overflow-y-auto px-2 py-2">
-        {visibleSections.map((section) => {
-          const accent = sectionAccentVar(section.label);
-          /**
-           * While a filter is active, a collapsed section would hide the result
-           * the user just searched for — so every match is shown expanded.
-           */
-          const isCollapsed = navFilterActive
-            ? false
-            : section.label
-              ? collapsed.includes(section.label)
-              : false;
-          /**
-           * §UI/UX Wave 2 — pinned destinations sort FIRST inside their own
-           * section, so a destination is never duplicated (no second
-           * aria-current, no ambiguous nav target).
-           */
-          const ordered = [...section.items].sort((a, b) => {
-            const pa = pinned.includes(a.id) ? 0 : 1;
-            const pb = pinned.includes(b.id) ? 0 : 1;
-            return pa - pb;
-          });
-          const sectionBadge = section.items.reduce((a, i) => a + (i.badge ?? 0), 0);
-          return (
-            <div key={section.label} className="mb-0.5 mt-2 first:mt-0">
-              {section.label && (
-                <div className="flex items-center gap-1">
-                  <p className="mb-1 min-w-0 flex-1 truncate px-2 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
-                    {section.label}
-                  </p>
-                  {!compact && sectionBadge > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="mb-0.5 font-mono text-ds-micro text-zinc-500"
-                    >
-                      {sectionBadge}
-                    </span>
-                  )}
-                  {!compact && (
-                    <button
-                      type="button"
-                      onClick={() => toggleSection(section.label)}
-                      aria-expanded={!isCollapsed}
-                      aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${section.label}`}
-                      data-testid={`nav-collapse-${section.label}`}
-                      className="mb-0.5 rounded-ds-sm p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
-                    >
-                      <ChevronDown
-                        className={cn(
-                          'h-3 w-3 transition-transform duration-ds-fast',
-                          isCollapsed && '-rotate-90'
-                        )}
+      {/* Primary navigation — §BATCH 5: the scroll region is wrapped so the
+          reference's scroll fade can sit over it (a fade INSIDE a scroller would
+          scroll away with the content). */}
+      <div className="relative min-h-0 flex-1">
+        <nav aria-label="Primary" className="h-full overflow-y-auto px-3 pb-12 pt-3">
+          {visibleSections.map((section) => {
+            const accent = sectionAccentVar(section.label);
+            /**
+             * While a filter is active, a collapsed section would hide the result
+             * the user just searched for — so every match is shown expanded.
+             */
+            const isCollapsed = navFilterActive
+              ? false
+              : section.label
+                ? collapsed.includes(section.label)
+                : false;
+            /**
+             * §UI/UX Wave 2 — pinned destinations sort FIRST inside their own
+             * section, so a destination is never duplicated (no second
+             * aria-current, no ambiguous nav target).
+             */
+            const ordered = [...section.items].sort((a, b) => {
+              const pa = pinned.includes(a.id) ? 0 : 1;
+              const pb = pinned.includes(b.id) ? 0 : 1;
+              return pa - pb;
+            });
+            const sectionBadge = section.items.reduce((a, i) => a + (i.badge ?? 0), 0);
+            return (
+              <div key={section.label} className="mt-5 first:mt-0">
+                {section.label && (
+                  <div className="flex items-center gap-1">
+                    <p className="mb-2 min-w-0 flex-1 truncate px-2 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                      {section.label}
+                    </p>
+                    {!compact && sectionBadge > 0 && (
+                      <span
                         aria-hidden="true"
-                      />
-                    </button>
-                  )}
-                </div>
-              )}
-              {!isCollapsed && (
-              <ul className="flex flex-col gap-0.5">
-                {ordered.map((item) => {
-                  const active = activeView === item.id;
-                  const itemPinned = pinned.includes(item.id);
-                  return (
-                    <li key={item.id} className="group/navitem relative">
+                        className="mb-2 font-mono text-ds-micro text-zinc-500"
+                      >
+                        {sectionBadge}
+                      </span>
+                    )}
+                    {!compact && (
                       <button
                         type="button"
-                        onClick={() => setActiveView(item.id)}
-                        data-tour={item.tourAttr}
-                        data-state={active ? 'active' : 'idle'}
-                        data-compact={compact ? 'true' : 'false'}
-                        aria-current={active ? 'page' : undefined}
-                        title={compact ? item.label : undefined}
-                        className={cn(
-                          'flex w-full items-center gap-2.5 rounded-ds-md text-sm transition-ds duration-ds-fast',
-                          compact ? 'justify-center px-0 py-2' : 'px-2.5 py-1.5',
-                          active
-                            ? 'text-white'
-                            : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
-                        )}
-                        style={
-                          active
-                            ? {
-                                backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
-                              }
-                            : undefined
-                        }
+                        onClick={() => toggleSection(section.label)}
+                        aria-expanded={!isCollapsed}
+                        aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${section.label}`}
+                        data-testid={`nav-collapse-${section.label}`}
+                        className="mb-2 rounded-ds-sm p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
                       >
-                        <span
-                          className="h-4 w-4 flex-shrink-0"
-                          style={{ color: active ? accent : undefined }}
-                        >
-                          {item.icon}
-                        </span>
-                        {!compact && (
-                          <span className="min-w-0 flex-1 truncate text-left font-medium">
-                            {item.label}
-                          </span>
-                        )}
-                        {!compact && typeof item.badge === 'number' && item.badge > 0 && (
-                          <span
-                            data-testid={`nav-badge-${item.id}`}
-                            /* §SSOT S5 — the number travels with its DECLARED set. */
-                            data-badge-label={item.badgeLabel}
-                            title={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
-                            aria-label={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
-                            className="flex-shrink-0 rounded-full px-1.5 py-0.5 font-mono text-ds-micro font-semibold leading-none"
-                            style={{ backgroundColor: accent, color: 'var(--mr-on-palette)' }}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                        {active && (
-                          <span
-                            aria-hidden="true"
-                            className="h-3.5 w-[3px] flex-shrink-0 rounded-full"
-                            style={{ backgroundColor: accent }}
-                          />
-                        )}
+                        <ChevronDown
+                          className={cn(
+                            'h-3 w-3 transition-transform duration-ds-fast',
+                            isCollapsed && '-rotate-90'
+                          )}
+                          aria-hidden="true"
+                        />
                       </button>
-                      {!compact && (
+                    )}
+                  </div>
+                )}
+                {!isCollapsed && (
+                <ul className="flex flex-col gap-1">
+                  {ordered.map((item) => {
+                    const active = activeView === item.id;
+                    const itemPinned = pinned.includes(item.id);
+                    return (
+                      <li key={item.id} className="group/navitem relative">
                         <button
                           type="button"
-                          onClick={() => togglePin(item.id)}
-                          aria-label={
-                            itemPinned ? `Unpin ${item.label}` : `Pin ${item.label} to the top`
-                          }
-                          data-testid={`nav-pin-${item.id}`}
+                          onClick={() => setActiveView(item.id)}
+                          data-tour={item.tourAttr}
+                          data-state={active ? 'active' : 'idle'}
+                          data-compact={compact ? 'true' : 'false'}
+                          aria-current={active ? 'page' : undefined}
+                          title={compact ? item.label : undefined}
                           className={cn(
-                            'absolute right-1 top-1/2 -translate-y-1/2 rounded-ds-sm p-0.5 transition-ds duration-ds-fast',
-                            itemPinned
-                              ? 'text-zinc-300 hover:text-white'
-                              : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'
+                            'flex w-full items-center gap-3 rounded-ds-md text-ds-body font-medium transition-ds duration-ds-fast',
+                            compact ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
+                            active
+                              ? 'text-white'
+                              : 'text-zinc-500 hover:bg-tint hover:text-zinc-200'
                           )}
+                          style={
+                            active
+                              ? {
+                                  backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
+                                }
+                              : undefined
+                          }
                         >
-                          <Pin className="h-3 w-3" aria-hidden="true" />
+                          <span
+                            className="h-5 w-5 flex-shrink-0"
+                            style={{ color: active ? accent : undefined }}
+                          >
+                            {item.icon}
+                          </span>
+                          {!compact && (
+                            <span className="min-w-0 flex-1 truncate text-left font-medium">
+                              {item.label}
+                            </span>
+                          )}
+                          {!compact && typeof item.badge === 'number' && item.badge > 0 && (
+                            <span
+                              data-testid={`nav-badge-${item.id}`}
+                              /* §SSOT S5 — the number travels with its DECLARED set. */
+                              data-badge-label={item.badgeLabel}
+                              title={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
+                              aria-label={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
+                              className="flex-shrink-0 rounded-full px-1.5 py-0.5 font-mono text-ds-micro font-semibold leading-none"
+                              style={{ backgroundColor: accent, color: 'var(--mr-on-palette)' }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                          {active && (
+                            <span
+                              aria-hidden="true"
+                              className="h-3.5 w-[3px] flex-shrink-0 rounded-full"
+                              style={{ backgroundColor: accent }}
+                            />
+                          )}
                         </button>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              )}
-            </div>
-          );
-        })}
-        {navFilterEmpty && (
-          <p className="px-2 py-3 text-ds-label text-zinc-600" data-testid="nav-filter-empty">
-            No destinations match “{query.trim()}”.
-          </p>
-        )}
-      </nav>
+                        {!compact && (
+                          <button
+                            type="button"
+                            onClick={() => togglePin(item.id)}
+                            aria-label={
+                              itemPinned ? `Unpin ${item.label}` : `Pin ${item.label} to the top`
+                            }
+                            data-testid={`nav-pin-${item.id}`}
+                            className={cn(
+                              'absolute right-1 top-1/2 -translate-y-1/2 rounded-ds-sm p-0.5 transition-ds duration-ds-fast',
+                              itemPinned
+                                ? 'text-zinc-300 hover:text-white'
+                                : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'
+                            )}
+                          >
+                            <Pin className="h-3 w-3" aria-hidden="true" />
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                )}
+              </div>
+            );
+          })}
+          {navFilterEmpty && (
+            <p className="px-2 py-3 text-ds-label text-zinc-600" data-testid="nav-filter-empty">
+              No destinations match “{query.trim()}”.
+            </p>
+          )}
+        </nav>
+
+      {/* §BATCH 5 — the reference's 56px scroll fade (spec §3.3), so a partly
+          scrolled rail reads as scrollable instead of cut off. It never
+          intercepts a click, and it fades into the CARD's own fill. */}
+      <div
+        aria-hidden="true"
+        data-testid="nav-scroll-fade"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-ink-900 to-transparent"
+      />
+      </div>
 
       {footer}
 
-      {/* Session footer — Avatar + identity */}
-      <div className="border-t border-white/[0.06] px-3 py-3">
+      {/* Session footer — Avatar + identity. §BATCH 5: the reference's ACCOUNT AREA
+          geometry (`px-3 pb-4 pt-1`, a 12px gap, a 14px name over a 12px second
+          line). The avatar keeps the design system's own step and its circular
+          form rather than the reference's 36px square — the avatar is a shared
+          primitive, so its shape belongs to the system, not to this rail. */}
+      <div className="border-t border-white/[0.06] px-3 pb-4 pt-2">
         <div
           className={cn(
-            'flex items-center gap-2.5 rounded-ds-md px-2 py-1.5 hover:bg-white/[0.03]',
+            'flex items-center gap-3 rounded-ds-md px-2 py-2 hover:bg-tint',
             compact && 'justify-center px-0'
           )}
         >
-          <Avatar name={userName} email={avatarEmail} size="sm" />
+          <Avatar name={userName} email={avatarEmail} size="md" />
           {!compact && (
             <div className="min-w-0">
-              <div className="truncate text-xs font-medium text-white">{userName}</div>
-              <div className="truncate text-ds-micro text-zinc-500">
+              <div className="truncate text-ds-body font-semibold leading-tight text-white">{userName}</div>
+              <div className="truncate text-ds-label leading-tight text-zinc-500">
                 {session?.tier === 'brand'
                   ? envLabel
                   : `${envLabel} · ${actingStaff?.role ?? ''}`.trim()}

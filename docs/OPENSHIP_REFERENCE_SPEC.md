@@ -1016,6 +1016,62 @@ divergence below. Divergences, stated rather than left silent:
    reference's own select contradicts its own input (8px against 12px, §7.4); Mercenta's ramp
    is the single owner of radii, so the control step wins and the inconsistency is not copied.
 
+**§EXECUTED 2026-10-15 (§OPENSHIP BATCH 5) — THE NAVIGATION RAIL, THE RADIUS SCALE THAT WAS
+NEVER EMITTED, AND WHERE IT DIVERGES FROM THE REFERENCE.** Built: the rail is a FLOATING CARD
+(`my-3 ms-3`, `rounded-ds-lg` 16px, its own derived hairline, `overflow-hidden`, no full-height
+edge border and no full-height fill behind it), its width moves to the reference's **260px
+expanded / 72px collapsed** (the wrapper is 260+12 and 72+12, because the 12px inset belongs to
+the card's margin), its nav rows take the reference's geometry (12px radius, 12px gap, `px-3
+py-2.5`, a 20px icon, one 4px list rhythm), its section gap becomes 20px, its header becomes
+`px-5 pt-6` with a 26px mark and the 16px wordmark, its scroll region becomes `px-3 pt-3 pb-12`
+and gains the reference's 56px scroll fade, and the account area becomes the reference's
+`px-3 pb-4 pt-2` block with a 14px name over a 12px second line. Mercenta's feature-identity
+accents, pinning, section collapsing, the nav filter, the compact rail and every destination are
+PRESERVED (each is pinned by the gate, and the navigation inventory by
+`validate-nav-destinations.mjs`). `bold` is preserved BY MECHANISM for its fill and its row
+hover: the fill stays the theme's surface role (which is exactly what `bold` draws today) and
+the hover moves to the ONE floating-surface tint (`--mr-hover-tint`, whose `bold` value IS the
+value the rail hovered with). Divergences, stated rather than left silent:
+
+1. **THE RADIUS RAMP HAD NEVER BEEN ON SCREEN — FOUND BY THIS BATCH'S OWN RENDERED CHECK AND
+   FIXED AT SOURCE.** `tailwind.config.js` declared the ramp as a NESTED object
+   (`borderRadius: { ds: { sm, md, lg, pill } }`). Tailwind 3.4 SILENTLY emits no utility for a
+   nested scale object, so `rounded-ds-sm` (**195** sites), `rounded-ds-md` (**431**) and
+   `rounded-ds-lg` (**88**) — **714 class sites** — rendered `border-radius: 0px`, from §PHASE C4
+   through BATCH 3 and BATCH 4. Every check read the config BLOCK or the SOURCE; none read the
+   generated CSS, which is why "declared · consumed · gated" and "rendered" disagreed for weeks.
+   Reproduced in isolation this session (a minimal config with the same nested shape emitted NO
+   `rounded-ds-*` rule; the same config with FLAT `'ds-*'` keys emitted `border-radius: 16px`),
+   and measured in the built stylesheet (zero occurrences of `rounded-ds`). The keys are now flat
+   — the class names are unchanged, so no call site moved — and
+   `scripts/validate-radius-elevation-scale.mjs` **COMPILES the config in memory and fails if the
+   three used steps do not really emit their declared value**. This is not a divergence from the
+   reference: it is the difference between what the project BELIEVED it rendered and what it did.
+   Consequence for the record: every earlier batch's pixel comparison was measured on a product
+   whose named radius ramp was inert; BATCH 5's own measurement (median **13.5%** of pixels moved
+   across the 30 baselines) is the first that contains real corners.
+2. **The nav row keeps the canonical 14px body step, not the reference's 15px.** The project's
+   type scale has five named steps and no 15px step, and its own written rule is that a 1px
+   difference between two steps is not a hierarchy (`tailwind.config.js`, §PHASE C4). The
+   reference's 15px is therefore NOT adopted, and the rail is pinned as introducing no unnamed
+   size.
+3. **The account avatar keeps the design system's own step and form** (32px, circular) rather
+   than the reference's 36px square: the avatar is a SHARED primitive, so its geometry belongs to
+   the design system, not to one rail. Its type pair does follow the reference (14px over 12px).
+4. **The section heading keeps the project's `tracking-[0.14em]`** (its convention at 52 sites)
+   rather than the reference's `tracking-widest`; the 11px size and uppercase treatment are the
+   reference's and are unchanged.
+5. **The rail's own navigation filter keeps its compact metrics.** The reference measures 44px on
+   form controls (§7.3), which BATCH 4 applied to `Input`/`Select`/`Textarea`; this filter is the
+   rail's own toolbar affordance (and has no counterpart in the reference), so it is aligned to
+   the card instead of promoted to a 44px form row.
+6. **A defect in the rail's own footer, fixed at source (rule 07).** The demo environment
+   switcher's grid declared THREE columns while its list holds TWO entries — a leftover of §P9,
+   which removed the carrier entry and left the grid behind, so a third of the card rendered
+   empty. It is now two columns, its rows take the theme's hover tint (the legacy near-white
+   hover is invisible on the light shells' card), and the gate DERIVES the column count from the
+   entries so the two cannot drift apart again.
+
 ---
 
 ## 14. VISUAL IMPLEMENTATION DECISIONS

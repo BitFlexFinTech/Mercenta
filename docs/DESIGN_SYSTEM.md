@@ -106,8 +106,17 @@ Rules:
 
 #### §PHASE C4 — the canonical radius + elevation scale
 
-Declared ONCE in `tailwind.config.js` (`theme.extend.borderRadius.ds`, `theme.extend.boxShadow`),
-which `npm run validate:radius-elevation` reads as the OWNER. The scale exists because
+Declared ONCE in `tailwind.config.js` (`theme.extend.borderRadius` — the FLAT `'ds-sm'…'ds-pill'`
+keys, and `theme.extend.boxShadow`), which `npm run validate:radius-elevation` reads as the OWNER.
+**§OPENSHIP BATCH 5 (2026-10-15) — REPOINTED, and a real defect closed.** This line used to read
+`theme.extend.borderRadius.ds`, i.e. the NESTED object `{ ds: { sm, md, lg, pill } }` — a shape
+Tailwind 3.4 SILENTLY EMITS NO UTILITY FOR. The ramp was therefore declared, documented, consumed
+by **714 class sites** (195 + 431 + 88) and rendered `border-radius: 0px` on every one of them,
+from §PHASE C4 through BATCH 3 and BATCH 4. Nothing caught it because every check read THIS BLOCK
+or the source, and none read the generated CSS. The keys are now flat (same class names, so no
+call site moved), and the gate **COMPILES the config in memory and fails if `rounded-ds-sm|md|lg`
+do not really emit their declared value** — a declared-but-inert scale can no longer pass. The
+scale exists because
 the design system declared four steps while the product rendered five UNNAMED ones —
 **630 class sites had no place in the ramp** (`rounded-lg` 387 · `rounded-md` 97 ·
 bare `rounded` 85 · `rounded-xl` 58 · `rounded-full` 76 · `rounded-2xl` 4 · `rounded-sm` 3)
@@ -146,6 +155,9 @@ invents their own version of.
 - The gate fails on an unnamed radius reappearing (including **per-side** forms such as
   `rounded-t-lg` and arbitrary `rounded-[…]`), on `rounded-2xl` escaping the marketing
   folder, and on a `border-radius` literal in CSS that the ramp does not declare.
+- §OPENSHIP BATCH 5 — it also **compiles the config** and asserts the three used steps really
+  emit their declared value: a scale that is declared but never generated is the defect that
+  shipped for weeks (see the note above), so "an empty compile" is a FAILURE, not a pass.
 - Migration is mechanical and idempotent: `npm run migrate:radius-elevation`
   (re-running is a no-op).
 

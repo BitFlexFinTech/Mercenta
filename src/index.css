@@ -59,9 +59,27 @@ body {
      transparent, it would VANISH on the four themes — the reference states this
      rule for exactly that reason (spec §2.7). `bold`'s token reproduces its own
      card fill, so the rule is a no-op there. */
+/* ── §OPENSHIP BATCH 5 — THE NAVIGATION RAIL IS A FLOATING CARD ─────────────
+   The reference's sidebar is a floating card with its own edge — and that edge
+   is NOT the card rule: its cards are transparent-bordered, while the rail
+   explicitly draws `border border-border/50` (spec §3.2/§3.3, `sidebar.tsx:307`,
+   and the same class the borderless-card rule carves out as an exception in
+   §2.7). So the rail's edge is HALF the theme's own border colour.
+
+   ONE owner for that colour: `--mr-hairline` is the theme's border token (it
+   equals the reference's `--th-bd-default` in every theme), so the rail DERIVES
+   its edge rather than declaring a second border value nobody else uses.
+
+   The first declaration is the graceful fallback for a browser without
+   `color-mix`: the rail then draws the full-strength hairline (a sane edge)
+   instead of falling back to `currentColor`, which `border` alone would give. */
 @layer components {
   .ds-card {
     border-color: var(--mr-card-border);
+  }
+  .ds-rail {
+    border-color: var(--mr-hairline);
+    border-color: color-mix(in srgb, var(--mr-hairline) 50%, transparent);
   }
 }
 .ds-card .ds-card {

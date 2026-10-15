@@ -246,13 +246,37 @@ export default {
        * migration script (`npm run migrate:radius`) needs no update: it maps class
        * NAMES, not values.
        */
+      /*
+       * §OPENSHIP BATCH 5 (2026-10-15) — THE RAMP IS DECLARED FLAT, BECAUSE THE
+       * NESTED FORM EMITTED **NOTHING**. This block used to read
+       *
+       *     borderRadius: { ds: { sm: '8px', md: '12px', lg: '16px', pill: … } }
+       *
+       * and Tailwind 3.4 SILENTLY DROPS a nested scale object: `matchUtilities`
+       * coerces the entry's value to a string, the declaration is invalid, and no
+       * `rounded-ds-*` rule is emitted at all. MEASURED this session, in the built
+       * stylesheet: `rounded-ds-sm` 195 sites · `rounded-ds-md` 431 · `rounded-ds-lg`
+       * 88 — **714 class sites with NO border-radius**, since §PHASE C4 and through
+       * BATCH 3. The classes were in the DOM the whole time, which is why nothing
+       * noticed: every check read THIS BLOCK, and none read the generated CSS.
+       *
+       * The one-line cause, reproduced in isolation (a minimal config with the same
+       * nested shape and a raw class list): the compiled output contained no
+       * `rounded-ds-*` rule, while the SAME config with flat `'ds-*'` keys emitted
+       * `border-radius: 16px` etc.
+       *
+       * The keys are therefore FLAT (`'ds-sm'` … `'ds-pill'`), which is the shape
+       * Tailwind's own `rounded-${key}` generator consumes; the class names the app
+       * already uses are unchanged (`rounded-ds-sm|md|lg|pill`), so no call site and
+       * no migration mapping changes. `scripts/validate-radius-elevation-scale.mjs`
+       * no longer trusts the shape: it COMPILES this config and fails if the three
+       * used steps do not really emit their declared value.
+       */
       borderRadius: {
-        ds: {
-          sm: '8px',      // small controls — in-row chips, tags, kbd/<code>, thumbnails, micro icon buttons
-          md: '12px',     // controls — buttons, inputs, selects, textareas, tabs, nav items
-          lg: '16px',     // containers — cards, panels, modals, popovers, dropdowns, tables
-          pill: '9999px', // pills · avatars · dots · status badges (`rounded-full` is the same value)
-        },
+        'ds-sm': '8px',      // small controls — in-row chips, tags, kbd/<code>, thumbnails, micro icon buttons
+        'ds-md': '12px',     // controls — buttons, inputs, selects, textareas, tabs, nav items
+        'ds-lg': '16px',     // containers — cards, panels, modals, popovers, dropdowns, tables
+        'ds-pill': '9999px', // pills · avatars · dots · status badges (`rounded-full` is the same value)
       },
       /**
        * §PHASE C4 (2026-10-13) — THE ELEVATION SCALE, and ONE REMOVAL.

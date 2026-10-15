@@ -179,11 +179,23 @@ export function AppShell({
         />
       )}
 
-      {/* Drawer below lg; static aligned layout at lg+. Single nav DOM tree. */}
+      {/*
+       * §OPENSHIP BATCH 5 — THE RAIL IS A FLOATING CARD, so the WRAPPER no longer
+       * paints anything: the full-height edge border, the surface fill and the
+       * raised shadow are gone, and the rail inside (`.ds-rail`, `Sidebar.tsx`)
+       * now owns the surface, its own hairline and its 12px inset on two sides.
+       * Leaving the fill here would paint a full-height column behind the card and
+       * hide the floating effect the batch exists for.
+       *
+       * WIDTHS: the reference's card is 260px expanded / 72px collapsed (spec §3.2)
+       * and it floats with a 12px start margin, so the WRAPPER is 260+12 = 272px and
+       * 72+12 = 84px. Declaring 260 here instead would render a 248px card.
+       * The `w-72` mobile drawer is unchanged: it is a drawer, not the rail.
+       */}
       <div
         className={cn(
-          'fixed top-0 z-50 flex h-full flex-col border-r border-white/[0.06] bg-ink-900 shadow-ds-raised transition-ds duration-ds',
-          navCompact ? 'w-72 lg:w-16' : 'w-72 lg:w-60',
+          'fixed top-0 z-50 flex h-full flex-col transition-[width,transform] duration-ds',
+          navCompact ? 'w-72 lg:w-[84px]' : 'w-72 lg:w-[272px]',
           navOpen ? 'translate-x-0' : '-translate-x-full',
           'lg:static lg:translate-x-0'
         )}

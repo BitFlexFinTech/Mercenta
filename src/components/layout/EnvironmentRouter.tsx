@@ -69,10 +69,10 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
               title={env.label}
               data-testid={`env-switch-${env.id}`}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-ds-sm transition-ds duration-ds-fast',
+                'flex h-7 w-7 items-center justify-center rounded-ds-md transition-ds duration-ds-fast',
                 active
-                  ? 'bg-white/[0.1] text-white'
-                  : 'text-zinc-600 hover:bg-white/[0.04] hover:text-zinc-300'
+                  ? 'bg-ink-700 text-white'
+                  : 'text-zinc-600 hover:bg-tint hover:text-zinc-300'
               )}
             >
               {env.icon}
@@ -98,7 +98,21 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
           Demo
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-1">
+      {/*
+       * §OPENSHIP BATCH 5 — a REAL defect fixed at source: this grid declared THREE
+       * columns while `ENVIRONMENTS` holds TWO entries, so each button took a third
+       * of the row and a third of the card sat empty. It was a leftover of §P9,
+       * which removed the `3PL Carrier View` entry and left the grid behind.
+       * `validate-shared-surfaces.mjs` now DERIVES the column count from the
+       * entries and fails on a mismatch, so the two cannot drift apart again.
+       *
+       * The row fills move onto theme roles rather than hardcoded whites: the
+       * hover is the canonical floating-surface tint (`bg-tint` — a legacy
+       * `white/[0.04]` remaps to a near-white fill on the light shells, where it
+       * was INVISIBLE on this card), and the active fill is the theme's own
+       * surface-hover step, so it reads as selected on all five themes.
+       */}
+      <div className="grid grid-cols-2 gap-1">
         {ENVIRONMENTS.map((env) => {
           const active = environment === env.id;
           return (
@@ -111,10 +125,10 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
               title={env.label}
               data-testid={`env-switch-${env.id}`}
               className={cn(
-                'flex min-h-[36px] flex-col items-center justify-center gap-0.5 rounded-ds-sm border px-1 py-1 text-ds-micro font-medium transition-ds duration-ds-fast',
+                'flex min-h-[36px] flex-col items-center justify-center gap-0.5 rounded-ds-md border px-1 py-1 text-ds-micro font-medium transition-ds duration-ds-fast',
                 active
-                  ? 'border-white/[0.16] bg-white/[0.08] text-white'
-                  : 'border-transparent text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300'
+                  ? 'border-white/[0.16] bg-ink-700 text-white'
+                  : 'border-transparent text-zinc-500 hover:bg-tint hover:text-zinc-300'
               )}
             >
               <span aria-hidden="true">{env.icon}</span>

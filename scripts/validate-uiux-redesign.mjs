@@ -455,7 +455,26 @@ check(
 );
 check('nav sections collapsible', SIDEBAR_SRC.includes('toggleSection'));
 check('compact rail opt-in implemented', SIDEBAR_SRC.includes('onToggleCompact'));
-check('single nav landmark preserved (one <aside>)', (SIDEBAR_SRC.match(/<aside/g) ?? []).length === 1);
+/*
+ * §OPENSHIP BATCH 5 (2026-10-15) — REPOINTED, not weakened. This assertion counted
+ * `<aside` in the RAW source, so a COMMENT that merely mentions the element broke it:
+ * BATCH 5's rail records the landmark fix in a comment beside the element, and the
+ * assertion then read 2 asides while the file still renders exactly one. The project's
+ * own convention for such guards (`scripts/validate-shared-surfaces.mjs`) is to assert
+ * against CODE, not prose, so the count is taken from the comment-stripped source — the
+ * contract is unchanged (exactly one element), and the a11y contract is now checked too.
+ */
+const SIDEBAR_CODE_COPY = stripComments(SIDEBAR_SRC);
+check(
+  'single nav landmark preserved (one `<aside>` element in code, not counting prose)',
+  (SIDEBAR_CODE_COPY.match(/<aside\b/g) ?? []).length === 1,
+  `found ${(SIDEBAR_CODE_COPY.match(/<aside\b/g) ?? []).length}`
+);
+check(
+  'exactly ONE "Primary" landmark label is rendered (the `<nav>`; a duplicate name is ambiguous)',
+  (SIDEBAR_CODE_COPY.match(/aria-label="Primary"/g) ?? []).length === 1,
+  `found ${(SIDEBAR_CODE_COPY.match(/aria-label="Primary"/g) ?? []).length}`
+);
 check('aria-current per active item preserved', SIDEBAR_SRC.includes('aria-current={active ?'));
 check('data-state active/idle preserved', SIDEBAR_SRC.includes("active ? 'active' : 'idle'"));
 const BADGES_SRC = read('src/lib/nav/navBadges.ts');
