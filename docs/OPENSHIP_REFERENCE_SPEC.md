@@ -892,8 +892,8 @@ Every row below was measured in this repository this session.
 
 | Element | Mercenta today | OpenShip | Delta |
 |---|---|---|---|
-| **Sidebar container** | `border-r border-white/[0.06] bg-ink-900 shadow-ds-raised`, full height | floating card `my-3 ms-3 rounded-2xl border-border/50 bg-card`, no border | **the biggest single visual change** |
-| **Sidebar width** | `w-72 lg:w-60` = **240px**; compact `lg:w-16` = **64px** | **260px** expanded / **72px** collapsed | +20px / +8px |
+| **Sidebar container** | `border-r border-white/[0.06] bg-ink-900 shadow-ds-raised`, full height | floating card `my-3 ms-3 rounded-2xl border-border/50 bg-card`, no border | **the biggest single visual change** — **CLOSED by BATCH 5 (2026-10-15)**: the rail is now that floating card (`.ds-rail`), and the wrapper paints nothing |
+| **Sidebar width** | `w-72 lg:w-60` = **240px**; compact `lg:w-16` = **64px** | **260px** expanded / **72px** collapsed | +20px / +8px — **CLOSED by BATCH 5**: the card is 260 / 72 inside a 272 / 84 wrapper (the 12px inset is the card's own margin) |
 | **Nav row** | `rounded-ds-md` **8px**, `gap-2.5` (10px), `text-sm` **14px**, `px-2.5 py-1.5` | `rounded-xl` **12px**, `gap-3` (12px), `text-[15px]` **15px**, `px-3 py-2.5` | radius +4px, font +1px |
 | **Nav section gap** | `mb-0.5 mt-2` (8px) | `mt-5` (**20px**) | +12px |
 | **Card radius** | `rounded-ds-lg` **12px** | **16px** | +4px |
@@ -1071,6 +1071,44 @@ value the rail hovered with). Divergences, stated rather than left silent:
    empty. It is now two columns, its rows take the theme's hover tint (the legacy near-white
    hover is invisible on the light shells' card), and the gate DERIVES the column count from the
    entries so the two cannot drift apart again.
+
+**§EXECUTED 2026-10-15 (§OPENSHIP BATCH 6) — THE TOP BAR: SURFACE AND TYPE, AND WHERE IT DERIVES RATHER
+THAN COPIES.** Built: the bar keeps every control it had and changes only its surface and type (the
+batch's own scope, §16). **Surface:** it no longer paints a fill of its own — the reference's only
+header carries no background class, so it sits on the page — and its single separation is a DERIVED
+bottom edge (`.ds-bar`: 40% of the theme's border token, the reference's own
+`border-b border-border/40`, with the full-strength hairline declared first as the fallback).
+**Type:** the command bar takes the reference's default button height and type (40px, 14px) in place
+of a ~34px pill at 12px; the account menu's exit label moves from 11px to the 12px small-meta step;
+the `kbd` hint moves from 11px to 12px. **Controls:** every chrome control is now the reference's own
+control — a 36px square icon control at the 12px control radius (the drawer toggle, the notification
+bell, the theme trigger) or a 36px-high control (the account button) — and every hover in chrome
+comes from the ONE floating-surface tint (`--mr-hover-tint`) instead of a legacy near-white, which is
+invisible on the light designs. Every control, test id, aria wiring and behaviour is preserved (the
+gate lists all fifteen of them). Divergences, stated rather than left silent:
+
+1. **The bar keeps its 56px height (`h-14`) — the reference's own mobile-header value.** There is no
+   other measurement to copy: OpenShip's desktop shell has no top bar at all (§3.1), so every value
+   here is DERIVED from that one header plus its control primitives, and this record says so rather
+   than implying a source it does not have.
+2. **It stays a full-bleed band, not a floating card.** The reference's own header IS a full-bleed
+   band separated by a bottom border — the only header evidence that exists — so floating the
+   desktop bar would have invented something the reference does not show. The rail floats; the bar
+   does not; both are stated rather than left to inference.
+3. **The `lg:px-8` step of the reference's container ladder (`px-4 sm:px-6 lg:px-8`) is NOT applied
+   to the bar.** The bar takes the first two steps; the third belongs with the shared page container
+   in BATCH 7, where the header and the content below it can be aligned to each other in ONE change
+   rather than by halves.
+4. **The `kbd` hint is 12px, not the reference's 10px.** The project's type scale declares an 11px
+   floor and no 10px step, and a keyboard hint is not worth a scale bypass — so the floor wins, the
+   same reasoning BATCH 5 recorded for the reference's 15px nav label.
+5. **TWO LIVE CLAIMS THAT WERE ALREADY FALSE WERE REPOINTED IN THE SAME CHANGE**
+   (`docs/DESIGN_SYSTEM.md`, "Shell & Navigation"): it still described the active nav item as a
+   "brass-accented icon + `bg-white/[0.08]` fill" and sections as "never `aria-expanded` — no
+   collapsible sections". Both had been false since §UI/UX Wave 2 (the feature-identity accent and
+   collapsible sections), and BATCH 5 then replaced the rail's hover mechanism as well. They are
+   corrected at source with a `§REPOINTED` note and a new "Chrome surfaces" sub-section, because a
+   live describer must not outlive the thing it describes.
 
 ---
 

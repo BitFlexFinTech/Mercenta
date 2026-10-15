@@ -494,4 +494,82 @@ test.describe('§OPENSHIP BATCH 5 — the navigation rail is a floating card', (
   });
 });
 
+/**
+ * §OPENSHIP BATCH 6 — THE TOP BAR, verified where it RENDERS.
+ *
+ * The source gate proves the class strings; only a browser can prove the RESULT — that
+ * the bar really is 56px, that it paints NO fill of its own, that its only separation is
+ * the DERIVED edge at 40% of the theme's border, that its padding is the reference's
+ * container ladder, and that every control is the reference's 36px (or 40px) control.
+ * NOTE ON PROVENANCE: OpenShip has no desktop top bar (spec §3.1), so these values are
+ * DERIVED from its mobile header and its control primitives — this test asserts the
+ * DECISION, not a copied component.
+ */
+test.describe('§OPENSHIP BATCH 6 — the top bar is surface and type only', () => {
+  test('the bar sits on the page, keeps its derived edge, and its controls are 36/40px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await loginAs(page, 'Super Admin — Tadii');
+    await expect(page.locator('text=Admin Overview').first()).toBeVisible({ timeout: 8000 });
+
+    const bar = page.locator('header').first();
+    const box = await bar.boundingBox();
+    expect(box, 'the top bar renders').not.toBeNull();
+
+    const style = await bar.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return {
+        height: s.height,
+        padLeft: s.paddingLeft,
+        bg: s.backgroundColor,
+        borderBottomWidth: s.borderBottomWidth,
+        borderBottomColor: s.borderBottomColor,
+      };
+    });
+    expect(style.height, "the bar keeps the reference's 56px band height").toBe('56px');
+    expect(style.padLeft, "the bar takes the reference's container padding at `sm`").toBe('24px');
+    expect(style.bg, 'the bar paints NO fill of its own — it sits on the page').toBe('rgba(0, 0, 0, 0)');
+    expect(style.borderBottomWidth, 'the derivative edge is a real 1px hairline').toBe('1px');
+
+    /*
+     * The edge is DERIVED: 40% of the theme's own border (minimal-light's #E8E8E8). Chrome
+     * resolves `color-mix()` into `color(srgb … / a)`, other engines may emit `rgba(…)`, so
+     * BOTH notations are read — the assertion is on the composed VALUE, not on a spelling.
+     */
+    const edge = style.borderBottomColor;
+    const srgb = edge.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\)/);
+    const rgba = edge.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    const redChannel = srgb ? Math.round(Number(srgb[1]) * 255) : rgba ? Number(rgba[1]) : NaN;
+    const alpha = srgb ? Number(srgb[4]) : rgba?.[4] !== undefined ? Number(rgba[4]) : NaN;
+    expect(redChannel, `the derived edge keeps the theme border's own colour (${edge})`).toBe(232);
+    expect(alpha, "the edge is the reference's 40% of that border").toBeCloseTo(0.4, 2);
+
+    /* The controls: the reference's 36px icon control and its 40px default button. */
+    const search = page.getByTestId('app-search-trigger');
+    expect((await search.boundingBox())!.height, "the command bar is the reference's 40px button").toBe(40);
+    const searchFont = await search.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(searchFont, "the command bar takes the reference's 14px control type").toBe('14px');
+
+    for (const [label, locator] of [
+      ['the account control', page.locator('button[aria-controls="profile-menu"]')],
+      ['the theme trigger', page.locator('[data-testid="theme-selector"] button').first()],
+    ] as const) {
+      expect((await locator.boundingBox())!.height, `${label} is the reference's 36px control`).toBe(36);
+    }
+    const bell = page.locator('[data-testid="notification-center"] button').first();
+    const bellBox = await bell.boundingBox();
+    expect(Math.round(bellBox!.width), 'the notification trigger is 36px SQUARE').toBe(36);
+    expect(Math.round(bellBox!.height), 'the notification trigger is 36px SQUARE').toBe(36);
+
+    await page.screenshot({ path: `${SHOTS}/openship-batch6-top-bar.png` });
+
+    /* Below `lg` the drawer toggle appears and is the same 36px control. */
+    await page.setViewportSize({ width: 900, height: 800 });
+    const toggle = page.getByTestId('app-menu-toggle');
+    await expect(toggle).toBeVisible();
+    const toggleBox = await toggle.boundingBox();
+    expect(Math.round(toggleBox!.width), 'the drawer toggle is the 36px icon control').toBe(36);
+    expect(Math.round(toggleBox!.height), 'the drawer toggle is the 36px icon control').toBe(36);
+  });
+});
+
 });

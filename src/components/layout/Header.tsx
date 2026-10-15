@@ -118,7 +118,29 @@ export function Header({
   }, []);
 
   return (
-    <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-white/[0.06] bg-ink-900 px-3 sm:px-5">
+    /*
+     * §OPENSHIP BATCH 6 — THE TOP BAR IS DERIVED, AND THIS IS STATED PLAINLY.
+     * OpenShip HAS NO DESKTOP TOP BAR (spec §3.1: its shell renders a mobile-only
+     * `h-14` header plus the sidebar), so nothing here is a copy of a reference
+     * component. What IS borrowed is the one piece of source evidence that exists
+     * — the reference's own mobile header:
+     *
+     *     flex h-14 shrink-0 items-center justify-between border-b border-border/40 px-4
+     *
+     * so: the SAME 56px height, a bottom edge at 40% of the theme's border token
+     * (`.ds-bar`, `src/index.css` — the rail's 50% is a different, separately
+     * evidenced value), and the reference's container padding ladder at its first
+     * two steps (`px-4 sm:px-6`; its `lg:px-8` step belongs with the shared page
+     * container in BATCH 7, where the header and the content can be aligned to each
+     * other in one change rather than by halves).
+     *
+     * The SURFACE change is the substantive one: the bar no longer paints a
+     * distinct fill (`bg-ink-900`). The reference's header carries no background
+     * class at all — it sits on the page — which is also why its only separation
+     * is the hairline. Every control, its test id, its aria wiring and its
+     * behaviour are unchanged.
+     */
+    <header className="ds-bar flex h-14 flex-shrink-0 items-center gap-3 border-b px-4 sm:px-6">
       {/*
         §UI/UX Wave 3 — CONTEXT ZONE.
         The mislabelled "Home" control was REMOVED. It rendered the text "Home"
@@ -134,7 +156,7 @@ export function Header({
           onClick={onToggleNav}
           aria-expanded={navOpen}
           aria-controls="app-sidebar"
-          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-300 transition-ds duration-ds-fast hover:bg-white/[0.05] lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-300 transition-ds duration-ds-fast hover:bg-tint lg:hidden"
           data-testid="app-menu-toggle"
           aria-label="Open navigation"
         >
@@ -165,7 +187,7 @@ export function Header({
           type="button"
           onClick={signOut}
           title="Back to homepage"
-          className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-micro font-medium uppercase tracking-[0.14em] text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-zinc-300"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-label font-medium uppercase tracking-[0.14em] text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-300"
         >
           <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
           {/* §Wave-3 Part 4 — the LABEL is hidden below `sm`, the control is not.
@@ -190,11 +212,11 @@ export function Header({
         onClick={onOpenSearch}
         data-testid="app-search-trigger"
         aria-label="Search records and destinations"
-        className="hidden min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-ds-label text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex md:max-w-md"
+        className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-3 text-ds-body text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex md:max-w-md"
       >
         <Search className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate text-left">Search records, destinations…</span>
-        <kbd className="flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1 py-0.5 font-mono text-ds-micro text-zinc-500">
+        <kbd className="flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1 py-0.5 font-mono text-ds-label text-zinc-500">
           ⌘K
         </kbd>
       </button>
@@ -215,7 +237,7 @@ export function Header({
             aria-expanded={profileOpen}
             aria-controls="profile-menu"
             aria-haspopup="menu"
-            className="flex items-center gap-2 rounded-ds-md px-1.5 py-1 hover:bg-white/[0.04] transition-colors"
+            className="flex h-9 items-center gap-1.5 rounded-ds-md pl-1 pr-2 hover:bg-tint transition-colors"
           >
             <Avatar name={identity.name} email={identity.email} size="sm" />
             <ChevronDown className="h-3 w-3 text-zinc-500" aria-hidden="true" />

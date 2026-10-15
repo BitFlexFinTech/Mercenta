@@ -467,6 +467,144 @@ check(
   ENV_CODE.includes('bg-ink-700')
 );
 
+/* ══════════════════════════════════════════════════════════════════════════
+   §OPENSHIP BATCH 6 (2026-10-15) — THE TOP BAR: SURFACE AND TYPE.
+
+   The reference has NO desktop top bar (§3.1), so this contract is what a DERIVED
+   top bar must hold to: the reference's own MOBILE header (`h-14`, a bottom edge
+   at 40% of the theme's border, no fill of its own) plus its control language
+   (icon controls at the reference's 36px square / 12px radius, control type at
+   14px, small meta at 12px). Without it, putting `bg-ink-900` and `px-3 sm:px-5`
+   back — or dropping the derived edge — would be invisible to every other check.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const HEADER = read('src/components/layout/Header.tsx');
+const HEADER_CODE = code(HEADER);
+const THEME_SEL = read('src/components/shared/ThemeSelector.tsx');
+const NOTIF = read('src/components/shared/NotificationCenter.tsx');
+
+const headerClass = (HEADER_CODE.match(/<header className="([^"]*)"/) ?? [])[1] ?? '';
+check(
+  'the top bar class string was DISCOVERED in the shell source (a check that finds nothing is a FAILURE)',
+  headerClass.length > 0,
+  'no `<header className=…>` found in src/components/layout/Header.tsx'
+);
+check(
+  "the bar keeps the reference's 56px band height (`h-14`, its own mobile header's value, spec §3.1)",
+  headerClass.includes('h-14')
+);
+check(
+  "the bar no longer paints a fill of its own — it sits on the page, as the reference's header does (no `bg-ink-*`)",
+  !/\bbg-(ink|surface)\b/.test(headerClass),
+  headerClass
+);
+check(
+  "the bar's only separation is its derived bottom edge (`.ds-bar` plus `border-b`)",
+  headerClass.includes('ds-bar') && /\bborder-b\b/.test(headerClass),
+  headerClass
+);
+check(
+  "the bar takes the reference's container padding ladder at its first two steps (`px-4 sm:px-6`)",
+  headerClass.includes('px-4') && headerClass.includes('sm:px-6'),
+  headerClass
+);
+check(
+  '`.ds-bar` sits in the `components` layer, like `.ds-card` and `.ds-rail`',
+  /@layer components\s*\{[\s\S]*?\.ds-bar\s*\{/.test(CSS)
+);
+check(
+  "`.ds-bar` DERIVES 40% of the theme's own border token (the reference's `border-border/40`)",
+  /\.ds-bar\s*\{[^}]*color-mix\(in srgb, var\(--mr-hairline\) 40%, transparent\)/.test(CSS)
+);
+check(
+  '`.ds-bar` declares the full-strength hairline FIRST, so a browser without `color-mix` degrades to a real edge',
+  /\.ds-bar\s*\{\s*border-bottom-color:\s*var\(--mr-hairline\);\s*border-bottom-color:\s*color-mix/.test(CSS)
+);
+
+/** The reference's control language: a 36px icon control, a 40px default button, 14/12px type. */
+check(
+  "the command bar takes the reference's default button height (`h-10` = 40px) instead of a ~34px pill",
+  /data-testid="app-search-trigger"[\s\S]{0,400}?className="hidden h-10 /.test(HEADER)
+);
+check(
+  "the command bar takes the reference's button type step (`text-ds-body`, 14px)",
+  /app-search-trigger[\s\S]{0,400}?text-ds-body/.test(HEADER)
+);
+check(
+  "the `kbd` hint stays inside the project's type floor (12px `ds-label`) — the reference's 10px has no step here",
+  /<kbd[^>]*text-ds-label/.test(HEADER)
+);
+check(
+  "the drawer toggle is the reference's 36px square icon control (`h-9 w-9`), and is the only control hidden above `lg`",
+  /className="flex h-9 w-9 items-center justify-center[^"]*lg:hidden"/.test(HEADER)
+);
+check(
+  "the account control is the reference's 36px-high control (`h-9`)",
+  /aria-controls="profile-menu"[\s\S]{0,260}?className="flex h-9 /.test(HEADER)
+);
+check(
+  "the notification trigger is the reference's 36px square icon control (`h-9 w-9`)",
+  /'relative flex h-9 w-9 items-center justify-center rounded-ds-md/.test(NOTIF)
+);
+check(
+  "the theme trigger is the reference's 36px-high control (`h-9`)",
+  /className="inline-flex h-9 items-center/.test(THEME_SEL)
+);
+
+/** ONE hover mechanism in chrome: the theme's floating-surface tint (BATCH 4's token). */
+for (const [file, label, src] of [
+  ['src/components/layout/Header.tsx', 'the top bar', HEADER],
+  ['src/components/shared/ThemeSelector.tsx', 'the theme trigger', THEME_SEL],
+]) {
+  const c = code(src);
+  check(
+    `${label} takes every hover from the theme (\`bg-tint\`) and leaves NO legacy near-white hover in the control`,
+    c.includes('hover:bg-tint') && !/hover:bg-white\/\[0\.0\d\]/.test(c),
+    file
+  );
+}
+/*
+ * The notification trigger is checked at its OWN class string, not file-wide: this batch
+ * owns the chrome CONTROL, while the panel's rows inside that file are the shared surface
+ * BATCH 8 owns (the same boundary BATCH 4 recorded for the floating panels).
+ */
+const notifTriggerClass = (code(NOTIF).match(/'(relative flex h-9[\s\S]{0,160}?)'/) ?? [])[1] ?? '';
+check(
+  'the notification trigger was DISCOVERED (a check that finds nothing is a FAILURE)',
+  notifTriggerClass.length > 0,
+  'no `relative flex h-9 …` class string found in NotificationCenter.tsx'
+);
+check(
+  'the notification TRIGGER takes its hover from the theme (`hover:bg-tint`) and keeps no legacy near-white hover',
+  notifTriggerClass.includes('hover:bg-tint') && !/hover:bg-white\/\[0\.0\d\]/.test(notifTriggerClass),
+  notifTriggerClass
+);
+check(
+  'the top bar introduces NO unnamed text size (the type scale is the single owner)',
+  (HEADER_CODE.match(/text-\[(1[1-9]|20)px\]/g) ?? []).length === 0,
+  (HEADER_CODE.match(/text-\[(1[1-9]|20)px\]/g) ?? []).join(', ')
+);
+
+/** NOTHING MAY BE LOST BY A RESTYLING BATCH. */
+const HEADER_PRESERVED = [
+  ['the mobile drawer toggle and its aria wiring survive', 'data-testid="app-menu-toggle"'],
+  ['the toggle still tells assistive tech what it controls', 'aria-controls="app-sidebar"'],
+  ['the toggle still announces its expanded state', 'aria-expanded={navOpen}'],
+  ['the command-bar trigger survives (the palette entry point)', 'data-testid="app-search-trigger"'],
+  ['the command bar keeps its accessible name', 'aria-label="Search records and destinations"'],
+  ['the command-bar key hint survives', 'kbd'],
+  ['the account menu keeps its four real actions', "'Account Settings'"],
+  ['the account menu keeps its billing route', "'Billing & Payouts'"],
+  ['the account menu keeps its API-keys route', "'API Keys'"],
+  ['the account menu keeps signing out', 'onClick={signOut}'],
+  ['the route back to the public site survives (four specs depend on its title)', 'title="Back to homepage"'],
+  ['the exit label is still hidden below `sm` rather than the control being lost', 'hidden sm:inline'],
+  ['the notification centre is still mounted', '<NotificationCenter onNavigate={onNavNotification} />'],
+  ['the theme selector is still mounted', '<ThemeSelector compact />'],
+  ['shell-supplied chrome actions still render', '{extraActions}'],
+];
+for (const [name, needle] of HEADER_PRESERVED) check(name, HEADER_CODE.includes(needle));
+
 console.log(
   failures === 0
     ? `SHARED_SURFACES_VALIDATION_PASS (${checks} checks)`

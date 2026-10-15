@@ -236,18 +236,40 @@ canonical way to mount navigation around an environment. Conventions:
 - Nav is defined as **sections** of items: `{ label, items: [{ id, label, icon }] }`
   (`NavSection` in `Sidebar.tsx`). Item `id` values are the SAME view ids the
   shells already switched on — grouping is presentation only.
-- Section headings are static text (`<p>`), never interactive, never
-  `aria-expanded` — no collapsible sections in this phase.
+- §REPOINTED 2026-10-15 (BATCH 6 — the claim it replaces was false): the section
+  heading is a static `<p>` (never itself interactive), but since §UI/UX Wave 2 a
+  SIBLING collapse control (`data-testid="nav-collapse-<section>"`) carries
+  `aria-expanded` and the sections ARE collapsible. A user's collapsed set is a
+  stored preference, and a live navigation filter forces every matching section
+  open so a search result can never be hidden inside a collapsed group.
 - A single unlabelled section (`label: ''`) renders **no heading** (used by the
   three-item Carrier nav).
 
 ### Active-state semantics
-- The active item is `aria-current="page"`, `data-state="active"`, brass-accented
-  icon + `bg-white/[0.08]` fill — never colour-only.
-- Inactive items are `data-state="idle"`.
+- §REPOINTED 2026-10-15 (BATCH 6 — the claim it replaces was false): the active
+  item is `aria-current="page"` and `data-state="active"`, with the
+  **feature-identity accent** — the section's own palette colour
+  (`DOMAIN_COLOURS` in `src/config/themes.ts`, resolved through `sectionDomain`)
+  as a tinted row fill, an accent-coloured icon and a 3px accent rail at the row's
+  trailing edge. It is never colour-only: the ARIA state is the authority and the
+  accent is decoration on top of it. (`bg-white/[0.08]` and a brass icon were the
+  pre-Wave-2 treatment.)
+- Inactive items are `data-state="idle"` and take their hover from the theme's
+  floating-surface tint (`bg-tint`).
 - The primary nav is a single `<nav aria-label="Primary">` landmark; the header
   breadcrumb uses a separate `<nav aria-label="Breadcrumb">` (canonical
   `Breadcrumb` component, `aria-current` on the last item).
+
+### Chrome surfaces (BATCH 5 + BATCH 6, 2026-10-15)
+- The rail is a **floating card** (`.ds-rail`): `my-3 ms-3`, the 16px container
+  radius, its own derived edge (50% of the theme's border token) and 260px /
+  72px widths.
+- The **top bar** is a `h-14` band that paints **no fill of its own** — it sits on
+  the page — separated only by its derived bottom edge (`.ds-bar`, 40% of the
+  theme's border token). Both are DERIVED from the reference's own evidence (the
+  rail's `border-border/50`, the mobile header's `border-b border-border/40`);
+  neither is a copy of a reference component, because OpenShip has no desktop top
+  bar (`docs/OPENSHIP_REFERENCE_SPEC.md` §3.1).
 
 ### Breadcrumb usage
 - `AppShell` derives the trail from the active section + the shell's existing

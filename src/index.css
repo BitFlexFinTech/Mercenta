@@ -81,6 +81,20 @@ body {
     border-color: var(--mr-hairline);
     border-color: color-mix(in srgb, var(--mr-hairline) 50%, transparent);
   }
+  /* ── §OPENSHIP BATCH 6 — THE TOP BAR'S EDGE ────────────────────────────────
+     The reference's ONLY header is its mobile one, and it is the one piece of
+     evidence a desktop top bar can be DERIVED from (spec §3.1): a `h-14` band
+     whose bottom edge is `border-border/40` — 40% of the theme's border — and
+     which carries NO surface fill of its own, so it sits on the page.
+
+     Same ONE owner as `.ds-rail` (`--mr-hairline` is the theme's border token,
+     equal to the reference's `--th-bd-default`), stated at the reference's own
+     40% here, with the full-strength fallback declared first so a browser
+     without `color-mix` still gets a real edge. */
+  .ds-bar {
+    border-bottom-color: var(--mr-hairline);
+    border-bottom-color: color-mix(in srgb, var(--mr-hairline) 40%, transparent);
+  }
 }
 .ds-card .ds-card {
   background-color: var(--mr-card-nested);

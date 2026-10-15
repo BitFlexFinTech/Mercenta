@@ -47,7 +47,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
         aria-haspopup="menu"
         data-state={open ? 'open' : 'closed'}
         title={`Theme: ${label}`}
-        className="inline-flex items-center gap-1.5 rounded-ds-md px-2 py-1.5 text-xs hover:bg-white/[0.06] transition-color"
+        className="inline-flex h-9 items-center gap-1.5 rounded-ds-md px-2.5 text-ds-label hover:bg-tint transition-colors"
       >
         <Palette className="w-3.5 h-3.5" aria-hidden="true" />
         {!compact && <span className="font-medium hidden sm:inline">{label}</span>}

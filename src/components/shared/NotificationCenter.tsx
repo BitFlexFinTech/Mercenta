@@ -569,7 +569,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
       <button
         type="button"
         className={cn(
-          'relative p-1.5 rounded-ds-md transition-colors',
+          'relative flex h-9 w-9 items-center justify-center rounded-ds-md transition-colors hover:bg-tint',
           items.length === 0
             ? 'text-zinc-500 hover:text-zinc-300'
             : highCount > 0
