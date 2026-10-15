@@ -5,7 +5,48 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCH 6 — CURRENT STATUS (session 144, 2026-10-15) — THE TOP BAR: SURFACE AND TYPE ONLY, DERIVED RATHER THAN COPIED
+## §OPENSHIP BATCH 7 — CURRENT STATUS (session 145, 2026-10-15) — PAGE LAYOUTS: THE SHARED CONTAINER, THE ALIGNED APP BAR AND THE 340px RAIL
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `b099b4f` (7 files,
++252/−13). The page container is capped at 1600px, centred and on the reference's padding
+ladder; the app bar carries the same container on an inner row so the two share one leading
+edge at every width; the context rail takes the reference's 340px/24px measurements. **NOT
+deployed and NOT live-verified** — the container moves content on every screen, so the
+three-way gate APPLIES and is UNSATISFIED; publishing needs the Owner's approval and none has
+been given. No credential was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", where the recorded NEXT TASK was
+   BATCH 7 — page layouts — scoped in `docs/OPENSHIP_REFERENCE_SPEC.md` §16 and measured in
+   §4.1–§4.3.
+2. **WHAT WAS BUILT.** `WorkspaceFrame` is now `max-w-[1600px] mx-auto px-4 py-6 sm:px-6 lg:px-8`
+   (the reference's container, cap and centring included) replacing `px-4 py-4 sm:px-5 sm:py-5
+   lg:px-6`; the page description takes the reference's 6px gap; the context rail is 340px with
+   a 24px gap; and `Header.tsx` carries `mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8` on an inner
+   row — the `lg:px-8` step BATCH 6 deferred so the alignment could happen in one change.
+3. **A DEFECT THIS SESSION INTRODUCED, CAUGHT AND FIXED.** An edit deleted the browser spec's
+   top-level `describe` closing brace (it read as a stray); the suite's own typecheck caught it
+   immediately and it was restored before any test ran again.
+4. **GATES EXTENDED, EACH PROVED ABLE TO FAIL.** `validate-shared-surfaces` **125 → 135**
+   (container discovered + absence guard for the retired ladder, the bar's inner row on the FULL
+   ladder, a DERIVED alignment assertion comparing both class strings, the 340px/24px rail, the
+   kept `xl` switch, the `mt-1.5` description, the complementary landmark). Mutations: the old
+   container ⇒ **4 failures**; the 320px rail ⇒ **2**; the bar losing its `lg` step ⇒ **2** —
+   files restored byte-identical. The BATCH 6 rendered test was REPOINTED for the moved padding.
+5. **RENDER VERIFIED.** 1440: padding 32px, top padding 24px, the bar's first control on the same
+   x as the container. 1920: content 1600px wide, both column gaps equal within 1px (centred, by
+   measurement), the bar row centred with it. A real surface with a context column: rail 340px.
+6. **MEASURED.** `typecheck` 0 · `lint` 0 · `build` ok · `validate:all` **196 PASS / 0 FAIL** ·
+   e2e 68 tests: 67 passed and 1 load-related timeout (design-system 390x844), re-verified **7/7**
+   in isolation at `--workers=1` · the 30 baselines BEFORE/AFTER: **median 10.802% of pixels
+   moved** (max 20.666%, min 5.718%).
+7. **FIVE DIVERGENCES** recorded in `docs/OPENSHIP_REFERENCE_SPEC.md`: the rail keeps the
+   project's `xl` switch; the page header keeps the project's `mb-3` rhythm; the title keeps the
+   Mercenta display face; the frame keeps its `reading`/`compact` affordances; and the
+   brace-defect above is recorded rather than hidden.
+8. **NEXT.** BATCH 8, the component states (empty · loading · error · interaction ·
+   no-permission, plus the two floating panels). Deployment remains PENDING the Owner's approval.
+
+## §OPENSHIP BATCH 6 (session 144, 2026-10-15) — THE TOP BAR: SURFACE AND TYPE ONLY, DERIVED RATHER THAN COPIED — SUPERSEDED BY §OPENSHIP BATCH 7
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `dc151a9` (9 files,
 +339/−19). The bar sits on the page with no fill of its own, separated only by a DERIVED bottom
