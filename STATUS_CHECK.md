@@ -5,7 +5,64 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
-## §OPENSHIP BATCH 3 — CURRENT STATUS (session 141, 2026-10-14) — THE DESIGN FOUNDATIONS, AND `bold` PROVEN UNCHANGED
+## §OPENSHIP BATCH 4 — CURRENT STATUS (session 142, 2026-10-15) — THE SHARED SURFACES AND CONTROLS, AND `bold` PRESERVED BY MECHANISM
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `5122b76` (12 files,
++434/−33). The card is borderless, the control is 44px with one 14px label step, the modal scrim
+is the theme's own token with a real blur, and all three dropdowns are translucent and blurred.
+**NOT deployed and NOT live-verified** — this batch changes what every screen looks like, so the
+three-way gate APPLIES and is UNSATISFIED; publishing needs the Owner's approval and none has
+been given. No credential was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue with the next batch", where the recorded NEXT TASK was
+   BATCH 4 — the shared surfaces and controls — whose scope is fixed in
+   `docs/OPENSHIP_REFERENCE_SPEC.md` §16 and measured in its §7 and §12.
+2. **WHAT WAS BUILT.** Three ROLE tokens on all five themes (`--mr-card-border`,
+   `--mr-card-nested`, `--mr-hover-tint`) and the named `tint` colour; `.ds-card` in
+   `src/index.css`; the nested-card rule; the input at the reference's 44px/`px-3.5` with ONE
+   shared 14px label step across Input, Select and Textarea; the modal scrim on
+   `var(--mr-overlay-tint)` + `backdrop-blur-lg` with a ~30px close target; and
+   `bg-ink-800/70 backdrop-blur-xl` on all three dropdown surfaces with a theme-driven row hover.
+3. **WHAT MAKES IT SAFE, AND WHY THAT IS PART OF THE BATCH.** Removing a card's border would make
+   an inner card the SAME fill as its outer and therefore INVISIBLE on the four non-Bold themes.
+   The reference states its nested-card rule for exactly that reason (spec §2.7), so the rule is
+   implemented here, and the gate asserts the FUNCTIONAL requirement (the nested fill must
+   differ from the card fill) rather than the presence of a token. In `bold` the nested value
+   equals the card fill, so the rule is a NO-OP there — preservation by mechanism.
+4. **TWO DEFECTS FIXED AT SOURCE ON THE WAY.** The modal's scrim was a hardcoded `bg-black/70`
+   that ignored the theme entirely (fatal on `serious`, whose black page needs the reference's
+   INVERTED veil); and the dropdown rows' hover was a legacy near-white shim that was invisible
+   on the light themes. Both were replaced by theme-owned values, not patched around.
+5. **THE BATCH'S OWN GATE — `scripts/validate-shared-surfaces.mjs` (48 checks, NEW).** Before it,
+   reverting any of these four treatments was invisible to the whole corpus. It also pins a
+   silent-no-op guard (Tailwind 3.4 quietly drops `/opacity` on a CSS variable). **Proved able to
+   fail FOUR ways** — card class reverted (2 failures), nested fill equal to the card fill (6),
+   hardcoded scrim restored (2), the four borders given back (8) — each file restored
+   BYTE-IDENTICAL (sha256 ui `ddfd4e005d7c1531` · themes `2895df3601eb23fe`). It also caught a
+   weakness IN ITSELF (a positive check matching a class string quoted in a comment), which was
+   fixed: absence/existence assertions now read comment-stripped CODE.
+6. **MEASURED THIS SESSION.** `typecheck` **0** (four projects) · `lint` **0** · `build` ok ·
+   `validate:all` **196 PASS / 0 FAIL** (exit 0, run on the DIRTY tree — which also proves the
+   declared surface works) · `e2e/theme-visual` **13 passed** (was 12) · `e2e` app-shell +
+   accessibility + design-system **52 passed** · the 30 rendered baselines compared BEFORE/AFTER
+   with Pillow: **median 0.357% of pixels moved, max 14.784%, min 0.000%**, with `bold`'s card
+   screens at **0.000%** — "bold is preserved" MEASURED. Two screenshots were inspected side by
+   side (the card border removal reads; the 44px control grows its row without clipping).
+7. **FIVE DIVERGENCES RECORDED, NOT SILENT** (`docs/OPENSHIP_REFERENCE_SPEC.md` §13): the
+   `:has(a:hover)` hover-border is not implemented (it would override the 26 call sites' own
+   borders); a card supplying its own border keeps it (the hardcoded class sites are the legacy
+   migration's work); the modal panel keeps its opaque fill and 1px edge; the floating PANELS
+   keep their opaque surface (the reference's translucency trait is evidenced for its DROPDOWN
+   only, §15.1/§15.3); `Select` keeps the canonical 12px radius rather than the reference's own
+   8px inconsistency. The spec's own item 3 — which said the card border "is still drawn" — was
+   REPOINTED in the same change (rule 10).
+8. **REMAINING / NEXT.** **BATCH 5 — THE SIDEBAR** (the reference's biggest single visual change:
+   a floating card, 260px/72px, 12px-radius nav rows, a 20px section gap), then BATCH 6 the top
+   bar, BATCH 7 page layouts, BATCH 8 component states, the legacy-styling migration and full
+   acceptance testing. What follows the programme is not build work: five `OWNER DECISION` rows,
+   one `RECORD` row, the six `phase15-*` launch prerequisites and eleven `deferred` rows.
+
+## §OPENSHIP BATCH 3 (session 141, 2026-10-14) — THE DESIGN FOUNDATIONS, AND `bold` PROVEN UNCHANGED — SUPERSEDED BY §OPENSHIP BATCH 4
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `3c30735` (19 files,
 +567/−197). The four non-Bold themes now carry OpenShip's actual design; `bold` is untouched.
