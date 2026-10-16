@@ -4,7 +4,56 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §OPENSHIP MAPPING BATCH 3 — CURRENT STATUS (session 147, 2026-10-15) — THE SOLID PRIMARY ACTION: THE PAGE PRIMARY ACTION IS NOW THE THEME'S OWN BUTTON, THE ACCENT GRADIENT IS RESERVED FOR THE 18 CREATE-STYLE ACTIONS, `bold` IS PRESERVED BY MEASURED VALUE — AND THE PREVIOUS SESSION'S INCOMPLETE CLOSE-OUT WAS REPAIRED AT SOURCE
+## §OPENSHIP BATCH 10, STEP 1 — CURRENT STATUS (session 148, 2026-10-15) — THE LEGACY-STYLING MEASUREMENT: THE METHOD NOW EXISTS, THE SPEC'S UNMETHODICAL FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `4965ebf` (+ this record).
+`typecheck` **0** · `lint` **0** · `build` ok · `validate:all` **197 PASS / 0 FAIL** (**was 196** — the
++1 is this batch's gate) · `e2e/theme-visual` **15 passed** · `design-system + app-shell +
+accessibility + state-coverage` **59 passed** (first run **58/1** on a loading-cue race — see point 6).
+**NOT deployed and NOT live-verified** — the Owner has not approved `demo.mercenta.co.uk`. No credential
+was needed or requested.
+
+1. **WHAT THE OWNER ASKED.** "Continue where you left off." The recorded `NEXT TASK` was **BATCH 10,
+   the legacy-styling migration**, whose own **STEP 1 is a RE-MEASUREMENT** of both class families,
+   because the figures it was planned from named no method.
+2. **WHAT WAS BUILT.** `scripts/measure-legacy-classes.mjs` (the METHOD: subject, the two family
+   regexes, `classSites()`, and `measureLiteralWhite()`), `scripts/validate-legacy-styling-migration.mjs`
+   (the gate, 9 checks), the measured figures in spec §12 with the method and the date, the plan
+   document's stale count and dead line-range citation repointed, and the light-shell force-patch
+   block shrunk by **thirteen** provably dead or redundant rules, each recorded inline. NO page, route,
+   workflow, data contract, permission, integration or business rule changed.
+3. **WHAT IT MEASURED — and why that changes the work.** **4,508** grey-family sites / **132** files ·
+   **960** `ink`/`surface`/`brass` sites / **118** files · only **1,676** of them genuinely LITERAL
+   (`white`/`black`, / **123** files). `tailwind.config.js` already routes `zinc-*`, `ink-*`, `brass-*`,
+   `steel`, `parchment` to the canonical theme variables, so the rest are legacy NAMES whose values
+   already come from the theme — renaming them would move no pixel. **Batch 10's real target is the
+   literal family and the block.**
+4. **THIRTEEN DEFECTS FIXED AT SOURCE (rule 07).** SEVEN rules declared exactly what Tailwind already
+   resolves (`.text-zinc-200` · `.text-zinc-300` · `.hover\:text-zinc-300:hover` · `.text-zinc-400` ·
+   `.text-zinc-500` · `.text-zinc-600` · `.text-steel`); SIX selectors could never match (`.divide-white/[0.06]` ·
+   `.divide-white/[0.08]` · `.bg-white/[0.1]` · `.border-white/[0.3]` · `.bg-red-600.text-white` ·
+   `.bg-red-700.text-white`). Each has zero pixel effect; each is recorded in `src/index.css`.
+5. **THE GATE, AND SEVEN MUTATION PROOFS.** T1 discovery non-empty · T2 the document must equal the
+   measurement (and name the method + date) · T3 a ratchet so no family grows · T4 no rule for a class
+   that is gone · T5 no rule repeating Tailwind (derived by importing `tailwind.config.js`) · T5b every
+   restore rule really restores · **T6 the ABSENCE GUARD** — the block must exist while literal sites
+   remain and must NOT exist once they are gone. All seven were proved able to fail (mutate → FAIL →
+   restore byte-identical, hashes recorded).
+6. **A FLAKE, INVESTIGATED AND RECORDED RATHER THAN WAVED AWAY.** The first run of the four browser
+   suites was **58 passed / 1 failed** (`state-coverage` → `admin · Contract Cycle`: no visible loading
+   cue seen). Evidence gathered before concluding: that spec alone with this change **4/4 passed**, the
+   same spec alone with the **PRE-CHANGE `src/index.css`** restored **4/4 passed**, and a **full second
+   run of all 59 passed**. It is a load-timing race in the existing suite — stated as such, with the
+   evidence, not dismissed as "just the machine".
+7. **RENDER EVIDENCE, LOOKED AT.** The 30 baselines compared with Pillow: **19 byte-identical · median
+   0.000% · max 0.212%**; the differing bands were cropped and inspected — a live clock-derived date
+   (`10/16` vs `10/15`) and the live PO countdown (`200 3hr` vs `200 6hr`), plus 15 pixels at a delta of
+   **1/255**. **Pixel-neutral, proved.**
+8. **REMAINING.** BATCH 10 SUB-BATCH 2 (the literal family, with two appearance decisions to bring to
+   the Owner **with the numbers**) → the block's deletion with its absence guard → full acceptance
+   testing.
+
+## PREVIOUS STATUS — **§OPENSHIP MAPPING BATCH 3 (session 147, 2026-10-15): THE SOLID PRIMARY ACTION — THE PAGE PRIMARY ACTION IS NOW THE THEME'S OWN BUTTON, THE ACCENT GRADIENT IS RESERVED FOR THE 18 CREATE-STYLE ACTIONS, `bold` IS PRESERVED BY MEASURED VALUE — AND THE PREVIOUS SESSION'S INCOMPLETE CLOSE-OUT WAS REPAIRED AT SOURCE** — SUPERSEDED BY §OPENSHIP BATCH 10, STEP 1
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `typecheck` **0** (four tsconfig
 projects) · `lint` **0** · `build` ok · `validate:all` **196 PASS / 0 FAIL** (exit 0 — and **195
