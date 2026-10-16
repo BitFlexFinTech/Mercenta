@@ -890,17 +890,34 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§METHOD NOT RECORDED (added 2026-10-15, §OPENSHIP MAPPING BATCH 3) — the last row cannot be
-> re-measured as it stands.** The `2,812` / `857` class counts name no METHOD anywhere in the
-> repository: no script, no regex, no definition of "grey family" or of which files were walked. So
-> the next session's **STEP 1 — a re-measurement — cannot reproduce these numbers**, and two counts
-> produced by two different methods sitting side by side would be exactly the drift rule 10 §2
-> forbids (a written fact must be reproducible, not merely written). **The fix, in the migration's
-> own first step:** either recover the original method, or choose one, REPLACE this row with a count
-> that states its method AND its date, and let the migration's gate read the same method. The shorter
-> class gates already in the repository (`scripts/validate-typography-scale.mjs`,
-> `scripts/validate-radius-elevation-scale.mjs`) are the pattern to follow: they DISCOVER their
-> subject rather than trusting a figure typed into a document.
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-15 grey=4508/132 ink=960/118 literal=1676/123**
+>
+> **§METHOD NOW RECORDED (added 2026-10-15, §OPENSHIP BATCH 10 step 1) — REPOINTED, not weakened.**
+> The row below used to read **2,812** / **857** and named **no method anywhere in the repository**:
+> no script, no regex, no definition of "grey family" and no statement of which files were walked, so
+> the migration's own first step — a re-measurement — **could not reproduce them**. Two counts from
+> two different methods sitting side by side is precisely the drift rule 10 §2 forbids. The method now
+> EXISTS as `scripts/measure-legacy-classes.mjs` (subject `src/**/*.{ts,tsx}` · a "site" = one
+> occurrence of a class token matching the family · generated CSS deliberately excluded) and the
+> figures above are **produced by it**, machine-read back out of this document by
+> `scripts/validate-legacy-styling-migration.mjs` (T2), which FAILS if the numbers here and the
+> numbers measured ever disagree. The old 2,812 / 857 pair is retained **only as history**.
+>
+> **WHAT STEP 1 ESTABLISHED — AND IT RESHAPES THIS BATCH.** The two families are NOT mostly
+> "hardcoded" values. `tailwind.config.js` already routes `zinc-*`, `ink-*`, `brass-*`, `steel` and
+> `parchment` through the canonical theme variables (`zinc-400` → `var(--mr-text-muted)`,
+> `bg-ink-850` → `var(--mr-surface-raised)`, …), so those class sites are legacy **NAMES** whose
+> values already come from the theme — renaming them would move no pixel. The genuinely LITERAL
+> family is `white`/`black` (**1,676** sites, above), and those are exactly what the light-shell
+> force-patch block exists to remap. Batch 10's real target is therefore the literal family and the
+> block, not 3,700 renames.
+>
+> **AND IT FOUND REAL DEAD WEIGHT IN THE BLOCK, FIXED AT SOURCE (rule 07).** Seven rules declared
+> **exactly** what Tailwind already resolves their class to, and six selectors could never match
+> because their class has **zero** sites in `src` (measured, and confirmed by an independent grep
+> with word boundaries). All thirteen were DELETED in the same change, recorded inline in
+> `src/index.css`, and pinned by that gate (T4/T5), which derives the verdict from the two owners —
+> the Tailwind palette and the block itself — rather than trusting a figure typed into a document.
 
 | Element | Mercenta today | OpenShip | Delta |
 |---|---|---|---|
@@ -923,7 +940,7 @@ Every row below was measured in this repository this session.
 | **Accent CTA** | flat `bg-brass-500` | **per-theme gradient + radial highlight + themed shadow** | add the gradient |
 | **Status colours** | Mercenta `--mr-state-*` | OpenShip `--st-*` five families | align values |
 | **Page container** | none shared; legacy `max-w-[1400px] mx-auto` | `max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6` | add shared container |
-| **Hardcoded classes** | **2,812** grey-family sites across **119** files; **857** `ink`/`surface`/`brass` sites across 115 files | theme tokens throughout | migrate (Batch 10) |
+| **Hardcoded classes** | **4,508** grey-family sites across **132** files and **960** `ink`/`surface`/`brass` sites across **118** files — MEASURED 2026-10-15 by `scripts/measure-legacy-classes.mjs` (the §MEASURED-BATCH10 line above); of these, the genuinely LITERAL ones are **1,676** `white`/`black` sites across **123** files, because the rest are legacy NAMES that `tailwind.config.js` already resolves to theme variables | theme tokens throughout | migrate (Batch 10) — retargeted by the measurement: the literal family and the light-shell force-patch block, not a mass rename |
 
 ---
 
@@ -1255,12 +1272,38 @@ interface is rebuilt on OpenShip's design language (§1.3).
 | **6** | **The top bar** — every control kept; only its surface and type change (there is no OpenShip desktop top bar to copy — §1/decision 9). |
 | **7** | **Page layouts** — the shared page container, page headers and the per-screen 340px right rail. |
 | **8** | **Component states** — empty, loading, error, interaction, no-permission. |
-| **then** | **The legacy-styling migration** — the hardcoded grey/`ink`/`surface`/`brass` class sites (§12), after which the `src/index.css` light-shell force-patch block is deleted and an absence guard proved able to fail. The spec's own §12 table labels this **Batch 10**. |
+| **then** | **The legacy-styling migration** — the hardcoded grey/`ink`/`surface`/`brass` class sites (§12), after which the `src/index.css` light-shell force-patch block is deleted and an absence guard proved able to fail. The spec's own §12 table labels this **Batch 10**. **§STEP 1 — THE MEASUREMENT — IS DONE (2026-10-15):** the method exists and the batch is RETARGETED by what it measured (the literal `white`/`black` family and the block, not a mass rename) — see the note under this table. |
 | **last** | **Full acceptance testing** — the rendered, page-by-page pass. |
 
 **The intervening numbers (9, 11 …) are NOT evidenced in this repository** — only the
 migration's "Batch 10" label is. The ORDER above is what was approved and what must be
 followed; no number is invented to fill a gap.
+
+> **§STEP 1 OF THE MIGRATION IS DONE (2026-10-15) — and it RETARGETED the batch rather than
+> merely renumbering it.** The migration's own first step was a RE-MEASUREMENT, because §12's
+> 2,812 / 857 figures named no method (see §12's note). It is now measured, recorded and gated:
+>
+> - **THE METHOD EXISTS:** `scripts/measure-legacy-classes.mjs` — subject `src/**/*.{ts,tsx}`,
+>   the two family regexes, and `classSites()` as the one owner of "how many sites does this class
+>   have". `npm run measure:legacy` prints the table; §12's row is written FROM it and the new gate
+>   machine-reads §12 back and fails on any disagreement.
+> - **THE FINDING THAT CHANGES THE WORK:** the two families are mostly legacy NAMES whose VALUES
+>   already come from the theme (`tailwind.config.js` routes `zinc-*`, `ink-*`, `brass-*`, `steel`,
+>   `parchment` to the canonical variables), so renaming them would move no pixel. The genuinely
+>   LITERAL family is `white`/`black` — **1,676 sites across 123 files** — and those are exactly
+>   what the light-shell force-patch block exists to remap. **The remaining migration work is
+>   therefore: the literal family, then the block's deletion with its absence guard (gate T6).**
+> - **IT ALSO FOUND DEAD WEIGHT IN THE BLOCK, FIXED AT SOURCE (rule 07):** seven rules declared
+>   exactly what Tailwind already resolves (so they could not change a pixel) and six selectors had
+>   ZERO sites in `src` (so they could never match). All thirteen were DELETED, recorded inline in
+>   `src/index.css`, and pinned by `scripts/validate-legacy-styling-migration.mjs`, which derives
+>   both verdicts from the two owners rather than trusting a figure in a document.
+> - **A REMAINING DESIGN QUESTION, NAMED SO IT IS NOT DISCOVERED LATE:** `--mr-hairline` is
+>   `#E8E8E8` on the two light designs but `rgba(255,255,255,0.08)` on dim/dark, so
+>   `border-white/[0.06]` (375 sites) cannot simply become `border-hairline` without changing the
+>   dark appearance by 2%; and a `text-white` site that sits ON a saturated fill must take an
+>   on-fill token rather than the strong text token, or the fill's label would invert on light
+>   shells. Both are decisions for the next sub-batch, with the numbers attached.
 
 ### Guardrails, unchanged and binding
 

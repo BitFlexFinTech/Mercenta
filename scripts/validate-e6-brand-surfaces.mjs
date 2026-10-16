@@ -4701,6 +4701,42 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   ]);
 
   /**
+   * §OPENSHIP BATCH 10 (2026-10-15) — THE LEGACY-STYLING MIGRATION, STEP 1 (the measurement).
+   *
+   * Declared surface — every file this change set touches, named:
+   *   · `scripts/measure-legacy-classes.mjs` — NEW. The METHOD that replaces spec §12's unmethodical
+   *     2,812 / 857 figures: subject `src/**\/*.{ts,tsx}`, the two family regexes, and `classSites()`
+   *     (the one owner of "how many sites does this class have"). Generated CSS is deliberately not
+   *     the subject — the shim file is emitted, and `src/index.css` carries the force-patch.
+   *   · `scripts/validate-legacy-styling-migration.mjs` — NEW, this batch's gate: discovery is
+   *     non-empty (rule 10 §5), the spec's recorded figures must EQUAL the measured ones (T2), a
+   *     ratchet ceiling so a family cannot grow (T3), no shim rule kept for a class that is gone
+   *     (T4), no shim rule that merely repeats what Tailwind already resolves (T5), the restore rules
+   *     really restore (T5b), and the ABSENCE GUARD for the block itself (T6).
+   *   · `src/index.css` — the force-patch block SHRINKS: seven rules that declared exactly what
+   *     `tailwind.config.js` already resolves, and six selectors whose class has zero sites in `src`,
+   *     are DELETED, each recorded inline. No live rule is removed and no value changes.
+   *   · `docs/OPENSHIP_REFERENCE_SPEC.md` — §12's row is REPOINTED to the measured figures with the
+   *     method and the date; the "no method recorded" note becomes the record of the fix.
+   *   · `package.json` — `measure:legacy` + `validate:legacy-styling` (the corpus glob discovers the
+   *     gate regardless; these are for a direct run).
+   *   · `scripts/validate-e6-brand-surfaces.mjs` — this declaration.
+   *
+   * The F5/F5b/F6 contract is UNCHANGED and NOT weakened: a working-tree path in NO declared set
+   * still fails, and no PROTECTED path appears in the change set (no RBAC or tenant scoping, no
+   * `src/lib/spapi/`, `src/lib/dhl/`, `src/services/xero/`, `src/lib/billing/`, no migrations, no
+   * deploy path).
+   */
+  const OPENSHIP_BATCH10_LEGACY_SCOPE = new Set([
+    'scripts/measure-legacy-classes.mjs',
+    'scripts/validate-legacy-styling-migration.mjs',
+    'src/index.css',
+    'docs/OPENSHIP_REFERENCE_SPEC.md',
+    'package.json',
+    'scripts/validate-e6-brand-surfaces.mjs',
+  ]);
+
+  /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
@@ -5002,6 +5038,8 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §OPENSHIP BATCH 4 (2026-10-15) — the shared surfaces and controls (see above). */
           OPENSHIP_BATCH4_SURFACES_SCOPE.has(p) ||
           [...OPENSHIP_BATCH4_SURFACES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §OPENSHIP BATCH 10 (2026-10-15) — the legacy-styling migration's declared surface (see above). */
+          OPENSHIP_BATCH10_LEGACY_SCOPE.has(p) ||
           /** §PHASE B (2026-10-13) — the auth/secret-hardening phase (see the declaration above). */
           PHASE_B_AUTH_SCOPE.has(p) ||
           [...PHASE_B_AUTH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

@@ -163,10 +163,22 @@ complete when **all** of these hold, with evidence:
 - Apply the redesign **consistently across the whole application** — administration, brand workflows,
   integrations, tables, forms, navigation, dashboards, detail views, empty / loading / error states and
   responsive layouts. **Not the six reference screens, and not just tables/buttons/cards.**
-- **Address the 3,137 hardcoded dark-theme classes** and remove the **underlying need** for the
-  `src/index.css` force-patch block (~lines 295–371). **Do NOT merely delete the patch and leave the
+- **Address the hardcoded dark-theme classes** and remove the **underlying need** for the
+  `src/index.css` light-shell force-patch block (the `§UI/UX WAVE 1 — LIGHT-SHELL TOKEN REMAP LAYER`).
+  **Do NOT merely delete the patch and leave the
   app broken.** The sequence is: *migrate the classes → prove every theme still renders → then delete
   the patch*, with an **absence guard** so it cannot return.
+  - **§REPOINTED 2026-10-15 (OPENSHIP BATCH 10, step 1) — two figures in this bullet were STALE and
+    one of them named no method, so both were replaced by MEASURED ones.** This bullet used to say
+    "the **3,137** hardcoded dark-theme classes" and to cite the block as "~lines 295–371" — a line
+    range that no longer describes anything after the batches that reshaped the file, and a count with
+    no method behind it (the same defect §12 of the reference spec carried). The measurement now
+    EXISTS: `scripts/measure-legacy-classes.mjs` (`npm run measure:legacy`) reports **4,508**
+    grey-family sites across **132** files, **960** `ink`/`surface`/`brass` sites across **118** files,
+    of which the genuinely LITERAL ones are **1,676** `white`/`black` sites across **123** files —
+    because the rest are legacy NAMES whose values `tailwind.config.js` already routes to the theme
+    variables. Never cite a line range here again: cite the block by its marker, which is what both
+    the spec and `scripts/validate-legacy-styling-migration.mjs` key off.
 - Keep the five themes genuinely distinct, accessible and consistent. **`bold` stays the colourful one.**
 - **Do NOT change business logic to make a screen easier to redesign.**
 - **Gate**: `validate:all` stays green · the patch's absence guard **proved able to fail** ·

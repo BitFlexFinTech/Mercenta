@@ -16,6 +16,8 @@
     "validate:wording-guard": "node scripts/validate-wording-guard.mjs",
     "validate:claims-registry": "node scripts/validate-claims-registry.mjs",
     "validate:typography": "node scripts/validate-typography-scale.mjs",
+    "measure:legacy": "node scripts/measure-legacy-classes.mjs",
+    "validate:legacy-styling": "node scripts/validate-legacy-styling-migration.mjs",
     "migrate:typography": "node scripts/migrate-micro-typography.mjs",
     "validate:radius-elevation": "node scripts/validate-radius-elevation-scale.mjs",
     "validate:nav-destinations": "node scripts/validate-nav-destinations.mjs",
