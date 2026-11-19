@@ -18,6 +18,44 @@ EXACT NEXT STARTING POINT: `docs/OPENSHIP_REFERENCE_SPEC.md` §16 (the approved 
 RULES APPLIED THIS SESSION: MODE: IMPLEMENT · EXPERTS: senior-software-engineer, project-manager · WHY: the authorised queue is document-and-check repair (bring four stale written records up to the real newest saved version, and extend the automatic check that watches them so this drift cannot recur), plus independent environment verification — engineering work sequenced across several independent items.
 PLAIN SUMMARY (OWNER-FACING): **Four of your written records were out of date, and I have corrected them.** The written record that says where the project stands still described the half-way point of the colour work — the step that measured the problem — while the actual newest saved version of the project — the commit (a saved snapshot of the code carrying a reference number) — had already finished the whole job. Nothing about your website changed today; I only made the paperwork tell the truth. **What was actually finished:** the colour work is complete. Every one of the 1,663 places where a colour was written in as a plain white or black now uses the colour setting built into the project instead, and the patch that used to correct those colours afterwards has been removed. All 197 automatic health checks (scripts that test the project and print PASS or FAIL) pass. **What I also changed:** I made the automatic check that watches these records stricter, so it will now notice if the written record falls behind the real code again — which is exactly what had happened. **What is NOT done:** the finished work has not been put on the public demo site, because you have not given permission for that, and the final page-by-page acceptance testing has not been done. **What happens next:** when you are ready, the next job is that full acceptance pass — looking at every screen, in both the dark and light versions, at desktop, tablet and phone widths, and fixing anything that is wrong.
 
+## §CLICKUP PROJECT ENVIRONMENT — BUILT 2026-11-19
+
+**A GOVERNANCE/TOOLING increment: it changes NO application runtime behaviour**, so the three-way
+deployment contract does not apply to it and the resume block above is deliberately unchanged.
+
+### What was built
+- The nine ClickUp demo tasks were **ARCHIVED — reversible, never deleted.** Rollback record:
+  `docs/clickup/CLICKUP_DEMO_TASK_ROLLBACK_2026-11-19.md`.
+- **8 Folders and 16 Lists** created inside the existing `Software Development` space, which is retained
+  and NOT renamed (the connector has no space-rename operation — verified, not assumed).
+- **53 tasks** created, each with a description, acceptance criteria, a status, a priority and a
+  repository reference. Every date that is not already recorded in the project is labelled **PROPOSED**.
+- **5 statuses** on the space: to do · in progress · **blocked** · **awaiting approval** · complete.
+- **3 dependencies** created and confirmed.
+- Zero-cost automation: `scripts/clickup/report.mjs` — `report` · `alerts` · `health` · `self-test`.
+
+### The two rules this increment obeys
+1. **The 580-entry capability register remains the technical source of truth.** It is NOT copied into
+   ClickUp, and the **35 `removed` entries have no tasks at all.**
+2. **ClickUp holds only genuine open work.** Of 580 register entries only 13 are open; the 11 deferred
+   rows are recorded as ONE record task, never as active work.
+
+### Verified this session (real output)
+- `node scripts/clickup/report.mjs self-test` → **SELF_TEST_PASS (9 checks)**, exit 0.
+- With no token present the script **FAILS LOUDLY** (exit 2) and records a FAILED health entry — it never
+  reports a false success.
+- **A REAL DEFECT WAS FOUND AND FIXED BY THAT TEST:** `new URL(import.meta.url).pathname` returns the
+  project path PERCENT-ENCODED because the folder name contains a space, which created a stray
+  `~/Desktop/1.%20Mercenta` folder. Replaced with `fileURLToPath`; the stray folder was removed.
+
+### OUTSTANDING — needs the Owner
+- The scheduled automation needs a **ClickUp personal API token** at `~/.config/mercenta/clickup.env`
+  (outside this project). **Nothing is scheduled until it is supplied and tested against the live workspace.**
+- **ClickUp Free has no dashboards and no automations**, so both are provided by the script instead.
+- **Milestones** cannot be created through the connector, so they are named tasks prefixed `◆ MILESTONE —`.
+- **This is one-way reporting, never two-way synchronisation.**
+
+
 ## CURRENT PLATFORM POSITION — **§OPENSHIP BATCH 10, STEP 1: THE LEGACY-STYLING MEASUREMENT — THE MIGRATION'S METHOD NOW EXISTS AND IS GATED, THE SPEC'S UNMETHODICAL 2,812 / 857 FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE (19 OF 30 RENDERED SCREENS BYTE-IDENTICAL)** (session 148, 2026-10-15)
 
 1. **COMPLETED / VERIFIED — BATCH 10, STEP 1 (commit `4965ebf`, 7 files).** The migration's own first step was a RE-MEASUREMENT, because the figures it was planned from named no method. Delivered: **the method** (`scripts/measure-legacy-classes.mjs` — subject `src/**\/*.{ts,tsx}`, the two family regexes, and `classSites()` as the ONE owner of "how many sites does this class have"; `npm run measure:legacy` prints the table), **the gate** (`scripts/validate-legacy-styling-migration.mjs`, nine checks), the measured figures recorded in spec §12 with the method and the date, the plan document's stale count and its dead line-range citation repointed, and the force-patch block SHRUNK by thirteen provably dead or redundant rules. **No page, route, workflow, data contract, permission, integration or business rule changed**, and (measured) no rendered pixel either.

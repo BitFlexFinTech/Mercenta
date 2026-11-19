@@ -68,3 +68,6 @@ Review Zip/*
 .bugpatrol/runs/
 .bugpatrol/appmap.json
 .bugpatrol/routines/
+
+# Generated ClickUp automation reports (reproducible outputs, never tracked)
+reports/
