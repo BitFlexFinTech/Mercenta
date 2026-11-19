@@ -45,7 +45,15 @@ function readToken() {
   if (!fs.existsSync(TOKEN_FILE)) return null;
   const txt = fs.readFileSync(TOKEN_FILE, 'utf8');
   const m = txt.match(/^\s*(?:CLICKUP_API_TOKEN|CLICKUP_TOKEN)\s*=\s*(\S+)\s*$/m);
-  return m ? m[1] : null;
+  if (!m) return null;
+  const v = m[1].trim();
+  /**
+   * A PLACEHOLDER is not a credential. Treat it as missing, so the report says plainly
+   * "not configured" instead of sending it to ClickUp and surfacing an opaque HTTP 401.
+   * The OAuth token written by scripts/clickup/auth.mjs uses the SAME key
+   * (CLICKUP_API_TOKEN), so nothing else in this file needed to change.
+   */
+  return (!v || v === 'REPLACE_WITH_YOUR_CLICKUP_TOKEN') ? null : v;
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

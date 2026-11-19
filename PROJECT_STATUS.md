@@ -9,7 +9,7 @@ LAST COMPLETED TASK: **OPENSHIP BATCH 10 — THE LEGACY-STYLING MIGRATION IS COM
 CURRENT VERIFIED STATE: **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `8193b40` on `redesign/foundation`. `npm run validate:all` **197 PASS / 0 FAIL (exit 0)** — re-run and confirmed in this session. `git status --porcelain` is EMPTY. **NOT deployed and NOT live-verified** — the Owner has not approved `demo.mercenta.co.uk`, so the three-way contract is UNSATISFIED. **REMAINING: full acceptance testing — PHASE G, the acceptance and regression pass.**
 CURRENT BRANCH: `redesign/foundation`
 LAST VERIFIED COMMIT: `8193b40` — feat(ui): OPENSHIP BATCH 10 COMPLETE — all 1,663 literal white/black class sites migrated to theme tokens, the force-patch block deleted from src/index.css, new tokens added, validators updated, spec document updated with final figures, all 197 validators pass.
-GITHUB PUSH: pushed to `origin/redesign/foundation` at `8193b40` — the branch tip. This documentation-repair commit is pushed on top of it in the same close-out, so the remote tip advances to this record.
+GITHUB PUSH: pushed to `origin/redesign/foundation`. The named runtime checkpoint `8193b40` is on the remote; the branch tip is AHEAD of it by governance/tooling commits ONLY — the ClickUp environment (`81a0821`) and the ClickUp OAuth tooling pushed in this close-out — so no application-runtime change sits between the record and the tip.
 DEMO DEPLOYMENT: NOT DEPLOYED — the Owner has not approved `demo.mercenta.co.uk`. The completed migration changes rendered pixels (the literal white/black family is now themed), so the three-way contract APPLIES and is UNSATISFIED. This is not a credential problem: it needs the explicit deployment approval from the Owner and nothing else.
 LIVE VERIFICATION: NOT VERIFIED — nothing new was deployed. The live demo still serves the previous build.
 OUTSTANDING BLOCKER: none on the code. Deployment approval is withheld by the Owner, not by a defect — and the standing decision stands: credentials are PENDING, are **never a build blocker** and are never asked for. The remaining work is the acceptance pass below plus the Owner decisions.
@@ -54,6 +54,55 @@ deployment contract does not apply to it and the resume block above is deliberat
 - **ClickUp Free has no dashboards and no automations**, so both are provided by the script instead.
 - **Milestones** cannot be created through the connector, so they are named tasks prefixed `◆ MILESTONE —`.
 - **This is one-way reporting, never two-way synchronisation.**
+
+## §CLICKUP OAUTH — STAGE 1 BUILT, AWAITING OWNER AUTHORISATION (2026-11-19)
+
+**GOVERNANCE/TOOLING increment: NO application runtime change**, so the three-way deployment
+contract does not apply and the resume block above is deliberately unchanged.
+
+### The problem this solves
+The ClickUp MCP connection on this machine **cannot** authenticate the reporting scripts. Its
+cached token is issued for `mcp.clickup.com`; a live read-only call to `api.clickup.com` was
+rejected with **HTTP 401 `{"err":"Oauth token not found","ECODE":"OAUTH_019"}`** (tested
+2026-11-19). The scripts therefore need their own OAuth token.
+
+### What was built (Stage 1 — no live authorisation performed)
+- `scripts/clickup/auth.mjs` — the OAuth 2.0 authorisation-code flow, built to ClickUp's
+  documented contract (`POST https://api.clickup.com/api/v2/oauth/token` with
+  `client_id`/`client_secret`/`code` → `{access_token}`; consent at `https://app.clickup.com/api`).
+  It runs a callback server bound to **127.0.0.1 only**, serves a local setup page, validates the
+  OAuth `state` value (CSRF guard), exchanges the code, verifies the token against the live API,
+  and stores it OUTSIDE the project at mode 600 in a 700 directory.
+- `scripts/clickup/auth.test.mjs` — **65 offline checks**, no network, no credential, writing only
+  to a temporary directory. **AUTH_SELF_TEST_PASS (65 checks, 0 failed).**
+- `scripts/clickup/report.mjs` — ONE minimal change: a placeholder token is now treated as NOT
+  configured, so it fails plainly instead of with an opaque 401. All four modes and its own
+  9-check self-test are preserved: **SELF_TEST_PASS (9 checks).**
+
+### Proof the tests can fail (rule 07/10 — a gate that cannot fail proves nothing)
+- Mutation 1 — `validateState` forced to `return true` → **FAIL** (`validateState REJECTS a
+  different value`), 1 of 65 failed.
+- Mutation 2 — server bind changed to `0.0.0.0` → **FAIL** (`the server binds to 127.0.0.1 ONLY`,
+  reported `0.0.0.0`), 1 of 65 failed.
+- Both files restored byte-identical: sha256 `9a1a9b8402a1f530a3c7bc69ffa4ba48a95879592d9b6c4f8a0249d5e1144072`
+  before AND after. Re-run after restore: **PASS**.
+
+### BLOCKED — the ONE thing only the Owner can do (exact next action)
+ClickUp provides **no API to register an OAuth app**, and only a workspace owner/admin can do it.
+Until it exists the local scripts **have no working credential**, and the scheduled automation
+must **not** be installed:
+1. Open **https://app.clickup.com/settings/apps** → **Create new app**.
+2. Name it **`Mercenta Automation`**.
+3. Paste the Redirect URL the setup page prints (default `http://localhost:8787/callback`).
+4. Enter the Client ID and Client Secret into the LOCAL setup page — never into chat or a terminal.
+5. Click **Allow** on ClickUp's consent screen.
+
+**NOT working, and never to be reported as working:** no token has been obtained, no scheduled job
+has been installed, and no live workspace verification has been run.
+
+### What did NOT happen in this stage (deliberately)
+No ClickUp task, folder, list or status was created, modified, archived or deleted. No scheduled
+job was installed. No application code changed. Nothing was deployed.
 
 
 ## CURRENT PLATFORM POSITION — **§OPENSHIP BATCH 10, STEP 1: THE LEGACY-STYLING MEASUREMENT — THE MIGRATION'S METHOD NOW EXISTS AND IS GATED, THE SPEC'S UNMETHODICAL 2,812 / 857 FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE (19 OF 30 RENDERED SCREENS BYTE-IDENTICAL)** (session 148, 2026-10-15)
