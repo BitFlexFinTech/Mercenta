@@ -55,54 +55,94 @@ deployment contract does not apply to it and the resume block above is deliberat
 - **Milestones** cannot be created through the connector, so they are named tasks prefixed `◆ MILESTONE —`.
 - **This is one-way reporting, never two-way synchronisation.**
 
-## §CLICKUP OAUTH — STAGE 1 BUILT, AWAITING OWNER AUTHORISATION (2026-11-19)
+## §CLICKUP — CONNECTED AND VERIFIED LIVE (2026-11-19)
 
 **GOVERNANCE/TOOLING increment: NO application runtime change**, so the three-way deployment
 contract does not apply and the resume block above is deliberately unchanged.
 
-### The problem this solves
-The ClickUp MCP connection on this machine **cannot** authenticate the reporting scripts. Its
-cached token is issued for `mcp.clickup.com`; a live read-only call to `api.clickup.com` was
-rejected with **HTTP 401 `{"err":"Oauth token not found","ECODE":"OAUTH_019"}`** (tested
-2026-11-19). The scripts therefore need their own OAuth token.
+### STATUS: the connection WORKS
+`node scripts/clickup/auth.mjs --status` reports `configured: YES — a personal credential is
+stored` and `live check: OK — workspace "Mercenta Partners's Workspace" is reachable`.
 
-### What was built (Stage 1 — no live authorisation performed)
-- `scripts/clickup/auth.mjs` — the OAuth 2.0 authorisation-code flow, built to ClickUp's
-  documented contract (`POST https://api.clickup.com/api/v2/oauth/token` with
-  `client_id`/`client_secret`/`code` → `{access_token}`; consent at `https://app.clickup.com/api`).
-  It runs a callback server bound to **127.0.0.1 only**, serves a local setup page, validates the
-  OAuth `state` value (CSRF guard), exchanges the code, verifies the token against the live API,
-  and stores it OUTSIDE the project at mode 600 in a 700 directory.
-- `scripts/clickup/auth.test.mjs` — **65 offline checks**, no network, no credential, writing only
-  to a temporary directory. **AUTH_SELF_TEST_PASS (65 checks, 0 failed).**
-- `scripts/clickup/report.mjs` — ONE minimal change: a placeholder token is now treated as NOT
-  configured, so it fails plainly instead of with an opaque 401. All four modes and its own
-  9-check self-test are preserved: **SELF_TEST_PASS (9 checks).**
+### Why a credential was needed at all
+The ClickUp MCP connection on this machine **cannot** authenticate the reporting scripts: its
+cached token is issued for `mcp.clickup.com`, and `api.clickup.com` rejects it with **HTTP 401
+`{"err":"Oauth token not found","ECODE":"OAUTH_019"}`** (live-tested 2026-11-19).
 
-### Proof the tests can fail (rule 07/10 — a gate that cannot fail proves nothing)
-- Mutation 1 — `validateState` forced to `return true` → **FAIL** (`validateState REJECTS a
-  different value`), 1 of 65 failed.
-- Mutation 2 — server bind changed to `0.0.0.0` → **FAIL** (`the server binds to 127.0.0.1 ONLY`,
-  reported `0.0.0.0`), 1 of 65 failed.
-- Both files restored byte-identical: sha256 `9a1a9b8402a1f530a3c7bc69ffa4ba48a95879592d9b6c4f8a0249d5e1144072`
-  before AND after. Re-run after restore: **PASS**.
+### Which credential is in use, and why the two are kept apart
+**The PERSONAL API TOKEN is the credential in use.** ClickUp's own documentation says to use a
+personal token for *"individual or testing purposes"* and reserves the OAuth flow for *"apps or
+integrations that other people use"* — Mercenta's scripts read one workspace, so the personal
+token is the documented choice, and it never expires. **The OAuth app is registered and that
+path is kept working, but its credentials are never mixed with the personal token.** The file
+records which is stored: `CLICKUP_TOKEN_KIND=personal|oauth`.
 
-### BLOCKED — the ONE thing only the Owner can do (exact next action)
-ClickUp provides **no API to register an OAuth app**, and only a workspace owner/admin can do it.
-Until it exists the local scripts **have no working credential**, and the scheduled automation
-must **not** be installed:
-1. Open **https://app.clickup.com/settings/apps** → **Create new app**.
-2. Name it **`Mercenta Automation`**.
-3. Paste the Redirect URL the setup page prints (default `http://localhost:8787/callback`).
-4. Enter the Client ID and Client Secret into the LOCAL setup page — never into chat or a terminal.
-5. Click **Allow** on ClickUp's consent screen.
+### A header difference that would have caused a false failure
+ClickUp accepts **two token shapes with DIFFERENT headers**: a personal token (`pk_...`) goes in
+**raw**, an OAuth access token goes as a **Bearer**. The helper used to send `Bearer` for both,
+which would have reported a perfectly good personal token as broken. `authHeaderFor()` now
+detects the shape, and `verifyToken()` falls back to the other form before calling a token bad.
+(`report.mjs` already sent the raw token, which is correct for a personal token.)
 
-**NOT working, and never to be reported as working:** no token has been obtained, no scheduled job
-has been installed, and no live workspace verification has been run.
 
-### What did NOT happen in this stage (deliberately)
-No ClickUp task, folder, list or status was created, modified, archived or deleted. No scheduled
-job was installed. No application code changed. Nothing was deployed.
+### What was built
+- `scripts/clickup/auth.mjs` — a local setup page bound to **127.0.0.1 ONLY**. It offers BOTH a
+  personal API token (**Option 1**, recommended) and the OAuth app flow (**Option 2**). A
+  submitted token arrives in a **POST body** — never a URL, never logged, never echoed — and is
+  **checked against ClickUp BEFORE it is saved**, so a rejected or wrong-workspace token is never
+  written to disk. On success the server shuts itself down. The credential is stored OUTSIDE the
+  project at mode 600 in a 700 directory, under the SAME key `report.mjs` already reads.
+- `scripts/clickup/auth.test.mjs` — **95 offline checks, 0 failed** (was 65). No network, no real
+  credential, temporary directory only.
+- `scripts/clickup/report.mjs` — behaviour unchanged: 4 modes, **SELF_TEST_PASS (9 checks)**.
+
+### Two real defects found and FIXED AT SOURCE
+1. **The app-registration link pointed at a page that has no Create control.**
+   `app.clickup.com/settings/apps` ("App Settings") offers only personal API tokens and authorized
+   apps. The control — labelled **"Create"**, NOT "Create new app" — is on the **"ClickUp API
+   Settings"** sub-tab of `app.clickup.com/{ws}/settings/team/{ws}/clickup-api/settings`.
+   **ClickUp's own documentation is out of date here**, and the helper had been sending the Owner
+   to the wrong page. `APPS_PAGE` is §REPOINTED, and the test that required the old URL is
+   §REPOINTED too — repointed, never weakened.
+2. **The credential page was CACHEABLE**, so after the helper changed the browser kept serving the
+   OLD single-option form (a stale credential page — unsafe as well as confusing). Every html
+   response now carries `Cache-Control: no-store, no-cache, must-revalidate`.
+
+### Proof the tests can fail (rule 07 — a gate that cannot fail proves nothing)
+Five mutations, each restored byte-identical:
+
+| Mutation | Result |
+|---|---|
+| `validateState` forced to `return true` | **1 FAIL** |
+| server bound to `0.0.0.0` instead of `127.0.0.1` | **1 FAIL** |
+| live verification skipped before saving | **5 FAIL** |
+| personal token always sent as `Bearer` | **2 FAIL** |
+| credential page made cacheable again | **1 FAIL** |
+
+sha256 `9a1a9b8402a1f530a3c7bc69ffa4ba48a95879592d9b6c4f8a0249d5e1144072` ·
+`ac12029a5ce3da1a9d65fd96f0206d5b5e4c73b6d6240dc6cf410cfa9c974a68` ·
+`074ff56cbd1356dc9233a91dde665d9728ae05a8d93486adb2411326595fb187` — identical before AND after
+each restore, with the suite re-run PASS afterwards.
+
+### VERIFIED LIVE (read-only — nothing in ClickUp was created, edited or deleted)
+
+| Check | Result |
+|---|---|
+| **Tasks** | **53** — all 53 returned `found`, 0 not found |
+| **Folders** | **8** (`01 Homepage` … `08 Milestones`) |
+| **Lists** | **19** = **16 project lists** + 3 ClickUp default lists (`Releases`, `Stories`, `Bugs`) |
+| **Statuses** | **5** (to do · in progress · blocked · awaiting approval · complete) |
+| **Blocked** | **6** |
+| **Awaiting approval** | **9** |
+| Active / overdue / due soon | 38 / 0 / 3 — and **6 + 9 + 38 = 53** ✅ |
+| **Dependencies** | **3** — `khka←khk9`, `khkc←khkb`, `khkd←khkc` (5 tasks carry them) |
+| auth self-test | **95 checks, 0 failed** |
+| report self-test | **9 checks, 0 failed** |
+| live report | generated — `reports/clickup-report.md` + `.html` (gitignored) |
+
+### NOT DONE (deliberately, and NOT to be reported as working)
+No scheduled job installed. Nothing deployed. No ClickUp record created, edited or deleted. No
+application code changed.
 
 
 ## CURRENT PLATFORM POSITION — **§OPENSHIP BATCH 10, STEP 1: THE LEGACY-STYLING MEASUREMENT — THE MIGRATION'S METHOD NOW EXISTS AND IS GATED, THE SPEC'S UNMETHODICAL 2,812 / 857 FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE (19 OF 30 RENDERED SCREENS BYTE-IDENTICAL)** (session 148, 2026-10-15)
