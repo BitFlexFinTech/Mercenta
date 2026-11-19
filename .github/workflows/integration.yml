@@ -73,14 +73,22 @@ jobs:
           restore-keys: |
             integration-state-
 
+      # §FIXED (2026-11-19): `secrets` is NOT a permitted named-value in a step `if:` — the whole
+      # workflow failed to parse ("Unrecognized named-value: 'secrets'") and every run died at 0s.
+      # The values are passed through `env` instead, which is also SAFER: interpolating
+      # `${{ secrets.X }}` into `run:` would write the value into the generated shell command, while
+      # an env var keeps it out of the command line.
       - name: Materialise the Google service account (never printed)
-        if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+        env:
+          SA_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          FOLDER_JSON: ${{ secrets.DRIVE_FOLDER_JSON }}
+        if: env.SA_JSON != ''
         run: |
           mkdir -p "$HOME/.config/mercenta"
           chmod 700 "$HOME/.config/mercenta"
-          printf '%s' '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > "$HOME/.config/mercenta/drive-service-account.json"
+          printf '%s' "$SA_JSON" > "$HOME/.config/mercenta/drive-service-account.json"
           chmod 600 "$HOME/.config/mercenta/drive-service-account.json"
-          printf '%s' '${{ secrets.DRIVE_FOLDER_JSON }}' > "$HOME/.config/mercenta/drive-folder.json"
+          printf '%s' "$FOLDER_JSON" > "$HOME/.config/mercenta/drive-folder.json"
           chmod 600 "$HOME/.config/mercenta/drive-folder.json"
           echo "service account file written (contents never shown)"
 
