@@ -1,0 +1,118 @@
+# §INTEGRATION (2026-11-19) — THE CLOUD LEG.
+#
+# WHY THIS EXISTS: every piece of Mercenta automation until now ran only when a person remembered
+# to run it, or when the owner's Mac happened to be awake. This workflow runs the reconciliation,
+# the health check and the reports on a GitHub runner, so they CONTINUE WHILE THE MAC IS OFF.
+#
+# IT ONLY READS. `permissions: contents: read` — it cannot push, tag, deploy or modify this
+# repository, and it holds no write credential for ClickUp, Penpot or Drive (the connectors in
+# scripts/integration issue no write request at all; a test asserts that).
+#
+# COST: GitHub Actions on a PRIVATE repository consumes included minutes. This workflow runs
+# three short jobs a day plus one a week — well inside the free allowance for a repo this size.
+# It is not "unlimited": `.github/dependabot.yml` and the CI workflow share the same allowance.
+name: Integration
+
+on:
+  schedule:
+    # Daily consolidated report + reconciliation, 05:00 UTC.
+    - cron: '0 5 * * *'
+    # Weekly progress report, Mondays 06:00 UTC.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      report:
+        description: 'Report kind'
+        type: choice
+        options: [daily, weekly]
+        default: daily
+
+# Least privilege: read the repository and its Actions metadata. Nothing else.
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: reconcile · health · report
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Credentials come from ENCRYPTED repository secrets. They are never echoed, and GitHub
+      # masks them in logs. `readEnvKey()` prefers the environment over any credential file.
+      CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+      PENPOT_MCP_KEY: ${{ secrets.PENPOT_MCP_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout (full history — the validators walk ancestry)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The sync layer is INCREMENTAL: it compares fingerprints against a cached state file, so a
+      # repeated run reports zero changes. That state has to survive between runs, which is what
+      # this cache does.
+      - name: Restore integration state
+        uses: actions/cache@v4
+        with:
+          path: reports/integration
+          key: integration-state-${{ github.run_id }}
+          restore-keys: |
+            integration-state-
+
+      - name: Materialise the Google service account (never printed)
+        if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+        run: |
+          mkdir -p "$HOME/.config/mercenta"
+          chmod 700 "$HOME/.config/mercenta"
+          printf '%s' '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > "$HOME/.config/mercenta/drive-service-account.json"
+          chmod 600 "$HOME/.config/mercenta/drive-service-account.json"
+          printf '%s' '${{ secrets.DRIVE_FOLDER_JSON }}' > "$HOME/.config/mercenta/drive-folder.json"
+          chmod 600 "$HOME/.config/mercenta/drive-folder.json"
+          echo "service account file written (contents never shown)"
+
+      - name: Integration health check
+        run: node scripts/integration/sync.mjs --health
+
+      - name: Reconciliation and report
+        run: |
+          KIND="${{ github.event.inputs.report }}"
+          if [ -z "$KIND" ]; then
+            if [ "${{ github.event.schedule }}" = "0 6 * * 1" ]; then KIND=weekly; else KIND=daily; fi
+          fi
+          echo "report kind: $KIND"
+          node scripts/integration/sync.mjs --report "$KIND"
+
+      - name: Integration self-test (offline, no network)
+        run: node scripts/integration/test.mjs
+
+      - name: Publish the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-report-${{ github.run_id }}
+          path: reports/integration/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Fail loudly if a system was unreachable
+        if: always()
+        run: |
+          if grep -q '| no — ' reports/integration/daily-report.md 2>/dev/null || grep -q '| no — ' reports/integration/weekly-report.md 2>/dev/null; then
+            echo "::error::At least one system was unreachable in this run — see the uploaded report."
+            exit 1
+          fi
+          echo "all systems reachable"
