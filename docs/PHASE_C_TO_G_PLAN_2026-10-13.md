@@ -12,7 +12,7 @@
 ## 1. WHERE THE WORK STANDS — the verified checkpoint
 
 **`CURRENT VERIFIED STATE: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.`**
-Local HEAD = `origin/redesign/foundation` = `abd8c69`. `git status --porcelain` is EMPTY.
+Local HEAD = `origin/redesign/foundation` = `8193b40`. `git status --porcelain` is EMPTY.
 **NOT deployed and NOT live-verified** — the Owner has withheld deployment approval and the
 remaining phases are unfinished.
 
@@ -25,6 +25,7 @@ remaining phases are unfinished.
 | **Phase C — themes** — five genuinely distinct themes; `bold` is the colourful one; a real 4.5:1 CTA-contrast defect found and fixed | `3fc8653` | new `validate-theme-distinctness.mjs` (33 checks); new `e2e/theme-visual.spec.ts` (11 passed) |
 | **Phase C — primitives** — Card gained theme-driven elevation (`shadow-ds-subtle`) and a `ds-title` heading; `Button` `lg` gained real hierarchy | `e13ee9e` | 25 of 30 screenshots changed |
 | **Phase C4 — `DataTable`** — canonical type scale, `py-3` rows, uppercase header treatment, 16px padding | `85e31d2` | 13 of 30 screenshots changed — exactly the `DataTable` screens |
+| **Batch 10 - the legacy-styling migration** - all 1,663 literal `white`/`black` class sites migrated to theme tokens; the `src/index.css` light-shell force-patch block DELETED; new tokens added; validators and the spec updated with the final measured figures | `8193b40` | `validate:all` 197/0; typecheck, build and E2E pass per the commit message |
 
 **Baselines a new chat must REUSE, not recreate:**
 - `test-screenshots/themes/<theme>/<screen>.png` — 30 rendered baselines (5 themes × 6 screens:
@@ -234,10 +235,10 @@ complete when **all** of these hold, with evidence:
 ## 6. EXACT NEXT STARTING POINT
 
 1. Read `PROJECT_STATUS.md` → `CURRENT RESUME STATE` (first screen only), `HANDOFF.md`, and this file.
-2. `git --no-pager log --oneline -6` · `git status --porcelain` — expect HEAD `abd8c69` and an empty tree.
+2. `git --no-pager log --oneline -6` · `git status --porcelain` — expect HEAD `8193b40` and an empty tree.
 3. Confirm the recorded baseline before changing anything:
-   `bash scripts/validate-all.sh` (expect **192 PASS / 0 FAIL**) and
-   `npx playwright test e2e/theme-visual.spec.ts` (expect **11 passed**).
+   `bash scripts/validate-all.sh` (expect **197 PASS / 0 FAIL**) and
+   `npx playwright test e2e/theme-visual.spec.ts` (expect **15 passed**).
 4. Begin at **C4 → typography (D-2)**: `tailwind.config.js` → `fontSize` ·
    `scripts/validate-typography-scale.mjs` (repoint) · `src/components/ui.tsx` · then re-render the 30
    baselines and compare before/after.

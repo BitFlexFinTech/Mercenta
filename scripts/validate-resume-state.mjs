@@ -56,6 +56,7 @@
 // Every mutation-sensitive assertion below was PROVED ABLE TO FAIL (see the
 // session report): each mutated file was restored byte-identical.
 import { readFileSync, existsSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 
 let failures = 0;
 let checks = 0;
@@ -262,6 +263,58 @@ test(
     );
   })()
 );
+
+/* ── 6. The named commit must be CURRENT, not merely real ─────────────────── */
+console.log("\n§ 6. THE NAMED COMMIT IS CURRENT — the drift this gate could not previously see\n");
+/**
+ * WHY THIS EXISTS (2026-11-19). Four live records named `4965ebf` / `abd8c69` while the real HEAD was
+ * `8193b40` — the legacy-styling migration had COMPLETED. Assertions 4 and 5b above could not see it:
+ * they prove the two files agree WITH EACH OTHER, and that the named hash is real. Two documents
+ * agreeing while both are stale passes such a check. Rule 10 §8: gate the whole class, not the instance.
+ *
+ * WHAT IT PROVES. The headline hash in `LAST VERIFIED COMMIT` must (a) exist in this repository,
+ * (b) be an ancestor of HEAD, and (c) have NO application-runtime change (`src/`, `supabase/`) between
+ * it and HEAD — because such a change is exactly what makes the record stale.
+ *
+ * A commit touching only documentation, rules or scripts does NOT invalidate the record: the record
+ * describes the RUNTIME state, and a governance commit does not change it.
+ *
+ * Proved able to fail (2026-11-19): the named hash was replaced with the genuinely stale `4965ebf`
+ * ⇒ FAIL → restored byte-identical ⇒ PASS.
+ */
+const gitOut = (cmd) => {
+  try {
+    return execSync(cmd, {
+      cwd: new URL("..", import.meta.url),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return null;
+  }
+};
+const namedCommit = statusHashes[0] ?? "";
+const headCommit = gitOut("git rev-parse HEAD");
+if (headCommit === null) {
+  console.log("      SKIP — not a git checkout, so the ancestry check cannot run (stated, not silently passed).");
+} else {
+  const existsInRepo = gitOut(`git cat-file -e ${namedCommit}^{commit}`) !== null;
+  test(`the named LAST VERIFIED COMMIT ${namedCommit} exists in this repository`, existsInRepo, namedCommit);
+  const isAncestor = existsInRepo && gitOut(`git merge-base --is-ancestor ${namedCommit} ${headCommit}`) !== null;
+  test(
+    `the named commit is an ancestor of HEAD (${headCommit.slice(0, 7)})`,
+    isAncestor,
+    `${namedCommit} vs ${headCommit.slice(0, 7)}`
+  );
+  if (isAncestor) {
+    const runtimeAfter = gitOut(`git rev-list ${namedCommit}..${headCommit} -- src supabase`) ?? "";
+    test(
+      "no APPLICATION-RUNTIME change (src/, supabase/) after the named commit — the record describes the newest runtime state",
+      runtimeAfter === "",
+      runtimeAfter === "" ? "none" : `${runtimeAfter.split("\n").length} commit(s) after the record`
+    );
+  }
+}
 
 /* ── Verdict ─────────────────────────────────────────────────────────────── */
 console.log('');

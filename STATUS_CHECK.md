@@ -4,7 +4,37 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §OPENSHIP BATCH 10, STEP 1 — CURRENT STATUS (session 148, 2026-10-15) — THE LEGACY-STYLING MEASUREMENT: THE METHOD NOW EXISTS, THE SPEC'S UNMETHODICAL FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE
+## §OPENSHIP BATCH 10 — COMPLETE, AND FOUR STALE RECORDS REPAIRED (2026-11-19)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `8193b40` (+ this record).
+`npm run validate:all` **197 PASS / 0 FAIL (exit 0)** — re-run and confirmed in this session.
+`npm run validate:resume-state` **PASS (57 assertions)**. `git status --porcelain` is EMPTY before this
+record is committed. **NOT deployed and NOT live-verified** — the Owner has not approved
+`demo.mercenta.co.uk`.
+
+1. **WHAT IS COMPLETE — OPENSHIP BATCH 10, THE LEGACY-STYLING MIGRATION.** All 1,663 literal
+   `white`/`black` class sites are migrated to theme tokens (`text-on-fill`, `text-strong`,
+   `border-hairline-06`, `border-hairline`, `border-hairline-strong`, `bg-tint`, `divide-hairline-06`,
+   `ring-hairline`, `bg-surface-hover`, `bg-surface-tint`, `bg-surface`); the `src/index.css`
+   light-shell force-patch block is DELETED; `--mr-hairline-06` and `--mr-on-fill` are added; the
+   validators are updated; and `docs/OPENSHIP_REFERENCE_SPEC.md` carries the final measured figures
+   (grey 2,866/126 · ink 974/117 · literal 0/0). The commit message records typecheck, build and E2E
+   passing at this commit.
+2. **WHAT WAS WRONG — AND THIS IS THE REPAIR.** Four written records still described the HALF-WAY
+   point: `PROJECT_STATUS.md` and `HANDOFF.md` (both naming `4965ebf`, the STEP 1 measurement),
+   `STATUS_CHECK.md` (the same), and `docs/PHASE_C_TO_G_PLAN_2026-10-13.md` (naming `abd8c69`, older
+   still). **No file named the real HEAD `8193b40` at all.** All four are corrected in this record.
+3. **WHY NOTHING CAUGHT IT.** `scripts/validate-resume-state.mjs` proved the two resume blocks agreed
+   WITH EACH OTHER, and that the ten fields existed — but never that the named commit was the newest
+   one. Two documents agreeing while both are stale passes such a check. The gate is extended in this
+   same change so the named commit must be a real ancestor of HEAD with no application-runtime change
+   (`src/`, `supabase/`) in between; that is the exact drift, now machine-checked.
+4. **WHAT IS REMAINING.** Full acceptance testing — PHASE G in the plan document, and the last step of
+   the design programme in `docs/OPENSHIP_REFERENCE_SPEC.md` §16.
+5. **NOT DONE HERE.** No ClickUp workspace content was read, changed or deleted; nothing was deployed;
+   nothing was purchased; the production homepage was not touched; no colour migration was started.
+
+## PREVIOUS STATUS — **§OPENSHIP BATCH 10, STEP 1 (session 148, 2026-10-15) — THE LEGACY-STYLING MEASUREMENT — SUPERSEDED BY §OPENSHIP BATCH 10 COMPLETE**
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `4965ebf` (+ this record).
 `typecheck` **0** · `lint` **0** · `build` ok · `validate:all` **197 PASS / 0 FAIL** (**was 196** — the
