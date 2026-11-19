@@ -152,7 +152,15 @@ for (const field of FIELDS) {
  */
 const firstTaskToken = (text) => {
   const value = fieldValue(text, 'NEXT TASK');
-  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z]\d?)\b/i);
+  /**
+   * §REPOINTED 2026-11-19 — the vocabulary gained its own `INT-n` family.
+   * The four-system integration programme is a SEPARATE programme from the design programme
+   * (which owns PHASE C→G), so borrowing its numbering would make two programmes share one
+   * counter and the resume record ambiguous. This is an EXTENSION, never a weakening: a phrase
+   * with no work token still yields '' (see the self-check below), so the contract is unchanged
+   * in force and only wider in vocabulary.
+   */
+  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S|INT)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z]\d?)\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -179,6 +187,9 @@ test(
        documents agreed. The sub-phase form is now accepted too. */
     firstTaskToken('NEXT TASK: §PHASE C2 → G — continue') === 'PHASE C2' &&
     firstTaskToken('NEXT TASK: PHASE C4 — primitives') === 'PHASE C4' &&
+    /* §REPOINTED 2026-11-19 — the integration programme's own family. */
+    firstTaskToken('NEXT TASK: INT-1 — prove Drive write') === 'INT-1' &&
+    firstTaskToken('NEXT TASK: **INT 2 — six system pairs**') === 'INT 2' &&
     /* And a phrase with NO work token still yields nothing — the contract holds. */
     firstTaskToken('NEXT TASK: nothing to see here') === '',
 );
@@ -235,8 +246,9 @@ test(
   `PROJECT_STATUS: ${statusHashes.join(',') || 'none'} · HANDOFF: ${handoffHashes.join(',') || 'none'}`
 );
 const taskTokenOf = (text) => {
+  /** §REPOINTED 2026-11-19 — `INT` added to the family, matching `firstTaskToken` above. */
   const m = fieldValue(text, 'LAST COMPLETED TASK').match(
-    /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|PHASE)\s?-?(\d+[a-z]?)\b/i
+    /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?(\d+[a-z]?)\b/i
   );
   return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
 };
@@ -252,13 +264,17 @@ test(
   (() => {
     const probe = (v) => {
       const m = v.match(
-        /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|PHASE)\s?-?(\d+[a-z]?)\b/i
+        /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?(\d+[a-z]?)\b/i
       );
       return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
     };
     return (
       probe('OPENSHIP MAPPING BATCH 3 (2026-10-15) — x') === 'OPENSHIP MAPPING BATCH 3' &&
       probe('§OPENSHIP BATCH 8 — x') === 'OPENSHIP BATCH 8' &&
+      /* §REPOINTED 2026-11-19 — the integration programme's own family, and the
+         negative case proving a token-less phrase still yields nothing. */
+      probe('INT-1 — Google Drive write capability (2026-11-19)') === 'INT 1' &&
+      probe('**INT 3 — six system pairs**') === 'INT 3' &&
       probe('nothing to see here') === ''
     );
   })()

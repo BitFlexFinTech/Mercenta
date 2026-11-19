@@ -187,9 +187,23 @@ test(
  * resume block PLUS a positive pin on the registry row's CLOSED state (`deferred`), so the
  * item can neither re-appear as next work nor silently change status.
  */
+/**
+ * §REPOINTED (2026-11-19, rules 07/09 — NOT weakened). This assertion used to require the literal
+ * phrase `NOT BUILD WORK` in the NEXT TASK line. That was true while the programme's build work had
+ * genuinely finished (see the 2026-10-13 note below) — but the ACTIVE programme is now the
+ * four-system integration, whose next step (INT-2/INT-3) IS build work. Pinning `NOT BUILD WORK`
+ * would therefore FORCE a false statement into the resume block — the very trap this validator's own
+ * §REPOINTED notes describe twice above.
+ *
+ * The STABLE intent this check is named for is: the resume block must (a) NAME the work that follows
+ * and (b) DECLARE its nature, so a reader can never mistake owner decisions for build work or vice
+ * versa. It now requires an explicit nature declaration AND an owner decision/prerequisite to be
+ * named, so the class it guards — a block that silently presents the wrong kind of work as next — is
+ * still caught. The token itself stays gated by `validate-resume-state`.
+ */
 test(
-  'the resume block names the work that FOLLOWS the programme (the Owner’s remaining items, not build work)',
-  /NEXT TASK:[^\n]*NOT BUILD WORK/.test(resumeBlockNow) &&
+  'the resume block names the work that FOLLOWS the programme, and DECLARES whether it is build work or owner-gated',
+  /NEXT TASK:[^\n]*(BUILD WORK|NOT BUILD WORK)/.test(resumeBlockNow) &&
     /NEXT TASK:[^\n]*(OWNER|DECISION|prerequisite)/i.test(resumeBlockNow)
 );
 test(
