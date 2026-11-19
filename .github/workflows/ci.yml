@@ -55,6 +55,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # §FIXED AT SOURCE (2026-11-19). The default is `fetch-depth: 1` — a SHALLOW clone
+          # holding ONLY the tip commit. Two validators legitimately walk history:
+          # `validate-resume-state` proves the named checkpoint is an ANCESTOR of HEAD, and
+          # `validate-data-preservation` resolves a baseline commit. On CI both therefore failed
+          # ("the named LAST VERIFIED COMMIT 8193b40 exists in this repository",
+          # "git cat-file -t 21ba4b8") while passing locally on a full clone — and the commit WAS
+          # on the remote (verified: `git branch -r --contains 8193b40` → origin/redesign/foundation).
+          # CI simply could not see it, so the gate was reporting the checkout, not the repo.
+          # Full history makes those ancestry checks real again.
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4

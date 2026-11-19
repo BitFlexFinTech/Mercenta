@@ -261,11 +261,29 @@ check(
   `a scripts/validate-*.mjs implements the deleted-file describer check (found: ${describerChecks.join(', ') || 'NONE'})`,
   describerChecks.length > 0
 );
-check(
-  'the global rule 10-describers-must-match-reality.md is installed in every rules folder the assistant reads',
-  fs.existsSync(path.join(HOME, '.cline/rules/10-describers-must-match-reality.md')) &&
-    fs.existsSync(path.join(HOME, 'Documents/Cline/Rules/10-describers-must-match-reality.md'))
-);
+/**
+ * §FIXED AT SOURCE (2026-11-19). This assertion used to be a bare `existsSync` on the OWNER'S
+ * HOME paths, so it could NEVER pass on a fresh clone or a build server — CI failed on a
+ * condition that says nothing about the repository, while the same file's own header states
+ * that "a rules folder that does not exist on this machine (a fresh clone, a build server) is
+ * SKIPPED with a warning rather than failed: absence there is not a drift."
+ *
+ * It now honours that guard. It is NOT weakened: when a rules folder IS present on this machine
+ * the rule must still be there, so a genuine drift is still caught.
+ */
+const rule10Files = [
+  path.join(HOME, '.cline/rules/10-describers-must-match-reality.md'),
+  path.join(HOME, 'Documents/Cline/Rules/10-describers-must-match-reality.md'),
+];
+if (!rule10Files.some((f) => fs.existsSync(path.dirname(f)))) {
+  console.log('  SKIP  the global rules are not installed on this machine (not a drift)');
+} else {
+  check(
+    'the global rule 10-describers-must-match-reality.md is installed in every rules folder the assistant reads',
+    rule10Files.every((f) => fs.existsSync(f)),
+    rule10Files.filter((f) => !fs.existsSync(f)).map((f) => 'missing: ' + f.replace(HOME, '~')).join(', ')
+  );
+}
 
 /* ── 6. the parser must be able to REJECT a skipped declaration ──────────── */
 
