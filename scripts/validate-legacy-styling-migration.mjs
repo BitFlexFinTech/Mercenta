@@ -26,13 +26,28 @@
  *       exactly the value the rule declares, the rule changes nothing and must be deleted.
  *   T6  THE ABSENCE GUARD — the force-patch block must exist while any literal-`white` site remains,
  *       and must NOT exist once they are gone. This is the guard the batch must be able to pass.
+ *   T7  PROSE IS NOT A CALL SITE (§SUB-BATCH 2) — a class NAMED IN A COMMENT must not be counted, proved
+ *       on a sample whose answer is known by construction. This is the gate for the counting defect.
+ *   T8  THE DECISION NUMBERS (§SUB-BATCH 2) — spec's `§DECISION-BATCH10-2` classification must EQUAL
+ *       what the method classifies now, so a decision cannot be taken on a figure that has since moved.
+ *   T9  THE UNCOVERED LITERAL SITES (§SUB-BATCH 2) — the literal sites no shim rule covers are a
+ *       RATCHET: they may only fall, and a covered class `src` no longer authors is reported.
  *
  * Run: node scripts/validate-legacy-styling-migration.mjs   (`npm run validate:all` runs it)
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { measure, measureLiteralWhite, subjectFiles, classSites } from './measure-legacy-classes.mjs';
+import {
+  measure,
+  measureLiteralWhite,
+  classifyLiteralFamily,
+  subjectFiles,
+  classSites,
+  authoredStrings,
+  tokensIn,
+  LITERAL_WHITE,
+} from './measure-legacy-classes.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -91,15 +106,72 @@ if (recorded) {
 
 /* ── T3 — THE RATCHET ────────────────────────────────────────────────────── */
 /**
- * The Batch-10 CEILING: the counts measured when the migration opened (2026-10-15). The migration
- * may only reduce them. The ceiling is lowered by the batch that lowers the count, recording the new
- * figure here — and lowering it can never be used to make a check pass, because what is compared is
- * the MEASURED value (this is a ceiling, not an equality).
+ * The Batch-10 CEILING. The migration may only reduce these counts. The ceiling is lowered by the batch
+ * that lowers the count, recording the new figure here — and lowering it can never be used to make a
+ * check pass, because what is compared is the MEASURED value (this is a ceiling, not an equality).
+ *
+ * §SUB-BATCH 2 (2026-10-16) — LOWERED FROM grey 4,508 / ink 960 / literal 1,676, because those were the
+ * counts produced by the DEFECTIVE reader: it matched the raw file text, so a class NAMED IN A COMMENT
+ * was counted as a call site. Measured: 13 grey sites, 13 literal sites (all prose) and 100 prose
+ * mentions inside `classSites()` — which is what feeds the "is this shim rule still used?" verdict, so a
+ * comment could certify a dead rule as live. The reader now takes the strings the parser sees; the
+ * ceiling is lowered to the TRUE counts, and lower is the direction that matters.
  */
-const CEILING = { grey: 4508, ink: 960, literal: 1676 };
+const CEILING = { grey: 4495, ink: 944, literal: 1663, uncovered: 57 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);
+
+/* ── T7 — PROSE IS NOT A CALL SITE (the defect fixed at source, proved) ──── */
+/**
+ * §SUB-BATCH 2. The counting defect was: a class mentioned in a COMMENT counted as authored. A fix with
+ * no gate comes back (`07-fix-defects-at-source.md` §4), so this check drives the reader with a sample
+ * whose answer is known BY CONSTRUCTION: the same three classes appear once in a comment and once in a
+ * string literal, and only the string literal may be counted.
+ */
+const PROSE_SAMPLE = [
+  "const a = 1; /* text-white border-white/[0.06] bg-white/[0.02] are the classes */",
+  "// hover:text-white",
+  "const cls = 'text-white border-white/[0.06] bg-white/[0.02]';",
+].join('\n');
+const proseCounted = authoredStrings(PROSE_SAMPLE, 'sample.ts').reduce((n, s) => n + tokensIn(LITERAL_WHITE, s.value).length, 0);
+check(
+  'T7 a class NAMED IN A COMMENT is not a call site (prose is excluded by construction)',
+  proseCounted === 3,
+  `the sample names three literal classes once in comments and once in a string — the reader counted ${proseCounted}, and must count exactly 3`,
+);
+
+/* ── T8 / T9 — THE CLASSIFICATION THE TWO DECISIONS REST ON ─────────────── */
+/**
+ * §SUB-BATCH 2. The migration's own two decisions (the border hairlines; white text on a saturated
+ * fill) must be taken WITH the numbers, so the numbers are recorded in the spec AND machine-read back:
+ * a decision recorded from a figure that has since changed is a decision about a different product.
+ */
+const CLASSIFICATION = classifyLiteralFamily(files);
+const COVERED_MARKER = /§DECISION-BATCH10-2:\s*method=([\w./-]+)\s+date=(\d{4}-\d{2}-\d{2})\s+literal=(\d+)\/(\d+)\s+border=(\d+)\s+text=(\d+)\s+bg=(\d+)\s+divide=(\d+)\s+ring=(\d+)\s+solid=(\d+)\s+tint=(\d+)\s+uncovered=(\d+)/;
+const decision = COVERED_MARKER.exec(SPEC);
+check(
+  'T8 spec records the CLASSIFICATION the decisions rest on (§DECISION-BATCH10-2, with method + date)',
+  !!decision,
+  'docs/OPENSHIP_REFERENCE_SPEC.md must carry the machine-readable §DECISION-BATCH10-2 line',
+);
+if (decision) {
+  const [, method, date, lS, lF, border, text, bg, divide, ring, solid, tint, uncovered] = decision;
+  const prefix = (k) => (CLASSIFICATION.byPrefix.find(([p]) => p === k) || [, 0])[1];
+  const agree =
+    method === 'scripts/measure-legacy-classes.mjs' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+    [Number(lS), Number(lF), Number(border), Number(text), Number(bg), Number(divide), Number(ring), Number(solid), Number(tint)].join(',') ===
+      [CLASSIFICATION.sites, W.files, prefix('border'), prefix('text'), prefix('bg'), prefix('divide'), prefix('ring'), CLASSIFICATION.textSites.onFillSolid, CLASSIFICATION.textSites.onFillTint].join(',');
+  check(
+    'T8 the recorded classification EQUALS what the method classifies now',
+    agree,
+    `recorded literal ${lS}/${lF} border ${border} text ${text} bg ${bg} divide ${divide} ring ${ring} solid ${solid} tint ${tint} ` +
+      `| measured literal ${CLASSIFICATION.sites}/${W.files} border ${prefix('border')} text ${prefix('text')} bg ${prefix('bg')} ` +
+      `divide ${prefix('divide')} ring ${prefix('ring')} solid ${CLASSIFICATION.textSites.onFillSolid} tint ${CLASSIFICATION.textSites.onFillTint} ` +
+      `· recorded uncovered ${uncovered}`,
+  );
+}
 
 /* ── THE FORCE-PATCH BLOCK, PARSED FROM ITS OWN SOURCE ───────────────────── */
 const MARKER = 'LIGHT-SHELL TOKEN REMAP LAYER';
@@ -221,6 +293,50 @@ for (const r of rules) {
   }
 }
 const shimPresent = !!BLOCK && rules.length > 0;
+
+/**
+ * ── T9 — THE LITERAL SITES THE BLOCK NEVER COVERS (a ratchet, and the third decision's numbers) ──
+ *
+ * §SUB-BATCH 2. Not every authored literal class has a shim selector. Those sites paint LITERALLY on a
+ * light shell — which is correct for a scrim (`bg-black/70`), intentional for a printable document
+ * (`bg-white text-black`), and a defect for an INTERACTION state (a `hover:border-white/20` hairline over
+ * a #FAFAFA surface is invisible, so the hover does not read). The measured count is therefore recorded
+ * as a CEILING: the migration may only reduce it, and a NEW uncovered literal site fails here.
+ */
+const coveredBase = new Set();
+for (const r of rules) {
+  for (const sel of r.selectors) {
+    for (const c of classesOf(sel)) {
+      /**
+       * The variant is stripped BEFORE the family test: a selector like `.hover\:bg-white\/\[0\.1\]:hover`
+       * yields `hover:bg-white/[0.1]`, which does NOT start with a property prefix — testing it un-stripped
+       * made every VARIANT-covered class look uncovered (measured: `hover:bg-white/[0.1]` 4 sites and
+       * `group-hover:border-white/[0.3]` 1 site were reported as uncovered although the block remaps both).
+       */
+      const base = c.replace(/^(?:[a-z-]+:)+/, '');
+      if (/^(?:text|bg|border|divide|ring|from|to|via|placeholder|decoration)-(?:white|black)/.test(base)) {
+        coveredBase.add(base);
+      }
+    }
+  }
+}
+const uncoveredLiteral = CLASSIFICATION.byBase.filter(([base]) => !coveredBase.has(base));
+const uncoveredSites = uncoveredLiteral.reduce((n, [, c]) => n + c, 0);
+console.log(
+  `      T9 measured: ${uncoveredSites} uncovered literal sites in ${uncoveredLiteral.length} classes (ceiling ${CEILING.uncovered}) — ` +
+    uncoveredLiteral.map(([b, c]) => `${b} ${c}`).join(' · '),
+);
+check(
+  'T9 the literal sites NO shim rule covers have not grown past the recorded ceiling (ratchet)',
+  uncoveredSites <= CEILING.uncovered,
+  `uncovered ${uncoveredSites}/${CEILING.uncovered} sites in ${uncoveredLiteral.length} classes: ` +
+    uncoveredLiteral.map(([b, c]) => `${b} ${c}`).join(' · '),
+);
+check(
+  'T9 every class the block DOES cover is a class src still authors (no coverage of a class that is gone)',
+  [...coveredBase].every((b) => CLASSIFICATION.byBase.some(([base]) => base === b)),
+  [...coveredBase].filter((b) => !CLASSIFICATION.byBase.some(([base]) => base === b)).join(' · ') || '',
+);
 
 check(
   'T4 every shim rule targets a class still AUTHORED in src (no rule kept for a class that is gone)',

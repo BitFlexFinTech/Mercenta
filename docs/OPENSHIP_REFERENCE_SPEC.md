@@ -890,7 +890,25 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-15 grey=4508/132 ink=960/118 literal=1676/123**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-16 grey=4495/129 ink=944/117 literal=1663/120**
+>
+> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-10-16 literal=1663/120 border=757 text=601 bg=268 divide=35 ring=2 solid=21 tint=4 uncovered=57**
+>
+> **§SUB-BATCH 2 — THE COUNT WAS COUNTING PROSE, AND THAT IS FIXED AT SOURCE (2026-10-16).** The
+> first reader matched the **raw file text**, so a class NAMED IN A COMMENT counted as a call site.
+> Measured both ways in one run: **13** of the grey family's sites and **13** of the literal family's
+> were prose (every one of those 13), and `classSites()` — the number the gate's "is this shim rule
+> still used?" verdict is built on — held **100** prose mentions (`bg-card`, `bg-tint`, `bg-ink-900`,
+> `border-white/[0.06]`, …). So a comment could certify a **DEAD** force-patch rule as live, which is
+> exactly how dead weight survives a gate. One of the "classes" measured was `bg-white/[0.0x]`, which
+> exists **only** inside a comment in `ThemeSelector.tsx`.
+> **The reader now takes the strings the TypeScript parser sees**, so prose is excluded BY
+> CONSTRUCTION rather than by a regex that guesses where a comment ends (a path glob such as
+> `src/**` + slash-star + `.tsx`, or a `//` inside `https://…`, both occur in this codebase and both
+> break naive stripping). The figures above are the TRUE counts, **lowered** accordingly; the old
+> 4,508 / 132 · 960 / 118 · 1,676 / 123 figures are retained **only as history**. The gate proves the
+> exclusion (T7) on a sample whose answer is known by construction, and the ratchet (T3) was lowered to
+> the true counts — and the ceiling only ever moves DOWN, so nothing was made easier to pass.
 >
 > **§METHOD NOW RECORDED (added 2026-10-15, §OPENSHIP BATCH 10 step 1) — REPOINTED, not weakened.**
 > The row below used to read **2,812** / **857** and named **no method anywhere in the repository**:
@@ -898,19 +916,20 @@ Every row below was measured in this repository this session.
 > the migration's own first step — a re-measurement — **could not reproduce them**. Two counts from
 > two different methods sitting side by side is precisely the drift rule 10 §2 forbids. The method now
 > EXISTS as `scripts/measure-legacy-classes.mjs` (subject `src/**/*.{ts,tsx}` · a "site" = one
-> occurrence of a class token matching the family · generated CSS deliberately excluded) and the
-> figures above are **produced by it**, machine-read back out of this document by
-> `scripts/validate-legacy-styling-migration.mjs` (T2), which FAILS if the numbers here and the
-> numbers measured ever disagree. The old 2,812 / 857 pair is retained **only as history**.
+> occurrence of a class token matching the family **inside an authored string** · generated CSS
+> deliberately excluded) and the figures above are **produced by it**, machine-read back out of this
+> document by `scripts/validate-legacy-styling-migration.mjs` (T2), which FAILS if the numbers here and
+> the numbers measured ever disagree. The old 2,812 / 857 pair is retained **only as history**.
 >
 > **WHAT STEP 1 ESTABLISHED — AND IT RESHAPES THIS BATCH.** The two families are NOT mostly
 > "hardcoded" values. `tailwind.config.js` already routes `zinc-*`, `ink-*`, `brass-*`, `steel` and
 > `parchment` through the canonical theme variables (`zinc-400` → `var(--mr-text-muted)`,
 > `bg-ink-850` → `var(--mr-surface-raised)`, …), so those class sites are legacy **NAMES** whose
 > values already come from the theme — renaming them would move no pixel. The genuinely LITERAL
-> family is `white`/`black` (**1,676** sites, above), and those are exactly what the light-shell
+> family is `white`/`black` (**1,663** sites, above), and those are exactly what the light-shell
 > force-patch block exists to remap. Batch 10's real target is therefore the literal family and the
 > block, not 3,700 renames.
+
 >
 > **AND IT FOUND REAL DEAD WEIGHT IN THE BLOCK, FIXED AT SOURCE (rule 07).** Seven rules declared
 > **exactly** what Tailwind already resolves their class to, and six selectors could never match
@@ -940,7 +959,7 @@ Every row below was measured in this repository this session.
 | **Accent CTA** | flat `bg-brass-500` | **per-theme gradient + radial highlight + themed shadow** | add the gradient |
 | **Status colours** | Mercenta `--mr-state-*` | OpenShip `--st-*` five families | align values |
 | **Page container** | none shared; legacy `max-w-[1400px] mx-auto` | `max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6` | add shared container |
-| **Hardcoded classes** | **4,508** grey-family sites across **132** files and **960** `ink`/`surface`/`brass` sites across **118** files — MEASURED 2026-10-15 by `scripts/measure-legacy-classes.mjs` (the §MEASURED-BATCH10 line above); of these, the genuinely LITERAL ones are **1,676** `white`/`black` sites across **123** files, because the rest are legacy NAMES that `tailwind.config.js` already resolves to theme variables | theme tokens throughout | migrate (Batch 10) — retargeted by the measurement: the literal family and the light-shell force-patch block, not a mass rename |
+| **Hardcoded classes** | **4,495** grey-family sites across **129** files and **944** `ink`/`surface`/`brass` sites across **117** files — MEASURED 2026-10-16 by `scripts/measure-legacy-classes.mjs` (the §MEASURED-BATCH10 line above; the 2026-10-15 figures were 4,508 / 960 because the reader then counted class names mentioned in COMMENTS — see the §SUB-BATCH 2 note); of these, the genuinely LITERAL ones are **1,663** `white`/`black` sites across **120** files, because the rest are legacy NAMES that `tailwind.config.js` already resolves to theme variables | theme tokens throughout | migrate (Batch 10) — retargeted by the measurement: the literal family and the light-shell force-patch block, not a mass rename |
 
 ---
 
@@ -1290,8 +1309,9 @@ followed; no number is invented to fill a gap.
 > - **THE FINDING THAT CHANGES THE WORK:** the two families are mostly legacy NAMES whose VALUES
 >   already come from the theme (`tailwind.config.js` routes `zinc-*`, `ink-*`, `brass-*`, `steel`,
 >   `parchment` to the canonical variables), so renaming them would move no pixel. The genuinely
->   LITERAL family is `white`/`black` — **1,676 sites across 123 files** — and those are exactly
->   what the light-shell force-patch block exists to remap. **The remaining migration work is
+>   LITERAL family is `white`/`black` — **1,663 sites across 120 files** (re-measured 2026-10-16; the
+>   1,676 recorded on 2026-10-15 counted 13 class names that appear only in comments) — and those are
+>   exactly what the light-shell force-patch block exists to remap. **The remaining migration work is
 >   therefore: the literal family, then the block's deletion with its absence guard (gate T6).**
 > - **IT ALSO FOUND DEAD WEIGHT IN THE BLOCK, FIXED AT SOURCE (rule 07):** seven rules declared
 >   exactly what Tailwind already resolves (so they could not change a pixel) and six selectors had
@@ -1304,6 +1324,58 @@ followed; no number is invented to fill a gap.
 >   dark appearance by 2%; and a `text-white` site that sits ON a saturated fill must take an
 >   on-fill token rather than the strong text token, or the fill's label would invert on light
 >   shells. Both are decisions for the next sub-batch, with the numbers attached.
+
+### SUB-BATCH 2 — THE CLASSIFICATION, AND THE THREE DECISIONS IT PUTS ON THE TABLE (2026-10-16)
+
+> **§SUB-BATCH 2 IS THE NUMBERS, NOT THE MIGRATION.** The two decisions above had to be taken WITH the
+> numbers, so this step made the numbers **reproducible and gated** before any component changed. What
+> was built: the reader now counts AUTHORED STRINGS (a comment is never a call site — the defect and
+> its fix are recorded in §12), and `classifyLiteralFamily()` produces the classification from that one
+> owner. `npm run measure:legacy` prints it; §12's `§DECISION-BATCH10-2` line is written FROM it and
+> the gate machine-reads it back (T8). **No component, no token and no CSS rule changed in this step,
+> so nothing rendered changed** — which is why the 30 baselines are byte-identical rather than "close".
+>
+> **THE CLASSIFICATION — 1,663 literal sites, by the property they are used on:**
+> **border 757 · text 601 · bg 268 · divide 35 · ring 2** (by variant: none 1,506 · hover 152 ·
+> focus 2 · group-hover 2 · focus-visible 1).
+>
+> **DECISION 1 — THE HAIRLINE BORDERS (757 sites; the block already remaps 20 of their base classes).**
+> Two of the five themes are LIGHT (`minimal-light`, `serious`: `--mr-hairline` `#E8E8E8`) and three are
+> DARK (`professional`, `fun`: `rgba(255,255,255,0.08)`; `bold`: `rgba(245,246,248,0.09)`, preserved
+> exactly by Batch 3). Today `border-white/[0.06]` renders `#E8E8E8` on light (the block) and **6%**
+> white on dark (no remap), so:
+>
+> | Option | What it does | What it changes on screen |
+> |---|---|---|
+> | **1A — add ONE new role token** (`--mr-hairline-soft`: `#E8E8E8` on the two light designs, `rgba(255,255,255,0.06)` on the three dark ones) | reproduces today EXACTLY, on all five themes | **nothing** — the migration becomes provably pixel-neutral |
+> | **1B — repoint onto the theme's own `--mr-hairline`** | one token for one role; the legacy 6% is deleted | dark-theme borders move **6% → 8%**, and `[0.04]` 49 · `[0.05]` 18 · `[0.07]` 1 · `[0.1]` 4 · `[0.12]` 18 sites all collapse onto the theme's value, so those move further |
+>
+> **DECISION 2 — WHITE TEXT ON A SATURATED FILL (601 text sites; 21 share their string with a SOLID
+> fill, 4 with only a TINT).** Today the block RESTORES white text on three fills only
+> (`.bg-state-danger`, `.bg-crimson-accent`, `.bg-red-500`), while the measured SOLID fills are
+> **`bg-brass-500` 18 · `bg-brass-400` 4 · `bg-brass-600` 2 · `hover:bg-red-700` 2 ·
+> `bg-state-warning` 1 · `bg-crimson-accent` 1 · `bg-state-danger` 1** — so **24 brass sites have NO
+> restore rule**, and on a light shell their text is remapped to `--mr-text-strong` (#000000) over a
+> solid gold fill. Options: **2A** give every solid fill an explicit ON-FILL token per theme (no
+> appearance change; one more token), or **2B** keep the three restore rules and add the brass pair
+> (smaller, but the rule list grows with every new fill). The 4 TINT sites (`bg-brass-500/10`) must
+> take the ORDINARY text token — the classifier keeps tint and solid apart so a correct remap is never
+> "fixed" into white-on-white.
+>
+> **DECISION 3 — THE 57 LITERAL SITES NO SHIM RULE COVERS (a new ratchet, gate T9).** 18 classes:
+> `bg-black/60` 11 · `bg-black/70` 10 · `border-white/20` 8 · `bg-white` 5 · `bg-black` 5 ·
+> `bg-white/10` 2 · `text-black` 2 · `border-black` 2 · `bg-black/20` 2 · `border-white/5` 2 ·
+> `border-white/10` 1 · `ring-white/20` 1 · `ring-white/[0.06]` 1 · `border-white/25` 1 ·
+> `bg-black/40` 1 · `bg-white/[0.01]` 1 · `border-white/[0.10]` 1 · `bg-black/30` 1.
+> Most are CORRECT as they stand (a `bg-black/70` modal scrim is meant to be dark on every theme, and
+> the printable waybill's `bg-white text-black` is a document). But **15 are INTERACTION STATES that
+> are INVISIBLE on the two light designs**: `hover:border-white/20` 8 · `border-white/5` 2 ·
+> `hover:border-white/25` 1 · `border-white/10` 1 · `border-white/[0.10]` 1 (a `[0.1]` written with a
+> trailing zero, so the block's own `[0.1]` selector cannot match it) · `ring-white/20` 1 ·
+> `ring-white/[0.06]` 1. A hover or selected state painting 20% white on a #FAFAFA surface reads as
+> nothing. Fixing them CHANGES what the light themes show, so it is the Owner's call; until then the
+> count is a frozen CEILING (57) so it cannot grow unnoticed.
+
 
 ### Guardrails, unchanged and binding
 

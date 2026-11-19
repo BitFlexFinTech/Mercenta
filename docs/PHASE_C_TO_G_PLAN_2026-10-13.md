@@ -173,12 +173,19 @@ complete when **all** of these hold, with evidence:
     "the **3,137** hardcoded dark-theme classes" and to cite the block as "~lines 295–371" — a line
     range that no longer describes anything after the batches that reshaped the file, and a count with
     no method behind it (the same defect §12 of the reference spec carried). The measurement now
-    EXISTS: `scripts/measure-legacy-classes.mjs` (`npm run measure:legacy`) reports **4,508**
-    grey-family sites across **132** files, **960** `ink`/`surface`/`brass` sites across **118** files,
-    of which the genuinely LITERAL ones are **1,676** `white`/`black` sites across **123** files —
+    EXISTS: `scripts/measure-legacy-classes.mjs` (`npm run measure:legacy`) reports **4,495**
+    grey-family sites across **129** files, **944** `ink`/`surface`/`brass` sites across **117** files,
+    of which the genuinely LITERAL ones are **1,663** `white`/`black` sites across **120** files —
     because the rest are legacy NAMES whose values `tailwind.config.js` already routes to the theme
     variables. Never cite a line range here again: cite the block by its marker, which is what both
     the spec and `scripts/validate-legacy-styling-migration.mjs` key off.
+    **§REPOINTED AGAIN 2026-10-16 (OPENSHIP BATCH 10, sub-batch 2) — these figures were LOWERED, not
+    revised, because the reader had been counting PROSE.** The figures written here on 2026-10-15
+    (4,508 / 132 · 960 / 118 · 1,676 / 123) were produced by matching the raw file text, so a class
+    NAMED IN A COMMENT counted as a call site: measured, 13 grey sites and 13 literal sites were
+    comment prose, and `classSites()` held 100 prose mentions — enough for a comment to certify a DEAD
+    force-patch rule as live. The reader now counts the strings the TypeScript parser sees, the gate
+    proves it (T7), and the ratchet (T3) was lowered onto the true counts.
 - Keep the five themes genuinely distinct, accessible and consistent. **`bold` stays the colourful one.**
 - **Do NOT change business logic to make a screen easier to redesign.**
 - **Gate**: `validate:all` stays green · the patch's absence guard **proved able to fail** ·

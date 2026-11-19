@@ -4726,6 +4726,25 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
    * still fails, and no PROTECTED path appears in the change set (no RBAC or tenant scoping, no
    * `src/lib/spapi/`, `src/lib/dhl/`, `src/services/xero/`, `src/lib/billing/`, no migrations, no
    * deploy path).
+   *
+   * §SUB-BATCH 2 (2026-10-16) — THE CLASSIFICATION: the numbers the migration's decisions needed.
+   * SAME DECLARED SET, and the same reasoning: the change is to the METHOD, its GATE and the DOCUMENTS,
+   * and it deliberately touches NO component, token or CSS rule, so nothing rendered changed.
+   *   · `scripts/measure-legacy-classes.mjs` — the reader now takes the strings the TypeScript PARSER
+   *     sees (`authoredStrings()`), instead of matching raw file text. The raw-text reader counted a
+   *     class NAMED IN A COMMENT as a call site — 13 grey sites, 13 literal sites, and 100 prose
+   *     mentions inside `classSites()`, which is the number the gate's "is this shim rule still used?"
+   *     verdict rests on. It also gains `classifyLiteralFamily()`: the per-property, per-variant,
+   *     SOLID-vs-TINT classification the decisions need, from ONE owner.
+   *   · `scripts/validate-legacy-styling-migration.mjs` — T7 (a comment is not a call site, proved on a
+   *     sample whose answer is known by construction), T8 (the classification recorded in the spec must
+   *     EQUAL the measured one), T9 (the literal sites no shim rule covers are a RATCHET, and a covered
+   *     class `src` no longer authors is reported), and the T3 ceiling LOWERED onto the true counts.
+   *   · `docs/OPENSHIP_REFERENCE_SPEC.md` — §12's `§MEASURED-BATCH10` figures repointed, and the
+   *     `§DECISION-BATCH10-2` line plus the three decisions recorded WITH their numbers.
+   *   · `docs/PHASE_C_TO_G_PLAN_2026-10-13.md` — its own two figures repointed (a `docs/` path, so F6
+   *     already exempts it; named here so the change set is readable in one place).
+   *   · `package.json` — UNCHANGED (§sub-batch 2 adds no npm script; the CLI name stays `measure:legacy`).
    */
   const OPENSHIP_BATCH10_LEGACY_SCOPE = new Set([
     'scripts/measure-legacy-classes.mjs',
