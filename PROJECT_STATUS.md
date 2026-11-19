@@ -144,6 +144,69 @@ each restore, with the suite re-run PASS afterwards.
 No scheduled job installed. Nothing deployed. No ClickUp record created, edited or deleted. No
 application code changed.
 
+## §INTEGRATION LAYER — BUILT AND RUNNING IN THE CLOUD (2026-11-19)
+
+**GOVERNANCE/TOOLING increment: NO application runtime change.** Adds `scripts/integration/` and
+`.github/workflows/integration.yml`.
+
+### What it does
+A **READ-ONLY** reconciliation and reporting layer across four systems. It reads, diffs against
+recorded fingerprints, records a redacted audit trail, and reports. **It writes to no system**, so
+there is no uncontrolled bidirectional overwrite — and no claim of one.
+
+| Property | Where it lives |
+|---|---|
+| Incremental sync | only fingerprints that CHANGED are reported as changes |
+| Idempotency | every item keyed; a repeat run reports **zero** changes (proven live) |
+| Retry / recovery | `lib/core.mjs request()` retries 429/5xx/network with jittered backoff |
+| Rate-limit awareness | `Retry-After` honoured; ClickUp lists walked sequentially |
+| Conflict detection | duplicate refs, ClickUp status regressions, workflow regressions |
+| Audit trail | `appendAudit()`, one REDACTED JSONL record per action |
+| Cached state | `reports/integration/state.json` (gitignored), persisted in CI by `actions/cache` |
+| Health monitoring | `check()` per system, reported centrally |
+
+### Google Drive — no new dependency
+The existing service-account key carries `client_email` + `private_key` + `token_uri`, so Google's
+**JWT-bearer flow is implemented with `node:crypto`**. Scope is **`drive.readonly` ONLY**; a test
+asserts the connector contains no PUT/PATCH/DELETE and no write endpoint.
+
+### Cloud automation — the Mac can be off
+`.github/workflows/integration.yml` runs on a GitHub runner: **daily 05:00 UTC**, **weekly Monday
+06:00 UTC**, plus `workflow_dispatch`. `permissions: contents: read` — it cannot push or deploy.
+Four **encrypted repository secrets** were set from the protected local files over stdin; the
+values were never printed, never in argv, and remain non-retrievable.
+
+### Verified live
+- Local: all four HEALTHY · first run 53 ClickUp + 30 GitHub + 9 Drive added ·
+  **second run 0 added / 0 changed / 53 + 30 unchanged** (idempotency) · 0 secret leaks
+- **Cloud run `44551199355`: `conclusion=success`, job ✓ in 47s**, artifact published —
+  clickup **53** · github **20** · penpot **yes (0)** · drive **9 files** · all four HEALTHY
+- `INTEGRATION_SELF_TEST_PASS (90 checks, 0 failed)`, proved able to fail by two mutations
+- `FULL VALIDATOR CORPUS: 197 PASS / 0 FAIL` — baseline preserved
+
+### Four real defects found by running it, fixed at source
+1. `nowIso` used but never imported in `sync.mjs` — the CLI crashed on its first live run.
+2. `github.snapshot` returned `ok:true` when **every** request failed — an unreachable GitHub would
+   have been reported healthy. It now fails when nothing could be read.
+3. The sync layer passed an **ENV object where a timestamp belonged**, making the Drive JWT's
+   `iat`/`exp` NaN so every token request failed. Non-finite clocks now fall back; Drive then found
+   all 9 files.
+4. The CLI entry guard used `new URL(import.meta.url).pathname`, which **percent-encodes** this
+   project's path (`1. Mercenta` → `1.%20Mercenta`) — the same class already documented in
+   `report.mjs`. The CLI exited 0 having done nothing. Now `fileURLToPath`.
+
+### Limitations, stated honestly
+Read-only; **no bidirectional synchronisation**. Cross-system semantic conflicts need an explicit
+object link, which does not exist. Penpot design references need a file connected via **MCP →
+Connect**. Drive is discovery only. The **ten Dependabot PRs were untouched**.
+
+### Remaining owner actions
+1. Connect a Penpot design file (**MCP → Connect**) for design references.
+2. The **`schedule:` trigger fires only on the DEFAULT branch (`main`)**. The workflow is verified
+   working on `redesign/foundation` via `workflow_dispatch`; for it to run automatically it must
+   reach `main`. Adding one file to the default branch is the owner's call.
+3. Credential rotation (Penpot key) remains deferred by the owner's instruction.
+
 
 ## CURRENT PLATFORM POSITION — **§OPENSHIP BATCH 10, STEP 1: THE LEGACY-STYLING MEASUREMENT — THE MIGRATION'S METHOD NOW EXISTS AND IS GATED, THE SPEC'S UNMETHODICAL 2,812 / 857 FIGURES ARE REPLACED BY MEASURED ONES THE DOCUMENT IS MACHINE-CHECKED AGAINST, THE BATCH IS RETARGETED BY WHAT IT MEASURED, AND 13 PROVABLY DEAD OR REDUNDANT LIGHT-SHELL RULES ARE DELETED AT SOURCE (19 OF 30 RENDERED SCREENS BYTE-IDENTICAL)** (session 148, 2026-10-15)
 
