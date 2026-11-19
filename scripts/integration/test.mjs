@@ -246,18 +246,67 @@ test('the report lists the conflict', md.indexOf('duplicate-ref') !== -1);
 test('the report states the read-only limitation', md.indexOf('read-only') !== -1);
 test('the report claims NO bidirectional sync', md.indexOf('No bidirectional synchronisation') !== -1);
 
-/* ── 11. data preservation — the layer must never write ────────────────── */
+/* ── 11. data preservation — nothing may delete, and writes are confined ── */
+/**
+ * §REWRITTEN 2026-11-19 (rule 08-removal-coherence §2). Two assertions here previously proved
+ * "the Drive connector is READ-ONLY", and the Google Drive write capability made them false.
+ * They were not deleted and not weakened: they were converted into STRONGER guards that pin the
+ * blast radius of the one write that now exists —
+ *   (a) NOTHING anywhere may issue DELETE / PUT / PATCH;
+ *   (b) ClickUp / GitHub / Penpot remain STRICTLY read-only (unchanged property, still pinned);
+ *   (c) Drive write is confined to two named helpers that can only CREATE, never update;
+ *   (d) the write test can only ever write inside its own dedicated test folder;
+ *   (e) the READ path still uses drive.readonly; the broad scope appears exactly once, for write.
+ */
 console.log('\n§ 11. Data preservation\n');
-const unsafe = [];
-for (const f of ['connectors.mjs', 'drive.mjs']) {
-  const src = fs.readFileSync(new URL('./' + f, import.meta.url), 'utf8');
-  if (/\bmethod:\s*['"](PUT|PATCH|DELETE)['"]/i.test(src)) unsafe.push(f + ': write verb');
-  if (/\/upload\b|files\/create|files\/update/i.test(src)) unsafe.push(f + ': write endpoint');
+const readSrc = (f) => fs.readFileSync(new URL('./' + f, import.meta.url), 'utf8');
+const connectorsSrc = readSrc('connectors.mjs');
+const driveSrc = readSrc('drive.mjs');
+
+const destructive = [];
+for (const [name, src] of [['connectors.mjs', connectorsSrc], ['drive.mjs', driveSrc]]) {
+  if (/\bmethod:\s*['"](DELETE|PUT|PATCH)['"]/i.test(src)) destructive.push(name + ': destructive verb');
+  if (/\.trash\b|files\/[^?'"]*\/delete/i.test(src)) destructive.push(name + ': delete endpoint');
 }
-test('no connector issues a PUT, PATCH or DELETE', unsafe.length === 0, unsafe.join(', '));
-const driveSrc = fs.readFileSync(new URL('./drive.mjs', import.meta.url), 'utf8');
-test('the Drive connector requests ONLY the read-only scope', driveSrc.indexOf('drive.readonly') !== -1);
-test('the Drive connector asks for NO write scope', !/auth\/drive(?!\.readonly)/.test(driveSrc));
+test('nothing issues a DELETE, PUT or PATCH', destructive.length === 0, destructive.join(', '));
+
+/**
+ * (b) ClickUp / GitHub / Penpot remain READ-ONLY. POST is permitted ONLY as a JSON-RPC envelope to
+ * the Penpot MCP server, because that protocol has no other transport — every such body must carry
+ * a `jsonrpc` field. Any NON-JSON-RPC POST, and any PUT/PATCH/DELETE at all, is a failure.
+ * (Refined 2026-11-19 after the first version of this guard flagged the legal MCP probe.)
+ */
+const connectorWrites = [];
+const postBlocks = connectorsSrc.match(/method:\s*['"]POST['"][\s\S]{0,400}?fetchImpl/g) || [];
+for (const b of postBlocks) {
+  if (!/jsonrpc/.test(b)) connectorWrites.push('connectors.mjs: POST that is not a JSON-RPC envelope');
+}
+if (/\bmethod:\s*['"](PUT|PATCH|DELETE)['"]/i.test(connectorsSrc)) connectorWrites.push('connectors.mjs: destructive verb');
+test('the ClickUp / GitHub / Penpot connectors remain read-only (POST only as JSON-RPC)',
+  connectorWrites.length === 0, connectorWrites.join(', '));
+
+test('the Penpot execute_code probes are non-mutating',
+  !/execute_code'[\s\S]{0,240}?(createBoard|addPage|deleteFile|removePage|setFile|saveFile)/i.test(connectorsSrc),
+  'the connector must only probe, never mutate the design file');
+
+test('Drive can only CREATE — it never updates an existing file',
+  !/files\/update|uploadType=resumable/i.test(driveSrc) &&
+  /export async function createFolder/.test(driveSrc) &&
+  /export async function createTextFile/.test(driveSrc));
+
+test('the write test writes ONLY inside its own dedicated test folder',
+  /const TEST_FOLDER = 'Mercenta Integration Test Artefacts'/.test(driveSrc) &&
+  /createTextFile\(testFolderId/.test(driveSrc) &&
+  !/createTextFile\(folder\.folderId/.test(driveSrc),
+  'the test artefact must never be created in the business root folder');
+
+test('the read path still requests the narrow drive.readonly scope',
+  /export const DRIVE_SCOPE = 'https:\/\/www\.googleapis\.com\/auth\/drive\.readonly'/.test(driveSrc) &&
+  /getAccessToken\(sa, fetchImpl, DRIVE_SCOPE/.test(driveSrc));
+
+test('the broad drive scope is declared exactly once, for the write path',
+  (driveSrc.match(/auth\/drive'/g) || []).length === 1,
+  'DRIVE_FULL_SCOPE must be the single occurrence of the broad scope');
 
 /* ── 12. end-to-end run (offline, everything failing) ───────────────────── */
 console.log('\n§ 12. Whole-run exercise\n');

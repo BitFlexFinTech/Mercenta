@@ -80,6 +80,7 @@ export const CRED = {
   penpot: path.join(os.homedir(), '.config', 'mercenta', 'penpot.env'),
   driveServiceAccount: path.join(os.homedir(), '.config', 'mercenta', 'drive-service-account.json'),
   driveFolder: path.join(os.homedir(), '.config', 'mercenta', 'drive-folder.json'),
+  driveOAuth: path.join(os.homedir(), '.config', 'mercenta', 'drive-oauth.json'),
 };
 
 /** Read one KEY=value out of an env-style credential file. Returns null when absent. */
