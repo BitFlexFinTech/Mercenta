@@ -13,8 +13,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   generateState, validateState, buildAuthorizeUrl, parseCallback, redirectUriFor,
-  storeToken, readStoredToken, hasStoredToken, fileMode, dirMode, ensureSecureDir,
-  exchangeCode, verifyToken, startSetupServer,
+  storeToken, readStoredToken, readStoredTokenKind, hasStoredToken, fileMode, dirMode, ensureSecureDir,
+  exchangeCode, verifyToken, authHeaderFor, startSetupServer,
 } from './auth.mjs';
 
 let pass = 0;
@@ -162,7 +162,15 @@ const homeHtml = await home.text();
 test('GET / serves the setup page', home.status === 200 && homeHtml.includes('<form'));
 test('the setup page shows the exact redirect URL to register', homeHtml.includes(srv.redirectUri));
 test('the setup page names the app', homeHtml.includes('Mercenta Automation'));
-test('the setup page links to the ClickUp apps page', homeHtml.includes('app.clickup.com/settings/apps'));
+/**
+ * §REPOINTED (2026-11-19) — NOT weakened, and the same class of breakage as the note above.
+ * This assertion used to REQUIRE `app.clickup.com/settings/apps` — the "App Settings" page,
+ * which offers only personal API tokens and authorized apps and has NO app-creation control
+ * at all (confirmed by reading the live page). It was asserting a link that sent the Owner
+ * to a page where the button does not exist. It is repointed to the page that actually holds
+ * the control, and still FAILS if that link is removed or drifts back.
+ */
+test('the setup page links to the ClickUp page that HAS the Create control', homeHtml.includes('clickup-api/settings'));
 test('the setup page states the secret goes outside the project', homeHtml.includes('.config/mercenta/clickup.env'));
 
 const missing404 = await fetch(base + '/does-not-exist');
@@ -209,7 +217,113 @@ test('a placeholder is NOT treated as an existing credential', (() => {
   return hasStoredToken(f) === false;
 })());
 
+/* ── 9. personal-token support (Option 1) ───────────────────────────────── */
+console.log('\n§ 9. Personal API token\n');
+
+test('a pk_ token is sent RAW, as ClickUp documents', authHeaderFor('pk_123_abc') === 'pk_123_abc');
+test('an OAuth token is sent as a Bearer', authHeaderFor('eyJhbGci') === 'Bearer eyJhbGci');
+
+const pkFetch = fakeFetch(200, { teams: [{ id: WORKSPACE, name: 'Workspace' }] });
+const pkVerify = await verifyToken('pk_123_abc', pkFetch);
+test('a personal token is verified with the RAW header, not Bearer', pkFetch.calls[0].opts.headers.Authorization === 'pk_123_abc');
+test('a personal token that works is accepted', pkVerify.ok === true && pkVerify.workspaceFound === true);
+
+const tried = [];
+const retryFetch = async (url, opts) => {
+  tried.push(opts.headers.Authorization);
+  if (opts.headers.Authorization.startsWith('Bearer ')) return { ok: false, status: 401, json: async () => ({}) };
+  return { ok: true, status: 200, json: async () => ({ teams: [{ id: WORKSPACE, name: 'W' }] }) };
+};
+const retried = await verifyToken('tok_plain', retryFetch);
+test('a token rejected as Bearer is retried RAW before being called broken', retried.ok === true && tried.length === 2);
+
+const kindFile = path.join(tmpDir, 'kind.env');
+storeToken('pk_999_zzz', kindFile, 'personal');
+test('a personal token is recorded with kind=personal', readStoredTokenKind(kindFile) === 'personal');
+test('the stored value round-trips', readStoredToken(kindFile) === 'pk_999_zzz');
+storeToken('tok_oauth', kindFile, 'oauth');
+test('an oauth token is recorded with kind=oauth', readStoredTokenKind(kindFile) === 'oauth');
+test('the default kind is oauth, so existing callers are unchanged', (() => {
+  const f = path.join(tmpDir, 'default-kind.env');
+  storeToken('tok_x', f);
+  return readStoredTokenKind(f) === 'oauth';
+})());
+
+let wsRefused = false;
+try { storeToken('pk_1_a b', kindFile, 'personal'); } catch { wsRefused = true; }
+test('a token containing whitespace is refused', wsRefused === true);
+
+/* ── 10. the /token route: verified BEFORE it is stored ─────────────────── */
+console.log('\n§ 10. Token entry route\n');
+
+let n = 0;
+async function startTokenServer(fetchImpl) {
+  n += 1;
+  const file = path.join(tmpDir, 'route-' + n + '.env');
+  const s = startSetupServer({ port: 0, state: generateState(), onLog: () => {}, fetchImpl, tokenFile: file });
+  const a = await s.listen();
+  return { s, file, base: 'http://127.0.0.1:' + a.port };
+}
+
+const post = (base, tok) =>
+  fetch(base + '/token', { method: 'POST', body: new URLSearchParams({ token: tok }) });
+
+// (a) the setup page offers the personal-token option, and points at the RIGHT ClickUp page
+const A = await startTokenServer(fakeFetch(200, {}));
+const pageHtml = await (await fetch(A.base + '/')).text();
+test('the setup page offers Option 1 (personal token)', pageHtml.includes('Option 1') && pageHtml.includes('Personal API token'));
+test('the setup page posts the token to /token', pageHtml.includes('action="/token"'));
+test('the setup page still offers Option 2 (OAuth app)', pageHtml.includes('Option 2'));
+test('the page sends the Owner to the page that HAS the Create control', pageHtml.includes('clickup-api/settings'));
+test('the page no longer sends the Owner to the page with NO Create control', pageHtml.includes('app.clickup.com/settings/apps"') === false);
+/**
+ * §DEFECT FIXED (2026-11-19): the setup page was CACHEABLE, so after the helper changed the
+ * browser kept showing the OLD form. This asserts the credential page is never cached again.
+ */
+const pageRes = await fetch(A.base + '/');
+test('the credential page is served with Cache-Control: no-store', String(pageRes.headers.get('cache-control') || '').includes('no-store'));
+A.s.close();
+
+// (b) an empty token is refused and nothing is written
+const B = await startTokenServer(fakeFetch(200, {}));
+const empty = await post(B.base, '');
+test('an empty token is refused (400)', empty.status === 400);
+test('nothing is written for an empty token', readStoredToken(B.file) === null);
+B.s.close();
+
+// (c) a token ClickUp REJECTS is refused and NOT saved
+const C = await startTokenServer(fakeFetch(401, { err: 'Token invalid' }));
+const bad = await post(C.base, 'pk_1_bad');
+const badHtml = await bad.text();
+test('a token ClickUp rejects is refused (400)', bad.status === 400);
+test('the refusal says plainly that nothing was saved', badHtml.includes('Nothing was saved'));
+test('a REJECTED token is never written to disk', readStoredToken(C.file) === null);
+C.s.close();
+
+// (d) a token that cannot see the Mercenta workspace is refused and NOT saved
+const D = await startTokenServer(fakeFetch(200, { teams: [{ id: '999', name: 'Other' }] }));
+const wrong = await post(D.base, 'pk_1_other');
+test('a token that cannot see the workspace is refused (400)', wrong.status === 400);
+test('a wrong-workspace token is never written to disk', readStoredToken(D.file) === null);
+D.s.close();
+
+// (e) a GOOD token: verified, saved as personal, never echoed, server stops
+const E = await startTokenServer(fakeFetch(200, { teams: [{ id: WORKSPACE, name: 'Mercenta' }] }));
+const okRes = await post(E.base, 'pk_1_good');
+const okHtml = await okRes.text();
+test('a good token is accepted (200)', okRes.status === 200 && okHtml.includes('Connected'));
+test('the token is NEVER echoed back into the page', okHtml.includes('pk_1_good') === false);
+test('the token is NEVER placed in a URL', okRes.url.endsWith('/token'));
+const doneE = await E.s.done;
+test('the server reports success and the personal kind', doneE.ok === true && doneE.kind === 'personal');
+test('the good token is stored as kind=personal', readStoredTokenKind(E.file) === 'personal');
+test('the good token round-trips intact', readStoredToken(E.file) === 'pk_1_good');
+let closedE = false;
+try { await fetch(E.base + '/'); } catch { closedE = true; }
+test('the server shuts itself down after a successful entry', closedE === true);
+
 /* ── verdict ────────────────────────────────────────────────────────────── */
+
 try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch { /* best effort */ }
 console.log('');
 console.log(fail === 0
