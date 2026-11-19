@@ -471,10 +471,46 @@ export async function runSetup({ port = Number(process.env.PENPOT_SETUP_PORT || 
   }
 }
 
+/**
+ * READ-ONLY design-access probe. Runs `return 1;` inside the plugin context: it reads nothing
+ * from a design, changes nothing, and returns a constant. It answers one question — is a Penpot
+ * tab actually CONNECTED? The credential is read internally and never printed.
+ */
+export async function probeDesign() {
+  const key = readStoredKey();
+  if (!key) { console.log('no key stored — run the setup page first'); return 1; }
+  let text = '';
+  try {
+    const res = await fetch(buildMcpUrl(PENPOT_ENDPOINT, key), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name: 'execute_code', arguments: { code: PROBE_CODE } } }),
+    });
+    text = await res.text();
+  } catch (e) {
+    console.log('design access : UNREACHABLE (' + (e && e.message ? e.message : e) + ')');
+    return 1;
+  }
+  const m = text.match(/"text":"((?:[^"\\]|\\.)*)"/);
+  const said = m ? JSON.parse('"' + m[1] + '"') : text.slice(0, 300);
+  if (/No userToken found/i.test(text)) {
+    console.log('design access : KEY NOT ACCEPTED — the stored key was refused');
+    return 1;
+  }
+  if (said.trim() === '1') {
+    console.log('design access : CONNECTED — a Penpot file is live and answering');
+    return 0;
+  }
+  console.log('design access : KEY OK, but NO Penpot file is connected yet');
+  console.log('penpot said   : ' + said.slice(0, 200));
+  return 2;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--self-test')) { await import('./setup.test.mjs'); return; }
   if (args.includes('--status')) { process.exit(await status()); }
+  if (args.includes('--probe')) { process.exit(await probeDesign()); }
   process.exit(await runSetup());
 }
 
