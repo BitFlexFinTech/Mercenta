@@ -159,8 +159,8 @@ export function BrandIntelligence() {
                 data-testid={`bi-detail-${d}`}
                 className={
                   detail === d
-                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-strong'
+                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-tint hover:text-strong'
                 }
               >
                 {d === 'none' ? 'Overview' : d === 'competitors' ? 'Competitors' : d === 'products' ? 'Your products' : 'Insights'}
@@ -199,7 +199,7 @@ export function BrandIntelligence() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {competitorRows.map(p => (
               <Card key={p.id} className="p-3 flex items-center justify-between">
-                <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-ds-micro text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
+                <div><span className="text-xs font-medium text-strong">{p.brand}</span><div className="text-ds-micro text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
               </Card>
             ))}
           </div>
@@ -214,18 +214,18 @@ export function BrandIntelligence() {
         domain="catalogue"
       >
         <div data-testid="bi-product-performance">
-          <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+          <h3 className="text-sm font-semibold text-strong mb-2 flex items-center gap-1.5">
             <Package className="w-4 h-4 text-brass-400" /> Your product performance
             <span className="text-ds-micro text-zinc-600">— deterministic estimates, never live data</span>
           </h3>
           {productPerformance.length === 0 ? (
             <p className="text-xs text-zinc-600">No catalogue products yet — add products to see estimated performance.</p>
           ) : (
-            <ul className="divide-y divide-white/[0.05] rounded-ds-md border border-white/[0.06] bg-ink-850">
+            <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-ink-850">
               {productPerformance.map(({ product: p, analysis: a }) => (
                 <li key={p.sku} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5" data-testid={`bi-sku-${p.sku}`}>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-xs font-medium text-white truncate">{p.name}</span>
+                    <span className="block text-xs font-medium text-strong truncate">{p.name}</span>
                     <span className="block text-ds-micro text-zinc-500 font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
                   </div>
                   <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Revenue</span>
@@ -249,10 +249,10 @@ export function BrandIntelligence() {
       {(detail === 'none' || detail === 'insights') && (
       <WorkspaceSection title="Market Insights" domain="finance">
         <Card className="p-4">
-        <h3 className="text-sm font-semibold text-white mb-2">Market Insights</h3>
+        <h3 className="text-sm font-semibold text-strong mb-2">Market Insights</h3>
         <div className="space-y-2 text-xs text-zinc-400">
           <p>Your brand is in <span className="text-brass-400">{brandCategory}</span> in the UK market, one of {APPROVED_CATEGORIES.length} approved categories.</p>
-          <p>We track <span className="text-white">{catData.scored.length}</span> brands total. Of those, <span className="text-white">{catData.sameCat.length}</span> are in {brandCategory}.</p>
+          <p>We track <span className="text-strong">{catData.scored.length}</span> brands total. Of those, <span className="text-strong">{catData.sameCat.length}</span> are in {brandCategory}.</p>
           <p>This intelligence updates weekly. Use these insights to understand your competitive position and identify growth opportunities.</p>
         </div>
         </Card>

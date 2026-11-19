@@ -182,7 +182,7 @@ export function BrandSupport() {
       <WorkspaceGrid
         rail={
           <Card className="p-4 space-y-2" data-state="brand-case-guidance">
-            <h3 className="text-sm font-semibold text-white">Guidance for this category</h3>
+            <h3 className="text-sm font-semibold text-strong">Guidance for this category</h3>
             <p className="text-ds-label text-zinc-500">{CATEGORY_LABELS[category]}</p>
             {guidance.length === 0 ? (
               <p className="text-ds-label text-amber-300">
@@ -191,7 +191,7 @@ export function BrandSupport() {
             ) : (
               <ul className="space-y-2">
                 {guidance.map((a) => (
-                  <li key={a.id} className="border-t border-white/[0.05] pt-2 first:border-0 first:pt-0">
+                  <li key={a.id} className="border-t border-hairline pt-2 first:border-0 first:pt-0">
                     <p className="text-ds-label font-medium text-zinc-200">{a.title}</p>
                     <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{a.summary}</p>
                   </li>
@@ -256,7 +256,7 @@ export function BrandSupport() {
               </Button>
             </div>
             {preview && (
-              <div className="space-y-1 border-t border-white/[0.06] pt-2" data-state="brand-case-verdict">
+              <div className="space-y-1 border-t border-hairline pt-2" data-state="brand-case-verdict">
                 <StatusBadge tone={VERDICT_TONE[preview.verdict]} dataStatus={preview.verdict}>
                   {BRAND_VERDICT_LABELS[preview.verdict]}
                 </StatusBadge>
@@ -286,7 +286,7 @@ export function BrandSupport() {
                 return (
                   <div
                     key={c.id}
-                    className="space-y-1.5 border-t border-white/[0.05] pt-2.5 first:border-0 first:pt-0"
+                    className="space-y-1.5 border-t border-hairline pt-2.5 first:border-0 first:pt-0"
                     data-state="brand-case-row"
                   >
                     <div className="flex flex-wrap items-center gap-2">

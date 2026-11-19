@@ -125,7 +125,7 @@ export function ComplianceHub() {
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-medium text-white">UK EORI Number</span>
+              <span className="text-xs font-medium text-strong">UK EORI Number</span>
             </div>
             <p className="text-ds-label text-zinc-400">
               Held by Mercenta as Importer of Record — <span className="font-mono">{MERCENTA_EORI}</span>.
@@ -135,7 +135,7 @@ export function ComplianceHub() {
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-medium text-white">UK VAT Registration</span>
+              <span className="text-xs font-medium text-strong">UK VAT Registration</span>
             </div>
             <p className="text-ds-label text-zinc-400">
               Mercenta's VAT number is used on all imports —{' '}
@@ -174,7 +174,7 @@ export function ComplianceHub() {
         )}
         <div className="space-y-4">
           {!posQuery.isPending && docBundles.map(({ po, brandName, docs }) => (
-            <div key={po.id} className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-4">
+            <div key={po.id} className="bg-tint border border-hairline rounded-ds-md p-4">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <span className="font-mono text-xs text-brass">{po.poNumber}</span>
@@ -193,7 +193,7 @@ export function ComplianceHub() {
                       onClick={() => { setPreviewDoc(doc); setPreviewPoId(po.id); }}
                       className={cn(
                         'text-left bg-ink-900 border rounded-ds-md p-3 transition-colors group',
-                        confirmed ? 'border-emerald-500/30' : 'border-white/[0.06] hover:border-brass/40'
+                        confirmed ? 'border-emerald-500/30' : 'border-hairline hover:border-brass/40'
                       )}
                     >
                       <div className="flex items-start justify-between">
@@ -204,7 +204,7 @@ export function ComplianceHub() {
                           </Badge>
                         )}
                       </div>
-                      <div className="text-ds-label font-medium text-white">{doc.title}</div>
+                      <div className="text-ds-label font-medium text-strong">{doc.title}</div>
                       <ul className="mt-1 space-y-0.5">
                         {doc.preFilled.slice(0, 2).map((f) => (
                           <li key={f.label} className="font-mono text-ds-micro text-zinc-600 truncate">
@@ -226,8 +226,8 @@ export function ComplianceHub() {
 
       {/* Document preview modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl bg-white max-h-[85vh] overflow-auto p-0">
+        <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-3xl bg-tint max-h-[85vh] overflow-auto p-0">
             <iframe
               title={previewDoc.title}
               srcDoc={previewDoc.html}
@@ -397,7 +397,7 @@ function ComplianceUploadCard({
           {gate.cleared ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-hairline-06">
           {requiredTypes.map(function(type) {
             // §M2 — read the LATEST version of the requirement.
             const doc = latestDocs.get(type);
@@ -412,7 +412,7 @@ function ComplianceUploadCard({
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>
                     {row && row.scope === 'conditional' && (
-                      <Badge className="text-ds-micro bg-white/[0.06] text-zinc-400 border-white/[0.08]">conditional</Badge>
+                      <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">conditional</Badge>
                     )}
                     {expiry && (
                       <Badge className={cn('text-ds-micro', expiry.color)}>

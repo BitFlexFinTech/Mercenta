@@ -83,27 +83,27 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
   return(<div className="space-y-4">
     {err&&<div className="bg-red-500/10 border border-red-500/30 rounded-ds-md p-3 text-sm text-red-400">{err}</div>}
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="Brand legal name"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="Primary contact"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Brand legal name"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Primary contact"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="brand@example.com"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="e.g. Zimbabwe"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="brand@example.com"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="e.g. Zimbabwe"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="0"/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="0"/></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://..."/></div>
+    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://..."/></div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://instagram.com/..."/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white" placeholder="https://facebook.com/..."/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://instagram.com/..."/></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://facebook.com/..."/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>
+    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>
     <div className="flex gap-2"><Button onClick={submit} disabled={busy}><UserPlus className="w-4 h-4"/>{busy?'Creating...':'Create Brand Account'}</Button><Button variant="ghost" onClick={onDone}>Cancel</Button></div>
   </div>);
 }
@@ -160,7 +160,7 @@ export function ApplicationsPanel() {
   }
 return(<div className="space-y-4">
     <div className="flex items-center justify-between">
-      <h2 className="text-sm font-semibold text-white">Brand Applications ({demoApplications.length})</h2>
+      <h2 className="text-sm font-semibold text-strong">Brand Applications ({demoApplications.length})</h2>
       <Button variant="accent" onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
     </div>
     {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-ds-md p-3 text-sm text-emerald-400">{msg}</div>}
@@ -175,8 +175,8 @@ return(<div className="space-y-4">
           <button key={f} type="button" aria-pressed={active} data-state={active?'active':'inactive'}
             onClick={()=>setFilter(f)}
             className={cn('text-left px-3 py-2.5 rounded-ds-md border transition-ds',
-              active?'bg-brass-500/15 border-brass-500/40':'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.14]')}>
-            <div className="text-lg font-semibold text-white tabular-nums">{count}</div>
+              active?'bg-brass-500/15 border-brass-500/40':'bg-tint border-hairline hover:border-hairline-strong')}>
+            <div className="text-lg font-semibold text-strong tabular-nums">{count}</div>
             <div className="text-ds-label text-zinc-400">{f==='all'?'All applications':applicationStatusPresentation(f).label}</div>
           </button>
         );
@@ -185,14 +185,14 @@ return(<div className="space-y-4">
     <div className="relative">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600"/>
       <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by company name..."
-        className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"/>
+        className="w-full bg-zinc-900 border border-hairline rounded-ds-md pl-9 pr-4 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"/>
     </div>
     {apps.length===0?(<div className="text-center py-12 text-zinc-500 text-sm">No applications found.</div>):(
       <div className="space-y-3">{apps.map(app=>(
         <Card key={app.id}>
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
-              <div><h3 className="text-sm font-semibold text-white">{app.companyName}</h3><p className="text-xs text-zinc-500">{app.country} · {app.category}</p></div>
+              <div><h3 className="text-sm font-semibold text-strong">{app.companyName}</h3><p className="text-xs text-zinc-500">{app.country} · {app.category}</p></div>
               <StatusBadge
                 tone={applicationStatusPresentation(app.status).tone}
                 dataStatus={applicationStatusPresentation(app.status).dataStatus}
@@ -224,7 +224,7 @@ return(<div className="space-y-4">
               </div>
             )}
             {(app.status==='pending'||app.status==='flagged'||app.status==='info_requested')&&(
-              <div className="flex flex-wrap gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex flex-wrap gap-2 pt-3 border-t border-hairline">
                 <Button size="sm" className="text-ds-micro" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'approved')}><CheckCircle2 className="w-3 h-3"/> Approve</Button>
                 <Button size="sm" className="text-ds-micro" variant="danger" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'rejected')}><XCircle className="w-3 h-3"/> Reject</Button>
                 <Button size="sm" className="text-ds-micro" variant="secondary" disabled={!canCurrentUserMutate} onClick={()=>{const n=prompt('What additional information do you need?');if(n)handleAction(app.id,'info_requested',n);}}><MessageSquare className="w-3 h-3"/> Request Info</Button>

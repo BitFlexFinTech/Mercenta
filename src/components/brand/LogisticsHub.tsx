@@ -181,23 +181,23 @@ function LogisticDialog({
       aria-label={title}
       data-testid={testId}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-surface-hover backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'relative max-h-[92vh] w-full overflow-y-auto rounded-t-ds-lg border border-white/[0.08] bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg',
+          'relative max-h-[92vh] w-full overflow-y-auto rounded-t-ds-lg border border-hairline bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg',
           width
         )}
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-white/[0.06] bg-ink-850/95 px-4 py-3 backdrop-blur">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-ink-850/95 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
-            <h2 className="text-ds-title font-semibold text-white">{title}</h2>
+            <h2 className="text-ds-title font-semibold text-strong">{title}</h2>
             {subtitle && <p className="mt-0.5 text-ds-label text-zinc-500">{subtitle}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -239,8 +239,8 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
       onClose={onClose}
       testId="logistics-waybill-dialog"
     >
-      <div ref={printableRef} className="rounded-ds-md bg-white p-5 text-black" id="printable-waybill">
-        <div className="mb-4 flex items-center justify-between border-b-2 border-black pb-3">
+      <div ref={printableRef} className="rounded-ds-md bg-tint p-5 text-strong" id="printable-waybill">
+        <div className="mb-4 flex items-center justify-between border-b-2 border-hairline-strong pb-3">
           <div>
             <div className="text-base font-bold uppercase tracking-tight">{BRAND_NAME}</div>
             <div className="text-ds-label text-zinc-600">Freight Waybill</div>
@@ -358,8 +358,8 @@ function LabelsModal({
       width="max-w-3xl"
       testId="logistics-labels-dialog"
     >
-      <div ref={printableRef} className="rounded-ds-md bg-white p-6 font-mono text-black" id="printable-label">
-        <div className="mb-4 border-b-2 border-black pb-3 text-center">
+      <div ref={printableRef} className="rounded-ds-md bg-tint p-6 font-mono text-strong" id="printable-label">
+        <div className="mb-4 border-b-2 border-hairline-strong pb-3 text-center">
           <div className="text-ds-title font-bold uppercase">Shipping Label</div>
           <div className="text-ds-label text-zinc-600">{BRAND_NAME}</div>
         </div>
@@ -443,7 +443,7 @@ function ShipmentTrackingTimeline({
       width="max-w-2xl"
       testId="logistics-tracking-dialog"
     >
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-ds-md border border-hairline bg-tint px-3 py-2">
         <StatusBadge
           dataStatus={shipmentStatusPresentation(shipment.status).dataStatus}
           tone={shipmentStatusPresentation(shipment.status).tone}
@@ -486,7 +486,7 @@ function ShipmentTrackingTimeline({
                         ? 'bg-state-success/15 text-state-success ring-state-success/25'
                         : isCurrent
                           ? 'bg-state-warning/15 text-state-warning ring-state-warning/25'
-                          : 'bg-white/[0.03] text-zinc-600 ring-white/[0.06]'
+                          : 'bg-tint text-zinc-600 ring-hairline'
                     )}
                   >
                     {isCompleted ? (
@@ -497,7 +497,7 @@ function ShipmentTrackingTimeline({
                   </span>
                   {i < MILESTONES.length - 1 && (
                     <span
-                      className={cn('h-7 w-0.5', isCompleted ? 'bg-state-success/50' : 'bg-white/[0.08]')}
+                      className={cn('h-7 w-0.5', isCompleted ? 'bg-state-success/50' : 'bg-tint')}
                     />
                   )}
                 </div>
@@ -516,12 +516,12 @@ function ShipmentTrackingTimeline({
                       {m.label}
                     </span>
                     {isCurrent && (
-                      <Badge className="border-white/[0.08] bg-state-warning/15 text-ds-micro text-state-warning">
+                      <Badge className="border-hairline bg-state-warning/15 text-ds-micro text-state-warning">
                         CURRENT
                       </Badge>
                     )}
                     {isCompleted && !isCurrent && (
-                      <Badge className="border-white/[0.08] bg-state-success/15 text-ds-micro text-state-success">
+                      <Badge className="border-hairline bg-state-success/15 text-ds-micro text-state-success">
                         DONE
                       </Badge>
                     )}
@@ -547,18 +547,18 @@ function ShipmentTrackingTimeline({
             {shipmentProducts.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center gap-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2"
+                className="flex items-center gap-3 rounded-ds-md border border-hairline bg-tint p-2"
               >
                 <ProductThumb product={p} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-ds-body font-medium text-zinc-200">{p.name}</div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-zinc-500">
                     <span>
-                      SKU: <code className="rounded-ds-sm bg-white/[0.06] px-1 font-mono">{p.sku}</code>
+                      SKU: <code className="rounded-ds-sm bg-tint px-1 font-mono">{p.sku}</code>
                     </span>
                     <span>
                       EAN:{' '}
-                      <code className="rounded-ds-sm bg-white/[0.06] px-1 font-mono">
+                      <code className="rounded-ds-sm bg-tint px-1 font-mono">
                         {p.barcode || '—'}
                       </code>
                     </span>
@@ -570,7 +570,7 @@ function ShipmentTrackingTimeline({
         </WorkspaceSection>
       )}
 
-      <div className="mt-5 flex justify-end border-t border-white/[0.06] pt-4">
+      <div className="mt-5 flex justify-end border-t border-hairline pt-4">
         <Button onClick={onClose}>Close</Button>
       </div>
     </LogisticDialog>
@@ -583,7 +583,7 @@ function FreightTermChip({ term }: { term: 'collect' | 'prepaid' | null }) {
   const semantics = freightSemantics(term);
   if (!semantics) {
     return (
-      <span className="rounded-ds-sm border border-white/[0.08] px-1.5 py-px text-ds-micro text-zinc-500">
+      <span className="rounded-ds-sm border border-hairline px-1.5 py-px text-ds-micro text-zinc-500">
         Freight term not declared
       </span>
     );
@@ -1126,7 +1126,7 @@ export function LogisticsHub() {
                 type="button"
                 onClick={() => setInsight(null)}
                 aria-label="Close insight detail"
-                className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+                className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -1148,9 +1148,9 @@ export function LogisticsHub() {
                       value: `${performance.verifiedDelivered} of ${performance.delivered}`,
                     },
                   ].map((item) => (
-                    <div key={item.label} className="rounded-ds-sm border border-white/[0.06] bg-ink-900 px-2.5 py-2">
+                    <div key={item.label} className="rounded-ds-sm border border-hairline bg-ink-900 px-2.5 py-2">
                       <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">{item.label}</p>
-                      <p className="mt-0.5 font-mono text-ds-label text-white">{item.value}</p>
+                      <p className="mt-0.5 font-mono text-ds-label text-strong">{item.value}</p>
                     </div>
                   ))}
                 </div>
@@ -1177,11 +1177,11 @@ export function LogisticsHub() {
                     return (
                       <li
                         key={shipment.id}
-                        className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-white/[0.04] pb-1.5 last:border-0"
+                        className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-hairline pb-1.5 last:border-0"
                         data-testid={`eta-basis-${shipment.reference}`}
                       >
                         <span className="font-mono text-ds-micro text-zinc-300">{shipment.reference}</span>
-                        <span className="text-ds-label text-white">{presentation.label}</span>
+                        <span className="text-ds-label text-strong">{presentation.label}</span>
                         <span className="text-ds-micro text-zinc-500">{presentation.detail}</span>
                         {isEtaAtRisk(eta ?? { date: null, basis: 'unavailable', simulated: false, source: '' }, shipment.delayed, shipment.exception) && (
                           <span className="text-ds-micro text-state-warning">At risk against its declared window</span>
@@ -1264,7 +1264,7 @@ export function LogisticsHub() {
                     type="button"
                     onClick={() => setSelectedId(null)}
                     aria-label="Clear selection"
-                    className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+                    className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
@@ -1293,7 +1293,7 @@ export function LogisticsHub() {
                   </div>
 
                   <div>
-                    <p className="text-ds-title font-semibold text-white">{selected.reference}</p>
+                    <p className="text-ds-title font-semibold text-strong">{selected.reference}</p>
                     <p className="mt-0.5 text-ds-label text-zinc-500">{selected.title}</p>
                   </div>
 
@@ -1371,7 +1371,7 @@ export function LogisticsHub() {
                     </>
                   )}
 
-                  <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
+                  <div className="rounded-ds-md border border-hairline bg-tint p-2.5">
                     <p className="mb-1 flex items-center gap-1.5 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                       <Info className="h-3 w-3" aria-hidden="true" />
                       Why this leg is {OPERATIONAL_TRUTH[selected.truth].short}
@@ -1387,7 +1387,7 @@ export function LogisticsHub() {
                     </p>
                   </div>
 
-                  <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
+                  <div className="rounded-ds-md border border-hairline bg-tint p-2.5">
                     <p className="mb-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                       Who arranges carriage
                     </p>
@@ -1519,7 +1519,7 @@ export function LogisticsHub() {
                   provider state that produced the decision. A carrier is never
                   eligible merely because it is available.
                 */}
-                <div className="border-t border-white/[0.06] pt-2.5" data-testid="carrier-eligibility">
+                <div className="border-t border-hairline pt-2.5" data-testid="carrier-eligibility">
                   <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
                     Eligibility for the consignment in scope
                   </p>
@@ -1600,13 +1600,13 @@ export function LogisticsHub() {
             <LoadingState rows={4} label="Loading your consignments…" />
           ) : visibleLegs.length === 0 ? (
             <p
-              className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-6 text-center text-ds-body text-zinc-500"
+              className="rounded-ds-md border border-hairline bg-tint px-3 py-6 text-center text-ds-body text-zinc-500"
               data-testid="logistics-list-empty"
             >
               No consignment matches the current filters.
             </p>
           ) : (
-            <ul className="divide-y divide-white/[0.04] overflow-hidden rounded-ds-md border border-white/[0.06]">
+            <ul className="divide-y divide-hairline-06 overflow-hidden rounded-ds-md border border-hairline">
               {visibleLegs.map((leg) => {
                 const status = shipmentStatusPresentation(leg.status);
                 const active = leg.id === selectedId;
@@ -1620,12 +1620,12 @@ export function LogisticsHub() {
                       data-truth={leg.truth}
                       className={cn(
                         'flex w-full flex-col gap-2 px-3 py-2.5 text-left transition-ds duration-ds-fast sm:flex-row sm:items-center sm:gap-4',
-                        active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                        active ? 'bg-tint' : 'hover:bg-tint'
                       )}
                     >
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="truncate text-ds-body font-semibold text-white">
+                          <span className="truncate text-ds-body font-semibold text-strong">
                             {leg.reference}
                           </span>
                           <span className="font-mono text-ds-micro text-zinc-600">{leg.poNumber}</span>

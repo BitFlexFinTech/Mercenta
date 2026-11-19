@@ -102,7 +102,7 @@ return (
       <div className="overflow-x-auto mt-2">
         <table className="w-full text-ds-label" data-table="product-discovery">
           <thead>
-            <tr className="text-left text-zinc-500 border-b border-white/[0.06]">
+            <tr className="text-left text-zinc-500 border-b border-hairline">
               <th className="py-1 px-2">Brand</th>
               <th className="py-1 px-2">Product</th>
               <th className="py-1 px-2">Category</th>
@@ -115,9 +115,9 @@ return (
               <th className="py-1 px-2">Demand</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.04]">
+          <tbody className="divide-y divide-hairline-06">
             {rows.slice(0, 60).map((r) => (
-              <tr key={`${r.prospectId}-${r.asin}`} className="hover:bg-white/[0.02]">
+              <tr key={`${r.prospectId}-${r.asin}`} className="hover:bg-tint">
                 <td className="py-1 px-2 font-mono text-zinc-300">{r.brand}</td>
                 <td className="py-1 px-2 text-zinc-200 truncate max-w-[220px]">{r.product}</td>
                 <td className="py-1 px-2 text-zinc-400">{r.category}{r.eligible ? '' : ' ⚠'}</td>

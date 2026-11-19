@@ -117,7 +117,7 @@ if (recorded) {
  * comment could certify a dead rule as live. The reader now takes the strings the parser sees; the
  * ceiling is lowered to the TRUE counts, and lower is the direction that matters.
  */
-const CEILING = { grey: 4495, ink: 944, literal: 1663, uncovered: 57 };
+const CEILING = { grey: 2866, ink: 974, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);

@@ -63,12 +63,12 @@ return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-3">
         <Upload className="w-4 h-4 text-brass-400" />
-        <h3 className="text-sm font-medium text-white">Bulk CSV Import</h3>
+        <h3 className="text-sm font-medium text-strong">Bulk CSV Import</h3>
       </div>
 
       {phase === 'idle' && (
         <div>
-          <div className={cn('border-2 border-dashed rounded-ds-md p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-brass-500/60 bg-brass-500/5' : 'border-white/[0.12] hover:border-white/[0.2]')}
+          <div className={cn('border-2 border-dashed rounded-ds-md p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-brass-500/60 bg-brass-500/5' : 'border-hairline-strong hover:border-hairline-strong')}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) void handleFile(e.dataTransfer.files[0]); }}
@@ -104,10 +104,10 @@ return (
             )}
           </div>
 
-          <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-ds-md">
+          <div className="max-h-48 overflow-y-auto border border-hairline rounded-ds-md">
             <table className="w-full text-ds-micro">
               <thead className="sticky top-0 bg-ink-850">
-                <tr className="border-b border-white/[0.06] text-zinc-500">
+                <tr className="border-b border-hairline text-zinc-500">
                   <th className="px-2 py-1 text-left">#</th>
                   <th className="px-2 py-1 text-left">SKU</th>
                   <th className="px-2 py-1 text-left">Name</th>
@@ -115,7 +115,7 @@ return (
                   <th className="px-2 py-1 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-hairline-06">
                 {rows.map((r) => (
                   <tr key={r.lineNumber} className={r.valid ? '' : 'bg-red-500/5'}>
                     <td className="px-2 py-1 text-zinc-600">{r.lineNumber}</td>
@@ -140,7 +140,7 @@ return (
             </div>
           )}
 
-          <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2 pt-2 border-t border-hairline">
             {phase === 'preview' && validCount > 0 && !summary.commit?.attempted && (
               <Button variant="accent" className="text-xs" onClick={handleCommit}>
                 <Database className="w-3.5 h-3.5 mr-1" /> Import {validCount} product(s)

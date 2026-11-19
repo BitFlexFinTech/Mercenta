@@ -278,7 +278,7 @@ export function ChannelOperationsPanel() {
   return (
     <Card className="p-4 space-y-4" data-testid="channel-operations">
       <div>
-        <h3 className="text-sm font-semibold text-white">
+        <h3 className="text-sm font-semibold text-strong">
           Channel operations{' '}
           <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
             Mercenta-side
@@ -333,7 +333,7 @@ export function ChannelOperationsPanel() {
                 <li
                   key={reading.channelPurchaseOrderId}
                   data-reading={reading.differs ? 'differs' : 'agrees'}
-                  className="rounded-ds-sm border border-white/[0.06] bg-ink-850/60 px-2 py-1 text-ds-label text-zinc-300"
+                  className="rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1 text-ds-label text-zinc-300"
                 >
                   <span className="font-mono">{reading.channelPurchaseOrderId}</span> · channel:{' '}
                   {RECEIVING_STATUS_LABELS[reading.channelReceivingStatus]} · Mercenta:{' '}
@@ -476,7 +476,7 @@ export function ChannelOperationsPanel() {
             {routingRows.map((instruction) => (
               <li
                 key={instruction.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-white/[0.06] bg-ink-850/60 px-2 py-1"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1"
               >
                 <span className="text-ds-label text-zinc-300">
                   <span className="font-mono">{instruction.poNumber}</span> ·{' '}
@@ -532,7 +532,7 @@ export function ChannelOperationsPanel() {
                 <li
                   key={invoice.id}
                   data-record-id={invoice.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-white/[0.06] bg-ink-850/60 px-2 py-1"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1"
                 >
                   <span className="text-ds-label text-zinc-300">
                     <span className="font-mono">{invoice.number}</span> · £

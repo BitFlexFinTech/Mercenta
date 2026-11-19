@@ -109,10 +109,10 @@ export function SalesEstimatorCard() {
         />
       </div>
 
-      <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="sales-estimate-result">
+      <div className="rounded-ds-md border border-hairline p-3" data-testid="sales-estimate-result">
         <div className="flex items-center gap-2 mb-2">
           <Calculator className="w-3.5 h-3.5 text-brass-400" />
-          <span className="text-xs font-medium text-white">Estimated monthly sales</span>
+          <span className="text-xs font-medium text-strong">Estimated monthly sales</span>
           <Badge className={`text-ds-micro ${CONFIDENCE_CLASS[estimate.confidence]}`}>
             {estimate.confidence} confidence
           </Badge>
@@ -157,17 +157,17 @@ export function SalesEstimatorCard() {
         </p>
       </div>
 
-      <div className="mt-3 border-t border-white/[0.06] pt-3">
+      <div className="mt-3 border-t border-hairline pt-3">
         <Button variant="tertiary" className="text-xs" onClick={() => setShowBornToRun((v) => !v)}>
           <TrendingUp className="w-3.5 h-3.5" />
           {showBornToRun ? 'Hide' : 'Model'} a new-to-channel launch
         </Button>
         {bornToRun && (
           <div
-            className="mt-2 rounded-ds-md border border-white/[0.08] p-3 text-ds-label"
+            className="mt-2 rounded-ds-md border border-hairline p-3 text-ds-label"
             data-testid="born-to-run-result"
           >
-            <p className="text-xs font-medium text-white mb-1">Launch modelling — simulation only</p>
+            <p className="text-xs font-medium text-strong mb-1">Launch modelling — simulation only</p>
             <p className="text-zinc-400 font-mono">
               New to the retail channel: {bornToRun.newToAmazon ? 'yes' : 'no'} · projected initial
               demand {bornToRun.projectedInitialMonthlyOrders} orders/month · suggested first

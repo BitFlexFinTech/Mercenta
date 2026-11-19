@@ -83,7 +83,7 @@ export function OpportunityDiscoveryPanel() {
       <Card>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Compass className="w-4 h-4" /> Opportunity Discovery
             </h2>
             <p className="text-ds-label text-zinc-500 mt-1">
@@ -111,11 +111,11 @@ export function OpportunityDiscoveryPanel() {
                   'text-left rounded-ds-md border px-2.5 py-2 transition-colors',
                   vertical === v
                     ? 'border-emerald-400/40 bg-emerald-500/[0.08]'
-                    : 'border-white/[0.06] bg-ink-850 hover:bg-white/[0.03]'
+                    : 'border-hairline bg-ink-850 hover:bg-tint'
                 )}
               >
                 <p className="text-ds-micro text-zinc-500">{OPPORTUNITY_VERTICALS[v].label}</p>
-                <p className="text-sm font-bold text-white">{r.count}</p>
+                <p className="text-sm font-bold text-strong">{r.count}</p>
                 <p className="text-ds-micro text-zinc-400 font-mono">
                   PO {gbp(r.poPotentialGbp)} · Mercenta {gbp(r.mercentaRevenueGbp)}
                 </p>
@@ -127,7 +127,7 @@ export function OpportunityDiscoveryPanel() {
 
       {/* §10/§14 — the ranked opportunity list. */}
       <Card className="p-0 overflow-x-auto">
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06]">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-hairline">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -159,12 +159,12 @@ export function OpportunityDiscoveryPanel() {
               data-testid="opportunity-row"
               onClick={() => setSelected(r.id)}
               className={cn(
-                'flex border-b cursor-pointer hover:bg-white/[0.03]',
-                selected === r.id && 'bg-white/[0.04]'
+                'flex border-b cursor-pointer hover:bg-tint',
+                selected === r.id && 'bg-tint'
               )}
             >
               <span className="px-2 py-1 text-zinc-500 flex-1 min-w-0 truncate">{r.rank}</span>
-              <span className="px-2 py-1 font-medium text-white flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 font-medium text-strong flex-1 min-w-0 truncate">
                 {r.brand}
               </span>
               <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
@@ -207,7 +207,7 @@ export function OpportunityDiscoveryPanel() {
             {ineligible.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-ds-md px-2 py-1.5"
+                className="flex items-center justify-between gap-2 bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5"
               >
                 <div className="min-w-0 flex-1">
                   <span className="text-xs font-medium text-zinc-300">{r.brand}</span>
@@ -228,7 +228,7 @@ export function OpportunityDiscoveryPanel() {
         {/* NOTE: the shared `Card` forwards only children/className/title/subtitle/action,
             so the test id lives on an inner element rather than on the frozen primitive. */}
         <div data-testid="sports-opportunities">
-        <h3 className="text-xs font-semibold text-white flex items-center gap-2">
+        <h3 className="text-xs font-semibold text-strong flex items-center gap-2">
           <Trophy className="w-3.5 h-3.5" /> Sports / Team / Club opportunities
         </h3>
         <p className="text-ds-micro text-amber-300/90 mt-1">{SEEDED_OPPORTUNITY_DISCLAIMER}</p>
@@ -236,12 +236,12 @@ export function OpportunityDiscoveryPanel() {
           {sports.map((s) => (
             <div
               key={s.id}
-              className="rounded-ds-md border border-white/[0.08] p-2.5 text-ds-label cursor-pointer hover:bg-white/[0.03]"
+              className="rounded-ds-md border border-hairline p-2.5 text-ds-label cursor-pointer hover:bg-tint"
               onClick={() => setSelected(s.id)}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="text-xs font-medium text-white">{s.brand}</span>
+                  <span className="text-xs font-medium text-strong">{s.brand}</span>
                   <span className="ml-2 text-ds-micro text-zinc-500">{s.category}</span>
                 </div>
                 <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
@@ -263,7 +263,7 @@ export function OpportunityDiscoveryPanel() {
         <Card>
           <div data-testid="opportunity-detail">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xs font-semibold text-white">
+            <h3 className="text-xs font-semibold text-strong">
               {current.brand}
               <span className="ml-2 text-ds-micro font-normal text-zinc-500">
                 {OPPORTUNITY_VERTICALS[current.vertical].label}
@@ -322,7 +322,7 @@ export function OpportunityDiscoveryPanel() {
               </p>
               <table className="w-full text-ds-micro">
                 <thead>
-                  <tr className="border-b border-white/[0.06] text-zinc-500">
+                  <tr className="border-b border-hairline text-zinc-500">
                     {['ASIN', 'Title', 'Price', 'Sellers', 'BSR', 'Reviews', 'Est. units/mo', 'Est. rev/mo'].map(
                       (h) => (
                         <th key={h} className="px-1.5 py-1 text-left">{h}</th>
@@ -332,7 +332,7 @@ export function OpportunityDiscoveryPanel() {
                 </thead>
                 <tbody>
                   {current.topAsins.map((a) => (
-                    <tr key={a.asin} className="border-b border-white/[0.04] text-zinc-300">
+                    <tr key={a.asin} className="border-b border-hairline text-zinc-300">
                       <td className="px-1.5 py-1 font-mono">{a.asin}</td>
                       <td className="px-1.5 py-1">{a.title}</td>
                       <td className="px-1.5 py-1">£{a.price.toFixed(2)}</td>

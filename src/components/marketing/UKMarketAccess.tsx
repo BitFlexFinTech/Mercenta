@@ -60,7 +60,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
           </div>
         </section>
 
-          <section className="border-t border-white/[0.06] px-6 py-16">
+          <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-5xl">
             <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">
               What stands between you and a UK shelf
@@ -73,7 +73,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
               {PUBLIC_BARRIERS.map((barrier, i) => (
                 <div
                   key={barrier.title}
-                  className="rounded-ds-lg border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-ink-850 p-5"
                   style={{ borderTopColor: BARRIER_DOMAIN[i % BARRIER_DOMAIN.length] }}
                 >
                   <h3 className="mb-2 font-display text-base font-semibold text-parchment">{barrier.title}</h3>
@@ -84,7 +84,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
           </div>
         </section>
 
-          <section className="border-t border-white/[0.06] px-6 py-16">
+          <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">
               Where our brands come from
@@ -96,7 +96,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
               {PUBLIC_MARKETS.map((market) => (
                 <li
                   key={market}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 font-mono text-ds-label"
+                  className="rounded-full border border-hairline bg-tint px-3 py-1 font-mono text-ds-label"
                   style={{ color: 'var(--mr-text-muted)' }}
                 >
                   {market}
@@ -106,12 +106,12 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-10 text-center font-display text-2xl font-semibold md:text-3xl">
               Which of these is you?
             </h2>
-            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-tint md:grid-cols-2">
               {PUBLIC_AUDIENCES.map((audience) => (
                 <div key={audience.id} className="bg-ink-850 p-6">
                   <h3 className="mb-2 font-display text-base font-semibold text-parchment">{audience.heading}</h3>
@@ -122,7 +122,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
             <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>

@@ -176,7 +176,7 @@ return (
       <Card className="p-3 space-y-2" data-state="helpdesk-cases-panel">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-brass-400" />
-          <h3 className="text-sm font-semibold text-white">Brand cases — Mercenta review queue</h3>
+          <h3 className="text-sm font-semibold text-strong">Brand cases — Mercenta review queue</h3>
           <span className="text-ds-label text-zinc-500">
             {listCasesAwaitingReview().length} awaiting review · {listAllCases().length} total
           </span>
@@ -192,7 +192,7 @@ return (
           {listCasesAwaitingReview().map((c) => {
             const sufficiency = evaluateCaseSufficiency(c);
             return (
-              <div key={c.id} className="space-y-1 border-t border-white/[0.05] pt-1.5" data-state="case-review-row">
+              <div key={c.id} className="space-y-1 border-t border-hairline pt-1.5" data-state="case-review-row">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-ds-label font-mono text-brass-300">{c.caseRef ?? c.id}</span>
                   <span className="text-ds-label text-zinc-300 flex-1 min-w-[180px]">{c.subject}</span>
@@ -252,7 +252,7 @@ return (
           })}
         </div>
         {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').length > 0 && (
-          <div className="space-y-1.5 border-t border-white/[0.06] pt-2">
+          <div className="space-y-1.5 border-t border-hairline pt-2">
             <p className="text-ds-label text-zinc-400">Reviewed — ready to escalate to Amazon:</p>
             {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2">
@@ -266,7 +266,7 @@ return (
           </div>
         )}
         {listAllCases().some((c) => c.amazonCase) && (
-          <div className="space-y-1 border-t border-white/[0.06] pt-2">
+          <div className="space-y-1 border-t border-hairline pt-2">
             <p className="text-ds-label text-zinc-400">Provider cases (truthful state):</p>
             {listAllCases().filter((c) => c.amazonCase).map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2 text-ds-label">
@@ -281,7 +281,7 @@ return (
         {/* §Brief §6 — return the channel's answer to the RIGHT case and tenant.
             The response is typed by the operator; the platform never invents one. */}
         {listAllCases().filter((c) => c.amazonCase && !c.providerResponse).length > 0 && (
-          <div className="space-y-2 border-t border-white/[0.06] pt-2" data-state="case-response-panel">
+          <div className="space-y-2 border-t border-hairline pt-2" data-state="case-response-panel">
             <p className="text-ds-label text-zinc-400">
               Record the retail channel&rsquo;s response as received. Nothing is generated or inferred.
             </p>
@@ -314,7 +314,7 @@ return (
           </div>
         )}
         {listAllCases().filter((c) => c.providerResponse && c.escalationState !== 'resolved' && c.escalationState !== 'closed').length > 0 && (
-          <div className="space-y-2 border-t border-white/[0.06] pt-2" data-state="case-resolve-panel">
+          <div className="space-y-2 border-t border-hairline pt-2" data-state="case-resolve-panel">
             <p className="text-ds-label text-zinc-400">
               Resolve the case with a note the brand will read.
             </p>
@@ -339,7 +339,7 @@ return (
         )}
       </Card>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-        <Card className="p-3"><p className="text-zinc-500">Open</p><p className="text-xl font-bold text-white mt-1">{metrics.openCount}</p></Card>
+        <Card className="p-3"><p className="text-zinc-500">Open</p><p className="text-xl font-bold text-strong mt-1">{metrics.openCount}</p></Card>
         <Card className="p-3"><p className="text-zinc-500">Pending</p><p className="text-xl font-bold text-amber-400 mt-1">{metrics.pendingCount}</p></Card>
         <Card className="p-3"><p className="text-zinc-500">Resolved Today</p><p className="text-xl font-bold text-emerald-400 mt-1">{metrics.resolvedToday}</p></Card>
         <Card className="p-3 border-red-500/20"><p className="text-zinc-500">SLA Overdue</p><p className="text-xl font-bold text-red-400 mt-1">{overdueCount}</p></Card>
@@ -347,13 +347,13 @@ return (
       </div>
       <div className="grid grid-cols-12 gap-4">
         <Card className="col-span-12 md:col-span-4 p-0 overflow-hidden">
-          <div className="p-3 border-b border-white/[0.06] space-y-2">
+          <div className="p-3 border-b border-hairline space-y-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tickets…"
                 aria-label="Search tickets"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             {/* §Wave-3 Part 4 — the filter chip rows WRAP. They were single-line
                 `flex` rows inside a `p-0 overflow-hidden` card, so at 768px the
@@ -362,7 +362,7 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'open', 'pending', 'resolved'] as const).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
-                  className={'px-2 py-1 rounded-ds-sm ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-strong')}>
                   {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
@@ -370,21 +370,21 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'urgent', 'high', 'medium', 'low'] as const).map((p) => (
                 <button key={p} onClick={() => setPriorityFilter(p)}
-                  className={'px-2 py-1 rounded-ds-sm ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-strong')}>
                   {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
             </div>
           </div>
-          <div className="max-h-[500px] overflow-y-auto divide-y divide-white/[0.04]">
+          <div className="max-h-[500px] overflow-y-auto divide-y divide-hairline-06">
             {filteredTickets.map((t: Ticket) => {
               const Icon = PI[t.priority];
               const sla = slaInd(t.slaDeadline, t.status);
               return (
                 <button key={t.id} onClick={() => { setSelectedTicketId(t.id); markTicketSeen(t.id); }}
-                  className={'w-full text-left px-3 py-2.5 ' + (selectedTicketId === t.id ? 'bg-brass-500/10' : 'hover:bg-white/[0.02]')}>
+                  className={'w-full text-left px-3 py-2.5 ' + (selectedTicketId === t.id ? 'bg-brass-500/10' : 'hover:bg-tint')}>
                   <div className="flex items-center justify-between gap-1.5 mb-0.5">
-                    <span className="text-xs font-medium text-white truncate">{brandName(t.brandId)}</span>
+                    <span className="text-xs font-medium text-strong truncate">{brandName(t.brandId)}</span>
                     <Icon className={'w-3 h-3 ' + (t.priority === 'urgent' ? 'text-red-400' : t.priority === 'high' ? 'text-amber-400' : 'text-zinc-500')} />
                   </div>
                   <p className="text-ds-micro text-zinc-500 truncate">{t.lastMessagePreview}</p>
@@ -403,9 +403,9 @@ return (
         <Card className="col-span-12 md:col-span-8 p-4">
           {selectedTicket ? (
             <div className="space-y-3">
-              <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] pb-3">
+              <div className="flex items-start justify-between gap-3 border-b border-hairline pb-3">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">{selectedTicket.subject}</h3>
+                  <h3 className="text-sm font-semibold text-strong">{selectedTicket.subject}</h3>
                   <div className="flex items-center gap-2 mt-1 text-ds-micro text-zinc-500">
                     <span>{brandName(selectedTicket.brandId)}</span> <span>·</span>
                     <span>{selectedTicket.source === 'live_chat' ? 'Live Chat' : selectedTicket.source}</span> <span>·</span>
@@ -414,7 +414,7 @@ return (
                 </div>
                 <select value={selectedTicket.status} onChange={(e) => { updateTicketStatus(selectedTicket.id, e.target.value as TicketStatus, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket status"
-                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   {(['open', 'pending', 'resolved'] as const).map((s) => (<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>))}
                 </select>
               </div>
@@ -422,14 +422,14 @@ return (
                 <User className="w-3 h-3 text-zinc-500" />
                 <select value={selectedTicket.assignedToStaffId ?? ''} onChange={(e) => { assignTicket(selectedTicket.id, e.target.value, actingStaff?.id); bumpStore(); }}
                   aria-label="Assign ticket to"
-                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   <option value="">Unassigned</option>
                   {staff.filter((s: any) => s.active).map((s: any) => (<option key={s.id} value={s.id}>{s.name}</option>))}
                 </select>
                 <Filter className="w-3 h-3 text-zinc-500" />
                 <select value={selectedTicket.priority} onChange={(e) => { setTicketPriority(selectedTicket.id, e.target.value as TicketPriority, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket priority"
-                  className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-white">
+                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (<option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>))}
                 </select>
                 {selectedTicket.slaDeadline && (() => {
@@ -444,7 +444,7 @@ return (
                 {!helpdeskPending && ticketMessages.length === 0 && <p className="text-xs text-zinc-600 py-4">No messages yet.</p>}
                 {ticketMessages.map((m: any) => (
                   <div key={m.id} className={'flex ' + (m.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
-                    <div className={'max-w-[80%] rounded-ds-lg px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-white/[0.04] text-zinc-300')}>
+                    <div className={'max-w-[80%] rounded-ds-lg px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-tint text-zinc-300')}>
                       <p className="whitespace-pre-wrap">{m.body}</p>
                       <p className="mt-1 text-ds-micro text-zinc-500 font-mono">{new Date(m.createdAt).toLocaleString()}</p>
                     </div>
@@ -456,17 +456,17 @@ return (
                   <div className="flex items-center gap-1.5 mb-1">
                     <Bot className="w-3 h-3 text-brass-400" />
                     <span className="text-ds-micro font-medium text-brass-300">AI Suggested Reply</span>
-                    <button onClick={() => setReplyDraft(aiSuggestion)} className="ml-auto text-ds-micro text-zinc-500 hover:text-white">
+                    <button onClick={() => setReplyDraft(aiSuggestion)} className="ml-auto text-ds-micro text-zinc-500 hover:text-strong">
                       <ArrowUpRight className="w-3 h-3 inline" /> Use
                     </button>
                   </div>
                   <p className="text-ds-micro text-zinc-400 italic">{aiSuggestion}</p>
                 </div>
               )}
-              <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-2 pt-2 border-t border-hairline">
                 <textarea value={replyDraft} onChange={(e) => setReplyDraft(e.target.value)}
                   rows={3} placeholder="Type a reply…"
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40" />
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40" />
                 <div className="flex items-center justify-between">
                   {replyNote && <span className="text-ds-micro text-zinc-500">{replyNote}</span>}
                   <Button className="text-xs ml-auto" disabled={!replyDraft.trim()} onClick={handleSendReply}>

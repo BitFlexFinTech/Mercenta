@@ -550,7 +550,7 @@ export function WorkWorkspace({
               value={priority}
               onChange={(e) => setPriority(e.target.value as 'all' | WorkPriority)}
               data-testid="work-priority-filter"
-              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Priority: all</option>
               <option value="critical">Critical</option>
@@ -562,7 +562,7 @@ export function WorkWorkspace({
               value={source}
               onChange={(e) => setSource(e.target.value as 'all' | WorkSource)}
               data-testid="work-source-filter"
-              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Source: all</option>
               {/*
@@ -702,15 +702,15 @@ function KanbanBoard({
             aria-label={`${WORK_STATUS_LABELS[status]} column`}
             data-testid={`work-column-${status}`}
             data-column-count={column.length}
-            className="flex min-h-[120px] flex-col overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850"
+            className="flex min-h-[120px] flex-col overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
           >
-            <header className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
+            <header className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-2">
               <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
                 {WORK_STATUS_LABELS[status]}
               </span>
               <span className="font-mono text-ds-label text-zinc-500">{column.length}</span>
             </header>
-            <ul className="flex-1 divide-y divide-white/[0.05]">
+            <ul className="flex-1 divide-y divide-hairline-06">
               {column.length === 0 && (
                 <li className="px-3 py-3 text-ds-label text-zinc-600">Nothing here.</li>
               )}
@@ -732,7 +732,7 @@ function KanbanBoard({
                     onClick={() => onOpen(w.id)}
                     className="mt-1.5 block w-full text-left"
                   >
-                    <span className="block text-xs font-medium text-white">{w.title}</span>
+                    <span className="block text-xs font-medium text-strong">{w.title}</span>
                     <span className="mt-0.5 block text-ds-label text-zinc-500">{dueLabel(w.dueDate)}</span>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -848,12 +848,12 @@ function ReminderList({
 }) {
   return (
     <div
-      className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850"
+      className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
       data-testid="work-reminders"
       data-reminder-count={reminders.length}
       data-reminder-overdue={buckets.overdue}
     >
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-3.5 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-3.5 py-2">
         <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Proactive reminders
         </span>
@@ -872,12 +872,12 @@ function ReminderList({
           </p>
         </div>
       )}
-      <ul className="divide-y divide-white/[0.05]">
+      <ul className="divide-y divide-hairline-06">
         {BUCKET_ORDER.flatMap((bucket) => {
           const rows = reminders.filter((r) => r.bucket === bucket);
           if (rows.length === 0) return [];
           return [
-            <li key={`bucket-${bucket}`} className="bg-white/[0.02] px-3.5 py-1">
+            <li key={`bucket-${bucket}`} className="bg-tint px-3.5 py-1">
               <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 {REMINDER_BUCKET_LABELS[bucket]} ({rows.length})
               </p>
@@ -895,7 +895,7 @@ function ReminderList({
                     </StatusBadge>
                     <SourceBadge source={r.source} />
                   </div>
-                  <p className="mt-1 text-xs font-medium text-white">{r.title}</p>
+                  <p className="mt-1 text-xs font-medium text-strong">{r.title}</p>
                   <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{r.detail}</p>
                   <p className="mt-0.5 font-mono text-ds-micro text-zinc-600">
                     due {r.dueDate} · raised {r.raisedAt} · work {r.workItemId}
@@ -970,14 +970,14 @@ function CalendarBoard({
       data-testid="work-calendar"
       data-calendar-month={month}
       data-calendar-entries={monthTotal}
-      className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850"
+      className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
     >
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-3 py-2">
         <div className="flex items-center gap-2">
           <Button variant="ghost" className="px-2" aria-label="Previous month" onClick={() => onMonth(addMonths(month, -1))} data-testid="work-calendar-prev">
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="min-w-[130px] text-center text-sm font-semibold text-white" data-testid="work-calendar-label">
+          <span className="min-w-[130px] text-center text-sm font-semibold text-strong" data-testid="work-calendar-label">
             {monthLabel(month)}
           </span>
           <Button variant="ghost" className="px-2" aria-label="Next month" onClick={() => onMonth(addMonths(month, 1))} data-testid="work-calendar-next">
@@ -992,7 +992,7 @@ function CalendarBoard({
         </div>
       </header>
 
-      <div className="grid grid-cols-7 border-b border-white/[0.06] bg-white/[0.02]">
+      <div className="grid grid-cols-7 border-b border-hairline bg-tint">
         {WEEKDAY_LABELS.map((d) => (
           <span key={d} className="px-2 py-1 text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
             {d}
@@ -1010,8 +1010,8 @@ function CalendarBoard({
               data-testid={`work-calendar-cell-${date}`}
               data-cell-count={day.length}
               className={
-                'min-h-[86px] border-b border-r border-white/[0.05] px-1.5 py-1.5 ' +
-                (isCurrentMonth ? '' : 'bg-white/[0.01] opacity-50')
+                'min-h-[86px] border-b border-r border-hairline px-1.5 py-1.5 ' +
+                (isCurrentMonth ? '' : 'bg-tint opacity-50')
               }
             >
               <span
@@ -1096,14 +1096,14 @@ export function NewTaskPanel({
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             data-testid="work-new-due"
-            className="flex-1 rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="flex-1 rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
           />
           <select
             aria-label="Priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value as WorkPriority)}
             data-testid="work-new-priority"
-            className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
           >
             <option value="normal">Normal</option>
             <option value="high">High</option>
@@ -1368,7 +1368,7 @@ function WorkRecordDrawer({
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 border-t border-white/[0.06] pt-2 text-ds-label text-zinc-400">
+              <p className="mt-2 border-t border-hairline pt-2 text-ds-label text-zinc-400">
                 Score <span className="font-mono text-zinc-200">{item.why.score}</span> — the sum of the factor
                 points above. Ranked by declared factors over stored data only; no AI, nothing invented.
               </p>

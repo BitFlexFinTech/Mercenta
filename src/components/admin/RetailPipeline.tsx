@@ -40,12 +40,12 @@ function LockedPipeline({ onGoToIntegrations }: { onGoToIntegrations?: () => voi
         description="Catalog submissions, purchase orders and deductions."
       />
 
-      <Card className="p-8 bg-ink-850 border-white/[0.06]">
+      <Card className="p-8 bg-ink-850 border-hairline">
         <div className="max-w-md mx-auto text-center">
-          <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-tint flex items-center justify-center mx-auto mb-4">
             <PlugZap className="w-6 h-6 text-zinc-500" />
           </div>
-          <h3 className="text-sm font-semibold text-white mb-2">
+          <h3 className="text-sm font-semibold text-strong mb-2">
             Connect Amazon SP-API to enable this
           </h3>
           <p className="text-xs text-zinc-500 leading-relaxed mb-5">
@@ -137,11 +137,11 @@ function UnlockedPipeline() {
 
       {/* ASIN-level submission status list */}
       <Card title="Catalog Submissions">
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-hairline-06">
           {submissions.map((sub) => (
             <div key={sub.id} className="flex items-start justify-between gap-4 px-1 py-3">
               <div className="min-w-0">
-                <div className="text-sm font-medium text-white truncate">{sub.productName}</div>
+                <div className="text-sm font-medium text-strong truncate">{sub.productName}</div>
                 <div className="text-ds-label font-mono text-zinc-600 mt-0.5">
                   {sub.sku}
                   {sub.asin ? ` · ASIN ${sub.asin}` : ''} · submitted{' '}
@@ -187,7 +187,7 @@ function UnlockedPipeline() {
 
       {/* Purchase order board — REAL data (single source of truth), auto-approve per §13 */}
       <Card title="Purchase Orders — Commission Board">
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-hairline-06">
           {purchaseOrders.map((po) => {
             // §13 threshold applies to PO VALUE (consistent with invoice.ts +
             // spapi/transform.ts), not the commission amount.
@@ -196,7 +196,7 @@ function UnlockedPipeline() {
             return (
               <div key={po.id} className="flex items-center justify-between px-1 py-3">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-white">{po.poNumber}</span>
+                  <span className="font-mono text-xs text-strong">{po.poNumber}</span>
                   {/* §Phase E5 (G2) — simulated POs are identified, never implied real. */}
                   {po.simulated === true && (
                     <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
@@ -223,7 +223,7 @@ function UnlockedPipeline() {
                   </StatusBadge>
                   <button
                     onClick={() => setDetailPoId(po.id)}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors"
+                    className="p-1 text-zinc-500 hover:text-strong transition-colors"
                     title="View PO detail"
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -342,7 +342,7 @@ function UnlockedPipeline() {
                         <Button
                           key={o}
                           variant="ghost"
-                          className="text-ds-micro capitalize text-zinc-400 hover:text-white"
+                          className="text-ds-micro capitalize text-zinc-400 hover:text-strong"
                           onClick={() => void closeDispute(d.id, o)}
                         >
                           {o}
@@ -368,7 +368,7 @@ function UnlockedPipeline() {
               onChange={(e) => setDisputeNotes(e.target.value)}
               rows={2}
               placeholder="Evidence / grounds for the dispute…"
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white"
+              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
             />
             <Button className="text-xs" disabled={!disputeNotes.trim()} onClick={() => void openDispute(disputingId)}>
               Record dispute
@@ -447,7 +447,7 @@ export function DeliveryReconciliation({
                 setReceived({});
                 setResult(null);
               }}
-              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+              className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="">Select a PO…</option>
               {eligible.map((p) => (
@@ -466,7 +466,7 @@ export function DeliveryReconciliation({
                     <div key={li.sku} className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-ds-label text-zinc-300 w-24 truncate">{li.sku}</span>
                       <span className="text-ds-micro text-zinc-500 w-56 truncate">{li.productName}</span>
-                      <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.08]">
+                      <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">
                         confirmed {confirmed || '—'}
                       </Badge>
                       <input
@@ -478,7 +478,7 @@ export function DeliveryReconciliation({
                           setReceived((prev) => ({ ...prev, [li.sku]: Number(e.target.value) }))
                         }
                         disabled={!canCurrentUserMutate}
-                        className="w-28 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-label text-white disabled:opacity-50"
+                        className="w-28 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-label text-strong disabled:opacity-50"
                       />
                     </div>
                   );

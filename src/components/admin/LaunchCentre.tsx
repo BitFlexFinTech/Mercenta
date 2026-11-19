@@ -109,7 +109,7 @@ export function LaunchCentre() {
       <Card>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Megaphone className="w-4 h-4" /> Mercenta Launch Centre
             </h2>
             <p className="text-ds-label text-zinc-500 mt-1">{LAUNCH_CENTRE_DISCLAIMER}</p>
@@ -119,21 +119,21 @@ export function LaunchCentre() {
           </Button>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Platforms</p>
-            <p className="text-sm font-bold text-white">{summary.total}</p>
+            <p className="text-sm font-bold text-strong">{summary.total}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Accounts created</p>
-            <p className="text-sm font-bold text-white">{summary.accountsCreated}</p>
+            <p className="text-sm font-bold text-strong">{summary.accountsCreated}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Profiles prepared</p>
-            <p className="text-sm font-bold text-white">{summary.prepared}</p>
+            <p className="text-sm font-bold text-strong">{summary.prepared}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Submitted</p>
-            <p className="text-sm font-bold text-white">{summary.submitted}</p>
+            <p className="text-sm font-bold text-strong">{summary.submitted}</p>
           </div>
         </div>
         {message && <p className="text-ds-micro text-emerald-300/90 mt-2">{message}</p>}
@@ -141,7 +141,7 @@ export function LaunchCentre() {
 
       {editingProfile && (
         <Card>
-          <h3 className="text-xs font-semibold text-white">Launch copy</h3>
+          <h3 className="text-xs font-semibold text-strong">Launch copy</h3>
           <div className="grid gap-2 mt-2">
             <Input
               label="Tagline"
@@ -150,14 +150,14 @@ export function LaunchCentre() {
             />
             <label className="text-ds-micro text-zinc-500">Short description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
               rows={2}
               value={profile.shortDescription}
               onChange={(e) => setProfile({ ...profile, shortDescription: e.target.value })}
             />
             <label className="text-ds-micro text-zinc-500">Long description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
               rows={5}
               value={profile.longDescription}
               onChange={(e) => setProfile({ ...profile, longDescription: e.target.value })}
@@ -205,9 +205,9 @@ export function LaunchCentre() {
                   key={p.id}
                   data-testid="launch-platform-row"
                   onClick={() => setSelectedId(p.id)}
-                  className="border-b cursor-pointer hover:bg-white/[0.03]"
+                  className="border-b cursor-pointer hover:bg-tint"
                 >
-                  <td className="px-2 py-1.5 font-medium text-white">{p.name}</td>
+                  <td className="px-2 py-1.5 font-medium text-strong">{p.name}</td>
                   <td className="px-2 py-1.5 text-zinc-400 text-ds-micro">
                     {CHANNEL_LABEL[p.submissionChannel]}
                   </td>
@@ -284,7 +284,7 @@ export function LaunchCentre() {
 
       {selected && selectedRecord && (
         <Card>
-          <h3 className="text-xs font-semibold text-white">
+          <h3 className="text-xs font-semibold text-strong">
             {selected.name}
             <span className="ml-2 text-ds-micro font-normal text-zinc-500">
               {CHANNEL_LABEL[selected.submissionChannel]} · requirements{' '}
@@ -327,7 +327,7 @@ export function LaunchCentre() {
           </div>
 
           <p className="text-ds-micro text-zinc-500 mt-2">Submission package (copyable)</p>
-          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-white/[0.06] rounded-ds-md p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
+          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-hairline rounded-ds-md p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
             {buildSubmissionPackage(selected, profile)}
           </pre>
         </Card>

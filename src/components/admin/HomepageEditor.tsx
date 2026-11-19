@@ -71,7 +71,7 @@ function LintableTextarea({
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white"
+        className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
       />
       {!lint.safe && (
         <p className="text-ds-micro text-stamp mt-1 flex items-center gap-1">
@@ -115,7 +115,7 @@ function PointsEditor({
           Points ({points.length})
         </p>
         {points.map((p, i) => (
-          <div key={i} className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
+          <div key={i} className="rounded-ds-md border border-hairline bg-tint p-2.5">
             <LintableInput
               label={`Point ${i + 1} title`}
               value={p.title}
@@ -278,7 +278,7 @@ export function HomepageEditor() {
             value={content.hero.subheading}
             onChange={(e) => setHero('subheading', e.target.value)}
             rows={4}
-            className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white"
+            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
           />
           {!lintOutwardWording(content.hero.subheading).safe && (
             <p className="text-ds-micro text-stamp mt-1">Unsafe wording in hero subheading</p>
@@ -318,7 +318,7 @@ export function HomepageEditor() {
 
       {previewDraft && (
         <Card title="Draft Preview (renders the actual homepage component)">
-          <div className="h-[520px] overflow-y-auto overflow-x-hidden rounded-ds-md border border-white/[0.08] bg-black">
+          <div className="h-[520px] overflow-y-auto overflow-x-hidden rounded-ds-md border border-hairline bg-surface">
             <div style={{ width: '1280px', transform: 'scale(0.75)', transformOrigin: 'top left' }}>
               <Home content={content} />
             </div>

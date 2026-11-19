@@ -179,12 +179,12 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-4xl">
         {/* Back to home */}
         <button
           onClick={() => setEnvironment('home')}
-          className="flex items-center gap-2 text-xs text-zinc-500 hover:text-white transition-colors mb-8"
+          className="flex items-center gap-2 text-xs text-zinc-500 hover:text-strong transition-colors mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Home
@@ -198,9 +198,9 @@ export function Login() {
               alt="Mercenta Partners hexagon mark"
               className="w-10 h-10"
             />
-            <span className="text-xl font-semibold text-white">{BRAND_NAME}</span>
+            <span className="text-xl font-semibold text-strong">{BRAND_NAME}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Partner Login</h1>
+          <h1 className="text-2xl font-bold text-strong mb-1">Partner Login</h1>
           <p className="text-sm text-zinc-500">
             Access your brand portal or operations environment
           </p>
@@ -237,7 +237,7 @@ export function Login() {
                     </span>
                   )}
                 </div>
-                <h3 className="text-sm font-semibold text-white leading-snug">{brand.name}</h3>
+                <h3 className="text-sm font-semibold text-strong leading-snug">{brand.name}</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {[brand.nation, brand.signatory].filter(Boolean).join(' · ') || 'Details pending'}
                 </p>
@@ -275,14 +275,14 @@ export function Login() {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-ds-md bg-white/[0.04] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-ds-md bg-tint flex items-center justify-center">
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-white">{login.label}</h3>
+                    <h3 className="text-sm font-semibold text-strong">{login.label}</h3>
                     <p className="text-xs text-zinc-500 mt-0.5">{login.description}</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-strong transition-colors" />
                 </div>
               </button>
             );
@@ -293,7 +293,7 @@ export function Login() {
         <div className="mt-8 text-center">
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-ds-md transition-colors"
+            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-strong font-medium px-6 py-3 rounded-ds-md transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Request Partner Access

@@ -28,9 +28,9 @@ const STAGE_STYLES: Record<string, string> = {
   responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
   qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
   won: 'bg-brass/15 text-brass border-brass/30',
-  lost: 'bg-zinc-500/15 text-zinc-400 border-white/[0.08]',
+  lost: 'bg-zinc-500/15 text-zinc-400 border-hairline',
   enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  'not enrolled': 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
+  'not enrolled': 'bg-tint text-zinc-400 border-hairline',
 };
 
 export function AcquisitionPipeline() {
@@ -96,11 +96,11 @@ export function AcquisitionPipeline() {
               title={`Show the ${m.label.toLowerCase()}`}
               className={cn(
                 'bg-ink-850 border rounded-ds-md px-2 py-1.5 text-left transition-colors',
-                metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-white/[0.06] hover:border-white/[0.16]'
+                metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-hairline hover:border-hairline-strong'
               )}
             >
               <p className="text-ds-micro text-zinc-500 uppercase">{m.label}</p>
-              <p className="text-sm font-semibold text-white font-mono">{m.value}</p>
+              <p className="text-sm font-semibold text-strong font-mono">{m.value}</p>
             </button>
           ))}
         </div>
@@ -129,7 +129,7 @@ export function AcquisitionPipeline() {
               primary: true,
               render: (r) => (
                 <span>
-                  <span className="inline-flex items-center gap-1.5 text-white font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-strong font-medium">
                     <Target className="w-3 h-3 text-brass-400" />
                     {r.prospect.brand}
                   </span>

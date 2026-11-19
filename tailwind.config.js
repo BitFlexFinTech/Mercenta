@@ -153,6 +153,12 @@ export default {
         tint: {
           DEFAULT: 'var(--mr-hover-tint)',
         },
+        /** §OPENSHIP BATCH 10 — hairline border tokens (exact 0.06 and 0.08 opacity steps). */
+        hairline: {
+          DEFAULT: 'var(--mr-hairline)',
+          '06': 'var(--mr-hairline-06)',
+          strong: 'var(--mr-hairline-strong)',
+        },
         /**
          * §UI/UX Wave 2 — the SATURATED feature palette. Hue → domain mapping is
          * canonical (src/config/themes.ts doc header): indigo=orders ·
@@ -173,6 +179,8 @@ export default {
         /** §UI/UX Wave 2 — canonical text/icon colour ON a solid palette fill. */
         on: {
           palette: 'var(--mr-on-palette)',
+          /** §OPENSHIP BATCH 10 — text colour ON saturated fills (bg-state-danger, bg-crimson-accent, etc.). */
+          fill: 'var(--mr-on-fill)',
         },
         /** §UI/UX Wave 2 — per-domain identity colours (icons, nav, tints). */
         feature: {

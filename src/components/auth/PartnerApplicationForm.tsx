@@ -240,17 +240,17 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-xl">
-        <button onClick={onBack} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-white transition-colors mb-8">
+        <button onClick={onBack} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-strong transition-colors mb-8">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Login
         </button>
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
             <img src={brandMark} alt="Mercenta Partners hexagon mark" className="w-10 h-10" />
-            <span className="text-xl font-semibold text-white">{BRAND_NAME}</span>
+            <span className="text-xl font-semibold text-strong">{BRAND_NAME}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Request Partner Access</h1>
+          <h1 className="text-2xl font-bold text-strong mb-1">Request Partner Access</h1>
           <p className="text-sm text-zinc-500">Apply to distribute your products in the UK</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
@@ -293,7 +293,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
             <input id="cg-companyName" data-cg-field="companyName" type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
               aria-invalid={issues.some(i => i.field === 'companyName')}
               aria-describedby={issues.some(i => i.field === 'companyName') ? 'cg-companyName-error' : undefined}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
               placeholder="Your registered business name" />
             <FieldError field="companyName" issues={issues} />
           </div>
@@ -305,14 +305,14 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                 onFocus={() => setShowCountryDropdown(true)} onBlur={() => setTimeout(() => setShowCountryDropdown(false), 200)}
                 aria-invalid={issues.some(i => i.field === 'country')}
                 aria-describedby={issues.some(i => i.field === 'country') ? 'cg-country-error' : undefined}
-                className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md pl-9 pr-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                className="w-full bg-zinc-900 border border-hairline rounded-ds-md pl-9 pr-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                 placeholder="Type your country name..." />
             </div>
             {showCountryDropdown && filteredCountries.length > 0 && (
-              <div className="absolute z-50 mt-1 w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md shadow-ds-overlay max-h-48 overflow-y-auto">
+              <div className="absolute z-50 mt-1 w-full bg-zinc-900 border border-hairline rounded-ds-md shadow-ds-overlay max-h-48 overflow-y-auto">
                 {filteredCountries.map((c) => (
                   <button key={c.name} type="button" onMouseDown={() => selectCountry(c)}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-brass-500/10 transition-colors flex items-center justify-between ${selectedCountry?.name === c.name ? 'bg-brass-500/15 text-brass-400' : 'text-white'}`}>
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-brass-500/10 transition-colors flex items-center justify-between ${selectedCountry?.name === c.name ? 'bg-brass-500/15 text-brass-400' : 'text-strong'}`}>
                     <span>{c.name}</span>
                     <span className="text-xs text-zinc-500 font-mono">{c.code}</span>
                   </button>
@@ -336,13 +336,13 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                   exactly — it claims nothing the domain does not enforce. */}
               <label className="block text-xs font-medium text-zinc-400 mb-1.5">Phone Number <span className="text-red-400">*</span></label>
               <div className="flex gap-2">
-                <div className="flex-shrink-0 bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-zinc-400 font-mono flex items-center">
+                <div className="flex-shrink-0 bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-zinc-400 font-mono flex items-center">
                   {phoneCode || '—'}
                 </div>
                 <input id="cg-phone" data-cg-field="phone" type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
                   aria-invalid={issues.some(i => i.field === 'phone')}
                   aria-describedby={issues.some(i => i.field === 'phone') ? 'cg-phone-error' : undefined}
-                  className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                  className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                   placeholder="Your phone number after the country code" />
               </div>
               <p className="text-ds-micro text-zinc-600 mt-1">Your country code is auto-filled. Enter the rest of your number.</p>
@@ -352,7 +352,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1.5">Product Category <span className="text-red-400">*</span></label>
             <select value={category} onChange={e => setCategory(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/40 appearance-none cursor-pointer">
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong focus:outline-none focus:border-brass-500/40 appearance-none cursor-pointer">
               {PRODUCT_CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-zinc-900">{cat}</option>)}
             </select>
           </div>
@@ -361,7 +361,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
             <input id="cg-skuCount" data-cg-field="skuCount" type="number" value={skuCount} onChange={e => setSkuCount(e.target.value)}
               aria-invalid={issues.some(i => i.field === 'skuCount')}
               aria-describedby={issues.some(i => i.field === 'skuCount') ? 'cg-skuCount-error' : undefined}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
               placeholder="Approximate number of products" />
             <FieldError field="skuCount" issues={issues} />
 
@@ -369,11 +369,11 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1.5">Current Monthly Revenue</label>
             <select value={monthlyRevenue} onChange={e => setMonthlyRevenue(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/40 appearance-none cursor-pointer">
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong focus:outline-none focus:border-brass-500/40 appearance-none cursor-pointer">
               {MONTHLY_REVENUE_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-zinc-900">{opt}</option>)}
             </select>
           </div>
-          <div className="border-t border-white/[0.06] pt-5">
+          <div className="border-t border-hairline pt-5">
             <p className="text-xs text-zinc-500 mb-3">Provide at least one link so we can verify your brand:</p>
             <div className="space-y-3">
               <div>
@@ -381,7 +381,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                 <input id="cg-websiteUrl" data-cg-field="websiteUrl" type="text" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)}
                   aria-invalid={issues.some(i => i.field === 'websiteUrl')}
                   aria-describedby={issues.some(i => i.field === 'websiteUrl') ? 'cg-websiteUrl-error' : undefined}
-                  className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                  className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                   placeholder="https://your-company.com" />
                 <FieldError field="websiteUrl" issues={issues} />
               </div>
@@ -390,7 +390,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                 <input id="cg-instagramUrl" data-cg-field="instagramUrl" type="text" value={instagramUrl} onChange={e => setInstagramUrl(e.target.value)}
                   aria-invalid={issues.some(i => i.field === 'instagramUrl')}
                   aria-describedby={issues.some(i => i.field === 'instagramUrl') ? 'cg-instagramUrl-error' : undefined}
-                  className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                  className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                   placeholder="https://instagram.com/your-brand" />
                 <FieldError field="instagramUrl" issues={issues} />
               </div>
@@ -399,7 +399,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                 <input id="cg-facebookUrl" data-cg-field="facebookUrl" type="text" value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)}
                   aria-invalid={issues.some(i => i.field === 'facebookUrl')}
                   aria-describedby={issues.some(i => i.field === 'facebookUrl') ? 'cg-facebookUrl-error' : undefined}
-                  className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                  className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                   placeholder="https://facebook.com/your-brand" />
                 <FieldError field="facebookUrl" issues={issues} />
               </div>
@@ -410,7 +410,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
             <input id="cg-referralSource" data-cg-field="referralSource" type="text" value={referralSource} onChange={e => setReferralSource(e.target.value)}
               aria-invalid={issues.some(i => i.field === 'referralSource')}
               aria-describedby={issues.some(i => i.field === 'referralSource') ? 'cg-referralSource-error' : undefined}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
               placeholder="e.g. UK Trade Fair, LinkedIn, Google" />
             <FieldError field="referralSource" issues={issues} />
           </div>
@@ -420,13 +420,13 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
               maxLength={PARTNER_APPLICATION_LIMITS.description.max} rows={4}
               aria-invalid={issues.some(i => i.field === 'description')}
               aria-describedby={issues.some(i => i.field === 'description') ? 'cg-description-error' : undefined}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 resize-none"
+              className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 resize-none"
               placeholder="Describe your product line, target customers, and why you're looking to enter the UK market..." />
             <p className="text-ds-micro text-zinc-600 text-right mt-1">{description.length}/{PARTNER_APPLICATION_LIMITS.description.max}</p>
             <FieldError field="description" issues={issues} />
           </div>
           <button type="submit" disabled={submitting}
-            className="w-full flex items-center justify-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-ds-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            className="w-full flex items-center justify-center gap-2 bg-brass-500 hover:bg-brass-600 text-strong font-medium px-6 py-3 rounded-ds-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting ? <>...</> : <><Send className="w-4 h-4" /> Submit Application</>}
           </button>
         </form>
@@ -436,14 +436,14 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
 }
 export function ApplicationReceived({ onBack }: { onBack: () => void }) {
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md text-center">
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
             <CheckCircle2 className="w-8 h-8 text-emerald-400" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-3">Application Received</h1>
+        <h1 className="text-2xl font-bold text-strong mb-3">Application Received</h1>
         <p className="text-sm text-zinc-400 leading-relaxed mb-8">Our team will review your brand and respond within 2 business days.</p>
         <button onClick={onBack} className="inline-flex items-center gap-2 text-sm text-brass-400 hover:text-brass-300 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Login

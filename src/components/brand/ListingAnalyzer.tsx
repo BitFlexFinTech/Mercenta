@@ -137,7 +137,7 @@ return (
           <ScanSearch className="w-5 h-5 text-brass-400" />
         </div>
         <div className="flex-1 min-w-[220px]">
-          <h3 className="text-sm font-semibold text-white">Listing Analyzer</h3>
+          <h3 className="text-sm font-semibold text-strong">Listing Analyzer</h3>
           <p className="text-xs text-zinc-500 mt-0.5">
             Mercenta prepares an automated listing health analysis for each catalogue product. You review,
             approve, edit or reject each suggested improvement.
@@ -168,7 +168,7 @@ return (
           </div>
         )}
         {analysis && (
-          <div className="mt-2 h-2 rounded-full bg-ink-900 border border-white/[0.08] overflow-hidden">
+          <div className="mt-2 h-2 rounded-full bg-ink-900 border border-hairline overflow-hidden">
             <div
               className={cn(
                 'h-full',
@@ -185,9 +185,9 @@ return (
       {analysis && (
         <Card title="Health dimensions" subtitle="Where the listing is strong and where it loses ground." className="p-0">
           {analysis.dimensions.map((d) => (
-            <div key={d.key} className="flex flex-wrap items-center justify-between gap-x-3 px-4 py-2.5 border-b border-white/[0.05] last:border-0" data-testid={`la-dim-${d.key}`}>
+            <div key={d.key} className="flex flex-wrap items-center justify-between gap-x-3 px-4 py-2.5 border-b border-hairline last:border-0" data-testid={`la-dim-${d.key}`}>
               <div className="min-w-0 flex-1">
-                <span className="text-xs font-medium text-white">{d.label}</span>
+                <span className="text-xs font-medium text-strong">{d.label}</span>
                 <span className="block text-ds-micro text-zinc-500 truncate">{d.note}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -214,9 +214,9 @@ return (
               ['Demand signal', analysis.estimates.demandSignal],
               ['Category position', analysis.estimates.categoryPosition],
             ].map(([k, v]) => (
-              <div key={String(k)} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
+              <div key={String(k)} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
                 <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
-                <div className="mt-1 text-ds-label font-medium text-white">{v}</div>
+                <div className="mt-1 text-ds-label font-medium text-strong">{v}</div>
               </div>
             ))}
           </div>
@@ -233,10 +233,10 @@ return (
           ) : (
             <div className="space-y-3 px-4 py-3" data-testid="la-recommendations">
               {analysis.recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`la-rec-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-3" data-testid={`la-rec-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <span className="text-xs font-medium text-white flex items-center gap-1.5">
+                      <span className="text-xs font-medium text-strong flex items-center gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5 text-brass-400" /> {rec.title}
                       </span>
                       <span className="text-ds-label text-zinc-500 mt-0.5 block">{rec.detail}</span>
@@ -278,7 +278,7 @@ return (
                         rows={3}
                         aria-label="Your edited improvement"
                         data-testid={`la-edit-input-${rec.id}`}
-                        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50"
+                        className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:border-brass-500/50"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button variant="primary" size="sm" disabled={busyId === rec.id} onClick={() => void decide(rec, 'edited')}>

@@ -55,9 +55,9 @@ export function DesignSystemShowcase() {
 {/* Typography */}
       <section className="space-y-2" aria-labelledby="ds-typography">
         <h2 id="ds-typography" className="text-xs uppercase tracking-wider text-zinc-500">Typography</h2>
-        <p className="font-display text-3xl font-semibold text-white">Display — Fraunces</p>
-        <p className="text-2xl font-semibold text-white">Page title</p>
-        <p className="text-lg font-semibold text-white">Section title</p>
+        <p className="font-display text-3xl font-semibold text-strong">Display — Fraunces</p>
+        <p className="text-2xl font-semibold text-strong">Page title</p>
+        <p className="text-lg font-semibold text-strong">Section title</p>
         <p className="text-sm text-zinc-300">Body — Plus Jakarta Sans. Regular reading copy.</p>
         <p className="text-xs text-zinc-500">Label / caption — secondary info and meta.</p>
         <p className="font-mono text-sm text-brass-300">Numeric / KPI — 12,480.50</p>
@@ -207,7 +207,7 @@ export function DesignSystemShowcase() {
                   dark: false,
                 }).url ?? undefined}
                 alt="Demo identity — Manchester United"
-                className="h-10 w-10 rounded-ds-md border border-white/[0.1]"
+                className="h-10 w-10 rounded-ds-md border border-hairline-strong"
               />
               <p className="text-xs text-zinc-500">
                 Brand logo identity seam — deterministic demo resolution (Manchester United → monogram), tenant-scoped override ahead.

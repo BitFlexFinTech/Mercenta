@@ -98,24 +98,24 @@ export function BrandReturns() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           onClick={() => setDrillCard('Total returned units')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Total returned units</p>
-          <p className="text-lg font-semibold text-white">{totalUnits}</p>
+          <p className="text-lg font-semibold text-strong">{totalUnits}</p>
         </button>
         <button
           onClick={() => setDrillCard('Quality/compliance flags')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Quality/compliance flags</p>
-          <p className="text-lg font-semibold text-white">{qualityIssues.length}</p>
+          <p className="text-lg font-semibold text-strong">{qualityIssues.length}</p>
         </button>
         <button
           onClick={() => setDrillCard('Deductions linked')}
-          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-ds-lg p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
           <p className="text-ds-micro text-zinc-500">Deductions linked</p>
-          <p className="text-lg font-semibold text-white">{deductedReturns.length}</p>
+          <p className="text-lg font-semibold text-strong">{deductedReturns.length}</p>
         </button>
       </div>
 
@@ -130,7 +130,7 @@ export function BrandReturns() {
               aria-label="Search returns by PO, product or reason"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
+              className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-9 pr-4 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
             />
           </div>
           {/* §Phase D — canonical DataTable: labelled cards below md (every
@@ -202,7 +202,7 @@ export function BrandReturns() {
               },
             ]}
           />
-          <div className="text-ds-micro text-zinc-600 pt-2 border-t border-white/[0.04] mt-1">
+          <div className="text-ds-micro text-zinc-600 pt-2 border-t border-hairline mt-1">
             {filtered.length} of {returns.length} return record{returns.length === 1 ? '' : 's'}
           </div>
         </div>
@@ -210,11 +210,11 @@ export function BrandReturns() {
 
       {/* §Batch-3 — Summary card drill-down modals */}
       {drillCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={() => setDrillCard(null)}>
+          <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
-              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white transition-colors">
+              <h3 className="text-sm font-semibold text-strong">{drillCard}</h3>
+              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-strong transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -227,7 +227,7 @@ export function BrandReturns() {
                     const Icon = REASON_ICONS[reason];
                     if (count === 0) return null;
                     return (
-                      <div key={reason} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                      <div key={reason} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
                         <span className="flex items-center gap-2 text-zinc-300">
                           <Icon className="w-3 h-3 text-zinc-500" />
                           {REASON_LABELS[reason]}
@@ -249,7 +249,7 @@ export function BrandReturns() {
                     {qualityIssues.map((r) => {
                       const Icon = REASON_ICONS[r.reason];
                       return (
-                        <div key={r.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                        <div key={r.id} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
                           <span className="flex items-center gap-2 text-zinc-300">
                             <Icon className="w-3 h-3 text-zinc-500" />
                             {r.productName}
@@ -270,7 +270,7 @@ export function BrandReturns() {
                 ) : (
                   <div className="max-h-60 overflow-y-auto space-y-1">
                     {deductedReturns.map((r) => (
-                      <div key={r.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                      <div key={r.id} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
                         <span className="text-zinc-300">{r.productName} — {r.poNumber}</span>
                         <span className="text-zinc-400 font-mono">{r.linkedDeductionId}</span>
                       </div>

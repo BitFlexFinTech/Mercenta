@@ -80,11 +80,11 @@ export function LiftOffProgramme() {
 
         <WorkspaceSection title="How the programme works" domain="compliance">
           <Card className="p-4">
-            <ul className="divide-y divide-white/[0.05]">
+            <ul className="divide-y divide-hairline-06">
               {LIFT_OFF_TERMS.map((t) => (
                 <li key={t.id} className="py-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium text-white">{t.label}</span>
+                    <span className="text-xs font-medium text-strong">{t.label}</span>
                     {t.basis === 'requires_verification' && (
                       <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
                         checked per launch
@@ -121,7 +121,7 @@ export function LiftOffProgramme() {
                           <Circle className="mt-0.5 w-4 h-4 flex-shrink-0 text-zinc-600" />
                         )}
                         <div>
-                          <span className={state === 'met' ? 'text-xs text-white' : 'text-xs text-zinc-400'}>
+                          <span className={state === 'met' ? 'text-xs text-strong' : 'text-xs text-zinc-400'}>
                             {rule.label}
                           </span>
                           <p className="text-ds-micro text-zinc-600">{rule.detail}</p>
@@ -140,7 +140,7 @@ export function LiftOffProgramme() {
             {[LIFT_OFF_VS_DISTRIBUTION.programme, LIFT_OFF_VS_DISTRIBUTION.distribution].map((p) => (
               <Card key={p.label} className="p-4">
                 <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">{p.label}</p>
-                <p className="mt-1 text-xs text-white">{p.for}</p>
+                <p className="mt-1 text-xs text-strong">{p.for}</p>
                 <p className="mt-2 text-ds-label text-zinc-400">{p.gets}</p>
               </Card>
             ))}

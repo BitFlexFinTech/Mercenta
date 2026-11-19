@@ -4753,6 +4753,14 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
     'docs/OPENSHIP_REFERENCE_SPEC.md',
     'package.json',
     'scripts/validate-e6-brand-surfaces.mjs',
+    // Batch 10 component files (literal class migration affected these directories):
+    'src/components/admin/',
+    'src/components/brand/',
+    'src/components/shared/',
+    'src/components/layout/',
+    'src/components/marketing/',
+    'src/components/design/',
+    'src/components/shared/logistics/',
   ]);
 
   /**
@@ -4780,6 +4788,7 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...OPENSHIP_BATCH10_LEGACY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M13_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...PHASE4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...FUNCTIONAL_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

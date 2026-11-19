@@ -109,10 +109,10 @@ export function CommercialModelsPanel() {
           are always audited.
         </p>
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="model-a-illustration">
+          <div className="rounded-ds-md border border-hairline p-3" data-testid="model-a-illustration">
             <div className="flex items-center gap-2 mb-1.5">
               <Badge className="bg-emerald-500/15 text-emerald-300">Model A</Badge>
-              <span className="text-xs font-medium text-white">
+              <span className="text-xs font-medium text-strong">
                 {COMMERCIAL_MODELS.commission_agent.label}
               </span>
             </div>
@@ -125,10 +125,10 @@ export function CommercialModelsPanel() {
             <p className="text-ds-micro text-zinc-500 mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
           </div>
 
-          <div className="rounded-ds-md border border-white/[0.08] p-3" data-testid="model-b-illustration">
+          <div className="rounded-ds-md border border-hairline p-3" data-testid="model-b-illustration">
             <div className="flex items-center gap-2 mb-1.5">
               <Badge className="bg-blue-500/15 text-blue-300">Model B</Badge>
-              <span className="text-xs font-medium text-white">
+              <span className="text-xs font-medium text-strong">
                 {COMMERCIAL_MODELS.buy_resell.label}
               </span>
             </div>
@@ -136,12 +136,12 @@ export function CommercialModelsPanel() {
             <dl className="space-y-1 text-ds-label font-mono">
               <div className="flex justify-between"><dt className="text-zinc-500">Retail-channel revenue</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Brand acquisition cost</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp)}</dd></div>
-              <div className="flex justify-between border-t border-white/[0.06] pt-1"><dt className="text-zinc-400">GROSS commercial spread</dt><dd className="text-amber-300">{gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)}</dd></div>
+              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-zinc-400">GROSS commercial spread</dt><dd className="text-amber-300">{gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Carrier</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.carrierCostGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Payment fees</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.paymentFeesGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Other agreed costs</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.otherAgreedFeesGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Deductions</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.deductionsGbp)}</dd></div>
-              <div className="flex justify-between border-t border-white/[0.06] pt-1"><dt className="text-zinc-400">NET Mercenta margin</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)}</dd></div>
+              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-zinc-400">NET Mercenta margin</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)}</dd></div>
             </dl>
             <p className="text-ds-micro text-zinc-500 mt-2">
               {gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)} is the commercial{' '}
@@ -151,8 +151,8 @@ export function CommercialModelsPanel() {
           </div>
         </div>
 
-        <div className="mt-3 rounded-ds-md border border-white/[0.08] p-3" data-testid="shipping-economics">
-          <p className="text-xs font-medium text-white mb-1">
+        <div className="mt-3 rounded-ds-md border border-hairline p-3" data-testid="shipping-economics">
+          <p className="text-xs font-medium text-strong mb-1">
             Shipping economics — canonical terms, derived (never hardcoded)
           </p>
           <p className="text-ds-label font-mono text-zinc-400">
@@ -178,7 +178,7 @@ export function CommercialModelsPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-zinc-500">
                 <th className="px-2 py-1.5">Brand</th>
                 <th className="px-2 py-1.5">Category</th>
                 <th className="px-2 py-1.5">Recorded model</th>
@@ -190,8 +190,8 @@ export function CommercialModelsPanel() {
             </thead>
             <tbody>
               {rows.map(({ brand, record, resolution, requirementCount }) => (
-                <tr key={brand.id} className="border-b border-white/[0.04]" data-testid={`commercial-model-row-${brand.id}`}>
-                  <td className="px-2 py-1.5 text-white font-medium">{brand.profile.businessName}</td>
+                <tr key={brand.id} className="border-b border-hairline" data-testid={`commercial-model-row-${brand.id}`}>
+                  <td className="px-2 py-1.5 text-strong font-medium">{brand.profile.businessName}</td>
                   <td className="px-2 py-1.5 text-zinc-400">{brand.category}</td>
                   <td className="px-2 py-1.5">
                     {resolution.ok ? (
@@ -271,7 +271,7 @@ export function CommercialModelsPanel() {
           <div className="space-y-1.5" data-testid="commercial-model-audit">
             {rows.flatMap((r) =>
               commercialModelAuditFor(r.brand.id).map((e) => (
-                <div key={e.id} className="flex items-start gap-2 text-ds-label border-b border-white/[0.04] pb-1.5">
+                <div key={e.id} className="flex items-start gap-2 text-ds-label border-b border-hairline pb-1.5">
                   <ArrowRight className="w-3 h-3 text-zinc-600 mt-0.5 flex-shrink-0" />
                   <div className="min-w-0">
                     <span className="text-zinc-300">{r.brand.profile.businessName}</span>

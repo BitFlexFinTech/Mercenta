@@ -185,8 +185,8 @@ const [onBehalfAsn, setOnBehalfAsn] = useState(false);
 
   if (!po) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-        <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[600px] shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={onClose}>
+        <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[600px] shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
           <p className="text-xs text-zinc-600">Purchase order not found.</p>
           <Button className="text-xs mt-3" onClick={onClose}>Close</Button>
         </div>
@@ -360,11 +360,11 @@ function beginOnBehalfAsn() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg w-[720px] max-h-[90vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={onClose}>
+      <div className="bg-ink-850 border border-hairline rounded-ds-lg w-[720px] max-h-[90vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div>
-            <h2 className="text-sm font-semibold text-white">{po.poNumber}</h2>
+            <h2 className="text-sm font-semibold text-strong">{po.poNumber}</h2>
             <p className="text-ds-label text-zinc-400 mt-0.5">{brandName} £{po.poValue.toLocaleString()}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -377,7 +377,7 @@ function beginOnBehalfAsn() {
                 {ackBadge.label}
               </StatusBadge>
             </span>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+            <button onClick={onClose} className="text-zinc-500 hover:text-strong transition-colors"><X className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -385,16 +385,16 @@ function beginOnBehalfAsn() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-ink-900 rounded-ds-md p-2.5">
               <p className="text-ds-micro text-zinc-500">Order date</p>
-              <p className="text-xs text-white font-mono">{orderDateLabel(po.orderDate)}</p>
+              <p className="text-xs text-strong font-mono">{orderDateLabel(po.orderDate)}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2.5">
               <p className="text-ds-micro text-zinc-500">Status</p>
-              <p className="text-xs text-white capitalize">{po.status.replace(/_/g, ' ')}</p>
+              <p className="text-xs text-strong capitalize">{po.status.replace(/_/g, ' ')}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2.5">
               <p className="text-ds-micro text-zinc-500">Deadline</p>
               <p
-                className="text-xs text-white font-mono"
+                className="text-xs text-strong font-mono"
                 title={ackWindow.reason}
                 data-testid={`admin-po-ack-window-${po.poNumber}`}
               >
@@ -409,7 +409,7 @@ function beginOnBehalfAsn() {
           <Card title={'Line Items (' + po.lineItems.length + ')'}>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
+                <tr className="border-b border-hairline text-xs text-zinc-500">
                   <th className="text-left font-medium px-3 py-2">SKU</th>
                   <th className="text-left font-medium px-3 py-2">Product</th>
                   <th className="text-right font-medium px-3 py-2">Ordered</th>
@@ -419,7 +419,7 @@ function beginOnBehalfAsn() {
                   <th className="w-8 px-3 py-2" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-hairline-06">
                 {po.lineItems.map((li) => (
                   <AdminPoLineItemRow
                     key={li.sku} line={li}
@@ -602,7 +602,7 @@ function beginOnBehalfAsn() {
                   <span className="font-mono text-zinc-300">{instruction.id}</span>
                 </p>
                 <p className="text-zinc-400">
-                  State: <span className="text-white">{instruction.state.replace(/_/g, ' ')}</span>
+                  State: <span className="text-strong">{instruction.state.replace(/_/g, ' ')}</span>
                   {instruction.outcome?.channelAcknowledgement?.ok && (
                     <>
                       {' · '}channel acknowledgement{' '}
@@ -656,7 +656,7 @@ function beginOnBehalfAsn() {
               <Card title="ASN / Shipment" className="mt-3">
                 <div className="space-y-2">
                   {po.lineItems.filter((li) => li.ackStatus !== 'rejected').map((li) => (
-                    <div key={li.sku} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1">
+                    <div key={li.sku} className="flex items-center justify-between text-xs border-b border-hairline py-1">
                       <span className="text-zinc-300">{li.sku} - {li.productName}</span>
                       <span className="text-zinc-400 font-mono">{li.acknowledgedQty ?? li.quantity} confirmed</span>
                     </div>
@@ -676,19 +676,19 @@ function beginOnBehalfAsn() {
                   </p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     <select value={asnCarrier} onChange={(e) => setAsnCarrier(e.target.value)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white">
+                      className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong">
                       {carrierOptionsForPO(po).map((c) => (
                         <option key={c.value} value={c.value}>{c.label}</option>
                       ))}
                     </select>
                     <input type="date" value={asnShipDate} onChange={(e) => setAsnShipDate(e.target.value)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white" />
+                      className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong" />
                     <input value={asnLot} onChange={(e) => setAsnLot(e.target.value)}
                       placeholder="Lot number (required for Grocery / H&PC)" aria-label="Lot number"
-                      className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white" />
+                      className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong" />
                     <input type="date" value={asnExpiry} onChange={(e) => setAsnExpiry(e.target.value)}
                       placeholder="Expiry date" aria-label="Expiry date"
-                      className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-white" />
+                      className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong" />
                   </div>
                   <Button className="text-xs" onClick={handleOnBehalfAsnSubmit}>Submit On-Behalf ASN</Button>
                   {asnNotice && <p className={cn('text-ds-micro mt-2', asnNotice.startsWith('ASN') ? 'text-emerald-400' : 'text-red-400')}>{asnNotice}</p>}
@@ -702,7 +702,7 @@ function beginOnBehalfAsn() {
               <div className="max-h-48 overflow-y-auto space-y-1">
                 {po.lineItems.filter((li) => !!li.ackHistory && li.ackHistory.length > 0).flatMap((li) =>
                   li.ackHistory!.map((h, idx) => (
-                    <div key={li.sku + '-' + idx} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                    <div key={li.sku + '-' + idx} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
                       <span className="flex items-center gap-2 text-zinc-300">
                         <History className="w-3 h-3 text-zinc-500" />{li.sku}
                       </span>
@@ -737,7 +737,7 @@ function beginOnBehalfAsn() {
             <Card title={'Deductions (' + poDeductions.length + ')'}>
               <div className="space-y-1">
                 {poDeductions.map((d) => (
-                  <div key={d.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                  <div key={d.id} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
                     <span className="flex items-center gap-1.5 text-zinc-300">
                       <Gavel className="w-3 h-3 text-zinc-500" /> {d.type.replace(/_/g, ' ')}
                     </span>
@@ -808,7 +808,7 @@ function ChannelRevisionHistory({ po }: { po: PurchaseOrder }) {
         {revisions.map((revision) => (
           <div
             key={revision.digest}
-            className="rounded-ds-sm border border-white/[0.06] bg-ink-900 p-2.5"
+            className="rounded-ds-sm border border-hairline bg-ink-900 p-2.5"
             data-testid={`admin-po-revision-${po.poNumber}-${revision.revisionNumber}`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -907,7 +907,7 @@ function AdminPoLineItemRow({
       {isOnBehalf ? (
         <input type="number" step="0.01" value={ackPrice ?? line.unitPrice}
           onChange={(e) => onAckPriceChange(Number(e.target.value))}
-          className="w-20 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-0.5 text-xs text-white text-right" />
+          className="w-20 bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-0.5 text-xs text-strong text-right" />
       ) : (
         String.fromCharCode(163) + line.unitPrice.toFixed(2)
       )}
@@ -927,7 +927,7 @@ function AdminPoLineItemRow({
          */
         <select value={ackStatus ?? line.ackStatus ?? 'accepted'}
           onChange={(e) => onAckStatusChange(e.target.value as 'accepted' | 'rejected' | 'backordered')}
-          className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1 py-0.5 text-xs text-white"
+          className="bg-ink-900 border border-hairline rounded-ds-sm px-1 py-0.5 text-xs text-strong"
           data-testid={`admin-po-ack-status-${line.sku}`}
           data-backorder-allowed={canBackOrderLine(line) ? 'true' : 'false'}>
           <option value="accepted">Accept</option>
@@ -943,7 +943,7 @@ function AdminPoLineItemRow({
       {isOnBehalf && ackStatus === 'rejected' && (
         <select value={ackRejectionCode ?? ''}
           onChange={(e) => onAckRejectionCodeChange(e.target.value)}
-          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1 py-0.5 text-ds-micro text-white w-full">
+          className="block mt-1 bg-ink-900 border border-hairline rounded-ds-sm px-1 py-0.5 text-ds-micro text-strong w-full">
           <option value="">Select reason...</option>
           {PO_REJECTION_CODES.map((c) => (
             <option key={c} value={c}>{c.replace(/([A-Z])/g, ' $1').trim()}</option>
@@ -953,7 +953,7 @@ function AdminPoLineItemRow({
       {isOnBehalf && ackStatus === 'backordered' && (
         <input type="date" value={ackShipDate ?? ''}
           onChange={(e) => onAckShipDateChange(e.target.value)}
-          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1 py-0.5 text-ds-micro text-white w-full"
+          className="block mt-1 bg-ink-900 border border-hairline rounded-ds-sm px-1 py-0.5 text-ds-micro text-strong w-full"
           placeholder="Ship by date" />
       )}
     </td>

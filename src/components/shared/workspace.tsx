@@ -154,7 +154,7 @@ export function WorkspaceHeader({
   return (
     <header className={cn('mb-3', className)} data-workspace-header="true">
       {entity && (
-        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-1.5">
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-ds-md border border-hairline bg-tint px-3 py-1.5">
           {entity}
         </div>
       )}
@@ -166,7 +166,7 @@ export function WorkspaceHeader({
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-display text-ds-page font-semibold tracking-tight text-white">
+            <h1 className="font-display text-ds-page font-semibold tracking-tight text-strong">
               {title}
             </h1>
             {status}
@@ -180,7 +180,7 @@ export function WorkspaceHeader({
       </div>
       {toolbar && (
         <div
-          className="sticky top-0 z-20 mt-2.5 rounded-ds-md border border-white/[0.06] bg-ink-900/95 px-3 py-2 backdrop-blur"
+          className="sticky top-0 z-20 mt-2.5 rounded-ds-md border border-hairline bg-ink-900/95 px-3 py-2 backdrop-blur"
           data-workspace-toolbar="true"
         >
           {toolbar}
@@ -267,7 +267,7 @@ export function WorkspaceSection({
             />
           )}
           <div className="min-w-0">
-            <h2 className="text-ds-body font-semibold tracking-tight text-white sm:text-ds-title">
+            <h2 className="text-ds-body font-semibold tracking-tight text-strong sm:text-ds-title">
               {title}
             </h2>
             {description && (
@@ -399,7 +399,7 @@ export function MetricTile({ data }: { data: MetricTileData }) {
           aria-label={`${data.label}: ${data.value}${data.statusText ? `, ${data.statusText}` : ''}`}
           aria-pressed={data.pressed === undefined ? undefined : data.pressed}
           data-testid={`kpi-open-${data.id}`}
-          className="w-full rounded-ds-sm pt-0.5 text-left transition-ds duration-ds-fast hover:bg-white/[0.03] focus-visible:bg-white/[0.03]"
+          className="w-full rounded-ds-sm pt-0.5 text-left transition-ds duration-ds-fast hover:bg-tint focus-visible:bg-tint"
         >
           {body}
         </button>
@@ -420,7 +420,7 @@ function MetricBody({ data }: { data: MetricTileData }) {
       <span
         data-testid={data.valueTestId ?? `kpi-value-${data.id}`}
         className={cn(
-          'animate-value-change font-mono font-semibold leading-none tracking-tight text-white',
+          'animate-value-change font-mono font-semibold leading-none tracking-tight text-strong',
           /*
            * §UI/UX Wave 3 — HIERARCHY. These were `text-[26px] sm:text-[30px]`
            * (hero) and `text-xl` (default, 20px). 20px was exactly the new page
@@ -544,7 +544,7 @@ export function MetricBand({
   const mdSpans = bandColumnSpans(items.length, columns);
   return (
     <div
-      className={cn('overflow-hidden rounded-ds-lg border border-white/[0.06]', className)}
+      className={cn('overflow-hidden rounded-ds-lg border border-hairline', className)}
       data-testid="metric-band"
       /* §Wave 3 Part 5 — the band's OWN loading state is announced now; before
          this it was silent to assistive technology and the skeleton bars were a
@@ -556,7 +556,7 @@ export function MetricBand({
           Loading metrics…
         </span>
       )}
-      <div className="grid grid-cols-12 gap-px bg-white/[0.06]">
+      <div className="grid grid-cols-12 gap-px bg-tint">
         {items.map((m, i) => (
           <div key={m.id} className={cn(BAND_BASE_SPAN[baseSpans[i]], BAND_MD_SPAN[mdSpans[i]])}>
             {loading ? (
@@ -621,7 +621,7 @@ export function Queue({
   rows.forEach((r) => {
     if (r.group && r.group !== lastGroup) {
       out.push(
-        <li key={`group-${r.group}`} className="bg-white/[0.02] px-3.5 py-1">
+        <li key={`group-${r.group}`} className="bg-tint px-3.5 py-1">
           <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
             {r.group}
           </p>
@@ -659,7 +659,7 @@ export function Queue({
           <span className="flex-shrink-0 font-mono text-ds-label text-zinc-400">{r.ref}</span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-xs font-medium text-white">{r.title}</span>
+          <span className="block truncate text-xs font-medium text-strong">{r.title}</span>
           {r.meta && (
             <span className="block truncate text-ds-label leading-snug text-zinc-500">{r.meta}</span>
           )}
@@ -670,7 +670,7 @@ export function Queue({
             <span
               className={cn(
                 'font-mono text-ds-label',
-                f.emphasis ? 'font-semibold text-white' : 'text-zinc-300'
+                f.emphasis ? 'font-semibold text-strong' : 'text-zinc-300'
               )}
             >
               {f.value}
@@ -681,7 +681,7 @@ export function Queue({
           <button
             type="button"
             onClick={r.onOpen}
-            className="flex-shrink-0 rounded-ds-sm border border-white/[0.08] bg-ink-800 px-2.5 py-1 text-ds-label font-medium text-zinc-300 transition-ds duration-ds-fast hover:bg-ink-700 hover:text-white"
+            className="flex-shrink-0 rounded-ds-sm border border-hairline bg-ink-800 px-2.5 py-1 text-ds-label font-medium text-zinc-300 transition-ds duration-ds-fast hover:bg-ink-700 hover:text-strong"
           >
             <span className="inline-flex items-center gap-1">
               {r.actionLabel ?? 'Review'}
@@ -695,7 +695,7 @@ export function Queue({
 
   if (rows.length === 0) {
     return (
-      <div className={cn('rounded-ds-lg border border-white/[0.06] bg-ink-850', className)}>
+      <div className={cn('rounded-ds-lg border border-hairline bg-ink-850', className)}>
         {empty ?? (
           <div className="flex items-center gap-2.5 px-3.5 py-3">
             <StatusBadge tone="success" dataStatus="success">
@@ -710,9 +710,9 @@ export function Queue({
 
   return (
     <div
-      className={cn('overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850', className)}
+      className={cn('overflow-hidden rounded-ds-lg border border-hairline bg-ink-850', className)}
     >
-      <ul className="divide-y divide-white/[0.05]">{out}</ul>
+      <ul className="divide-y divide-hairline-06">{out}</ul>
     </div>
   );
 }
@@ -761,8 +761,8 @@ export function PipelineTrack({
             data-pipeline-stage={s.id}
             data-stage-count={s.count}
             className={cn(
-              'block w-full overflow-hidden rounded-ds-md border border-white/[0.06] bg-ink-850 text-left transition-ds duration-ds-fast',
-              interactive && 'hover:border-white/[0.14]'
+              'block w-full overflow-hidden rounded-ds-md border border-hairline bg-ink-850 text-left transition-ds duration-ds-fast',
+              interactive && 'hover:border-hairline-strong'
             )}
           >
             <span
@@ -781,10 +781,10 @@ export function PipelineTrack({
               )}
             </span>
             <span className="block px-2.5 pb-2 pt-2">
-              <span className="block font-mono text-lg font-semibold leading-none text-white">
+              <span className="block font-mono text-lg font-semibold leading-none text-strong">
                 {s.count}
               </span>
-              <span className="mt-2 block h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+              <span className="mt-2 block h-1 w-full overflow-hidden rounded-full bg-tint">
                 <span
                   className="animate-pipeline-grow block h-full rounded-full"
                   style={{
@@ -824,11 +824,11 @@ export function ContextPanel({
     <section
       aria-label={title}
       className={cn(
-        'overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850',
+        'overflow-hidden rounded-ds-lg border border-hairline bg-ink-850',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
+      <div className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-2">
         <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           {title}
         </h3>
@@ -865,7 +865,7 @@ export function ActivityFeed({
 }) {
   if (entries.length === 0) {
     return (
-      <div className={cn('rounded-ds-lg border border-white/[0.06] bg-ink-850', className)}>
+      <div className={cn('rounded-ds-lg border border-hairline bg-ink-850', className)}>
         {empty ?? <p className="px-3.5 py-3 text-xs text-zinc-500">No activity recorded yet.</p>}
       </div>
     );
@@ -892,12 +892,12 @@ export function ActivityFeed({
             {i < entries.length - 1 && (
               <span
                 aria-hidden="true"
-                className="absolute left-1/2 top-3.5 h-[calc(100%-0.5rem)] w-px -translate-x-1/2 bg-white/[0.08]"
+                className="absolute left-1/2 top-3.5 h-[calc(100%-0.5rem)] w-px -translate-x-1/2 bg-tint"
               />
             )}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-ds-label font-medium leading-snug text-white">{e.title}</span>
+            <span className="block text-ds-label font-medium leading-snug text-strong">{e.title}</span>
             {e.meta && (
               <span className="block truncate text-ds-micro leading-snug text-zinc-500">
                 {e.meta}
@@ -911,7 +911,7 @@ export function ActivityFeed({
             <button
               type="button"
               onClick={e.onOpen}
-              className="flex-shrink-0 self-start rounded-ds-sm px-1.5 py-0.5 text-ds-micro font-medium text-zinc-400 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-white"
+              className="flex-shrink-0 self-start rounded-ds-sm px-1.5 py-0.5 text-ds-micro font-medium text-zinc-400 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
             >
               Open
             </button>
@@ -1015,24 +1015,24 @@ export function RecordDrawer({
         aria-label={title}
         tabIndex={-1}
         data-testid={testId}
-        className="animate-drawer-in relative flex h-full w-full max-w-md flex-col border-l border-white/[0.08] bg-ink-900 shadow-ds-overlay"
+        className="animate-drawer-in relative flex h-full w-full max-w-md flex-col border-l border-hairline bg-ink-900 shadow-ds-overlay"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
+        <div className="flex items-start justify-between gap-3 border-b border-hairline px-4 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold tracking-tight text-white">{title}</h2>
+            <h2 className="truncate text-sm font-semibold tracking-tight text-strong">{title}</h2>
             {subtitle && <p className="mt-0.5 truncate text-ds-label text-zinc-500">{subtitle}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close record"
-            className="flex-shrink-0 rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-white"
+            className="flex-shrink-0 rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">{children}</div>
-        {footer && <div className="border-t border-white/[0.06] px-4 py-3">{footer}</div>}
+        {footer && <div className="border-t border-hairline px-4 py-3">{footer}</div>}
       </div>
     </div>
   );
@@ -1081,7 +1081,7 @@ export function SegmentedControl({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex flex-wrap items-center gap-0.5 rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-0.5',
+        'inline-flex flex-wrap items-center gap-0.5 rounded-ds-md border border-hairline bg-tint p-0.5',
         className
       )}
     >
@@ -1098,8 +1098,8 @@ export function SegmentedControl({
             className={cn(
               'rounded-ds-sm px-2.5 py-1 text-ds-label font-medium transition-ds duration-ds-fast',
               selected
-                ? 'bg-ink-700 text-white'
-                : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200'
+                ? 'bg-ink-700 text-strong'
+                : 'text-zinc-400 hover:bg-tint hover:text-zinc-200'
             )}
           >
             {it.label}

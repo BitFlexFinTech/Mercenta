@@ -132,7 +132,7 @@ export function PoDocumentQueuePanel({
             return (
               <li
                 key={po.id}
-                className="rounded-ds-md border border-white/[0.06] bg-white/[0.02]"
+                className="rounded-ds-md border border-hairline bg-tint"
                 data-testid={`po-documents-queue-row-${po.poNumber}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 p-2.5">
@@ -170,7 +170,7 @@ export function PoDocumentQueuePanel({
 
                 {open && (
                   <div
-                    className="border-t border-white/[0.06] p-2.5"
+                    className="border-t border-hairline p-2.5"
                     data-testid={`po-documents-queue-panel-${po.poNumber}`}
                   >
                     {/*

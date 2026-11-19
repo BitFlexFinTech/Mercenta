@@ -56,7 +56,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">
               What you keep, and what we carry
@@ -68,7 +68,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
               {PUBLIC_BRAND_SPLIT.map((row, i) => (
                 <div
                   key={row.keep}
-                  className="rounded-ds-lg border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-ink-850 p-5"
                   style={{ borderTopColor: CARRIED_DOMAIN[i % CARRIED_DOMAIN.length] }}
                 >
                   <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">You keep</p>
@@ -81,7 +81,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 font-display text-2xl font-semibold md:text-3xl">What it feels like</h2>
             <p className="text-base leading-relaxed md:text-lg" style={{ color: 'var(--mr-text-muted)' }}>
@@ -90,7 +90,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
             <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>

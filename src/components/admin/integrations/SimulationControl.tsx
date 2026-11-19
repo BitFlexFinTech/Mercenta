@@ -159,13 +159,13 @@ function EnvironmentSwitch() {
 
   return (
     <Card className="p-4" data-testid="environment-switch">
-      <div data-environment-banner={mode} className="mt-3 rounded-ds-md border border-white/[0.08] bg-white/[0.03] p-2 text-ds-label text-zinc-300 flex items-start gap-2">
+      <div data-environment-banner={mode} className="mt-3 rounded-ds-md border border-hairline bg-tint p-2 text-ds-label text-zinc-300 flex items-start gap-2">
         <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
         <span>{isDemo ? 'DEMO MODE: you are viewing demo data. No real data or API calls.' : 'LIVE MODE: some integrations are not yet connected. Connect them in Settings.'}</span>
       </div>
       <div className="flex items-center justify-between gap-3 flex-wrap" data-environment-switch={mode}>
         <div>
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-strong flex items-center gap-2">
             <Power className="w-4 h-4 text-brass-300" /> Platform environment
           </h3>
           <p className="text-ds-label text-zinc-500 mt-0.5 max-w-2xl leading-relaxed">
@@ -293,7 +293,7 @@ export function SimulationControl() {
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-base font-semibold text-white flex items-center gap-2">
+          <h2 className="text-base font-semibold text-strong flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-brass-300" /> Simulation Control Centre
           </h2>
           <p className="text-xs text-zinc-500 mt-0.5">
@@ -349,7 +349,7 @@ export function SimulationControl() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-sm font-semibold text-white">{meta.name}</h4>
+                    <h4 className="text-sm font-semibold text-strong">{meta.name}</h4>
                     <Badge className="text-ds-micro uppercase tracking-wide bg-zinc-500/15 text-zinc-400 border-zinc-500/20">{id}</Badge>
                   </div>
                   <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{meta.purpose}</p>
@@ -401,7 +401,7 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
     : result.status === 'safety_refused' ? 'Safety refused' : 'Error';
 
   return (
-    <div className="mt-3 bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 space-y-2">
+    <div className="mt-3 bg-tint border border-hairline rounded-ds-md p-3 space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Badge className={cn('text-ds-micro border', statusCls)}>

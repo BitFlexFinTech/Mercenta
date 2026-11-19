@@ -192,7 +192,7 @@ export function BrandInventory() {
       <Card className="p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-white">Inventory position</h3>
+            <h3 className="text-sm font-semibold text-strong">Inventory position</h3>
             <p className="text-ds-label text-zinc-500">
               Derived from the movement ledger · {INVENTORY_UOM_SOURCE}
             </p>
@@ -216,10 +216,10 @@ export function BrandInventory() {
             ].map((tile) => (
               <div
                 key={tile.label}
-                className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3"
+                className="bg-tint border border-hairline rounded-ds-md p-3"
               >
                 <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</div>
-                <div className="text-lg font-semibold text-white tabular-nums">{tile.value}</div>
+                <div className="text-lg font-semibold text-strong tabular-nums">{tile.value}</div>
               </div>
             ))}
           </div>
@@ -238,7 +238,7 @@ export function BrandInventory() {
       {notice && (
         <div
           data-testid="inventory-notice"
-          className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3 text-xs text-zinc-300"
+          className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-zinc-300"
         >
           {notice}
         </div>
@@ -269,7 +269,7 @@ export function BrandInventory() {
                         neutral icon — never text. */}
                     <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-ds-md" />
                     <div>
-                      <div className="text-sm font-medium text-white">{p?.name ?? r.sku}</div>
+                      <div className="text-sm font-medium text-strong">{p?.name ?? r.sku}</div>
                       <div className={cn(MONO, 'text-zinc-500')}>{r.sku}</div>
                     </div>
                   </div>
@@ -334,7 +334,7 @@ export function BrandInventory() {
               render: (r) => (
                 <span
                   data-testid={`inventory-available-${r.sku}`}
-                  className={cn(MONO, 'tabular-nums', r.available < 0 ? 'text-red-300' : 'text-white')}
+                  className={cn(MONO, 'tabular-nums', r.available < 0 ? 'text-red-300' : 'text-strong')}
                 >
                   {r.available}
                 </span>
@@ -357,7 +357,7 @@ export function BrandInventory() {
                   data-testid={`inventory-status-${r.sku}`}
                   className={cn(
                     'inline-flex items-center rounded-full border px-2 py-0.5 text-ds-micro',
-                    STATUS_TONE[r.status] ?? 'bg-white/[0.04] text-zinc-300 border-white/[0.08]'
+                    STATUS_TONE[r.status] ?? 'bg-tint text-zinc-300 border-hairline'
                   )}
                 >
                   {INVENTORY_STATUS_LABELS[r.status]}
@@ -396,7 +396,7 @@ export function BrandInventory() {
         <Card className="p-4 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-strong">
                 Manage stock — <span className={MONO}>{selected.sku}</span>
               </h3>
               <p className="text-ds-label text-zinc-500">
@@ -523,7 +523,7 @@ export function BrandInventory() {
 
       {/* The rule, stated where the figures and the identifier are handled. */}
       <Card className="p-4 space-y-2">
-        <div className="text-xs font-semibold text-white">How these figures work</div>
+        <div className="text-xs font-semibold text-strong">How these figures work</div>
         <ul data-testid="inventory-rules" className="space-y-1 text-ds-label text-zinc-400">
           {INVENTORY_RULES.map((r) => (
             <li key={r}>• {r}</li>

@@ -119,7 +119,7 @@ export function InvestorDemoPanel() {
       <Card className="p-4">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Fingerprint className="w-4 h-4 text-brass-300" /> Investor demo — deterministic
               end-to-end lifecycle
             </h3>
@@ -135,13 +135,13 @@ export function InvestorDemoPanel() {
             <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
               Simulation
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
               Deterministic
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
               <WifiOff className="w-3 h-3 mr-1" /> No live integration
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
               Demo / test data
             </Badge>
           </div>
@@ -200,16 +200,16 @@ export function InvestorDemoPanel() {
                 {run.summary.ok}/{run.summary.total} stages OK
               </span>
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
               blocked: {run.summary.blocked}
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
               errors: {run.summary.error}
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
               <WifiOff className="w-3 h-3 mr-1" /> network calls: {run.networkCalls}
             </Badge>
-            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
               audit rows: {run.auditRows}
             </Badge>
           </div>
@@ -243,7 +243,7 @@ export function InvestorDemoPanel() {
               <li
                 key={stage.id}
                 data-state={`investor-demo-stage-${stage.id}`}
-                className="border border-white/[0.05] rounded-ds-md p-2.5 bg-white/[0.02]"
+                className="border border-hairline rounded-ds-md p-2.5 bg-tint"
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="min-w-0 flex items-start gap-2">

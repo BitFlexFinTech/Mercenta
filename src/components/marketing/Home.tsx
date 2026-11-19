@@ -254,7 +254,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
               micro floor with tighter tracking below `sm`, so it holds one line.
             */}
             <span
-              className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-2.5 py-1 font-mono uppercase text-ds-micro tracking-[0.06em] text-[var(--mr-text-muted)] sm:px-3 sm:text-ds-label sm:tracking-[0.25em]"
+              className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-tint px-2.5 py-1 font-mono uppercase text-ds-micro tracking-[0.06em] text-[var(--mr-text-muted)] sm:px-3 sm:text-ds-label sm:tracking-[0.25em]"
             >
               <span className="w-1.5 h-1.5 flex-shrink-0 rounded-full bg-state-success" aria-hidden="true" />
               <span className="min-w-0">{c.hero.eyebrow}</span>
@@ -313,7 +313,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
 
           {/* Animated shipment-tracker card */}
           <div className={cn('relative', rv, 'is-revealed')}>
-            <div className="bg-ink-2 border border-white/[0.07] rounded-2xl p-6 shadow-ds-overlay">
+            <div className="bg-ink-2 border border-hairline rounded-2xl p-6 shadow-ds-overlay">
               <div className="flex items-center justify-between mb-6">
                 <span className="font-mono text-ds-label tracking-[0.25em] text-steel uppercase">
                   Shipment Tracker
@@ -372,12 +372,12 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <span style={{ color: 'var(--mr-palette-orange)' }}>UK Arrival</span>
               </div>
 
-              <div className="bg-ink rounded-ds-lg border border-white/[0.05] divide-y divide-white/[0.05]">
+              <div className="bg-ink rounded-ds-lg border border-hairline divide-y divide-hairline-06">
                 <div className="flex items-center justify-between px-4 py-3">
                   <span className="font-mono text-xs text-steel">
                     {c.tracker.reference} · {c.tracker.cargoLabel}
                   </span>
-                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline-strong bg-tint px-2 py-0.5 font-mono text-ds-micro text-zinc-300">
                     {c.tracker.freightMode}
                   </span>
                 </div>
@@ -435,7 +435,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       {/* §UI/UX Wave 2 — what the platform is, in three numbered moves */}
-      <section id="about" className="px-6 py-16 border-t border-white/[0.06]">
+      <section id="about" className="px-6 py-16 border-t border-hairline">
         <div className="max-w-6xl mx-auto">
           <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
             Who we work with
@@ -451,7 +451,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           </p>
           <div
             className={cn(
-              'grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06]',
+              'grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-tint',
               c.about.points.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
             )}
           >
@@ -484,7 +484,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       {/* §PUBLIC MESSAGING — the four things that stop being the brand's job */}
-      <section id="services" className="px-6 py-16 border-t border-white/[0.06]">
+      <section id="services" className="px-6 py-16 border-t border-hairline">
         <div className="max-w-6xl mx-auto">
           <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
             What changes for you
@@ -518,7 +518,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <div
                   key={service.title}
                   className={cn(
-                    'relative overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5 transition-colors hover:border-white/[0.16]',
+                    'relative overflow-hidden rounded-ds-lg border border-hairline bg-ink-850 p-5 transition-colors hover:border-hairline-strong',
                     rv
                   )}
                 >
@@ -547,7 +547,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       */}
       <section
         id="network"
-        className="border-y border-white/[0.06] px-6 py-16"
+        className="border-y border-hairline px-6 py-16"
         style={{ backgroundColor: 'var(--mr-surface-tint)' }}
       >
         <div className="max-w-6xl mx-auto">
@@ -577,7 +577,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <li
                   key={step.title}
                   className={cn(
-                    'relative rounded-ds-md border border-white/[0.06] bg-ink-850 p-4',
+                    'relative rounded-ds-md border border-hairline bg-ink-850 p-4',
                     rv
                   )}
                 >
@@ -598,7 +598,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       {/* §UI/UX Wave 2 — visibility & control */}
-      <section id="visibility" className="px-6 py-16 border-t border-white/[0.06]">
+      <section id="visibility" className="px-6 py-16 border-t border-hairline">
         <div className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
           <div>
             <p className="mb-3 font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
@@ -623,7 +623,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <li
                   key={point.title}
                   className={cn(
-                    'flex gap-3.5 rounded-ds-lg border border-white/[0.06] bg-ink-850 p-4',
+                    'flex gap-3.5 rounded-ds-lg border border-hairline bg-ink-850 p-4',
                     rv
                   )}
                 >
@@ -646,7 +646,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       {/* §UI/UX Wave 2 — proactive brand success protection */}
-      <section id="protection" className="px-6 py-16 border-t border-white/[0.06]">
+      <section id="protection" className="px-6 py-16 border-t border-hairline">
         <div className="max-w-6xl mx-auto">
           <p className="mb-3 text-center font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
             When things go wrong
@@ -675,7 +675,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 <div
                   key={point.title}
                   className={cn(
-                    'rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5',
+                    'rounded-ds-lg border border-hairline bg-ink-850 p-5',
                     rv
                   )}
                 >
@@ -694,7 +694,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       {/* Final CTA with onboarding-status stamp badge */}
-      <section className="border-t border-white/[0.06] px-6 py-20">
+      <section className="border-t border-hairline px-6 py-20">
         <div className="mx-auto max-w-2xl text-center">
           {/*
             §CRAFT FIX (2026-09-28) — the stamp was absolutely positioned over the

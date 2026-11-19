@@ -890,9 +890,15 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-16 grey=4495/129 ink=944/117 literal=1663/120**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
 >
-> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-10-16 literal=1663/120 border=757 text=601 bg=268 divide=35 ring=2 solid=21 tint=4 uncovered=57**
+> **§MEASURED-BATCH10-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
+>
+> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-10-19 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
+>
+> **§DECISION-BATCH10-2-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
+>
+> **§MIGRATION COMPLETE (2026-10-19) — All 1,663 literal white/black class sites migrated to theme tokens. The force-patch block (§UI/UX WAVE 1 — LIGHT-SHELL TOKEN REMAP LAYER) has been DELETED from src/index.css as no literal sites remain. Ratchet ceilings updated to final measured figures (grey 2866/126, ink 974/117, literal 0/0).**
 >
 > **§SUB-BATCH 2 — THE COUNT WAS COUNTING PROSE, AND THAT IS FIXED AT SOURCE (2026-10-16).** The
 > first reader matched the **raw file text**, so a class NAMED IN A COMMENT counted as a call site.

@@ -49,7 +49,7 @@ export function ShippingCostEstimate(props: ShippingEstimateProps) {
 
   return (
     <div className={cn(
-      'bg-ink-900 rounded-ds-md border border-white/[0.06]',
+      'bg-ink-900 rounded-ds-md border border-hairline',
       props.compact ? 'p-2.5' : 'p-3',
     )}>
       <div className="flex items-center gap-1.5 mb-1.5">
@@ -70,8 +70,8 @@ export function ShippingCostEstimate(props: ShippingEstimateProps) {
           <span className="text-zinc-500">Mercenta service fee</span>
           <span className="font-mono text-zinc-300">£{estimate.markupApplied.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between border-t border-white/[0.06] pt-0.5 mt-0.5 text-ds-label font-semibold">
-          <span className="text-white">Total (incl. fee)</span>
+        <div className="flex justify-between border-t border-hairline pt-0.5 mt-0.5 text-ds-label font-semibold">
+          <span className="text-strong">Total (incl. fee)</span>
           <span className="font-mono text-brass-400">£{estimate.brandPrice.toFixed(2)}</span>
         </div>
       </div>

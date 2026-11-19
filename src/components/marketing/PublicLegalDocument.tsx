@@ -82,7 +82,7 @@ export function PublicLegalDocument({
           </div>
         </section>
 
-        <div className="border-t border-white/[0.06] px-6 py-12">
+        <div className="border-t border-hairline px-6 py-12">
           <div className="mx-auto max-w-3xl space-y-8">
             {sections.map((section) => (
               <section key={section.title}>

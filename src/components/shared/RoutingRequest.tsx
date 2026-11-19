@@ -166,10 +166,10 @@ export function RoutingRequestStatus({
   const isOverdue = !!deadline && deadline.getTime() < Date.now();
 
   return (
-    <div className="border border-white/[0.08] rounded-ds-md p-3 space-y-2">
+    <div className="border border-hairline rounded-ds-md p-3 space-y-2">
       <div className="flex items-center gap-2">
         <Truck className="w-4 h-4 text-brass-400" />
-        <span className="text-xs font-medium text-white">Routing step — raised by Mercenta</span>
+        <span className="text-xs font-medium text-strong">Routing step — raised by Mercenta</span>
       </div>
       <p className="text-ds-micro text-zinc-400">
         This PO has <strong>Freight Collect</strong> terms — the retail channel arranges the carrier.

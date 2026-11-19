@@ -152,7 +152,7 @@ return (
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search return tracking"
                 placeholder="Search by brand, tracking number, or return…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             <SegmentedControl
               ariaLabel="Filter by stage"
@@ -307,7 +307,7 @@ return (
         <ContextPanel title="Warehouse partner">
           <div className="flex items-center gap-2">
             <Boxes className="h-4 w-4 text-brass-400" aria-hidden="true" />
-            <span className="text-xs font-medium text-white">{DEMO_WAREHOUSE_PARTNER.name}</span>
+            <span className="text-xs font-medium text-strong">{DEMO_WAREHOUSE_PARTNER.name}</span>
             <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>
           </div>
           <p className="mt-1.5 text-ds-micro text-zinc-500">

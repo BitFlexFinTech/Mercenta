@@ -58,11 +58,11 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
           The journey — five genuinely ordered steps. This is the ONE place on
           the public pages where numbering carries meaning, so it stays.
         */}
-        <section className="border-t border-white/[0.06] px-6 py-12">
+        <section className="border-t border-hairline px-6 py-12">
           <div className="mx-auto max-w-4xl">
             <ol className="space-y-4">
               {PUBLIC_HOW_IT_WORKS.map((step, i) => (
-                <li key={step.title} className="flex gap-4 rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5">
+                <li key={step.title} className="flex gap-4 rounded-ds-lg border border-hairline bg-ink-850 p-5">
                   <span
                     aria-hidden="true"
                     className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ds-md font-mono text-ds-label"
@@ -84,13 +84,13 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
           "Who does what", told as the split rather than as three columns of
           parties — the old version named the companies we buy carriage from.
         */}
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">Who does what</h2>
             <p className="mx-auto mb-10 max-w-2xl text-center text-sm" style={{ color: 'var(--mr-text-muted)' }}>
               One half of each row below is yours. The other half is the job you are handing over.
             </p>
-            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-tint md:grid-cols-2">
               {PUBLIC_BRAND_SPLIT.map((row) => (
                 <div key={row.keep} className="bg-ink-850 p-5">
                   <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">You keep</p>
@@ -103,7 +103,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
             <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>

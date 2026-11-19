@@ -109,12 +109,12 @@ export function BrandIntelligenceStrategyPanel() {
             return (
               <div
                 key={id}
-                className="rounded-ds-md border border-white/[0.08] p-3"
+                className="rounded-ds-md border border-hairline p-3"
                 data-testid={`strategy-card-${id}`}
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <Icon className="w-3.5 h-3.5 text-brass-400" />
-                  <span className="text-xs font-medium text-white">{def.label}</span>
+                  <span className="text-xs font-medium text-strong">{def.label}</span>
                 </div>
                 <p className="text-ds-micro text-zinc-500 mb-2">{def.summary}</p>
                 <div className="grid grid-cols-2 gap-2 text-ds-label font-mono">
@@ -145,7 +145,7 @@ export function BrandIntelligenceStrategyPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs" data-testid="speed-to-revenue-table">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-zinc-500">
                 <th className="px-2 py-1.5">#</th>
                 <th className="px-2 py-1.5">Brand</th>
                 <th className="px-2 py-1.5">Strategy</th>
@@ -164,8 +164,8 @@ export function BrandIntelligenceStrategyPanel() {
                   <tr
                     key={r.prospectId}
                     className={cn(
-                      'border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.03]',
-                      selected === r.prospectId ? 'bg-white/[0.03]' : ''
+                      'border-b border-hairline cursor-pointer hover:bg-tint',
+                      selected === r.prospectId ? 'bg-tint' : ''
                     )}
                     data-testid={`speed-row-${r.prospectId}`}
                     onClick={() => {
@@ -175,7 +175,7 @@ export function BrandIntelligenceStrategyPanel() {
                     }}
                   >
                     <td className="px-2 py-1.5 text-zinc-500">{r.rank}</td>
-                    <td className="px-2 py-1.5 text-white font-medium">{r.brand}</td>
+                    <td className="px-2 py-1.5 text-strong font-medium">{r.brand}</td>
                     <td className="px-2 py-1.5 text-zinc-400">
                       {r.strategy === 'uk_brands' ? 'A · UK' : 'B · global→UK'}
                     </td>
@@ -228,7 +228,7 @@ export function BrandIntelligenceStrategyPanel() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Tag className="w-3.5 h-3.5 text-brass-400" />
-                <span className="text-xs font-medium text-white">{selectedProspect.brand}</span>
+                <span className="text-xs font-medium text-strong">{selectedProspect.brand}</span>
                 <span className="text-ds-micro text-zinc-500">
                   currently: {describeMarketAccessTag(selectedProspect.marketAccess)}
                 </span>
@@ -291,10 +291,10 @@ export function BrandIntelligenceStrategyPanel() {
 
             {estimate && (
               <div
-                className="rounded-ds-md border border-white/[0.08] p-3 text-ds-label"
+                className="rounded-ds-md border border-hairline p-3 text-ds-label"
                 data-testid="admin-sales-estimate"
               >
-                <p className="text-xs font-medium text-white mb-1">
+                <p className="text-xs font-medium text-strong mb-1">
                   Estimated sales — {selectedProspect.brand}
                 </p>
                 <p className="text-zinc-400 font-mono">

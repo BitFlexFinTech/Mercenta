@@ -77,10 +77,10 @@ export function CompliancePanel() {
       <Card className="p-5">
         <div className="flex items-start gap-3">
           <div className="w-11 h-11 rounded-ds-md bg-brand-500/15 flex items-center justify-center">
-            <ShieldCheck className="w-6 h-6 text-white" />
+            <ShieldCheck className="w-6 h-6 text-strong" />
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-white">Compliance — Companies House &amp; HMRC</h3>
+            <h3 className="text-sm font-semibold text-strong">Compliance — Companies House &amp; HMRC</h3>
             <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
               Simulated government-provider workflows: brand company verification at the registrar and
               VAT status/filing with HMRC. Every action runs through the SAME adapter contracts a live
@@ -125,7 +125,7 @@ export function CompliancePanel() {
               key: 'name',
               label: 'Brand',
               primary: true,
-              render: (b) => <span className="text-xs text-white">{b.name}</span>,
+              render: (b) => <span className="text-xs text-strong">{b.name}</span>,
             },
             {
               key: 'companyNumber',
@@ -212,7 +212,7 @@ export function CompliancePanel() {
               key: 'name',
               label: 'Brand',
               primary: true,
-              render: (b) => <span className="text-xs text-white">{b.name}</span>,
+              render: (b) => <span className="text-xs text-strong">{b.name}</span>,
             },
             {
               key: 'vrn',

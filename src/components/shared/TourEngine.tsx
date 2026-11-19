@@ -311,14 +311,14 @@ function TourStepCard(props: {
        * items, settings tabs) and swallowed the click.
        */
       style={{ ...tooltipStyle, pointerEvents: 'none' }}
-      className="w-[400px] bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay p-4 animate-fade-in [&_button]:pointer-events-auto"
+      className="w-[400px] bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay p-4 animate-fade-in [&_button]:pointer-events-auto"
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-brass-400" />
-          <span className="text-xs font-medium text-white">{step.title}</span>
+          <span className="text-xs font-medium text-strong">{step.title}</span>
         </div>
-        <button onClick={onSkip} className="text-zinc-500 hover:text-white transition-colors" aria-label="Dismiss tour"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={onSkip} className="text-zinc-500 hover:text-strong transition-colors" aria-label="Dismiss tour"><X className="w-3.5 h-3.5" /></button>
       </div>
       <p className="text-ds-label text-zinc-400 leading-relaxed mb-3">{step.description}</p>
       <div className="flex items-center justify-between">
@@ -358,18 +358,18 @@ function SkipConfirmModal(props: {
 }) {
   const { tourName, onConfirm, onCancel } = props;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay p-6 max-w-sm w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover">
+      <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay p-6 max-w-sm w-full mx-4">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="w-5 h-5 text-amber-400" />
-          <span className="text-sm font-semibold text-white">Skip Tour?</span>
+          <span className="text-sm font-semibold text-strong">Skip Tour?</span>
         </div>
         <p className="text-xs text-zinc-400 mb-4">
           Are you sure? You can restart tours anytime from Settings.
         </p>
         <div className="flex items-center justify-end gap-2">
           <Button className="text-ds-micro" variant="ghost" onClick={onCancel}>Continue Tour</Button>
-          <Button className="text-ds-micro bg-zinc-700 hover:bg-zinc-600 text-white" onClick={onConfirm}>Skip Tour</Button>
+          <Button className="text-ds-micro bg-zinc-700 hover:bg-zinc-600 text-strong" onClick={onConfirm}>Skip Tour</Button>
         </div>
       </div>
     </div>
@@ -383,11 +383,11 @@ function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
   const completed = progress.checklistCompleted;
 
   return (
-    <div className={cn(compact ? '' : 'bg-ink-900 border border-white/[0.06] rounded-ds-md p-3')}>
+    <div className={cn(compact ? '' : 'bg-ink-900 border border-hairline rounded-ds-md p-3')}>
       {!compact && (
         <div className="flex items-center gap-2 mb-2">
           <CheckCircle2 className="w-3.5 h-3.5 text-brass-400" />
-          <span className="text-xs font-medium text-white">Onboarding Checklist</span>
+          <span className="text-xs font-medium text-strong">Onboarding Checklist</span>
         </div>
       )}
       <div className="space-y-1">
@@ -529,7 +529,7 @@ export function TourEngine(props: TourEngineProps) {
     <>
       {showTour && currentStep && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/60 pointer-events-none" />
+          <div className="fixed inset-0 z-40 bg-surface-hover pointer-events-none" />
           {(() => {
             const el = document.querySelector(currentStep.targetSelector);
             if (!el) return null;
@@ -553,19 +553,19 @@ export function TourEngine(props: TourEngineProps) {
         const article: KBArticle | undefined = openArticleId ? getKnowledgeArticle(openArticleId) : undefined;
         if (!article) return null;
         return (
-          <div className="fixed z-50 inset-0 bg-black/40 flex items-center justify-center" data-testid="kb-article-panel">
-            <div className="bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay w-[560px] max-h-[70vh] overflow-y-auto p-5">
+          <div className="fixed z-50 inset-0 bg-surface-tint flex items-center justify-center" data-testid="kb-article-panel">
+            <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay w-[560px] max-h-[70vh] overflow-y-auto p-5">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4 text-brass-400" />
-                  <span className="text-sm font-semibold text-white">{article.title}</span>
+                  <span className="text-sm font-semibold text-strong">{article.title}</span>
                 </span>
-                <button type="button" onClick={() => setOpenArticleId(null)} className="text-zinc-500 hover:text-white" aria-label="Close article"><X className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setOpenArticleId(null)} className="text-zinc-500 hover:text-strong" aria-label="Close article"><X className="w-4 h-4" /></button>
               </div>
               <p className="text-ds-label text-zinc-400 mb-3">{article.summary}</p>
               <div className="space-y-2.5 text-ds-label text-zinc-300">
                 {article.sections.map((sec) => (
-                  <div key={sec.heading} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
+                  <div key={sec.heading} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
                     <div className="text-ds-micro uppercase tracking-wide text-brass-400">{sec.heading}</div>
                     <p className="mt-1">{sec.body}</p>
                   </div>

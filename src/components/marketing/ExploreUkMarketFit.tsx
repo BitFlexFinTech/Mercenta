@@ -94,7 +94,7 @@ const COUNTRIES = [
 ];
 
 const field =
-  'w-full rounded-ds-md border border-white/[0.12] bg-ink-900 px-3 py-2 text-sm text-parchment placeholder:text-zinc-600 focus:border-palette-indigo focus:outline-none';
+  'w-full rounded-ds-md border border-hairline-strong bg-ink-900 px-3 py-2 text-sm text-parchment placeholder:text-zinc-600 focus:border-palette-indigo focus:outline-none';
 const labelCls = 'mb-1.5 block text-xs font-medium text-steel';
 const hintCls = 'mt-1 text-ds-label text-zinc-500';
 
@@ -110,8 +110,8 @@ function StepRail({ current }: { current: PreAuditStepId }) {
             i === index
               ? 'border-palette-indigo bg-palette-indigo/10 text-parchment'
               : i < index
-                ? 'border-white/[0.12] text-zinc-400'
-                : 'border-white/[0.06] text-zinc-600'
+                ? 'border-hairline-strong text-zinc-400'
+                : 'border-hairline text-zinc-600'
           )}
         >
           {i + 1}. {s.title}
@@ -266,7 +266,7 @@ export function ExploreUkMarketFit({
               not publish the vendor list of the services Mercenta buys.
             */}
             <div className="mt-5 flex flex-col items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-tint px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
                 <Info className="w-3 h-3" aria-hidden="true" />
                 {status.simulationSafe ? 'Simulated research' : 'Live research'}
               </span>
@@ -283,7 +283,7 @@ export function ExploreUkMarketFit({
 
           {step === 'identity' && (
             <section
-              className="bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6 md:p-8"
+              className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
               data-testid={PRE_AUDIT_TESTIDS.step('identity')}
             >
               <h2 className="font-display text-xl font-semibold mb-1">Your brand</h2>
@@ -376,7 +376,7 @@ export function ExploreUkMarketFit({
 
           {step === 'products' && (
             <section
-              className="bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6 md:p-8"
+              className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
               data-testid={PRE_AUDIT_TESTIDS.step('products')}
             >
               <h2 className="font-display text-xl font-semibold mb-1">Your products</h2>
@@ -543,7 +543,7 @@ export function ExploreUkMarketFit({
                 <button
                   type="button"
                   onClick={() => setStep('identity')}
-                  className="inline-flex items-center gap-2 border border-white/[0.2] hover:border-brass/60 text-parchment px-5 py-3 rounded-ds-md transition-colors text-sm"
+                  className="inline-flex items-center gap-2 border border-hairline-strong hover:border-brass/60 text-parchment px-5 py-3 rounded-ds-md transition-colors text-sm"
                   data-testid={PRE_AUDIT_TESTIDS.back}
                 >
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -579,17 +579,17 @@ export function ExploreUkMarketFit({
           {step === 'result' && snapshot && (
             <section data-testid={PRE_AUDIT_TESTIDS.step('result')}>
               <div
-                className="bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6 md:p-8"
+                className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
                 data-testid={PRE_AUDIT_TESTIDS.result}
               >
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span
-                    className="rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em]"
+                    className="rounded-full border border-hairline-strong bg-tint px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em]"
                     data-testid={PRE_AUDIT_TESTIDS.qualification}
                   >
                     {snapshot.qualificationLabel}
                   </span>
-                  <span className="rounded-full border border-white/[0.14] px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-steel">
+                  <span className="rounded-full border border-hairline-strong px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-steel">
                     UK presence {snapshot.presenceLabel}
                   </span>
                   {snapshot.simulationLabel && (
@@ -611,7 +611,7 @@ export function ExploreUkMarketFit({
                   {snapshot.indicators.map((ind) => (
                     <div
                       key={ind.id}
-                      className="rounded-ds-lg border-t-[3px] border border-white/[0.06] bg-ink-850 p-5"
+                      className="rounded-ds-lg border-t-[3px] border border-hairline bg-ink-850 p-5"
                       style={{
                         borderTopColor:
                           ind.state === 'favourable'
@@ -656,7 +656,7 @@ export function ExploreUkMarketFit({
                 {snapshot.sections.map((s) => (
                   <div
                     key={s.id}
-                    className="bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6"
+                    className="bg-ink-900 border border-hairline rounded-ds-lg p-6"
                     data-testid={PRE_AUDIT_TESTIDS.snapshotSection(s.id)}
                   >
                     <h3 className="font-display text-base font-semibold mb-3">{s.title}</h3>
@@ -679,7 +679,7 @@ export function ExploreUkMarketFit({
 
               {snapshot.openQuestions.length > 0 && (
                 <div
-                  className="mt-6 bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6"
+                  className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6"
                   data-testid={PRE_AUDIT_TESTIDS.openQuestions}
                 >
                   <h3 className="font-display text-base font-semibold mb-3">What is still open</h3>
@@ -703,7 +703,7 @@ export function ExploreUkMarketFit({
 
               {snapshot.educationalGaps.length > 0 && (
                 <div
-                  className="mt-6 bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6"
+                  className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6"
                   data-testid={PRE_AUDIT_TESTIDS.gap}
                 >
                   <h3 className="font-display text-base font-semibold mb-2">
@@ -717,7 +717,7 @@ export function ExploreUkMarketFit({
                     {snapshot.educationalGaps.map((g) => (
                       <span
                         key={g.id}
-                        className="rounded-full border border-white/[0.1] px-3 py-1 text-ds-micro text-zinc-400"
+                        className="rounded-full border border-hairline-strong px-3 py-1 text-ds-micro text-zinc-400"
                       >
                         {g.label} · stage {g.academyStage}
                       </span>
@@ -727,7 +727,7 @@ export function ExploreUkMarketFit({
               )}
 
 
-              <div className="mt-6 bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6">
+              <div className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6">
                 <h3 className="font-display text-base font-semibold mb-2">Recommended next step</h3>
                 <p className="text-xs leading-relaxed text-steel">
                   {snapshot.recommendedNextStep.replace(/^Recommended next step:\s*/, '')}
@@ -758,7 +758,7 @@ export function ExploreUkMarketFit({
                     <button
                       type="button"
                       onClick={submitReview}
-                      className="inline-flex items-center gap-2 rounded-ds-md border border-white/[0.2] hover:border-brass/60 px-5 py-2.5 text-sm text-parchment transition-colors"
+                      className="inline-flex items-center gap-2 rounded-ds-md border border-hairline-strong hover:border-brass/60 px-5 py-2.5 text-sm text-parchment transition-colors"
                       data-testid={PRE_AUDIT_TESTIDS.requestReview}
                     >
                       Ask Mercenta to review this
@@ -767,7 +767,7 @@ export function ExploreUkMarketFit({
                 )}
               </div>
 
-              <div className="mt-6 bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6">
+              <div className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6">
                 <p className="text-ds-label leading-relaxed text-zinc-500">{snapshot.disclaimer}</p>
                 {snapshot.couldNotEstablish.length > 0 && (
                   <ul className="mt-3 space-y-1">
@@ -799,7 +799,7 @@ export function ExploreUkMarketFit({
           )}
 
           {step === 'result' && !snapshot && (
-            <section className="bg-ink-900 border border-white/[0.06] rounded-ds-lg p-6">
+            <section className="bg-ink-900 border border-hairline rounded-ds-lg p-6">
               <p className="text-sm text-steel">
                 No result is available for this assessment. Nothing has been claimed.
               </p>

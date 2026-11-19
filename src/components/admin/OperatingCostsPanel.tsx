@@ -40,7 +40,7 @@ function sourceClass(source: CostSourceLabel): string {
     case 'LIVE':
       return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20';
     default:
-      return 'bg-white/[0.06] text-zinc-300 border-white/10';
+      return 'bg-tint text-zinc-300 border-hairline-strong';
   }
 }
 
@@ -75,7 +75,7 @@ export function OperatingCostsPanel() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Wallet className="w-4 h-4" /> Operating costs
             </h2>
             <p className="text-ds-label text-zinc-500 mt-1">{OPERATING_COSTS_DISCLAIMER}</p>
@@ -107,25 +107,25 @@ export function OperatingCostsPanel() {
           </div>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Fixed monthly (MANUAL)</p>
-            <p className="text-sm font-bold text-white" data-testid="cost-fixed">
+            <p className="text-sm font-bold text-strong" data-testid="cost-fixed">
               {money(summary.monthlyFixedGbp)}
             </p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">AI usage this month (ESTIMATED)</p>
-            <p className="text-sm font-bold text-white" data-testid="cost-ai-month">
+            <p className="text-sm font-bold text-strong" data-testid="cost-ai-month">
               {money(summary.ai.monthlySpendGbp)}
             </p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Projected month (ESTIMATED)</p>
-            <p className="text-sm font-bold text-white">{money(summary.projectedMonthGbp)}</p>
+            <p className="text-sm font-bold text-strong">{money(summary.projectedMonthGbp)}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Total this month</p>
-            <p className="text-sm font-bold text-white" data-testid="cost-total-month">
+            <p className="text-sm font-bold text-strong" data-testid="cost-total-month">
               {money(summary.monthlyTotalGbp)}
             </p>
           </div>
@@ -137,11 +137,11 @@ export function OperatingCostsPanel() {
           {summary.providers.map((p) => (
             <div
               key={p.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-ds-md border border-hairline bg-ink-850 px-3 py-2"
               data-testid="cost-provider"
             >
               <div className="min-w-[220px]">
-                <p className="text-xs text-white">{p.name}</p>
+                <p className="text-xs text-strong">{p.name}</p>
                 <p className="text-ds-micro text-zinc-500">
                   {p.plan} · {p.billing} · {p.category}
                 </p>
@@ -172,23 +172,23 @@ export function OperatingCostsPanel() {
         subtitle={`Runtime policy: FREE models only (${FREE_RUNTIME_MODELS.join(', ')}). Ceilings £${AI_SPEND_CEILINGS.dailyGbp}/day, £${AI_SPEND_CEILINGS.monthlyGbp}/month.`}
       >
         <div className="grid gap-2 sm:grid-cols-4 text-ds-label">
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Calls</p>
-            <p className="text-sm font-bold text-white" data-testid="ai-calls">{summary.ai.calls}</p>
+            <p className="text-sm font-bold text-strong" data-testid="ai-calls">{summary.ai.calls}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Tokens</p>
-            <p className="text-sm font-bold text-white">{summary.ai.tokens}</p>
+            <p className="text-sm font-bold text-strong">{summary.ai.tokens}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cache hit / miss</p>
-            <p className="text-sm font-bold text-white">
+            <p className="text-sm font-bold text-strong">
               {summary.ai.cacheHits} / {summary.ai.cacheMisses}
             </p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Refused by budget</p>
-            <p className="text-sm font-bold text-white" data-testid="ai-refused">{summary.ai.refused}</p>
+            <p className="text-sm font-bold text-strong" data-testid="ai-refused">{summary.ai.refused}</p>
           </div>
         </div>
         <p className="text-ds-micro text-zinc-500 mt-2" data-testid="ai-protection-reason">
@@ -257,26 +257,26 @@ export function OperatingCostsPanel() {
               </li>
             ))}
           </ul>
-          <p className="text-xs text-white mt-2" data-testid="revenue-total">
+          <p className="text-xs text-strong mt-2" data-testid="revenue-total">
             Total {money(summary.revenue.totalGbp)} <span className="text-ds-micro text-zinc-500">(demo data)</span>
           </p>
         </Card>
 
         <Card className="p-5" title="Contribution" subtitle="Provisional while any input still requires founder approval">
           <div className="grid gap-2 sm:grid-cols-3 text-ds-label">
-            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Gross contribution</p>
-              <p className="text-sm font-bold text-white" data-testid="contribution-gross">
+              <p className="text-sm font-bold text-strong" data-testid="contribution-gross">
                 {money(summary.contribution.grossGbp)}
               </p>
             </div>
-            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Margin</p>
-              <p className="text-sm font-bold text-white">{summary.contribution.marginPct}%</p>
+              <p className="text-sm font-bold text-strong">{summary.contribution.marginPct}%</p>
             </div>
-            <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+            <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
               <p className="text-ds-micro text-zinc-500">Status</p>
-              <p className="text-sm font-bold text-white">
+              <p className="text-sm font-bold text-strong">
                 {summary.contribution.provisional ? 'provisional' : 'confirmed'}
               </p>
             </div>
@@ -290,21 +290,21 @@ export function OperatingCostsPanel() {
 
       <Card className="p-5" title="Unit economics" subtitle="What each unit of the platform costs at the current run-rate">
         <div className="grid gap-2 sm:grid-cols-4 text-ds-label" data-testid="unit-economics">
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per brand ({summary.units.brands})</p>
-            <p className="text-sm font-bold text-white">{money(summary.perUnit.perBrandGbp)}</p>
+            <p className="text-sm font-bold text-strong">{money(summary.perUnit.perBrandGbp)}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per opportunity ({summary.units.opportunities})</p>
-            <p className="text-sm font-bold text-white">{money(summary.perUnit.perOpportunityGbp)}</p>
+            <p className="text-sm font-bold text-strong">{money(summary.perUnit.perOpportunityGbp)}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per lead ({summary.units.leads})</p>
-            <p className="text-sm font-bold text-white">{money(summary.perUnit.perLeadGbp)}</p>
+            <p className="text-sm font-bold text-strong">{money(summary.perUnit.perLeadGbp)}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Cost per AI operation ({summary.units.aiOperations})</p>
-            <p className="text-sm font-bold text-white">{money(summary.perUnit.perAiOperationGbp)}</p>
+            <p className="text-sm font-bold text-strong">{money(summary.perUnit.perAiOperationGbp)}</p>
           </div>
         </div>
         <p className="text-ds-micro text-zinc-600 mt-2">
@@ -317,7 +317,7 @@ export function OperatingCostsPanel() {
           {COST_MODEL_INPUTS.map((i) => (
             <li key={i.id} className="text-ds-label text-zinc-300 flex flex-wrap items-center gap-2">
               <span>{i.label}:</span>
-              <span className="text-white">
+              <span className="text-strong">
                 {i.unit === 'percent' ? `${i.value}%` : i.unit === 'GBP/month' ? `${money(i.value)}/month` : money(i.value)}
               </span>
               {i.requiresFounderApproval && (
@@ -331,7 +331,7 @@ export function OperatingCostsPanel() {
         </ul>
         <p className="text-ds-label text-zinc-400 mt-2" data-testid="derived-min-subscription">
           Break-even subscription per brand at the target margin:{' '}
-          <span className="text-white">
+          <span className="text-strong">
             {summary.derived.minSubscriptionGbp === null ? 'not computable yet' : money(summary.derived.minSubscriptionGbp)}
           </span>
         </p>

@@ -435,8 +435,8 @@ export function LogisticsControl({
                 data-testid={`logistics-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
-                    : 'rounded-ds-md bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-strong'
+                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-tint hover:text-strong'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -625,7 +625,7 @@ export function LogisticsControl({
                 label: 'Value',
                 align: 'right',
                 render: (s) => (
-                  <span className="font-mono text-white">£{s.value.toLocaleString()}</span>
+                  <span className="font-mono text-strong">£{s.value.toLocaleString()}</span>
                 ),
               },
             ]}
@@ -746,7 +746,7 @@ export function LogisticsControl({
                 label: 'Shipment',
                 render: (s) => (
                   <div>
-                    <div className="text-sm font-medium text-white">{s.title}</div>
+                    <div className="text-sm font-medium text-strong">{s.title}</div>
                     <div className="mt-0.5 text-xs text-zinc-500">{brandName(s.brandId)}</div>
                   </div>
                 ),
@@ -800,7 +800,7 @@ export function LogisticsControl({
                           });
                         }
                       }}
-                      className="w-full cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2.5 py-1.5 text-xs text-white transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
+                      className="w-full cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2.5 py-1.5 text-xs text-strong transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
                     >
                       {CARRIER_MILESTONES.map((opt) => (
                         <option key={opt} value={opt} className="bg-ink-900">
@@ -846,7 +846,7 @@ export function LogisticsControl({
               {apiLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="rounded-ds-sm border border-white/[0.06] p-2 font-mono text-ds-label text-zinc-400"
+                  className="rounded-ds-sm border border-hairline p-2 font-mono text-ds-label text-zinc-400"
                 >
                   <span className="text-zinc-600">{log.timestamp}</span>{' '}
                   <span className="text-brass-400">{log.method}</span> {log.endpoint}

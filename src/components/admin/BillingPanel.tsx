@@ -169,8 +169,8 @@ export function BillingPanel() {
           const marginTotal = brandMargins.reduce(function(a, m) { return a + (m.brandBilledPrice - m.carrierCostPrice); }, 0);
           const deductionsTotal = brandDeductions.reduce(function(a, d) { return a + d.amountGbp; }, 0);
           return (<Card key={b.id} className="p-0 overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <span className="text-sm font-medium text-white">{b.profile.businessName}</span>
+            <div className="px-4 py-3 border-b border-hairline flex items-center justify-between">
+              <span className="text-sm font-medium text-strong">{b.profile.businessName}</span>
               {sub && <Badge className={cn('text-ds-micro', sub.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-500/15 text-zinc-400')}>{sub.planTier}</Badge>}
             </div>
             <div className="p-4 space-y-2">
@@ -179,7 +179,7 @@ export function BillingPanel() {
               <div className="flex items-center justify-between text-ds-label"><span className="text-zinc-500">Deductions</span><span className="font-mono text-red-300">&pound;{deductionsTotal.toFixed(2)}</span></div>
               {inv.notes.length > 0 && <p className="text-ds-micro text-zinc-600">{inv.notes.join(' &middot; ')}</p>}
             </div>
-            <div className="px-4 py-2 border-t border-white/[0.06] flex justify-end">
+            <div className="px-4 py-2 border-t border-hairline flex justify-end">
               <Button variant="ghost" className="text-ds-micro" disabled={brandComms.length === 0}
                 onClick={function() { downloadCsv('commission-'.concat(b.id).concat('.csv'), ['PO','Gross','Commission','Status'], brandComms.map(function(c) { return [c.purchaseOrderId, String(c.poValue), String(c.commissionAmount), c.status]; })); }}>Export CSV</Button>
             </div>
@@ -193,8 +193,8 @@ export function BillingPanel() {
           const brandLineItems = brandComms.map(function(c) { return ({ poNumber: c.purchaseOrderId, grossValue: c.poValue, commission: c.commissionAmount, deductions: deductionTotals.rows.filter(function(d) { return d.brandId === b.id && d.purchaseOrderId === c.purchaseOrderId; }).map(function(d) { return ({ type: d.type, amountGbp: d.amountGbp }); }), }); });
           const stmt = generateRemittanceStatement({ brandName: b.profile.businessName, periodStart: '2026-08-01', periodEnd: '2026-08-31', statementNumber: 'RS-2026-08-' + b.id.slice(0, 8), lines: brandLineItems });
           const empty = stmt.lines.length === 0;
-          return (<div key={b.id} className="flex items-center justify-between bg-white/[0.02] border border-white/[0.05] rounded-ds-md px-4 py-2.5">
-            <div><div className="text-xs font-medium text-white">{b.profile.businessName}</div><div className="text-ds-micro text-zinc-500 font-mono">{stmt.statementNumber} &middot; net paid <span className={empty ? 'text-zinc-600' : 'text-emerald-300'}>&pound;{stmt.netPaid.toFixed(2)}</span>{empty && ' &middot; no settled POs'}</div></div>
+          return (<div key={b.id} className="flex items-center justify-between bg-tint border border-hairline rounded-ds-md px-4 py-2.5">
+            <div><div className="text-xs font-medium text-strong">{b.profile.businessName}</div><div className="text-ds-micro text-zinc-500 font-mono">{stmt.statementNumber} &middot; net paid <span className={empty ? 'text-zinc-600' : 'text-emerald-300'}>&pound;{stmt.netPaid.toFixed(2)}</span>{empty && ' &middot; no settled POs'}</div></div>
             <Button variant="ghost" className="text-ds-label text-brass" disabled={empty}
               onClick={function() { const w = window.open('', '_blank'); if (w) { w.document.write(stmt.html); w.document.close(); } }}>View statement</Button>
           </div>);})}

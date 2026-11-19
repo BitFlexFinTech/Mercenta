@@ -42,7 +42,7 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
           <div className="w-10 h-10 rounded-ds-lg bg-brass-500/15 flex items-center justify-center"><Target className="w-5 h-5 text-brass-400" /></div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-white">{p.brand}</h3>
+              <h3 className="text-lg font-semibold text-strong">{p.brand}</h3>
               <Badge className={cn('text-ds-micro border', TC[p.score.tier])}>{TL[p.score.tier]}</Badge>
               <span className={cn('text-xl font-bold', TC[p.score.tier])}>{p.score.total}<span className="text-xs text-zinc-600">/100</span></span>
             </div>
@@ -55,14 +55,14 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
             <p className="text-xs text-zinc-500 mt-0.5">{p.category}{p.website ? <> · <a href={p.website} target="_blank" rel="noreferrer" className="text-brass-400 hover:underline">{p.website.replace('https://', '')}</a></> : null}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-ds-md hover:bg-white/[0.06] text-zinc-500"><X className="w-4 h-4" /></button>
+        <button onClick={onClose} className="p-1.5 rounded-ds-md hover:bg-tint text-zinc-500"><X className="w-4 h-4" /></button>
       </div>
 
       {p.whyInteresting && <div className="bg-brass-500/5 border border-brass-500/15 rounded-ds-md p-3"><p className="text-xs text-brass-300 leading-relaxed">{p.whyInteresting}</p></div>}
 
-      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-ds-md p-0.5">
+      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-hairline rounded-ds-md p-0.5">
         {tabs.map(t => { const Ic = t.icon; return (
-          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-ds-sm text-ds-micro font-medium transition-colors', tab === t.id ? 'bg-brass-500 text-white' : 'text-zinc-400 hover:text-white')}><Ic className="w-3 h-3" />{t.label}</button>
+          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-ds-sm text-ds-micro font-medium transition-colors', tab === t.id ? 'bg-brass-500 text-strong' : 'text-zinc-400 hover:text-strong')}><Ic className="w-3 h-3" />{t.label}</button>
         ); })}
       </div>
 

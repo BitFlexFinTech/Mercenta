@@ -54,7 +54,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
   };
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 bg-ink/80 backdrop-blur-xl border-b border-white/[0.06]">
+    <nav className="fixed top-0 inset-x-0 z-50 bg-ink/80 backdrop-blur-xl border-b border-hairline">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <a
           href="/"
@@ -85,7 +85,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
               {openDropdown === item.page && (
                 /* §OPENSHIP BATCH 4 — the same translucent + blurred dropdown
                    surface as the shell menus (spec §7.6). */
-                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] rounded-ds-lg shadow-ds-overlay py-2 animate-fade-in">
+                <div className="absolute top-full left-0 mt-2 w-52 bg-ink-800/70 backdrop-blur-xl border border-hairline rounded-ds-lg shadow-ds-overlay py-2 animate-fade-in">
                   {item.children.map((child) => (
                     <a
                       key={child.page}
@@ -115,7 +115,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
         {/* Mobile */}
         <button
           onClick={() => setMobileOpen((o) => !o)}
-          className="md:hidden text-zinc-400 hover:text-white transition-colors"
+          className="md:hidden text-zinc-400 hover:text-strong transition-colors"
           aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -123,7 +123,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden bg-ink-900 border-b border-white/[0.06] px-6 py-4 space-y-3 animate-fade-in">
+        <div className="md:hidden bg-ink-900 border-b border-hairline px-6 py-4 space-y-3 animate-fade-in">
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); handleNav('home'); }}

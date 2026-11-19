@@ -68,7 +68,7 @@ return (
       <div className="flex items-center justify-between px-0 py-4">
         <div className="flex items-center gap-3">
           <Bot className="w-5 h-5 text-emerald-400" />
-          <h2 className="text-lg font-semibold text-white">Rakazo Bot Dashboard</h2>
+          <h2 className="text-lg font-semibold text-strong">Rakazo Bot Dashboard</h2>
           <span
             className={cn(
               'inline-block w-2.5 h-2.5 rounded-full',
@@ -92,7 +92,7 @@ return (
           <button
             onClick={openInNewTab}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
-                       bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
+                       bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
                        transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ return (
           <button
             onClick={handleRefresh}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
-                       bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
+                       bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
                        transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -138,7 +138,7 @@ return (
                 <button
                   onClick={openInNewTab}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
-                             bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white
+                             bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
                              transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
@@ -172,7 +172,7 @@ return (
       </div>
 
       {/* ── Footer strip ───────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-0 py-3 text-xs text-zinc-500 border-t border-white/[0.06] mt-4">
+      <div className="flex items-center justify-between px-0 py-3 text-xs text-zinc-500 border-t border-hairline mt-4">
         <span>20 bots active · Demo mode</span>
         <span>Droplet: 24.144.86.50</span>
       </div>

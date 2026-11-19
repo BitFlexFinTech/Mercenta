@@ -145,13 +145,13 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
               Reporting period
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex overflow-hidden rounded-ds-md border border-white/[0.06] bg-ink-850" role="group" aria-label="Reporting period">
+              <div className="flex overflow-hidden rounded-ds-md border border-hairline bg-ink-850" role="group" aria-label="Reporting period">
                 {([30, 60, 90] as Period[]).map((p) => (
                   <button key={p} onClick={() => setPeriod(p)}
                     aria-pressed={period === p}
                     data-state={period === p ? 'active' : 'idle'}
                     className={cn('px-3 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
-                      period === p ? 'bg-ink-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}>
+                      period === p ? 'bg-ink-700 text-strong' : 'text-zinc-500 hover:text-zinc-300')}>
                     Last {p} days
                   </button>
                 ))}
@@ -176,12 +176,12 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           const Icon = m.icon;
           return (
             <button key={m.label} type="button" onClick={() => setDrillCard(m.label)}
-              className="bg-ink-850 border border-white/[0.06] hover:border-white/[0.12] rounded-ds-lg p-4 text-left transition-all">
+              className="bg-ink-850 border border-hairline hover:border-hairline-strong rounded-ds-lg p-4 text-left transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 text-zinc-500" />
                 <span className="text-ds-micro text-zinc-500 font-medium">{m.label}</span>
               </div>
-              <div className="text-xl font-bold text-white">{m.value}</div>
+              <div className="text-xl font-bold text-strong">{m.value}</div>
               <div className="flex items-center gap-1 mt-1">
                 <span className={cn('text-ds-micro', m.trendUp ? 'text-emerald-400' : 'text-zinc-500')}>{m.trend}</span>
               </div>
@@ -232,8 +232,8 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             const pct = rp.length > 0 ? Math.round((count/rp.length)*100) : 0;
             if (count === 0) return null;
             return (
-              <div key={s} className="bg-ink-850 border border-white/[0.06] rounded-ds-md px-3 py-2 text-center min-w-[80px]">
-                <div className="text-lg font-bold text-white">{count}</div>
+              <div key={s} className="bg-ink-850 border border-hairline rounded-ds-md px-3 py-2 text-center min-w-[80px]">
+                <div className="text-lg font-bold text-strong">{count}</div>
                 <div className="text-ds-micro text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
                 <div className="text-ds-micro text-zinc-600">{pct}%</div>
               </div>
@@ -244,17 +244,17 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
 
       {/* Drill-down modal */}
       {drillCard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
-              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover backdrop-blur-sm" onClick={() => setDrillCard(null)}>
+          <div className="bg-ink-850 border border-hairline rounded-ds-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
+              <h3 className="text-sm font-semibold text-strong">{drillCard}</h3>
+              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
             </div>
             <div className="px-5 py-4 space-y-3">
               {drillCard === 'ASIN Confirmation Rate' && (
                 <div className="space-y-2">
                   <p className="text-xs text-zinc-400">{confirmedLines} of {totalLines} lines confirmed ({asinRate}%)</p>
-                  <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                  <div className="h-2 bg-tint rounded-full overflow-hidden">
                     <div className="h-full bg-brass-500 rounded-full transition-all" style={{ width: asinRate + '%' }} />
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                 <div className="space-y-2">
                   <p className="text-xs text-zinc-400">{outOfStock} of {products.length} products out of stock</p>
                   {products.filter((p) => !p.isAvailable).map((p) => (
-                    <div key={p.sku} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1">
+                    <div key={p.sku} className="flex items-center justify-between text-xs border-b border-hairline py-1">
                       <span className="text-zinc-300">{p.name}</span>
                       <span className="text-zinc-500 font-mono">{p.sku}</span>
                     </div>
@@ -274,7 +274,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                 <div className="space-y-2">
                   <p className="text-xs text-zinc-400">{openPOQty} units across {openPOs.length} open POs</p>
                   {openPOs.map((po) => (
-                    <div key={po.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1">
+                    <div key={po.id} className="flex items-center justify-between text-xs border-b border-hairline py-1">
                       <span className="text-zinc-300">{po.poNumber}</span>
                       <span className="text-zinc-500 font-mono">{po.lineItems.reduce((s,l) => s + l.quantity, 0)} units</span>
                     </div>

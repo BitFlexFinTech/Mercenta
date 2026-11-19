@@ -44,12 +44,12 @@ export function getCategoryNetPpmTarget(category?: ApprovedCategory): number {
 function CasePackSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
+    <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors"
       >
-        <span className="flex items-center gap-2 text-xs font-medium text-white">
+        <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <Package className="w-3.5 h-3.5 text-brass-400" />
           Case Packs & Inner Packs
         </span>
@@ -89,12 +89,12 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
   const target = getCategoryNetPpmTarget(category);
 
   return (
-    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
+    <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors"
       >
-        <span className="flex items-center gap-2 text-xs font-medium text-white">
+        <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <DollarSign className="w-3.5 h-3.5 text-brass-400" />
           Net PPM & Wholesale Pricing
         </span>
@@ -131,7 +131,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
             </p>
             <table className="w-full text-ds-micro text-zinc-500 mt-1.5">
               <thead>
-                <tr className="border-b border-white/[0.06] text-zinc-600">
+                <tr className="border-b border-hairline text-zinc-600">
                   <th className="text-left font-medium py-1">Type</th>
                   <th className="text-left font-medium py-1">Categories</th>
                   <th className="text-right font-medium py-1">Min Net PPM</th>
@@ -139,7 +139,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
               </thead>
               <tbody>
                 {NET_PPM_BENCHMARKS.map((b) => (
-                  <tr key={b.label} className="border-b border-white/[0.04]">
+                  <tr key={b.label} className="border-b border-hairline">
                     <td className="py-1 text-zinc-400">{b.label}</td>
                     <td className="py-1">{b.categories.join(', ')}</td>
                     <td className="py-1 text-right font-mono">{b.minNetPpm}%</td>
@@ -184,10 +184,10 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
 function PackagingSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
+    <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors">
-        <span className="flex items-center gap-2 text-xs font-medium text-white">
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors">
+        <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <Shield className="w-3.5 h-3.5 text-brass-400" />
           Packaging & Labelling Standards
         </span>
@@ -237,10 +237,10 @@ function PackagingSection() {
 function PORejectionSection() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-white/[0.08] rounded-ds-md overflow-hidden">
+    <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors">
-        <span className="flex items-center gap-2 text-xs font-medium text-white">
+        className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors">
+        <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <AlertTriangle className="w-3.5 h-3.5 text-brass-400" />
           PO Rejection — Performance Impact
         </span>
@@ -319,7 +319,7 @@ function PORejectionSection() {
               </div>
             </div>
           </div>
-          <div className="mt-2 text-ds-micro text-zinc-500 border-t border-white/[0.06] pt-2">
+          <div className="mt-2 text-ds-micro text-zinc-500 border-t border-hairline pt-2">
             <p className="flex items-start gap-1">
               <Info className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" />
               {PO_ACK_ONBOARDING_STATEMENT.mercentaProcess}
@@ -334,11 +334,11 @@ function PORejectionSection() {
 
 function RequiredReadingAck({ ack, setAck }: { ack: boolean; setAck: (v: boolean) => void }) {
   return (
-    <label className="flex items-start gap-2.5 cursor-pointer bg-ink-900 rounded-ds-md p-3 border border-white/[0.06] hover:border-brass-500/30 transition-colors">
+    <label className="flex items-start gap-2.5 cursor-pointer bg-ink-900 rounded-ds-md p-3 border border-hairline hover:border-brass-500/30 transition-colors">
       <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)}
         className="mt-0.5 accent-brass-500" />
       <div>
-        <p className="text-xs text-white font-medium">I acknowledge the guidance above</p>
+        <p className="text-xs text-strong font-medium">I acknowledge the guidance above</p>
         {/*
           §P13 / S8 — REPOINTED (old contract recorded): this line used to read
           *"I understand how pricing, packaging, and PO rejections affect my vendor
@@ -397,7 +397,7 @@ export function BrandGuidance({
           <Scale className="w-4 h-4 text-brass-400" />
           <p className="text-xs text-zinc-400">
             Operational guidance for{' '}
-            <strong className="text-white">{category ?? 'your category'}</strong>
+            <strong className="text-strong">{category ?? 'your category'}</strong>
           </p>
         </div>
       )}

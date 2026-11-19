@@ -45,12 +45,12 @@ function ThreadListItem({
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left px-4 py-3 border-b border-white/[0.04] transition-colors',
-        active ? 'bg-brass-500/10' : 'hover:bg-white/[0.02]'
+        'w-full text-left px-4 py-3 border-b border-hairline transition-colors',
+        active ? 'bg-brass-500/10' : 'hover:bg-tint'
       )}
     >
       <div className="flex items-center justify-between gap-2 mb-1">
-        <span className="text-sm font-medium text-white truncate">{thread.brandName}</span>
+        <span className="text-sm font-medium text-strong truncate">{thread.brandName}</span>
         {hot && (
           <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 flex-shrink-0">
             <AlertTriangle className="w-3 h-3 mr-1" /> Hot lead
@@ -73,11 +73,11 @@ function MessageBubble({ m }: { m: Message }) {
           'max-w-[75%] rounded-ds-lg px-4 py-3 text-xs leading-relaxed',
           outbound
             ? 'bg-brass-500/15 text-zinc-200'
-            : 'bg-white/[0.04] text-zinc-300'
+            : 'bg-tint text-zinc-300'
         )}
       >
         {m.subject && (
-          <div className="font-medium text-white mb-1">{m.subject}</div>
+          <div className="font-medium text-strong mb-1">{m.subject}</div>
         )}
         <div className="whitespace-pre-wrap">{m.body}</div>
         <div className="mt-1.5 flex items-center gap-2 text-ds-micro font-mono text-zinc-500">
@@ -277,7 +277,7 @@ export function MessagesHub() {
                 'rounded-ds-md px-2.5 py-1 text-ds-label font-medium transition-colors',
                 needsHumanOnly
                   ? 'bg-red-500/20 text-red-200'
-                  : 'bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                  : 'bg-tint text-zinc-400 hover:bg-tint hover:text-strong'
               )}
             >
               Needs human only
@@ -289,7 +289,7 @@ export function MessagesHub() {
       <MetricBand items={metrics} columns={4} />
 
       {!emailLive && !emailSandbox && (
-        <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 text-ds-label text-zinc-500 flex items-start gap-2">
+        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-ds-label text-zinc-500 flex items-start gap-2">
           <Lock className="w-3.5 h-3.5 mt-0.5 text-zinc-600 flex-shrink-0" />
           Power sending is disabled — connect Postmark or SendGrid in Integration
           Settings. Viewing threads and logging notes still works.
@@ -358,7 +358,7 @@ export function MessagesHub() {
         <Card className="col-span-12 md:col-span-8 p-5">
           {activeThread ? (
             <>
-              <h3 className="text-sm font-semibold text-white mb-4">
+              <h3 className="text-sm font-semibold text-strong mb-4">
                 {activeThread.brandName}
               </h3>
               <div className="space-y-3 mb-5 max-h-[420px] overflow-y-auto pr-1">
@@ -405,7 +405,7 @@ function ComposeBox({
   const [draftBody, setDraftBody] = useState('');
 
   return (
-    <div className="space-y-2 pt-3 border-t border-white/[0.06]">
+    <div className="space-y-2 pt-3 border-t border-hairline">
       <Input
         label="Subject"
         value={draftSubject}
@@ -417,7 +417,7 @@ function ComposeBox({
         onChange={(e) => setDraftBody(e.target.value)}
         rows={3}
         placeholder="Write a reply…"
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+        className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
       />
       <div className="flex items-center justify-between">
         {sendNote && <span className="text-ds-label text-zinc-400">{sendNote}</span>}

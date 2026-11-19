@@ -120,7 +120,7 @@ export function CommercialReadiness() {
 
       {notice && (
         <div
-          className="rounded-ds-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-ds-label text-zinc-200"
+          className="rounded-ds-lg border border-hairline bg-tint px-3.5 py-2.5 text-ds-label text-zinc-200"
           data-testid="brand-commercial-notice"
           role="status"
         >
@@ -163,7 +163,7 @@ export function CommercialReadiness() {
                     <li
                       key={r.id}
                       data-testid="brand-commercial-product"
-                      className="rounded-ds-lg border border-white/[0.06] bg-white/[0.02]"
+                      className="rounded-ds-lg border border-hairline bg-tint"
                     >
                       <button
                         type="button"
@@ -188,7 +188,7 @@ export function CommercialReadiness() {
                         </span>
                       </button>
 
-                      <div className="border-t border-white/[0.06] px-3.5 py-3">
+                      <div className="border-t border-hairline px-3.5 py-3">
                         <p className="text-ds-label text-zinc-300">{summary.explanation}</p>
                         {open && (
                           <ProductDetail
@@ -285,14 +285,14 @@ function ProductDetail({
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <input
                       aria-label={f.label}
-                      className="w-32 rounded-ds-md border border-white/[0.12] bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
+                      className="w-32 rounded-ds-md border border-hairline-strong bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
                       value={draft.value}
                       onChange={(e) => setDraft(key, { value: e.target.value })}
                       data-testid={`brand-commercial-input-${f.field}`}
                     />
                     <select
                       aria-label={`${f.label} basis`}
-                      className="rounded-ds-md border border-white/[0.12] bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
+                      className="rounded-ds-md border border-hairline-strong bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
                       value={draft.basis}
                       onChange={(e) => setDraft(key, { basis: e.target.value as CommercialValueBasis })}
                       data-testid={`brand-commercial-basis-${f.field}`}

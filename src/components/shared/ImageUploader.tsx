@@ -44,7 +44,7 @@ function ImageUploader({
 
   if (compact) {
     return (
-      <div className={cn('flex items-center gap-2 bg-ink-900 rounded-ds-md p-2', editable && 'hover:bg-white/[0.04]')}>
+      <div className={cn('flex items-center gap-2 bg-ink-900 rounded-ds-md p-2', editable && 'hover:bg-tint')}>
         <span className="text-lg">{currentImage?.url ?? '—'}</span>
         <div className="flex-1 min-w-0">
           <span className="text-ds-micro font-medium text-zinc-300">{label}</span>
@@ -61,16 +61,16 @@ function ImageUploader({
   }
 
   return (
-    <div className={cn('bg-ink-900 border rounded-ds-md p-3', compliant ? 'border-white/[0.06]' : 'border-amber-500/20')}>
+    <div className={cn('bg-ink-900 border rounded-ds-md p-3', compliant ? 'border-hairline' : 'border-amber-500/20')}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-lg">{currentImage?.url ?? '—'}</span>
-          <span className="text-xs font-medium text-white">{label}</span>
+          <span className="text-xs font-medium text-strong">{label}</span>
           {slot === 'main' && <Badge className="text-ds-micro bg-brass-500/15 text-brass-300">Required</Badge>}
         </div>
         <div className="flex items-center gap-1.5">
           {compliant ? <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Compliant</Badge> : <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{errors.length} error(s)</Badge>}
-          <button onClick={() => setShowSpecs(!showSpecs)} className="text-zinc-500 hover:text-white"><Info className="w-3.5 h-3.5" /></button>
+          <button onClick={() => setShowSpecs(!showSpecs)} className="text-zinc-500 hover:text-strong"><Info className="w-3.5 h-3.5" /></button>
         </div>
       </div>
       {showSpecs && (
@@ -84,7 +84,7 @@ function ImageUploader({
         </div>
       )}
       {editable && (
-        <div className="flex items-center gap-2 pt-1 border-t border-white/[0.06]">
+        <div className="flex items-center gap-2 pt-1 border-t border-hairline">
           <Button className="text-ds-micro" onClick={handleMockUpload}><ImageUp className="w-3 h-3 mr-1" />{currentImage?.url ? 'Replace' : 'Upload'}</Button>
           {currentImage?.url && <button onClick={() => onImageChange(createProductImage(slot, '📸', true))} className="text-ds-micro text-zinc-500 hover:text-red-400"><X className="w-3 h-3" /></button>}
         </div>
@@ -136,7 +136,7 @@ export function ImageSetEditor({ images = [], onImagesChange, mockMode = true, e
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-white">Product Images</span>
+        <span className="text-xs font-medium text-strong">Product Images</span>
         <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{images.length} of 9 slots</Badge>
         {compliantCount >= 1 ? <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Main compliant</Badge> : <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">Main needs review</Badge>}
       </div>

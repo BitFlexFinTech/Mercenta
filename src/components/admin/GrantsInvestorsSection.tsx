@@ -192,7 +192,7 @@ function formatReport(r: GrantsInvestorsReport): string {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BadgeDollarSign className="w-4 h-4 text-brass-400" />
-          <span className="text-sm font-semibold text-white">Grants & Investors</span>
+          <span className="text-sm font-semibold text-strong">Grants & Investors</span>
           <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -235,11 +235,11 @@ function formatReport(r: GrantsInvestorsReport): string {
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Grants</p>
-              <p className="text-sm font-semibold text-white">{report.grants.length}</p>
+              <p className="text-sm font-semibold text-strong">{report.grants.length}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Investors</p>
-              <p className="text-sm font-semibold text-white">{report.investors.length}</p>
+              <p className="text-sm font-semibold text-strong">{report.investors.length}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Drafts</p>
@@ -247,23 +247,23 @@ function formatReport(r: GrantsInvestorsReport): string {
             </div>
           </div>
 
-          <div className="flex gap-1 mb-3 border-b border-white/[0.06]">
-            <button onClick={() => setTab('grants')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'grants' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Grants ({report.grants.length})</button>
-            <button onClick={() => setTab('investors')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'investors' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Investors ({report.investors.length})</button>
-            <button onClick={() => setTab('drafts')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'drafts' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Drafts ({grantsDrafts.length + investorDrafts.length})</button>
+          <div className="flex gap-1 mb-3 border-b border-hairline">
+            <button onClick={() => setTab('grants')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'grants' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Grants ({report.grants.length})</button>
+            <button onClick={() => setTab('investors')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'investors' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Investors ({report.investors.length})</button>
+            <button onClick={() => setTab('drafts')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'drafts' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Drafts ({grantsDrafts.length + investorDrafts.length})</button>
           </div>
 {tab === 'grants' && (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {report.grants.map((g) => {
                 const isSelected = selectedGrant === g.id;
                 return (
-                  <div key={g.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
+                  <div key={g.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-hairline hover:border-hairline-strong')}
                     onClick={() => setSelectedGrant(isSelected ? null : g.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-medium text-white truncate">{g.title}</span>
+                          <span className="text-xs font-medium text-strong truncate">{g.title}</span>
                           <Badge className={cn('text-ds-micro', g.status === 'open' ? 'bg-emerald-500/15 text-emerald-300' : g.status === 'closing_soon' ? 'bg-amber-500/15 text-amber-300' : 'bg-red-500/15 text-red-300')}>{g.status.replace(/_/g, ' ')}</Badge>
                         </div>
                         <div className="text-ds-micro text-zinc-500 mt-0.5">{g.provider} — {g.amountRange} — Deadline: {g.deadline}</div>
@@ -274,7 +274,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                       </div>
                     </div>
                     {isSelected && (
-                      <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
+                      <div className="mt-2 pt-2 border-t border-hairline space-y-1.5">
                         <p className="text-ds-micro text-zinc-400 leading-relaxed">{g.fitReason}</p>
                         <p className="text-ds-micro text-zinc-500"><span className="text-zinc-400">Eligibility:</span> {g.eligibility}</p>
                         <div className="flex gap-2 pt-1">
@@ -298,13 +298,13 @@ function formatReport(r: GrantsInvestorsReport): string {
               {report.investors.map((inv) => {
                 const isSelected = selectedInvestor === inv.id;
                 return (
-                  <div key={inv.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]')}
+                  <div key={inv.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-hairline hover:border-hairline-strong')}
                     onClick={() => setSelectedInvestor(isSelected ? null : inv.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-medium text-white truncate">{inv.name}</span>
+                          <span className="text-xs font-medium text-strong truncate">{inv.name}</span>
                           <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{inv.type.replace(/_/g, ' ')}</Badge>
                         </div>
                         <div className="text-ds-micro text-zinc-500 mt-0.5">{inv.investmentRange} — {inv.stage.replace(/_/g, ' ')} — {inv.sectors.slice(0, 3).join(', ')}</div>
@@ -315,7 +315,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                       </div>
                     </div>
                     {isSelected && (
-                      <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
+                      <div className="mt-2 pt-2 border-t border-hairline space-y-1.5">
                         <p className="text-ds-micro text-zinc-400 leading-relaxed">{inv.fitReason}</p>
                         <div className="flex gap-2 pt-1">
                           {!inv.draftStarted && !inv.contacted && (
@@ -339,10 +339,10 @@ function formatReport(r: GrantsInvestorsReport): string {
                 <p className="text-xs text-zinc-600 text-center py-4">No drafts yet. Click &quot;Apply&quot; or &quot;Reach Out&quot; on a grant or investor to create a draft.</p>
               )}
               {grantsDrafts.map((d) => (
-                <div key={d.grantId} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
+                <div key={d.grantId} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-medium text-white">{d.grantTitle}</span>
+                      <span className="text-xs font-medium text-strong">{d.grantTitle}</span>
                       <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
@@ -358,10 +358,10 @@ function formatReport(r: GrantsInvestorsReport): string {
                 </div>
               ))}
               {investorDrafts.map((d) => (
-                <div key={d.investorId} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
+                <div key={d.investorId} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-medium text-white">{d.investorName}</span>
+                      <span className="text-xs font-medium text-strong">{d.investorName}</span>
                       <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalOutreachLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
@@ -380,11 +380,11 @@ function formatReport(r: GrantsInvestorsReport): string {
           )}
 
           {draftContent && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setDraftContent(null)}>
-              <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={() => setDraftContent(null)}>
+              <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-white">Draft Preview</h3>
-                  <button onClick={() => setDraftContent(null)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
+                  <h3 className="text-sm font-semibold text-strong">Draft Preview</h3>
+                  <button onClick={() => setDraftContent(null)} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
                 </div>
                 <pre className="text-xs text-zinc-300 whitespace-pre-wrap font-sans leading-relaxed">{draftContent}</pre>
               </div>
@@ -403,7 +403,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
         {fundingNotice && (
           <div
-            className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-2.5 text-ds-label text-zinc-300"
+            className="bg-ink-900 border border-hairline rounded-ds-md p-2.5 text-ds-label text-zinc-300"
             data-testid="funding-notice"
           >
             {fundingNotice}
@@ -417,14 +417,14 @@ function formatReport(r: GrantsInvestorsReport): string {
           return (
             <div
               key={o.id}
-              className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-3"
+              className="bg-ink-900 rounded-ds-md border border-hairline p-3"
               data-testid={`funding-opportunity-${o.id}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-white">
+                  <p className="text-xs font-medium text-strong">
                     {o.organisation}
-                    <Badge className="text-ds-micro ml-2 bg-white/[0.06] text-zinc-300">
+                    <Badge className="text-ds-micro ml-2 bg-tint text-zinc-300">
                       {FUNDING_OPPORTUNITY_TYPE_LABELS[o.opportunityType]}
                     </Badge>
                   </p>
@@ -484,7 +484,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input
-                  className="bg-ink-850 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro text-zinc-200 w-44"
+                  className="bg-ink-850 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-zinc-200 w-44"
                   placeholder="Programme reference"
                   value={submissionRefs[o.id] ?? ''}
                   onChange={(e) =>
@@ -527,7 +527,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
         {fundingDraft && (
           <div
-            className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-3"
+            className="bg-ink-900 border border-hairline rounded-ds-md p-3"
             data-testid="funding-draft"
           >
             <p className="text-ds-label text-zinc-300">
@@ -535,7 +535,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               {fundingDraft.lintPassed ? 'PASS' : `FAIL (${fundingDraft.lintReasons.join('; ')})`} ·
               basis: {fundingDraft.basis}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-ds-md p-2 mt-2 max-h-60 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-hairline rounded-ds-md p-2 mt-2 max-h-60 overflow-y-auto">
               {fundingDraft.content}
             </pre>
           </div>

@@ -54,7 +54,7 @@ export function BankFinancingSection() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Landmark className="w-4 h-4 text-brass-400" />
-          <span className="text-sm font-semibold text-white">Bank Financing Partners</span>
+          <span className="text-sm font-semibold text-strong">Bank Financing Partners</span>
           <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <Button className="text-ds-micro" onClick={handleDownload}>
@@ -68,29 +68,29 @@ export function BankFinancingSection() {
       </p>
 
       <div className="grid grid-cols-3 gap-2 text-ds-micro mb-4">
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
           <p className="text-zinc-500">Total UK Import TAM</p>
-          <p className="font-semibold text-white">GBP {report.totalTamGbp.toFixed(0)}B</p>
+          <p className="font-semibold text-strong">GBP {report.totalTamGbp.toFixed(0)}B</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
           <p className="text-zinc-500">Serviceable SAM</p>
           <p className="font-semibold text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-white/[0.06]">
+        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
           <p className="text-zinc-500">Categories</p>
-          <p className="font-semibold text-white">{report.categories.length}</p>
+          <p className="font-semibold text-strong">{report.categories.length}</p>
         </div>
       </div>
 
       <div className="space-y-3">
         {(['north_america', 'europe', 'africa'] as BrandRegion[]).map(function(region) { return (
           <div key={region}>
-            <p className="text-ds-label font-medium text-white mb-1.5">{REGION_LABELS[region]}</p>
+            <p className="text-ds-label font-medium text-strong mb-1.5">{REGION_LABELS[region]}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {getFinancingPartnerForRegion(region).map(function(p: FinancingPartner) { return (
-                <div key={p.id} className="bg-ink-900 rounded-ds-md border border-white/[0.06] p-2.5">
+                <div key={p.id} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-ds-label font-medium text-white">{p.name}</span>
+                    <span className="text-ds-label font-medium text-strong">{p.name}</span>
                     {p.isMock && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>}
                   </div>
                   <p className="text-ds-micro text-zinc-500 mb-1.5">{p.description}</p>

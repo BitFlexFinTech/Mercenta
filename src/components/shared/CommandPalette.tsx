@@ -123,9 +123,9 @@ export function CommandPalette({
         aria-modal="true"
         aria-label="Search and navigate"
         data-testid={testId}
-        className="animate-rise relative w-full max-w-xl overflow-hidden rounded-ds-lg border border-white/[0.1] bg-ink-900 shadow-ds-overlay"
+        className="animate-rise relative w-full max-w-xl overflow-hidden rounded-ds-lg border border-hairline-strong bg-ink-900 shadow-ds-overlay"
       >
-        <div className="flex items-center gap-2.5 border-b border-white/[0.06] px-3.5 py-2.5">
+        <div className="flex items-center gap-2.5 border-b border-hairline px-3.5 py-2.5">
           <Search className="h-4 w-4 flex-shrink-0 text-zinc-500" aria-hidden="true" />
           <input
             ref={inputRef}
@@ -140,10 +140,10 @@ export function CommandPalette({
                 ? `${testId}-item-${orderedItems[activeIndex].id}`
                 : undefined
             }
-            className="w-full bg-transparent text-sm text-white placeholder-zinc-600 outline-none"
+            className="w-full bg-transparent text-sm text-strong placeholder-zinc-600 outline-none"
             data-testid={`${testId}-input`}
           />
-          <kbd className="hidden flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
+          <kbd className="hidden flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
             ESC
           </kbd>
         </div>
@@ -173,7 +173,7 @@ export function CommandPalette({
                           onClick={() => select(item)}
                           className={cn(
                             'flex w-full items-center gap-2.5 px-3.5 py-1.5 text-left transition-ds duration-ds-fast',
-                            isActive ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                            isActive ? 'bg-tint' : 'hover:bg-tint'
                           )}
                         >
                           {item.icon && (
@@ -182,7 +182,7 @@ export function CommandPalette({
                             </span>
                           )}
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-xs text-white">{item.label}</span>
+                            <span className="block truncate text-xs text-strong">{item.label}</span>
                             {item.meta && (
                               <span className="block truncate text-ds-micro text-zinc-500">
                                 {item.meta}
@@ -205,7 +205,7 @@ export function CommandPalette({
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/[0.06] px-3.5 py-1.5">
+        <div className="flex items-center justify-between border-t border-hairline px-3.5 py-1.5">
           <span className="font-mono text-ds-micro text-zinc-600">↑↓ navigate · ⏎ open</span>
           <span className="font-mono text-ds-micro text-zinc-600" data-testid={`${testId}-count`}>
             {totalItems} result{totalItems === 1 ? '' : 's'}

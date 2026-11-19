@@ -190,7 +190,7 @@ export function Header({
           action and is the specs' contract. No aria-label is set, so the
           accessible name stays identical to the visible text (WCAG 2.5.3).
         */}
-        <span aria-hidden="true" className="mx-1 h-4 w-px flex-shrink-0 bg-white/[0.08]" />
+        <span aria-hidden="true" className="mx-1 h-4 w-px flex-shrink-0 bg-tint" />
         <button
           type="button"
           onClick={signOut}
@@ -220,11 +220,11 @@ export function Header({
         onClick={onOpenSearch}
         data-testid="app-search-trigger"
         aria-label="Search records and destinations"
-        className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-3 text-ds-body text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex md:max-w-md"
+        className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-hairline bg-tint px-3 text-ds-body text-zinc-500 transition-ds duration-ds-fast hover:border-hairline-strong hover:text-zinc-300 md:flex md:max-w-md"
       >
         <Search className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate text-left">Search records, destinations…</span>
-        <kbd className="flex-shrink-0 rounded-ds-sm border border-white/[0.12] px-1 py-0.5 font-mono text-ds-label text-zinc-500">
+        <kbd className="flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1 py-0.5 font-mono text-ds-label text-zinc-500">
           ⌘K
         </kbd>
       </button>
@@ -265,10 +265,10 @@ export function Header({
                  for the light designs); the shim already generates that mix, so no
                  value is duplicated here. Radius was already the container step
                  (16px) after BATCH 3. */
-              className="absolute right-0 top-full mt-2 w-56 bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
+              className="absolute right-0 top-full mt-2 w-56 bg-ink-800/70 backdrop-blur-xl border border-hairline rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
             >
-              <div className="px-4 py-2 border-b border-white/[0.06]">
-                <div className="text-sm font-medium text-white">{identity.name}</div>
+              <div className="px-4 py-2 border-b border-hairline">
+                <div className="text-sm font-medium text-strong">{identity.name}</div>
                 <div className="text-xs text-zinc-500">{identity.email || identity.roleLabel}</div>
               </div>
               <div className="py-1">
@@ -282,7 +282,7 @@ export function Header({
                       key={label}
                       role="menuitem"
                       onClick={onClick}
-                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-tint transition-colors"
+                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-strong hover:bg-tint transition-colors"
                     >
                       <span className="text-zinc-600">{icon}</span>
                       {label}
@@ -292,7 +292,7 @@ export function Header({
                 <button
                   role="menuitem"
                   onClick={signOut}
-                  className="w-full text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-white hover:bg-tint transition-colors border-t border-white/[0.06] mt-1 pt-2"
+                  className="w-full text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-strong hover:bg-tint transition-colors border-t border-hairline mt-1 pt-2"
                 >
                   Sign Out
                 </button>

@@ -529,13 +529,13 @@ export function BrandPurchaseOrders() {
               onChange={(e) => setPoSearch(e.target.value)}
               placeholder="Search PO number…"
               aria-label="Search purchase orders"
-              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-1.5 text-xs text-white w-52 focus:outline-none focus:border-brass-500/40"
+              className="bg-ink-900 border border-hairline rounded-ds-sm px-3 py-1.5 text-xs text-strong w-52 focus:outline-none focus:border-brass-500/40"
             />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="Filter by status"
-              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
+              className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
             >
               <option value="all">Status: all</option>
               {PO_STATUS_ORDER.map((s) => (
@@ -557,7 +557,7 @@ export function BrandPurchaseOrders() {
               />
               <Button
                 variant="ghost"
-                className="text-ds-label text-zinc-400 hover:text-white"
+                className="text-ds-label text-zinc-400 hover:text-strong"
                 onClick={() =>
                   downloadCsv(
                     `mercenta-pos-${viewingBrandId_ ?? 'all'}.csv`,
@@ -773,7 +773,7 @@ export function BrandPurchaseOrders() {
                       Open shipping documents
                     </Button>
                   )}
-                  <span className="font-mono text-sm font-semibold text-white">
+                  <span className="font-mono text-sm font-semibold text-strong">
                     £{po.poValue.toLocaleString()}
                   </span>
                   {canAct && (
@@ -814,7 +814,7 @@ export function BrandPurchaseOrders() {
                        */
                       <Button
                         variant="ghost"
-                        className="text-xs text-zinc-400 hover:text-white"
+                        className="text-xs text-zinc-400 hover:text-strong"
                         data-testid={`po-packing-correction-${po.poNumber}`}
                         onClick={() => (correctionPO === po.id ? setCorrectionPO(null) : beginCorrection(po))}
                       >
@@ -826,7 +826,7 @@ export function BrandPurchaseOrders() {
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      className="text-xs text-zinc-400 hover:text-white"
+                      className="text-xs text-zinc-400 hover:text-strong"
                       onClick={() =>
                         setContactingPO(
                           contactingPO?.id === po.id && contactingPO.mode === 'message'
@@ -839,7 +839,7 @@ export function BrandPurchaseOrders() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="text-xs text-zinc-400 hover:text-white"
+                      className="text-xs text-zinc-400 hover:text-strong"
                       onClick={() =>
                         setContactingPO(
                           contactingPO?.id === po.id && contactingPO.mode === 'call'
@@ -876,7 +876,7 @@ export function BrandPurchaseOrders() {
               <OnBehalfAuthorisationControl po={po} actor={`${po.brandId} (brand)`} />
               {/* Inline brand communication (shared layer, same thread as Messages Hub) */}
               {contactingPO?.id === po.id && (
-                <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                <div className="mt-3 pt-3 border-t border-hairline">
                   <BrandCommPanel
                     brandId={po.brandId}
                     compact
@@ -946,7 +946,7 @@ export function BrandPurchaseOrders() {
                               },
                             }))
                           }
-                          className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-1 text-xs text-white"
+                          className="bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
                           data-testid={`po-ack-status-${li.sku}`}
                           data-backorder-allowed={backOrderAllowed ? 'true' : 'false'}
                         >
@@ -976,7 +976,7 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], acknowledgedQty: Number(e.target.value) },
                                 }))
                               }
-                              className="w-16 ml-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-white"
+                              className="w-16 ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                             <span className="ml-1">/ {li.quantity}</span>
                           </label>
@@ -996,7 +996,7 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], unitPrice: Number(e.target.value) },
                                 }))
                               }
-                              className="w-20 ml-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-white"
+                              className="w-20 ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                           </label>
                         )}
@@ -1012,7 +1012,7 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], scheduledShipDate: e.target.value },
                                 }))
                               }
-                              className="ml-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-white"
+                              className="ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                           </label>
                         )}
@@ -1025,7 +1025,7 @@ export function BrandPurchaseOrders() {
                                 [li.sku]: { ...prev[li.sku], rejectionCode: e.target.value },
                               }))
                             }
-                            className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-1 text-xs text-white"
+                            className="bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
                           >
                             <option value="">Rejection code…</option>
                             {PO_REJECTION_CODES.map((c) => (
@@ -1200,7 +1200,7 @@ export function BrandPurchaseOrders() {
                                 onChange={(e) =>
                                   setCorrectionCartons((prev) => ({ ...prev, [l.sku]: Number(e.target.value) }))
                                 }
-                                className="w-20 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-white text-right"
+                                className="w-20 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong text-right"
                               />
                             </td>
                           </tr>
@@ -1212,7 +1212,7 @@ export function BrandPurchaseOrders() {
                     <input
                       value={correctionNote}
                       onChange={(e) => setCorrectionNote(e.target.value)}
-                      className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-white"
+                      className="block w-full mt-0.5 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                     />
                   </label>
                   {/* §P4 — Mercenta's routing status (read-only; the brand files nothing). */}
@@ -1241,7 +1241,7 @@ export function BrandPurchaseOrders() {
 
               {/* Expanded detail + fulfillment-track branching */}
               {expanded && (
-                <div className="mt-4 pt-3 border-t border-white/[0.05] space-y-3">
+                <div className="mt-4 pt-3 border-t border-hairline space-y-3">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-zinc-600">
@@ -1297,7 +1297,7 @@ export function BrandPurchaseOrders() {
 
                   {/* §Batch-3 — Acknowledgment history per line */}
                   {po.lineItems.some((l) => l.ackHistory && l.ackHistory.length > 0) && (
-                    <div className="border border-white/[0.06] rounded-ds-md p-2">
+                    <div className="border border-hairline rounded-ds-md p-2">
                       <p className="text-ds-micro font-medium text-zinc-500 mb-1">Acknowledgment History</p>
                       <table className="w-full text-ds-micro">
                         <thead>
@@ -1564,7 +1564,7 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
     <div
       className={cn(
         'mt-3 rounded-ds-md border p-3',
-        duty.held ? 'border-amber-500/20 bg-amber-500/10' : 'border-white/[0.06] bg-white/[0.02]'
+        duty.held ? 'border-amber-500/20 bg-amber-500/10' : 'border-hairline bg-tint'
       )}
       data-testid={`po-channel-hold-${po.poNumber}`}
     >
@@ -1627,7 +1627,7 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
 
   return (
     <div
-      className="mt-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-3"
+      className="mt-3 rounded-ds-md border border-hairline bg-tint p-3"
       data-testid={`po-on-behalf-authorisation-${po.poNumber}`}
       data-authorisation-state={authority.state}
     >
@@ -1643,7 +1643,7 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
             onChange={(e) => setNote(e.target.value)}
             placeholder="Say what Mercenta may do (your own words)"
             aria-label="What Mercenta may do on your behalf, in your own words"
-            className="min-w-[16rem] flex-1 rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1 text-ds-micro text-white"
+            className="min-w-[16rem] flex-1 rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1 text-ds-micro text-strong"
             data-testid={`po-on-behalf-note-${po.poNumber}`}
           />
           <Button
@@ -1858,9 +1858,9 @@ function BrandPoPreviewBody({
         <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Lines
         </h3>
-        <div className="overflow-hidden rounded-ds-md border border-white/[0.06]">
+        <div className="overflow-hidden rounded-ds-md border border-hairline">
           <table className="w-full text-left text-ds-label">
-            <thead className="bg-white/[0.02] text-ds-micro uppercase tracking-wider text-zinc-500">
+            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-zinc-500">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -1869,7 +1869,7 @@ function BrandPoPreviewBody({
                 <th scope="col" className="px-2 py-1.5">Ack</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-hairline-06">
               {po.lineItems.map((line) => {
                 const ack = ackStatusPresentation(line.ackStatus);
                 return (

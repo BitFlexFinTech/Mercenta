@@ -188,7 +188,7 @@ export function MarketingHub() {
                       'text-ds-micro px-2 py-1 rounded-full border transition-colors',
                       active
                         ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                        : 'border-white/[0.08] text-zinc-500 hover:border-white/20'
+                        : 'border-hairline text-zinc-500 hover:border-hairline-strong'
                     )}
                   >
                     {cat}
@@ -213,7 +213,7 @@ export function MarketingHub() {
                       'text-ds-micro px-2 py-1 rounded-full border transition-colors',
                       active
                         ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'border-white/[0.08] text-zinc-500 hover:border-white/20'
+                        : 'border-hairline text-zinc-500 hover:border-hairline-strong'
                     )}
                   >
                     {r.label}
@@ -255,14 +255,14 @@ export function MarketingHub() {
             </Button>
             {discoveryResult && (
               <div className="flex items-center gap-3 text-xs">
-                <span className="text-white font-medium">{discoveryResult.discovered} discovered</span>
+                <span className="text-strong font-medium">{discoveryResult.discovered} discovered</span>
                 <span className="text-emerald-400">{discoveryResult.enrolled} enrolled</span>
                 {discoveryResult.dropped > 0 && <span className="text-red-400">{discoveryResult.dropped} dropped</span>}
               </div>
             )}
           </div>
           {discoveryResult && discoveryResult.leads.length > 0 && (
-            <div className="border border-white/[0.06] rounded-ds-md divide-y divide-white/[0.04] max-h-48 overflow-y-auto">
+            <div className="border border-hairline rounded-ds-md divide-y divide-hairline-06 max-h-48 overflow-y-auto">
               {discoveryResult.leads.map((l, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-2">
                   <span className="text-xs text-zinc-300">{l.name}</span>
@@ -296,14 +296,14 @@ export function MarketingHub() {
             Auto-enroll qualified ({autoEnrollable.length})
           </Button>
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-hairline-06">
           {scored.slice(0, 6).map(({ lead, fit }) => {
             const stage = lead.outreachStatus as PipelineStage;
             const paused = sequencePaused(stage);
             return (
               <div key={lead.id} className="flex items-center justify-between px-1 py-2">
                 <div className="min-w-0">
-                  <div className="text-xs font-medium text-white truncate">{lead.company}</div>
+                  <div className="text-xs font-medium text-strong truncate">{lead.company}</div>
                   <div className="text-ds-micro text-zinc-600 font-mono">
                     {lead.region.toUpperCase()} · {lead.segment}
                     {/* §Phase C — canonical Brand Intelligence identity carried by the lead */}
@@ -346,7 +346,7 @@ export function MarketingHub() {
               (l) => (l.outreachStatus as PipelineStage) === stage
             );
             return (
-              <div key={stage} className="bg-ink-900 border border-white/[0.05] rounded-ds-md p-2.5">
+              <div key={stage} className="bg-ink-900 border border-hairline rounded-ds-md p-2.5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-ds-micro font-medium text-zinc-400">{stage}</span>
                   <span className="font-mono text-ds-micro text-zinc-600">
@@ -357,9 +357,9 @@ export function MarketingHub() {
                   {stageLeads.map((lead) => (
                     <div
                       key={lead.id}
-                      className="bg-white/[0.03] rounded-ds-sm px-2 py-1.5 border border-white/[0.04]"
+                      className="bg-tint rounded-ds-sm px-2 py-1.5 border border-hairline"
                     >
-                      <div className="text-ds-label font-medium text-white truncate">
+                      <div className="text-ds-label font-medium text-strong truncate">
                         {lead.company}
                       </div>
                       <div className="font-mono text-ds-micro text-zinc-600 mt-0.5">
@@ -387,7 +387,7 @@ export function MarketingHub() {
         <div className="space-y-1.5 px-1 pb-1">
           {SEQUENCE_STEPS.map((step) => (
             <div key={step.step} className="flex items-center gap-3 text-xs">
-              <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+              <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                 Day {step.dayOffset}
               </Badge>
               <span className="text-zinc-300">{step.subjectTemplate}</span>
@@ -410,7 +410,7 @@ export function MarketingHub() {
               key: 'name',
               label: 'Campaign',
               primary: true,
-              render: (camp) => <span className="text-xs text-white">{camp.name}</span>,
+              render: (camp) => <span className="text-xs text-strong">{camp.name}</span>,
             },
             {
               key: 'status',

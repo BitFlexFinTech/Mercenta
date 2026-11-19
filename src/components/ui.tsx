@@ -61,7 +61,7 @@ export function Card({
       data-testid={dataTestId}
     >
       {(title || action) && (
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div>
             {title && (
               /* §PHASE C — REPOINTED from `text-sm` (14px) to the canonical
@@ -69,7 +69,7 @@ export function Card({
                  own type scale instead of a raw Tailwind size that sits outside
                  it. Hierarchy, not decoration: the card title now reads a step
                  above its own body copy rather than level with it. */
-              <h3 className="text-ds-title font-semibold text-white tracking-tight">
+              <h3 className="text-ds-title font-semibold text-strong tracking-tight">
                 {title}
               </h3>
             )}
@@ -154,12 +154,12 @@ export function Button({
        `none`. No prop, size or API changed. */
     accent:
       'ds-btn-accent bg-brass-500 hover:bg-brass-600 text-ink font-semibold shadow-ds-raised',
-    secondary: 'bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/[0.08]',
-    tertiary: 'bg-ink-800 hover:bg-ink-700 text-zinc-300 border border-white/[0.06]',
-    ghost: 'hover:bg-white/[0.04] text-zinc-400 hover:text-white',
+    secondary: 'bg-tint hover:bg-tint/[0.1] text-strong border border-hairline',
+    tertiary: 'bg-ink-800 hover:bg-ink-700 text-zinc-300 border border-hairline',
+    ghost: 'hover:bg-tint text-zinc-400 hover:text-strong',
     // `danger` retained for backward compatibility; `destructive` is canonical.
-    danger: 'bg-crimson-accent hover:bg-red-700 text-white',
-    destructive: 'bg-state-danger hover:bg-red-700 text-white',
+    danger: 'bg-crimson-accent hover:bg-red-700 text-strong',
+    destructive: 'bg-state-danger hover:bg-red-700 text-on-fill',
     link: 'text-brass-400 hover:underline underline-offset-4 p-0 h-auto shadow-ds-none',
   } as const;
   const sizes = {
@@ -299,7 +299,7 @@ export function Input({
            already declares (`ds-md` = 12px, spec §2.2). No prop, id, ARIA or
            behaviour changes; the focus treatment stays the product's own
            accent-tinted border + ring. */
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md h-11 px-3.5 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
+        className="w-full bg-ink-900 border border-hairline rounded-ds-md h-11 px-3.5 py-2 text-sm text-strong placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
       />
       {helper && !error && (
         <p id={`${inputId}-helper`} className="text-ds-label text-zinc-500 mt-1">{helper}</p>
@@ -366,7 +366,7 @@ export function Select({
            form row cannot mix a 44px field with a 38px field, so this control
            takes the ONE control height the ramp and the reference's input already
            agree on (`h-11`). The radius stays on the canonical control step. */
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md h-11 px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
+        className="w-full bg-ink-900 border border-hairline rounded-ds-md h-11 px-3 py-2 text-sm text-strong focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-ink-900">
@@ -426,7 +426,7 @@ export function Textarea({
         placeholder={placeholder}
         rows={rows}
         aria-label={ariaLabel}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
+        className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
       />
     </div>
   );
@@ -459,12 +459,12 @@ export function Checkbox({
             'w-4 h-4 rounded-ds-sm border transition-all flex items-center justify-center',
             checked
               ? 'bg-brass-500 border-brass-500'
-              : 'border-white/[0.15] group-hover:border-white/[0.3]'
+              : 'border-hairline-strong group-hover:border-hairline-strong'
           )}
         >
           {checked && (
             <svg
-              className="w-3 h-3 text-white"
+              className="w-3 h-3 text-strong"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -491,7 +491,7 @@ const STATUS_STYLES: Record<StatusTone, { badge: string; dot: string; label: str
   warning: { badge: 'bg-state-warning/15 text-state-warning border-state-warning/25', dot: 'bg-state-warning', label: 'Warning' },
   danger: { badge: 'bg-state-danger/15 text-state-danger border-state-danger/30', dot: 'bg-state-danger', label: 'Error' },
   info: { badge: 'bg-state-info/15 text-state-info border-state-info/25', dot: 'bg-state-info', label: 'Info' },
-  neutral: { badge: 'bg-white/[0.04] text-zinc-400 border-white/[0.08]', dot: 'bg-zinc-500', label: 'Neutral' },
+  neutral: { badge: 'bg-tint text-zinc-400 border-hairline', dot: 'bg-zinc-500', label: 'Neutral' },
   brass: { badge: 'bg-brass-500/15 text-brass-300 border-brass-500/25', dot: 'bg-brass-400', label: 'Accent' },
 };
 
@@ -563,7 +563,7 @@ export function Tabs({
   className?: string;
 }) {
   return (
-    <div role="tablist" aria-label={ariaLabel ?? 'Tabs'} className={cn('flex gap-1 border-b border-white/[0.06]', className)}>
+    <div role="tablist" aria-label={ariaLabel ?? 'Tabs'} className={cn('flex gap-1 border-b border-hairline', className)}>
       {items.map((it) => {
         const selected = active === it.id;
         return (
@@ -576,7 +576,7 @@ export function Tabs({
             data-testid={it.testId}
             className={cn(
               'px-3.5 py-2 text-sm font-medium border-b-2 transition-colors',
-              selected ? 'text-brass-300 border-brass-500' : 'text-zinc-400 border-transparent hover:text-white'
+              selected ? 'text-brass-300 border-brass-500' : 'text-zinc-400 border-transparent hover:text-strong'
             )}
           >
             {it.label}
@@ -671,10 +671,10 @@ export function Modal({
            was `rounded-lg` (8px), although both are containers — and every OTHER
            overlay in the app (drawers, popovers, floating cards) was already 12px.
            A dialog is a container, so it now sits on `ds-lg` with the rest. */
-        className="relative w-full max-w-lg bg-ink-850 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay"
+        className="relative w-full max-w-lg bg-ink-850 border border-hairline rounded-ds-lg shadow-ds-overlay"
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
+          <h3 className="text-sm font-semibold text-strong">{title}</h3>
           <button
             type="button"
             onClick={onClose}
@@ -686,13 +686,13 @@ export function Modal({
                `×` gave, which was below every touch-target guideline) and a
                hover state that reads. Tokens, so it follows the theme; `text-lg`
                is kept so the glyph stays the same size. */
-            className="rounded-ds-sm bg-ink-800 hover:bg-ink-700 p-1.5 text-lg text-zinc-500 hover:text-white leading-none transition-colors"
+            className="rounded-ds-sm bg-ink-800 hover:bg-ink-700 p-1.5 text-lg text-zinc-500 hover:text-strong leading-none transition-colors"
           >
             ×
           </button>
         </div>
         <div className="px-5 py-4">{children}</div>
-        {footer && <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">{footer}</div>}
+        {footer && <div className="flex justify-end gap-2 px-5 py-3 border-t border-hairline">{footer}</div>}
       </div>
     </div>
   );
@@ -710,13 +710,13 @@ export function Pagination({
   if (pageCount <= 1) return null;
   return (
     <nav aria-label="Pagination" className="flex items-center gap-2 text-xs">
-      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-2.5 py-1 rounded-ds-sm border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
+      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-2.5 py-1 rounded-ds-sm border border-hairline disabled:opacity-40 hover:bg-tint">
         Previous
       </button>
       <span className="text-zinc-400" data-testid="pagination-page">
         Page {page} of {pageCount}
       </span>
-      <button type="button" disabled={page >= pageCount} onClick={() => onPage(page + 1)} className="px-2.5 py-1 rounded-ds-sm border border-white/[0.08] disabled:opacity-40 hover:bg-white/[0.05]">
+      <button type="button" disabled={page >= pageCount} onClick={() => onPage(page + 1)} className="px-2.5 py-1 rounded-ds-sm border border-hairline disabled:opacity-40 hover:bg-tint">
         Next
       </button>
     </nav>
@@ -908,10 +908,10 @@ export function ErrorState({
         >
           <AlertTriangle className="h-5 w-5" />
         </span>
-        <h2 className="mb-1 text-ds-title font-semibold tracking-tight text-white">{title}</h2>
+        <h2 className="mb-1 text-ds-title font-semibold tracking-tight text-strong">{title}</h2>
         {description && <p className="mb-4 text-ds-body leading-relaxed text-zinc-500">{description}</p>}
         {details && (
-          <details className="mb-4 rounded-ds-md bg-black/30 p-3 text-left">
+          <details className="mb-4 rounded-ds-md bg-surface-tint p-3 text-left">
             <summary className="cursor-pointer text-ds-micro text-zinc-600 hover:text-zinc-400">
               Technical details
             </summary>
@@ -984,7 +984,7 @@ export function NoPermissionState({
           {glyph}
         </span>
         {heading && (
-          <h2 className="mb-2 text-ds-title font-semibold tracking-tight text-white">{heading}</h2>
+          <h2 className="mb-2 text-ds-title font-semibold tracking-tight text-strong">{heading}</h2>
         )}
         <p className="mb-6 text-ds-body leading-relaxed text-zinc-400">{description}</p>
         {action && <span className="inline-flex items-center gap-2">{action}</span>}
@@ -1005,7 +1005,7 @@ export function NoPermissionState({
           {glyph}
         </span>
         <div className="min-w-0">
-          <h3 className="text-ds-body font-semibold text-white">{heading}</h3>
+          <h3 className="text-ds-body font-semibold text-strong">{heading}</h3>
           <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{description}</p>
         </div>
       </div>
@@ -1026,7 +1026,7 @@ export function PageHeader({
   return (
     <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-white tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold text-strong tracking-tight">{title}</h1>
         {description && <p className="text-sm text-zinc-500 mt-1 max-w-2xl">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -1052,7 +1052,7 @@ export function EntityHeader({
       <div className="min-w-0">
         {eyebrow && <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">{eyebrow}</p>}
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="font-display text-xl font-semibold text-white tracking-tight">{title}</h1>
+          <h1 className="font-display text-xl font-semibold text-strong tracking-tight">{title}</h1>
           {status}
         </div>
         {description && <p className="text-sm text-zinc-500 mt-1 max-w-2xl">{description}</p>}
@@ -1199,12 +1199,12 @@ export function DataTable<T>({
               key={rowKey(r)}
               onClick={onRowClick ? () => onRowClick(r) : undefined}
               className={cn(
-                'rounded-ds-md border border-white/[0.06] bg-ink-850 p-3',
-                onRowClick && 'cursor-pointer hover:border-white/[0.14] transition-ds',
+                'rounded-ds-md border border-hairline bg-ink-850 p-3',
+                onRowClick && 'cursor-pointer hover:border-hairline-strong transition-ds',
                 rowClassName?.(r)
               )}
             >
-              <div className="text-sm font-medium text-white">{cell(primaryColumn, r)}</div>
+              <div className="text-sm font-medium text-strong">{cell(primaryColumn, r)}</div>
               {detailColumns.length > 0 && (
                 <dl className="mt-2 space-y-1">
                   {detailColumns.map((c) => (
@@ -1216,7 +1216,7 @@ export function DataTable<T>({
                 </dl>
               )}
               {rowActions && (
-                <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-white/[0.06] pt-2">
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-hairline pt-2">
                   {rowActions(r)}
                 </div>
               )}
@@ -1230,7 +1230,7 @@ export function DataTable<T>({
           <table className="w-full text-ds-body border-collapse" data-table={dataTable}>
             <caption className="sr-only">{caption}</caption>
             <thead>
-              <tr className="border-b border-white/[0.08]">
+              <tr className="border-b border-hairline">
                 {columns.map((c) => (
                   <th
                     key={c.key}
@@ -1274,7 +1274,7 @@ export function DataTable<T>({
                      reads as a wall of text; 12px makes each row scannable without
                      changing the information density or any behaviour. */
                   className={cn(
-                    'border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors',
+                    'border-b border-hairline hover:bg-tint transition-colors',
                     onRowClick && 'cursor-pointer',
                     rowClassName?.(r)
                   )}

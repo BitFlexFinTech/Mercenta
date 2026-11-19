@@ -53,10 +53,10 @@ export function LiftOff({
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
             {LIFT_OFF_PUBLIC_POINTS.map((p) => (
-              <div key={p.title} className="rounded-ds-lg border border-white/[0.06] bg-ink-850 p-5">
+              <div key={p.title} className="rounded-ds-lg border border-hairline bg-ink-850 p-5">
                 <p className="font-display text-base font-semibold text-parchment">{p.title}</p>
                 <p className="mt-2 text-sm leading-relaxed text-steel">{p.body}</p>
               </div>
@@ -64,7 +64,7 @@ export function LiftOff({
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
             <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>

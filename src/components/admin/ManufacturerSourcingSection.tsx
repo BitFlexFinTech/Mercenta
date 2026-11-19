@@ -41,7 +41,7 @@ async function handleRun() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Factory className="w-4 h-4 text-brass-400" />
-          <span className="text-sm font-semibold text-white">Manufacturer Sourcing</span>
+          <span className="text-sm font-semibold text-strong">Manufacturer Sourcing</span>
           <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -82,11 +82,11 @@ async function handleRun() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Scanned</p>
-              <p className="text-sm font-semibold text-white">{report.scannedCount}</p>
+              <p className="text-sm font-semibold text-strong">{report.scannedCount}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Qualified</p>
-              <p className="text-sm font-semibold text-white">{report.suppliers.length}</p>
+              <p className="text-sm font-semibold text-strong">{report.suppliers.length}</p>
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Top Suppliers</p>
@@ -94,7 +94,7 @@ async function handleRun() {
             </div>
             <div className="bg-ink-900 rounded-ds-md p-2">
               <p className="text-ds-micro text-zinc-500">Source</p>
-              <p className="text-sm font-semibold text-white">{report.sourceLabel}</p>
+              <p className="text-sm font-semibold text-strong">{report.sourceLabel}</p>
             </div>
           </div>
 
@@ -108,14 +108,14 @@ async function handleRun() {
               return (
                 <div key={s.id}
                   className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all',
-                    isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-white/[0.06] hover:border-white/[0.12]'
+                    isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-hairline hover:border-hairline-strong'
                   )}
                   onClick={() => setSelectedSupplier(isSelected ? null : s.id)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-medium text-white truncate">{s.companyName}</span>
+                        <span className="text-xs font-medium text-strong truncate">{s.companyName}</span>
                         <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{s.country}</Badge>
                         {s.tradeAssurance && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Trade Assurance</Badge>}
                         {s.verifiedSupplier && <Badge className="text-ds-micro bg-blue-500/15 text-blue-300">Verified</Badge>}
@@ -134,7 +134,7 @@ async function handleRun() {
                   </div>
 
                   {isSelected && (
-                    <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
+                    <div className="mt-2 pt-2 border-t border-hairline space-y-1.5">
                       <div className="grid grid-cols-2 gap-2 text-ds-micro">
                         <div className="bg-ink-800 rounded-ds-sm p-1.5">
                           <span className="text-zinc-500">Capacity: </span>

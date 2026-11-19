@@ -137,13 +137,13 @@ export function DeductionsLedger() {
         }
       >
         {/* ── Categories ─────────────────────────────────────────────── */}
-        <div data-tour="deductions-categories" className="px-5 py-3 border-b border-white/[0.06]">
+        <div data-tour="deductions-categories" className="px-5 py-3 border-b border-hairline">
           <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{DEDUCTION_TAXONOMY.heading}</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {categories.map(([type, c]) => (
               <span
                 key={type}
-                className="inline-flex items-center gap-1.5 rounded-ds-sm border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-ds-micro text-zinc-300"
+                className="inline-flex items-center gap-1.5 rounded-ds-sm border border-hairline bg-tint px-2 py-1 text-ds-micro text-zinc-300"
               >
                 <span>{deductionTypeLabel(type)}</span>
                 <span className="text-zinc-500">·</span>
@@ -239,7 +239,7 @@ export function DeductionsLedger() {
         {/* ── Dispute workflow ───────────────────────────────────────── */}
         <div
           data-tour="deductions-dispute-btn"
-          className="px-5 py-3 border-t border-white/[0.06] space-y-2"
+          className="px-5 py-3 border-t border-hairline space-y-2"
         >
           <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute a deduction</p>
           {disputable.length === 0 ? (
@@ -279,7 +279,7 @@ export function DeductionsLedger() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
                 placeholder="Evidence / grounds for the dispute…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white"
+                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
               />
               <div className="flex gap-2">
                 <Button
@@ -310,7 +310,7 @@ export function DeductionsLedger() {
         {/* ── Outcomes ───────────────────────────────────────────────── */}
         <div
           data-tour="deductions-outcome-info"
-          className="px-5 py-3 border-t border-white/[0.06] space-y-2"
+          className="px-5 py-3 border-t border-hairline space-y-2"
         >
           <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute Outcomes</p>
           <p className="text-ds-label text-zinc-400">
@@ -326,7 +326,7 @@ export function DeductionsLedger() {
                 <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
                   <span className={cn(MONO, 'text-zinc-400')}>{d.purchaseOrderId}</span>
                   <span className="text-zinc-500">{deductionTypeLabel(d.type)}</span>
-                  <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                  <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                     outcome: {d.dispute?.outcome}
                   </Badge>
                   <span className="text-zinc-500">£{d.amountGbp.toFixed(2)}</span>

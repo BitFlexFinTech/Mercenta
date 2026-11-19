@@ -50,9 +50,9 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
 
 function TourCard({ tour }: { tour: TourDefinition }) {
   return (
-    <div className="relative flex flex-col rounded-ds-lg bg-ink-850 border border-white/[0.06] overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-ds-raised">
+    <div className="relative flex flex-col rounded-ds-lg bg-ink-850 border border-hairline overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-ds-raised">
       {/* Preview area — step count summary */}
-      <div className="flex min-h-0 flex-1 items-center justify-center bg-white/[0.02] border-b border-white/[0.06] px-4 py-6">
+      <div className="flex min-h-0 flex-1 items-center justify-center bg-tint border-b border-hairline px-4 py-6">
         <div className="text-center">
           <Layers className="w-8 h-8 text-brass-400/60 mx-auto mb-2" />
           <div className="text-ds-label text-zinc-500">{tour.steps.length} guided steps</div>
@@ -68,7 +68,7 @@ function TourCard({ tour }: { tour: TourDefinition }) {
       <div className="flex flex-none flex-col gap-1.5 px-4 py-3">
         {/* Row 1: name + status */}
         <div className="flex items-center gap-2">
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-white">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-strong">
             {tour.name}
           </span>
           <span className="flex shrink-0 items-center gap-1">
@@ -139,18 +139,18 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
   useEffect(() => { setStepIndex(0); }, [tour.id]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={onClose}>
       <div
-        className="w-[460px] bg-ink-900 border border-white/[0.08] rounded-ds-lg shadow-ds-overlay overflow-hidden"
+        className="w-[460px] bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div className="flex items-center gap-2">
             <HelpCircle className="w-4 h-4 text-brass-400" />
-            <span className="text-sm font-medium text-white">{tour.name}</span>
+            <span className="text-sm font-medium text-strong">{tour.name}</span>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors" aria-label="Close preview">
+          <button onClick={onClose} className="text-zinc-500 hover:text-strong transition-colors" aria-label="Close preview">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -165,11 +165,11 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
           <p className="text-ds-micro text-zinc-500 mb-3">
             Step {stepIndex + 1} of {tour.steps.length} &middot; Position: {step.position}
           </p>
-          <h4 className="text-sm font-semibold text-white mb-2">{step.title}</h4>
+          <h4 className="text-sm font-semibold text-strong mb-2">{step.title}</h4>
           <p className="text-xs text-zinc-400 leading-relaxed mb-4">{step.description}</p>
 
           {/* Target selector info */}
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md px-3 py-2 mb-4">
+          <div className="bg-tint border border-hairline rounded-ds-md px-3 py-2 mb-4">
             <div className="text-ds-micro text-zinc-500">Target element</div>
             <code className="text-ds-micro text-brass-300 font-mono">{step.targetSelector}</code>
           </div>
@@ -188,7 +188,7 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-t border-hairline">
           <Button size="sm" variant="ghost" className="text-ds-micro" onClick={onClose}>
             Close
           </Button>
@@ -326,14 +326,14 @@ export function UsertourAdminPanel() {
               onChange={(e) => setTourQuery(e.target.value)}
               placeholder="Search tours"
               data-testid="tours-search"
-              className="w-48 bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-1.5 text-xs text-white"
+              className="w-48 bg-ink-900 border border-hairline rounded-ds-md px-3 py-1.5 text-xs text-strong"
             />
             <select
               aria-label="Tour status filter"
               value={tourStatus}
               onChange={(e) => setTourStatus(e.target.value as 'all' | 'published' | 'draft' | 'required')}
               data-testid="tours-status-filter"
-              className="cursor-pointer rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Status: all</option>
               <option value="published">Published</option>

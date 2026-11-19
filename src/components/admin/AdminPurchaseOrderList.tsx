@@ -382,11 +382,11 @@ return (
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search purchase orders"
                 placeholder="Search by PO number or brand…"
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
             </div>
             <select value={statusFilter} onChange={function(e) { setStatusFilter(e.target.value); }}
               aria-label="Filter by status"
-              className="bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-brass-500/40">
+              className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong focus:outline-none focus:border-brass-500/40">
               <option value="all">All Statuses</option>
               {STATUS_ORDER.map(function(s) { return (<option key={s} value={s}>{s.replace(/_/g, ' ')}</option>); })}
             </select>
@@ -399,7 +399,7 @@ return (
                 'rounded-ds-md border px-2.5 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
                 simOnly
                   ? 'border-brass-500/40 bg-brass-500/15 text-brass-300'
-                  : 'border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:text-zinc-200'
+                  : 'border-hairline bg-tint text-zinc-400 hover:text-zinc-200'
               )}
             >
               Simulated only
@@ -441,7 +441,7 @@ return (
                   );
                 })}
               </dl>
-              <p className="mt-2 border-t border-white/[0.06] pt-2 text-ds-micro leading-snug text-zinc-600">
+              <p className="mt-2 border-t border-hairline pt-2 text-ds-micro leading-snug text-zinc-600">
                 Every figure is derived from the canonical purchase-order and deduction
                 stores — nothing is estimated.
               </p>
@@ -652,7 +652,7 @@ return (
                     The channel returned no purchase orders for this read.
                   </p>
                 ) : (
-                  <ul className="divide-y divide-white/[0.04]" data-testid="channel-po-outcome-rows">
+                  <ul className="divide-y divide-hairline-06" data-testid="channel-po-outcome-rows">
                     {ingestResult.outcomes.map(function(o) {
                       const filed = o.status === 'ingested' && o.po;
                       return (
@@ -684,7 +684,7 @@ return (
                                 o.status === 'ingested'
                                   ? 'bg-emerald-500/15 text-emerald-300'
                                   : o.status === 'already_present'
-                                    ? 'bg-white/[0.06] text-zinc-400'
+                                    ? 'bg-tint text-zinc-400'
                                     : 'bg-red-500/15 text-red-300'
                               )}
                             >
@@ -720,13 +720,13 @@ return (
           <div className="space-y-3">
         {grouped.map(function([brandId, brandPos]) { return (
           <Card key={brandId} title={brandName(brandId)}>
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-hairline-06">
               {brandPos.map(function(po) {
                 const poDeductions = deductions.filter(function(d) { return d.purchaseOrderId === po.id; });
                 return (
-                  <div key={po.id} data-density={density} className={cn('flex items-center justify-between px-1 hover:bg-white/[0.02]', density === 'compact' ? 'py-2' : 'py-2.5')}>
+                  <div key={po.id} data-density={density} className={cn('flex items-center justify-between px-1 hover:bg-tint', density === 'compact' ? 'py-2' : 'py-2.5')}>
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="font-mono text-xs text-white font-medium">{po.poNumber}</span>
+                      <span className="font-mono text-xs text-strong font-medium">{po.poNumber}</span>
                       {/* §Phase E5 (G2) — truthful provenance on the admin PO list. */}
                       {po.simulated === true && (
                         <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
@@ -748,13 +748,13 @@ return (
                         type="button"
                         data-testid={`po-preview-${po.id}`}
                         onClick={function() { setPreviewPoId(po.id); }}
-                        className="rounded-ds-sm border border-white/[0.08] px-2 py-1 text-ds-micro font-medium text-zinc-300 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-white"
+                        className="rounded-ds-sm border border-hairline px-2 py-1 text-ds-micro font-medium text-zinc-300 transition-ds duration-ds-fast hover:border-hairline-strong hover:text-strong"
                         title="Preview record"
                       >
                         Preview
                       </button>
                       <button onClick={function() { setSelectedPoId(po.id); }}
-                        className="p-1.5 text-zinc-500 hover:text-white" title="View detail">
+                        className="p-1.5 text-zinc-500 hover:text-strong" title="View detail">
                         <Eye className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -915,9 +915,9 @@ function PoPreviewBody({
         <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Lines
         </h3>
-        <div className="overflow-hidden rounded-ds-md border border-white/[0.06]">
+        <div className="overflow-hidden rounded-ds-md border border-hairline">
           <table className="w-full text-left text-ds-label">
-            <thead className="bg-white/[0.02] text-ds-micro uppercase tracking-wider text-zinc-500">
+            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-zinc-500">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -926,7 +926,7 @@ function PoPreviewBody({
                 <th scope="col" className="px-2 py-1.5">Ack</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-hairline-06">
               {po.lineItems.map(function(line) {
                 const ack = ackStatusPresentation(line.ackStatus);
                 return (

@@ -80,7 +80,7 @@ export function MonitoringDashboard() {
       <Card className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="w-4 h-4 text-brass-400" />
-          <span className="text-xs font-medium text-white">Dependency Monitoring</span>
+          <span className="text-xs font-medium text-strong">Dependency Monitoring</span>
           <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Configured</Badge>
         </div>
         <p className="text-ds-micro text-zinc-500 leading-relaxed">
@@ -92,10 +92,10 @@ export function MonitoringDashboard() {
 
       {/* Health check history */}
       <Card className="p-0 overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-white/[0.06]">
-          <span className="text-xs font-medium text-white">Health Check History</span>
+        <div className="px-4 py-2.5 border-b border-hairline">
+          <span className="text-xs font-medium text-strong">Health Check History</span>
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-hairline-06">
           {entries.length === 0 && (
             <div className="px-4 py-3 text-ds-label text-zinc-500">
               No health checks have been run in this session. Press &ldquo;Run Health Check&rdquo; to read

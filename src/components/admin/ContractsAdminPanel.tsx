@@ -289,11 +289,11 @@ function GenerateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-xl bg-ink-850 border-white/[0.08] max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-xl bg-ink-850 border-hairline max-h-[85vh] overflow-y-auto">
         <div className="flex items-center gap-3 mb-1">
           <FileText className="w-5 h-5 text-brass" />
-          <h3 className="text-base font-semibold text-white">
+          <h3 className="text-base font-semibold text-strong">
             New Contract — {brand.profile.businessName}
           </h3>
         </div>
@@ -309,7 +309,7 @@ function GenerateModal({
             <select
               value={track}
               onChange={(e) => setTrack(e.target.value as FulfillmentTrack)}
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2.5 py-2 text-xs text-white cursor-pointer"
+              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer"
             >
               <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
               <option value="financed">{fulfillmentTrackLabel('financed')}</option>
@@ -318,7 +318,7 @@ function GenerateModal({
           </div>
         </div>
 
-        <pre className="bg-ink rounded-ds-md border border-white/[0.05] p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
+        <pre className="bg-ink rounded-ds-md border border-hairline p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
           {previewText}
         </pre>
 
@@ -355,13 +355,13 @@ function ContractVersionHistory({ contracts, currentVersion }: { contracts: Cont
         const isLast = i === sorted.length - 1;
         return (
           <div key={c.id} className="relative flex gap-4 pb-6 last:pb-0">
-            {!isLast && <div className="absolute left-[11px] top-5 bottom-0 w-px bg-white/[0.08]" />}
+            {!isLast && <div className="absolute left-[11px] top-5 bottom-0 w-px bg-tint" />}
             <div className={cn('w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-ink-850 z-10', isCurrent ? 'bg-brass-500' : c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500' : 'bg-zinc-600')}>
-              {isCurrent ? <FileText className="w-3 h-3 text-white" /> : <Clock className="w-3 h-3 text-white" />}
+              {isCurrent ? <FileText className="w-3 h-3 text-strong" /> : <Clock className="w-3 h-3 text-strong" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-medium text-white">Version {c.version}{isCurrent && <span className="text-ds-micro text-brass-400 ml-1.5">(Current)</span>}</span>
+                <span className="text-xs font-medium text-strong">Version {c.version}{isCurrent && <span className="text-ds-micro text-brass-400 ml-1.5">(Current)</span>}</span>
                 <Badge className={cn('text-ds-micro', c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : c.status === 'draft' ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20' : 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>{CONTRACT_STATUS_LABELS[c.status]}</Badge>
               </div>
               <div className="text-ds-micro text-zinc-500 space-y-0.5">
@@ -400,25 +400,25 @@ function ContractDetailModal({ contract, allContracts, brands, canMutate, actor,
   const handleRenew = () => { renewContract(contract.id, actor); onClose(); };
   const handleTerminate = () => { terminateContract(contract.id, actor, 'Terminated from the Contract Cycle console'); onClose(); };
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+    <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div>
-            <h3 className="text-sm font-semibold text-white">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-ds-micro ml-2', 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
+            <h3 className="text-sm font-semibold text-strong">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-ds-micro ml-2', 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
             <p className="text-ds-micro text-zinc-500 mt-0.5">{contract.fulfillmentTrack.replace(/_/g, ' ')} track - {contract.commissionRate}% - {contract.monthlyFee}/mo</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
         </div>
-        <div className="flex gap-1 px-5 pt-3 border-b border-white/[0.06]">
-          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'document' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
-          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'history' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
+        <div className="flex gap-1 px-5 pt-3 border-b border-hairline">
+          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'document' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
+          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'history' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
         </div>
         {tab === 'document' && (
           <>
             <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
               {buildDistributionAgreement({ businessName: brandName, commissionRate: contract.commissionRate, monthlyFee: contract.monthlyFee, category: brandCategory, fulfillmentTrack: contract.fulfillmentTrack === 'unassigned' ? 'financed' : contract.fulfillmentTrack })}
             </pre>
-            <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between px-5 py-3 border-t border-hairline">
               <div className="flex items-center gap-2">
                 {canMutate && contract.status !== 'draft' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateRenewalDraft}><RotateCcw className="w-3 h-3 mr-1" /> Create Renewal Draft</Button>}
                 {canMutate && contract.status === 'active' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateAmendment}><AlertTriangle className="w-3 h-3 mr-1" /> Create Track Amendment</Button>}

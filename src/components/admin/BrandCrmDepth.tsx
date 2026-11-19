@@ -24,7 +24,7 @@ import { cn } from '@/utils/cn';
 const KIND_STYLES: Record<TimelineEntry['kind'], string> = {
   message: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
   call: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
-  note: 'bg-white/[0.05] text-zinc-300 border-white/[0.08]',
+  note: 'bg-tint text-zinc-300 border-hairline',
   task: 'bg-brass-500/10 text-brass-300 border-brass-500/20',
   system_po: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
   system_contract: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
@@ -78,7 +78,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               onClick={() => setTab(t)}
               className={cn(
                 'px-2 py-1 rounded-ds-sm text-ds-label capitalize',
-                tab === t ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
+                tab === t ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-strong'
               )}
             >
               {t}
@@ -103,7 +103,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               {timeline.length} events — messages, calls, notes, tasks and system events in one feed.
             </p>
             {timeline.map((e) => (
-              <div key={e.id} className="border-b border-white/[0.04] pb-1.5">
+              <div key={e.id} className="border-b border-hairline pb-1.5">
                 <div className="flex items-center gap-2">
                   <Badge className={cn('text-ds-micro', KIND_STYLES[e.kind])}>{e.label}</Badge>
                   <span className="text-ds-micro font-mono text-zinc-600">
@@ -131,7 +131,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                 <select
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
                 >
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -173,7 +173,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               const assignee = staff.find((s) => s.id === t.assignedToStaffId);
               const overdue = t.status === 'open' && t.dueDate < new Date().toISOString().slice(0, 10);
               return (
-                <div key={t.id} className="flex items-center justify-between gap-2 border-b border-white/[0.04] py-1">
+                <div key={t.id} className="flex items-center justify-between gap-2 border-b border-hairline py-1">
                   <div>
                     <span className={cn('text-ds-label', t.status === 'done' ? 'text-zinc-600 line-through' : 'text-zinc-200')}>
                       {t.title}
@@ -196,8 +196,8 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       className={cn(
                         'text-ds-micro px-2 py-0.5 rounded-ds-sm border',
                         canCurrentUserMutate
-                          ? 'border-white/[0.1] text-zinc-400 hover:text-white hover:border-brass-500/40'
-                          : 'border-white/[0.05] text-zinc-700 cursor-not-allowed'
+                          ? 'border-hairline-strong text-zinc-400 hover:text-strong hover:border-brass-500/40'
+                          : 'border-hairline text-zinc-700 cursor-not-allowed'
                       )}
                     >
                       {t.status === 'open' ? 'Mark done' : 'Reopen'}
@@ -216,7 +216,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               onChange={(e) => setNoteBody(e.target.value)}
               rows={2}
               placeholder="Internal note (timestamped, attributed — never shown to the brand)…"
-              className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
             />
             <Button
               variant="accent"
@@ -235,7 +235,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               <p className="text-ds-label text-zinc-600">No internal notes yet.</p>
             )}
             {brandNotes.map((n) => (
-              <div key={n.id} className="border-b border-white/[0.04] pb-1.5">
+              <div key={n.id} className="border-b border-hairline pb-1.5">
                 <span className="text-ds-micro font-mono text-zinc-600">
                   {new Date(n.createdAt).toLocaleString()} ·{' '}
                   {staff.find((s) => s.id === n.authorStaffId)?.name ?? n.authorStaffId}
@@ -264,8 +264,8 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                     className={cn(
                       'text-ds-micro px-1 py-1.5 rounded-ds-md border capitalize transition-colors',
                       meta.lifecycleStage === stage
-                        ? 'border-brass-500/50 bg-brass-500/10 text-white'
-                        : 'border-white/[0.08] text-zinc-400',
+                        ? 'border-brass-500/50 bg-brass-500/10 text-strong'
+                        : 'border-hairline text-zinc-400',
                       !canCurrentUserMutate && 'cursor-not-allowed opacity-50'
                     )}
                   >
@@ -315,7 +315,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                   setBrandAccountOwner(brandId, e.target.value || null, actingStaffId);
                   bump();
                 }}
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 disabled:opacity-50"
+                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 disabled:opacity-50"
               >
                 <option value="">(unassigned)</option>
                 {staff.map((s) => (

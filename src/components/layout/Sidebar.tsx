@@ -193,7 +193,7 @@ export function Sidebar({
           and the reference's 16px tracking-tight wordmark (spec §3.3). Collapsed,
           the header stacks (a 72px card cannot hold a 26px mark and a 32px control
           side by side). */}
-      <div className="border-b border-white/[0.06]">
+      <div className="border-b border-hairline">
         <div className={cn('flex items-center gap-3 px-5 pt-6', compact ? 'flex-col pb-3' : 'pb-6')}>
           <img
             src={brandMark}
@@ -202,7 +202,7 @@ export function Sidebar({
           />
           {!compact && (
             <div className="min-w-0 flex-1">
-              <div className="truncate text-ds-title font-semibold tracking-tight text-white">Mercenta</div>
+              <div className="truncate text-ds-title font-semibold tracking-tight text-strong">Mercenta</div>
               <div className="truncate text-ds-micro uppercase tracking-wider text-zinc-500">
                 {envLabel}
               </div>
@@ -229,7 +229,7 @@ export function Sidebar({
 
       {/* §UI/UX Wave 3 — find a destination without scrolling the whole rail. */}
       {!compact && (
-        <div className="border-b border-white/[0.06] px-3 py-2.5">
+        <div className="border-b border-hairline px-3 py-2.5">
           <div className="relative">
             <Search
               className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600"
@@ -242,7 +242,7 @@ export function Sidebar({
               placeholder="Filter navigation…"
               aria-label="Filter navigation"
               data-testid="nav-filter"
-              className="w-full rounded-ds-md border border-white/[0.06] bg-white/[0.02] py-1.5 pl-7 pr-2 text-ds-label text-zinc-300 transition-ds duration-ds-fast placeholder:text-zinc-600 focus:border-white/[0.16] focus:outline-none"
+              className="w-full rounded-ds-md border border-hairline bg-tint py-1.5 pl-7 pr-2 text-ds-label text-zinc-300 transition-ds duration-ds-fast placeholder:text-zinc-600 focus:border-hairline-strong focus:outline-none"
             />
           </div>
         </div>
@@ -329,7 +329,7 @@ export function Sidebar({
                             'flex w-full items-center gap-3 rounded-ds-md text-ds-body font-medium transition-ds duration-ds-fast',
                             compact ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
                             active
-                              ? 'text-white'
+                              ? 'text-strong'
                               : 'text-zinc-500 hover:bg-tint hover:text-zinc-200'
                           )}
                           style={
@@ -383,7 +383,7 @@ export function Sidebar({
                             className={cn(
                               'absolute right-1 top-1/2 -translate-y-1/2 rounded-ds-sm p-0.5 transition-ds duration-ds-fast',
                               itemPinned
-                                ? 'text-zinc-300 hover:text-white'
+                                ? 'text-zinc-300 hover:text-strong'
                                 : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'
                             )}
                           >
@@ -422,7 +422,7 @@ export function Sidebar({
           line). The avatar keeps the design system's own step and its circular
           form rather than the reference's 36px square — the avatar is a shared
           primitive, so its shape belongs to the system, not to this rail. */}
-      <div className="border-t border-white/[0.06] px-3 pb-4 pt-2">
+      <div className="border-t border-hairline px-3 pb-4 pt-2">
         <div
           className={cn(
             'flex items-center gap-3 rounded-ds-md px-2 py-2 hover:bg-tint',
@@ -432,7 +432,7 @@ export function Sidebar({
           <Avatar name={userName} email={avatarEmail} size="md" />
           {!compact && (
             <div className="min-w-0">
-              <div className="truncate text-ds-body font-semibold leading-tight text-white">{userName}</div>
+              <div className="truncate text-ds-body font-semibold leading-tight text-strong">{userName}</div>
               <div className="truncate text-ds-label leading-tight text-zinc-500">
                 {session?.tier === 'brand'
                   ? envLabel

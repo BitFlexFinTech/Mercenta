@@ -193,7 +193,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
@@ -202,9 +202,9 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               alt="Mercenta Partners hexagon mark"
               className="w-9 h-9"
             />
-            <span className="text-lg font-semibold text-white">{BRAND_NAME}</span>
+            <span className="text-lg font-semibold text-strong">{BRAND_NAME}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Brand Onboarding</h1>
+          <h1 className="text-2xl font-bold text-strong mb-1">Brand Onboarding</h1>
           <p className="text-sm text-zinc-500">
                         Global wholesale trade platform — scale your brand into the UK market
           </p>
@@ -225,8 +225,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       isDone
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : isActive
-                        ? 'bg-brass-500 text-white shadow-ds-raised'
-                        : 'bg-ink-850 text-zinc-600 border border-white/[0.08]'
+                        ? 'bg-brass-500 text-strong shadow-ds-raised'
+                        : 'bg-ink-850 text-zinc-600 border border-hairline'
                     )}
                   >
                     {isDone ? (
@@ -238,7 +238,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   <span
                     className={cn(
                       'text-ds-micro font-medium transition-colors',
-                      isActive ? 'text-white' : 'text-zinc-600'
+                      isActive ? 'text-strong' : 'text-zinc-600'
                     )}
                   >
                     {s.label}
@@ -248,7 +248,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   <div
                     className={cn(
                       'flex-1 h-px mx-2 mb-5 transition-colors',
-                      step > s.id ? 'bg-emerald-500/30' : 'bg-white/[0.06]'
+                      step > s.id ? 'bg-emerald-500/30' : 'bg-tint'
                     )}
                   />
                 )}
@@ -258,10 +258,10 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
         </div>
 
         {/* Step Content */}
-        <div className="bg-ink-850 border border-white/[0.06] rounded-ds-lg p-6 min-h-[340px]">
+        <div className="bg-ink-850 border border-hairline rounded-ds-lg p-6 min-h-[340px]">
           {step === 1 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">Brand Profile</h2>
+              <h2 className="text-base font-semibold text-strong mb-1">Brand Profile</h2>
               <p className="text-xs text-zinc-500 mb-4">
                 Tell us about your business and primary contact
               </p>
@@ -283,8 +283,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       className={cn(
                         'text-ds-micro px-2.5 py-2 rounded-ds-md border transition-colors text-left',
                         brandProfile.category === cat
-                          ? 'border-brass-500/50 bg-brass-500/10 text-white'
-                          : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
+                          ? 'border-brass-500/50 bg-brass-500/10 text-strong'
+                          : 'border-hairline text-zinc-400 hover:border-hairline-strong'
                       )}
                     >
                       {cat}
@@ -338,13 +338,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 2 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">
+              <h2 className="text-base font-semibold text-strong mb-1">
                 UK Master Wholesale & Distribution Agreement
               </h2>
               <p className="text-xs text-zinc-500 mb-2">
                 Review and accept the terms below
               </p>
-              <div className="bg-ink-900 border border-white/[0.06] rounded-ds-md p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+              <div className="bg-ink-900 border border-hairline rounded-ds-md p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                 <p className="mb-3">
                   This Master Wholesale & Distribution Agreement ("Agreement") is entered
                   into between {BRAND_LEGAL_NAME} ("Mercenta"), acting as the Exclusive UK
@@ -412,9 +412,9 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   the brand; it is a DIFFERENT concept from the retail-channel
                   compliance documents the products need, and it can never change
                   which documents are required. */}
-              <div className="border-t border-white/[0.06] pt-4 space-y-2.5">
+              <div className="border-t border-hairline pt-4 space-y-2.5">
                 <div>
-                  <h3 className="text-xs font-semibold text-white">
+                  <h3 className="text-xs font-semibold text-strong">
                     Commercial Relationship with Mercenta
                   </h3>
                   <p className="text-ds-micro text-zinc-500 mt-1">
@@ -440,17 +440,17 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                           'text-left rounded-ds-md border px-3 py-2.5 transition-colors',
                           selected
                             ? 'border-brass-500/50 bg-brass-500/10'
-                            : 'border-white/[0.08] hover:border-white/20'
+                            : 'border-hairline hover:border-hairline-strong'
                         )}
                       >
                         <div className="flex items-center gap-2">
                           <span
                             className={cn(
                               'w-3.5 h-3.5 rounded-full border flex-shrink-0',
-                              selected ? 'border-brass-400 bg-brass-400' : 'border-white/25'
+                              selected ? 'border-brass-400 bg-brass-400' : 'border-hairline-strong'
                             )}
                           />
-                          <span className={cn('text-xs font-medium', selected ? 'text-white' : 'text-zinc-300')}>
+                          <span className={cn('text-xs font-medium', selected ? 'text-strong' : 'text-zinc-300')}>
                             {def.label}
                           </span>
                         </div>
@@ -471,7 +471,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 3 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">Banking Details</h2>
+              <h2 className="text-base font-semibold text-strong mb-1">Banking Details</h2>
               <p className="text-xs text-zinc-500 mb-4">
                 Where should we send your wholesale payouts?
               </p>
@@ -491,7 +491,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       <select
                         value={brandProfile.bic}
                         onChange={(e) => update('bic', e.target.value)}
-                        className="w-full bg-ink-800 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 appearance-none"
+                        className="w-full bg-ink-800 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40 appearance-none"
                         required
                       >
                         <option value="">-- Select bank --</option>
@@ -503,7 +503,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         <div className="bg-brass-500/5 border border-brass-500/20 rounded-ds-md p-3 mt-2 text-ds-micro text-zinc-400 space-y-1">
                           <p><span className="text-zinc-500">Account format:</span> {selectedBank.accountFormat}</p>
                           {selectedBank.routingLabel && <p><span className="text-zinc-500">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
-                          <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-white font-mono">{selectedBank.swift}</span> (pre-filled)</p>
+                          <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-strong font-mono">{selectedBank.swift}</span> (pre-filled)</p>
                         </div>
                       )}
                     </div>
@@ -547,8 +547,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       className={cn(
                         'text-xs px-3 py-2 rounded-ds-md border transition-colors',
                         brandProfile.workingCapitalAnswer === opt.value
-                          ? 'border-brass-500/50 bg-brass-500/10 text-white'
-                          : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
+                          ? 'border-brass-500/50 bg-brass-500/10 text-strong'
+                          : 'border-hairline text-zinc-400 hover:border-hairline-strong'
                       )}
                     >
                       {opt.label}
@@ -566,7 +566,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 4 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">Fulfillment Track</h2>
+              <h2 className="text-base font-semibold text-strong mb-1">Fulfillment Track</h2>
               <p className="text-xs text-zinc-500 mb-2">
                 Confirm how your goods reach the UK. This is pre-filled with the
                 system's provisional recommendation based on your answers — you can
@@ -577,7 +577,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-xs text-zinc-400">
                 System recommendation:{' '}
-                <span className="text-white font-medium">
+                <span className="text-strong font-medium">
                   {fulfillmentTrackLabel(recommendedTrack)}
                 </span>{' '}
               </div>
@@ -605,7 +605,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       'text-left px-3 py-2.5 rounded-ds-md border transition-colors relative',
                       brandProfile.fulfillmentTrack === opt.value
                         ? 'border-brass-500/50 bg-brass-500/10'
-                        : 'border-white/[0.08] hover:border-white/20'
+                        : 'border-hairline hover:border-hairline-strong'
                     )}
                   >
                     {recommendedTrack === opt.value && (
@@ -613,7 +613,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         Recommended
                       </span>
                     )}
-                    <span className="block text-xs font-medium text-white">{opt.label}</span>
+                    <span className="block text-xs font-medium text-strong">{opt.label}</span>
                     <span className="block text-ds-micro text-zinc-500 mt-0.5">{opt.hint}</span>
                   </button>
                 ))}
@@ -630,7 +630,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     {partners.map(function(p) {
                       return (
                         <div key={p.id} className="text-ds-micro text-zinc-400 space-y-0.5">
-                          <p className="text-white font-medium">{p.name}</p>
+                          <p className="text-strong font-medium">{p.name}</p>
                           <p>{p.description}</p>
                           <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1 text-ds-micro">
                             <span className="text-zinc-500">Advance rate:</span>
@@ -656,20 +656,20 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 5 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">Mandatory Legal Agreements</h2>
+              <h2 className="text-base font-semibold text-strong mb-1">Mandatory Legal Agreements</h2>
               <p className="text-xs text-zinc-500 mb-2">
                 Please review and accept both agreements below. You must scroll through each
                 section and click "I have read and agree" for each one before you can continue.
               </p>
 
               {/* 4.1 — Logistics SLAs & Carrier Alignment */}
-              <div className="border border-white/[0.06] rounded-ds-md overflow-hidden">
-                <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
-                  <h3 className="text-xs font-semibold text-white">
+              <div className="border border-hairline rounded-ds-md overflow-hidden">
+                <div className="bg-ink-900/80 border-b border-hairline px-4 py-2.5">
+                  <h3 className="text-xs font-semibold text-strong">
                     4.1 — Logistics SLAs & Carrier Alignment
                   </h3>
                 </div>
-                <div className="bg-ink-900 border-white/[0.06] p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                <div className="bg-ink-900 border-hairline p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                   <p className="mb-3">
                     The Supplier explicitly acknowledges that all logistical executions under
                     this Agreement must strictly align with retail-channel vendor core metrics.
@@ -681,7 +681,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     an On-Time Shipment Rate of 98% within the designated retail-channel shipping window.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] bg-black/20">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-hairline bg-surface-tint">
                   <input
                     type="checkbox"
                     id="agreement-logistics"
@@ -698,13 +698,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               </div>
 
               {/* 4.2 — Automated Chargeback Remediation & Financial Indemnity */}
-              <div className="border border-white/[0.06] rounded-ds-md overflow-hidden">
-                <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
-                  <h3 className="text-xs font-semibold text-white">
+              <div className="border border-hairline rounded-ds-md overflow-hidden">
+                <div className="bg-ink-900/80 border-b border-hairline px-4 py-2.5">
+                  <h3 className="text-xs font-semibold text-strong">
                     4.2 — Automated Chargeback Remediation & Financial Indemnity
                   </h3>
                 </div>
-                <div className="bg-ink-900 border-white/[0.06] p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                <div className="bg-ink-900 border-hairline p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                   <p className="mb-3">
                     In the event that the retail channel issues an operational chargeback,
                     cost-deduction, or logistical penalty resulting from Supplier
@@ -720,7 +720,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     metrics.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] bg-black/20">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-hairline bg-surface-tint">
                   <input
                     type="checkbox"
                     id="agreement-chargeback"
@@ -740,7 +740,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 6 && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">Operational Guidance</h2>
+              <h2 className="text-base font-semibold text-strong mb-1">Operational Guidance</h2>
               {/*
                 §P13 / S8 — REPOINTED (old contract recorded): this paragraph used to read
                 *"…understanding how pricing, packaging, and PO rejections affect your

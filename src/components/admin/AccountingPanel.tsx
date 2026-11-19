@@ -325,7 +325,7 @@ export function AccountingPanel() {
         description="Xero is the accounting and reconciliation layer — it is NOT the bank. Connection state, the 28-day reseed tracker, the financial summary, brand payouts and the deterministic finance work items all read the same canonical records."
         status={
           connected === null ? (
-            <Badge className="bg-white/[0.06] text-zinc-400">
+            <Badge className="bg-tint text-zinc-400">
               <Loader2 className="w-3 h-3 animate-spin" /> Checking Xero
             </Badge>
           ) : connected ? (
@@ -515,28 +515,28 @@ export function AccountingPanel() {
         )}
 
         {showCredentialForm && (
-          <div className="mt-4 space-y-3 border border-white/[0.06] rounded-ds-md p-4">
+          <div className="mt-4 space-y-3 border border-hairline rounded-ds-md p-4">
             <h4 className="text-xs font-medium text-zinc-400">Xero API Credentials</h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Client ID</label>
                 <input value={credClientId} onChange={(e) => setCredClientId(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-client-id" />
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-id" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Client Secret</label>
                 <input value={credClientSecret} onChange={(e) => setCredClientSecret(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-client-secret" />
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-secret" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Tenant ID</label>
                 <input value={credTenantId} onChange={(e) => setCredTenantId(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-tenant-id" />
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-tenant-id" />
               </div>
               <div>
                 <label className="block text-ds-label text-zinc-500 mb-1">Access Token</label>
                 <input value={credAccessToken} onChange={(e) => setCredAccessToken(e.target.value)}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-md px-3 py-2 text-xs text-white" placeholder="xero-access-token" />
+                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-access-token" />
               </div>
             </div>
             <Button onClick={handleSaveCredentials} size="sm" disabled={!credClientId || !credAccessToken}>
@@ -550,7 +550,7 @@ export function AccountingPanel() {
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-zinc-400">
               Days since last reseed:{' '}
-              <span className="text-white font-semibold">{daysSinceReseed ?? '—'}</span>
+              <span className="text-strong font-semibold">{daysSinceReseed ?? '—'}</span>
               {' / 28'}
             </span>
             {remainingDays !== null && remainingDays <= 3 && (
@@ -582,21 +582,21 @@ export function AccountingPanel() {
       <Card title="Financial Summary" className="p-5">
         {summary ? (
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white/[0.03] rounded-ds-md p-3">
+            <div className="bg-tint rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Revenue</span>
               </div>
-              <span className="text-lg font-semibold text-white">£{summary.revenue.toLocaleString()}</span>
+              <span className="text-lg font-semibold text-strong">£{summary.revenue.toLocaleString()}</span>
             </div>
-            <div className="bg-white/[0.03] rounded-ds-md p-3">
+            <div className="bg-tint rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-rose-400 mb-1">
                 <TrendingDown className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Expenses</span>
               </div>
-              <span className="text-lg font-semibold text-white">£{summary.expenses.toLocaleString()}</span>
+              <span className="text-lg font-semibold text-strong">£{summary.expenses.toLocaleString()}</span>
             </div>
-            <div className="bg-white/[0.03] rounded-ds-md p-3">
+            <div className="bg-tint rounded-ds-md p-3">
               <div className="flex items-center gap-1.5 text-brass-400 mb-1">
                 <DollarSign className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Net Profit</span>
@@ -650,21 +650,21 @@ export function AccountingPanel() {
                 'rounded-ds-md border p-2.5 text-left transition-colors',
                 payoutFilter === m.key
                   ? 'border-brass-500/40 bg-brass-500/10'
-                  : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.14]'
+                  : 'border-hairline bg-tint hover:border-hairline-strong'
               )}
             >
               <p className="text-ds-micro uppercase tracking-wider text-zinc-500">{m.label}</p>
-              <p className="font-mono text-base font-semibold text-white">{m.value}</p>
+              <p className="font-mono text-base font-semibold text-strong">{m.value}</p>
               <p className="text-ds-micro text-zinc-500">{m.sub}</p>
             </button>
           ))}
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
             {pendingPayouts.length} pending
           </Badge>
-          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
             {settledCount} settled
           </Badge>
           <span className="text-ds-micro text-brass-300">
@@ -727,7 +727,7 @@ export function AccountingPanel() {
               primary: true,
               render: (c) => (
                 <span>
-                  <span className="text-xs font-medium text-white">{brandName(c.brandId)}</span>
+                  <span className="text-xs font-medium text-strong">{brandName(c.brandId)}</span>
                   <span className="block font-mono text-ds-micro text-zinc-500">{c.id}</span>
                 </span>
               ),
@@ -756,7 +756,7 @@ export function AccountingPanel() {
               label: 'Net payout',
               align: 'right',
               render: (c) => (
-                <span className="font-mono text-xs font-semibold text-white">
+                <span className="font-mono text-xs font-semibold text-strong">
                   £{netShareOf(c).toFixed(2)}
                 </span>
               ),
@@ -852,7 +852,7 @@ export function AccountingPanel() {
           Brand accounts. A payout can only be submitted to a <span className="text-emerald-300">verified</span>{' '}
           destination; suspending an account blocks it immediately.
         </p>
-        <div className="mt-3 divide-y divide-white/[0.04]">
+        <div className="mt-3 divide-y divide-hairline-06">
           {destinationRows.map((d) => {
             const p = payoutDestinationStatusPresentation(d.status);
             return (
@@ -863,7 +863,7 @@ export function AccountingPanel() {
                 className="flex items-center justify-between gap-3 py-2.5"
               >
                 <div className="min-w-0">
-                  <div className="text-xs font-medium text-white truncate">{d.accountName}</div>
+                  <div className="text-xs font-medium text-strong truncate">{d.accountName}</div>
                   <div className="font-mono text-ds-micro text-zinc-500">
                     {d.accountRefMasked} · {d.bankName}
                   </div>

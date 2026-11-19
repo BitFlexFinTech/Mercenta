@@ -587,7 +587,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
           <span
             className={cn(
               'absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full text-ds-micro font-bold flex items-center justify-center px-0.5',
-              highCount > 0 ? 'bg-state-critical text-white' : 'bg-state-warning text-white'
+              highCount > 0 ? 'bg-state-critical text-strong' : 'bg-state-warning text-on-fill'
             )}
           >
             {items.length}
@@ -604,8 +604,8 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
             aria-label={ariaSummary}
             className="ds-card absolute right-0 top-9 z-50 w-[380px] overflow-hidden rounded-ds-lg border bg-ink-900 shadow-ds-overlay"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-              <span className="text-xs font-semibold text-white">Needs attention</span>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
+              <span className="text-xs font-semibold text-strong">Needs attention</span>
               <span
                 className={cn(
                   'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-ds-micro font-medium border',
@@ -621,7 +621,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                   : `${highCount} critical · ${mediumCount} follow-up`}
               </span>
             </div>
-            <div className="max-h-[420px] overflow-y-auto divide-y divide-white/[0.04]" data-testid="notification-list">
+            <div className="max-h-[420px] overflow-y-auto divide-y divide-hairline-06" data-testid="notification-list">
               {items.length === 0 && (
                 <EmptyState
                   title="Everything is tracked"
@@ -659,7 +659,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                       <Icon className="w-3 h-3" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-ds-label font-medium text-white leading-snug">{n.title}</span>
+                      <span className="block text-ds-label font-medium text-strong leading-snug">{n.title}</span>
                       <span className="block text-ds-micro text-zinc-500 truncate" title={n.detail}>{n.detail}</span>
                       {/* §P13 / S6 — the reminder's OWN record detail (channel →
                           destination, and any channel that could not be used). */}
@@ -677,7 +677,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                 );
               })}
             </div>
-            <div className="px-4 py-2 border-t border-white/[0.06] text-ds-micro text-zinc-600">
+            <div className="px-4 py-2 border-t border-hairline text-ds-micro text-zinc-600">
               Same event stream as the daily email digest — no second pipeline.
             </div>
           </div>

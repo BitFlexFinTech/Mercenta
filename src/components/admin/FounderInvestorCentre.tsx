@@ -201,7 +201,7 @@ export function FounderInvestorCentre() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-2 mt-4 border-t border-white/[0.06] pt-3">
+        <div className="flex flex-wrap gap-2 mt-4 border-t border-hairline pt-3">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -211,8 +211,8 @@ export function FounderInvestorCentre() {
               className={cn(
                 'rounded-ds-md px-3 py-1.5 text-xs transition-ds',
                 tab === t.id
-                  ? 'bg-white/[0.08] text-white'
-                  : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300'
+                  ? 'bg-tint text-strong'
+                  : 'text-zinc-500 hover:bg-tint hover:text-zinc-300'
               )}
             >
               {t.label}
@@ -245,8 +245,8 @@ export function FounderInvestorCentre() {
         <Card title="Investor talking points">
           <div className="space-y-2.5" data-testid="founder-talking-points">
             {FOUNDER_TALKING_POINTS.map((t) => (
-              <div key={t.id} className="border-b border-white/[0.04] pb-2">
-                <p className="text-xs font-medium text-white">{t.title}</p>
+              <div key={t.id} className="border-b border-hairline pb-2">
+                <p className="text-xs font-medium text-strong">{t.title}</p>
                 <p className="text-ds-label text-zinc-400 mt-0.5">{t.body}</p>
               </div>
             ))}
@@ -258,12 +258,12 @@ export function FounderInvestorCentre() {
         <Card title="Difficult questions — practice list">
           <div className="space-y-2" data-testid="founder-questions">
             {FOUNDER_DIFFICULT_QUESTIONS.map((q) => (
-              <div key={q.id} className="border border-white/[0.06] rounded-ds-md">
+              <div key={q.id} className="border border-hairline rounded-ds-md">
                 <button
                   type="button"
                   data-testid={`founder-question-${q.id}`}
                   onClick={() => setOpenQuestion(openQuestion === q.id ? null : q.id)}
-                  className="w-full text-left px-3 py-2 text-xs text-white hover:bg-white/[0.03]"
+                  className="w-full text-left px-3 py-2 text-xs text-strong hover:bg-tint"
                 >
                   {q.question}
                 </button>
@@ -280,9 +280,9 @@ export function FounderInvestorCentre() {
         <Card title="Investor meeting practice">
           <div className="space-y-3" data-testid="founder-practice">
             {FOUNDER_MEETING_PRACTICE.map((s) => (
-              <div key={s.id} className="border-b border-white/[0.04] pb-2">
+              <div key={s.id} className="border-b border-hairline pb-2">
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-medium text-white">{s.label}</p>
+                  <p className="text-xs font-medium text-strong">{s.label}</p>
                   <span className="text-ds-micro text-brass-300">{s.targetTime}</span>
                 </div>
                 <p className="text-ds-label text-zinc-400 mt-0.5">{s.direction}</p>

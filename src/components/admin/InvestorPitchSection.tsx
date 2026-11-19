@@ -28,7 +28,7 @@ export function InvestorPitchSection() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ChartPie className="w-4 h-4 text-brass-400" />
-          <span className="text-sm font-semibold text-white">UK Import Market — Investor Data</span>
+          <span className="text-sm font-semibold text-strong">UK Import Market — Investor Data</span>
           <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <Button className="text-ds-micro" onClick={handleDownload}>
@@ -47,10 +47,10 @@ export function InvestorPitchSection() {
         <TamSamBreakdown />
       </div>
 
-      <div className="mt-4 bg-ink-900 border border-white/[0.06] rounded-ds-md p-3">
+      <div className="mt-4 bg-ink-900 border border-hairline rounded-ds-md p-3">
         <div className="flex items-center gap-2 mb-1.5">
           <TrendingUp className="w-3.5 h-3.5 text-brass-400" />
-          <span className="text-ds-label font-medium text-white">Positioning Frame</span>
+          <span className="text-ds-label font-medium text-strong">Positioning Frame</span>
         </div>
         <p className="text-ds-micro text-zinc-400 leading-relaxed">
           <em>&quot;We aren't a needle in a haystack — we are the haystack.&quot;</em> The UK imports over

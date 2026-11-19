@@ -62,7 +62,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
   const linkClass = "text-ds-label text-steel hover:text-brass-400 transition-colors cursor-pointer block py-0.5 text-left";
 
   return (
-    <footer className="bg-ink-900 border-t border-white/[0.06]">
+    <footer className="bg-ink-900 border-t border-hairline">
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* The declared FIVE-column shape: the brand column, then four owner columns. */}
         <div className="grid grid-cols-2 gap-8 mb-10 md:grid-cols-3 lg:grid-cols-5">
@@ -123,7 +123,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
           and the brand stays READ from `src/config/brand.ts`, so the line can
           never go stale or disagree with the rest of the site.
         */}
-        <div className="border-t border-white/[0.06] pt-6 flex flex-col items-center gap-2 text-center">
+        <div className="border-t border-hairline pt-6 flex flex-col items-center gap-2 text-center">
           {/*
             §PUBLIC MESSAGING (2026-09-28) — THE LEGAL LINE CARRIES THE COMPANY'S
             PUBLIC IDENTITY AND NOTHING ELSE. It previously read "… · UK Importer

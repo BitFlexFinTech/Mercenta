@@ -51,11 +51,11 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-12">
+        <section className="border-t border-hairline px-6 py-12">
           <div className="mx-auto max-w-3xl space-y-3">
             {PUBLIC_FAQ.map((item) => (
-              <details key={item.q} className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850">
-                <summary className="cursor-pointer px-6 py-4 font-display text-base font-semibold text-parchment transition-colors hover:bg-white/[0.02]">
+              <details key={item.q} className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850">
+                <summary className="cursor-pointer px-6 py-4 font-display text-base font-semibold text-parchment transition-colors hover:bg-tint">
                   {item.q}
                 </summary>
                 <div className="px-6 pb-5 text-sm leading-relaxed text-steel">{item.a}</div>
@@ -64,7 +64,7 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
           </div>
         </section>
 
-        <section className="border-t border-white/[0.06] px-6 py-16">
+        <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
             <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>

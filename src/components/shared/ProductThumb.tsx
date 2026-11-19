@@ -57,7 +57,7 @@ export function ProductThumb({
         src={candidate}
         alt={product.name}
         style={{ width: size, height: size }}
-        className={cn('shrink-0 rounded-ds-sm bg-white/[0.06] object-cover', className)}
+        className={cn('shrink-0 rounded-ds-sm bg-tint object-cover', className)}
       />
     );
   }
@@ -67,7 +67,7 @@ export function ProductThumb({
       style={{ width: size, height: size, fontSize: glyphPx, lineHeight: 1 }}
       aria-hidden="true"
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-ds-sm bg-white/[0.06]',
+        'flex shrink-0 items-center justify-center rounded-ds-sm bg-tint',
         className
       )}
     >

@@ -161,7 +161,7 @@ function BankSection({ brandId }: { brandId: string }) {
           </div>
         )}
         {fields.map(({ key, label, value }) => (
-          <div key={key} className="flex items-center gap-2 border-b border-white/[0.04] pb-2">
+          <div key={key} className="flex items-center gap-2 border-b border-hairline pb-2">
             <span className="text-ds-label text-zinc-500 w-28 flex-shrink-0">{label}</span>
             <span className="text-ds-label text-zinc-300 font-mono flex-1">{value || '—'}</span>
             <input
@@ -169,7 +169,7 @@ function BankSection({ brandId }: { brandId: string }) {
               onChange={(e) => updateField(key, e.target.value)}
               placeholder="New value..."
               aria-label={`New value for ${label}`}
-              className="w-28 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-1.5 py-0.5 text-ds-micro text-zinc-300"
+              className="w-28 bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-0.5 text-ds-micro text-zinc-300"
             />
           </div>
         ))}
@@ -178,7 +178,7 @@ function BankSection({ brandId }: { brandId: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for change..."
-            className="flex-1 bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-ds-micro"
+            className="flex-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro"
           />
           <Button className="text-ds-micro" onClick={() => {
             const active = fields.find((f) => requested[f.key]?.trim());
@@ -211,11 +211,11 @@ function LoginSection() {
         control labelled "Change Password" or "Enable 2FA" ever returns.
       */}
       <div className="space-y-3 text-xs text-zinc-300">
-        <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
+        <div className="flex items-center justify-between border-b border-hairline pb-2">
           <span>Sign-in method</span>
           <span className="text-ds-micro text-zinc-500">Role-based — no Mercenta password to change</span>
         </div>
-        <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
+        <div className="flex items-center justify-between border-b border-hairline pb-2">
           <span>Two-factor authentication</span>
           <span className="text-ds-micro text-zinc-500">Not offered — contacts use their own provider’s 2FA</span>
         </div>
@@ -261,7 +261,7 @@ function PermissionsSection({ brandId }: { brandId: string }) {
     <Card title="Manage Permissions">
       <div className="space-y-1">
         {members.map((m) => (
-          <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
+          <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-hairline">
             <div>
               <span className="text-xs text-zinc-300">{m.name}</span>
               <span className="text-ds-micro text-zinc-600 ml-2">{m.email}</span>
@@ -278,11 +278,11 @@ function PermissionsSection({ brandId }: { brandId: string }) {
         {members.length === 0 && <p className="text-xs text-zinc-600 py-2">No team members invited yet.</p>}
       </div>
       {showInvite ? (
-        <div className="mt-3 space-y-2 border-t border-white/[0.06] pt-3">
+        <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <Input label="Name" value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} />
           <Input label="Email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} />
           <select value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value as BrandPermissionRole })}
-            className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1 text-xs text-zinc-300">
+            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-zinc-300">
             <option value="Owner">Owner</option><option value="Shipping">Shipping</option><option value="Accounts">Accounts</option><option value="Compliance">Compliance</option>
           </select>
           <div className="flex gap-2">
@@ -317,7 +317,7 @@ function OutagesSection({ brandId }: { brandId: string }) {
     <Card title="Purchase Order Outages">
       <p className="text-ds-micro text-zinc-600 mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
       {outages.map((o) => (
-        <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
+        <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-hairline">
           <div>
             <span className="text-ds-label text-zinc-300">{o.startDate} → {o.endDate}</span>
             <p className="text-ds-micro text-zinc-500">{o.reason}</p>
@@ -338,7 +338,7 @@ function OutagesSection({ brandId }: { brandId: string }) {
       ))}
       {outages.length === 0 && <p className="text-xs text-zinc-600 py-2">No outages declared.</p>}
       {showNew ? (
-        <div className="mt-3 space-y-2 border-t border-white/[0.06] pt-3">
+        <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <div className="grid grid-cols-2 gap-2">
             <Input label="Start date" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
             <Input label="End date" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
@@ -383,7 +383,7 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
   return (
     <Card title="Return Addresses">
       {addrs.map((a) => (
-        <div key={a.id} className="py-2 border-b border-white/[0.04]">
+        <div key={a.id} className="py-2 border-b border-hairline">
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-300 font-medium">{a.label}</span>
             {a.isDefault && <Badge className="text-ds-micro bg-brass-500/15 text-brass-300">Default</Badge>}
@@ -399,7 +399,7 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
       ))}
       {addrs.length === 0 && <p className="text-xs text-zinc-600 py-2">No return addresses configured.</p>}
       {showNew ? (
-        <div className="mt-3 space-y-2 border-t border-white/[0.06] pt-3">
+        <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <Input label="Label" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="UK Returns — Standard" />
           <Input label="Company" value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
           <Input label="Address 1" value={form.addressLine1} onChange={(e) => setForm({ ...form, addressLine1: e.target.value })} />
@@ -436,13 +436,13 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
       <p className="text-ds-micro text-zinc-600 mb-3">View-only reference to your compliance documents. Manage documents through the Compliance hub.</p>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
+          <tr className="border-b border-hairline text-xs text-zinc-500">
             <th className="text-left font-medium px-2 py-2">Document Type</th>
             <th className="text-left font-medium px-2 py-2">Status</th>
             <th className="text-right font-medium px-2 py-2">Uploaded</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.04]">
+        <tbody className="divide-y divide-hairline-06">
           {docs.map((d) => (
             <tr key={d.id}>
               <td className="px-2 py-1.5 text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</td>
@@ -498,7 +498,7 @@ function NotificationsSection({ brandId }: { brandId: string }) {
     <Card title="Notification Preferences">
       <p className="text-ds-micro text-zinc-600 mb-3">Choose which events you want to be notified about and through which channels.</p>
       {prefs.map((p) => (
-        <div key={p.id} className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+        <div key={p.id} className="flex items-center justify-between py-2 border-b border-hairline">
           <div className="flex-1">
             <span className={cn('text-xs', p.enabled ? 'text-zinc-300' : 'text-zinc-600')}>{EVENT_LABELS[p.eventType]}</span>
           </div>
@@ -572,7 +572,7 @@ function ToursSection({ brandId }: { brandId: string }) {
         Re-run any onboarding tour whenever you need a refresher. Restarting a tour resumes it from its first
         step and never touches your account, products, or orders.
       </p>
-      <ul className="divide-y divide-white/[0.05] rounded-ds-md border border-white/[0.06] bg-ink-850">
+      <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-ink-850">
         {ALL_TOUR_DEFINITIONS.map((t) => {
           const completed = isTourCompleted(brandId, t.id);
           const skipped = isTourSkipped(brandId, t.id);
@@ -582,7 +582,7 @@ function ToursSection({ brandId }: { brandId: string }) {
           return (
             <li key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-medium text-white truncate">{t.name}</span>
+                <span className="block text-xs font-medium text-strong truncate">{t.name}</span>
                 <span className="block text-ds-label text-zinc-500 truncate leading-snug">{t.description}</span>
               </span>
               <StatusBadge tone={tone} dataStatus={state.toLowerCase().replace(' ', '-')}>{state}</StatusBadge>
@@ -619,7 +619,7 @@ export function BrandSettings() {
         description="Manage your brand account, preferences, and operational details."
       />
 
-      <div className="flex flex-wrap gap-1 border-b border-white/[0.06] pb-px">
+      <div className="flex flex-wrap gap-1 border-b border-hairline pb-px">
         {SETTINGS_TABS.map(({ id, label, icon: TabIcon }) => (
           <button
             key={id}
@@ -627,8 +627,8 @@ export function BrandSettings() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-ds-md transition-colors',
               activeTab === id
-                ? 'text-white border-b-2 border-brass-500 bg-white/[0.03]'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]'
+                ? 'text-strong border-b-2 border-brass-500 bg-tint'
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-tint'
             )}
           >
             <TabIcon className="w-3.5 h-3.5" />

@@ -71,7 +71,7 @@ interface Props<T extends { id: string }> {
 }
 
 const CONTROL =
-  'bg-ink-900 border border-white/[0.08] rounded-ds-sm text-xs text-zinc-300 focus:outline-none focus:border-brass-500/40';
+  'bg-ink-900 border border-hairline rounded-ds-sm text-xs text-zinc-300 focus:outline-none focus:border-brass-500/40';
 
 export function DataTable<T extends { id: string }>({
   rows,
@@ -158,7 +158,7 @@ export function DataTable<T extends { id: string }>({
                 }}
                 placeholder="Search…"
                 aria-label={`Search ${caption}`}
-                className={`${CONTROL} pl-8 pr-3 py-1.5 text-white w-52`}
+                className={`${CONTROL} pl-8 pr-3 py-1.5 text-strong w-52`}
               />
             </div>
           )}
@@ -211,7 +211,7 @@ export function DataTable<T extends { id: string }>({
               disabled={!sortKey}
               onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
               aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
-              className="rounded-ds-sm border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300 hover:text-white disabled:opacity-40 transition-ds duration-ds-fast"
+              className="rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300 hover:text-strong disabled:opacity-40 transition-ds duration-ds-fast"
             >
               {sortDir === 'asc' ? 'Asc' : 'Desc'}
             </button>
@@ -263,7 +263,7 @@ export function DataTable<T extends { id: string }>({
             type="button"
             disabled={safePage === 0}
             onClick={() => setPage(safePage - 1)}
-            className="p-1 rounded-ds-sm text-zinc-500 hover:text-white disabled:opacity-30"
+            className="p-1 rounded-ds-sm text-zinc-500 hover:text-strong disabled:opacity-30"
             aria-label="Previous page"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
@@ -275,7 +275,7 @@ export function DataTable<T extends { id: string }>({
             type="button"
             disabled={safePage >= pageCount - 1}
             onClick={() => setPage(safePage + 1)}
-            className="p-1 rounded-ds-sm text-zinc-500 hover:text-white disabled:opacity-30"
+            className="p-1 rounded-ds-sm text-zinc-500 hover:text-strong disabled:opacity-30"
             aria-label="Next page"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />

@@ -71,7 +71,7 @@ export function NotFound({
             onClick={onOpenPortal}
             className={cn(
               'inline-flex items-center gap-2 rounded-ds-md border px-5 py-2.5 text-sm font-semibold',
-              'border-white/[0.12] text-parchment transition-colors hover:bg-white/[0.04]',
+              'border-hairline-strong text-parchment transition-colors hover:bg-tint',
               'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass'
             )}
           >

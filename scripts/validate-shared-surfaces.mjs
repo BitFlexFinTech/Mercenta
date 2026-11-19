@@ -176,7 +176,8 @@ check(
 check('ABSENCE GUARD — no hardcoded `bg-black/70` scrim remains in the primitives', !UI_CODE.includes('bg-black/70'));
 
 /* The control metrics the reference measures (spec §7.3/§7.4 and §12). */
-const controls = UI_CODE.match(/className="w-full bg-ink-900 border border-white\/\[0\.08\] rounded-ds-md[^"]*"/g) ?? [];
+/* Post-migration: literal border-white/* migrated to border-hairline/border-hairline-strong */
+const controls = UI_CODE.match(/className="w-full bg-ink-900 border border-hairline(?:-strong)? rounded-ds-md[^"]*"/g) ?? [];
 const byMarker = (m) => controls.find((c) => c.includes(m)) ?? '';
 const inputCls = byMarker('placeholder-zinc-600'); // the single-line `<input>`
 const textareaCls = byMarker('resize-none'); // the multi-line `<textarea>`
@@ -390,7 +391,7 @@ const RAIL_GEOMETRY = [
   ],
   [
     "the account area takes the reference's type pair (a 14px name over a 12px second line)",
-    RAIL_CODE.includes('text-ds-body font-semibold leading-tight text-white') &&
+    RAIL_CODE.includes('text-ds-body font-semibold leading-tight text-strong') &&
       RAIL_CODE.includes('text-ds-label leading-tight text-zinc-500'),
   ],
   [

@@ -62,7 +62,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
           /* §OPENSHIP BATCH 4 — the dropdown surface: TRANSLUCENT (`bg-ink-800/70`,
              the theme's own flyout token at 70%) with the reference's
              `backdrop-blur-xl` (spec §7.6). */
-          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-800/70 backdrop-blur-xl border border-white/[0.08] shadow-ds-overlay animate-fade-in p-2"
+          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-800/70 backdrop-blur-xl border border-hairline shadow-ds-overlay animate-fade-in p-2"
         >
           <p className="px-3 py-1.5 text-ds-micro uppercase tracking-wider text-zinc-500">
             Visual theme · {shellMode === 'light' ? 'light' : 'dark'} mode
@@ -86,13 +86,13 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
                      takes the theme's `--mr-surface-hover` step at 60%, and hover takes
                      the canonical foreground tint (`bg-tint`). */
                   active
-                    ? 'bg-ink-700/60 text-white'
-                    : 'text-zinc-400 hover:bg-tint hover:text-white'
+                    ? 'bg-ink-700/60 text-strong'
+                    : 'text-zinc-400 hover:bg-tint hover:text-strong'
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className="w-4 h-4 rounded-ds-sm border border-white/[0.2] shrink-0"
+                  className="w-4 h-4 rounded-ds-sm border border-hairline-strong shrink-0"
                   style={{
                     background: `linear-gradient(135deg, ${t.vars['--mr-bg']} 50%, ${t.vars['--mr-accent']} 50%)`,
                   }}

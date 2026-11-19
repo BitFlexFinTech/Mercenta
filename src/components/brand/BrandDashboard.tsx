@@ -600,7 +600,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   {complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).label}
                 </StatusBadge>
               </div>
-              <div className="mt-2.5 flex items-start gap-2 border-t border-white/[0.06] pt-2.5">
+              <div className="mt-2.5 flex items-start gap-2 border-t border-hairline pt-2.5">
                 <FileText className="w-4 h-4 flex-shrink-0 text-zinc-500" aria-hidden="true" />
                 <span className="text-ds-label leading-snug text-zinc-400">
                   {activeContract
@@ -667,7 +667,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
               description={`Your net payout accrues as purchase orders are accepted. ${pendingPayouts.length} payout(s) totalling £${pendingPayoutValue.toFixed(2)} are outstanding; a monthly trend appears once more than one month carries accrual.`}
             />
           ) : (
-            <div className="rounded-ds-lg border border-white/[0.06] bg-ink-900 px-2 pb-2 pt-3">
+            <div className="rounded-ds-lg border border-hairline bg-ink-900 px-2 pb-2 pt-3">
               <MercentaBars
                 bars={earningsSeries}
                 height={180}
@@ -734,7 +734,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       <div
         id="brand-payouts"
         data-payouts-pulse={payoutsPulse ? 'true' : undefined}
-        className={payoutsPulse ? 'rounded-ds-lg ring-1 ring-white/20' : undefined}
+        className={payoutsPulse ? 'rounded-ds-lg ring-1 ring-hairline-strong' : undefined}
       >
       <WorkspaceSection
         title="Payouts"
@@ -761,7 +761,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   primary: true,
                   render: (c) => (
                     <span>
-                      <span className="font-mono text-xs text-white">{c.purchaseOrderId}</span>
+                      <span className="font-mono text-xs text-strong">{c.purchaseOrderId}</span>
                       <span className="block font-mono text-ds-micro text-zinc-500">{c.id}</span>
                     </span>
                   ),
@@ -787,7 +787,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   label: 'Net payout',
                   align: 'right',
                   render: (c) => (
-                    <span className="font-mono text-xs font-semibold text-white">
+                    <span className="font-mono text-xs font-semibold text-strong">
                       £{netPayoutOf(c).toFixed(2)}
                     </span>
                   ),

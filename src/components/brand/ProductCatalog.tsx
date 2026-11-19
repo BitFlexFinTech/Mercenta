@@ -235,10 +235,10 @@ export function ProductCatalog() {
 
       {/* §Phase E3 — catalog readiness, derived from the existing rules only. */}
       {gateCleared && (
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-4 text-xs">
+        <div className="bg-tint border border-hairline rounded-ds-md p-4 text-xs">
           <div className="flex items-center justify-between gap-3">
             <div className="text-zinc-300">
-              <span className="font-medium text-white">Catalog readiness</span>{' '}
+              <span className="font-medium text-strong">Catalog readiness</span>{' '}
               · {products.length} product{products.length === 1 ? '' : 's'} in your catalog ·{' '}
               {incompleteCount === 0
                 ? 'all product information complete'
@@ -269,7 +269,7 @@ export function ProductCatalog() {
       )}
 
       {submissionNotice && (
-        <div className="bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-3 text-xs text-zinc-300">
+        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-zinc-300">
           {submissionNotice}
         </div>
       )}
@@ -302,7 +302,7 @@ export function ProductCatalog() {
                       ONE owner (`ProductThumb`), whose placeholder glyph/icon now
                       scale with the box; nothing else in the cell moved. */}
                   <ProductThumb product={p} size={64} className="rounded-ds-md" />
-                  <span className="text-sm font-medium text-white">{p.name}</span>
+                  <span className="text-sm font-medium text-strong">{p.name}</span>
                 </div>
               ),
             },
@@ -353,7 +353,7 @@ export function ProductCatalog() {
               label: 'Ex-Works (£)',
               align: 'right',
               render: (p) => (
-                <span className="text-sm font-semibold text-white">£{p.exWorksPrice.toFixed(2)}</span>
+                <span className="text-sm font-semibold text-strong">£{p.exWorksPrice.toFixed(2)}</span>
               ),
             },
             {
@@ -638,15 +638,15 @@ function AddProductPanel({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-surface-hover backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md bg-ink-850 border-l border-white/[0.08] h-full overflow-y-auto animate-slide-up">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06] sticky top-0 bg-ink-850 z-10">
-          <h3 className="text-sm font-semibold text-white">
+      <div className="relative w-full max-w-md bg-ink-850 border-l border-hairline h-full overflow-y-auto animate-slide-up">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline sticky top-0 bg-ink-850 z-10">
+          <h3 className="text-sm font-semibold text-strong">
             {guidanceAcked ? 'Add New Product' : 'Before You Add a Product'}
           </h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white">
+          <button onClick={onClose} className="text-zinc-500 hover:text-strong">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -726,7 +726,7 @@ function AddProductPanel({
             ]}
           />
           {/* §Batch-21 — Product image set with Amazon-standard validation */}
-          <div className="border-t border-white/[0.06] pt-3 mt-2">
+          <div className="border-t border-hairline pt-3 mt-2">
             <p className="text-ds-micro text-zinc-500 font-medium mb-2 flex items-center gap-1">
               <ImageUp className="w-3 h-3" /> Product Images
             </p>
@@ -767,7 +767,7 @@ function AddProductPanel({
               type="checkbox"
               checked={form.hazmat}
               onChange={(e) => setForm({ ...form, hazmat: e.target.checked })}
-              className="rounded-ds-sm border-white/[0.15] bg-ink-900 text-brass-500 focus:ring-brass-500/30"
+              className="rounded-ds-sm border-hairline-strong bg-ink-900 text-brass-500 focus:ring-brass-500/30"
             />
             <span className="text-xs text-zinc-400">Contains hazardous materials</span>
           </label>
@@ -823,9 +823,9 @@ function CostEditPanel({
   if (!product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-ink-850 border border-white/[0.08] rounded-ds-lg p-5 w-80 shadow-ds-overlay">
-        <h3 className="text-sm font-semibold text-white mb-1">Edit Item Cost</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover">
+      <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-80 shadow-ds-overlay">
+        <h3 className="text-sm font-semibold text-strong mb-1">Edit Item Cost</h3>
         <p className="text-ds-micro text-zinc-500 mb-4">
           {product.name} · {product.sku}
         </p>

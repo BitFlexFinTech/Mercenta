@@ -103,7 +103,7 @@ export function BrandContractView() {
         <Card key={c.id}>
           <div className="flex items-start justify-between gap-4 mb-3">
             <div>
-              <h3 className="text-sm font-semibold text-white capitalize">
+              <h3 className="text-sm font-semibold text-strong capitalize">
                 {c.type.replace(/_/g, ' ')} — v{c.version}
               </h3>
               <p className="text-ds-label text-zinc-500 mt-0.5">
@@ -128,15 +128,15 @@ export function BrandContractView() {
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
               <div className="text-ds-micro text-zinc-600 font-medium mb-1">Commission</div>
-              <div className="font-mono text-sm text-white">{c.commissionRate}%</div>
+              <div className="font-mono text-sm text-strong">{c.commissionRate}%</div>
             </div>
             <div>
               <div className="text-ds-micro text-zinc-600 font-medium mb-1">Monthly Fee</div>
-              <div className="font-mono text-sm text-white">£{c.monthlyFee}</div>
+              <div className="font-mono text-sm text-strong">£{c.monthlyFee}</div>
             </div>
             <div>
               <div className="text-ds-micro text-zinc-600 font-medium mb-1">Track</div>
-              <div className="text-sm capitalize text-white">
+              <div className="text-sm capitalize text-strong">
                 {c.fulfillmentTrack.replace(/_/g, ' ')}
               </div>
             </div>
@@ -155,25 +155,25 @@ export function BrandContractView() {
 
       {/* Full-document viewer */}
       {viewing && (
-        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
               <div>
-                <h3 className="text-sm font-semibold text-white capitalize">
+                <h3 className="text-sm font-semibold text-strong capitalize">
                   {viewing.type.replace(/_/g, ' ')} — v{viewing.version}
                 </h3>
                 <p className="text-ds-micro text-zinc-500 mt-0.5">
                   Generated from the {viewing.fulfillmentTrack.replace(/_/g, ' ')} clause set
                 </p>
               </div>
-              <button onClick={() => setViewingId(null)} className="text-zinc-500 hover:text-white">
+              <button onClick={() => setViewingId(null)} className="text-zinc-500 hover:text-strong">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
               {renderAgreement(viewing)}
             </pre>
-            <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">
+            <div className="flex justify-end gap-2 px-5 py-3 border-t border-hairline">
               <Button variant="ghost" onClick={() => download(viewing)} className="text-xs">
                 <Download className="w-3.5 h-3.5 mr-1.5" /> Download copy
               </Button>

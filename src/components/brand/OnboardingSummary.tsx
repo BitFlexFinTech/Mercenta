@@ -116,7 +116,7 @@ export function OnboardingSummary({ onNavigate }: { onNavigate?: (view: string) 
         <div className="flex items-start gap-3">
           <MessageSquare className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-white">Need to change your onboarding details?</p>
+            <p className="text-sm font-medium text-strong">Need to change your onboarding details?</p>
             <p className="text-xs text-zinc-400 mt-1">
               Your onboarding is locked as submitted. To request changes, open a support ticket in{' '}
               <button onClick={() => onNavigate?.('settings')} className="text-brass-400 hover:text-brass-300 underline underline-offset-2">Settings</button>.
@@ -130,7 +130,7 @@ export function OnboardingSummary({ onNavigate }: { onNavigate?: (view: string) 
 
 function Row({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-white/[0.04] py-1">
+    <div className="flex items-center justify-between border-b border-hairline py-1">
       <span className="text-ds-label text-zinc-500">{label}</span>
       <span className="text-ds-label text-zinc-300 font-medium truncate ml-4 max-w-[200px]">{value || '\u2014'}</span>
     </div>

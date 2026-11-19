@@ -48,7 +48,7 @@ export function CarrierProviderConfigurationPanel({
         {configurations.map((config) => (
           <li
             key={config.carrier}
-            className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5"
+            className="rounded-ds-md border border-hairline bg-tint p-2.5"
             data-testid={`carrier-provider-${config.carrier}`}
             data-operational={config.operational ? 'true' : 'false'}
           >
@@ -89,7 +89,7 @@ export function CarrierProviderConfigurationPanel({
             <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-500">{config.basis}</p>
 
             {scope === 'admin' && (
-              <div className="mt-2 space-y-1 border-t border-white/[0.06] pt-2">
+              <div className="mt-2 space-y-1 border-t border-hairline pt-2">
                 <p className="flex items-start gap-1.5 text-ds-micro leading-relaxed text-zinc-400">
                   <ShieldCheck className="mt-px h-3 w-3 flex-shrink-0 text-zinc-500" aria-hidden="true" />
                   Configured by Mercenta in the {config.controlPlane}.

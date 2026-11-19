@@ -36,7 +36,7 @@ function buildAgreementHtml(documentUrl: string): string {
 function RemittanceRow({ statement }: { statement: ReturnType<typeof generateRemittanceStatement> | null }) {
   if (!statement) return null;
   return (
-    <div className="flex items-center justify-between border-b border-white/[0.04] py-1.5">
+    <div className="flex items-center justify-between border-b border-hairline py-1.5">
       <span className="flex items-center gap-2 text-ds-label text-zinc-300">
         <FileText className="w-3.5 h-3.5 text-zinc-500" />
         Remittance statement {statement.statementNumber} · net £{statement.netPaid.toFixed(2)}
@@ -130,7 +130,7 @@ export function BrandSelfService() {
             <p className="text-ds-label text-zinc-600">No signed contract yet.</p>
           )}
           {!contractsQuery.isPending && signed.map((c) => (
-            <div key={c.id} className="flex items-center justify-between border-b border-white/[0.04] py-1.5">
+            <div key={c.id} className="flex items-center justify-between border-b border-hairline py-1.5">
               <span className="flex items-center gap-2 text-ds-label text-zinc-300">
                 <FileText className="w-3.5 h-3.5 text-zinc-500" />
                 Distribution Agreement v{c.version} · {c.status}
@@ -162,7 +162,7 @@ export function BrandSelfService() {
               <select
                 value={field}
                 onChange={(e) => setField(e.target.value as (typeof CHANGE_FIELDS)[number])}
-                className="w-full bg-ink-900 border border-white/[0.08] rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
               >
                 {CHANGE_FIELDS.map((f) => (
                   <option key={f} value={f}>{f}</option>
@@ -220,7 +220,7 @@ export function BrandSelfService() {
             <div className="pt-1">
               <p className="text-ds-micro font-medium text-zinc-500 mb-1">Your requests</p>
               {myRequests.map((r) => (
-                <div key={r.id} className="flex items-center justify-between border-b border-white/[0.04] py-1">
+                <div key={r.id} className="flex items-center justify-between border-b border-hairline py-1">
                   <span className="text-ds-label text-zinc-300 capitalize">
                     {r.field}: {r.requestedValue}
                   </span>

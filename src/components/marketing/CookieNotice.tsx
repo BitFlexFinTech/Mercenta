@@ -103,7 +103,7 @@ export function CookieNotice({ onNavigate }: { onNavigate: (page: PublicLinkPage
       aria-label={PUBLIC_COOKIE_NOTICE_REGION}
       aria-live="polite"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-ink-850',
+        'fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-ink-850',
         'md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md md:rounded-ds-lg md:border md:shadow-ds-overlay'
       )}
     >

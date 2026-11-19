@@ -230,7 +230,7 @@ function HealthPanel({
   }
 
   return (
-    <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 space-y-1 text-ds-label">
+    <div className="bg-tint border border-hairline rounded-ds-md p-3 space-y-1 text-ds-label">
       <div className="flex items-center justify-between">
         <span className="text-zinc-500">Auth</span>
         <span className={health.authValid ? 'text-emerald-300' : 'text-red-300'}>
@@ -316,7 +316,7 @@ function WizardStepper({
               'text-ds-micro font-medium px-2 py-0.5 rounded-full border flex items-center gap-1',
               completed[s.id]
                 ? 'bg-brass-500/10 text-brass-300 border-brass-500/20'
-                : 'bg-white/[0.02] text-zinc-500 border-white/[0.06]'
+                : 'bg-tint text-zinc-500 border-hairline'
             )}
             data-state={completed[s.id] ? 'complete' : 'pending'}
           >
@@ -324,7 +324,7 @@ function WizardStepper({
             <span className="hidden sm:inline">{s.label}</span>
           </div>
           {i < WIZARD_STEPS.length - 1 && (
-            <div className="w-2 h-px bg-white/10" />
+            <div className="w-2 h-px bg-tint" />
           )}
         </div>
       ))}
@@ -505,11 +505,11 @@ function ConnectWizard({ id, onClose }: WizardProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-ink-850 border-white/[0.08]">
+    <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg bg-ink-850 border-hairline">
         <div className="flex items-center gap-3 mb-1">
           <Plug className="w-5 h-5 text-brass-400" />
-          <h3 className="text-base font-semibold text-white">Connect — {def.name}</h3>
+          <h3 className="text-base font-semibold text-strong">Connect — {def.name}</h3>
         </div>
         <p className="text-xs text-zinc-500 mb-5">{def.description}</p>
 
@@ -526,8 +526,8 @@ function ConnectWizard({ id, onClose }: WizardProps) {
                   className={cn(
                     'text-left text-sm px-3 py-2.5 rounded-ds-md border transition-colors',
                     provider === opt.id
-                      ? 'border-brass-500/50 bg-brass-500/10 text-white'
-                      : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
+                      ? 'border-brass-500/50 bg-brass-500/10 text-strong'
+                      : 'border-hairline text-zinc-400 hover:border-hairline-strong'
                   )}
                 >
                   {opt.label}
@@ -808,7 +808,7 @@ export function IntegrationsPanel() {
 
       {/* Provider list */}
       {visibleIds.length === 0 ? (
-        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+        <Card className="p-2 bg-ink-850 border-hairline">
           <EmptyState
             title="No integrations match this view"
             description="Clear the filters to see every registered provider again. The Hub never hides an integration — a provider appears here as soon as it is registered."
@@ -832,7 +832,7 @@ export function IntegrationsPanel() {
           if (row.kind === 'heading') {
             return (
               <div key={`heading-${row.category}`} className="col-span-full mt-2 first:mt-0">
-                <h2 className="text-sm font-semibold text-white tracking-tight">
+                <h2 className="text-sm font-semibold text-strong tracking-tight">
                   {INTEGRATION_CATEGORY_LABELS[row.category]}
                 </h2>
                 <p className="text-ds-label text-zinc-500 mt-0.5">
@@ -848,10 +848,10 @@ export function IntegrationsPanel() {
           const connected = state.status === 'connected';
           const mode = modes[id];
           return (
-            <Card key={id} className="p-5 bg-ink-850 border-white/[0.06]">
+            <Card key={id} className="p-5 bg-ink-850 border-hairline">
               <div data-mode={mode} data-connection={state.status} className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-start justify-between w-full">
-                  <h3 className="text-sm font-semibold text-white">{def.name}</h3>
+                  <h3 className="text-sm font-semibold text-strong">{def.name}</h3>
                   <div className="flex flex-col items-end gap-1.5">
                     <StatusBadge state={state} />
                     <ModeBadge mode={mode} />
@@ -867,7 +867,7 @@ export function IntegrationsPanel() {
               </div>
 
               {state.status === 'connected' && (
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-ds-md p-3 mb-3 space-y-1">
+                <div className="bg-tint border border-hairline rounded-ds-md p-3 mb-3 space-y-1">
                   {Object.entries(state.metadata ?? {})
                     .filter(([k]) => k !== 'sandbox')
                     .map(([k, v]) => (
@@ -905,7 +905,7 @@ export function IntegrationsPanel() {
                   It remains a HINT, never a status: Mercenta holding a key is not
                   a verified connection, and it is never rendered as one. */}
               {serverSecrets[id] === true && mode !== 'live' && !connected && (
-                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-tint border border-hairline rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
                   <strong className="text-zinc-300">Server-side key present.</strong>{' '}
                   Mercenta holds a key for {def.name} on the server ({serverSecretNameFor(id) ?? 'a Vault secret'}),
                   so the live test call can run. Holding a key is not a verified connection —

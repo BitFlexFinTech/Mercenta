@@ -146,7 +146,7 @@ export function CommerceOperationsPanel() {
     <Card className="p-4 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-strong">
             Operational commerce{' '}
             <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
               (sim)
@@ -158,10 +158,10 @@ export function CommerceOperationsPanel() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
             {activityRows.length} activity step(s) · {simulatedCount} simulated
           </Badge>
-          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">
             persistence: {persistence.state} · durable {String(persistence.durable)}
           </Badge>
         </div>
@@ -204,11 +204,11 @@ export function CommerceOperationsPanel() {
           const cancelledInvoice = journal.find((i) => i.status === 'cancelled');
           const reason = cancelReason[po.id] ?? '';
           return (
-            <div key={po.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
+            <div key={po.id} className="rounded-ds-md border border-hairline bg-ink-850/60 p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
                 <span className="text-ds-micro text-zinc-500">{po.brandId}</span>
-                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                   {po.status}
                 </Badge>
                 <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
@@ -218,12 +218,12 @@ export function CommerceOperationsPanel() {
                 <span data-state="admin-commerce-receiving-status">
                   <Badge
                     className={cn(
-                      'text-ds-micro border-white/[0.08]',
+                      'text-ds-micro border-hairline',
                       receiving === 'received'
                         ? 'bg-emerald-500/10 text-emerald-300'
                         : receiving === 'partially_received'
                           ? 'bg-amber-500/10 text-amber-300'
-                          : 'bg-white/[0.05] text-zinc-400'
+                          : 'bg-tint text-zinc-400'
                     )}
                   >
                     receiving: {RECEIVING_STATUS_LABELS[receiving]}
@@ -256,7 +256,7 @@ export function CommerceOperationsPanel() {
                 <select
                   data-state="admin-commerce-terms-select"
                   aria-label={`Payment terms for ${po.poNumber} — carried on the invoice raised at receipt`}
-                  className="text-ds-label rounded-ds-sm border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
+                  className="text-ds-label rounded-ds-sm border border-hairline bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
                   value={chosenTerms}
                   disabled={busy || !!activeInvoice || !(n.receive || n.invoice)}
                   onChange={(e) =>
@@ -350,7 +350,7 @@ export function CommerceOperationsPanel() {
                     <input
                       data-state="admin-commerce-cancel-reason"
                       aria-label={`Cancellation reason for ${activeInvoice.number}`}
-                      className="text-ds-label rounded-ds-sm border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
+                      className="text-ds-label rounded-ds-sm border border-hairline bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
                       placeholder="Cancellation reason (required)"
                       value={reason}
                       disabled={busy}
@@ -438,7 +438,7 @@ export function CommerceOperationsPanel() {
               key: 'status',
               label: 'State',
               render: (a) => (
-                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                   {a.status}
                 </Badge>
               ),
@@ -474,7 +474,7 @@ export function CommerceOperationsPanel() {
             invoices.value.slice(0, 5).map((i) => (
               <div key={i.id} className="text-ds-label text-zinc-400">
                 <span className={cn(MONO, 'text-brass')}>{i.number}</span> · {i.brandId} ·{' '}
-                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                   {i.status}
                 </Badge>{' '}
                 £{i.subtotalGbp.toFixed(2)}
@@ -539,7 +539,7 @@ export function CommerceOperationsPanel() {
             exceptions.value.slice(0, 5).map((d) => (
               <div key={d.id} className="text-ds-label text-zinc-400">
                 <span className={MONO}>{d.id}</span> · {d.brandId} · {d.type} ·{' '}
-                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
                   {d.status}
                 </Badge>{' '}
                 £{d.amountGbp.toFixed(2)}

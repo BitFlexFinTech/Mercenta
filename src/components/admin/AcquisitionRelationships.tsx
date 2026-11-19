@@ -27,8 +27,8 @@ const STAGE_STYLES: Record<string, string> = {
   qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
   responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
   won: 'bg-brass/15 text-brass border-brass/30',
-  lost: 'bg-zinc-500/15 text-zinc-400 border-white/[0.08]',
-  new: 'bg-white/[0.05] text-zinc-300 border-white/[0.08]',
+  lost: 'bg-zinc-500/15 text-zinc-400 border-hairline',
+  new: 'bg-tint text-zinc-300 border-hairline',
   contacted: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
 };
 
@@ -54,11 +54,11 @@ export function AcquisitionRelationships() {
           the ONE message thread also shown in Admin → Messages.
         </p>
         <div className="flex flex-wrap gap-2 text-ds-micro text-zinc-400">
-          <span>In acquisition: <span className="text-white font-mono">{summary.enrolled}</span></span>
-          <span>Responses: <span className="text-white font-mono">{summary.responded}</span></span>
-          <span>Opportunities: <span className="text-white font-mono">{summary.opportunities}</span></span>
-          <span>In onboarding: <span className="text-white font-mono">{onboardedCount}</span></span>
-          <span>Operational: <span className="text-white font-mono">{operationalCount}</span></span>
+          <span>In acquisition: <span className="text-strong font-mono">{summary.enrolled}</span></span>
+          <span>Responses: <span className="text-strong font-mono">{summary.responded}</span></span>
+          <span>Opportunities: <span className="text-strong font-mono">{summary.opportunities}</span></span>
+          <span>In onboarding: <span className="text-strong font-mono">{onboardedCount}</span></span>
+          <span>Operational: <span className="text-strong font-mono">{operationalCount}</span></span>
         </div>
 
         {/* §Phase D4 — honest persistence status (never claims storage it lacks). */}
@@ -87,15 +87,15 @@ export function AcquisitionRelationships() {
             (Brand Intelligence → brand → Outreach) to create one.
           </p>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-hairline-06">
             {rowViews.map(({ row: r, onboarding }) => (
               <button
                 key={r.prospect.id}
                 onClick={() => setOpenId(openId === r.prospect.id ? null : r.prospect.id)}
-                className="w-full flex items-center justify-between gap-2 px-1 py-2 text-left hover:bg-white/[0.02]"
+                className="w-full flex items-center justify-between gap-2 px-1 py-2 text-left hover:bg-tint"
               >
                 <span className="min-w-0">
-                  <span className="text-xs font-medium text-white inline-flex items-center gap-1.5">
+                  <span className="text-xs font-medium text-strong inline-flex items-center gap-1.5">
                     <Trophy className="w-3 h-3 text-brass-400" />
                     {r.prospect.brand}
                   </span>
@@ -121,7 +121,7 @@ export function AcquisitionRelationships() {
         )}
 
         {open && (
-          <div className="border border-white/[0.06] rounded-ds-md p-3" data-section="crm-acquisition-relationship">
+          <div className="border border-hairline rounded-ds-md p-3" data-section="crm-acquisition-relationship">
             <div className="flex items-center justify-between pb-2">
               <p className="text-ds-micro font-semibold text-zinc-400 uppercase">
                 Relationship — {open.prospect.brand}

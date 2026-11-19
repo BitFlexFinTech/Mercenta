@@ -165,7 +165,7 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Link2 className="w-4 h-4" /> Google setup — {GOOGLE_ACCOUNT.email}
             </h2>
             <p className="text-ds-label text-zinc-500 mt-1">{GOOGLE_SETUP_DISCLAIMER}</p>
@@ -185,21 +185,21 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
           </Badge>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Account type</p>
-            <p className="text-sm font-bold text-white">Personal</p>
+            <p className="text-sm font-bold text-strong">Personal</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">OAuth client id</p>
-            <p className="text-sm font-bold text-white">{oauth.clientId ? 'recorded' : 'not entered'}</p>
+            <p className="text-sm font-bold text-strong">{oauth.clientId ? 'recorded' : 'not entered'}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Connection</p>
-            <p className="text-sm font-bold text-white" data-testid="google-connection-state">{oauth.state}</p>
+            <p className="text-sm font-bold text-strong" data-testid="google-connection-state">{oauth.state}</p>
           </div>
-          <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
             <p className="text-ds-micro text-zinc-500">Audit entries</p>
-            <p className="text-sm font-bold text-white">{auditCount}</p>
+            <p className="text-sm font-bold text-strong">{auditCount}</p>
           </div>
         </div>
         <p className="text-ds-micro text-zinc-500 mt-2" data-testid="google-connection-note">
@@ -296,25 +296,25 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
         {run ? (
           <div className="mt-3">
             <div className="grid gap-2 sm:grid-cols-4 text-ds-label">
-              <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+              <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
                 <p className="text-ds-micro text-zinc-500">Created</p>
-                <p className="text-sm font-bold text-white" data-testid="google-run-created">
+                <p className="text-sm font-bold text-strong" data-testid="google-run-created">
                   {run.created}/{run.steps.length}
                 </p>
               </div>
-              <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+              <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
                 <p className="text-ds-micro text-zinc-500">Failed</p>
-                <p className="text-sm font-bold text-white">{run.failed}</p>
+                <p className="text-sm font-bold text-strong">{run.failed}</p>
               </div>
-              <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+              <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
                 <p className="text-ds-micro text-zinc-500">Capability tests</p>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm font-bold text-strong">
                   {run.capabilityTestsPassed}/{run.capabilityTestsTotal}
                 </p>
               </div>
-              <div className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-2">
+              <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
                 <p className="text-ds-micro text-zinc-500">Mode</p>
-                <p className="text-sm font-bold text-white" data-testid="google-run-mode">
+                <p className="text-sm font-bold text-strong" data-testid="google-run-mode">
                   {run.mode}
                 </p>
               </div>
@@ -327,7 +327,7 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
               {run.steps.map((s) => (
                 <li
                   key={s.itemId}
-                  className="flex items-center justify-between gap-2 rounded-ds-md border border-white/[0.06] bg-ink-850 px-2.5 py-1.5"
+                  className="flex items-center justify-between gap-2 rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-1.5"
                   data-testid="google-setup-step"
                 >
                   <span className="text-ds-label text-zinc-300">

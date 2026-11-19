@@ -119,7 +119,7 @@ export function PartnershipsCentre() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs" data-testid="partner-targets-table">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-zinc-500">
                 <th className="px-2 py-1.5">Route</th>
                 <th className="px-2 py-1.5">Kind</th>
                 <th className="px-2 py-1.5">Market</th>
@@ -132,11 +132,11 @@ export function PartnershipsCentre() {
               {FOUNDER_PARTNER_TARGETS.map((t) => (
                 <tr
                   key={t.id}
-                  className="border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.03]"
+                  className="border-b border-hairline cursor-pointer hover:bg-tint"
                   data-testid={`partner-target-${t.id}`}
                   onClick={() => setSelected(t)}
                 >
-                  <td className="px-2 py-1.5 text-white">{t.name}</td>
+                  <td className="px-2 py-1.5 text-strong">{t.name}</td>
                   <td className="px-2 py-1.5 text-zinc-400">{t.kind}</td>
                   <td className="px-2 py-1.5 text-zinc-400">{t.market}</td>
                   <td className="px-2 py-1.5 text-zinc-400">
@@ -171,7 +171,7 @@ export function PartnershipsCentre() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs" data-testid="partnership-pipeline-table">
             <thead>
-              <tr className="border-b border-white/[0.06] text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-zinc-500">
                 <th className="px-2 py-1.5">Route</th>
                 <th className="px-2 py-1.5">Discovered</th>
                 <th className="px-2 py-1.5">Contacted</th>
@@ -181,7 +181,7 @@ export function PartnershipsCentre() {
             </thead>
             <tbody>
               {pipeline.byProgramme.map((b) => (
-                <tr key={b.label} className="border-b border-white/[0.04]">
+                <tr key={b.label} className="border-b border-hairline">
                   <td className="px-2 py-1.5 text-zinc-300">{b.label}</td>
                   <td className="px-2 py-1.5 text-zinc-400">{b.discovered}</td>
                   <td className="px-2 py-1.5 text-zinc-400">{b.contacted}</td>
@@ -201,7 +201,7 @@ export function PartnershipsCentre() {
       <Card title="Recipient-specific outreach — generate, then SEND explicitly">
         <div className="grid gap-2 sm:grid-cols-3">
           <div>
-            <p className="text-xs font-medium text-white">{selected.name}</p>
+            <p className="text-xs font-medium text-strong">{selected.name}</p>
             <p className="text-ds-micro text-zinc-500">{selected.objective}</p>
           </div>
           <Input
@@ -221,7 +221,7 @@ export function PartnershipsCentre() {
             <p className="text-ds-label text-zinc-400">
               <span className="text-zinc-500">Subject:</span> {draft.subject}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-white/[0.06] rounded-ds-md p-3">
+            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-hairline rounded-ds-md p-3">
               {draft.text}
             </pre>
             <p className="text-ds-micro text-zinc-500">
@@ -270,7 +270,7 @@ export function PartnershipsCentre() {
           <div>
             <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Use of funds</p>
             {FUNDRAISING_PLAN.useOfFunds.map((u) => (
-              <div key={u.label} className="border-b border-white/[0.04] py-1.5">
+              <div key={u.label} className="border-b border-hairline py-1.5">
                 <p className="text-ds-label text-zinc-300">
                   {u.label} — <span className="text-brass-300">{u.pct}%</span>
                 </p>
@@ -281,7 +281,7 @@ export function PartnershipsCentre() {
           <div>
             <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Milestones</p>
             {FUNDRAISING_PLAN.milestones.map((m) => (
-              <div key={m.label} className="border-b border-white/[0.04] py-1.5">
+              <div key={m.label} className="border-b border-hairline py-1.5">
                 <p className="text-ds-label text-zinc-300">{m.label}</p>
                 <p className="text-ds-micro text-zinc-600">{m.detail}</p>
               </div>

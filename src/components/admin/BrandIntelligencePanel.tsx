@@ -91,9 +91,9 @@ return<WorkspaceFrame className="space-y-4">
     {msg?<p className="text-ds-label text-brass-300 mt-1.5 font-mono truncate" data-run-status="1">{msg}</p>:null}
   </Card>
   <Card className="p-0">
-    <h3 className="px-3 py-2 text-xs font-semibold text-white uppercase flex items-center gap-2"><History className="w-3.5 h-3.5 text-zinc-400" />Run History <Badge className="text-ds-micro bg-ink-850 text-zinc-400">{runs.length}</Badge></h3>
+    <h3 className="px-3 py-2 text-xs font-semibold text-strong uppercase flex items-center gap-2"><History className="w-3.5 h-3.5 text-zinc-400" />Run History <Badge className="text-ds-micro bg-ink-850 text-zinc-400">{runs.length}</Badge></h3>
     {runs.length===0?<p className="px-3 py-4 text-xs text-zinc-600">No runs recorded yet.</p>:(
-    <div className="divide-y divide-white/[0.05]">
+    <div className="divide-y divide-hairline-06">
       {[...runs].reverse().slice(0,10).map(r=>{
         const open=exp===r.runId;
         const chvs=changesByRun(r.runId) as ProspectChangeEvent[];
@@ -115,19 +115,19 @@ return<WorkspaceFrame className="space-y-4">
     </div>)}
   </Card>
   <Card className="p-3">
-    <h3 className="text-xs font-semibold text-white uppercase flex items-center gap-2"><ShieldBan className="w-3.5 h-3.5 text-amber-400" />Disqualified <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{dqPros.length}</Badge></h3>
+    <h3 className="text-xs font-semibold text-strong uppercase flex items-center gap-2"><ShieldBan className="w-3.5 h-3.5 text-amber-400" />Disqualified <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{dqPros.length}</Badge></h3>
     <p className="text-ds-micro text-zinc-500 mt-1">Manually or engine-disqualified prospects remain tracked and can be re-qualified. Disqualifications survive re-runs.</p>
     {dqPros.length===0?<p className="text-xs text-zinc-600 mt-2">None.</p>:
-    <div className="mt-1.5 space-y-1">{dqPros.map((p:any)=><div key={p.id} className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-ds-md px-2 py-1.5">
+    <div className="mt-1.5 space-y-1">{dqPros.map((p:any)=><div key={p.id} className="flex items-center justify-between gap-2 bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5">
       <div className="min-w-0 flex-1"><span className="text-xs font-medium text-zinc-300">{p.brand}</span><p className="text-ds-micro text-amber-300/80 font-mono truncate">{p.disqualificationReason||'Disqualified'}</p></div>
       <Button variant="tertiary" className="text-ds-micro px-2 py-1" onClick={()=>handleRequalify(p.id,p.brand)}>Requalify</Button>
     </div>)}</div>}
   </Card>
   <Card className="p-0 overflow-x-auto"><table className="w-full text-xs" data-testid="bi-prospect-table">
     <thead><tr className="border-b bg-ink-850/50"><th className="px-2 py-1.5 text-left text-zinc-500">#</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('brand')}>Brand</th><th className="px-2 py-1.5 text-left text-zinc-500">Cat</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('score')}>Score</th><th className="px-2 py-1.5 text-left text-zinc-500">Tier</th>{['D','PO','G','Dist','Acc','Fit','Amz','Distrib','Ctc'].map(h=><th key={h} className="px-2 py-1.5 text-left text-zinc-500">{h}</th>)}</tr></thead>
-    <tbody>{filtered.map((p:any,i:number)=><tr key={p.id} onClick={()=>sSel(p)} className="border-b cursor-pointer hover:bg-white/[0.03]">
+    <tbody>{filtered.map((p:any,i:number)=><tr key={p.id} onClick={()=>sSel(p)} className="border-b cursor-pointer hover:bg-tint">
       <td className="px-2 py-1 text-zinc-500">{i+1}</td>
-      <td className="px-2 py-1 font-medium text-white">{p.brand}</td>
+      <td className="px-2 py-1 font-medium text-strong">{p.brand}</td>
       <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.category}</td>
       <td className="px-2 py-1"><span className={cn('font-bold',p.score.total>=80?'text-emerald-400':p.score.total>=70?'text-blue-400':'text-zinc-500')}>{p.score.total}</span></td>
       <td className="px-2 py-1"><Badge className={cn('text-ds-micro',TB[p.score.tier])}>{TL[p.score.tier]}</Badge></td>

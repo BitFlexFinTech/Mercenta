@@ -263,12 +263,12 @@ export function ComplianceApprovals() {
           compliance documents on file" about a brand that may simply not have
           loaded yet (measured in a real browser). */}
       {compliancePending && (
-        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+        <Card className="p-2 bg-ink-850 border-hairline">
           <LoadingState rows={4} label="Loading compliance documents…" />
         </Card>
       )}
       {!compliancePending && brandMap.size === 0 && (
-        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+        <Card className="p-2 bg-ink-850 border-hairline">
           <EmptyState
             title={reviewFilter === 'all' ? 'No compliance documents on file' : 'No documents match this filter'}
             description="A partner brand appears here with its per-document review state as soon as Mercenta holds a document record for it. Approving a document is what clears that brand's compliance gate."
@@ -283,12 +283,12 @@ export function ComplianceApprovals() {
         const pending = brandDocs.filter(function(d) { return d.status === 'under_review' || d.status === 'uploaded'; }).length;
         const approved = brandDocs.filter(function(d) { return d.status === 'approved'; }).length;
         const isExpanded = expandedBrandId === brandId;
-        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-white/[0.06] rounded-ds-lg overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-white/[0.12]')}>
+        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-hairline rounded-ds-lg overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-hairline-strong')}>
           <button onClick={function() { setExpandedBrandId(isExpanded ? null : brandId); }} className="w-full text-left p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-white">{brandName}</div><div className="text-ds-micro text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
+            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-strong">{brandName}</div><div className="text-ds-micro text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
             <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
           </button>
-          {isExpanded && (<div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">{brandDocs.map(function(d) { return (<div key={d.id} data-density={density} className={cn('flex items-center justify-between px-4', density === 'compact' ? 'py-2' : 'py-2.5')}>
+          {isExpanded && (<div className="border-t border-hairline divide-y divide-hairline-06">{brandDocs.map(function(d) { return (<div key={d.id} data-density={density} className={cn('flex items-center justify-between px-4', density === 'compact' ? 'py-2' : 'py-2.5')}>
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xs text-zinc-300 capitalize truncate">{d.type.replace(/_/g, ' ')}</span>
               <span className="text-ds-micro text-zinc-600">v{d.version ?? 1}</span>
@@ -346,14 +346,14 @@ export function ComplianceApprovals() {
       {preview && previewBundle && (function() {
         const bundle = previewBundle;
         const docBrand = brandsList.find(function(b) { return b.id === preview.brandId; });
-        return (<div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <span className="text-sm font-semibold text-white capitalize">{preview.type.replace(/_/g, ' ')} — {docBrand?.profile.businessName}</span>
-              <button onClick={function() { setPreviewId(null); }} className="text-zinc-400 hover:text-white">✕</button>
+        return (<div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
+              <span className="text-sm font-semibold text-strong capitalize">{preview.type.replace(/_/g, ' ')} — {docBrand?.profile.businessName}</span>
+              <button onClick={function() { setPreviewId(null); }} className="text-zinc-400 hover:text-strong">✕</button>
             </div>
-            <iframe title="doc-preview" srcDoc={bundle?.html ?? '<p>No preview.</p>'} className="w-full h-[60vh] bg-white" />
-            <div className="flex justify-end gap-2 p-4 border-t border-white/[0.06]">
+            <iframe title="doc-preview" srcDoc={bundle?.html ?? '<p>No preview.</p>'} className="w-full h-[60vh] bg-tint" />
+            <div className="flex justify-end gap-2 p-4 border-t border-hairline">
               <Button variant="ghost" onClick={function() { setPreviewId(null); }}>Close</Button>
               <Button onClick={function() { void manual(preview.id, 'approve'); }} className="text-xs"><CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve (manual)</Button>
               <Button variant="ghost" onClick={function() { void manual(preview.id, 'reject'); }} className="text-xs text-red-300"><XCircle className="w-3.5 h-3.5 mr-1" /> Reject</Button>

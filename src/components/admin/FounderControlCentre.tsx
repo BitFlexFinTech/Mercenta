@@ -370,7 +370,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           >
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="founder-intelligence-questions">
               {model.founderIntelligence.questions.map((q) => (
-                <li key={q.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <li key={q.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <p className="text-ds-label text-zinc-200">{q.question}</p>
                   <p className="mt-1 text-ds-micro text-zinc-500">{q.about}</p>
                   <p className="mt-1 font-mono text-ds-micro text-zinc-600">{q.dataOwner}</p>
@@ -406,7 +406,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-integrated-loop">
               {model.integratedLoop.stages.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
                     {s.label}
                   </span>
                   {i < model.integratedLoop.stageCount - 1 && (
@@ -417,7 +417,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </ol>
             <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-integrated-loop-stages">
               {model.integratedLoop.stages.map((s) => (
-                <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <p className="text-ds-label text-zinc-200">{s.label}</p>
                   <p className="mt-1 text-ds-micro text-zinc-500">{s.about}</p>
                   <p className="mt-1 font-mono text-ds-micro text-zinc-600">{s.dataOwner}</p>
@@ -462,7 +462,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-acquisition-intelligence-sources">
               {model.acquisitionIntelligence.sources.map((s) => (
-                <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <span className="flex justify-between gap-3">
                     <span className="text-ds-label text-zinc-200">{s.label}</span>
                     <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
@@ -477,7 +477,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-acquisition-intelligence-demonstrations">
               {model.acquisitionIntelligence.demonstrations.map((d) => (
-                <li key={d.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={d.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">{d.dimensionLabel} · {d.sourceLabel}</span>
                     <span className="font-mono text-zinc-400">{d.allowed ? 'allowed' : d.refusal}</span>
@@ -522,7 +522,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-uk-opportunity-states-sources">
               {model.ukOpportunityStates.evidenceSources.map((s) => (
-                <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <span className="flex justify-between gap-3">
                     <span className="text-ds-label text-zinc-200">{s.label}</span>
                     <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
@@ -536,7 +536,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-uk-opportunity-states-states">
               {model.ukOpportunityStates.states.map((st) => (
-                <li key={st.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={st.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">{st.id} — {st.label}</span>
                     <span className="font-mono text-zinc-400">{st.assertable ? 'asserted' : st.refusal}</span>
@@ -591,7 +591,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="learning-loop-stages">
                 {model.learningLoop.stages.map((s) => (
-                  <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
                       {s.label}
                       {s.gate ? ' · gate' : ''}
@@ -634,7 +634,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="curriculum-stages">
                 {model.onboardingCurriculum.stages.map((s) => (
-                  <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
                       {s.order}. {s.label}
                       {s.gating ? ' · teaching' : s.kind === 'readiness' ? ' · final' : ' · orientation'}
@@ -681,7 +681,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="contextual-education-screens">
                 {model.contextualEducation.screens.map((s) => (
-                  <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.label}</p>
                     <p className="mt-1 text-ds-micro text-zinc-500">
                       {s.fieldCount} field{s.fieldCount === 1 ? '' : 's'}
@@ -692,7 +692,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               </ul>
               <ul className="mt-4 space-y-2" data-testid="contextual-education-fields">
                 {model.contextualEducation.explanations.map((e) => (
-                  <li key={e.key} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={e.key} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-label text-zinc-300">
                       <span className="font-mono">{e.screenLabel}</span> · {e.label}
                     </p>
@@ -736,14 +736,14 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="mb-4 flex flex-wrap gap-2" data-testid="shared-workflows-consumers">
                 {model.sharedWorkflows.consumers.map((c) => (
-                  <li key={c.id} className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-400">
+                  <li key={c.id} className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-400">
                     {c.label}
                   </li>
                 ))}
               </ul>
               <ul className="space-y-2" data-testid="shared-workflows-list">
                 {model.sharedWorkflows.workflows.map((w) => (
-                  <li key={w.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={w.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-label text-zinc-300">{w.label}</p>
                     <p className="mt-1 text-ds-micro text-zinc-500">{w.description}</p>
                     <p className="mt-1 text-ds-micro text-zinc-600">
@@ -801,7 +801,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               </p>
               <ul className="mt-4 space-y-2" data-testid="control-tutorial-recordings-list">
                 {model.tutorialRecordings.recordings.map((t) => (
-                  <li key={t.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={t.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <span className="flex justify-between gap-3">
                       <span className="text-ds-label text-zinc-300">{t.title}</span>
                       <span className="font-mono text-ds-micro text-zinc-400">{t.playable ? 'current' : t.refusal}</span>
@@ -855,7 +855,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               </p>
               <ul className="mt-4 space-y-2" data-testid="control-credential-vault-list">
                 {model.credentialVault.providers.map((p) => (
-                  <li key={p.providerId} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={p.providerId} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <span className="flex justify-between gap-3">
                       <span className="text-ds-label text-zinc-300">{p.providerId}</span>
                       <span className="font-mono text-ds-micro text-zinc-400">{p.usable ? 'usable' : p.refusal}</span>
@@ -976,7 +976,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="localisation-concepts-grid">
                 {model.localisation.concepts.map((c) => (
-                  <li key={c.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={c.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{c.label}</p>
                     <p className="mt-1 text-ds-label text-zinc-300">{c.description}</p>
                     <p className="mt-1 text-ds-micro text-zinc-500">{c.source}</p>
@@ -1002,7 +1002,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.localisation.basis} {model.localisation.disclaimer}
               </p>
               {/* §PHASE 9 — the localization / SEO / hreflang framework (formats, timezones, hreflang). */}
-              <div className="mt-5 border-t border-white/[0.06] pt-4" data-testid="localisation-seo">
+              <div className="mt-5 border-t border-hairline pt-4" data-testid="localisation-seo">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Localization, SEO &amp; hreflang</p>
                   <span className="text-ds-micro text-zinc-500" data-testid="localisation-seo-served">
@@ -1072,7 +1072,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3" data-testid="amazon-governance-sources">
                 {model.amazonGovernance.sources.map((s) => (
-                  <li key={s.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.id}</p>
                       <span className={`text-ds-micro ${s.status === 'verified' ? 'text-emerald-400' : 'text-amber-400'}`}>{s.status}</span>
@@ -1106,7 +1106,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="country-framework-roles">
                 {model.countryFramework.roles.map((role) => (
-                  <li key={role.id} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <li key={role.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{role.label}</p>
                     <p className="mt-1 text-ds-label text-zinc-300">{role.description}</p>
                     <p className="mt-1 text-ds-micro text-zinc-500">
@@ -1163,7 +1163,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   { label: 'Engaged', count: model.acquisitionConversion.counts.engaged, sub: `${formatRate(model.acquisitionConversion.rates.engagementRate)} of contacted` },
                   { label: 'Converted', count: model.acquisitionConversion.counts.converted, sub: `${formatRate(model.acquisitionConversion.rates.conversionRate)} of contacted` },
                 ].map((funnel) => (
-                  <div key={funnel.label} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                  <div key={funnel.label} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{funnel.label}</p>
                     <p className="mt-1 font-mono text-lg text-zinc-100">{funnel.count}</p>
                     <p className="text-ds-micro text-brass-300">{funnel.sub}</p>
@@ -1331,7 +1331,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 { label: 'Cross-tenant', value: String(model.objectResolution.crossTenant), sub: 'fails closed · queued' },
                 { label: 'Replays deduped', value: String(model.objectResolution.replays), sub: 'duplicates contained' },
               ].map((tile) => (
-                <div key={tile.label} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <div key={tile.label} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
                   <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
                   <p className="text-ds-micro text-brass-300">{tile.sub}</p>
@@ -1434,7 +1434,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   sub: 'Model B orders',
                 },
               ].map((tile) => (
-                <div key={tile.label} className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3">
+                <div key={tile.label} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
                   <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
                   <p className="text-ds-micro text-brass-300">{tile.sub}</p>
@@ -1477,7 +1477,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.financingRouting.byRoute.map((b) => (
                 <div
                   key={b.routeId}
-                  className="rounded-ds-md border border-white/[0.08] bg-white/[0.02] p-3"
+                  className="rounded-ds-md border border-hairline bg-tint p-3"
                 >
                   <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{b.label}</p>
                   <p className="mt-1 font-mono text-lg text-zinc-100">{b.count}</p>
@@ -1489,7 +1489,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.financingRouting.decisions.map((d) => (
                 <li
                   key={d.purchaseId}
-                  className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label"
+                  className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label"
                 >
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">
@@ -1534,7 +1534,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-financier-lifecycle">
               {model.financierLifecycle.stages.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
                     {s.label}
                   </span>
                   {i < model.financierLifecycle.stageCount - 1 && (
@@ -1551,7 +1551,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-4 space-y-1" data-testid="control-financier-lifecycle-candidates">
               {model.financierLifecycle.candidates.map((c) => (
-                <li key={c.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={c.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">{c.label}</span>
                     <span className="font-mono text-zinc-400">{c.stageLabel}</span>
@@ -1590,7 +1590,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.pitchWorkspace.sections.map((s) => (
                 <li
                   key={s.id}
-                  className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label"
+                  className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label"
                 >
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">
@@ -1641,7 +1641,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-founder-outreach-cadence">
               {model.founderOutreach.cadence.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
                     Day {s.dayOffset} · {s.typeLabel}
                   </span>
                   {i < model.founderOutreach.cadenceCount - 1 && (
@@ -1658,7 +1658,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-4 space-y-1" data-testid="control-founder-outreach-touchpoints">
               {model.founderOutreach.demoTouchpoints.map((t) => (
-                <li key={t.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={t.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">
                       {t.providerStageLabel} · {t.channelLabel} · {t.typeLabel}
@@ -1710,7 +1710,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-4 space-y-1" data-testid="control-financier-universe-fields">
               {model.financierUniverse.recordFields.map((f) => (
-                <li key={f.key} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={f.key} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">{f.label}</span>
                     <span className="font-mono text-zinc-400">{f.requiredForRealEntry ? 'required' : 'optional'}</span>
@@ -1724,7 +1724,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-financier-universe-placeholders">
               {model.financierUniverse.illustrative.map((r) => (
-                <li key={r.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                <li key={r.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
                     <span className="text-zinc-300">{r.providerTypeLabel} · {r.marketLabels.join(', ')}</span>
                     <span className="font-mono text-zinc-400">{r.allowed ? 'allowed' : r.refusal}</span>
@@ -1778,7 +1778,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               domain="risk"
             >
               <div
-                className="flex flex-wrap items-center justify-between gap-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-ds-md border border-hairline bg-tint px-3 py-2"
                 data-testid="automation-halt-panel"
                 data-halted={halt.halted ? 'true' : 'false'}
               >
@@ -1813,8 +1813,8 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="What automation exists, when it last ran, whether it succeeded, what it affected, and how it can be safely retried."
               domain="risk"
             >
-            <div className="overflow-hidden rounded-ds-lg border border-white/[0.06]" data-testid="automation-table">
-              <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px bg-white/[0.06] text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <div className="overflow-hidden rounded-ds-lg border border-hairline" data-testid="automation-table">
+              <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px bg-tint text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 <span className="bg-ink-900 px-3 py-2">Automation</span>
                 <span className="bg-ink-900 px-3 py-2">Status</span>
                 <span className="bg-ink-900 px-3 py-2">Next run</span>
@@ -1824,7 +1824,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 <div
                   key={h.id}
                   data-testid={`automation-row-${h.id}`}
-                  className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px border-t border-white/[0.06] bg-white/[0.02] text-ds-label"
+                  className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px border-t border-hairline bg-tint text-ds-label"
                 >
                   <div className="bg-ink-900 px-3 py-2">
                     <p className="text-zinc-200">{h.name}</p>
@@ -1964,7 +1964,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="space-y-1" data-testid="automation-dependencies">
                 {model.dependencies.map((d) => (
-                  <li key={d.providerId} className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                  <li key={d.providerId} className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-ds-label text-zinc-200">{d.label}</span>
                       <Badge className="text-ds-micro">{d.mode.replace(/_/g, ' ')}</Badge>
@@ -1990,7 +1990,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   <p className="text-ds-label text-zinc-500">Composing the brief…</p>
                 ) : (
                   <>
-                    <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                    <div className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="text-ds-label font-semibold text-zinc-200">Narrative</span>
                         <span data-testid="ai-narrative-basis">
@@ -2005,7 +2005,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                       <p className="mt-1 text-ds-micro text-zinc-600">{brief.narrative.reason}</p>
                     </div>
                     {brief.facts.sections.map((s) => (
-                      <div key={s.id} className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                      <div key={s.id} className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <span className="text-ds-label font-semibold text-zinc-200">{s.title}</span>
                           <Badge className="text-ds-micro">canonical facts</Badge>
@@ -2025,7 +2025,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                       </div>
                     ))}
                     {brief.facts.recommendedActions.length > 0 && (
-                      <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                      <div className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                         <span className="text-ds-label font-semibold text-zinc-200">Recommended next actions</span>
                         <ul className="mt-1 space-y-1">
                           {brief.facts.recommendedActions.map((a) => (
@@ -2065,7 +2065,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 aria-label="Ask Mercenta a question"
-                className="min-w-[240px] flex-1 rounded-ds-md border border-white/[0.08] bg-ink-850 px-3 py-2 text-ds-label text-zinc-200 outline-none focus:border-white/[0.2]"
+                className="min-w-[240px] flex-1 rounded-ds-md border border-hairline bg-ink-850 px-3 py-2 text-ds-label text-zinc-200 outline-none focus:border-hairline-strong"
               />
               <Button
                 variant="secondary"
@@ -2080,7 +2080,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </div>
             {answer && (
               <div
-                className="mt-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                className="mt-3 rounded-ds-md border border-hairline bg-tint px-3 py-2"
                 data-testid="ai-ask-answer"
               >
                 <div className="flex flex-wrap items-center gap-2">

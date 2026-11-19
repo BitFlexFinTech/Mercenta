@@ -82,7 +82,7 @@ const STANDING_PRESENTATION: Record<
   },
   not_applicable: {
     label: 'Not applicable',
-    className: 'border-white/[0.10] bg-white/[0.03] text-zinc-500',
+    className: 'border-hairline-strong bg-tint text-zinc-500',
     Icon: Info,
   },
 };
@@ -108,18 +108,18 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
       aria-label={doc.title}
       data-testid="po-document-dialog"
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-ds-lg border border-white/[0.08] bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg">
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-white/[0.06] bg-ink-850/95 px-4 py-3 backdrop-blur">
+      <div className="absolute inset-0 bg-surface-hover backdrop-blur-sm" onClick={onClose} />
+      <div className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-ds-lg border border-hairline bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-ink-850/95 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
-            <h2 className="text-ds-title font-semibold text-white">{doc.title}</h2>
+            <h2 className="text-ds-title font-semibold text-strong">{doc.title}</h2>
             <p className="mt-0.5 text-ds-label text-zinc-500">{doc.purpose}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -127,7 +127,7 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
 
         {doc.placeholderNotice && (
           <p
-            className="border-b border-white/[0.06] bg-state-warning/10 px-4 py-2 text-ds-micro leading-relaxed text-state-warning"
+            className="border-b border-hairline bg-state-warning/10 px-4 py-2 text-ds-micro leading-relaxed text-state-warning"
             data-testid="po-document-placeholder-notice"
           >
             {doc.placeholderNotice}
@@ -139,7 +139,7 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
             ref={frameRef}
             title={doc.title}
             srcDoc={doc.html}
-            className="h-[60vh] w-full bg-white"
+            className="h-[60vh] w-full bg-tint"
             data-testid="po-document-frame"
           />
         ) : (
@@ -150,7 +150,7 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline p-4">
           <span className="text-ds-micro text-zinc-500">
             {doc.cartonIdentifiers?.length
               ? `${doc.cartonIdentifiers.length} carton identifier(s) on this document.`
@@ -212,7 +212,7 @@ const CHAIN_STATE_PRESENTATION: Record<
  */
 export function CollectChainPanel({ chain }: { chain: CollectChain }) {
   return (
-    <div className="border-t border-white/[0.06] pt-2.5" data-testid="collect-chain">
+    <div className="border-t border-hairline pt-2.5" data-testid="collect-chain">
       <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
         Channel collect chain
       </p>
@@ -366,7 +366,7 @@ export function PoDocumentPackPanel({
           return (
             <li
               key={doc.kind}
-              className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5"
+              className="rounded-ds-md border border-hairline bg-tint p-2.5"
               data-testid={`po-document-${doc.kind}`}
             >
               <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
@@ -469,7 +469,7 @@ export function PoDocumentPackPanel({
           channel-generated label for a UK/EU consignment. The labels this pack
           renders are MERCENTA'S OWN carrier templates (DHL / Palletline). */}
       <p
-        className="border-t border-white/[0.06] pt-2.5 text-ds-micro leading-relaxed text-zinc-500"
+        className="border-t border-hairline pt-2.5 text-ds-micro leading-relaxed text-zinc-500"
         data-testid="channel-labels-rule"
       >
         {channelShipmentLabelsAvailability(UK_MARKETPLACE_ID).reason}

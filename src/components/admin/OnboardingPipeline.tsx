@@ -34,7 +34,7 @@ const ORIGIN_LABELS: Record<string, string> = {
 };
 
 const STEP_STYLES: Record<string, string> = {
-  pending: 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
+  pending: 'bg-tint text-zinc-400 border-hairline',
   in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
   done: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
 };
@@ -133,10 +133,10 @@ export function OnboardingPipeline() {
                 'px-2 py-1 rounded-ds-sm border transition-colors',
                 filter === chip.key
                   ? 'bg-brass-500/15 text-brass border-brass/30'
-                  : 'text-zinc-400 border-white/[0.08] hover:text-white'
+                  : 'text-zinc-400 border-hairline hover:text-strong'
               )}
             >
-              {chip.label}: <span className="font-mono text-white">{chip.value}</span>
+              {chip.label}: <span className="font-mono text-strong">{chip.value}</span>
             </button>
           ))}
         </div>
@@ -170,16 +170,16 @@ export function OnboardingPipeline() {
         ) : visible.length === 0 ? (
           <p className="text-ds-label text-zinc-600">No onboarding records in this state.</p>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-hairline-06">
             {visible.map((row) => (
               <div key={row.onboarding.id}>
                 <button
                   data-onboarding-row={row.onboarding.status}
                   onClick={() => setOpenId(openId === row.onboarding.id ? null : row.onboarding.id)}
-                  className="w-full flex items-center justify-between gap-2 px-1 py-2 text-left hover:bg-white/[0.02]"
+                  className="w-full flex items-center justify-between gap-2 px-1 py-2 text-left hover:bg-tint"
                 >
                   <span className="min-w-0">
-                    <span className="text-xs font-medium text-white inline-flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-strong inline-flex items-center gap-1.5">
                       <ClipboardList className="w-3 h-3 text-brass-400" />
                       {row.onboarding.businessName}
                     </span>
@@ -240,7 +240,7 @@ function OnboardingDetail({
 }) {
   const o = row.onboarding;
   return (
-    <div className="border border-white/[0.06] rounded-ds-md p-3 mb-2 space-y-2" data-section="onboarding-detail">
+    <div className="border border-hairline rounded-ds-md p-3 mb-2 space-y-2" data-section="onboarding-detail">
       {row.opportunity && (
         <p className="text-ds-micro text-zinc-400">
           Originating opportunity{' '}
@@ -254,7 +254,7 @@ function OnboardingDetail({
           <li
             key={s.id}
             data-onboarding-step={s.id}
-            className="flex items-center justify-between gap-2 border-b border-white/[0.04] pb-1"
+            className="flex items-center justify-between gap-2 border-b border-hairline pb-1"
           >
             <span className="text-ds-label text-zinc-300">
               <span className="font-mono text-ds-micro text-zinc-500 mr-1.5">{s.id}</span>

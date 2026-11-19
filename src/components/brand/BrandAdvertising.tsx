@@ -180,7 +180,7 @@ return (
                   {t.icon}
                   {t.label}
                 </div>
-                <div className="text-xl font-semibold text-white">{t.value}</div>
+                <div className="text-xl font-semibold text-strong">{t.value}</div>
               </Card>
             ))}
       </div>
@@ -193,7 +193,7 @@ return (
         ) : (
           <DataTable<AdCampaign>
             columns={[
-              { key: 'name', label: 'Campaign', primary: true, render: (c) => <span className="font-medium text-white">{c.name}</span> },
+              { key: 'name', label: 'Campaign', primary: true, render: (c) => <span className="font-medium text-strong">{c.name}</span> },
               { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-ds-micro', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
               { key: 'monthlyBudgetGbp', label: 'Budget', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.monthlyBudgetGbp)}</span> },
               { key: 'spendToDateGbp', label: 'Spend', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.spendToDateGbp)}</span> },
@@ -224,9 +224,9 @@ return (
                 ['ACOS', pct(selectedCampaignRow.acos)],
                 ['Budget', gbp(selectedCampaignRow.monthlyBudgetGbp)],
               ].map(([k, v]) => (
-                <div key={String(k)} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-2">
+                <div key={String(k)} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
                   <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
-                  <div className="mt-1 font-medium text-white">{v}</div>
+                  <div className="mt-1 font-medium text-strong">{v}</div>
                 </div>
               ))}
             </div>
@@ -235,7 +235,7 @@ return (
       )}
 
       <div data-testid="ba-recommendation-card">
-        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+        <h3 className="text-sm font-semibold text-strong mb-2 flex items-center gap-1.5">
           <TrendingUp className="w-4 h-4 text-brass-400" /> Recommended monthly advertising budget
         </h3>
         {adsLoading ? (
@@ -254,10 +254,10 @@ return (
             </p>
             <div className="space-y-3">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-ds-md border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <span className="text-xs font-medium text-white">{rec.month}</span>
+                      <span className="text-xs font-medium text-strong">{rec.month}</span>
                       <span className="text-ds-label text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
                     </div>
                     <Badge className={cn('text-ds-micro', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
