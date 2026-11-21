@@ -148,10 +148,12 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                      sat at x=1360 on a 1280px viewport — OFF-SCREEN and unclickable.
                      Measured fit with the recipe below: 1029px, 33px spare. The row
                      now appears from `xl` (1280px); below that the drawer carries all
-                     nine groups. 10px is the size at which nine groups + BOTH actions
-                     fit an 80rem header at 0.08em tracking; the tracking is kept wide
-                     because that is the approved Concept 3 label treatment. */
-                  className="flex items-center gap-0.5 whitespace-nowrap rounded-ds-sm px-0.5 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
+                     nine groups. The label uses the NAMED 11px floor (`ds-micro`), not
+                     an arbitrary sub-12px size: `validate-typography-scale` forbids any
+                     arbitrary micro size, and 11px is the scale's readable floor.
+                     Tracking is kept wide because that is the approved Concept 3 label
+                     treatment. */
+                  className="flex items-center gap-0.5 whitespace-nowrap rounded-ds-sm px-0.5 py-2 font-mono text-ds-micro uppercase tracking-[0.08em] text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
                 >
                   {item.label}
                   <ChevronDown
@@ -210,14 +212,14 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           <button
             onClick={onOpenPortal}
             data-testid={PRE_AUDIT_TESTIDS.headerUtility}
-            className="ml-2 whitespace-nowrap bg-[var(--mr-accent)] px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
+            className="ml-2 whitespace-nowrap bg-[var(--mr-accent)] px-3 py-2 font-mono text-ds-micro font-semibold uppercase tracking-[0.08em] text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
           >
             Partner Login
           </button>
           <button
             onClick={onOpenPortal}
             data-testid="public-nav-request-access"
-            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
+            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-ds-micro uppercase tracking-[0.08em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
           >
             Request Partner Access
           </button>
