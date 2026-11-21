@@ -136,6 +136,32 @@ export default {
           600: 'var(--mr-accent-600)',
           700: 'var(--mr-accent-700)',
         },
+        /**
+         * §BATCH 5 (2026-11-21) — THE CANONICAL ACCENT NAME.
+         *
+         * WHY. The token has always been `--mr-accent` (`src/config/themes.ts`),
+         * but the only CLASS family that reached it was `brass` — the legacy alias
+         * the migration programme classifies as the INK family. So every accent
+         * use counted as un-migrated legacy even though its value was correct, and
+         * there was no canonical name to migrate TO.
+         *
+         * This block is that name, declared as an EXACT MIRROR of `brass` — same
+         * token, same ramp — so migrating a class from `brass` to `accent` is a
+         * pure RENAME that moves no pixel. It is additive: `brass` stays declared
+         * (Batches 6–7 finish the rename), and nothing that resolves today stops
+         * resolving.
+         *
+         * The alpha steps (`bg-accent/15`, `border-accent/20`, …) are emitted by
+         * `scripts/gen-theme-alpha-shims.mjs`, which carries the matching targets.
+         */
+        accent: {
+          DEFAULT: 'var(--mr-accent)',
+          300: 'var(--mr-accent-300)',
+          400: 'var(--mr-accent-400)',
+          500: 'var(--mr-accent)',
+          600: 'var(--mr-accent-600)',
+          700: 'var(--mr-accent-700)',
+        },
         zinc: {
           100: 'var(--mr-text-200)',
           200: 'var(--mr-text-200)',

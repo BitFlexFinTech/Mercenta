@@ -163,7 +163,10 @@ for (const id of IDS) {
 
 check(
   'the `Card` primitive carries `.ds-card` (the token is applied by that class, not by a hardcoded colour)',
-  /'ds-card bg-ink-850 border rounded-ds-lg shadow-ds-subtle'/.test(UI_CODE)
+  /* §REPOINTED §BATCH 5a (2026-11-21) — `bg-ink-850` became `bg-surface-raised`. The
+     assertion's subject is unchanged (`Card` carries `.ds-card`, and no hardcoded
+     colour); only the surface class it reads moved onto the canonical ladder. */
+  /'ds-card bg-surface-raised border rounded-ds-lg shadow-ds-subtle'/.test(UI_CODE)
 );
 check(
   'ABSENCE GUARD — the `Card` primitive no longer carries the retired `border-white/[0.06]`',
@@ -199,9 +202,12 @@ check('ABSENCE GUARD — no hardcoded `bg-black/70` scrim remains in the primiti
 
 /* The control metrics the reference measures (spec §7.3/§7.4 and §12). */
 /* Post-migration: literal border-white/* migrated to border-hairline/border-hairline-strong */
-const controls = UI_CODE.match(/className="w-full bg-ink-900 border border-hairline(?:-strong)? rounded-ds-md[^"]*"/g) ?? [];
+/* §REPOINTED §BATCH 5a (2026-11-21) — `bg-ink-900`/`placeholder-zinc-600` became
+   `bg-surface`/`placeholder-faint`. Same subject (the three control class strings are
+   DISCOVERED from the primitives); only the canonical class names it matches moved. */
+const controls = UI_CODE.match(/className="w-full bg-surface border border-hairline(?:-strong)? rounded-ds-md[^"]*"/g) ?? [];
 const byMarker = (m) => controls.find((c) => c.includes(m)) ?? '';
-const inputCls = byMarker('placeholder-zinc-600'); // the single-line `<input>`
+const inputCls = byMarker('placeholder-faint'); // the single-line `<input>`
 const textareaCls = byMarker('resize-none'); // the multi-line `<textarea>`
 const selectCls = byMarker('appearance-none'); // the `<select>`
 check(
@@ -218,7 +224,10 @@ check(
   'the textarea stays multi-line (no fixed height is imposed on it)',
   textareaCls.length > 0 && !/ h-11\b/.test(textareaCls)
 );
-const labelClasses = UI.match(/className="block [^"]*font-medium text-zinc-400 mb-1\.5"/g) ?? [];
+/* §REPOINTED §BATCH 5a (2026-11-21) — `text-zinc-400` became `text-muted`. The
+   assertion's subject is unchanged (all three control labels share ONE label step);
+   only the colour class in the label string moved onto the canonical ladder. */
+const labelClasses = UI.match(/className="block [^"]*font-medium text-muted mb-1\.5"/g) ?? [];
 check(
   'all three control labels (Input · Select · Textarea) share ONE 14px label step',
   labelClasses.length === 3 && labelClasses.every((c) => c.includes('text-ds-body')),
@@ -265,7 +274,10 @@ const DROPDOWNS = [
  * legacy shim. The PublicNav dropdown was MEASURED to use an OPAQUE token surface, so
  * it was brought back to the peers' translucent treatment in the same change.
  */
-const MENU_SURFACE = /bg-ink-800\/70|bg-\[var\(--mr-surface-overlay\)\]\/\d+/;
+/* §REPOINTED §BATCH 5a (2026-11-21) — `bg-ink-800/70` became `bg-surface-overlay/70`.
+   Both name the SAME thing (a translucent, theme-derived surface); the new form is the
+   canonical token, so it is now the expected one rather than the legacy alias. */
+const MENU_SURFACE = /bg-surface-overlay\/\d+|bg-ink-800\/70|bg-\[var\(--mr-surface-overlay\)\]\/\d+/;
 const menuSurface = (src) => {
   const m = code(src).match(MENU_SURFACE);
   return m ? m[0] : '';
@@ -334,7 +346,10 @@ check(
 );
 check(
   'the rail keeps the theme surface role as its fill (no new colour role was invented)',
-  railCardClass.includes('bg-ink-900'),
+  /* §REPOINTED §BATCH 5a (2026-11-21) — `bg-ink-900` became `bg-surface`. The
+     assertion's subject is unchanged (the rail keeps a THEME SURFACE role); the
+     negative lookahead keeps it exact, so a different surface STEP would not pass. */
+  /bg-surface(?!-)/.test(railCardClass),
   railCardClass
 );
 check(
@@ -350,7 +365,7 @@ check(
 );
 check(
   'ABSENCE GUARD — the wrapper paints nothing: no full-height fill, edge border or raised shadow behind the card',
-  drawerClasses.every((c) => !/border-r|bg-ink-900|shadow-ds-raised/.test(c)),
+  drawerClasses.every((c) => !/border-r|bg-surface(?!-)|shadow-ds-raised/.test(c)),
   drawerClasses.join(' | ')
 );
 
@@ -410,7 +425,11 @@ const RAIL_GEOMETRY = [
   ],
   [
     "the nav row's hover is the floating-surface tint from the theme (`hover:bg-tint`)",
-    RAIL_CODE.includes("'text-zinc-500 hover:bg-tint hover:text-zinc-200'"),
+    /* §REPOINTED §BATCH 5a (2026-11-21) — `text-zinc-500` → `text-muted` and
+       `hover:text-zinc-200` → `hover:text-strong`. Same subject (the row's hover comes
+       from the theme's floating-surface tint); only the two text classes moved onto the
+       canonical ladder. */
+    RAIL_CODE.includes("'text-muted hover:bg-tint hover:text-strong'"),
   ],
   ['ABSENCE GUARD — no legacy `hover:bg-white/[0.04]` remains in the rail', !RAIL_CODE.includes(LEGACY_HOVER)],
   ["the nav icon takes the reference's 20px step", RAIL_CODE.includes('className="h-5 w-5 flex-shrink-0"')],
@@ -430,8 +449,11 @@ const RAIL_GEOMETRY = [
   ],
   [
     "the account area takes the reference's type pair (a 14px name over a 12px second line)",
+    /* §REPOINTED §BATCH 5a (2026-11-21) — `text-zinc-500` became `text-muted`. Same
+       subject (the 14px name over the 12px second line); the colour class it reads
+       moved onto the canonical ladder. */
     RAIL_CODE.includes('text-ds-body font-semibold leading-tight text-strong') &&
-      RAIL_CODE.includes('text-ds-label leading-tight text-zinc-500'),
+      RAIL_CODE.includes('text-ds-label leading-tight text-muted'),
   ],
   [
     'the scroll fade is present, never intercepts a pointer and is hidden from assistive tech',
@@ -504,8 +526,10 @@ check(
   ENV_CODE.includes('hover:bg-tint') && !ENV_CODE.includes(LEGACY_HOVER)
 );
 check(
-  'the ACTIVE environment uses a theme surface step (`bg-ink-700`), so it stays legible on all five themes',
-  ENV_CODE.includes('bg-ink-700')
+  'the ACTIVE environment uses a theme surface step (`bg-surface-hover`), so it stays legible on all five themes',
+  /* §REPOINTED §BATCH 5a (2026-11-21) — `bg-ink-700` became `bg-surface-hover`. Both
+     resolve to `var(--mr-surface-hover)`; the new form is the canonical token name. */
+  ENV_CODE.includes('bg-surface-hover')
 );
 
 /* ══════════════════════════════════════════════════════════════════════════

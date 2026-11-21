@@ -150,7 +150,7 @@ const BRAND_VIEW_IDS: readonly string[] = BRAND_SECTIONS.flatMap((s) =>
  */
 function BrandViewFallback() {
   return (
-    <div className="rounded-ds-lg border border-hairline-strong bg-ink-850" data-testid="brand-view-loading">
+    <div className="rounded-ds-lg border border-hairline-strong bg-surface-raised" data-testid="brand-view-loading">
       {/* §Wave 3 Part 5 — ONE owner for the loading region (`LoadingState`). */}
       <LoadingState rows={3} label="Loading view…" />
     </div>

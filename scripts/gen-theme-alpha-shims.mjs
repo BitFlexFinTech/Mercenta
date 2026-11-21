@@ -37,6 +37,20 @@ const TARGETS = [
   { prefix: 'text-brass-200/', var: 'var(--mr-accent-300)' },
   { prefix: 'text-brass-300/', var: 'var(--mr-accent-300)' },
   { prefix: 'text-brass-400/', var: 'var(--mr-accent-400)' },
+  // §BATCH 5 (2026-11-21) — the CANONICAL accent name, an exact mirror of `brass`
+  // above (same tokens), so a `brass` → `accent` rename moves no pixel.
+  { prefix: 'bg-accent-500/', var: 'var(--mr-accent)' },
+  { prefix: 'bg-accent/', var: 'var(--mr-accent)' },
+  { prefix: 'border-accent-500/', var: 'var(--mr-accent)' },
+  { prefix: 'border-accent/', var: 'var(--mr-accent)' },
+  { prefix: 'bg-accent-300/', var: 'var(--mr-accent-300)' },
+  { prefix: 'border-accent-300/', var: 'var(--mr-accent-300)' },
+  { prefix: 'bg-accent-600/', var: 'var(--mr-accent-600)' },
+  { prefix: 'border-accent-600/', var: 'var(--mr-accent-600)' },
+  { prefix: 'bg-accent-700/', var: 'var(--mr-accent-700)' },
+  { prefix: 'border-accent-700/', var: 'var(--mr-accent-700)' },
+  { prefix: 'text-accent-300/', var: 'var(--mr-accent-300)' },
+  { prefix: 'text-accent-400/', var: 'var(--mr-accent-400)' },
   // semantic state soft tones
   { prefix: 'bg-state-success/', var: 'var(--mr-state-success)' },
   { prefix: 'border-state-success/', var: 'var(--mr-state-success)' },
@@ -122,6 +136,21 @@ const VAR_BY_KEY = {
   'ink-850': 'var(--mr-surface-raised)',
   'ink-800': 'var(--mr-surface-overlay)',
   'ink-700': 'var(--mr-surface-hover)',
+  /**
+   * §BATCH 5 (2026-11-21) — THE CANONICAL SURFACE LADDER.
+   *
+   * The migration renames `bg-ink-850` → `bg-surface-raised` and so on, because
+   * the token has always been `--mr-surface*`. The resolver must therefore know
+   * those names: without them an ALPHA utility such as `bg-surface-overlay/70`
+   * resolves to nothing and the shim is never emitted, so the class would go
+   * dark. This generator REFUSES to allow that (it fails on an unresolved key),
+   * which is how the omission was caught rather than shipped.
+   */
+  surface: 'var(--mr-surface)',
+  'surface-raised': 'var(--mr-surface-raised)',
+  'surface-overlay': 'var(--mr-surface-overlay)',
+  'surface-hover': 'var(--mr-surface-hover)',
+  'surface-tint': 'var(--mr-surface-tint)',
   // zinc neutrals — mirrors the zinc scale in tailwind.config.js exactly
   'zinc-100': 'var(--mr-text-200)',
   'zinc-200': 'var(--mr-text-200)',

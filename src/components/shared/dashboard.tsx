@@ -77,7 +77,7 @@ export function AttentionPanel({
       className={className}
       empty={
         <div className="flex items-center gap-3 px-3.5 py-3" data-testid="attention-empty">
-          <span className="text-ds-label font-medium text-zinc-400">{emptyMeta}</span>
+          <span className="text-ds-label font-medium text-muted">{emptyMeta}</span>
         </div>
       }
     />

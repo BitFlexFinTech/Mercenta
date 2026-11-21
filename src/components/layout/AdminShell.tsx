@@ -393,7 +393,7 @@ function AdminViewFallback() {
       {/* §Wave 3 Part 5 — ONE owner for the loading region (`LoadingState`),
           which announces itself to assistive technology. This fallback used to
           be a bare "Loading…" word. */}
-      <div className="rounded-ds-lg border border-hairline-strong bg-ink-850" data-testid="admin-view-loading">
+      <div className="rounded-ds-lg border border-hairline-strong bg-surface-raised" data-testid="admin-view-loading">
         <LoadingState rows={3} label="Loading view…" />
       </div>
     </WorkspaceFrame>

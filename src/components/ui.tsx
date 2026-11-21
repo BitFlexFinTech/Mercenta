@@ -47,14 +47,14 @@ export function Card({
            colour is now the theme's own token, applied by `.ds-card` in
            `src/index.css`:
 
-             'ds-card bg-ink-850 border rounded-ds-lg shadow-ds-subtle'
+             'ds-card bg-surface-raised border rounded-ds-lg shadow-ds-subtle'
 
            `border` (the 1px width) is KEPT deliberately: the border BOX is
            unchanged, so no card moves by a pixel, and a caller that supplies its own
            border utility still wins (the token is applied in the `components`
            layer). `bold`'s token reproduces exactly the colour it draws today, so
            that theme is preserved by mechanism. */
-        'ds-card bg-ink-850 border rounded-ds-lg shadow-ds-subtle',
+        'ds-card bg-surface-raised border rounded-ds-lg shadow-ds-subtle',
         className
       )}
       data-state={dataState}
@@ -74,7 +74,7 @@ export function Card({
               </h3>
             )}
             {subtitle && (
-              <p className="text-ds-label text-zinc-500 mt-1">{subtitle}</p>
+              <p className="text-ds-label text-muted mt-1">{subtitle}</p>
             )}
           </div>
           {action}
@@ -148,19 +148,27 @@ export function Button({
        onto its own variant: the reference keeps its gradient for actions that
        CREATE something (its empty state's "Create project", spec §5.4, and its
        header CTA, §5.1) rather than for every primary action, because an accent
-       on every button is no accent at all. `bg-brass-500` STAYS as the flat
+       on every button is no accent at all. `bg-accent-500` STAYS as the flat
        colour, which is both the fallback for a browser without `in oklab`
        support AND the whole treatment in `bold`, whose two gradient tokens are
        `none`. No prop, size or API changed. */
-    accent:
-      'ds-btn-accent bg-brass-500 hover:bg-brass-600 text-ink font-semibold shadow-ds-raised',
+    /* §BATCH 5 (2026-11-21) — `text-ink` -> `text-on-accent`, a REAL CONTRAST
+       DEFECT FIXED AT SOURCE. `text-ink` resolves to `--mr-surface`, which is
+       DARK in the dark appearance but LIGHT in the light one — so the accent
+       button's label was light-on-orange in the light appearance, where the
+       project's own config records that white on #FF6A00 measures only
+       2.34:1. `--mr-on-accent` is black in BOTH appearances, which is the token
+       declared for exactly this pairing. (The comment sits ABOVE the key, never
+       between the key and its value: `validate-theme-distinctness` reads the
+       variant with `accent:\s*'…'`.) */
+    accent: 'ds-btn-accent bg-accent-500 hover:bg-accent-600 text-on-accent font-semibold shadow-ds-raised',
     secondary: 'bg-tint hover:bg-tint/[0.1] text-strong border border-hairline',
-    tertiary: 'bg-ink-800 hover:bg-ink-700 text-zinc-300 border border-hairline',
-    ghost: 'hover:bg-tint text-zinc-400 hover:text-strong',
+    tertiary: 'bg-surface-overlay hover:bg-surface-hover text-strong border border-hairline',
+    ghost: 'hover:bg-tint text-muted hover:text-strong',
     // `danger` retained for backward compatibility; `destructive` is canonical.
     danger: 'bg-crimson-accent hover:bg-red-700 text-strong',
     destructive: 'bg-state-danger hover:bg-red-700 text-on-fill',
-    link: 'text-brass-400 hover:underline underline-offset-4 p-0 h-auto shadow-ds-none',
+    link: 'text-accent-400 hover:underline underline-offset-4 p-0 h-auto shadow-ds-none',
   } as const;
   const sizes = {
     sm: 'px-3 py-1.5 text-ds-label',
@@ -273,7 +281,7 @@ export function Input({
            14px by name, not a raw Tailwind size — because the reference labels a
            control at its body size. The label's own association, id derivation,
            `required` marker, helper and error wiring are UNCHANGED. */
-        <label htmlFor={inputId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
+        <label htmlFor={inputId} className="block text-ds-body font-medium text-muted mb-1.5">
           {label} {required && <span className="text-state-danger">*</span>}
         </label>
       )}
@@ -299,10 +307,10 @@ export function Input({
            already declares (`ds-md` = 12px, spec §2.2). No prop, id, ARIA or
            behaviour changes; the focus treatment stays the product's own
            accent-tinted border + ring. */
-        className="w-full bg-ink-900 border border-hairline rounded-ds-md h-11 px-3.5 py-2 text-sm text-strong placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
+        className="w-full bg-surface border border-hairline rounded-ds-md h-11 px-3.5 py-2 text-sm text-strong placeholder-faint focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/30 transition-colors"
       />
       {helper && !error && (
-        <p id={`${inputId}-helper`} className="text-ds-label text-zinc-500 mt-1">{helper}</p>
+        <p id={`${inputId}-helper`} className="text-ds-label text-muted mt-1">{helper}</p>
       )}
       {error && (
         <p id={`${inputId}-error`} className="text-ds-label text-state-danger mt-1" role="alert">{error}</p>
@@ -350,7 +358,7 @@ export function Select({
       {label && (
         /* §OPENSHIP BATCH 4 — the same 14px label step as `Input` (the reference
            labels a control at its body size, spec §7.4). */
-        <label htmlFor={selectId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
+        <label htmlFor={selectId} className="block text-ds-body font-medium text-muted mb-1.5">
           {label} {required && <span className="text-crimson-accent">*</span>}
         </label>
       )}
@@ -366,10 +374,10 @@ export function Select({
            form row cannot mix a 44px field with a 38px field, so this control
            takes the ONE control height the ramp and the reference's input already
            agree on (`h-11`). The radius stays on the canonical control step. */
-        className="w-full bg-ink-900 border border-hairline rounded-ds-md h-11 px-3 py-2 text-sm text-strong focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
+        className="w-full bg-surface border border-hairline rounded-ds-md h-11 px-3 py-2 text-sm text-strong focus:outline-none focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-ink-900">
+          <option key={opt.value} value={opt.value} className="bg-surface">
             {opt.label}
           </option>
         ))}
@@ -415,7 +423,7 @@ export function Textarea({
       {label && (
         /* §OPENSHIP BATCH 4 — the same 14px label step as `Input` and `Select`: the
            three controls share ONE label treatment, so they cannot drift apart. */
-        <label htmlFor={areaId} className="block text-ds-body font-medium text-zinc-400 mb-1.5">
+        <label htmlFor={areaId} className="block text-ds-body font-medium text-muted mb-1.5">
           {label}
         </label>
       )}
@@ -426,7 +434,7 @@ export function Textarea({
         placeholder={placeholder}
         rows={rows}
         aria-label={ariaLabel}
-        className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
+        className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-faint focus:outline-none focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/30 transition-colors resize-none"
       />
     </div>
   );
@@ -458,7 +466,7 @@ export function Checkbox({
           className={cn(
             'w-4 h-4 rounded-ds-sm border transition-all flex items-center justify-center',
             checked
-              ? 'bg-brass-500 border-brass-500'
+              ? 'bg-accent-500 border-accent-500'
               : 'border-hairline-strong group-hover:border-hairline-strong'
           )}
         >
@@ -475,7 +483,7 @@ export function Checkbox({
           )}
         </span>
       </span>
-      <span className="text-xs text-zinc-300 leading-relaxed">
+      <span className="text-xs text-strong leading-relaxed">
         {label} {required && <span className="text-crimson-accent">*</span>}
       </span>
     </label>
@@ -491,8 +499,8 @@ const STATUS_STYLES: Record<StatusTone, { badge: string; dot: string; label: str
   warning: { badge: 'bg-state-warning/15 text-state-warning border-state-warning/25', dot: 'bg-state-warning', label: 'Warning' },
   danger: { badge: 'bg-state-danger/15 text-state-danger border-state-danger/30', dot: 'bg-state-danger', label: 'Error' },
   info: { badge: 'bg-state-info/15 text-state-info border-state-info/25', dot: 'bg-state-info', label: 'Info' },
-  neutral: { badge: 'bg-tint text-zinc-400 border-hairline', dot: 'bg-zinc-500', label: 'Neutral' },
-  brass: { badge: 'bg-brass-500/15 text-brass-300 border-brass-500/25', dot: 'bg-brass-400', label: 'Accent' },
+  neutral: { badge: 'bg-tint text-muted border-hairline', dot: 'bg-state-muted', label: 'Neutral' },
+  brass: { badge: 'bg-accent-500/15 text-accent-300 border-accent-500/25', dot: 'bg-accent-400', label: 'Accent' },
 };
 
 /**
@@ -576,7 +584,7 @@ export function Tabs({
             data-testid={it.testId}
             className={cn(
               'px-3.5 py-2 text-sm font-medium border-b-2 transition-colors',
-              selected ? 'text-brass-300 border-brass-500' : 'text-zinc-400 border-transparent hover:text-strong'
+              selected ? 'text-accent-300 border-accent-500' : 'text-muted border-transparent hover:text-strong'
             )}
           >
             {it.label}
@@ -597,14 +605,14 @@ export function Breadcrumb({ items }: { items: { label: string; href?: string }[
    * crumbs' TEXT changes; they simply use the space available.
    */
   return (
-    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs text-zinc-500">
+    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
       {items.map((it, i) => (
         <span key={it.label} className="flex min-w-0 items-center gap-1.5">
           {i > 0 && <span aria-hidden="true">/</span>}
           {it.href ? (
-            <a href={it.href} className="truncate hover:text-brass-300">{it.label}</a>
+            <a href={it.href} className="truncate hover:text-accent-300">{it.label}</a>
           ) : (
-            <span className="truncate text-zinc-300" aria-current="page">{it.label}</span>
+            <span className="truncate text-strong" aria-current="page">{it.label}</span>
           )}
         </span>
       ))}
@@ -671,7 +679,7 @@ export function Modal({
            was `rounded-lg` (8px), although both are containers — and every OTHER
            overlay in the app (drawers, popovers, floating cards) was already 12px.
            A dialog is a container, so it now sits on `ds-lg` with the rest. */
-        className="relative w-full max-w-lg bg-ink-850 border border-hairline rounded-ds-lg shadow-ds-overlay"
+        className="relative w-full max-w-lg bg-surface-raised border border-hairline rounded-ds-lg shadow-ds-overlay"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <h3 className="text-sm font-semibold text-strong">{title}</h3>
@@ -686,7 +694,7 @@ export function Modal({
                `×` gave, which was below every touch-target guideline) and a
                hover state that reads. Tokens, so it follows the theme; `text-lg`
                is kept so the glyph stays the same size. */
-            className="rounded-ds-sm bg-ink-800 hover:bg-ink-700 p-1.5 text-lg text-zinc-500 hover:text-strong leading-none transition-colors"
+            className="rounded-ds-sm bg-surface-overlay hover:bg-surface-hover p-1.5 text-lg text-muted hover:text-strong leading-none transition-colors"
           >
             ×
           </button>
@@ -713,7 +721,7 @@ export function Pagination({
       <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-2.5 py-1 rounded-ds-sm border border-hairline disabled:opacity-40 hover:bg-tint">
         Previous
       </button>
-      <span className="text-zinc-400" data-testid="pagination-page">
+      <span className="text-muted" data-testid="pagination-page">
         Page {page} of {pageCount}
       </span>
       <button type="button" disabled={page >= pageCount} onClick={() => onPage(page + 1)} className="px-2.5 py-1 rounded-ds-sm border border-hairline disabled:opacity-40 hover:bg-tint">
@@ -759,14 +767,14 @@ export function EmptyState({
       {icon && (
         <span
           aria-hidden="true"
-          className="mb-1 flex h-10 w-10 items-center justify-center rounded-ds-md bg-tint text-zinc-500"
+          className="mb-1 flex h-10 w-10 items-center justify-center rounded-ds-md bg-tint text-muted"
         >
           {icon}
         </span>
       )}
-      <p className="text-ds-title font-medium tracking-tight text-zinc-200">{title}</p>
+      <p className="text-ds-title font-medium tracking-tight text-strong">{title}</p>
       {description && (
-        <p className="mx-auto max-w-sm text-ds-body leading-relaxed text-zinc-500">{description}</p>
+        <p className="mx-auto max-w-sm text-ds-body leading-relaxed text-muted">{description}</p>
       )}
       {action}
     </div>
@@ -901,7 +909,7 @@ export function ErrorState({
       role="alert"
       data-testid="error-state"
     >
-      <div className="ds-card mx-4 max-w-md rounded-ds-lg border bg-ink-850 p-8 text-center shadow-ds-overlay">
+      <div className="ds-card mx-4 max-w-md rounded-ds-lg border bg-surface-raised p-8 text-center shadow-ds-overlay">
         <span
           aria-hidden="true"
           className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-ds-md bg-state-danger/15 text-state-danger"
@@ -909,13 +917,13 @@ export function ErrorState({
           <AlertTriangle className="h-5 w-5" />
         </span>
         <h2 className="mb-1 text-ds-title font-semibold tracking-tight text-strong">{title}</h2>
-        {description && <p className="mb-4 text-ds-body leading-relaxed text-zinc-500">{description}</p>}
+        {description && <p className="mb-4 text-ds-body leading-relaxed text-muted">{description}</p>}
         {details && (
           <details className="mb-4 rounded-ds-md bg-surface-tint p-3 text-left">
-            <summary className="cursor-pointer text-ds-micro text-zinc-600 hover:text-zinc-400">
+            <summary className="cursor-pointer text-ds-micro text-faint hover:text-muted">
               Technical details
             </summary>
-            <pre className="mt-2 max-h-[200px] overflow-y-auto whitespace-pre-wrap break-all font-mono text-ds-micro text-zinc-500">
+            <pre className="mt-2 max-h-[200px] overflow-y-auto whitespace-pre-wrap break-all font-mono text-ds-micro text-muted">
               {details}
             </pre>
           </details>
@@ -973,7 +981,7 @@ export function NoPermissionState({
         role="status"
         data-testid="no-permission-state"
         className={cn(
-          'mx-auto max-w-md rounded-ds-lg border border-state-danger/20 bg-ink-850 p-8 text-center',
+          'mx-auto max-w-md rounded-ds-lg border border-state-danger/20 bg-surface-raised p-8 text-center',
           className
         )}
       >
@@ -986,7 +994,7 @@ export function NoPermissionState({
         {heading && (
           <h2 className="mb-2 text-ds-title font-semibold tracking-tight text-strong">{heading}</h2>
         )}
-        <p className="mb-6 text-ds-body leading-relaxed text-zinc-400">{description}</p>
+        <p className="mb-6 text-ds-body leading-relaxed text-muted">{description}</p>
         {action && <span className="inline-flex items-center gap-2">{action}</span>}
       </div>
     );
@@ -995,7 +1003,7 @@ export function NoPermissionState({
     <div
       role="status"
       data-testid="no-permission-state"
-      className={cn('ds-card rounded-ds-lg border bg-ink-850 p-6', className)}
+      className={cn('ds-card rounded-ds-lg border bg-surface-raised p-6', className)}
     >
       <div className="flex items-center gap-3">
         <span
@@ -1006,7 +1014,7 @@ export function NoPermissionState({
         </span>
         <div className="min-w-0">
           <h3 className="text-ds-body font-semibold text-strong">{heading}</h3>
-          <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{description}</p>
+          <p className="mt-0.5 text-ds-label leading-snug text-muted">{description}</p>
         </div>
       </div>
       {action && <div className="mt-4 flex items-center gap-2">{action}</div>}
@@ -1027,7 +1035,7 @@ export function PageHeader({
     <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
       <div>
         <h1 className="font-display text-2xl font-semibold text-strong tracking-tight">{title}</h1>
-        {description && <p className="text-sm text-zinc-500 mt-1 max-w-2xl">{description}</p>}
+        {description && <p className="text-sm text-muted mt-1 max-w-2xl">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -1050,12 +1058,12 @@ export function EntityHeader({
   return (
     <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
       <div className="min-w-0">
-        {eyebrow && <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">{eyebrow}</p>}
+        {eyebrow && <p className="text-xs uppercase tracking-wider text-muted mb-1">{eyebrow}</p>}
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="font-display text-xl font-semibold text-strong tracking-tight">{title}</h1>
           {status}
         </div>
-        {description && <p className="text-sm text-zinc-500 mt-1 max-w-2xl">{description}</p>}
+        {description && <p className="text-sm text-muted mt-1 max-w-2xl">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
     </div>
@@ -1199,7 +1207,7 @@ export function DataTable<T>({
               key={rowKey(r)}
               onClick={onRowClick ? () => onRowClick(r) : undefined}
               className={cn(
-                'rounded-ds-md border border-hairline bg-ink-850 p-3',
+                'rounded-ds-md border border-hairline bg-surface-raised p-3',
                 onRowClick && 'cursor-pointer hover:border-hairline-strong transition-ds',
                 rowClassName?.(r)
               )}
@@ -1209,8 +1217,8 @@ export function DataTable<T>({
                 <dl className="mt-2 space-y-1">
                   {detailColumns.map((c) => (
                     <div key={c.key} className="flex items-start justify-between gap-3">
-                      <dt className="text-ds-label text-zinc-500">{c.label}</dt>
-                      <dd className="min-w-0 text-right text-xs text-zinc-300">{cell(c, r)}</dd>
+                      <dt className="text-ds-label text-muted">{c.label}</dt>
+                      <dd className="min-w-0 text-right text-xs text-strong">{cell(c, r)}</dd>
                     </div>
                   ))}
                 </dl>
@@ -1245,7 +1253,7 @@ export function DataTable<T>({
                        `uppercase` is CSS-only, so no DOM text changes and no
                        selector or test is affected. */
                     className={cn(
-                      'px-4 py-3 text-ds-label font-semibold uppercase tracking-wider text-zinc-500',
+                      'px-4 py-3 text-ds-label font-semibold uppercase tracking-wider text-muted',
                       alignClass(c),
                       hideClass(c),
                       c.className
@@ -1257,7 +1265,7 @@ export function DataTable<T>({
                 {rowActions && (
                   <th
                     scope="col"
-                    className="px-4 py-3 text-right text-ds-label font-semibold uppercase tracking-wider text-zinc-500"
+                    className="px-4 py-3 text-right text-ds-label font-semibold uppercase tracking-wider text-muted"
                   >
                     <span className="sr-only">Actions</span>
                   </th>
@@ -1280,7 +1288,7 @@ export function DataTable<T>({
                   )}
                 >
                   {columns.map((c) => (
-                    <td key={c.key} className={cn('px-4 py-3 text-zinc-300', alignClass(c), hideClass(c), c.className)}>
+                    <td key={c.key} className={cn('px-4 py-3 text-strong', alignClass(c), hideClass(c), c.className)}>
                       {cell(c, r)}
                     </td>
                   ))}

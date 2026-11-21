@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2785/121 ink=929/115 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2675/112 ink=907/115 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -916,6 +916,23 @@ Every row below was measured in this repository this session.
 > (`state-success` · `state-warning` · `state-danger` · `state-info` · `state-muted`).
 > The ratchet ceiling in `scripts/validate-legacy-styling-migration.mjs` was lowered to
 > these figures in the SAME change, as this document's own note requires.
+>
+> **Re-measured again 2026-11-21 (§BATCH 5a — the shared primitives):** grey moved
+> 2785 → **2675** sites across **112** files (−110) and ink 929 → **907** (−22), because
+> the shared primitives were migrated onto the canonical ladder — `src/components/ui.tsx`
+> (the UI kit), `src/components/shared/workspace.tsx`, `DataTable`, `dashboard`, the chart
+> system, `ThemeSelector` and the six `src/components/layout/` files. `zinc-*` became the
+> declared text ladder; `brass-*` became **`accent-*`**, the canonical name for
+> `--mr-accent` (declared in `tailwind.config.js` as an exact mirror of `brass`, so the
+> rename moves no pixel); `bg-ink-*` became `bg-surface-*`.
+>
+> **§FINDING (2026-11-21) — THIS FAMILY COUNTS `surface-*`, WHICH IS NOT AN ALIAS.** The
+> `ink` → `surface` half of that rename moved sites between two members of this family's
+> own definition (`INK = ink-N | surface-* | brass-N`), so it barely moved the count.
+> `--mr-surface*` is the CANONICAL token name and `ink` is the alias, so `surface-*` is
+> not legacy and this family cannot reach zero by migration. The definition is NOT
+> redefined here — changing what a metric counts must not be done quietly — it is recorded
+> as a decision in `PROJECT_STATUS.md` §BATCH 5a.
 >
 > **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
 > header's dropdown panel was the last site in that component still painted with the

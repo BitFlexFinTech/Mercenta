@@ -59,12 +59,12 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
           id="theme-menu"
           role="menu"
           aria-label="Visual theme"
-          /* §OPENSHIP BATCH 4 — the dropdown surface: TRANSLUCENT (`bg-ink-800/70`,
+          /* §OPENSHIP BATCH 4 — the dropdown surface: TRANSLUCENT (`bg-surface-overlay/70`,
              the theme's own flyout token at 70%) with the reference's
              `backdrop-blur-xl` (spec §7.6). */
-          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-800/70 backdrop-blur-xl border border-hairline shadow-ds-overlay animate-fade-in p-2"
+          className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-surface-overlay/70 backdrop-blur-xl border border-hairline shadow-ds-overlay animate-fade-in p-2"
         >
-          <p className="px-3 py-1.5 text-ds-micro uppercase tracking-wider text-zinc-500">
+          <p className="px-3 py-1.5 text-ds-micro uppercase tracking-wider text-muted">
             Visual theme · {shellMode === 'light' ? 'light' : 'dark'} mode
           </p>
           {THEME_ORDER.map((id) => {
@@ -86,8 +86,8 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
                      takes the theme's `--mr-surface-hover` step at 60%, and hover takes
                      the canonical foreground tint (`bg-tint`). */
                   active
-                    ? 'bg-ink-700/60 text-strong'
-                    : 'text-zinc-400 hover:bg-tint hover:text-strong'
+                    ? 'bg-surface-hover/60 text-strong'
+                    : 'text-muted hover:bg-tint hover:text-strong'
                 )}
               >
                 <span
@@ -98,11 +98,11 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
                   }}
                 />
                 <span className="min-w-0 flex-1 truncate font-medium">{t.label}</span>
-                {active && <Check className="w-3.5 h-3.5 text-brass-400" aria-hidden="true" />}
+                {active && <Check className="w-3.5 h-3.5 text-accent-400" aria-hidden="true" />}
               </button>
             );
           })}
-          <p className="px-3 pb-2 pt-1 text-ds-micro text-zinc-600 leading-snug">
+          <p className="px-3 pb-2 pt-1 text-ds-micro text-faint leading-snug">
             Presentation only — data, permissions and workflows never change.
           </p>
         </div>

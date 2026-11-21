@@ -71,7 +71,7 @@ interface Props<T extends { id: string }> {
 }
 
 const CONTROL =
-  'bg-ink-900 border border-hairline rounded-ds-sm text-xs text-zinc-300 focus:outline-none focus:border-brass-500/40';
+  'bg-surface border border-hairline rounded-ds-sm text-xs text-strong focus:outline-none focus:border-accent-500/40';
 
 export function DataTable<T extends { id: string }>({
   rows,
@@ -147,7 +147,7 @@ export function DataTable<T extends { id: string }>({
           {searchText && (
             <div className="relative">
               <Search
-                className="w-3.5 h-3.5 text-zinc-600 absolute left-2.5 top-1/2 -translate-y-1/2"
+                className="w-3.5 h-3.5 text-faint absolute left-2.5 top-1/2 -translate-y-1/2"
                 aria-hidden="true"
               />
               <input
@@ -189,7 +189,7 @@ export function DataTable<T extends { id: string }>({
             );
           })}
           <div className="flex items-center gap-1.5">
-            <ArrowUpDown className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
             <select
               value={sortKey}
               onChange={(e) => {
@@ -211,12 +211,12 @@ export function DataTable<T extends { id: string }>({
               disabled={!sortKey}
               onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
               aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
-              className="rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300 hover:text-strong disabled:opacity-40 transition-ds duration-ds-fast"
+              className="rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong hover:text-strong disabled:opacity-40 transition-ds duration-ds-fast"
             >
               {sortDir === 'asc' ? 'Asc' : 'Desc'}
             </button>
           </div>
-          <span className="ml-auto text-ds-micro text-zinc-600">
+          <span className="ml-auto text-ds-micro text-faint">
             {loading ? 'Loading…' : `${sorted.length} record${sorted.length === 1 ? '' : 's'}`}
           </span>
         </div>
@@ -240,7 +240,7 @@ export function DataTable<T extends { id: string }>({
 
       {/* Pagination */}
       <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2 text-ds-label text-zinc-500">
+        <div className="flex items-center gap-2 text-ds-label text-muted">
           <span>Rows</span>
           <select
             value={pageSize}
@@ -263,19 +263,19 @@ export function DataTable<T extends { id: string }>({
             type="button"
             disabled={safePage === 0}
             onClick={() => setPage(safePage - 1)}
-            className="p-1 rounded-ds-sm text-zinc-500 hover:text-strong disabled:opacity-30"
+            className="p-1 rounded-ds-sm text-muted hover:text-strong disabled:opacity-30"
             aria-label="Previous page"
           >
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           </button>
-          <span className="text-ds-label text-zinc-400 font-mono">
+          <span className="text-ds-label text-muted font-mono">
             {safePage + 1} / {pageCount}
           </span>
           <button
             type="button"
             disabled={safePage >= pageCount - 1}
             onClick={() => setPage(safePage + 1)}
-            className="p-1 rounded-ds-sm text-zinc-500 hover:text-strong disabled:opacity-30"
+            className="p-1 rounded-ds-sm text-muted hover:text-strong disabled:opacity-30"
             aria-label="Next page"
           >
             <ChevronRight className="w-4 h-4" aria-hidden="true" />

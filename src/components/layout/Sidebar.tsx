@@ -183,11 +183,11 @@ export function Sidebar({
        * navigation scrolls INSIDE the rounded corners.
        *
        * `.ds-rail` is the edge (it derives the theme's own hairline — see
-       * `src/index.css`); the fill stays `bg-ink-900` (the theme's surface role),
+       * `src/index.css`); the fill stays `bg-surface` (the theme's surface role),
        * which is exactly what this element draws today in `bold` and equals the
        * card role in the other four themes, so no theme's rail changes colour.
        */
-      className="ds-rail my-3 ms-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-ds-lg border bg-ink-900"
+      className="ds-rail my-3 ms-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-ds-lg border bg-surface"
     >
       {/* Brand block + rail controls — §BATCH 5 geometry: `px-5 py-6`, a 26px mark
           and the reference's 16px tracking-tight wordmark (spec §3.3). Collapsed,
@@ -199,7 +199,7 @@ export function Sidebar({
           {!compact && (
             <div className="min-w-0 flex-1">
               <div className="truncate text-ds-title font-semibold tracking-tight text-strong">Mercenta</div>
-              <div className="truncate text-ds-micro uppercase tracking-wider text-zinc-500">
+              <div className="truncate text-ds-micro uppercase tracking-wider text-muted">
                 {envLabel}
               </div>
             </div>
@@ -211,7 +211,7 @@ export function Sidebar({
               aria-label={compact ? 'Expand navigation' : 'Collapse navigation'}
               aria-pressed={compact}
               data-testid="nav-compact-toggle"
-              className="flex size-8 flex-shrink-0 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-200"
+              className="flex size-8 flex-shrink-0 items-center justify-center rounded-ds-md text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
             >
               {compact ? (
                 <PanelLeft className="h-4 w-4" aria-hidden="true" />
@@ -228,7 +228,7 @@ export function Sidebar({
         <div className="border-b border-hairline px-3 py-2.5">
           <div className="relative">
             <Search
-              className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600"
+              className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-faint"
               aria-hidden="true"
             />
             <input
@@ -238,7 +238,7 @@ export function Sidebar({
               placeholder="Filter navigation…"
               aria-label="Filter navigation"
               data-testid="nav-filter"
-              className="w-full rounded-ds-md border border-hairline bg-tint py-1.5 pl-7 pr-2 text-ds-label text-zinc-300 transition-ds duration-ds-fast placeholder:text-zinc-600 focus:border-hairline-strong focus:outline-none"
+              className="w-full rounded-ds-md border border-hairline bg-tint py-1.5 pl-7 pr-2 text-ds-label text-strong transition-ds duration-ds-fast placeholder:text-faint focus:border-hairline-strong focus:outline-none"
             />
           </div>
         </div>
@@ -275,13 +275,13 @@ export function Sidebar({
               <div key={section.label} className="mt-5 first:mt-0">
                 {section.label && (
                   <div className="flex items-center gap-1">
-                    <p className="mb-2 min-w-0 flex-1 truncate px-2 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                    <p className="mb-2 min-w-0 flex-1 truncate px-2 text-ds-micro font-semibold uppercase tracking-[0.14em] text-faint">
                       {section.label}
                     </p>
                     {!compact && sectionBadge > 0 && (
                       <span
                         aria-hidden="true"
-                        className="mb-2 font-mono text-ds-micro text-zinc-500"
+                        className="mb-2 font-mono text-ds-micro text-muted"
                       >
                         {sectionBadge}
                       </span>
@@ -293,7 +293,7 @@ export function Sidebar({
                         aria-expanded={!isCollapsed}
                         aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${section.label}`}
                         data-testid={`nav-collapse-${section.label}`}
-                        className="mb-2 rounded-ds-sm p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
+                        className="mb-2 rounded-ds-sm p-0.5 text-faint transition-ds duration-ds-fast hover:text-strong"
                       >
                         <ChevronDown
                           className={cn(
@@ -326,7 +326,7 @@ export function Sidebar({
                             compact ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
                             active
                               ? 'text-strong'
-                              : 'text-zinc-500 hover:bg-tint hover:text-zinc-200'
+                              : 'text-muted hover:bg-tint hover:text-strong'
                           )}
                           style={
                             active
@@ -379,8 +379,8 @@ export function Sidebar({
                             className={cn(
                               'absolute right-1 top-1/2 -translate-y-1/2 rounded-ds-sm p-0.5 transition-ds duration-ds-fast',
                               itemPinned
-                                ? 'text-zinc-300 hover:text-strong'
-                                : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'
+                                ? 'text-strong hover:text-strong'
+                                : 'text-transparent hover:text-strong group-hover/navitem:text-muted'
                             )}
                           >
                             <Pin className="h-3 w-3" aria-hidden="true" />
@@ -395,7 +395,7 @@ export function Sidebar({
             );
           })}
           {navFilterEmpty && (
-            <p className="px-2 py-3 text-ds-label text-zinc-600" data-testid="nav-filter-empty">
+            <p className="px-2 py-3 text-ds-label text-faint" data-testid="nav-filter-empty">
               No destinations match “{query.trim()}”.
             </p>
           )}
@@ -429,7 +429,7 @@ export function Sidebar({
           {!compact && (
             <div className="min-w-0">
               <div className="truncate text-ds-body font-semibold leading-tight text-strong">{userName}</div>
-              <div className="truncate text-ds-label leading-tight text-zinc-500">
+              <div className="truncate text-ds-label leading-tight text-muted">
                 {session?.tier === 'brand'
                   ? envLabel
                   : `${envLabel} · ${actingStaff?.role ?? ''}`.trim()}

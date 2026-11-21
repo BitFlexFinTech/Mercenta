@@ -274,7 +274,10 @@ try {
   test(
     "the empty state takes the reference's block (`py-16`, spec §9.1) and a named title step",
     /className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center"/.test(uiOwner) &&
-      /text-ds-title font-medium tracking-tight text-zinc-200/.test(uiOwner)
+      /* §REPOINTED §BATCH 5a (2026-11-21) — `text-zinc-200` became `text-strong`. This
+         assertion's subject is unchanged (the empty state's title takes a NAMED type
+         step); only the colour class it reads moved onto the canonical text ladder. */
+      /text-ds-title font-medium tracking-tight text-strong/.test(uiOwner)
   );
   test(
     "the loading row has the reference's anatomy — a leading TILE and two bars (§9.2)",

@@ -405,8 +405,8 @@ export function MercentaDoughnut({
                   className="h-2 w-2 flex-shrink-0 rounded-ds-sm"
                   style={{ backgroundColor: color }}
                 />
-                <span className="min-w-0 flex-1 truncate text-zinc-300">{s.label}</span>
-                <span className="font-mono text-zinc-400">
+                <span className="min-w-0 flex-1 truncate text-strong">{s.label}</span>
+                <span className="font-mono text-muted">
                   {Math.round((s.value / total) * 100)}%
                 </span>
               </li>

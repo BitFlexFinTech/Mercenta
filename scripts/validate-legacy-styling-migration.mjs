@@ -118,18 +118,30 @@ if (recorded) {
  * ceiling is lowered to the TRUE counts, and lower is the direction that matters.
  */
 /**
- * §BATCH 4b (2026-11-21) — LOWERED FROM grey 2,866 / ink 974 to the counts this
- * batch measured after migrating the two advertising screens onto the theme
- * ladder: the brand surface `src/components/brand/BrandAdvertising.tsx` and the
- * admin surface `src/components/admin/AmazonAdsDashboard.tsx` now use only the
- * declared tokens (`text-strong` · `text-muted` · `text-faint` · `bg-surface-raised`
- * · `bg-tint` · `border-hairline` · `bg-[var(--mr-accent)]`) and the canonical
- * state tones (`state-success` · `state-warning` · `state-danger` · `state-info`
- * · `state-muted`) instead of the legacy `zinc`/`ink`/`brass` aliases and the
- * legacy Tailwind palette. The ceiling is lowered to the measured value, as this
- * check's own note above requires.
+ * §BATCH 5a (2026-11-21) — LOWERED FROM grey 2,785 / ink 929 to the counts this
+ * batch measured after migrating the SHARED PRIMITIVES onto the canonical theme
+ * ladder: `src/components/ui.tsx` (the UI kit), `src/components/shared/workspace.tsx`
+ * (the frame/header/metric/queue primitives), `DataTable`, `dashboard`, the chart
+ * system, `ThemeSelector` and the six `src/components/layout/` files.
+ *
+ *   · grey 2,785 -> 2,675  (-110): `zinc-*` -> the declared text ladder
+ *     (`text-strong` · `text-muted` · `text-faint`) and the surface ladder.
+ *   · ink 929 -> 907       (-22): `brass-*` -> `accent-*`, the CANONICAL name for
+ *     `--mr-accent` (declared in `tailwind.config.js` this batch as an exact
+ *     mirror of `brass`, so the rename moves no pixel); and `bg-ink-*` ->
+ *     `bg-surface-*`.
+ *
+ * §FINDING — THE INK FAMILY COUNTS `surface-*`, WHICH IS NOT AN ALIAS (2026-11-21).
+ * The `ink` -> `surface` half of this rename moved sites BETWEEN two members of
+ * this very family (`INK` is defined as `ink-N | surface-* | brass-N`), so it
+ * lowered the count by almost nothing. That is because `--mr-surface*` is the
+ * CANONICAL token name (`src/config/themes.ts`) and `ink` is the alias — so
+ * `surface-*` is not legacy at all, and this family cannot reach zero by
+ * migration. Recorded as a finding needing a decision (see PROJECT_STATUS.md
+ * §BATCH 5a), NOT silently redefined here: changing what a metric counts is
+ * exactly the change that must not be made quietly.
  */
-const CEILING = { grey: 2785, ink: 929, literal: 0, uncovered: 0 };
+const CEILING = { grey: 2675, ink: 907, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);

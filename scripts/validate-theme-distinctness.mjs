@@ -470,7 +470,10 @@ try {
   );
   test(
     'the `accent` variant KEEPS its flat background class as the fallback (a browser without `in oklab`)',
-    accentVariant.includes('bg-brass-500'),
+    /* §REPOINTED §BATCH 5a (2026-11-21) — `bg-brass-500` became `bg-accent-500`.
+       Same token (`--mr-accent`); `accent` is the canonical name for it, declared in
+       tailwind.config.js as an exact mirror of the legacy `brass` alias. */
+    accentVariant.includes('bg-accent-500'),
     accentVariant || 'accent variant not found'
   );
   test(

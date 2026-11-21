@@ -71,8 +71,8 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-ds-md transition-ds duration-ds-fast',
                 active
-                  ? 'bg-ink-700 text-strong'
-                  : 'text-zinc-600 hover:bg-tint hover:text-zinc-300'
+                  ? 'bg-surface-hover text-strong'
+                  : 'text-faint hover:bg-tint hover:text-strong'
               )}
             >
               {env.icon}
@@ -91,10 +91,10 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
       className="border-t border-hairline px-3 py-2.5"
     >
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
+        <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-faint">
           Environment
         </span>
-        <span className="rounded-full border border-hairline px-1.5 py-px text-ds-micro font-medium uppercase tracking-wide text-zinc-500">
+        <span className="rounded-full border border-hairline px-1.5 py-px text-ds-micro font-medium uppercase tracking-wide text-muted">
           Demo
         </span>
       </div>
@@ -127,8 +127,8 @@ export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {
               className={cn(
                 'flex min-h-[36px] flex-col items-center justify-center gap-0.5 rounded-ds-md border px-1 py-1 text-ds-micro font-medium transition-ds duration-ds-fast',
                 active
-                  ? 'border-hairline-strong bg-ink-700 text-strong'
-                  : 'border-transparent text-zinc-500 hover:bg-tint hover:text-zinc-300'
+                  ? 'border-hairline-strong bg-surface-hover text-strong'
+                  : 'border-transparent text-muted hover:bg-tint hover:text-strong'
               )}
             >
               <span aria-hidden="true">{env.icon}</span>

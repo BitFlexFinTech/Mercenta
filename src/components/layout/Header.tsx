@@ -135,7 +135,7 @@ export function Header({
      * other in one change rather than by halves).
      *
      * The SURFACE change is the substantive one: the bar no longer paints a
-     * distinct fill (`bg-ink-900`). The reference's header carries no background
+     * distinct fill (`bg-surface`). The reference's header carries no background
      * class at all — it sits on the page — which is also why its only separation
      * is the hairline. Every control, its test id, its aria wiring and its
      * behaviour are unchanged.
@@ -164,7 +164,7 @@ export function Header({
           onClick={onToggleNav}
           aria-expanded={navOpen}
           aria-controls="app-sidebar"
-          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-300 transition-ds duration-ds-fast hover:bg-tint lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-strong transition-ds duration-ds-fast hover:bg-tint lg:hidden"
           data-testid="app-menu-toggle"
           aria-label="Open navigation"
         >
@@ -191,7 +191,7 @@ export function Header({
           type="button"
           onClick={signOut}
           title="Back to homepage"
-          className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-label font-medium uppercase tracking-[0.14em] text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-300"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-label font-medium uppercase tracking-[0.14em] text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
         >
           <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
           {/* §Wave-3 Part 4 — the LABEL is hidden below `sm`, the control is not.
@@ -216,11 +216,11 @@ export function Header({
         onClick={onOpenSearch}
         data-testid="app-search-trigger"
         aria-label="Search records and destinations"
-        className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-hairline bg-tint px-3 text-ds-body text-zinc-500 transition-ds duration-ds-fast hover:border-hairline-strong hover:text-zinc-300 md:flex md:max-w-md"
+        className="hidden h-10 min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-hairline bg-tint px-3 text-ds-body text-muted transition-ds duration-ds-fast hover:border-hairline-strong hover:text-strong md:flex md:max-w-md"
       >
         <Search className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
         <span className="min-w-0 flex-1 truncate text-left">Search records, destinations…</span>
-        <kbd className="flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1 py-0.5 font-mono text-ds-label text-zinc-500">
+        <kbd className="flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1 py-0.5 font-mono text-ds-label text-muted">
           ⌘K
         </kbd>
       </button>
@@ -244,7 +244,7 @@ export function Header({
             className="flex h-9 items-center gap-1.5 rounded-ds-md pl-1 pr-2 hover:bg-tint transition-colors"
           >
             <Avatar name={identity.name} email={identity.email} size="sm" />
-            <ChevronDown className="h-3 w-3 text-zinc-500" aria-hidden="true" />
+            <ChevronDown className="h-3 w-3 text-muted" aria-hidden="true" />
           </button>
 
           {profileOpen && (
@@ -255,17 +255,17 @@ export function Header({
                  dropdown is TRANSLUCENT with a BACKDROP BLUR — `bg-popover/70
                  backdrop-blur-xl`, 16px radius, "the single largest visual
                  difference from Mercenta's current opaque menus" (spec §7.6, and its
-                 §12 measured gap). `bg-ink-800/70` is the same 70% of the theme's
+                 §12 measured gap). `bg-surface-overlay/70` is the same 70% of the theme's
                  own dropdown/flyout surface token (`--mr-surface-overlay`, which
                  BATCH 3 set to the reference's `#161616` for `serious` and `#FFFFFF`
                  for the light designs); the shim already generates that mix, so no
                  value is duplicated here. Radius was already the container step
                  (16px) after BATCH 3. */
-              className="absolute right-0 top-full mt-2 w-56 bg-ink-800/70 backdrop-blur-xl border border-hairline rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
+              className="absolute right-0 top-full mt-2 w-56 bg-surface-overlay/70 backdrop-blur-xl border border-hairline rounded-ds-lg py-2 z-50 shadow-ds-overlay animate-fade-in"
             >
               <div className="px-4 py-2 border-b border-hairline">
                 <div className="text-sm font-medium text-strong">{identity.name}</div>
-                <div className="text-xs text-zinc-500">{identity.email || identity.roleLabel}</div>
+                <div className="text-xs text-muted">{identity.email || identity.roleLabel}</div>
               </div>
               <div className="py-1">
                 {[
@@ -278,9 +278,9 @@ export function Header({
                       key={label}
                       role="menuitem"
                       onClick={onClick}
-                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-strong hover:bg-tint transition-colors"
+                      className="w-full flex items-center gap-2.5 text-left px-4 py-1.5 text-xs text-muted hover:text-strong hover:bg-tint transition-colors"
                     >
-                      <span className="text-zinc-600">{icon}</span>
+                      <span className="text-faint">{icon}</span>
                       {label}
                     </button>
                   )
@@ -288,7 +288,7 @@ export function Header({
                 <button
                   role="menuitem"
                   onClick={signOut}
-                  className="w-full text-left px-4 py-1.5 text-xs text-zinc-400 hover:text-strong hover:bg-tint transition-colors border-t border-hairline mt-1 pt-2"
+                  className="w-full text-left px-4 py-1.5 text-xs text-muted hover:text-strong hover:bg-tint transition-colors border-t border-hairline mt-1 pt-2"
                 >
                   Sign Out
                 </button>
