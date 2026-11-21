@@ -131,32 +131,32 @@ export function CommerceSimulationPanel() {
         <div>
           <h3 className="text-sm font-semibold text-strong">
             Operational commerce simulation{' '}
-            <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+            <Badge className="ml-1 text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
           </h3>
-          <p className="text-ds-label text-zinc-500 mt-0.5">
+          <p className="text-ds-label text-muted mt-0.5">
             Simulated purchase orders, fulfilment, receiving, invoicing, payments and
             exceptions. No live provider is contacted and no email is sent.
           </p>
           {/* §S9 — the receipt → invoice automation, stated from its ONE owner. */}
           <p
             data-state="commerce-receipt-invoice-automation"
-            className="text-ds-label text-zinc-500 mt-0.5"
+            className="text-ds-label text-muted mt-0.5"
           >
             {RECEIPT_INVOICE_AUTOMATION_STATEMENT.text}
           </p>
         </div>
-        <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">
+        <Badge className="text-ds-micro bg-tint text-muted border-hairline">
           persistence: {persistence.state} · durable {String(persistence.durable)}
         </Badge>
       </div>
 
       <div className="flex flex-wrap items-end gap-2">
-        <label className="text-ds-label text-zinc-500">
+        <label className="text-ds-label text-muted">
           Product
           <select
             value={effectiveSku}
             onChange={(e) => setSku(e.target.value)}
-            className="block mt-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 max-w-[280px]"
+            className="block mt-1 bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong max-w-[280px]"
           >
             {products.length === 0 && <option value="">No catalog products</option>}
             {products.map((p) => (
@@ -166,14 +166,14 @@ export function CommerceSimulationPanel() {
             ))}
           </select>
         </label>
-        <label className="text-ds-label text-zinc-500">
+        <label className="text-ds-label text-muted">
           Units
           <input
             type="number"
             min={1}
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="block mt-1 w-24 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong"
+            className="block mt-1 w-24 bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong"
           />
         </label>
       </div>
@@ -302,8 +302,8 @@ export function CommerceSimulationPanel() {
           className={cn(
             'rounded-ds-md p-3 text-ds-label border',
             eligibility.eligible
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-state-success'
-              : 'bg-amber-500/10 border-amber-500/20 text-state-warning'
+              ? 'bg-emerald-500/10 border-state-success/20 text-state-success'
+              : 'bg-amber-500/10 border-state-warning/20 text-state-warning'
           )}
         >
           {eligibility.eligible ? (
@@ -332,16 +332,16 @@ export function CommerceSimulationPanel() {
       )}
 
       {po && (
-        <div className="rounded-ds-md border border-hairline bg-ink-850/60 p-3 space-y-1">
+        <div className="rounded-ds-md border border-hairline bg-surface-raised/60 p-3 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">{po.status}</Badge>
-            <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
-            <span className="text-ds-micro text-zinc-500">
+            <span className={cn(MONO, 'text-accent')}>{po.poNumber}</span>
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">{po.status}</Badge>
+            <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
+            <span className="text-ds-micro text-muted">
               £{po.poValue.toFixed(2)} · {po.lineItems.length} line(s)
             </span>
           </div>
-          <div className="text-ds-micro text-zinc-500">
+          <div className="text-ds-micro text-muted">
             {po.lineItems
               .map(
                 (l) =>
@@ -355,17 +355,17 @@ export function CommerceSimulationPanel() {
       )}
 
       {commerceInvoice && (
-        <div className="rounded-ds-md border border-hairline bg-ink-850/60 p-3 text-ds-label space-y-1">
+        <div className="rounded-ds-md border border-hairline bg-surface-raised/60 p-3 text-ds-label space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={cn(MONO, 'text-brass')}>{commerceInvoice.number}</span>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+            <span className={cn(MONO, 'text-accent')}>{commerceInvoice.number}</span>
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">
               {commerceInvoice.status}
             </Badge>
-            <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
-            <span className="text-zinc-400">£{commerceInvoice.subtotalGbp.toFixed(2)}</span>
+            <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
+            <span className="text-muted">£{commerceInvoice.subtotalGbp.toFixed(2)}</span>
           </div>
           {commerceInvoice.lines.map((l) => (
-            <div key={l.description} className="text-ds-micro text-zinc-500">
+            <div key={l.description} className="text-ds-micro text-muted">
               {l.description} — £{l.amountGbp.toFixed(2)}
             </div>
           ))}
@@ -373,7 +373,7 @@ export function CommerceSimulationPanel() {
             payments.value
               .filter((p) => p.invoiceId === commerceInvoice.id)
               .map((p) => (
-                <div key={p.id} className="text-ds-micro text-emerald-300">
+                <div key={p.id} className="text-ds-micro text-state-success">
                   (sim) payment {p.id} — £{p.amountGbp.toFixed(2)} {p.status} via {p.method}
                 </div>
               ))}
@@ -382,18 +382,18 @@ export function CommerceSimulationPanel() {
 
       {exceptions?.ok && exceptions.value.length > 0 && (
         <div className="space-y-1">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Exceptions (chargebacks)
           </p>
           {exceptions.value.slice(0, 6).map((d) => (
             <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
-              <span className={cn(MONO, 'text-zinc-400')}>{d.id}</span>
-              <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">{d.type}</Badge>
-              <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">{d.status}</Badge>
-              <span className="text-zinc-500">
+              <span className={cn(MONO, 'text-muted')}>{d.id}</span>
+              <Badge className="text-ds-micro bg-tint text-strong border-hairline">{d.type}</Badge>
+              <Badge className="text-ds-micro bg-tint text-strong border-hairline">{d.status}</Badge>
+              <span className="text-muted">
                 £{d.amountGbp.toFixed(2)} · {d.purchaseOrderId}
               </span>
-              {d.simulated && <span className="text-ds-micro text-brass-400">(sim)</span>}
+              {d.simulated && <span className="text-ds-micro text-accent-400">(sim)</span>}
               {!d.dispute && (
                 <Button
                   variant="ghost"
@@ -426,7 +426,7 @@ export function CommerceSimulationPanel() {
                  * truthfully instead of offering a self-award control.
                  */
                 <span
-                  className="text-ds-micro text-amber-300/90"
+                  className="text-ds-micro text-state-warning/90"
                   data-state="commerce-dispute-awaiting-operations"
                 >
                   Awaiting Mercenta operations decision
@@ -439,16 +439,16 @@ export function CommerceSimulationPanel() {
 
       {activities?.ok && activities.value.length > 0 && (
         <div className="space-y-1">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Operational activity trail
           </p>
           <div className="max-h-56 overflow-auto divide-y divide-hairline-06">
             {[...activities.value].reverse().map((a) => (
-              <div key={a.id} className="py-1 text-ds-label text-zinc-400">
-                <span className="text-zinc-500">{a.at.slice(11, 19)}</span>{' '}
-                <span className={cn(MONO, 'text-zinc-300')}>{a.type}</span>{' '}
-                <span className="text-zinc-500">[{a.status}]</span> {a.detail}
-                {a.simulated && <span className="text-ds-micro text-brass-400"> (sim)</span>}
+              <div key={a.id} className="py-1 text-ds-label text-muted">
+                <span className="text-muted">{a.at.slice(11, 19)}</span>{' '}
+                <span className={cn(MONO, 'text-strong')}>{a.type}</span>{' '}
+                <span className="text-muted">[{a.status}]</span> {a.detail}
+                {a.simulated && <span className="text-ds-micro text-accent-400"> (sim)</span>}
               </div>
             ))}
           </div>

@@ -71,7 +71,7 @@ export function ProductThumb({
         className
       )}
     >
-      {candidate ? candidate : <Package style={{ width: iconPx, height: iconPx }} className="text-zinc-500" />}
+      {candidate ? candidate : <Package style={{ width: iconPx, height: iconPx }} className="text-muted" />}
     </span>
   );
 }

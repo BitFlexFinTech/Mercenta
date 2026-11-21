@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2675/112 ink=907/115 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2401/92 ink=848/114 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -933,6 +933,17 @@ Every row below was measured in this repository this session.
 > not legacy and this family cannot reach zero by migration. The definition is NOT
 > redefined here — changing what a metric counts must not be done quietly — it is recorded
 > as a decision in `PROJECT_STATUS.md` §BATCH 5a.
+>
+> **Re-measured again 2026-11-21 (§BATCH 5b — the remaining shared components):** grey moved
+> 2675 → **2401** sites across **92** files (−274) and ink 907 → **848** (−59), because the
+> rest of `src/components/shared/**` was migrated onto the canonical ladder — `BrandGuidance`,
+> `WorkWorkspace`, `TamSamDisplay`, `CommerceSimulationPanel`, `TourEngine`, `LiveChatWidget`,
+> `ImageUploader`, `CsvCatalogImport`, `ShippingCostEstimate`, `BrandComm`, `RoutingRequest`,
+> `CommandPalette`, `NotificationCenter`, `ProductThumb`, `ErrorBoundary`, `UnlockGrowth` and
+> the five `shared/logistics/` panels. `zinc-*` became the declared text ladder; `parchment`
+> became `soft` (the declared `--mr-text-soft` step); `brass-*` became `accent-*`. One
+> validator assertion was repointed (`validate-shared-surfaces` — the live-chat trigger's
+> text class), never weakened.
 >
 > **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
 > header's dropdown panel was the last site in that component still painted with the

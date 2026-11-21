@@ -454,13 +454,13 @@ export function WorkWorkspace({
         description={description}
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {all.length} open · {closedManually} resolved (manual tasks)
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {reminders.length} reminder{reminders.length === 1 ? '' : 's'} active
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">As at {today}</span>
+            <span className="font-mono text-ds-label text-muted">As at {today}</span>
             {/*
               §SSOT S4 — HONEST LABELLING. Every item in this list is projected from
               a canonical operational RECORD, and in demo mode those records are
@@ -470,7 +470,7 @@ export function WorkWorkspace({
               platform (`src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL`).
             */}
             <span
-              className="font-mono text-ds-label text-amber-300"
+              className="font-mono text-ds-label text-state-warning"
               data-testid="work-operational-state-label"
             >
               {DEMO_OPERATIONAL_STATE_LABEL}
@@ -527,7 +527,7 @@ export function WorkWorkspace({
             </Button>
             {sweep && (
               <span
-                className="font-mono text-ds-micro text-zinc-500"
+                className="font-mono text-ds-micro text-muted"
                 data-testid="work-sweep-report"
                 data-sweep-raised={sweep.raised.length}
                 data-sweep-duplicates={sweep.duplicatesSuppressed}
@@ -550,7 +550,7 @@ export function WorkWorkspace({
               value={priority}
               onChange={(e) => setPriority(e.target.value as 'all' | WorkPriority)}
               data-testid="work-priority-filter"
-              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
             >
               <option value="all">Priority: all</option>
               <option value="critical">Critical</option>
@@ -562,7 +562,7 @@ export function WorkWorkspace({
               value={source}
               onChange={(e) => setSource(e.target.value as 'all' | WorkSource)}
               data-testid="work-source-filter"
-              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
             >
               <option value="all">Source: all</option>
               {/*
@@ -607,7 +607,7 @@ export function WorkWorkspace({
                   <StatusBadge tone="success" dataStatus="success">
                     All clear
                   </StatusBadge>
-                  <p className="text-xs text-zinc-400">No work matches the current filters.</p>
+                  <p className="text-xs text-muted">No work matches the current filters.</p>
                 </div>
               }
             />
@@ -654,7 +654,7 @@ export function WorkWorkspace({
                 { label: 'Network calls', value: '0 (simulation only)' },
               ]}
             />
-            <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+            <p className="mt-2 text-ds-label leading-snug text-muted">
               {describeReminderSweep().cadence} — resolving the underlying work item removes its
               reminder immediately.
             </p>
@@ -702,17 +702,17 @@ function KanbanBoard({
             aria-label={`${WORK_STATUS_LABELS[status]} column`}
             data-testid={`work-column-${status}`}
             data-column-count={column.length}
-            className="flex min-h-[120px] flex-col overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
+            className="flex min-h-[120px] flex-col overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised"
           >
             <header className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-2">
-              <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
+              <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                 {WORK_STATUS_LABELS[status]}
               </span>
-              <span className="font-mono text-ds-label text-zinc-500">{column.length}</span>
+              <span className="font-mono text-ds-label text-muted">{column.length}</span>
             </header>
             <ul className="flex-1 divide-y divide-hairline-06">
               {column.length === 0 && (
-                <li className="px-3 py-3 text-ds-label text-zinc-600">Nothing here.</li>
+                <li className="px-3 py-3 text-ds-label text-faint">Nothing here.</li>
               )}
               {column.map((w) => (
                 <li key={w.id} className="relative px-3 py-2.5" data-testid={`work-card-${w.id}`}>
@@ -733,7 +733,7 @@ function KanbanBoard({
                     className="mt-1.5 block w-full text-left"
                   >
                     <span className="block text-xs font-medium text-strong">{w.title}</span>
-                    <span className="mt-0.5 block text-ds-label text-zinc-500">{dueLabel(w.dueDate)}</span>
+                    <span className="mt-0.5 block text-ds-label text-muted">{dueLabel(w.dueDate)}</span>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {/*
@@ -848,16 +848,16 @@ function ReminderList({
 }) {
   return (
     <div
-      className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
+      className="overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised"
       data-testid="work-reminders"
       data-reminder-count={reminders.length}
       data-reminder-overdue={buckets.overdue}
     >
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-3.5 py-2">
-        <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
           Proactive reminders
         </span>
-        <span className="font-mono text-ds-label text-zinc-500">
+        <span className="font-mono text-ds-label text-muted">
           {buckets.overdue} overdue · {buckets.due_today} due today · {buckets.due_soon} due soon
         </span>
       </header>
@@ -866,7 +866,7 @@ function ReminderList({
           <StatusBadge tone="success" dataStatus="success">
             No reminders raised
           </StatusBadge>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-muted">
             Nothing is inside the reminder window. Run the deterministic sweep to re-evaluate
             every deadline.
           </p>
@@ -878,7 +878,7 @@ function ReminderList({
           if (rows.length === 0) return [];
           return [
             <li key={`bucket-${bucket}`} className="bg-tint px-3.5 py-1">
-              <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                 {REMINDER_BUCKET_LABELS[bucket]} ({rows.length})
               </p>
             </li>,
@@ -896,8 +896,8 @@ function ReminderList({
                     <SourceBadge source={r.source} />
                   </div>
                   <p className="mt-1 text-xs font-medium text-strong">{r.title}</p>
-                  <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{r.detail}</p>
-                  <p className="mt-0.5 font-mono text-ds-micro text-zinc-600">
+                  <p className="mt-0.5 text-ds-label leading-snug text-muted">{r.detail}</p>
+                  <p className="mt-0.5 font-mono text-ds-micro text-faint">
                     due {r.dueDate} · raised {r.raisedAt} · work {r.workItemId}
                   </p>
                 </div>
@@ -970,7 +970,7 @@ function CalendarBoard({
       data-testid="work-calendar"
       data-calendar-month={month}
       data-calendar-entries={monthTotal}
-      className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850"
+      className="overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised"
     >
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-3 py-2">
         <div className="flex items-center gap-2">
@@ -985,7 +985,7 @@ function CalendarBoard({
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-ds-label text-zinc-500">{monthTotal} deadline(s)</span>
+          <span className="font-mono text-ds-label text-muted">{monthTotal} deadline(s)</span>
           <Button variant="ghost" className="text-ds-label" onClick={() => onMonth(monthKey(today))} data-testid="work-calendar-today">
             Today
           </Button>
@@ -994,7 +994,7 @@ function CalendarBoard({
 
       <div className="grid grid-cols-7 border-b border-hairline bg-tint">
         {WEEKDAY_LABELS.map((d) => (
-          <span key={d} className="px-2 py-1 text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
+          <span key={d} className="px-2 py-1 text-ds-micro font-semibold uppercase tracking-[0.12em] text-muted">
             {d}
           </span>
         ))}
@@ -1017,7 +1017,7 @@ function CalendarBoard({
               <span
                 className={
                   'font-mono text-ds-micro ' +
-                  (date === today ? 'rounded-ds-sm bg-brass-500/25 px-1 text-brass-300' : 'text-zinc-600')
+                  (date === today ? 'rounded-ds-sm bg-accent-500/25 px-1 text-accent-300' : 'text-faint')
                 }
               >
                 {date.slice(8)}
@@ -1032,7 +1032,7 @@ function CalendarBoard({
                       data-testid={`work-calendar-entry-${e.workItemId}`}
                       className={
                         'block w-full truncate rounded-ds-sm px-1 py-0.5 text-left text-ds-micro ' +
-                        (e.resolved ? 'text-zinc-600 line-through' : 'text-zinc-200')
+                        (e.resolved ? 'text-faint line-through' : 'text-strong')
                       }
                       style={{
                         borderLeft: `2px solid ${DOMAIN_COLOURS[PRIORITY_DOMAIN[e.priority]].solid}`,
@@ -1043,14 +1043,14 @@ function CalendarBoard({
                   </li>
                 ))}
                 {day.length > 3 && (
-                  <li className="px-1 text-ds-micro text-zinc-500">+{day.length - 3} more</li>
+                  <li className="px-1 text-ds-micro text-muted">+{day.length - 3} more</li>
                 )}
               </ul>
             </div>
           );
         })}
       </div>
-      <p className="px-3 py-2 text-ds-micro text-zinc-600">
+      <p className="px-3 py-2 text-ds-micro text-faint">
         Every entry is a work item's deadline. Resolved items stay visible, struck through, and stop
         driving reminders.
       </p>
@@ -1096,14 +1096,14 @@ export function NewTaskPanel({
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             data-testid="work-new-due"
-            className="flex-1 rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="flex-1 rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
           />
           <select
             aria-label="Priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value as WorkPriority)}
             data-testid="work-new-priority"
-            className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            className="cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
           >
             <option value="normal">Normal</option>
             <option value="high">High</option>
@@ -1134,7 +1134,7 @@ export function NewTaskPanel({
           Create task
         </Button>
         {created && (
-          <p className="text-ds-micro text-emerald-300" data-testid="work-new-confirm">
+          <p className="text-ds-micro text-state-success" data-testid="work-new-confirm">
             Created “{created}” — it is now in the list, board and calendar.
           </p>
         )}
@@ -1229,13 +1229,13 @@ function WorkRecordDrawer({
                   * same explanation on hover.
                   */}
                 <p
-                  className="w-full text-ds-micro leading-snug text-zinc-500"
+                  className="w-full text-ds-micro leading-snug text-muted"
                   data-testid="work-drawer-actions-explainer"
                 >
-                  <span className="text-zinc-400">{openLabel}</span> takes you to the record where this is
+                  <span className="text-muted">{openLabel}</span> takes you to the record where this is
                   actually settled — this item closes by doing THAT work, not by ticking a box here.{' '}
-                  <span className="text-zinc-400">Mark in progress</span> and{' '}
-                  <span className="text-zinc-400">Mark blocked</span> only write a note on this list for you and
+                  <span className="text-muted">Mark in progress</span> and{' '}
+                  <span className="text-muted">Mark blocked</span> only write a note on this list for you and
                   your colleagues; they change nothing on the order.
                 </p>
               </>
@@ -1346,7 +1346,7 @@ function WorkRecordDrawer({
               { label: 'Work id', value: <span className="font-mono text-ds-label">{item.id}</span> },
             ]}
           />
-          <p className="text-ds-label leading-snug text-zinc-400">{item.detail}</p>
+          <p className="text-ds-label leading-snug text-muted">{item.detail}</p>
           {/*
             §P3 — the founder console's WHY, verbatim: every factor with the value
             it was actually observed from, and the score as the sum of its points
@@ -1354,28 +1354,28 @@ function WorkRecordDrawer({
           */}
           {item.why && (
             <div data-testid="work-drawer-why">
-              <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+              <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
                 Why this rank
               </h3>
               <ul className="space-y-1">
                 {item.why.factors.map((f) => (
                   <li key={f.id} className="flex items-start justify-between gap-3 text-ds-label">
-                    <span className="text-zinc-300">
+                    <span className="text-strong">
                       {f.label}
-                      <span className="block text-ds-micro text-zinc-500">{f.observed}</span>
+                      <span className="block text-ds-micro text-muted">{f.observed}</span>
                     </span>
-                    <span className="font-mono text-zinc-200">{f.points}</span>
+                    <span className="font-mono text-strong">{f.points}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 border-t border-hairline pt-2 text-ds-label text-zinc-400">
-                Score <span className="font-mono text-zinc-200">{item.why.score}</span> — the sum of the factor
+              <p className="mt-2 border-t border-hairline pt-2 text-ds-label text-muted">
+                Score <span className="font-mono text-strong">{item.why.score}</span> — the sum of the factor
                 points above. Ranked by declared factors over stored data only; no AI, nothing invented.
               </p>
             </div>
           )}
           <div>
-            <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
               Activity
             </h3>
             <ActivityFeed
@@ -1386,7 +1386,7 @@ function WorkRecordDrawer({
                 at: a.at,
                 tone: (a.action === 'resolved' ? 'success' : 'info') as StatusTone,
               }))}
-              empty={<p className="text-ds-label text-zinc-600">No activity recorded yet.</p>}
+              empty={<p className="text-ds-label text-faint">No activity recorded yet.</p>}
             />
           </div>
         </div>

@@ -105,21 +105,21 @@ export function PoDocumentQueuePanel({
   return (
     <div data-testid={`po-documents-queue-${scope}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
           Shipping documents awaiting download
         </p>
-        <span className="font-mono text-ds-micro text-zinc-400" data-testid="po-documents-queue-count">
+        <span className="font-mono text-ds-micro text-muted" data-testid="po-documents-queue-count">
           {summaries.length} of {pos.length} purchase orders
         </span>
       </div>
-      <p className="mt-1 text-ds-micro leading-relaxed text-zinc-500">
+      <p className="mt-1 text-ds-micro leading-relaxed text-muted">
         {scope === 'brand'
           ? 'Every pack is produced automatically when Mercenta accepts a purchase order, and stays in this queue until its consignment is dispatched.'
           : "The same derived queue the brand sees: Mercenta has already filed the ASN and produced the pack, so this is the brand's remaining job — download and print before dispatch."}
       </p>
 
       {summaries.length === 0 ? (
-        <p className="mt-2 text-ds-body text-zinc-500" data-testid="po-documents-queue-empty">
+        <p className="mt-2 text-ds-body text-muted" data-testid="po-documents-queue-empty">
           Nothing is awaiting download. A pack appears here the moment a purchase order is accepted, and
           leaves the queue when its consignment is dispatched.
         </p>
@@ -137,23 +137,23 @@ export function PoDocumentQueuePanel({
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 p-2.5">
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 text-ds-label font-medium text-zinc-200">
-                      <FileText className="h-3.5 w-3.5 flex-shrink-0 text-zinc-500" aria-hidden="true" />
+                    <p className="flex items-center gap-1.5 text-ds-label font-medium text-strong">
+                      <FileText className="h-3.5 w-3.5 flex-shrink-0 text-muted" aria-hidden="true" />
                       <span className="font-mono">{po.poNumber}</span>
-                      <span className="font-normal text-zinc-400">{status.label}</span>
+                      <span className="font-normal text-muted">{status.label}</span>
                       {scope === 'admin' && (
-                        <span className="text-ds-micro text-zinc-500">
+                        <span className="text-ds-micro text-muted">
                           · {brandNameFor(po.brandId)}
                         </span>
                       )}
                     </p>
-                    <p className="mt-0.5 text-ds-micro leading-relaxed text-zinc-500">
-                      Destination <span className="text-zinc-300">{pack.destinationLabel}</span> ·{' '}
+                    <p className="mt-0.5 text-ds-micro leading-relaxed text-muted">
+                      Destination <span className="text-strong">{pack.destinationLabel}</span> ·{' '}
                       {pack.lane === 'international' ? 'International' : 'UK domestic'} lane ·{' '}
                       <span data-testid={`po-documents-queue-ready-${po.poNumber}`}>
                         {pack.readyCount}/{pack.applicableCount} documents ready
                       </span>
-                      {generatedAt && <span className="text-zinc-600"> · generated {generatedAt}</span>}
+                      {generatedAt && <span className="text-faint"> · generated {generatedAt}</span>}
                     </p>
                   </div>
                   <Button

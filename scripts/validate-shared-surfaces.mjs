@@ -836,8 +836,11 @@ check(
 );
 check(
   'the live-chat trigger is the SAME 36px chrome control as its neighbours (it was 32px beside three 36px controls)',
+  /* §REPOINTED §BATCH 5b (2026-11-21) — `text-zinc-500` became `text-muted`. Same
+     subject (the trigger is the same 36px chrome control as its neighbours); only the
+     text class it reads moved onto the canonical ladder. */
   read('src/components/shared/LiveChatWidget.tsx').includes(
-    'flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint'
+    'flex h-9 w-9 items-center justify-center rounded-ds-md text-muted transition-ds duration-ds-fast hover:bg-tint'
   )
 );
 check(

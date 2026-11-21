@@ -90,7 +90,7 @@ export function LiveChatWidget() {
         aria-label={open ? 'Close support chat' : 'Open support chat'}
         title="Support chat"
         data-testid="live-chat-trigger"
-        className="relative flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-zinc-200"
+        className="relative flex h-9 w-9 items-center justify-center rounded-ds-md text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
       >
         <MessageSquare className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -102,18 +102,18 @@ export function LiveChatWidget() {
           role="dialog"
           aria-label="Mercenta support chat"
           data-testid="live-chat-panel"
-          className="ds-card absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-ds-lg border bg-ink-850 shadow-ds-overlay animate-fade-in"
+          className="ds-card absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-ds-lg border bg-surface-raised shadow-ds-overlay animate-fade-in"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-hairline bg-ink-900">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-hairline bg-surface">
             <div className="flex items-center gap-2.5">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <div>
                 <p className="text-xs font-medium text-strong">Mercenta Support</p>
-                <p className="text-ds-micro text-zinc-500">We typically reply within 2 hours</p>
+                <p className="text-ds-micro text-muted">We typically reply within 2 hours</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-strong transition-colors">
+            <button onClick={() => setOpen(false)} className="text-muted hover:text-strong transition-colors">
               <MinusCircle className="w-4 h-4" />
             </button>
           </div>
@@ -130,23 +130,23 @@ export function LiveChatWidget() {
             {threadMessages.map((m) => (
               <div key={m.id} className={cn('flex', m.direction === 'outbound' ? 'justify-start' : 'justify-end')}>
                 <div className={cn('max-w-[85%] rounded-ds-lg px-3 py-2 text-xs leading-relaxed',
-                  m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-brass-500 text-strong'
+                  m.direction === 'outbound' ? 'bg-accent-500/15 text-strong' : 'bg-accent-500 text-strong'
                 )}>
                   <p className="whitespace-pre-wrap">{m.body}</p>
-                  <p className="mt-1 text-ds-micro text-zinc-500 font-mono">
+                  <p className="mt-1 text-ds-micro text-muted font-mono">
                     {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
             {sentCount > 0 && threadMessages.length === 0 && (
-              <p className="text-ds-micro text-zinc-600 text-center py-4">Message sent — awaiting reply.</p>
+              <p className="text-ds-micro text-faint text-center py-4">Message sent — awaiting reply.</p>
             )}
             <div ref={bottomRef} />
           </div>
 
           {/* Compose */}
-          <div className="p-3 border-t border-hairline bg-ink-900">
+          <div className="p-3 border-t border-hairline bg-surface">
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -154,12 +154,12 @@ export function LiveChatWidget() {
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder="Type your message…"
-                className="flex-1 bg-ink-850 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                className="flex-1 bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong placeholder-faint focus:outline-none focus:border-accent-500/40"
               />
               <button
                 onClick={handleSend}
                 disabled={!draft.trim()}
-                className="w-8 h-8 rounded-ds-md bg-brass-500 hover:bg-brass-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-strong flex items-center justify-center transition-colors flex-shrink-0"
+                className="w-8 h-8 rounded-ds-md bg-accent-500 hover:bg-accent-400 disabled:bg-surface-overlay disabled:text-muted text-strong flex items-center justify-center transition-colors flex-shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>

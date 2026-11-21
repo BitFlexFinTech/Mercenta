@@ -109,7 +109,7 @@ export function SupplyRouteEscalationPanel({
           </StatusBadge>
         </span>
       </div>
-      <p className="text-ds-micro leading-relaxed text-zinc-400">
+      <p className="text-ds-micro leading-relaxed text-muted">
         {partner.capability.label}. {partner.basis}
       </p>
 
@@ -132,13 +132,13 @@ export function SupplyRouteEscalationPanel({
             },
           ]}
         />
-        <p className="mt-1 text-ds-micro leading-relaxed text-zinc-500">{thresholds.basis}</p>
+        <p className="mt-1 text-ds-micro leading-relaxed text-muted">{thresholds.basis}</p>
       </div>
 
       {loading ? (
         <LoadingState rows={2} label="Loading the consignments in scope…" />
       ) : !selected || !evaluated ? (
-        <p className="text-ds-label text-zinc-500" data-testid="supply-route-empty">
+        <p className="text-ds-label text-muted" data-testid="supply-route-empty">
           No consignment is in scope, so there is no route to assess.
         </p>
       ) : (
@@ -193,7 +193,7 @@ export function SupplyRouteEscalationPanel({
             </StatusBadge>
             <ul data-testid="supply-route-reasons" className="mt-1.5 space-y-0.5">
               {evaluated.result.reasons.map((reason) => (
-                <li key={reason} className="text-ds-micro leading-relaxed text-zinc-400">
+                <li key={reason} className="text-ds-micro leading-relaxed text-muted">
                   {reason}
                 </li>
               ))}
@@ -202,12 +202,12 @@ export function SupplyRouteEscalationPanel({
 
           {evaluated.route.unknowns.length > 0 && (
             <div data-testid="supply-route-unknowns">
-              <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+              <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
                 Not recorded — reported, never estimated
               </p>
               <ul className="mt-1 space-y-0.5">
                 {evaluated.route.unknowns.map((unknown) => (
-                  <li key={unknown} className="text-ds-micro leading-relaxed text-zinc-500">
+                  <li key={unknown} className="text-ds-micro leading-relaxed text-muted">
                     {unknown}
                   </li>
                 ))}
@@ -215,13 +215,13 @@ export function SupplyRouteEscalationPanel({
             </div>
           )}
 
-          <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="supply-route-basis">
+          <p className="text-ds-micro leading-relaxed text-muted" data-testid="supply-route-basis">
             {ROUTE_DERIVATION_BASIS}
           </p>
         </>
       )}
 
-      <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="supply-route-activation">
+      <p className="text-ds-micro leading-relaxed text-muted" data-testid="supply-route-activation">
         {partner.activation}
       </p>
     </div>

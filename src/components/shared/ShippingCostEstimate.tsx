@@ -49,34 +49,34 @@ export function ShippingCostEstimate(props: ShippingEstimateProps) {
 
   return (
     <div className={cn(
-      'bg-ink-900 rounded-ds-md border border-hairline',
+      'bg-surface rounded-ds-md border border-hairline',
       props.compact ? 'p-2.5' : 'p-3',
     )}>
       <div className="flex items-center gap-1.5 mb-1.5">
-        <DollarSign className="w-3.5 h-3.5 text-brass-400" />
-        <span className="text-ds-micro font-medium text-zinc-300">Shipping cost estimate</span>
+        <DollarSign className="w-3.5 h-3.5 text-accent-400" />
+        <span className="text-ds-micro font-medium text-strong">Shipping cost estimate</span>
         {estimate.mockRate && (
-          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
+          <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20 ml-auto">
             Estimated
           </Badge>
         )}
       </div>
       <div className="space-y-0.5">
         <div className="flex justify-between text-ds-micro">
-          <span className="text-zinc-500">Base carrier cost</span>
-          <span className="font-mono text-zinc-300">£{estimate.baseCarrierCost.toFixed(2)}</span>
+          <span className="text-muted">Base carrier cost</span>
+          <span className="font-mono text-strong">£{estimate.baseCarrierCost.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-ds-micro">
-          <span className="text-zinc-500">Mercenta service fee</span>
-          <span className="font-mono text-zinc-300">£{estimate.markupApplied.toFixed(2)}</span>
+          <span className="text-muted">Mercenta service fee</span>
+          <span className="font-mono text-strong">£{estimate.markupApplied.toFixed(2)}</span>
         </div>
         <div className="flex justify-between border-t border-hairline pt-0.5 mt-0.5 text-ds-label font-semibold">
           <span className="text-strong">Total (incl. fee)</span>
-          <span className="font-mono text-brass-400">£{estimate.brandPrice.toFixed(2)}</span>
+          <span className="font-mono text-accent-400">£{estimate.brandPrice.toFixed(2)}</span>
         </div>
       </div>
       {!props.compact && estimate.mockRate && (
-        <p className="flex items-start gap-1 mt-1.5 text-ds-micro text-zinc-600">
+        <p className="flex items-start gap-1 mt-1.5 text-ds-micro text-faint">
           <Info className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
           Estimated rate — actual cost confirmed when carrier manifest is filed.
         </p>

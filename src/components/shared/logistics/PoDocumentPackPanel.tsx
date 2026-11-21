@@ -82,7 +82,7 @@ const STANDING_PRESENTATION: Record<
   },
   not_applicable: {
     label: 'Not applicable',
-    className: 'border-hairline-strong bg-tint text-zinc-500',
+    className: 'border-hairline-strong bg-tint text-muted',
     Icon: Info,
   },
 };
@@ -109,17 +109,17 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
       data-testid="po-document-dialog"
     >
       <div className="absolute inset-0 bg-surface-hover backdrop-blur-sm" onClick={onClose} />
-      <div className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-ds-lg border border-hairline bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg">
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-ink-850/95 px-4 py-3 backdrop-blur">
+      <div className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-ds-lg border border-hairline bg-surface-raised shadow-ds-overlay sm:rounded-ds-lg">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-surface-raised/95 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
             <h2 className="text-ds-title font-semibold text-strong">{doc.title}</h2>
-            <p className="mt-0.5 text-ds-label text-zinc-500">{doc.purpose}</p>
+            <p className="mt-0.5 text-ds-label text-muted">{doc.purpose}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
+            className="rounded-ds-sm p-1.5 text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -144,14 +144,14 @@ function DocumentDialog({ doc, onClose }: { doc: PoDocument; onClose: () => void
           />
         ) : (
           <div className="p-4">
-            <p className="text-ds-body text-zinc-400">
+            <p className="text-ds-body text-muted">
               {doc.notReadyReason ?? 'This document has no printable content yet.'}
             </p>
           </div>
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline p-4">
-          <span className="text-ds-micro text-zinc-500">
+          <span className="text-ds-micro text-muted">
             {doc.cartonIdentifiers?.length
               ? `${doc.cartonIdentifiers.length} carton identifier(s) on this document.`
               : `Lane scope: ${doc.laneScope === 'international' ? 'international lanes' : 'all lanes'}.`}
@@ -194,12 +194,12 @@ const CHAIN_STATE_PRESENTATION: Record<
   },
   awaiting_channel: {
     label: 'Awaiting the channel',
-    className: 'text-zinc-400',
+    className: 'text-muted',
     Icon: Clock,
   },
   not_applicable: {
     label: 'Not applicable',
-    className: 'text-zinc-600',
+    className: 'text-faint',
     Icon: Info,
   },
 };
@@ -213,10 +213,10 @@ const CHAIN_STATE_PRESENTATION: Record<
 export function CollectChainPanel({ chain }: { chain: CollectChain }) {
   return (
     <div className="border-t border-hairline pt-2.5" data-testid="collect-chain">
-      <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+      <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
         Channel collect chain
       </p>
-      <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400" data-testid="collect-chain-notice">
+      <p className="mt-1 text-ds-micro leading-relaxed text-muted" data-testid="collect-chain-notice">
         {chain.notice}
       </p>
       <ol className="mt-2 space-y-1.5">
@@ -235,13 +235,13 @@ export function CollectChainPanel({ chain }: { chain: CollectChain }) {
                 <Icon className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               <span className="min-w-0">
-                <span className="text-ds-label text-zinc-200">
+                <span className="text-ds-label text-strong">
                   {index + 1}. {step.label}
                 </span>
                 <span className={cn('ml-2 font-mono text-ds-micro', presentation.className)}>
                   {presentation.label}
                 </span>
-                <span className="mt-0.5 block text-ds-micro leading-relaxed text-zinc-500">
+                <span className="mt-0.5 block text-ds-micro leading-relaxed text-muted">
                   {step.detail}
                 </span>
               </span>
@@ -330,11 +330,11 @@ export function PoDocumentPackPanel({
   return (
     <div data-testid="po-documents-panel">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
           Documents for this PO
         </p>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-ds-micro text-zinc-400" data-testid="po-documents-summary">
+          <span className="font-mono text-ds-micro text-muted" data-testid="po-documents-summary">
             {pack.readyCount}/{pack.applicableCount} ready ·{' '}
             {pack.lane === 'international' ? 'International' : 'UK domestic'}
           </span>
@@ -351,9 +351,9 @@ export function PoDocumentPackPanel({
           </Button>
         </div>
       </div>
-      <p className="mt-1 text-ds-micro leading-relaxed text-zinc-500">
+      <p className="mt-1 text-ds-micro leading-relaxed text-muted">
         Generated automatically when Mercenta accepted {pack.poNumber}. Destination:{' '}
-        <span className="text-zinc-300">{pack.destinationLabel}</span>.
+        <span className="text-strong">{pack.destinationLabel}</span>.
       </p>
 
       <ul className="mt-2 space-y-2">
@@ -371,11 +371,11 @@ export function PoDocumentPackPanel({
             >
               <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-ds-label font-medium text-zinc-200">
-                    <FileText className="h-3.5 w-3.5 flex-shrink-0 text-zinc-500" aria-hidden="true" />
+                  <p className="flex items-center gap-1.5 text-ds-label font-medium text-strong">
+                    <FileText className="h-3.5 w-3.5 flex-shrink-0 text-muted" aria-hidden="true" />
                     {doc.title}
                   </p>
-                  <p className="mt-0.5 text-ds-micro leading-relaxed text-zinc-500">
+                  <p className="mt-0.5 text-ds-micro leading-relaxed text-muted">
                     {doc.purpose}
                   </p>
                 </div>
@@ -433,7 +433,7 @@ export function PoDocumentPackPanel({
 
               {reason && (
                 <p
-                  className="mt-1.5 text-ds-micro leading-relaxed text-zinc-500"
+                  className="mt-1.5 text-ds-micro leading-relaxed text-muted"
                   data-testid={`po-document-reason-${doc.kind}`}
                 >
                   {reason}
@@ -443,8 +443,8 @@ export function PoDocumentPackPanel({
               <dl className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                 {doc.fields.map((field) => (
                   <div key={field.label} className="flex items-baseline gap-1 text-ds-micro">
-                    <dt className="text-zinc-600">{field.label}:</dt>
-                    <dd className="font-mono text-zinc-400">{field.value}</dd>
+                    <dt className="text-faint">{field.label}:</dt>
+                    <dd className="font-mono text-muted">{field.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -455,7 +455,7 @@ export function PoDocumentPackPanel({
 
       <ul className="mt-2 space-y-0.5">
         {pack.notices.map((notice) => (
-          <li key={notice} className="text-ds-micro leading-relaxed text-zinc-600">
+          <li key={notice} className="text-ds-micro leading-relaxed text-faint">
             {notice}
           </li>
         ))}
@@ -469,7 +469,7 @@ export function PoDocumentPackPanel({
           channel-generated label for a UK/EU consignment. The labels this pack
           renders are MERCENTA'S OWN carrier templates (DHL / Palletline). */}
       <p
-        className="border-t border-hairline pt-2.5 text-ds-micro leading-relaxed text-zinc-500"
+        className="border-t border-hairline pt-2.5 text-ds-micro leading-relaxed text-muted"
         data-testid="channel-labels-rule"
       >
         {channelShipmentLabelsAvailability(UK_MARKETPLACE_ID).reason}

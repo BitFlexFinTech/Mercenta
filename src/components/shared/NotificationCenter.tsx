@@ -572,7 +572,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
         className={cn(
           'relative flex h-9 w-9 items-center justify-center rounded-ds-md transition-colors hover:bg-tint',
           items.length === 0
-            ? 'text-zinc-500 hover:text-zinc-300'
+            ? 'text-muted hover:text-strong'
             : highCount > 0
               ? 'text-state-danger'
               : 'text-state-warning'
@@ -602,7 +602,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
             id="notification-panel"
             role="dialog"
             aria-label={ariaSummary}
-            className="ds-card absolute right-0 top-9 z-50 w-[380px] overflow-hidden rounded-ds-lg border bg-ink-900 shadow-ds-overlay"
+            className="ds-card absolute right-0 top-9 z-50 w-[380px] overflow-hidden rounded-ds-lg border bg-surface shadow-ds-overlay"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
               <span className="text-xs font-semibold text-strong">Needs attention</span>
@@ -660,12 +660,12 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-ds-label font-medium text-strong leading-snug">{n.title}</span>
-                      <span className="block text-ds-micro text-zinc-500 truncate" title={n.detail}>{n.detail}</span>
+                      <span className="block text-ds-micro text-muted truncate" title={n.detail}>{n.detail}</span>
                       {/* §P13 / S6 — the reminder's OWN record detail (channel →
                           destination, and any channel that could not be used). */}
                       {n.meta && (
                         <span
-                          className="block text-ds-micro text-zinc-600 mt-0.5 line-clamp-2"
+                          className="block text-ds-micro text-faint mt-0.5 line-clamp-2"
                           title={n.meta}
                           data-notification-meta={n.kind}
                         >
@@ -677,7 +677,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                 );
               })}
             </div>
-            <div className="px-4 py-2 border-t border-hairline text-ds-micro text-zinc-600">
+            <div className="px-4 py-2 border-t border-hairline text-ds-micro text-faint">
               Same event stream as the daily email digest — no second pipeline.
             </div>
           </div>

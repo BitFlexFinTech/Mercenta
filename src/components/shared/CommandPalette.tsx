@@ -123,10 +123,10 @@ export function CommandPalette({
         aria-modal="true"
         aria-label="Search and navigate"
         data-testid={testId}
-        className="animate-rise relative w-full max-w-xl overflow-hidden rounded-ds-lg border border-hairline-strong bg-ink-900 shadow-ds-overlay"
+        className="animate-rise relative w-full max-w-xl overflow-hidden rounded-ds-lg border border-hairline-strong bg-surface shadow-ds-overlay"
       >
         <div className="flex items-center gap-2.5 border-b border-hairline px-3.5 py-2.5">
-          <Search className="h-4 w-4 flex-shrink-0 text-zinc-500" aria-hidden="true" />
+          <Search className="h-4 w-4 flex-shrink-0 text-muted" aria-hidden="true" />
           <input
             ref={inputRef}
             value={query}
@@ -140,23 +140,23 @@ export function CommandPalette({
                 ? `${testId}-item-${orderedItems[activeIndex].id}`
                 : undefined
             }
-            className="w-full bg-transparent text-sm text-strong placeholder-zinc-600 outline-none"
+            className="w-full bg-transparent text-sm text-strong placeholder-faint outline-none"
             data-testid={`${testId}-input`}
           />
-          <kbd className="hidden flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
+          <kbd className="hidden flex-shrink-0 rounded-ds-sm border border-hairline-strong px-1.5 py-0.5 font-mono text-ds-micro text-muted sm:block">
             ESC
           </kbd>
         </div>
 
         <div id={`${testId}-results`} className="max-h-[52vh] overflow-y-auto py-1.5">
           {flat.length === 0 ? (
-            <p className="px-3.5 py-4 text-xs text-zinc-500" data-testid={`${testId}-empty`}>
+            <p className="px-3.5 py-4 text-xs text-muted" data-testid={`${testId}-empty`}>
               No match for “{query}”. Try a reference, brand or destination.
             </p>
           ) : (
             flat.map((g) => (
               <div key={g.label} className="mb-1">
-                <p className="px-3.5 py-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                <p className="px-3.5 py-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-faint">
                   {g.label}
                 </p>
                 <ul>
@@ -177,21 +177,21 @@ export function CommandPalette({
                           )}
                         >
                           {item.icon && (
-                            <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center text-zinc-500">
+                            <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center text-muted">
                               {item.icon}
                             </span>
                           )}
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-xs text-strong">{item.label}</span>
                             {item.meta && (
-                              <span className="block truncate text-ds-micro text-zinc-500">
+                              <span className="block truncate text-ds-micro text-muted">
                                 {item.meta}
                               </span>
                             )}
                           </span>
                           {isActive && (
                             <CornerDownLeft
-                              className="h-3 w-3 flex-shrink-0 text-zinc-500"
+                              className="h-3 w-3 flex-shrink-0 text-muted"
                               aria-hidden="true"
                             />
                           )}
@@ -206,8 +206,8 @@ export function CommandPalette({
         </div>
 
         <div className="flex items-center justify-between border-t border-hairline px-3.5 py-1.5">
-          <span className="font-mono text-ds-micro text-zinc-600">↑↓ navigate · ⏎ open</span>
-          <span className="font-mono text-ds-micro text-zinc-600" data-testid={`${testId}-count`}>
+          <span className="font-mono text-ds-micro text-faint">↑↓ navigate · ⏎ open</span>
+          <span className="font-mono text-ds-micro text-faint" data-testid={`${testId}-count`}>
             {totalItems} result{totalItems === 1 ? '' : 's'}
           </span>
         </div>

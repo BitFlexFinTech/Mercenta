@@ -62,20 +62,20 @@ const handleFile = useCallback(async (file: File) => {
 return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Upload className="w-4 h-4 text-brass-400" />
+        <Upload className="w-4 h-4 text-accent-400" />
         <h3 className="text-sm font-medium text-strong">Bulk CSV Import</h3>
       </div>
 
       {phase === 'idle' && (
         <div>
-          <div className={cn('border-2 border-dashed rounded-ds-md p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-brass-500/60 bg-brass-500/5' : 'border-hairline-strong hover:border-hairline-strong')}
+          <div className={cn('border-2 border-dashed rounded-ds-md p-8 text-center cursor-pointer transition-colors', dragOver ? 'border-accent-500/60 bg-accent-500/5' : 'border-hairline-strong hover:border-hairline-strong')}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) void handleFile(e.dataTransfer.files[0]); }}
             onClick={() => fileRef.current?.click()}>
-            <Upload className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-            <p className="text-sm text-zinc-400">Drop a CSV file here, or click to browse</p>
-            <p className="text-xs text-zinc-600 mt-1">Required: name, SKU, barcode, exWorksPrice, ukRetailPrice, commodityCode, vatStatus, hazmat, length, width, height, weight</p>
+            <Upload className="w-8 h-8 text-faint mx-auto mb-2" />
+            <p className="text-sm text-muted">Drop a CSV file here, or click to browse</p>
+            <p className="text-xs text-faint mt-1">Required: name, SKU, barcode, exWorksPrice, ukRetailPrice, commodityCode, vatStatus, hazmat, length, width, height, weight</p>
             <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }} />
           </div>
           {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
@@ -84,8 +84,8 @@ return (
 
       {phase === 'parsing' && (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-brass-400 mr-2" />
-          <span className="text-sm text-zinc-400">Parsing and validating {fileName}...</span>
+          <Loader2 className="w-6 h-6 animate-spin text-accent-400 mr-2" />
+          <span className="text-sm text-muted">Parsing and validating {fileName}...</span>
         </div>
       )}
 
@@ -93,12 +93,12 @@ return (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-xs">
-              <span className="text-zinc-400">{fileName} &mdash; {summary.totalRows} rows</span>
-              <span className="text-emerald-400">{validCount} valid</span>
+              <span className="text-muted">{fileName} &mdash; {summary.totalRows} rows</span>
+              <span className="text-state-success">{validCount} valid</span>
               {invalidCount > 0 && <span className="text-red-400">{invalidCount} invalid</span>}
             </div>
             {summary.abortedReason && (
-              <div className="flex items-center gap-1 text-ds-micro text-amber-400">
+              <div className="flex items-center gap-1 text-ds-micro text-state-warning">
                 <AlertTriangle className="w-3 h-3" /> {summary.abortedReason}
               </div>
             )}
@@ -106,8 +106,8 @@ return (
 
           <div className="max-h-48 overflow-y-auto border border-hairline rounded-ds-md">
             <table className="w-full text-ds-micro">
-              <thead className="sticky top-0 bg-ink-850">
-                <tr className="border-b border-hairline text-zinc-500">
+              <thead className="sticky top-0 bg-surface-raised">
+                <tr className="border-b border-hairline text-muted">
                   <th className="px-2 py-1 text-left">#</th>
                   <th className="px-2 py-1 text-left">SKU</th>
                   <th className="px-2 py-1 text-left">Name</th>
@@ -118,12 +118,12 @@ return (
               <tbody className="divide-y divide-hairline-06">
                 {rows.map((r) => (
                   <tr key={r.lineNumber} className={r.valid ? '' : 'bg-red-500/5'}>
-                    <td className="px-2 py-1 text-zinc-600">{r.lineNumber}</td>
-                    <td className="px-2 py-1 font-mono text-zinc-300">{r.row?.sku ?? '\u2014'}</td>
-                    <td className="px-2 py-1 text-zinc-300 truncate max-w-[200px]">{r.row?.name ?? '\u2014'}</td>
-                    <td className="px-2 py-1 text-right text-zinc-300">{r.row ? '\u00a3' + r.row.exWorksPrice.toFixed(2) : '\u2014'}</td>
+                    <td className="px-2 py-1 text-faint">{r.lineNumber}</td>
+                    <td className="px-2 py-1 font-mono text-strong">{r.row?.sku ?? '\u2014'}</td>
+                    <td className="px-2 py-1 text-strong truncate max-w-[200px]">{r.row?.name ?? '\u2014'}</td>
+                    <td className="px-2 py-1 text-right text-strong">{r.row ? '\u00a3' + r.row.exWorksPrice.toFixed(2) : '\u2014'}</td>
                     <td className="px-2 py-1 text-center">
-                      {r.valid ? <CheckCircle2 className="w-3 h-3 text-emerald-400 inline" /> : <span className="text-red-400 inline-flex items-center gap-1 cursor-help" title={r.errors?.join('; ')}><XCircle className="w-3 h-3" /></span>}
+                      {r.valid ? <CheckCircle2 className="w-3 h-3 text-state-success inline" /> : <span className="text-red-400 inline-flex items-center gap-1 cursor-help" title={r.errors?.join('; ')}><XCircle className="w-3 h-3" /></span>}
                     </td>
                   </tr>
                 ))}
@@ -136,7 +136,7 @@ return (
               {rows.filter((r) => !r.valid).slice(0, 5).map((r) => (
                 <p key={r.lineNumber}>Line {r.lineNumber}: {r.errors?.join('; ')}</p>
               ))}
-              {rows.filter((r) => !r.valid).length > 5 && <p className="text-zinc-500">...and {rows.filter((r) => !r.valid).length - 5} more</p>}
+              {rows.filter((r) => !r.valid).length > 5 && <p className="text-muted">...and {rows.filter((r) => !r.valid).length - 5} more</p>}
             </div>
           )}
 
@@ -157,8 +157,8 @@ return (
       )}
 
       {phase === 'done' && summary?.commit?.ok && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-state-success" />
           <span className="text-xs text-state-success">Successfully imported {summary.commit.imported} product(s) into the catalog.</span>
         </div>
       )}

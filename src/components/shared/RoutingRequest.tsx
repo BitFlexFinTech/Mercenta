@@ -99,8 +99,8 @@ export function RoutingRequestIndicator({
    */
   if (routing?.raised) {
     return (
-      <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md px-3 py-2">
-        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+      <div className="flex items-center gap-2 bg-emerald-500/10 border border-state-success/20 rounded-ds-md px-3 py-2">
+        <CheckCircle2 className="w-4 h-4 text-state-success flex-shrink-0" />
         <span className="text-ds-label text-state-success font-medium" data-testid="routing-raised-by-mercenta">
           Routing step raised by Mercenta · {routingCarrierLabel(routing)} · {routing.reference}
         </span>
@@ -111,21 +111,21 @@ export function RoutingRequestIndicator({
   return (
     <div className={cn(
       'flex items-center gap-2 rounded-ds-md px-3 py-2 border',
-      countdown.overdue ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-amber-500/20'
+      countdown.overdue ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-state-warning/20'
     )}>
-      <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-amber-400')} />
+      <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-state-warning')} />
       <div className="flex-1 min-w-0">
         <p className={cn('text-ds-label font-medium', countdown.overdue ? 'text-state-danger' : 'text-state-warning')}>
           Routing step — Mercenta raises it (Freight Collect)
         </p>
-        <p className="text-ds-micro text-zinc-500" data-testid="routing-readiness-notice">
+        <p className="text-ds-micro text-muted" data-testid="routing-readiness-notice">
           {ROUTING_READINESS.label}: prepare by {ROUTING_READINESS.cutoffHour}:00 (Europe/London) the day before
           the ship window closes. Not a retail-channel deadline.
         </p>
       </div>
       <div className={cn(
         'text-ds-micro font-mono px-2 py-0.5 rounded-ds-sm',
-        countdown.overdue ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-amber-300'
+        countdown.overdue ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-state-warning'
       )}>
         <Clock className="w-3 h-3 inline mr-1" />{countdown.label}
       </div>
@@ -168,19 +168,19 @@ export function RoutingRequestStatus({
   return (
     <div className="border border-hairline rounded-ds-md p-3 space-y-2">
       <div className="flex items-center gap-2">
-        <Truck className="w-4 h-4 text-brass-400" />
+        <Truck className="w-4 h-4 text-accent-400" />
         <span className="text-xs font-medium text-strong">Routing step — raised by Mercenta</span>
       </div>
-      <p className="text-ds-micro text-zinc-400">
+      <p className="text-ds-micro text-muted">
         This PO has <strong>Freight Collect</strong> terms — the retail channel arranges the carrier.
         Mercenta raises the routing step before the ship window closes, then files the ASN within it.
         You are not required to action this step.
       </p>
-      <p className="text-ds-micro text-zinc-500" data-testid="routing-readiness-basis">
+      <p className="text-ds-micro text-muted" data-testid="routing-readiness-basis">
         {routingReadinessNotice()}
       </p>
       {routing?.raised ? (
-        <p className="text-ds-micro text-emerald-300" data-testid="routing-status-raised">
+        <p className="text-ds-micro text-state-success" data-testid="routing-status-raised">
           Raised {routing.reference} · {routingCarrierLabel(routing)}
         </p>
       ) : (
@@ -188,9 +188,9 @@ export function RoutingRequestStatus({
           <div className="flex items-center gap-2">
             {isOverdue
               ? <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-              : <Clock className="w-3.5 h-3.5 text-amber-400" />
+              : <Clock className="w-3.5 h-3.5 text-state-warning" />
             }
-            <span className={cn('text-ds-micro', isOverdue ? 'text-red-300' : 'text-amber-300')}>
+            <span className={cn('text-ds-micro', isOverdue ? 'text-red-300' : 'text-state-warning')}>
               {isOverdue
                 ? 'OVERDUE — ship window closed ' + new Date(shipWindowEnd as string).toLocaleDateString('en-GB') + '. Ship at risk of rejection.'
                 : 'Mercenta readiness target: ' + deadline.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at ' + ROUTING_READINESS.cutoffHour + ':00 (Europe/London)'}

@@ -35,34 +35,34 @@ export function ConsolidationPosturePanel({ poNumber }: ConsolidationPosturePane
         <span data-testid="consolidation-status" data-status={CONSOLIDATION_POSTURE.status}>
           <StatusBadge tone="neutral">Deferred by Founder decision</StatusBadge>
         </span>
-        <span className="text-ds-micro text-zinc-500">{CONSOLIDATION_POSTURE.decision}</span>
+        <span className="text-ds-micro text-muted">{CONSOLIDATION_POSTURE.decision}</span>
       </div>
 
-      <p className="text-ds-micro leading-relaxed text-zinc-300" data-testid="consolidation-today">
+      <p className="text-ds-micro leading-relaxed text-strong" data-testid="consolidation-today">
         {CONSOLIDATION_POSTURE.today}
       </p>
 
       {declared && (
-        <p className="text-ds-micro leading-relaxed text-zinc-400" data-testid="consolidation-declared">
+        <p className="text-ds-micro leading-relaxed text-muted" data-testid="consolidation-declared">
           This consignment declares{' '}
-          <span className="font-mono text-zinc-300">{declared.poNumbers.join(', ')}</span> —{' '}
+          <span className="font-mono text-strong">{declared.poNumbers.join(', ')}</span> —{' '}
           {declared.grouped
             ? 'a grouped consignment (1..n purchase orders).'
             : 'one purchase order today; the model accepts 1..n.'}
         </p>
       )}
 
-      <p className="text-ds-micro leading-relaxed text-zinc-400" data-testid="consolidation-model-support">
+      <p className="text-ds-micro leading-relaxed text-muted" data-testid="consolidation-model-support">
         {CONSOLIDATION_POSTURE.modelSupports}
       </p>
 
       <div>
-        <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
           Documented channel evidence
         </p>
         <ul className="mt-1 space-y-0.5" data-testid="consolidation-evidence">
           {CONSOLIDATION_POSTURE.evidence.map((entry) => (
-            <li key={entry} className="text-ds-micro leading-relaxed text-zinc-500">
+            <li key={entry} className="text-ds-micro leading-relaxed text-muted">
               {entry}
             </li>
           ))}
@@ -70,19 +70,19 @@ export function ConsolidationPosturePanel({ poNumber }: ConsolidationPosturePane
       </div>
 
       <div>
-        <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
           Invariants a grouping must honour
         </p>
         <ul className="mt-1 space-y-0.5" data-testid="consolidation-invariants">
           {CONSOLIDATION_POSTURE.invariants.map((entry) => (
-            <li key={entry} className="text-ds-micro leading-relaxed text-zinc-500">
+            <li key={entry} className="text-ds-micro leading-relaxed text-muted">
               {entry}
             </li>
           ))}
         </ul>
       </div>
 
-      <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="consolidation-activation">
+      <p className="text-ds-micro leading-relaxed text-muted" data-testid="consolidation-activation">
         {CONSOLIDATION_POSTURE.activation}
       </p>
     </div>

@@ -25,7 +25,7 @@ export function UnlockGrowth({
       className="border-t-2 pt-5"
       style={{ borderColor: 'var(--mr-accent)' }}
     >
-      <p className="font-display text-lg font-semibold tracking-tight text-parchment">
+      <p className="font-display text-lg font-semibold tracking-tight text-soft">
         {eyebrow}
       </p>
       <p

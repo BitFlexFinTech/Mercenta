@@ -54,8 +54,8 @@ export function CarrierProviderConfigurationPanel({
           >
             <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
               <div className="min-w-0">
-                <p className="text-ds-label font-medium text-zinc-200">{config.accountLabel}</p>
-                <p className="mt-0.5 text-ds-micro leading-relaxed text-zinc-500">
+                <p className="text-ds-label font-medium text-strong">{config.accountLabel}</p>
+                <p className="mt-0.5 text-ds-micro leading-relaxed text-muted">
                   {config.capabilityLabel}
                 </p>
               </div>
@@ -71,30 +71,30 @@ export function CarrierProviderConfigurationPanel({
 
             <dl className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
               <div className="flex items-baseline gap-1 text-ds-micro">
-                <dt className="text-zinc-600">Lane:</dt>
-                <dd className="text-zinc-400">{config.laneLabels.join(' · ')}</dd>
+                <dt className="text-faint">Lane:</dt>
+                <dd className="text-muted">{config.laneLabels.join(' · ')}</dd>
               </div>
               <div className="flex items-baseline gap-1 text-ds-micro">
-                <dt className="text-zinc-600">Service:</dt>
-                <dd className="text-zinc-400">{config.services.join(' · ')}</dd>
+                <dt className="text-faint">Service:</dt>
+                <dd className="text-muted">{config.services.join(' · ')}</dd>
               </div>
               <div className="flex items-baseline gap-1 text-ds-micro">
-                <dt className="text-zinc-600">Lane account for:</dt>
-                <dd className="font-mono text-zinc-400">
+                <dt className="text-faint">Lane account for:</dt>
+                <dd className="font-mono text-muted">
                   {config.routingLanes.length > 0 ? config.routingLanes.join(', ') : '— override only'}
                 </dd>
               </div>
             </dl>
 
-            <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-500">{config.basis}</p>
+            <p className="mt-1.5 text-ds-micro leading-relaxed text-muted">{config.basis}</p>
 
             {scope === 'admin' && (
               <div className="mt-2 space-y-1 border-t border-hairline pt-2">
-                <p className="flex items-start gap-1.5 text-ds-micro leading-relaxed text-zinc-400">
-                  <ShieldCheck className="mt-px h-3 w-3 flex-shrink-0 text-zinc-500" aria-hidden="true" />
+                <p className="flex items-start gap-1.5 text-ds-micro leading-relaxed text-muted">
+                  <ShieldCheck className="mt-px h-3 w-3 flex-shrink-0 text-muted" aria-hidden="true" />
                   Configured by Mercenta in the {config.controlPlane}.
                 </p>
-                <p className="text-ds-micro leading-relaxed text-zinc-500">{config.activation}</p>
+                <p className="text-ds-micro leading-relaxed text-muted">{config.activation}</p>
                 {onOpenIntegrations && (
                   <Button size="sm" variant="secondary" onClick={onOpenIntegrations}>
                     <PlugZap className="h-3 w-3" />
@@ -108,11 +108,11 @@ export function CarrierProviderConfigurationPanel({
       </ul>
 
       {scope === 'brand' ? (
-        <p className="mt-2 text-ds-micro leading-relaxed text-zinc-500" data-testid="carrier-provider-brand-notice">
+        <p className="mt-2 text-ds-micro leading-relaxed text-muted" data-testid="carrier-provider-brand-notice">
           {BRAND_PROVIDER_CONFIGURATION_NOTICE}
         </p>
       ) : (
-        <p className="mt-2 text-ds-micro leading-relaxed text-zinc-500">
+        <p className="mt-2 text-ds-micro leading-relaxed text-muted">
           A provider that is not positively operational is refused by the eligibility derivation and by the
           carrier domain — availability is never eligibility, and an unregistered provider is never treated
           as simulation.

@@ -346,27 +346,27 @@ function TourStepCard(props: {
        * items, settings tabs) and swallowed the click.
        */
       style={{ ...tooltipStyle, pointerEvents: 'none' }}
-      className="w-[400px] bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay p-4 animate-fade-in [&_button]:pointer-events-auto"
+      className="w-[400px] bg-surface border border-hairline rounded-ds-lg shadow-ds-overlay p-4 animate-fade-in [&_button]:pointer-events-auto"
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          <HelpCircle className="w-4 h-4 text-brass-400" />
+          <HelpCircle className="w-4 h-4 text-accent-400" />
           <span className="text-xs font-medium text-strong">{step.title}</span>
         </div>
-        <button onClick={onSkip} className="text-zinc-500 hover:text-strong transition-colors" aria-label="Dismiss tour"><X className="w-3.5 h-3.5" /></button>
+        <button onClick={onSkip} className="text-muted hover:text-strong transition-colors" aria-label="Dismiss tour"><X className="w-3.5 h-3.5" /></button>
       </div>
-      <p className="text-ds-label text-zinc-400 leading-relaxed mb-3">{step.description}</p>
+      <p className="text-ds-label text-muted leading-relaxed mb-3">{step.description}</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           {dots.map(function(i) {
-            return <span key={i} className={cn('w-1.5 h-1.5 rounded-full', i === currentIndex ? 'bg-brass-500' : 'bg-zinc-700')} />;
+            return <span key={i} className={cn('w-1.5 h-1.5 rounded-full', i === currentIndex ? 'bg-accent-500' : 'bg-surface-overlay')} />;
           })}
           {step.learnMore && onLearnMore && (
             <button
               type="button"
               onClick={() => onLearnMore(String(step.learnMore))}
               data-testid={`tour-learn-more-${step.id}`}
-              className="flex items-center gap-1 text-ds-micro text-brass-400 hover:text-brass-300 transition-colors ml-1.5"
+              className="flex items-center gap-1 text-ds-micro text-accent-400 hover:text-accent-300 transition-colors ml-1.5"
             >
               <BookOpen className="w-3 h-3" /> Learn more
             </button>
@@ -405,17 +405,17 @@ function SkipConfirmModal(props: {
       aria-modal="true"
       aria-label="Skip tour confirmation"
     >
-      <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay p-6 max-w-sm w-full mx-4">
+      <div className="bg-surface border border-hairline rounded-ds-lg shadow-ds-overlay p-6 max-w-sm w-full mx-4">
         <div className="flex items-center gap-2 mb-3">
-          <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <AlertTriangle className="w-5 h-5 text-state-warning" />
           <span className="text-sm font-semibold text-strong">Skip Tour?</span>
         </div>
-        <p className="text-xs text-zinc-400 mb-4">
+        <p className="text-xs text-muted mb-4">
           Are you sure? You can restart tours anytime from Settings.
         </p>
         <div className="flex items-center justify-end gap-2">
           <Button className="text-ds-micro" variant="ghost" onClick={onCancel}>Continue Tour</Button>
-          <Button className="text-ds-micro bg-zinc-700 hover:bg-zinc-600 text-strong" onClick={onConfirm}>Skip Tour</Button>
+          <Button className="text-ds-micro bg-surface-overlay hover:bg-surface-hover text-strong" onClick={onConfirm}>Skip Tour</Button>
         </div>
       </div>
     </div>
@@ -429,10 +429,10 @@ function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
   const completed = progress.checklistCompleted;
 
   return (
-    <div className={cn(compact ? '' : 'bg-ink-900 border border-hairline rounded-ds-md p-3')}>
+    <div className={cn(compact ? '' : 'bg-surface border border-hairline rounded-ds-md p-3')}>
       {!compact && (
         <div className="flex items-center gap-2 mb-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-brass-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-accent-400" />
           <span className="text-xs font-medium text-strong">Onboarding Checklist</span>
         </div>
       )}
@@ -443,8 +443,8 @@ function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
             <div key={item.id} className="flex items-center gap-2 text-ds-micro">
               {done
                 ? <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                : <Circle className="w-3 h-3 text-zinc-600 flex-shrink-0" />}
-              <span className={cn(done ? 'text-zinc-500 line-through' : 'text-zinc-400')}>{item.label}</span>
+                : <Circle className="w-3 h-3 text-faint flex-shrink-0" />}
+              <span className={cn(done ? 'text-muted line-through' : 'text-muted')}>{item.label}</span>
             </div>
           );
         })}
@@ -673,19 +673,19 @@ export function TourEngine(props: TourEngineProps) {
             style={{ backgroundColor: 'var(--mr-overlay-tint)' }}
             data-testid="kb-article-panel"
           >
-            <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay w-[560px] max-h-[70vh] overflow-y-auto p-5">
+            <div className="bg-surface border border-hairline rounded-ds-lg shadow-ds-overlay w-[560px] max-h-[70vh] overflow-y-auto p-5">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-brass-400" />
+                  <BookOpen className="w-4 h-4 text-accent-400" />
                   <span className="text-sm font-semibold text-strong">{article.title}</span>
                 </span>
-                <button type="button" onClick={() => setOpenArticleId(null)} className="text-zinc-500 hover:text-strong" aria-label="Close article"><X className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setOpenArticleId(null)} className="text-muted hover:text-strong" aria-label="Close article"><X className="w-4 h-4" /></button>
               </div>
-              <p className="text-ds-label text-zinc-400 mb-3">{article.summary}</p>
-              <div className="space-y-2.5 text-ds-label text-zinc-300">
+              <p className="text-ds-label text-muted mb-3">{article.summary}</p>
+              <div className="space-y-2.5 text-ds-label text-strong">
                 {article.sections.map((sec) => (
-                  <div key={sec.heading} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
-                    <div className="text-ds-micro uppercase tracking-wide text-brass-400">{sec.heading}</div>
+                  <div key={sec.heading} className="rounded-ds-md border border-hairline bg-surface-raised px-3 py-2">
+                    <div className="text-ds-micro uppercase tracking-wide text-accent-400">{sec.heading}</div>
                     <p className="mt-1">{sec.body}</p>
                   </div>
                 ))}

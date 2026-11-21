@@ -149,7 +149,7 @@ export function BrandCommPanel({
       {/* Thread preview */}
       <div className={cn('space-y-1.5 overflow-y-auto', compact ? 'max-h-[120px]' : 'max-h-[180px]')}>
         {preview.length === 0 && (
-          <p className="text-ds-label text-zinc-600">No messages with this brand yet.</p>
+          <p className="text-ds-label text-faint">No messages with this brand yet.</p>
         )}
         {preview.map((m) => (
           <div
@@ -157,11 +157,11 @@ export function BrandCommPanel({
             className={cn(
               'rounded-ds-md px-3 py-2 text-ds-label leading-relaxed',
               m.direction === 'outbound'
-                ? 'bg-brass-500/10 text-zinc-300'
-                : 'bg-tint text-zinc-400'
+                ? 'bg-accent-500/10 text-strong'
+                : 'bg-tint text-muted'
             )}
           >
-            <span className="font-mono text-ds-micro text-zinc-500 mr-2">
+            <span className="font-mono text-ds-micro text-muted mr-2">
               {new Date(m.createdAt).toLocaleString()} · {m.channel}
             </span>
             <span className="whitespace-pre-wrap">{m.body}</span>
@@ -175,7 +175,7 @@ export function BrandCommPanel({
           onClick={() => setTab('message')}
           className={cn(
             'flex items-center gap-1 px-2 py-1 rounded-ds-sm text-ds-label',
-            tab === 'message' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-strong'
+            tab === 'message' ? 'bg-accent-500/15 text-accent-300' : 'text-muted hover:text-strong'
           )}
         >
           <MessageSquare className="w-3 h-3" /> Message
@@ -184,7 +184,7 @@ export function BrandCommPanel({
           onClick={() => setTab('call')}
           className={cn(
             'flex items-center gap-1 px-2 py-1 rounded-ds-sm text-ds-label',
-            tab === 'call' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-strong'
+            tab === 'call' ? 'bg-accent-500/15 text-accent-300' : 'text-muted hover:text-strong'
           )}
         >
           <Phone className="w-3 h-3" /> Log a call
@@ -192,7 +192,7 @@ export function BrandCommPanel({
       </div>
 
       {!emailLive && !emailSandbox && tab === 'message' && (
-        <p className="text-ds-micro text-zinc-600">
+        <p className="text-ds-micro text-faint">
           Power sending disabled — connect Postmark/SendGrid in Integrations. Messages are still
           logged to the thread.
         </p>
@@ -211,7 +211,7 @@ export function BrandCommPanel({
             onChange={(e) => setBody(e.target.value)}
             rows={compact ? 2 : 3}
             placeholder="Write a reply…"
-            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
+            className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40"
           />
           <Button className="text-xs" disabled={!body.trim()} onClick={() => void handleSend()}>
             <Send className="w-3.5 h-3.5 mr-1.5" />
@@ -225,7 +225,7 @@ export function BrandCommPanel({
             onChange={(e) => setCallNote(e.target.value)}
             rows={compact ? 2 : 3}
             placeholder="What was discussed on the call?"
-            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
+            className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40"
           />
           <Button
             className="text-xs"
@@ -238,7 +238,7 @@ export function BrandCommPanel({
         </div>
       )}
 
-      {note && <p className="text-ds-micro text-zinc-400">{note}</p>}
+      {note && <p className="text-ds-micro text-muted">{note}</p>}
     </div>
   );
 }

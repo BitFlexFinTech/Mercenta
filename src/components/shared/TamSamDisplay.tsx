@@ -17,10 +17,10 @@ export function TamSamAggregate({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-muted">
         UK import market: <strong className="text-strong">GBP {report.totalTamGbp.toFixed(0)}B</strong> total ·{' '}
-        Addressable: <strong className="text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B</strong> ·{' '}
-        <span className="text-zinc-600">ONS {report.categories[0].dataYear}</span>
+        Addressable: <strong className="text-accent-400">GBP {report.totalSamGbp.toFixed(1)}B</strong> ·{' '}
+        <span className="text-faint">ONS {report.categories[0].dataYear}</span>
       </p>
     );
   }
@@ -28,23 +28,23 @@ export function TamSamAggregate({ compact = false }: { compact?: boolean }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <BarChart3 className="w-4 h-4 text-brass-400" />
+        <BarChart3 className="w-4 h-4 text-accent-400" />
         <span className="text-xs font-medium text-strong">UK Import Market — TAM / SAM</span>
-        <Badge className="text-ds-micro bg-brass-500/15 text-brass-400">{report.categories[0].dataYear} Data</Badge>
+        <Badge className="text-ds-micro bg-accent-500/15 text-accent-400">{report.categories[0].dataYear} Data</Badge>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-ink-900 rounded-ds-md p-3 border border-hairline">
-          <p className="text-ds-micro text-zinc-500">Total Addressable Market</p>
+        <div className="bg-surface rounded-ds-md p-3 border border-hairline">
+          <p className="text-ds-micro text-muted">Total Addressable Market</p>
           <p className="text-2xl font-bold font-mono text-strong mt-1">GBP {report.totalTamGbp.toFixed(0)}B</p>
-          <p className="text-ds-micro text-zinc-600 mt-1">All UK import value across {report.categories.length} categories</p>
+          <p className="text-ds-micro text-faint mt-1">All UK import value across {report.categories.length} categories</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-md p-3 border border-brass-500/20">
-          <p className="text-ds-micro text-zinc-500">Serviceable Addressable Market</p>
-          <p className="text-2xl font-bold font-mono text-brass-400 mt-1">GBP {report.totalSamGbp.toFixed(1)}B</p>
-          <p className="text-ds-micro text-zinc-600 mt-1">Realistic reach given wholesale model and sourcing regions</p>
+        <div className="bg-surface rounded-ds-md p-3 border border-accent-500/20">
+          <p className="text-ds-micro text-muted">Serviceable Addressable Market</p>
+          <p className="text-2xl font-bold font-mono text-accent-400 mt-1">GBP {report.totalSamGbp.toFixed(1)}B</p>
+          <p className="text-ds-micro text-faint mt-1">Realistic reach given wholesale model and sourcing regions</p>
         </div>
       </div>
-      <p className="text-ds-micro text-zinc-600 flex items-start gap-1">
+      <p className="text-ds-micro text-faint flex items-start gap-1">
         <Info className="w-2.5 h-2.5 mt-0.5 flex-shrink-0" />
         Source: {report.source}. SAM is directional — see full report for methodology.
       </p>
@@ -72,28 +72,28 @@ export function TamSamBreakdown() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-brass-400" />
+          <TrendingUp className="w-4 h-4 text-accent-400" />
           <span className="text-xs font-medium text-strong">Category Breakdown</span>
         </div>
         <div className="flex items-center gap-2">
           <Button className="text-ds-micro" onClick={handleDownload}><Download className="w-3 h-3 mr-1" /> Report</Button>
-          <button onClick={() => setExpanded(!expanded)} className="text-zinc-500 hover:text-strong">
+          <button onClick={() => setExpanded(!expanded)} className="text-muted hover:text-strong">
             {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-ds-micro">
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">{report.categories.length} Categories</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">{report.categories.length} Categories</p>
           <p className="font-semibold text-strong">GBP {report.totalTamGbp.toFixed(0)}B TAM</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">Addressable</p>
-          <p className="font-semibold text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B SAM</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">Addressable</p>
+          <p className="font-semibold text-accent-400">GBP {report.totalSamGbp.toFixed(1)}B SAM</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">Avg. Penetration</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">Avg. Penetration</p>
           <p className="font-semibold text-strong">{Math.round(report.totalSamGbp / report.totalTamGbp * 100)}%</p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export function TamSamBreakdown() {
         <div className="overflow-x-auto">
           <table className="w-full text-ds-micro">
             <thead>
-              <tr className="border-b border-hairline text-zinc-600">
+              <tr className="border-b border-hairline text-faint">
                 <th className="text-left py-1.5 font-medium">Category</th>
                 <th className="text-right py-1.5 font-medium">TAM (GBP B)</th>
                 <th className="text-right py-1.5 font-medium">SAM (GBP B)</th>
@@ -114,10 +114,10 @@ export function TamSamBreakdown() {
               {report.categories.map(function(cat) { return (
                 <tr key={cat.category} className="hover:bg-tint">
                   <td className="py-1.5 text-strong font-medium">{cat.category}</td>
-                  <td className="py-1.5 text-right font-mono text-zinc-300">{cat.tamGbpBillions.toFixed(1)}</td>
-                  <td className="py-1.5 text-right font-mono text-brass-400">{cat.samGbpBillions.toFixed(2)}</td>
-                  <td className="py-1.5 text-right font-mono text-zinc-400">{cat.samPercentage}%</td>
-                  <td className="py-1.5 text-zinc-500 font-mono">{cat.hsCodeRanges.join(', ')}</td>
+                  <td className="py-1.5 text-right font-mono text-strong">{cat.tamGbpBillions.toFixed(1)}</td>
+                  <td className="py-1.5 text-right font-mono text-accent-400">{cat.samGbpBillions.toFixed(2)}</td>
+                  <td className="py-1.5 text-right font-mono text-muted">{cat.samPercentage}%</td>
+                  <td className="py-1.5 text-muted font-mono">{cat.hsCodeRanges.join(', ')}</td>
                 </tr>
               );})}
             </tbody>
@@ -125,7 +125,7 @@ export function TamSamBreakdown() {
         </div>
       )}
 
-      <p className="text-ds-micro text-zinc-600 flex items-start gap-1">
+      <p className="text-ds-micro text-faint flex items-start gap-1">
         <Info className="w-2.5 h-2.5 mt-px flex-shrink-0" />
         {report.methodology}
       </p>
@@ -139,28 +139,28 @@ export function TamSamCategoryCard({ category }: { category: ApprovedCategory })
   const data = useMemo(function() { return getCategoryTamSam(category); }, [category]);
 
   if (!data) {
-    return <p className="text-xs text-zinc-600">No market data for {category}.</p>;
+    return <p className="text-xs text-faint">No market data for {category}.</p>;
   }
 
   return (
-    <div className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
+    <div className="bg-surface rounded-ds-md border border-hairline p-2.5">
       <div className="flex items-center gap-2 mb-1">
-        <BarChart3 className="w-3 h-3 text-brass-400" />
+        <BarChart3 className="w-3 h-3 text-accent-400" />
         <span className="text-ds-micro font-medium text-strong">{data.category}</span>
-        <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 ml-auto">{data.dataYear}</Badge>
+        <Badge className="text-ds-micro bg-tint text-muted ml-auto">{data.dataYear}</Badge>
       </div>
       <div className="grid grid-cols-2 gap-2 text-ds-micro">
         <div>
-          <p className="text-zinc-500">UK Import TAM</p>
+          <p className="text-muted">UK Import TAM</p>
           <p className="font-mono font-semibold text-strong">GBP {data.tamGbpBillions.toFixed(1)}B</p>
         </div>
         <div>
-          <p className="text-zinc-500">Addressable SAM</p>
-          <p className="font-mono font-semibold text-brass-400">GBP {data.samGbpBillions.toFixed(2)}B</p>
+          <p className="text-muted">Addressable SAM</p>
+          <p className="font-mono font-semibold text-accent-400">GBP {data.samGbpBillions.toFixed(2)}B</p>
         </div>
       </div>
-      <p className="text-ds-micro text-zinc-500 mt-1.5 leading-relaxed">{data.description}</p>
-      <p className="text-ds-micro text-zinc-600 mt-1">{data.source}</p>
+      <p className="text-ds-micro text-muted mt-1.5 leading-relaxed">{data.description}</p>
+      <p className="text-ds-micro text-faint mt-1">{data.source}</p>
     </div>
   );
 }

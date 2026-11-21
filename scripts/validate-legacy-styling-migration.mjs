@@ -141,7 +141,21 @@ if (recorded) {
  * §BATCH 5a), NOT silently redefined here: changing what a metric counts is
  * exactly the change that must not be made quietly.
  */
-const CEILING = { grey: 2675, ink: 907, literal: 0, uncovered: 0 };
+/**
+ * §BATCH 5b (2026-11-21) — LOWERED FROM grey 2,675 / ink 907 to the counts this
+ * batch measured after migrating the REMAINING SHARED COMPONENTS onto the canonical
+ * ladder: `BrandGuidance`, `WorkWorkspace`, `TamSamDisplay`, `CommerceSimulationPanel`,
+ * `TourEngine`, `LiveChatWidget`, `ImageUploader`, `CsvCatalogImport`,
+ * `ShippingCostEstimate`, `BrandComm`, `RoutingRequest`, `CommandPalette`,
+ * `NotificationCenter`, `ProductThumb`, `ErrorBoundary`, `UnlockGrowth` and the five
+ * `src/components/shared/logistics/` panels.
+ *
+ *   · grey 2,675 -> 2,401  (-274): `zinc-*` -> the declared text ladder; `parchment`
+ *     -> `soft` (the declared `--mr-text-soft` step).
+ *   · ink 907 -> 848       (-59): `brass-*` -> `accent-*` (the canonical name); and
+ *     `bg-ink-*` -> `bg-surface-*`.
+ */
+const CEILING = { grey: 2401, ink: 848, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);
