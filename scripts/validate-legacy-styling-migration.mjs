@@ -155,7 +155,21 @@ if (recorded) {
  *   · ink 907 -> 848       (-59): `brass-*` -> `accent-*` (the canonical name); and
  *     `bg-ink-*` -> `bg-surface-*`.
  */
-const CEILING = { grey: 2401, ink: 848, literal: 0, uncovered: 0 };
+/**
+ * §BATCH 6 (2026-11-21) — LOWERED FROM grey 2,401 / ink 848 to the counts this batch
+ * measured after migrating the SIGNED-IN BRAND PORTAL onto the canonical ladder: all
+ * 23 files in `src/components/brand/` (`BrandPurchaseOrders` · `BrandSettings` ·
+ * `OnboardingWizard` · `LogisticsHub` · `BrandTeamMessages` · `ProductCatalog` ·
+ * `SalesAnalytics` · `BrandReturns` · `BrandInventory` · `BrandReports` ·
+ * `ListingAnalyzer` · `BrandIntelligence` · `DeductionsLedger` · `CommercialReadiness` ·
+ * `ComplianceHub` · `BrandDashboard` · `SalesEstimatorCard` · `OnboardingSummary` ·
+ * `BrandSupport` · `BrandSelfService` · `BrandContractView` · `LiftOffProgramme` ·
+ * `WorkManagement`). ZERO legacy sites remain in that folder.
+ *
+ *   · grey 2,401 -> 1,832  (-569): `zinc-*` -> the declared text ladder.
+ *   · ink 848 -> 759       (-89): `brass-*` -> `accent-*`; `bg-ink-*` -> `bg-surface-*`.
+ */
+const CEILING = { grey: 1832, ink: 759, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);

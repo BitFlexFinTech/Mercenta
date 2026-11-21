@@ -132,19 +132,19 @@ export function BrandIntelligence() {
         title="Your UK Market"
         description="Market intelligence for your brand in the UK market. Every figure is a planning estimate derived from the same deterministic model as the Listing Analyzer — no live marketplace data and no proprietary internal scoring is shown on a brand surface."
         entity={
-          <span className="text-ds-label text-zinc-400">
+          <span className="text-ds-label text-muted">
             {brandName} · {brandCategory}
           </span>
         }
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {catData.scored.length} brands modelled
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {catData.sameCat.length} in {brandCategory}
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               showing {competitorRows.length} competitor{competitorRows.length === 1 ? '' : 's'}
             </span>
           </>
@@ -159,8 +159,8 @@ export function BrandIntelligence() {
                 data-testid={`bi-detail-${d}`}
                 className={
                   detail === d
-                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-strong'
-                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-tint hover:text-strong'
+                    ? 'rounded-ds-md bg-accent-500 px-2.5 py-1 text-ds-label font-medium text-strong'
+                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-muted hover:bg-tint hover:text-strong'
                 }
               >
                 {d === 'none' ? 'Overview' : d === 'competitors' ? 'Competitors' : d === 'products' ? 'Your products' : 'Insights'}
@@ -188,18 +188,18 @@ export function BrandIntelligence() {
               type="button"
               onClick={() => setShowAllCompetitors((v) => !v)}
               data-testid="bi-toggle-competitors"
-              className="text-ds-label text-brass-400 hover:text-brass-300"
+              className="text-ds-label text-accent-400 hover:text-accent-300"
             >
               {showAllCompetitors ? 'Show fewer' : `Show all ${catData.sameCat.length}`}
             </button>
           ) : undefined
         }
       >
-        {catData.sameCat.length === 0 ? <Card className="p-6 text-center"><p className="text-xs text-zinc-600">No competitor data available yet.</p></Card> : (
+        {catData.sameCat.length === 0 ? <Card className="p-6 text-center"><p className="text-xs text-faint">No competitor data available yet.</p></Card> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {competitorRows.map(p => (
               <Card key={p.id} className="p-3 flex items-center justify-between">
-                <div><span className="text-xs font-medium text-strong">{p.brand}</span><div className="text-ds-micro text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
+                <div><span className="text-xs font-medium text-strong">{p.brand}</span><div className="text-ds-micro text-muted mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
               </Card>
             ))}
           </div>
@@ -215,31 +215,31 @@ export function BrandIntelligence() {
       >
         <div data-testid="bi-product-performance">
           <h3 className="text-sm font-semibold text-strong mb-2 flex items-center gap-1.5">
-            <Package className="w-4 h-4 text-brass-400" /> Your product performance
-            <span className="text-ds-micro text-zinc-600">— deterministic estimates, never live data</span>
+            <Package className="w-4 h-4 text-accent-400" /> Your product performance
+            <span className="text-ds-micro text-faint">— deterministic estimates, never live data</span>
           </h3>
           {productPerformance.length === 0 ? (
-            <p className="text-xs text-zinc-600">No catalogue products yet — add products to see estimated performance.</p>
+            <p className="text-xs text-faint">No catalogue products yet — add products to see estimated performance.</p>
           ) : (
-            <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-ink-850">
+            <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-surface-raised">
               {productPerformance.map(({ product: p, analysis: a }) => (
                 <li key={p.sku} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5" data-testid={`bi-sku-${p.sku}`}>
                   <div className="min-w-0 flex-1">
                     <span className="block text-xs font-medium text-strong truncate">{p.name}</span>
-                    <span className="block text-ds-micro text-zinc-500 font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
+                    <span className="block text-ds-micro text-muted font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
                   </div>
-                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Revenue</span>
-                  <span className="text-xs font-mono text-emerald-300">£{(a.estimates.monthlyRevenueMidGbp / 1000).toFixed(0)}k/mo</span>
-                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Demand</span>
-                  <span className={a.estimates.demandSignal === 'high' ? 'text-emerald-300' : a.estimates.demandSignal === 'medium' ? 'text-amber-300' : 'text-zinc-500'}>{a.estimates.demandSignal}</span>
-                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Opportunity</span>
-                  <span className="text-ds-micro text-brass-400">{a.estimates.opportunityIndicators[0] ?? '—'}</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-zinc-600" />
+                  <span className="text-ds-micro uppercase text-faint hidden md:inline">Revenue</span>
+                  <span className="text-xs font-mono text-state-success">£{(a.estimates.monthlyRevenueMidGbp / 1000).toFixed(0)}k/mo</span>
+                  <span className="text-ds-micro uppercase text-faint hidden md:inline">Demand</span>
+                  <span className={a.estimates.demandSignal === 'high' ? 'text-state-success' : a.estimates.demandSignal === 'medium' ? 'text-state-warning' : 'text-muted'}>{a.estimates.demandSignal}</span>
+                  <span className="text-ds-micro uppercase text-faint hidden md:inline">Opportunity</span>
+                  <span className="text-ds-micro text-accent-400">{a.estimates.opportunityIndicators[0] ?? '—'}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-faint" />
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-ds-micro text-zinc-600 mt-2">
+          <p className="text-ds-micro text-faint mt-2">
             Estimates derived from the same deterministic model as the Listing Analyzer — planning ranges, not measured marketplace data.
           </p>
         </div>
@@ -250,8 +250,8 @@ export function BrandIntelligence() {
       <WorkspaceSection title="Market Insights" domain="finance">
         <Card className="p-4">
         <h3 className="text-sm font-semibold text-strong mb-2">Market Insights</h3>
-        <div className="space-y-2 text-xs text-zinc-400">
-          <p>Your brand is in <span className="text-brass-400">{brandCategory}</span> in the UK market, one of {APPROVED_CATEGORIES.length} approved categories.</p>
+        <div className="space-y-2 text-xs text-muted">
+          <p>Your brand is in <span className="text-accent-400">{brandCategory}</span> in the UK market, one of {APPROVED_CATEGORIES.length} approved categories.</p>
           <p>We track <span className="text-strong">{catData.scored.length}</span> brands total. Of those, <span className="text-strong">{catData.sameCat.length}</span> are in {brandCategory}.</p>
           <p>This intelligence updates weekly. Use these insights to understand your competitive position and identify growth opportunities.</p>
         </div>
@@ -269,7 +269,7 @@ export function BrandIntelligence() {
             { label: 'Data source', value: 'Deterministic model (no live data)' },
           ]}
         />
-        <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+        <p className="mt-2 text-ds-label leading-snug text-muted">
           Estimates are planning ranges produced by the same engine as the Listing Analyzer.
           They are not measured marketplace results and this surface never displays Mercenta&apos;s
           internal scoring.

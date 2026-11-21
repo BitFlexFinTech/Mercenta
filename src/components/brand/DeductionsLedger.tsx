@@ -138,29 +138,29 @@ export function DeductionsLedger() {
       >
         {/* ── Categories ─────────────────────────────────────────────── */}
         <div data-tour="deductions-categories" className="px-5 py-3 border-b border-hairline">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{DEDUCTION_TAXONOMY.heading}</p>
+          <p className="text-ds-micro uppercase tracking-wide text-muted">{DEDUCTION_TAXONOMY.heading}</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {categories.map(([type, c]) => (
               <span
                 key={type}
-                className="inline-flex items-center gap-1.5 rounded-ds-sm border border-hairline bg-tint px-2 py-1 text-ds-micro text-zinc-300"
+                className="inline-flex items-center gap-1.5 rounded-ds-sm border border-hairline bg-tint px-2 py-1 text-ds-micro text-strong"
               >
                 <span>{deductionTypeLabel(type)}</span>
-                <span className="text-zinc-500">·</span>
-                <span className="text-zinc-400">{c.count}</span>
-                <span className="text-zinc-500">·</span>
-                <span className={cn(MONO, 'text-zinc-400')}>£{c.amount.toFixed(2)}</span>
+                <span className="text-muted">·</span>
+                <span className="text-muted">{c.count}</span>
+                <span className="text-muted">·</span>
+                <span className={cn(MONO, 'text-muted')}>£{c.amount.toFixed(2)}</span>
               </span>
             ))}
             {categories.length === 0 && (
-              <span className="text-ds-label text-zinc-600">
+              <span className="text-ds-label text-faint">
                 No deductions recorded for your account.
               </span>
             )}
           </div>
           {/* §BATCH 2a (`AV-019`) — the attribution: these are Mercenta's own
               working categories, never presented as the channel's codes. */}
-          <p className="text-ds-micro text-zinc-600 mt-2">{DEDUCTION_TAXONOMY.attributionNote}</p>
+          <p className="text-ds-micro text-faint mt-2">{DEDUCTION_TAXONOMY.attributionNote}</p>
         </div>
 
         {/* ── Ledger rows — canonical DataTable: labelled cards below md (so no
@@ -176,13 +176,13 @@ export function DeductionsLedger() {
               key: 'date',
               label: 'Date',
               hideBelow: 'sm',
-              render: (d) => <span className={cn(MONO, 'text-zinc-400')}>{d.date}</span>,
+              render: (d) => <span className={cn(MONO, 'text-muted')}>{d.date}</span>,
             },
             {
               key: 'po',
               label: 'PO',
               primary: true,
-              render: (d) => <span className={cn(MONO, 'text-zinc-200')}>{d.purchaseOrderId}</span>,
+              render: (d) => <span className={cn(MONO, 'text-strong')}>{d.purchaseOrderId}</span>,
             },
             {
               key: 'type',
@@ -190,7 +190,7 @@ export function DeductionsLedger() {
               render: (d) => (
                 <span className="text-xs capitalize">
                   {deductionTypeLabel(d.type)}
-                  {d.simulated && <span className="ml-1 text-ds-micro text-brass-400">(sim)</span>}
+                  {d.simulated && <span className="ml-1 text-ds-micro text-accent-400">(sim)</span>}
                 </span>
               ),
             },
@@ -202,10 +202,10 @@ export function DeductionsLedger() {
                 <span className="block max-w-[280px] text-xs">
                   {d.reason}
                   {d.dispute && (
-                    <span className="mt-1 block text-ds-micro text-zinc-500">
+                    <span className="mt-1 block text-ds-micro text-muted">
                       Disputed {d.dispute.openedAt}: {d.dispute.notes}
                       {d.dispute.outcome && (
-                        <span className="ml-1 capitalize text-zinc-400">
+                        <span className="ml-1 capitalize text-muted">
                           → outcome: {d.dispute.outcome}
                         </span>
                       )}
@@ -231,7 +231,7 @@ export function DeductionsLedger() {
               key: 'amount',
               label: 'Amount',
               align: 'right',
-              render: (d) => <span className={cn(MONO, 'text-zinc-300')}>−£{d.amountGbp.toFixed(2)}</span>,
+              render: (d) => <span className={cn(MONO, 'text-strong')}>−£{d.amountGbp.toFixed(2)}</span>,
             },
           ]}
         />
@@ -241,9 +241,9 @@ export function DeductionsLedger() {
           data-tour="deductions-dispute-btn"
           className="px-5 py-3 border-t border-hairline space-y-2"
         >
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute a deduction</p>
+          <p className="text-ds-micro uppercase tracking-wide text-muted">Dispute a deduction</p>
           {disputable.length === 0 ? (
-            <p className="text-ds-label text-zinc-600">
+            <p className="text-ds-label text-faint">
               {rows.length === 0
                 ? 'No deductions to dispute.'
                 : 'Every deduction on your account is already disputed or settled.'}
@@ -254,7 +254,7 @@ export function DeductionsLedger() {
                 <Button
                   key={d.id}
                   variant="ghost"
-                  className="text-ds-label text-blue-300"
+                  className="text-ds-label text-state-info"
                   data-state="brand-deduction-dispute"
                   onClick={() => {
                     setDisputingId(d.id);
@@ -279,7 +279,7 @@ export function DeductionsLedger() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
                 placeholder="Evidence / grounds for the dispute…"
-                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
+                className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
               />
               <div className="flex gap-2">
                 <Button
@@ -303,7 +303,7 @@ export function DeductionsLedger() {
               </div>
             </div>
           )}
-          {notice && <p className="text-ds-label text-emerald-300">{notice}</p>}
+          {notice && <p className="text-ds-label text-state-success">{notice}</p>}
           {error && <p className="text-ds-label text-red-300">{error}</p>}
         </div>
 
@@ -312,29 +312,29 @@ export function DeductionsLedger() {
           data-tour="deductions-outcome-info"
           className="px-5 py-3 border-t border-hairline space-y-2"
         >
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute Outcomes</p>
-          <p className="text-ds-label text-zinc-400">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">Dispute Outcomes</p>
+          <p className="text-ds-label text-muted">
             A dispute is decided by the retail channel, not by you. It can be{' '}
-            <span className="text-emerald-300">Won</span> (the deduction is refunded),{' '}
+            <span className="text-state-success">Won</span> (the deduction is refunded),{' '}
             <span className="text-red-300">Lost</span> (the deduction stands) or{' '}
-            <span className="text-amber-300">Partially resolved</span> (part of the amount is
+            <span className="text-state-warning">Partially resolved</span> (part of the amount is
             refunded). The recorded outcome is shown against the deduction in the ledger above.
           </p>
           {recordedOutcomes.length > 0 ? (
             <div className="space-y-1">
               {recordedOutcomes.map((d) => (
                 <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
-                  <span className={cn(MONO, 'text-zinc-400')}>{d.purchaseOrderId}</span>
-                  <span className="text-zinc-500">{deductionTypeLabel(d.type)}</span>
-                  <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+                  <span className={cn(MONO, 'text-muted')}>{d.purchaseOrderId}</span>
+                  <span className="text-muted">{deductionTypeLabel(d.type)}</span>
+                  <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                     outcome: {d.dispute?.outcome}
                   </Badge>
-                  <span className="text-zinc-500">£{d.amountGbp.toFixed(2)}</span>
+                  <span className="text-muted">£{d.amountGbp.toFixed(2)}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-ds-label text-zinc-600">
+            <p className="text-ds-label text-faint">
               No dispute outcomes have been recorded on your account yet.
             </p>
           )}

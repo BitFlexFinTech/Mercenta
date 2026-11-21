@@ -94,7 +94,7 @@ export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => 
           description={`Revenue & performance for ${brandProfile.businessName || 'your brand'}`}
         />
         <Card title="Sales Analytics">
-          <p className="text-xs text-zinc-600">No POs yet for {brandProfile.businessName || 'your brand'}</p>
+          <p className="text-xs text-faint">No POs yet for {brandProfile.businessName || 'your brand'}</p>
         </Card>
         {/* §Phase G1 — the deductions ledger is independent of PO volume, so it
             renders (with its own honest empty state) on every tenant. */}
@@ -119,7 +119,7 @@ return (
 
       <Card title={chartTab === "revenue" ? "Monthly Revenue Trend" : "Monthly Volume Trend"}
         action={<div className="flex gap-1">{( ["revenue","volume"] as const).map((t) => (
-          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-ds-sm text-ds-micro font-medium transition-colors " + (chartTab === t ? "bg-brass-500/20 text-brass-400" : "text-zinc-500 hover:text-zinc-300")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
+          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-ds-sm text-ds-micro font-medium transition-colors " + (chartTab === t ? "bg-accent-500/20 text-accent-400" : "text-muted hover:text-strong")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
         ))}</div>}>
         <div className="h-[280px]" onClick={() => setDrillCard("monthly")}>
           <ResponsiveContainer width="100%" height="100%">
@@ -141,14 +141,14 @@ return (
       {/* Best-selling SKUs — top performers by revenue */}
       <Card title="Best-selling SKUs">
         <div className="space-y-2">
-          {skuStats.length === 0 && <p className="text-xs text-zinc-600">No data yet.</p>}
+          {skuStats.length === 0 && <p className="text-xs text-faint">No data yet.</p>}
           {skuStats.map((s, i) => (
             <div key={s.name} className="flex items-center justify-between text-ds-label">
               <div className="flex items-center gap-2">
-                <span className="text-zinc-600 font-mono w-4">{i + 1}.</span>
-                <span className="text-zinc-300">{s.name}</span>
+                <span className="text-faint font-mono w-4">{i + 1}.</span>
+                <span className="text-strong">{s.name}</span>
               </div>
-              <div className="text-right font-mono text-zinc-400">
+              <div className="text-right font-mono text-muted">
                 {s.units} units · £{s.revenue.toFixed(0)}
               </div>
             </div>
@@ -171,15 +171,15 @@ function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
     <button type="button" onClick={onClick} disabled={!onClick} className="w-full text-left disabled:cursor-default">
       <Card className={"p-4 " + (onClick ? "cursor-pointer ds-card-interactive" : "")}>
         <div className="flex items-start justify-between mb-2">
-          <span className="text-ds-micro text-zinc-500 font-medium">{label}</span>
-          <div className="w-7 h-7 rounded-ds-md bg-tint flex items-center justify-center text-zinc-400">{icon}</div>
+          <span className="text-ds-micro text-muted font-medium">{label}</span>
+          <div className="w-7 h-7 rounded-ds-md bg-tint flex items-center justify-center text-muted">{icon}</div>
         </div>
         <div className="text-lg font-bold text-strong tracking-tight">{value}</div>
-        <div className={"flex items-center gap-1 text-ds-micro mt-0.5 " + (trendUp !== undefined ? (trendUp ? "text-emerald-400" : "text-zinc-500") : "")}>
+        <div className={"flex items-center gap-1 text-ds-micro mt-0.5 " + (trendUp !== undefined ? (trendUp ? "text-state-success" : "text-muted") : "")}>
           {trendUp !== undefined && (trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />)}
           {trend}
         </div>
-        {onClick && <span className="mt-1 block text-ds-micro text-zinc-600">Click for details \u2192</span>}
+        {onClick && <span className="mt-1 block text-ds-micro text-faint">Click for details \u2192</span>}
       </Card>
     </button>
   );
@@ -194,31 +194,31 @@ function DrillModal({ card, onClose, data, onNavigate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={onClose}>
-      <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[540px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-surface-raised border border-hairline rounded-ds-lg p-5 w-[540px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-strong">{title}</h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-muted hover:text-strong"><X className="w-4 h-4" /></button>
         </div>
         {card === "rev" && (
           <div className="space-y-3">
-            <p className="text-xs text-zinc-400">Revenue across {data.accepted.length} fulfilled POs</p>
+            <p className="text-xs text-muted">Revenue across {data.accepted.length} fulfilled POs</p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Total Revenue</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Avg per PO</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-strong font-mono">{data.totalUnits.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">SKUs</p><p className="text-lg font-semibold text-strong font-mono">{data.skuCount}</p></div>
+              <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">Total Revenue</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
+              <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">Avg per PO</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
+              <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">Units</p><p className="text-lg font-semibold text-strong font-mono">{data.totalUnits.toLocaleString()}</p></div>
+              <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">SKUs</p><p className="text-lg font-semibold text-strong font-mono">{data.skuCount}</p></div>
             </div>
-            <button onClick={() => { onClose(); onNavigate?.("purchase_orders"); }} className="text-ds-micro text-brass-400 hover:text-brass-300 flex items-center gap-1">View all POs <ArrowUpRight className="w-3 h-3" /></button>
+            <button onClick={() => { onClose(); onNavigate?.("purchase_orders"); }} className="text-ds-micro text-accent-400 hover:text-accent-300 flex items-center gap-1">View all POs <ArrowUpRight className="w-3 h-3" /></button>
           </div>
         )}
         {(card === "units" || card === "monthly") && (
           <div className="space-y-2">
-            <p className="text-xs text-zinc-400">{card === "units" ? "SKU-level breakdown" : "Monthly trend data"}</p>
+            <p className="text-xs text-muted">{card === "units" ? "SKU-level breakdown" : "Monthly trend data"}</p>
             <div className="max-h-60 overflow-y-auto space-y-1">
               {(card === "units" ? data.skuStats : data.monthlyData).map((item: any, i: number) => (
                 <div key={i} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
-                  <span className="text-zinc-300">{item.name || item.month}</span>
-                  <span className="text-zinc-400 font-mono">{card === "units" ? item.units + "u \u00b7 \u00a3" + item.revenue.toLocaleString() : "\u00a3" + item.revenue.toLocaleString() + " \u00b7 " + item.volume.toLocaleString() + "u"}</span>
+                  <span className="text-strong">{item.name || item.month}</span>
+                  <span className="text-muted font-mono">{card === "units" ? item.units + "u \u00b7 \u00a3" + item.revenue.toLocaleString() : "\u00a3" + item.revenue.toLocaleString() + " \u00b7 " + item.volume.toLocaleString() + "u"}</span>
                 </div>
               ))}
             </div>
@@ -226,13 +226,13 @@ function DrillModal({ card, onClose, data, onNavigate }: {
         )}
         {card.startsWith("sku:") && (() => {
           const sku = data.skuStats.find((x: any) => x.name === card.slice(4));
-          if (!sku) return <p className="text-xs text-zinc-600">SKU not found.</p>;
+          if (!sku) return <p className="text-xs text-faint">SKU not found.</p>;
           return (<div className="grid grid-cols-2 gap-3">
-            <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-strong font-mono">{sku.units.toLocaleString()}</p></div>
-            <div className="bg-ink-900 rounded-ds-md p-3"><p className="text-ds-micro text-zinc-500">Revenue</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
+            <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">Units</p><p className="text-lg font-semibold text-strong font-mono">{sku.units.toLocaleString()}</p></div>
+            <div className="bg-surface rounded-ds-md p-3"><p className="text-ds-micro text-muted">Revenue</p><p className="text-lg font-semibold text-strong font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
           </div>);
         })()}
-        {card === "avg" && <div className="bg-ink-900 rounded-ds-md p-4 text-center"><p className="text-ds-micro text-zinc-500">Average Order Value</p><p className="text-3xl font-bold text-brass-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-ds-micro text-zinc-600 mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
+        {card === "avg" && <div className="bg-surface rounded-ds-md p-4 text-center"><p className="text-ds-micro text-muted">Average Order Value</p><p className="text-3xl font-bold text-accent-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-ds-micro text-faint mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
       </div>
     </div>
   );

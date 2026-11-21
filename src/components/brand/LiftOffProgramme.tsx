@@ -72,7 +72,7 @@ export function LiftOffProgramme() {
           title={wordmark}
           description={LIFT_OFF_SUMMARY}
           status={
-            <Badge className="text-ds-micro bg-brass/15 text-brass-300">
+            <Badge className="text-ds-micro bg-accent/15 text-accent-300">
               <Zap className="w-3 h-3" /> {LIFT_OFF_INTEREST_LABELS.not_registered}
             </Badge>
           }
@@ -86,16 +86,16 @@ export function LiftOffProgramme() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-medium text-strong">{t.label}</span>
                     {t.basis === 'requires_verification' && (
-                      <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
+                      <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">
                         checked per launch
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-1 text-ds-label text-zinc-400">{t.detail}</p>
+                  <p className="mt-1 text-ds-label text-muted">{t.detail}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-600">{LIFT_OFF_VERIFICATION_NOTE}</p>
+            <p className="mt-3 text-ds-micro text-faint">{LIFT_OFF_VERIFICATION_NOTE}</p>
           </Card>
         </WorkspaceSection>
 
@@ -106,7 +106,7 @@ export function LiftOffProgramme() {
                 <LoadingState rows={3} label="Checking your brand against the Lift Off criteria…" />
               ) : (
                 <>
-                  <p className="mb-3 text-xs text-zinc-400">
+                  <p className="mb-3 text-xs text-muted">
                     {eligibility.met} of {eligibility.total} criteria met.{' '}
                     {eligibility.eligible
                       ? 'Your brand satisfies every criterion Mercenta can check here.'
@@ -116,15 +116,15 @@ export function LiftOffProgramme() {
                     {eligibility.outcomes.map(({ rule, state }) => (
                       <li key={rule.id} className="flex items-start gap-2">
                         {state === 'met' ? (
-                          <CheckCircle2 className="mt-0.5 w-4 h-4 flex-shrink-0 text-emerald-400" />
+                          <CheckCircle2 className="mt-0.5 w-4 h-4 flex-shrink-0 text-state-success" />
                         ) : (
-                          <Circle className="mt-0.5 w-4 h-4 flex-shrink-0 text-zinc-600" />
+                          <Circle className="mt-0.5 w-4 h-4 flex-shrink-0 text-faint" />
                         )}
                         <div>
-                          <span className={state === 'met' ? 'text-xs text-strong' : 'text-xs text-zinc-400'}>
+                          <span className={state === 'met' ? 'text-xs text-strong' : 'text-xs text-muted'}>
                             {rule.label}
                           </span>
-                          <p className="text-ds-micro text-zinc-600">{rule.detail}</p>
+                          <p className="text-ds-micro text-faint">{rule.detail}</p>
                         </div>
                       </li>
                     ))}
@@ -139,9 +139,9 @@ export function LiftOffProgramme() {
           <div className="grid gap-3 md:grid-cols-2">
             {[LIFT_OFF_VS_DISTRIBUTION.programme, LIFT_OFF_VS_DISTRIBUTION.distribution].map((p) => (
               <Card key={p.label} className="p-4">
-                <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">{p.label}</p>
+                <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-accent">{p.label}</p>
                 <p className="mt-1 text-xs text-strong">{p.for}</p>
-                <p className="mt-2 text-ds-label text-zinc-400">{p.gets}</p>
+                <p className="mt-2 text-ds-label text-muted">{p.gets}</p>
               </Card>
             ))}
           </div>

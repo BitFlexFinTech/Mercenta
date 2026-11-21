@@ -36,11 +36,11 @@ const REASON_LABELS: Record<ReturnReason, string> = {
 
 const REASON_BADGES: Record<ReturnReason, string> = {
   defective: 'bg-red-500/15 text-red-300 border-red-500/20',
-  damaged_in_transit: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+  damaged_in_transit: 'bg-state-warning/10 text-state-warning border-state-warning/20',
   wrong_item: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   quality_issue: 'bg-orange-500/15 text-orange-300 border-orange-500/20',
-  customer_return: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  compliance_issue: 'bg-rose-500/15 text-rose-300 border-rose-500/20',
+  customer_return: 'bg-state-info/10 text-state-info border-blue-500/20',
+  compliance_issue: 'bg-state-danger/10 text-state-danger border-state-danger/20',
 };
 
 /**
@@ -80,7 +80,7 @@ export function BrandReturns() {
           description="Returned units per purchase order, sourced from the canonical returns record."
         />
         <Card title="Returns">
-          <p className="text-xs text-zinc-600">No returns recorded for your brand.</p>
+          <p className="text-xs text-faint">No returns recorded for your brand.</p>
         </Card>
       </WorkspaceFrame>
     );
@@ -98,23 +98,23 @@ export function BrandReturns() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button
           onClick={() => setDrillCard('Total returned units')}
-          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
+          className="w-full text-left bg-surface-raised border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
-          <p className="text-ds-micro text-zinc-500">Total returned units</p>
+          <p className="text-ds-micro text-muted">Total returned units</p>
           <p className="text-lg font-semibold text-strong">{totalUnits}</p>
         </button>
         <button
           onClick={() => setDrillCard('Quality/compliance flags')}
-          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
+          className="w-full text-left bg-surface-raised border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
-          <p className="text-ds-micro text-zinc-500">Quality/compliance flags</p>
+          <p className="text-ds-micro text-muted">Quality/compliance flags</p>
           <p className="text-lg font-semibold text-strong">{qualityIssues.length}</p>
         </button>
         <button
           onClick={() => setDrillCard('Deductions linked')}
-          className="w-full text-left bg-ink-850 border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
+          className="w-full text-left bg-surface-raised border border-hairline rounded-ds-lg p-3 hover:bg-tint hover:border-hairline-strong transition-all cursor-pointer"
         >
-          <p className="text-ds-micro text-zinc-500">Deductions linked</p>
+          <p className="text-ds-micro text-muted">Deductions linked</p>
           <p className="text-lg font-semibold text-strong">{deductedReturns.length}</p>
         </button>
       </div>
@@ -123,14 +123,14 @@ export function BrandReturns() {
       <Card title="Returned Items">
         <div className="px-4 pb-3">
           <div className="relative mb-3 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-faint" />
             <input
               type="text"
               placeholder="Search by PO, product, or reason…"
               aria-label="Search returns by PO, product or reason"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-9 pr-4 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
+              className="w-full bg-surface border border-hairline rounded-ds-md pl-9 pr-4 py-1.5 text-xs text-strong placeholder-faint focus:outline-none focus:border-accent-500/40 transition-all"
             />
           </div>
           {/* §Phase D — canonical DataTable: labelled cards below md (every
@@ -148,21 +148,21 @@ export function BrandReturns() {
                 key: 'returnDate',
                 label: 'Date',
                 hideBelow: 'lg',
-                render: (r) => <span className="font-mono text-xs text-zinc-400">{r.returnDate}</span>,
+                render: (r) => <span className="font-mono text-xs text-muted">{r.returnDate}</span>,
               },
               {
                 key: 'poNumber',
                 label: 'PO',
                 primary: true,
-                render: (r) => <span className="font-mono text-xs text-zinc-400">{r.poNumber}</span>,
+                render: (r) => <span className="font-mono text-xs text-muted">{r.poNumber}</span>,
               },
               {
                 key: 'productName',
                 label: 'Product',
                 render: (r) => (
                   <div>
-                    <div className="font-medium text-zinc-300">{r.productName}</div>
-                    <div className="text-ds-micro text-zinc-500">{r.productSku}</div>
+                    <div className="font-medium text-strong">{r.productName}</div>
+                    <div className="text-ds-micro text-muted">{r.productSku}</div>
                   </div>
                 ),
               },
@@ -170,7 +170,7 @@ export function BrandReturns() {
                 key: 'quantity',
                 label: 'Qty',
                 align: 'right',
-                render: (r) => <span className="text-xs text-zinc-400">{r.quantity}</span>,
+                render: (r) => <span className="text-xs text-muted">{r.quantity}</span>,
               },
               {
                 key: 'reason',
@@ -180,12 +180,12 @@ export function BrandReturns() {
                   return (
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <Icon className="w-3 h-3 text-zinc-500" />
+                        <Icon className="w-3 h-3 text-muted" />
                         <Badge className={cn('text-ds-micro', REASON_BADGES[r.reason])}>
                           {REASON_LABELS[r.reason]}
                         </Badge>
                       </div>
-                      <p className="text-ds-micro text-zinc-600 mt-0.5 max-w-[200px]">{r.description}</p>
+                      <p className="text-ds-micro text-faint mt-0.5 max-w-[200px]">{r.description}</p>
                     </div>
                   );
                 },
@@ -197,12 +197,12 @@ export function BrandReturns() {
                   r.linkedDeductionId ? (
                     <Badge className="text-ds-micro bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
                   ) : (
-                    <span className="text-zinc-600">—</span>
+                    <span className="text-faint">—</span>
                   ),
               },
             ]}
           />
-          <div className="text-ds-micro text-zinc-600 pt-2 border-t border-hairline mt-1">
+          <div className="text-ds-micro text-faint pt-2 border-t border-hairline mt-1">
             {filtered.length} of {returns.length} return record{returns.length === 1 ? '' : 's'}
           </div>
         </div>
@@ -211,16 +211,16 @@ export function BrandReturns() {
       {/* §Batch-3 — Summary card drill-down modals */}
       {drillCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface-raised border border-hairline rounded-ds-lg p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-strong">{drillCard}</h3>
-              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-strong transition-colors">
+              <button onClick={() => setDrillCard(null)} className="text-muted hover:text-strong transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             {drillCard === 'Total returned units' && (
               <div className="space-y-2">
-                <p className="text-xs text-zinc-400 mb-2">Returns by reason:</p>
+                <p className="text-xs text-muted mb-2">Returns by reason:</p>
                 <div className="space-y-1">
                   {(Object.keys(REASON_LABELS) as ReturnReason[]).map((reason) => {
                     const count = filtered.filter((r) => r.reason === reason).reduce((s, r) => s + r.quantity, 0);
@@ -228,11 +228,11 @@ export function BrandReturns() {
                     if (count === 0) return null;
                     return (
                       <div key={reason} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
-                        <span className="flex items-center gap-2 text-zinc-300">
-                          <Icon className="w-3 h-3 text-zinc-500" />
+                        <span className="flex items-center gap-2 text-strong">
+                          <Icon className="w-3 h-3 text-muted" />
                           {REASON_LABELS[reason]}
                         </span>
-                        <span className="font-mono text-zinc-400">{count} units</span>
+                        <span className="font-mono text-muted">{count} units</span>
                       </div>
                     );
                   })}
@@ -241,20 +241,20 @@ export function BrandReturns() {
             )}
             {drillCard === 'Quality/compliance flags' && (
               <div className="space-y-2">
-                <p className="text-xs text-zinc-400 mb-2">Returns flagged with quality or compliance issues:</p>
+                <p className="text-xs text-muted mb-2">Returns flagged with quality or compliance issues:</p>
                 {qualityIssues.length === 0 ? (
-                  <p className="text-xs text-zinc-600">No quality/compliance flagged returns.</p>
+                  <p className="text-xs text-faint">No quality/compliance flagged returns.</p>
                 ) : (
                   <div className="max-h-60 overflow-y-auto space-y-1">
                     {qualityIssues.map((r) => {
                       const Icon = REASON_ICONS[r.reason];
                       return (
                         <div key={r.id} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
-                          <span className="flex items-center gap-2 text-zinc-300">
-                            <Icon className="w-3 h-3 text-zinc-500" />
+                          <span className="flex items-center gap-2 text-strong">
+                            <Icon className="w-3 h-3 text-muted" />
                             {r.productName}
                           </span>
-                          <span className="font-mono text-zinc-400">{r.quantity} u</span>
+                          <span className="font-mono text-muted">{r.quantity} u</span>
                         </div>
                       );
                     })}
@@ -264,15 +264,15 @@ export function BrandReturns() {
             )}
             {drillCard === 'Deductions linked' && (
               <div className="space-y-2">
-                <p className="text-xs text-zinc-400 mb-2">Returns that triggered deductions:</p>
+                <p className="text-xs text-muted mb-2">Returns that triggered deductions:</p>
                 {deductedReturns.length === 0 ? (
-                  <p className="text-xs text-zinc-600">No returns with linked deductions.</p>
+                  <p className="text-xs text-faint">No returns with linked deductions.</p>
                 ) : (
                   <div className="max-h-60 overflow-y-auto space-y-1">
                     {deductedReturns.map((r) => (
                       <div key={r.id} className="flex items-center justify-between text-xs border-b border-hairline py-1.5">
-                        <span className="text-zinc-300">{r.productName} — {r.poNumber}</span>
-                        <span className="text-zinc-400 font-mono">{r.linkedDeductionId}</span>
+                        <span className="text-strong">{r.productName} — {r.poNumber}</span>
+                        <span className="text-muted font-mono">{r.linkedDeductionId}</span>
                       </div>
                     ))}
                   </div>

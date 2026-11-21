@@ -37,8 +37,8 @@ function RemittanceRow({ statement }: { statement: ReturnType<typeof generateRem
   if (!statement) return null;
   return (
     <div className="flex items-center justify-between border-b border-hairline py-1.5">
-      <span className="flex items-center gap-2 text-ds-label text-zinc-300">
-        <FileText className="w-3.5 h-3.5 text-zinc-500" />
+      <span className="flex items-center gap-2 text-ds-label text-strong">
+        <FileText className="w-3.5 h-3.5 text-muted" />
         Remittance statement {statement.statementNumber} · net £{statement.netPaid.toFixed(2)}
       </span>
       <Button className="text-ds-micro" onClick={() => download(`${statement.statementNumber}.html`, statement.html)}>
@@ -127,12 +127,12 @@ export function BrandSelfService() {
             <LoadingState rows={2} label="Loading your signed documents…" />
           )}
           {!contractsQuery.isPending && signed.length === 0 && (
-            <p className="text-ds-label text-zinc-600">No signed contract yet.</p>
+            <p className="text-ds-label text-faint">No signed contract yet.</p>
           )}
           {!contractsQuery.isPending && signed.map((c) => (
             <div key={c.id} className="flex items-center justify-between border-b border-hairline py-1.5">
-              <span className="flex items-center gap-2 text-ds-label text-zinc-300">
-                <FileText className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="flex items-center gap-2 text-ds-label text-strong">
+                <FileText className="w-3.5 h-3.5 text-muted" />
                 Distribution Agreement v{c.version} · {c.status}
               </span>
               <Button
@@ -151,18 +151,18 @@ export function BrandSelfService() {
 
       <Card title="Request an account change">
         <div className="px-1 pb-2 space-y-2">
-          <p className="text-ds-micro text-zinc-600 flex items-center gap-1">
+          <p className="text-ds-micro text-faint flex items-center gap-1">
             <Landmark className="w-3 h-3" />
             Banking changes always require Mercenta verification before they apply —
             they are never directly self-service.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <label className="block text-ds-micro text-zinc-500 mb-1">Field</label>
+              <label className="block text-ds-micro text-muted mb-1">Field</label>
               <select
                 value={field}
                 onChange={(e) => setField(e.target.value as (typeof CHANGE_FIELDS)[number])}
-                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+                className="w-full bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong"
               >
                 {CHANGE_FIELDS.map((f) => (
                   <option key={f} value={f}>{f}</option>
@@ -214,23 +214,23 @@ export function BrandSelfService() {
           >
             Submit Request
           </Button>
-          {note && <p className="text-ds-micro text-zinc-400">{note}</p>}
+          {note && <p className="text-ds-micro text-muted">{note}</p>}
 
           {myRequests.length > 0 && (
             <div className="pt-1">
-              <p className="text-ds-micro font-medium text-zinc-500 mb-1">Your requests</p>
+              <p className="text-ds-micro font-medium text-muted mb-1">Your requests</p>
               {myRequests.map((r) => (
                 <div key={r.id} className="flex items-center justify-between border-b border-hairline py-1">
-                  <span className="text-ds-label text-zinc-300 capitalize">
+                  <span className="text-ds-label text-strong capitalize">
                     {r.field}: {r.requestedValue}
                   </span>
                   <Badge
                     className={cn(
                       'text-ds-micro',
                       r.status === 'pending'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+                        ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
                         : r.status === 'approved'
-                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                          ? 'bg-state-success/10 text-state-success border-state-success/20'
                           : 'bg-red-500/15 text-red-300 border-red-500/20'
                     )}
                   >

@@ -550,16 +550,16 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
         meta={
           <div
             data-testid="po-summary"
-            className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-ds-label text-zinc-500"
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-ds-label text-muted"
           >
             <span data-testid="po-summary-active">{openPos.length} active</span>
-            <span aria-hidden="true" className="text-zinc-600">
+            <span aria-hidden="true" className="text-faint">
               ·
             </span>
             <span data-testid="po-summary-awaiting">
               {awaitingAck.length} awaiting acknowledgement
             </span>
-            <span aria-hidden="true" className="text-zinc-600">
+            <span aria-hidden="true" className="text-faint">
               ·
             </span>
             <span data-testid="po-summary-in-fulfilment">{inFlightPos.length} in fulfilment</span>
@@ -591,8 +591,8 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                 data-testid="compliance-summary"
                 className="flex flex-wrap items-center gap-x-2 gap-y-1.5"
               >
-                <ShieldCheck className="w-4 h-4 text-brass-400" aria-hidden="true" />
-                <span className="text-xs text-zinc-300">{complianceLabel}</span>
+                <ShieldCheck className="w-4 h-4 text-accent-400" aria-hidden="true" />
+                <span className="text-xs text-strong">{complianceLabel}</span>
                 <StatusBadge
                   tone={complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).tone}
                   dataStatus={complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).dataStatus}
@@ -601,8 +601,8 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                 </StatusBadge>
               </div>
               <div className="mt-2.5 flex items-start gap-2 border-t border-hairline pt-2.5">
-                <FileText className="w-4 h-4 flex-shrink-0 text-zinc-500" aria-hidden="true" />
-                <span className="text-ds-label leading-snug text-zinc-400">
+                <FileText className="w-4 h-4 flex-shrink-0 text-muted" aria-hidden="true" />
+                <span className="text-ds-label leading-snug text-muted">
                   {activeContract
                     ? `Distribution agreement v${activeContract.version} — ${activeContract.status}`
                     : 'No active distribution agreement on file'}
@@ -628,7 +628,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
             <ContextPanel title="Recent communications">
               <ActivityFeed
                 entries={messageEntries}
-                empty={<p className="text-xs text-zinc-500">No recent communications recorded.</p>}
+                empty={<p className="text-xs text-muted">No recent communications recorded.</p>}
               />
             </ContextPanel>
           </>
@@ -639,11 +639,11 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
           description="Live numbers from your real purchase orders, catalogue, contract and documents."
           domain="orders"
         >
-          <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Your earnings
           </h3>
           <MetricBand items={earningsCells} loading={loading} columns={4} />
-          <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Your account
           </h3>
           <MetricBand items={kpiCells} loading={loading} />
@@ -667,7 +667,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
               description={`Your net payout accrues as purchase orders are accepted. ${pendingPayouts.length} payout(s) totalling £${pendingPayoutValue.toFixed(2)} are outstanding; a monthly trend appears once more than one month carries accrual.`}
             />
           ) : (
-            <div className="rounded-ds-lg border border-hairline bg-ink-900 px-2 pb-2 pt-3">
+            <div className="rounded-ds-lg border border-hairline bg-surface px-2 pb-2 pt-3">
               <MercentaBars
                 bars={earningsSeries}
                 height={180}
@@ -762,7 +762,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   render: (c) => (
                     <span>
                       <span className="font-mono text-xs text-strong">{c.purchaseOrderId}</span>
-                      <span className="block font-mono text-ds-micro text-zinc-500">{c.id}</span>
+                      <span className="block font-mono text-ds-micro text-muted">{c.id}</span>
                     </span>
                   ),
                 },
@@ -779,7 +779,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   align: 'right',
                   hideBelow: 'lg',
                   render: (c) => (
-                    <span className="font-mono text-xs text-zinc-500">−£{c.commissionAmount.toFixed(2)}</span>
+                    <span className="font-mono text-xs text-muted">−£{c.commissionAmount.toFixed(2)}</span>
                   ),
                 },
                 {
@@ -811,14 +811,14 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
                   align: 'right',
                   hideBelow: 'lg',
                   render: (c) => (
-                    <span className="font-mono text-ds-label text-zinc-500">
+                    <span className="font-mono text-ds-label text-muted">
                       {new Date(c.createdAt).toLocaleDateString()}
                     </span>
                   ),
                 },
               ]}
             />
-            <p className="text-ds-label text-zinc-500">
+            <p className="text-ds-label text-muted">
               Payout transfers run through the platform's payout seam in simulation until live
               payment credentials are configured — a settlement is labelled simulated wherever it is
               shown.

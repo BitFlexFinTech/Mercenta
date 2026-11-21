@@ -18,8 +18,8 @@ function UrgencyBadge({ renewalDate, now }: { renewalDate: string; now: string }
   const map: Record<string, string> = {
     expired: 'bg-red-500/15 text-red-300 border-red-500/20',
     '7d': 'bg-red-500/15 text-red-300 border-red-500/20',
-    '30d': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-    '60d': 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+    '30d': 'bg-state-warning/10 text-state-warning border-state-warning/20',
+    '60d': 'bg-state-info/10 text-state-info border-blue-500/20',
   };
   const label = urgency === 'expired' ? 'Expired' : `Renews in ≤ ${urgency.replace('d', '')} days`;
   return <Badge className={cn('text-ds-micro', map[urgency])}>{label}</Badge>;
@@ -92,7 +92,7 @@ export function BrandContractView() {
 
       {!contractsQuery.isPending && contracts.length === 0 && (
         <Card className="p-8 text-center">
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-muted">
             No contracts yet — your distribution agreement is generated when you
             complete onboarding.
           </p>
@@ -106,7 +106,7 @@ export function BrandContractView() {
               <h3 className="text-sm font-semibold text-strong capitalize">
                 {c.type.replace(/_/g, ' ')} — v{c.version}
               </h3>
-              <p className="text-ds-label text-zinc-500 mt-0.5">
+              <p className="text-ds-label text-muted mt-0.5">
                 Effective {c.effectiveDate || '—'} · Renews {c.renewalDate || '—'}
               </p>
             </div>
@@ -116,8 +116,8 @@ export function BrandContractView() {
                 className={cn(
                   'text-ds-micro',
                   c.status === 'active' || c.status === 'signed'
-                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                    : 'bg-blue-500/15 text-blue-300 border-blue-500/20'
+                    ? 'bg-state-success/10 text-state-success border-state-success/20'
+                    : 'bg-state-info/10 text-state-info border-blue-500/20'
                 )}
               >
                 {CONTRACT_STATUS_LABELS[c.status]}
@@ -127,15 +127,15 @@ export function BrandContractView() {
 
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
-              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Commission</div>
+              <div className="text-ds-micro text-faint font-medium mb-1">Commission</div>
               <div className="font-mono text-sm text-strong">{c.commissionRate}%</div>
             </div>
             <div>
-              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Monthly Fee</div>
+              <div className="text-ds-micro text-faint font-medium mb-1">Monthly Fee</div>
               <div className="font-mono text-sm text-strong">£{c.monthlyFee}</div>
             </div>
             <div>
-              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Track</div>
+              <div className="text-ds-micro text-faint font-medium mb-1">Track</div>
               <div className="text-sm capitalize text-strong">
                 {c.fulfillmentTrack.replace(/_/g, ' ')}
               </div>
@@ -144,7 +144,7 @@ export function BrandContractView() {
 
           <div className="flex items-center gap-2">
             <span
-              className="text-ds-label text-brass inline-flex items-center gap-1 cursor-pointer hover:underline"
+              className="text-ds-label text-accent inline-flex items-center gap-1 cursor-pointer hover:underline"
               onClick={() => setViewingId(c.id)}
             >
               <Eye className="w-3 h-3" /> Open document
@@ -156,21 +156,21 @@ export function BrandContractView() {
       {/* Full-document viewer */}
       {viewing && (
         <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-surface-raised border-hairline">
             <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
               <div>
                 <h3 className="text-sm font-semibold text-strong capitalize">
                   {viewing.type.replace(/_/g, ' ')} — v{viewing.version}
                 </h3>
-                <p className="text-ds-micro text-zinc-500 mt-0.5">
+                <p className="text-ds-micro text-muted mt-0.5">
                   Generated from the {viewing.fulfillmentTrack.replace(/_/g, ' ')} clause set
                 </p>
               </div>
-              <button onClick={() => setViewingId(null)} className="text-zinc-500 hover:text-strong">
+              <button onClick={() => setViewingId(null)} className="text-muted hover:text-strong">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
+            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-strong whitespace-pre-wrap font-mono">
               {renderAgreement(viewing)}
             </pre>
             <div className="flex justify-end gap-2 px-5 py-3 border-t border-hairline">
@@ -183,7 +183,7 @@ export function BrandContractView() {
         </div>
       )}
 
-      <p className="text-ds-micro text-zinc-600">
+      <p className="text-ds-micro text-faint">
         Commercial rates shown are placeholders pending sign-off. Signed copies are
         also available through the e-signature provider once live-wired.
       </p>

@@ -30,10 +30,10 @@ const gbp = (n: number) =>
   `£${n.toLocaleString('en-GB', { maximumFractionDigits: 0 })}`;
 
 const HEALTH_BADGE: Record<string, string> = {
-  strong: 'bg-emerald-500/15 text-emerald-300',
-  good: 'bg-blue-500/15 text-blue-300',
-  fair: 'bg-amber-500/15 text-amber-300',
-  poor: 'bg-rose-500/15 text-rose-300',
+  strong: 'bg-state-success/10 text-state-success',
+  good: 'bg-state-info/10 text-state-info',
+  fair: 'bg-state-warning/10 text-state-warning',
+  poor: 'bg-state-danger/10 text-state-danger',
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -44,10 +44,10 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  suggested: 'bg-blue-500/15 text-blue-300',
-  approved: 'bg-emerald-500/15 text-emerald-300',
-  edited: 'bg-amber-500/15 text-amber-300',
-  rejected: 'bg-rose-500/15 text-rose-300',
+  suggested: 'bg-state-info/10 text-state-info',
+  approved: 'bg-state-success/10 text-state-success',
+  edited: 'bg-state-warning/10 text-state-warning',
+  rejected: 'bg-state-danger/10 text-state-danger',
 };
 
 export function ListingAnalyzer() {
@@ -110,7 +110,7 @@ export function ListingAnalyzer() {
           description="Automated listing health analysis for your catalogue products."
         />
         <Card title="Listing Analyzer">
-          <p className="text-xs text-zinc-600">No listing analyzer without a tenant session.</p>
+          <p className="text-xs text-faint">No listing analyzer without a tenant session.</p>
         </Card>
       </WorkspaceFrame>
     );
@@ -125,7 +125,7 @@ export function ListingAnalyzer() {
           description="Automated listing health analysis for your catalogue products."
         />
         <Card title="Listing Analyzer">
-          <p className="text-xs text-zinc-600">Add products to your catalogue to analyse their listings.</p>
+          <p className="text-xs text-faint">Add products to your catalogue to analyse their listings.</p>
         </Card>
       </WorkspaceFrame>
     );
@@ -133,23 +133,23 @@ export function ListingAnalyzer() {
 return (
     <div className="space-y-4" data-testid="listing-analyzer">
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="w-10 h-10 rounded-ds-lg bg-brass-500/15 flex items-center justify-center">
-          <ScanSearch className="w-5 h-5 text-brass-400" />
+        <div className="w-10 h-10 rounded-ds-lg bg-accent-500/15 flex items-center justify-center">
+          <ScanSearch className="w-5 h-5 text-accent-400" />
         </div>
         <div className="flex-1 min-w-[220px]">
           <h3 className="text-sm font-semibold text-strong">Listing Analyzer</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Mercenta prepares an automated listing health analysis for each catalogue product. You review,
             approve, edit or reject each suggested improvement.
           </p>
         </div>
-        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+        <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">
           <Info className="w-3 h-3 mr-1" /> Deterministic simulation
         </Badge>
       </div>
 
-      {notice && <p className="text-ds-label text-emerald-400" data-testid="la-notice">{notice}</p>}
-      {error && <p className="text-ds-label text-rose-400" data-testid="la-error">{error}</p>}
+      {notice && <p className="text-ds-label text-state-success" data-testid="la-notice">{notice}</p>}
+      {error && <p className="text-ds-label text-state-danger" data-testid="la-error">{error}</p>}
 
       <Card className="p-4">
         <Select
@@ -160,15 +160,15 @@ return (
         />
         {analysis && (
           <div className="flex flex-wrap items-center gap-2 mt-3" data-testid="la-health">
-            <span className="text-xs text-zinc-300">Listing health</span>
+            <span className="text-xs text-strong">Listing health</span>
             <Badge className={cn('text-ds-micro', HEALTH_BADGE[analysis.healthLevel])}>
               {analysis.healthLevel} · {analysis.healthScore}/100
             </Badge>
-            <span className="text-ds-micro text-zinc-500">Prepared by {analysis.preparedBy} · {analysis.simulationLabel}</span>
+            <span className="text-ds-micro text-muted">Prepared by {analysis.preparedBy} · {analysis.simulationLabel}</span>
           </div>
         )}
         {analysis && (
-          <div className="mt-2 h-2 rounded-full bg-ink-900 border border-hairline overflow-hidden">
+          <div className="mt-2 h-2 rounded-full bg-surface border border-hairline overflow-hidden">
             <div
               className={cn(
                 'h-full',
@@ -188,13 +188,13 @@ return (
             <div key={d.key} className="flex flex-wrap items-center justify-between gap-x-3 px-4 py-2.5 border-b border-hairline last:border-0" data-testid={`la-dim-${d.key}`}>
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-medium text-strong">{d.label}</span>
-                <span className="block text-ds-micro text-zinc-500 truncate">{d.note}</span>
+                <span className="block text-ds-micro text-muted truncate">{d.note}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-24 h-1.5 rounded-full bg-ink-900 overflow-hidden">
+                <div className="w-24 h-1.5 rounded-full bg-surface overflow-hidden">
                   <div className={cn('h-full', d.score >= 70 ? 'bg-emerald-400' : d.score >= 45 ? 'bg-amber-400' : 'bg-rose-400')} style={{ width: `${Math.max(2, d.score)}%` }} />
                 </div>
-                <span className="w-8 text-right text-ds-label font-mono text-zinc-300">{d.score}</span>
+                <span className="w-8 text-right text-ds-label font-mono text-strong">{d.score}</span>
               </div>
             </div>
           ))}
@@ -214,13 +214,13 @@ return (
               ['Demand signal', analysis.estimates.demandSignal],
               ['Category position', analysis.estimates.categoryPosition],
             ].map(([k, v]) => (
-              <div key={String(k)} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
-                <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
+              <div key={String(k)} className="rounded-ds-md border border-hairline bg-surface-raised px-3 py-2">
+                <div className="text-ds-micro uppercase tracking-wide text-muted">{k}</div>
                 <div className="mt-1 text-ds-label font-medium text-strong">{v}</div>
               </div>
             ))}
           </div>
-          <div className="px-4 py-2 text-ds-micro text-zinc-600">
+          <div className="px-4 py-2 text-ds-micro text-faint">
             Competitive position: {analysis.estimates.competitivePosition} · Opportunities: {analysis.estimates.opportunityIndicators.join(' · ') || 'none flagged'}
           </div>
         </Card>
@@ -229,33 +229,33 @@ return (
       {analysis && (
         <Card title="Suggested improvements" subtitle="Mercenta-prepared recommendations — approve, edit or reject each one.">
           {analysis.recommendations.length === 0 ? (
-            <p className="text-xs text-zinc-500 px-4 py-3" data-testid="la-no-recs">No suggestions for this listing right now.</p>
+            <p className="text-xs text-muted px-4 py-3" data-testid="la-no-recs">No suggestions for this listing right now.</p>
           ) : (
             <div className="space-y-3 px-4 py-3" data-testid="la-recommendations">
               {analysis.recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-3" data-testid={`la-rec-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-hairline bg-surface-raised px-3 py-3" data-testid={`la-rec-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-xs font-medium text-strong flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5 text-brass-400" /> {rec.title}
+                        <TrendingUp className="w-3.5 h-3.5 text-accent-400" /> {rec.title}
                       </span>
-                      <span className="text-ds-label text-zinc-500 mt-0.5 block">{rec.detail}</span>
-                      <span className="text-ds-micro text-zinc-600 block mt-0.5">Impact: {rec.impact}</span>
+                      <span className="text-ds-label text-muted mt-0.5 block">{rec.detail}</span>
+                      <span className="text-ds-micro text-faint block mt-0.5">Impact: {rec.impact}</span>
                     </div>
                     <Badge className={cn('text-ds-micro', STATUS_BADGE[rec.status])}>{STATUS_LABEL[rec.status]}</Badge>
                   </div>
                   {rec.suggestedCopy && (
-                    <p className="text-ds-label text-zinc-300 mt-2 block" data-testid={`la-suggested-${rec.id}`}>
-                      <span className="text-ds-micro text-zinc-500 uppercase">Mercenta suggestion: </span>{rec.suggestedCopy}
+                    <p className="text-ds-label text-strong mt-2 block" data-testid={`la-suggested-${rec.id}`}>
+                      <span className="text-ds-micro text-muted uppercase">Mercenta suggestion: </span>{rec.suggestedCopy}
                     </p>
                   )}
                   {rec.editedCopy && (
-                    <p className="text-ds-label text-zinc-300 mt-1 block">
-                      <span className="text-ds-micro text-zinc-500 uppercase">Your edited version: </span>{rec.editedCopy}
+                    <p className="text-ds-label text-strong mt-1 block">
+                      <span className="text-ds-micro text-muted uppercase">Your edited version: </span>{rec.editedCopy}
                     </p>
                   )}
                   {rec.reviewedAt && (
-                    <p className="text-ds-micro text-zinc-600 mt-1">Reviewed {rec.reviewedAt.slice(0, 16).replace('T', ' ')}</p>
+                    <p className="text-ds-micro text-faint mt-1">Reviewed {rec.reviewedAt.slice(0, 16).replace('T', ' ')}</p>
                   )}
                   {rec.status === 'suggested' && editingRec !== rec.id && (
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -278,7 +278,7 @@ return (
                         rows={3}
                         aria-label="Your edited improvement"
                         data-testid={`la-edit-input-${rec.id}`}
-                        className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 focus:border-brass-500/50"
+                        className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-faint focus:border-accent-500/50"
                       />
                       <div className="flex flex-wrap gap-2">
                         <Button variant="primary" size="sm" disabled={busyId === rec.id} onClick={() => void decide(rec, 'edited')}>

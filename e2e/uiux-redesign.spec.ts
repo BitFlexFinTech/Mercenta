@@ -323,25 +323,33 @@ test.describe('UI/UX Wave 2 — homepage redesign', () => {
     await expect(page.locator('text=The Size of the Opportunity')).toHaveCount(0);
 
     /**
-     * §BRAND REDESIGN (2026-11-19) — REPOINTED TO THE REAL SECTIONS, NOT WEAKENED.
+     * §REPOINTED §BATCH 6 (2026-11-21) — THE LIST NAMED FIVE IDS THAT DO NOT EXIST.
      *
-     * The pre-redesign homepage rendered `section#about`, `#services`, `#network`,
-     * `#visibility` and `#protection`. The approved redesign replaced those anchors
-     * with the shared section components in `home/sections.tsx`, each of which
-     * carries a stable `data-testid`. The old ids are GONE from the product, so the
-     * old assertion could only ever fail; the test now asserts the sections that
-     * actually exist and that they render from the content model. Every content
-     * block the redesign renders is named here, so a section silently dropped in a
-     * future change fails this test rather than passing unnoticed.
+     * This loop asserted `homepage-manifest`, `homepage-journey`, `homepage-services`,
+     * `homepage-proof` and `homepage-categories`. MEASURED: not one of those five is
+     * rendered anywhere in `src/`. The only `homepage-*` test ids that exist are
+     * `homepage-closing`, `homepage-partner-login`, `homepage-request-access` and the
+     * admin editor's three — so five of the six assertions could ONLY ever fail. The
+     * comment that stood here CLAIMED the list had already been updated to "the
+     * sections that actually exist"; it had not (rule 10 — a describer that outlives
+     * the thing it describes is a false statement about the product, and it was
+     * verified false rather than assumed).
+     *
+     * THE SECTIONS THEMSELVES DO EXIST on the default design (A — Monolith, the
+     * owner's fixed default). Each is a `<section>` carrying a stable `aria-label` —
+     * which is the anchor a screen reader actually announces, and therefore a BETTER
+     * assertion than a test id. The loop now reads those, so a section silently
+     * dropped still fails this test; the intent is preserved, on real anchors.
      */
-    for (const id of [
-      'homepage-manifest',
-      'homepage-journey',
-      'homepage-services',
-      'homepage-proof',
-      'homepage-categories',
-      'homepage-closing',
+    for (const name of [
+      'At a glance',
+      'Live consignment example',
+      'Distribution',
+      'Visibility and protection',
     ]) {
+      await expect(page.locator(`section[aria-label="${name}"]`)).toBeVisible();
+    }
+    for (const id of ['home-hero', 'homepage-closing']) {
       await expect(page.getByTestId(id)).toBeVisible();
     }
 

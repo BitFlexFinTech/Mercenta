@@ -111,16 +111,16 @@ export function CommercialReadiness() {
         description="What Mercenta needs in order to assess each of your products commercially, why it is needed, and what to do about it. Nothing here is a promise of an order."
         meta={
           <>
-            <span className="text-ds-label text-zinc-500">{totals.total} product(s) assessed</span>
-            <span className="text-ds-label text-zinc-500">{totals.ready} commercially ready</span>
-            <span className="text-ds-label text-zinc-500">{totals.action} needing your information</span>
+            <span className="text-ds-label text-muted">{totals.total} product(s) assessed</span>
+            <span className="text-ds-label text-muted">{totals.ready} commercially ready</span>
+            <span className="text-ds-label text-muted">{totals.action} needing your information</span>
           </>
         }
       />
 
       {notice && (
         <div
-          className="rounded-ds-lg border border-hairline bg-tint px-3.5 py-2.5 text-ds-label text-zinc-200"
+          className="rounded-ds-lg border border-hairline bg-tint px-3.5 py-2.5 text-ds-label text-strong"
           data-testid="brand-commercial-notice"
           role="status"
         >
@@ -131,7 +131,7 @@ export function CommercialReadiness() {
       <WorkspaceGrid
         rail={
           <ContextPanel title="How this works">
-            <ol className="space-y-1.5 text-ds-label text-zinc-400">
+            <ol className="space-y-1.5 text-ds-label text-muted">
               <li>1. Learn — every field links to a short guide.</li>
               <li>2. Understand — Mercenta shows why it is asking.</li>
               <li>3. Do — add or confirm the figure.</li>
@@ -172,10 +172,10 @@ export function CommercialReadiness() {
                         aria-expanded={open}
                       >
                         <span className="min-w-0">
-                          <span className="block text-sm font-medium text-zinc-100">
+                          <span className="block text-sm font-medium text-strong">
                             {r.productLabel ?? r.id}
                           </span>
-                          <span className="mt-0.5 block text-ds-label text-zinc-500">
+                          <span className="mt-0.5 block text-ds-label text-muted">
                             {progress.satisfied} of {progress.total} checks passed · {progress.percent}%
                           </span>
                         </span>
@@ -189,7 +189,7 @@ export function CommercialReadiness() {
                       </button>
 
                       <div className="border-t border-hairline px-3.5 py-3">
-                        <p className="text-ds-label text-zinc-300">{summary.explanation}</p>
+                        <p className="text-ds-label text-strong">{summary.explanation}</p>
                         {open && (
                           <ProductDetail
                             record={r}
@@ -208,7 +208,7 @@ export function CommercialReadiness() {
               </ul>
             )}
 
-            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="brand-commercial-disclaimer">
+            <p className="mt-4 text-ds-micro text-muted" data-testid="brand-commercial-disclaimer">
               {COMMERCIAL_BRAND_OUTCOME_DISCLAIMER}
             </p>
           </WorkspaceSection>
@@ -245,15 +245,15 @@ function ProductDetail({
     <>
       {summary.reasons.length > 0 && (
         <div className="mt-3" data-testid="brand-commercial-guidance">
-          <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
             What Mercenta needs, and why
           </p>
           <ul className="mt-1.5 space-y-2">
             {summary.reasons.map((reason) => (
               <li key={reason.label} className="text-ds-label">
-                <span className="text-zinc-200">{reason.label}</span>
-                <span className="block text-ds-micro text-zinc-400">{reason.what}</span>
-                <span className="block text-ds-micro text-zinc-500">{reason.why}</span>
+                <span className="text-strong">{reason.label}</span>
+                <span className="block text-ds-micro text-muted">{reason.what}</span>
+                <span className="block text-ds-micro text-muted">{reason.why}</span>
                 <a
                   className="mt-0.5 inline-block text-ds-micro text-state-info underline"
                   href={`#kb:${reason.articleId}`}
@@ -271,7 +271,7 @@ function ProductDetail({
         <p className="mt-3 text-ds-label text-state-success">Nothing is needed from you right now.</p>
       ) : (
         <div className="mt-3" data-testid="brand-commercial-missing">
-          <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
             Your actions
           </p>
           <ul className="mt-1.5 space-y-3">
@@ -280,19 +280,19 @@ function ProductDetail({
               const draft = drafts[key] ?? { value: '', basis: 'actual' as CommercialValueBasis };
               return (
                 <li key={f.field} data-testid={`brand-commercial-field-${f.field}`}>
-                  <p className="text-ds-label text-zinc-200">{f.guidance.what}</p>
-                  <p className="text-ds-micro text-zinc-500">{f.guidance.action}</p>
+                  <p className="text-ds-label text-strong">{f.guidance.what}</p>
+                  <p className="text-ds-micro text-muted">{f.guidance.action}</p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <input
                       aria-label={f.label}
-                      className="w-32 rounded-ds-md border border-hairline-strong bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
+                      className="w-32 rounded-ds-md border border-hairline-strong bg-surface px-2 py-1 text-ds-label text-strong"
                       value={draft.value}
                       onChange={(e) => setDraft(key, { value: e.target.value })}
                       data-testid={`brand-commercial-input-${f.field}`}
                     />
                     <select
                       aria-label={`${f.label} basis`}
-                      className="rounded-ds-md border border-hairline-strong bg-ink-900 px-2 py-1 text-ds-label text-zinc-100"
+                      className="rounded-ds-md border border-hairline-strong bg-surface px-2 py-1 text-ds-label text-strong"
                       value={draft.basis}
                       onChange={(e) => setDraft(key, { basis: e.target.value as CommercialValueBasis })}
                       data-testid={`brand-commercial-basis-${f.field}`}
@@ -335,7 +335,7 @@ function ProductDetail({
         />
       </div>
 
-      <p className="mt-3 text-ds-micro text-zinc-600">{record.moqDisclaimer}</p>
+      <p className="mt-3 text-ds-micro text-faint">{record.moqDisclaimer}</p>
     </>
   );
 }

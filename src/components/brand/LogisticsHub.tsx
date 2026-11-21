@@ -184,20 +184,20 @@ function LogisticDialog({
       <div className="absolute inset-0 bg-surface-hover backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'relative max-h-[92vh] w-full overflow-y-auto rounded-t-ds-lg border border-hairline bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg',
+          'relative max-h-[92vh] w-full overflow-y-auto rounded-t-ds-lg border border-hairline bg-surface-raised shadow-ds-overlay sm:rounded-ds-lg',
           width
         )}
       >
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-ink-850/95 px-4 py-3 backdrop-blur">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-hairline bg-surface-raised/95 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
             <h2 className="text-ds-title font-semibold text-strong">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-ds-label text-zinc-500">{subtitle}</p>}
+            {subtitle && <p className="mt-0.5 text-ds-label text-muted">{subtitle}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
+            className="rounded-ds-sm p-1.5 text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -243,55 +243,55 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
         <div className="mb-4 flex items-center justify-between border-b-2 border-hairline-strong pb-3">
           <div>
             <div className="text-base font-bold uppercase tracking-tight">{BRAND_NAME}</div>
-            <div className="text-ds-label text-zinc-600">Freight Waybill</div>
+            <div className="text-ds-label text-faint">Freight Waybill</div>
           </div>
           <div className="text-right">
-            <div className="text-ds-label text-zinc-600">Tracking no.</div>
+            <div className="text-ds-label text-faint">Tracking no.</div>
             <div className="font-mono text-ds-body font-bold">{shipment.trackingNumber}</div>
           </div>
         </div>
 
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-ds-label">
           <div>
-            <dt className="text-zinc-500">Reference</dt>
+            <dt className="text-muted">Reference</dt>
             <dd className="font-semibold">{shipment.reference}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Date</dt>
+            <dt className="text-muted">Date</dt>
             <dd className="font-semibold">{shipment.date}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Origin</dt>
+            <dt className="text-muted">Origin</dt>
             <dd className="font-semibold">{shipment.origin}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Destination</dt>
+            <dt className="text-muted">Destination</dt>
             <dd className="font-semibold">{shipment.destination}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Consignee</dt>
+            <dt className="text-muted">Consignee</dt>
             <dd className="font-semibold">{shipment.customer}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Value</dt>
+            <dt className="text-muted">Value</dt>
             <dd className="font-semibold">£{shipment.value.toLocaleString()}</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Volume</dt>
+            <dt className="text-muted">Volume</dt>
             <dd className="font-semibold">{shipment.cbm} CBM</dd>
           </div>
           <div>
-            <dt className="text-zinc-500">Carrier</dt>
+            <dt className="text-muted">Carrier</dt>
             <dd className="font-semibold uppercase">{carrierLabel(shipment.carrier)}</dd>
           </div>
         </dl>
 
-        {/* §BRAND IDENTITY — was `border-zinc-300`, which mapped to the
+        {/* §BRAND IDENTITY — was `border-hairline-strong`, which mapped to the
             `--mr-text-active` token (near-WHITE in the dark appearance) — a text
             token borrowed for a structural border. The deliberate strong hairline
             is the correct role for a visible dashed frame. */}
         <div className="mt-4 border-2 border-dashed border-hairline-strong p-4 text-center">
-          <div className="mb-2 text-ds-label text-zinc-600">Barcode</div>
+          <div className="mb-2 text-ds-label text-faint">Barcode</div>
           <div className="font-mono text-xl tracking-widest">{shipment.trackingNumber}</div>
           <div className="mt-3 flex justify-center gap-0.5">
             {Array.from({ length: 40 }).map((_, i) => (
@@ -365,7 +365,7 @@ function LabelsModal({
       <div ref={printableRef} className="rounded-ds-md bg-tint p-6 font-mono text-strong" id="printable-label">
         <div className="mb-4 border-b-2 border-hairline-strong pb-3 text-center">
           <div className="text-ds-title font-bold uppercase">Shipping Label</div>
-          <div className="text-ds-label text-zinc-600">{BRAND_NAME}</div>
+          <div className="text-ds-label text-faint">{BRAND_NAME}</div>
         </div>
         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-ds-label">
           <dt className="font-bold">Brand:</dt>
@@ -454,10 +454,10 @@ function ShipmentTrackingTimeline({
         >
           {shipmentStatusPresentation(shipment.status).label}
         </StatusBadge>
-        <span className="text-ds-micro text-zinc-500">
+        <span className="text-ds-micro text-muted">
           Stage: {STAGE_LABELS[shipment.stage] ?? shipment.stage}
         </span>
-        <span className="text-ds-micro text-zinc-600">· Ship date {shipment.date}</span>
+        <span className="text-ds-micro text-faint">· Ship date {shipment.date}</span>
       </div>
 
       <RecordFieldList
@@ -490,7 +490,7 @@ function ShipmentTrackingTimeline({
                         ? 'bg-state-success/15 text-state-success ring-state-success/25'
                         : isCurrent
                           ? 'bg-state-warning/15 text-state-warning ring-state-warning/25'
-                          : 'bg-tint text-zinc-600 ring-hairline'
+                          : 'bg-tint text-faint ring-hairline'
                     )}
                   >
                     {isCompleted ? (
@@ -514,7 +514,7 @@ function ShipmentTrackingTimeline({
                           ? 'text-state-success'
                           : isCurrent
                             ? 'text-state-warning'
-                            : 'text-zinc-500'
+                            : 'text-muted'
                       )}
                     >
                       {m.label}
@@ -531,7 +531,7 @@ function ShipmentTrackingTimeline({
                     )}
                   </div>
                   {isCurrent && (
-                    <p className="mt-1 text-ds-micro text-zinc-500">
+                    <p className="mt-1 text-ds-micro text-muted">
                       {carrierLabel(shipment.carrier).toUpperCase()} — last update: {shipment.date}
                     </p>
                   )}
@@ -555,8 +555,8 @@ function ShipmentTrackingTimeline({
               >
                 <ProductThumb product={p} size={40} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-ds-body font-medium text-zinc-200">{p.name}</div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-zinc-500">
+                  <div className="truncate text-ds-body font-medium text-strong">{p.name}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-muted">
                     <span>
                       SKU: <code className="rounded-ds-sm bg-tint px-1 font-mono">{p.sku}</code>
                     </span>
@@ -587,7 +587,7 @@ function FreightTermChip({ term }: { term: 'collect' | 'prepaid' | null }) {
   const semantics = freightSemantics(term);
   if (!semantics) {
     return (
-      <span className="rounded-ds-sm border border-hairline px-1.5 py-px text-ds-micro text-zinc-500">
+      <span className="rounded-ds-sm border border-hairline px-1.5 py-px text-ds-micro text-muted">
         Freight term not declared
       </span>
     );
@@ -1030,10 +1030,10 @@ export function LogisticsHub() {
         description="Every consignment Mercenta moves on your behalf, with its declared route, carrier position and who actually arranges carriage. Selecting a consignment exposes its evidence state and the artefacts you can produce for it."
         entity={
           <>
-            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
               {session?.tier === 'brand' ? 'Tenant' : 'Environment'}
             </span>
-            <span className="text-ds-label text-zinc-200">
+            <span className="text-ds-label text-strong">
               {session?.tenantId ?? 'Mercenta operations'}
             </span>
           </>
@@ -1048,7 +1048,7 @@ export function LogisticsHub() {
         }
         meta={
           <>
-            <span className="text-ds-micro text-zinc-500" data-testid="logistics-scope-count">
+            <span className="text-ds-micro text-muted" data-testid="logistics-scope-count">
               {model.legs.length} consignments in scope
             </span>
           </>
@@ -1063,7 +1063,7 @@ export function LogisticsHub() {
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[200px] flex-1 [&>input]:pl-8">
               <Search
-                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600"
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-faint"
                 aria-hidden="true"
               />
               <Input
@@ -1130,7 +1130,7 @@ export function LogisticsHub() {
                 type="button"
                 onClick={() => setInsight(null)}
                 aria-label="Close insight detail"
-                className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
+                className="rounded-ds-sm p-1 text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
@@ -1152,15 +1152,15 @@ export function LogisticsHub() {
                       value: `${performance.verifiedDelivered} of ${performance.delivered}`,
                     },
                   ].map((item) => (
-                    <div key={item.label} className="rounded-ds-sm border border-hairline bg-ink-900 px-2.5 py-2">
-                      <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">{item.label}</p>
+                    <div key={item.label} className="rounded-ds-sm border border-hairline bg-surface px-2.5 py-2">
+                      <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">{item.label}</p>
                       <p className="mt-0.5 font-mono text-ds-label text-strong">{item.value}</p>
                     </div>
                   ))}
                 </div>
                 <ul className="space-y-1">
                   {performance.sources.map((source) => (
-                    <li key={source} className="text-ds-micro leading-relaxed text-zinc-500">
+                    <li key={source} className="text-ds-micro leading-relaxed text-muted">
                       {source}
                     </li>
                   ))}
@@ -1184,9 +1184,9 @@ export function LogisticsHub() {
                         className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-hairline pb-1.5 last:border-0"
                         data-testid={`eta-basis-${shipment.reference}`}
                       >
-                        <span className="font-mono text-ds-micro text-zinc-300">{shipment.reference}</span>
+                        <span className="font-mono text-ds-micro text-strong">{shipment.reference}</span>
                         <span className="text-ds-label text-strong">{presentation.label}</span>
-                        <span className="text-ds-micro text-zinc-500">{presentation.detail}</span>
+                        <span className="text-ds-micro text-muted">{presentation.detail}</span>
                         {isEtaAtRisk(eta ?? { date: null, basis: 'unavailable', simulated: false, source: '' }, shipment.delayed, shipment.exception) && (
                           <span className="text-ds-micro text-state-warning">At risk against its declared window</span>
                         )}
@@ -1195,9 +1195,9 @@ export function LogisticsHub() {
                             data-testid={`appointment-${shipment.reference}`}
                             data-appointment-state={shipment.appointment?.state ?? 'unknown'}
                             data-appointment-window={shipment.appointment?.window.code ?? 'unknown'}
-                            className="basis-full text-ds-micro leading-relaxed text-zinc-400"
+                            className="basis-full text-ds-micro leading-relaxed text-muted"
                           >
-                            <span className="text-zinc-300">Delivery appointment: {appointmentView.label}.</span>{' '}
+                            <span className="text-strong">Delivery appointment: {appointmentView.label}.</span>{' '}
                             {appointmentView.windowDetail}
                           </span>
                         )}
@@ -1206,7 +1206,7 @@ export function LogisticsHub() {
                   })}
                 </ul>
                 {liveShipments.length === 0 && (
-                  <p className="text-ds-body text-zinc-500">No consignments in scope for this tenant.</p>
+                  <p className="text-ds-body text-muted">No consignments in scope for this tenant.</p>
                 )}
               </div>
             )}
@@ -1268,7 +1268,7 @@ export function LogisticsHub() {
                     type="button"
                     onClick={() => setSelectedId(null)}
                     aria-label="Clear selection"
-                    className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
+                    className="rounded-ds-sm p-1 text-muted transition-ds duration-ds-fast hover:bg-tint hover:text-strong"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
@@ -1298,7 +1298,7 @@ export function LogisticsHub() {
 
                   <div>
                     <p className="text-ds-title font-semibold text-strong">{selected.reference}</p>
-                    <p className="mt-0.5 text-ds-label text-zinc-500">{selected.title}</p>
+                    <p className="mt-0.5 text-ds-label text-muted">{selected.title}</p>
                   </div>
 
                   <RecordFieldList
@@ -1344,7 +1344,7 @@ export function LogisticsHub() {
                   />
 
                   {selectedEta && (
-                    <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="logistics-eta-basis">
+                    <p className="text-ds-micro leading-relaxed text-muted" data-testid="logistics-eta-basis">
                       {etaPresentation(selectedEta).detail}
                     </p>
                   )}
@@ -1358,16 +1358,16 @@ export function LogisticsHub() {
                   {selectedAppointment && selectedAppointmentView && (
                     <>
                       <p
-                        className="text-ds-micro leading-relaxed text-zinc-400"
+                        className="text-ds-micro leading-relaxed text-muted"
                         data-testid="logistics-appointment"
                         data-appointment-state={selectedAppointment.state}
                         data-appointment-window={selectedAppointment.window.code}
                       >
-                        <span className="text-zinc-300">Delivery appointment: {selectedAppointmentView.label}.</span>{' '}
+                        <span className="text-strong">Delivery appointment: {selectedAppointmentView.label}.</span>{' '}
                         {selectedAppointmentView.windowDetail}
                       </p>
                       <p
-                        className="text-ds-micro leading-relaxed text-zinc-500"
+                        className="text-ds-micro leading-relaxed text-muted"
                         data-testid="logistics-appointment-basis"
                       >
                         {selectedAppointmentView.detail}
@@ -1376,38 +1376,38 @@ export function LogisticsHub() {
                   )}
 
                   <div className="rounded-ds-md border border-hairline bg-tint p-2.5">
-                    <p className="mb-1 flex items-center gap-1.5 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <p className="mb-1 flex items-center gap-1.5 text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                       <Info className="h-3 w-3" aria-hidden="true" />
                       Why this leg is {OPERATIONAL_TRUTH[selected.truth].short}
                     </p>
                     <p
-                      className="text-ds-micro leading-relaxed text-zinc-400"
+                      className="text-ds-micro leading-relaxed text-muted"
                       data-testid="logistics-truth-reason"
                     >
                       {selected.truthReason}
                     </p>
-                    <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-600">
+                    <p className="mt-1.5 text-ds-micro leading-relaxed text-faint">
                       {selected.origin.reason} {selected.destination.reason}
                     </p>
                   </div>
 
                   <div className="rounded-ds-md border border-hairline bg-tint p-2.5">
-                    <p className="mb-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <p className="mb-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                       Who arranges carriage
                     </p>
                     <FreightTermChip term={selected.freightTerm} />
                     {freightSemantics(selected.freightTerm) ? (
-                      <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-400">
+                      <p className="mt-1.5 text-ds-micro leading-relaxed text-muted">
                         {freightSemantics(selected.freightTerm)!.arranges}
                       </p>
                     ) : (
-                      <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-500">
+                      <p className="mt-1.5 text-ds-micro leading-relaxed text-muted">
                         This consignment has no declared freight term on its purchase order, so Mercenta
                         does not assert who arranges carriage.
                       </p>
                     )}
                     {selected.expectedCarrier && (
-                      <p className="mt-1.5 text-ds-micro text-zinc-500">
+                      <p className="mt-1.5 text-ds-micro text-muted">
                         Lane rule expects{' '}
                         <span className="font-mono">{carrierLabel(selected.expectedCarrier)}</span>.
                       </p>
@@ -1443,7 +1443,7 @@ export function LogisticsHub() {
             ) : (
               <ContextPanel title="Consignment inspector">
                 <div className="p-3" data-testid="logistics-inspector-empty">
-                  <p className="text-ds-body text-zinc-500">
+                  <p className="text-ds-body text-muted">
                     Select a consignment in the list to see its route, evidence state and who arranges
                     carriage.
                   </p>
@@ -1488,7 +1488,7 @@ export function LogisticsHub() {
             ) : (
               <ContextPanel title="Documents for this PO">
                 <div className="p-3" data-testid="po-documents-unavailable">
-                  <p className="text-ds-body text-zinc-500">
+                  <p className="text-ds-body text-muted">
                     This consignment is not linked to a purchase order in your scope, so no document
                     pack applies. A document is only ever produced from a PO you own.
                   </p>
@@ -1502,14 +1502,14 @@ export function LogisticsHub() {
               <div className="space-y-2.5 p-3">
                 <div>
                   <FreightTermChip term="collect" />
-                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400">
+                  <p className="mt-1 text-ds-micro leading-relaxed text-muted">
                     Retail-channel-arranged. The carrier is not Mercenta’s choice, and a Mercenta carrier
                     account is refused on this PO.
                   </p>
                 </div>
                 <div>
                   <FreightTermChip term="prepaid" />
-                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400">
+                  <p className="mt-1 text-ds-micro leading-relaxed text-muted">
                     Mercenta arranges carriage. International → DHL, UK domestic → Palletline. No single
                     carrier is universal; an admin override is attributed and audited.
                   </p>
@@ -1524,15 +1524,15 @@ export function LogisticsHub() {
                   eligible merely because it is available.
                 */}
                 <div className="border-t border-hairline pt-2.5" data-testid="carrier-eligibility">
-                  <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+                  <p className="text-ds-micro uppercase tracking-[0.12em] text-muted">
                     Eligibility for the consignment in scope
                   </p>
-                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400" data-testid="carrier-eligibility-lane">
+                  <p className="mt-1 text-ds-micro leading-relaxed text-muted" data-testid="carrier-eligibility-lane">
                     Lane: {eligibility.lane === 'uk_domestic' ? 'UK domestic' : 'International'}
                     {eligibility.channelArranged ? ' · carriage arranged by the retail channel' : ' · carriage arranged by Mercenta'}
                   </p>
                   {eligibility.permitted.length > 0 && (
-                    <p className="mt-1 text-ds-micro text-zinc-300" data-testid="carrier-eligibility-permitted">
+                    <p className="mt-1 text-ds-micro text-strong" data-testid="carrier-eligibility-permitted">
                       Permitted now:{' '}
                       <span className="font-mono">
                         {eligibility.permitted
@@ -1542,7 +1542,7 @@ export function LogisticsHub() {
                     </p>
                   )}
                   {eligibility.overrideCandidates.length > 0 && (
-                    <p className="mt-1 text-ds-micro text-zinc-400" data-testid="carrier-eligibility-override">
+                    <p className="mt-1 text-ds-micro text-muted" data-testid="carrier-eligibility-override">
                       Override only (attributed + audited):{' '}
                       <span className="font-mono">{eligibility.overrideCandidates.map((c) => carrierLabel(c)).join(', ')}</span>
                     </p>
@@ -1550,10 +1550,10 @@ export function LogisticsHub() {
                   {eligibility.blocked.length > 0 && (
                     <ul className="mt-1 space-y-0.5" data-testid="carrier-eligibility-blocked">
                       {eligibility.blocked.map((entry) => (
-                        <li key={entry.carrier} className="text-ds-micro leading-relaxed text-zinc-500">
+                        <li key={entry.carrier} className="text-ds-micro leading-relaxed text-muted">
                           <span className="font-mono">{entry.carrier}</span> refused — {entry.reason}
                           {!isCarrierOperational(providerModeFor(modes, entry.carrier)) && (
-                            <span className="text-zinc-600"> (state: {providerModeFor(modes, entry.carrier)})</span>
+                            <span className="text-faint"> (state: {providerModeFor(modes, entry.carrier)})</span>
                           )}
                         </li>
                       ))}
@@ -1604,7 +1604,7 @@ export function LogisticsHub() {
             <LoadingState rows={4} label="Loading your consignments…" />
           ) : visibleLegs.length === 0 ? (
             <p
-              className="rounded-ds-md border border-hairline bg-tint px-3 py-6 text-center text-ds-body text-zinc-500"
+              className="rounded-ds-md border border-hairline bg-tint px-3 py-6 text-center text-ds-body text-muted"
               data-testid="logistics-list-empty"
             >
               No consignment matches the current filters.
@@ -1632,24 +1632,24 @@ export function LogisticsHub() {
                           <span className="truncate text-ds-body font-semibold text-strong">
                             {leg.reference}
                           </span>
-                          <span className="font-mono text-ds-micro text-zinc-600">{leg.poNumber}</span>
+                          <span className="font-mono text-ds-micro text-faint">{leg.poNumber}</span>
                           <StatusBadge tone={OPERATIONAL_TRUTH[leg.truth].tone} dataStatus={leg.truth}>
                             {OPERATIONAL_TRUTH[leg.truth].short}
                           </StatusBadge>
                         </span>
                         {/* The canonical consignment title (e.g. "Tapatío — PO-9002"). */}
-                        <span className="mt-0.5 block truncate text-ds-micro text-zinc-400">
+                        <span className="mt-0.5 block truncate text-ds-micro text-muted">
                           {leg.title}
                         </span>
-                        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-ds-micro text-zinc-500">
+                        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-ds-micro text-muted">
                           <span className="inline-flex items-center gap-1">
                             <MapPin className="h-3 w-3" aria-hidden="true" />
                             {leg.origin.raw || 'origin not declared'}
                           </span>
-                          <ArrowRight className="h-3 w-3 text-zinc-700" aria-hidden="true" />
+                          <ArrowRight className="h-3 w-3 text-faint" aria-hidden="true" />
                           <span>{leg.destination.raw || 'destination not declared'}</span>
                           {!leg.geometry && (
-                            <span className="text-zinc-600">· location not resolvable</span>
+                            <span className="text-faint">· location not resolvable</span>
                           )}
                         </span>
                       </span>
@@ -1664,10 +1664,10 @@ export function LogisticsHub() {
                             Exception
                           </span>
                         )}
-                        <span className="font-mono text-ds-label text-zinc-300">
+                        <span className="font-mono text-ds-label text-strong">
                           £{Math.round(leg.value / 1000)}k
                         </span>
-                        <span className="text-ds-micro text-zinc-600">{leg.cbm} CBM</span>
+                        <span className="text-ds-micro text-faint">{leg.cbm} CBM</span>
                       </span>
                     </button>
 
@@ -1715,7 +1715,7 @@ export function LogisticsHub() {
         <Button variant="secondary" onClick={() => setTruthFilter('all')}>
           Clear evidence filter
         </Button>
-        <span className="text-ds-micro text-zinc-600">
+        <span className="text-ds-micro text-faint">
           Booking a consignment happens on Purchase Orders through the canonical ASN flow — Mercenta files
           the ASN against the accepted PO, so freight cannot be booked without a valid PO.
         </span>

@@ -169,6 +169,18 @@ const VAR_BY_KEY = {
   background: 'var(--mr-bg)',
   foreground: 'var(--mr-text-strong)',
   muted: 'var(--mr-text-muted)',
+  /**
+   * §BATCH 6 (2026-11-21) — THE REST OF THE TEXT LADDER.
+   *
+   * `foreground` and `muted` were the only text keys here, so an ALPHA utility on
+   * any other step — `text-strong/90`, `text-faint/80`, `text-soft/70` — resolved
+   * to nothing and its shim was never emitted, leaving the class dark. The
+   * generator FAILS on an unresolved key, which is how the omission surfaced.
+   */
+  strong: 'var(--mr-text-strong)',
+  faint: 'var(--mr-text-faint)',
+  soft: 'var(--mr-text-soft)',
+  active: 'var(--mr-text-active)',
   canvas: 'var(--mr-bg)',
   stamp: 'var(--mr-state-critical)',
   // LEGACY HUE FAMILIES — same tokens as the Tailwind scales in tailwind.config.js

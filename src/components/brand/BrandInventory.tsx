@@ -55,8 +55,8 @@ const MONO = 'font-mono text-ds-label';
 
 /** The status pill colours, so the derived status reads at a glance. */
 const STATUS_TONE: Record<string, string> = {
-  in_stock: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  below_safety_stock: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+  in_stock: 'bg-state-success/10 text-state-success border-state-success/20',
+  below_safety_stock: 'bg-state-warning/10 text-state-warning border-state-warning/20',
   out_of_stock: 'bg-red-500/15 text-red-300 border-red-500/20',
 };
 
@@ -175,7 +175,7 @@ export function BrandInventory() {
           title="Inventory"
           description="Inventory is linked to your catalogue and is kept here, inside Mercenta."
         />
-        <Card className="p-4 text-sm text-zinc-400">Sign in as a brand to see your inventory.</Card>
+        <Card className="p-4 text-sm text-muted">Sign in as a brand to see your inventory.</Card>
       </WorkspaceFrame>
     );
   }
@@ -193,11 +193,11 @@ export function BrandInventory() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-strong">Inventory position</h3>
-            <p className="text-ds-label text-zinc-500">
+            <p className="text-ds-label text-muted">
               Derived from the movement ledger · {INVENTORY_UOM_SOURCE}
             </p>
           </div>
-          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
+          <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">
             Mercenta’s own model
           </Badge>
         </div>
@@ -218,13 +218,13 @@ export function BrandInventory() {
                 key={tile.label}
                 className="bg-tint border border-hairline rounded-ds-md p-3"
               >
-                <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</div>
+                <div className="text-ds-micro uppercase tracking-wide text-muted">{tile.label}</div>
                 <div className="text-lg font-semibold text-strong tabular-nums">{tile.value}</div>
               </div>
             ))}
           </div>
         )}
-        <p className="text-ds-label text-zinc-500 leading-relaxed">{INVENTORY_DERIVATION_BASIS}</p>
+        <p className="text-ds-label text-muted leading-relaxed">{INVENTORY_DERIVATION_BASIS}</p>
       </Card>
 
       {error && (
@@ -238,7 +238,7 @@ export function BrandInventory() {
       {notice && (
         <div
           data-testid="inventory-notice"
-          className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-zinc-300"
+          className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-strong"
         >
           {notice}
         </div>
@@ -270,7 +270,7 @@ export function BrandInventory() {
                     <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-ds-md" />
                     <div>
                       <div className="text-sm font-medium text-strong">{p?.name ?? r.sku}</div>
-                      <div className={cn(MONO, 'text-zinc-500')}>{r.sku}</div>
+                      <div className={cn(MONO, 'text-muted')}>{r.sku}</div>
                     </div>
                   </div>
                 );
@@ -283,14 +283,14 @@ export function BrandInventory() {
                 <div data-testid={`inventory-asin-${r.sku}`}>
                   {r.asin ? (
                     <>
-                      <div className={cn(MONO, 'text-zinc-300')}>{r.asin}</div>
-                      <div className="text-ds-micro text-zinc-500">
+                      <div className={cn(MONO, 'text-strong')}>{r.asin}</div>
+                      <div className="text-ds-micro text-muted">
                         {r.asinSource ? ASIN_SOURCE_LABELS[r.asinSource] : ''}
                         {r.asinSimulated ? ' (simulated placeholder)' : ''}
                       </div>
                     </>
                   ) : (
-                    <div className="text-ds-label text-zinc-500">
+                    <div className="text-ds-label text-muted">
                       {ASIN_STATE_LABELS[r.identifierState]}
                     </div>
                   )}
@@ -300,7 +300,7 @@ export function BrandInventory() {
             {
               key: 'uom',
               label: 'UoM',
-              render: (r) => <span className="text-xs text-zinc-400">{INVENTORY_UOM_LABELS[r.uom]}</span>,
+              render: (r) => <span className="text-xs text-muted">{INVENTORY_UOM_LABELS[r.uom]}</span>,
             },
             {
               key: 'onHand',
@@ -309,7 +309,7 @@ export function BrandInventory() {
               render: (r) => (
                 <span
                   data-testid={`inventory-onhand-${r.sku}`}
-                  className={cn(MONO, 'text-zinc-200 tabular-nums')}
+                  className={cn(MONO, 'text-strong tabular-nums')}
                 >
                   {r.onHand}
                 </span>
@@ -319,13 +319,13 @@ export function BrandInventory() {
               key: 'committed',
               label: 'Committed',
               align: 'right',
-              render: (r) => <span className={cn(MONO, 'text-zinc-400 tabular-nums')}>{r.committed}</span>,
+              render: (r) => <span className={cn(MONO, 'text-muted tabular-nums')}>{r.committed}</span>,
             },
             {
               key: 'inbound',
               label: 'Inbound',
               align: 'right',
-              render: (r) => <span className={cn(MONO, 'text-zinc-400 tabular-nums')}>{r.inbound}</span>,
+              render: (r) => <span className={cn(MONO, 'text-muted tabular-nums')}>{r.inbound}</span>,
             },
             {
               key: 'available',
@@ -346,7 +346,7 @@ export function BrandInventory() {
               align: 'right',
               hideBelow: 'lg',
               render: (r) => (
-                <span className={cn(MONO, 'text-zinc-400 tabular-nums')}>{r.safetyStock}</span>
+                <span className={cn(MONO, 'text-muted tabular-nums')}>{r.safetyStock}</span>
               ),
             },
             {
@@ -357,7 +357,7 @@ export function BrandInventory() {
                   data-testid={`inventory-status-${r.sku}`}
                   className={cn(
                     'inline-flex items-center rounded-full border px-2 py-0.5 text-ds-micro',
-                    STATUS_TONE[r.status] ?? 'bg-tint text-zinc-300 border-hairline'
+                    STATUS_TONE[r.status] ?? 'bg-tint text-strong border-hairline'
                   )}
                 >
                   {INVENTORY_STATUS_LABELS[r.status]}
@@ -399,7 +399,7 @@ export function BrandInventory() {
               <h3 className="text-sm font-semibold text-strong">
                 Manage stock — <span className={MONO}>{selected.sku}</span>
               </h3>
-              <p className="text-ds-label text-zinc-500">
+              <p className="text-ds-label text-muted">
                 On hand {selected.onHand} · committed {selected.committed} · inbound {selected.inbound}{' '}
                 · available {selected.available} eaches
               </p>
@@ -412,7 +412,7 @@ export function BrandInventory() {
           <div className="grid gap-4 lg:grid-cols-3">
             {/* 1 — a stock movement: the ONLY way a figure changes. */}
             <div className="space-y-2" data-testid="inventory-movement-form">
-              <div className="text-xs font-medium text-zinc-300">Record a movement</div>
+              <div className="text-xs font-medium text-strong">Record a movement</div>
               <Select
                 label="Movement"
                 value={movementType}
@@ -452,7 +452,7 @@ export function BrandInventory() {
 
             {/* 2 — the brand's own unit + reorder trigger. */}
             <div className="space-y-2" data-testid="inventory-settings-form">
-              <div className="text-xs font-medium text-zinc-300">Safety stock</div>
+              <div className="text-xs font-medium text-strong">Safety stock</div>
               <Input
                 label="Safety stock (eaches)"
                 type="number"
@@ -462,14 +462,14 @@ export function BrandInventory() {
               <Button className="text-xs" onClick={handleSettings}>
                 Save settings
               </Button>
-              <p className="text-ds-label text-zinc-500">
+              <p className="text-ds-label text-muted">
                 Available = on hand − committed (eaches). Below the trigger ⇒ “below safety stock”.
               </p>
             </div>
 
             {/* 3 — decision 10: the brand's half of the identifier rule. */}
             <div className="space-y-2" data-testid="inventory-asin-form">
-              <div className="text-xs font-medium text-zinc-300">Channel identifier</div>
+              <div className="text-xs font-medium text-strong">Channel identifier</div>
               <Input
                 label="ASIN"
                 value={asinInput}
@@ -484,7 +484,7 @@ export function BrandInventory() {
               <Button variant="accent" className="text-xs" onClick={handleDeclareAsin}>
                 Add ASIN
               </Button>
-              <p className="text-ds-label text-zinc-500">
+              <p className="text-ds-label text-muted">
                 {selected.asin
                   ? `Recorded: ${selected.asin} — ${selected.asinSource ? ASIN_SOURCE_LABELS[selected.asinSource] : ''}`
                   : ASIN_STATE_LABELS[selected.identifierState]}
@@ -494,12 +494,12 @@ export function BrandInventory() {
 
           {/* The provenance: the ledger behind the figures above. */}
           <div className="space-y-1">
-            <div className="text-xs font-medium text-zinc-300">
+            <div className="text-xs font-medium text-strong">
               Movement ledger ({selected.movementCount} recorded)
             </div>
             <ul
               data-testid="inventory-ledger"
-              className="max-h-48 overflow-y-auto space-y-1 text-ds-label text-zinc-400"
+              className="max-h-48 overflow-y-auto space-y-1 text-ds-label text-muted"
             >
               {[...ledger].reverse().map((m) => (
                 <li key={m.id} className="flex flex-wrap gap-x-3">
@@ -509,11 +509,11 @@ export function BrandInventory() {
                     {m.quantityDelta > 0 ? '+' : ''}
                     {m.quantityDelta}
                   </span>
-                  <span className="text-zinc-500">
+                  <span className="text-muted">
                     {m.enteredQuantity} {INVENTORY_UOM_LABELS[m.enteredUom]}
                     {m.enteredUom === 'cases' ? ` × ${m.unitsPerCaseUsed}` : ''}
                   </span>
-                  {m.reason && <span className="text-zinc-500">— {m.reason}</span>}
+                  {m.reason && <span className="text-muted">— {m.reason}</span>}
                 </li>
               ))}
             </ul>
@@ -524,20 +524,20 @@ export function BrandInventory() {
       {/* The rule, stated where the figures and the identifier are handled. */}
       <Card className="p-4 space-y-2">
         <div className="text-xs font-semibold text-strong">How these figures work</div>
-        <ul data-testid="inventory-rules" className="space-y-1 text-ds-label text-zinc-400">
+        <ul data-testid="inventory-rules" className="space-y-1 text-ds-label text-muted">
           {INVENTORY_RULES.map((r) => (
             <li key={r}>• {r}</li>
           ))}
         </ul>
         <div data-testid="inventory-asin-rules" className="pt-1 space-y-1">
-          <div className="text-ds-label text-zinc-500">{ASIN_RULE_SOURCE}</div>
-          <ul className="space-y-1 text-ds-label text-zinc-400">
+          <div className="text-ds-label text-muted">{ASIN_RULE_SOURCE}</div>
+          <ul className="space-y-1 text-ds-label text-muted">
             {ASIN_RULES.map((r) => (
               <li key={r}>• {r}</li>
             ))}
           </ul>
         </div>
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           The movement ledger is held in memory in this environment; nothing here contacts a retail
           channel.
         </p>

@@ -25,18 +25,18 @@ function BrandRailExtras({ tenantId, actor }: { tenantId: string | null; actor: 
       <NewTaskPanel scope="brand" tenantId={tenantId} actor={actor} />
       <ContextPanel title="Your open work">
         {top.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">Nothing outstanding on your account.</p>
+          <p className="text-ds-label text-faint">Nothing outstanding on your account.</p>
         ) : (
           <ul className="space-y-1">
             {top.map(([src, n]) => (
               <li key={src} className="flex items-center justify-between gap-2 text-ds-label">
-                <span className="text-zinc-400">{src.replace(/_/g, ' ')}</span>
-                <span className="font-mono text-zinc-200">{n}</span>
+                <span className="text-muted">{src.replace(/_/g, ' ')}</span>
+                <span className="font-mono text-strong">{n}</span>
               </li>
             ))}
           </ul>
         )}
-        <p className="mt-2 text-ds-micro text-zinc-600">
+        <p className="mt-2 text-ds-micro text-faint">
           {mine.length} item(s) · your account only · as at {demoToday()}
         </p>
       </ContextPanel>

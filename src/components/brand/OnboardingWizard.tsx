@@ -201,7 +201,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
             <span className="text-lg font-semibold text-strong">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-strong mb-1">Brand Onboarding</h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted">
                         Global wholesale trade platform — scale your brand into the UK market
           </p>
         </div>
@@ -219,10 +219,10 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     className={cn(
                       'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300',
                       isDone
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-500/20 text-state-success border border-emerald-500/30'
                         : isActive
-                        ? 'bg-brass-500 text-strong shadow-ds-raised'
-                        : 'bg-ink-850 text-zinc-600 border border-hairline'
+                        ? 'bg-accent-500 text-strong shadow-ds-raised'
+                        : 'bg-surface-raised text-faint border border-hairline'
                     )}
                   >
                     {isDone ? (
@@ -234,7 +234,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   <span
                     className={cn(
                       'text-ds-micro font-medium transition-colors',
-                      isActive ? 'text-strong' : 'text-zinc-600'
+                      isActive ? 'text-strong' : 'text-faint'
                     )}
                   >
                     {s.label}
@@ -254,11 +254,11 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
         </div>
 
         {/* Step Content */}
-        <div className="bg-ink-850 border border-hairline rounded-ds-lg p-6 min-h-[340px]">
+        <div className="bg-surface-raised border border-hairline rounded-ds-lg p-6 min-h-[340px]">
           {step === 1 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-strong mb-1">Brand Profile</h2>
-              <p className="text-xs text-zinc-500 mb-4">
+              <p className="text-xs text-muted mb-4">
                 Tell us about your business and primary contact
               </p>
               <Input
@@ -269,7 +269,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 required
               />
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-400">Product Category</label>
+                <label className="text-xs font-medium text-muted">Product Category</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                   {APPROVED_CATEGORIES.map((cat) => (
                     <button
@@ -279,8 +279,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       className={cn(
                         'text-ds-micro px-2.5 py-2 rounded-ds-md border transition-colors text-left',
                         brandProfile.category === cat
-                          ? 'border-brass-500/50 bg-brass-500/10 text-strong'
-                          : 'border-hairline text-zinc-400 hover:border-hairline-strong'
+                          ? 'border-accent-500/50 bg-accent-500/10 text-strong'
+                          : 'border-hairline text-muted hover:border-hairline-strong'
                       )}
                     >
                       {cat}
@@ -288,7 +288,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-brass-400">
+              <div className="flex items-center gap-2 text-xs text-accent-400">
                 <Globe2 className="w-3.5 h-3.5" />
                 <span>Select your region to unlock country options</span>
               </div>
@@ -337,40 +337,40 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               <h2 className="text-base font-semibold text-strong mb-1">
                 UK Master Wholesale & Distribution Agreement
               </h2>
-              <p className="text-xs text-zinc-500 mb-2">
+              <p className="text-xs text-muted mb-2">
                 Review and accept the terms below
               </p>
-              <div className="bg-ink-900 border border-hairline rounded-ds-md p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+              <div className="bg-surface border border-hairline rounded-ds-md p-4 max-h-44 overflow-y-auto text-xs text-muted leading-relaxed">
                 <p className="mb-3">
                   This Master Wholesale & Distribution Agreement ("Agreement") is entered
                   into between {BRAND_LEGAL_NAME} ("Mercenta"), acting as the Exclusive UK
                   Importer of Record, and the undersigned Brand ("Brand").
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">1. Appointment.</strong> Mercenta is
+                  <strong className="text-strong">1. Appointment.</strong> Mercenta is
                   hereby appointed as the exclusive UK importer and wholesale distributor
                   of the Brand's products, routing inventory via direct UK retail placement
                   through established national retail networks.
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">2. Importer of Record.</strong> Mercenta
+                  <strong className="text-strong">2. Importer of Record.</strong> Mercenta
                   shall hold valid UK EORI numbers, manage HMRC customs declarations, and
                   ensure full UKCA compliance for all imported goods — regardless of
                   whether the Brand originates from North America, Europe, or Africa.
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">3. Exclusivity.</strong> The Brand
+                  <strong className="text-strong">3. Exclusivity.</strong> The Brand
                   grants Mercenta exclusive rights to import, clear, and distribute its
                                     products through the retail channel within the United Kingdom territory.
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">4. Payment Terms.</strong> Mercenta
+                  <strong className="text-strong">4. Payment Terms.</strong> Mercenta
                   shall purchase inventory at agreed Ex-Works wholesale prices and remit
                   payouts to the Brand's nominated banking account in the selected payout
                   currency.
                 </p>
                 <p>
-                  <strong className="text-zinc-300">5. Compliance.</strong> The Brand
+                  <strong className="text-strong">5. Compliance.</strong> The Brand
                   warrants that all products meet applicable UK and EU regulatory
                   standards, including labelling, hazardous materials, and food safety
                   requirements where applicable.
@@ -413,9 +413,9 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   <h3 className="text-xs font-semibold text-strong">
                     Commercial Relationship with Mercenta
                   </h3>
-                  <p className="text-ds-micro text-zinc-500 mt-1">
+                  <p className="text-ds-micro text-muted mt-1">
                     Choose how Mercenta and your brand trade. This is a private commercial
-                    agreement between us — it does <strong className="text-zinc-400">not</strong> change
+                    agreement between us — it does <strong className="text-muted">not</strong> change
                     the retail-channel compliance documents your products require, and no
                     commercial model removes a compliance requirement.
                   </p>
@@ -435,7 +435,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         className={cn(
                           'text-left rounded-ds-md border px-3 py-2.5 transition-colors',
                           selected
-                            ? 'border-brass-500/50 bg-brass-500/10'
+                            ? 'border-accent-500/50 bg-accent-500/10'
                             : 'border-hairline hover:border-hairline-strong'
                         )}
                       >
@@ -443,20 +443,20 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                           <span
                             className={cn(
                               'w-3.5 h-3.5 rounded-full border flex-shrink-0',
-                              selected ? 'border-brass-400 bg-brass-400' : 'border-hairline-strong'
+                              selected ? 'border-accent-400 bg-accent-400' : 'border-hairline-strong'
                             )}
                           />
-                          <span className={cn('text-xs font-medium', selected ? 'text-strong' : 'text-zinc-300')}>
+                          <span className={cn('text-xs font-medium', selected ? 'text-strong' : 'text-strong')}>
                             {def.label}
                           </span>
                         </div>
-                        <p className="text-ds-micro text-zinc-500 mt-1 leading-relaxed">{def.summary}</p>
+                        <p className="text-ds-micro text-muted mt-1 leading-relaxed">{def.summary}</p>
                       </button>
                     );
                   })}
                 </div>
                 {!checkCommercialModelSelection(brandProfile.commercialModel).ok && (
-                  <p className="text-ds-micro text-amber-300/90" data-testid="commercial-model-required">
+                  <p className="text-ds-micro text-state-warning/90" data-testid="commercial-model-required">
                     Commercial relationship required — onboarding cannot continue until you
                     choose Model A or Model B.
                   </p>
@@ -468,14 +468,14 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
           {step === 3 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-strong mb-1">Banking Details</h2>
-              <p className="text-xs text-zinc-500 mb-4">
+              <p className="text-xs text-muted mb-4">
                 Where should we send your wholesale payouts?
               </p>
 
               {(() => {
                 const nation = brandProfile.nation;
                 const banks = nation ? (BANKS_BY_COUNTRY[nation] ?? []) : [];
-                if (!nation) return <p className="text-xs text-zinc-600">Select a country in step 1 to see available banks.</p>;
+                if (!nation) return <p className="text-xs text-faint">Select a country in step 1 to see available banks.</p>;
 
                 const bankOptions = banks.map((b) => ({ value: b.swift, label: `${b.name} (${b.swift})` }));
                 const selectedBank = banks.find((b) => b.swift === brandProfile.bic);
@@ -483,11 +483,11 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 return (
                   <>
                     <div>
-                      <label className="text-xs font-medium text-zinc-400 mb-1.5 block">Select Your Bank</label>
+                      <label className="text-xs font-medium text-muted mb-1.5 block">Select Your Bank</label>
                       <select
                         value={brandProfile.bic}
                         onChange={(e) => update('bic', e.target.value)}
-                        className="w-full bg-ink-800 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40 appearance-none"
+                        className="w-full bg-surface-overlay border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40 appearance-none"
                         required
                       >
                         <option value="">-- Select bank --</option>
@@ -496,10 +496,10 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         ))}
                       </select>
                       {selectedBank && (
-                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-ds-md p-3 mt-2 text-ds-micro text-zinc-400 space-y-1">
-                          <p><span className="text-zinc-500">Account format:</span> {selectedBank.accountFormat}</p>
-                          {selectedBank.routingLabel && <p><span className="text-zinc-500">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
-                          <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-strong font-mono">{selectedBank.swift}</span> (pre-filled)</p>
+                        <div className="bg-accent-500/5 border border-accent-500/20 rounded-ds-md p-3 mt-2 text-ds-micro text-muted space-y-1">
+                          <p><span className="text-muted">Account format:</span> {selectedBank.accountFormat}</p>
+                          {selectedBank.routingLabel && <p><span className="text-muted">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
+                          <p><span className="text-muted">SWIFT/BIC:</span> <span className="text-strong font-mono">{selectedBank.swift}</span> (pre-filled)</p>
                         </div>
                       )}
                     </div>
@@ -514,7 +514,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 onChange={(e) => update('payoutCurrency', e.target.value)}
                 options={CURRENCIES_BY_REGION[brandProfile.region]}
               />
-              <div className="bg-brass-500/10 border border-brass-500/20 rounded-ds-md p-3 text-xs text-zinc-400">
+              <div className="bg-accent-500/10 border border-accent-500/20 rounded-ds-md p-3 text-xs text-muted">
                 Payouts are processed bi-weekly. Available currencies are based on your
                 region selection ({REGIONS.find((r) => r.value === brandProfile.region)?.label}).
                 GBP is always available for UK retail reconciliation.
@@ -522,10 +522,10 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
               {/* §5 — working-capital qualification question */}
               <div>
-                <label className="text-xs font-medium text-zinc-400 mb-1.5 block">
+                <label className="text-xs font-medium text-muted mb-1.5 block">
                   Working Capital Qualification
                 </label>
-                <p className="text-xs text-zinc-500 mb-2">
+                <p className="text-xs text-muted mb-2">
                   Can your business fund 30–90 days of stock before Mercenta payment lands?
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -543,15 +543,15 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       className={cn(
                         'text-xs px-3 py-2 rounded-ds-md border transition-colors',
                         brandProfile.workingCapitalAnswer === opt.value
-                          ? 'border-brass-500/50 bg-brass-500/10 text-strong'
-                          : 'border-hairline text-zinc-400 hover:border-hairline-strong'
+                          ? 'border-accent-500/50 bg-accent-500/10 text-strong'
+                          : 'border-hairline text-muted hover:border-hairline-strong'
                       )}
                     >
                       {opt.label}
                     </button>
                   ))}
                 </div>
-                <p className="text-ds-micro text-zinc-600 mt-1.5">
+                <p className="text-ds-micro text-faint mt-1.5">
                   This directly affects your fulfillment track assessment.
                 </p>
               </div>
@@ -563,7 +563,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
           {step === 4 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-strong mb-1">Fulfillment Track</h2>
-              <p className="text-xs text-zinc-500 mb-2">
+              <p className="text-xs text-muted mb-2">
                 Confirm how your goods reach the UK. This is pre-filled with the
                 system's provisional recommendation based on your answers — you can
                 change it. Mercenta may adjust the final track after document review;
@@ -571,7 +571,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 never a silent edit.
               </p>
 
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-xs text-zinc-400">
+              <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 text-xs text-muted">
                 System recommendation:{' '}
                 <span className="text-strong font-medium">
                   {fulfillmentTrackLabel(recommendedTrack)}
@@ -600,17 +600,17 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     className={cn(
                       'text-left px-3 py-2.5 rounded-ds-md border transition-colors relative',
                       brandProfile.fulfillmentTrack === opt.value
-                        ? 'border-brass-500/50 bg-brass-500/10'
+                        ? 'border-accent-500/50 bg-accent-500/10'
                         : 'border-hairline hover:border-hairline-strong'
                     )}
                   >
                     {recommendedTrack === opt.value && (
-                      <span className="absolute top-1.5 right-1.5 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                      <span className="absolute top-1.5 right-1.5 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-state-success/10 text-state-success border border-state-success/20">
                         Recommended
                       </span>
                     )}
                     <span className="block text-xs font-medium text-strong">{opt.label}</span>
-                    <span className="block text-ds-micro text-zinc-500 mt-0.5">{opt.hint}</span>
+                    <span className="block text-ds-micro text-muted mt-0.5">{opt.hint}</span>
                   </button>
                 ))}
               </div>
@@ -621,27 +621,27 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 const partners = getFinancingPartnerForRegion(region);
                 if (partners.length === 0) return null;
                 return (
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-ds-md p-3">
-                    <p className="text-ds-micro font-medium text-emerald-300 mb-1.5">Your Region's Financing Partner</p>
+                  <div className="bg-emerald-500/5 border border-state-success/20 rounded-ds-md p-3">
+                    <p className="text-ds-micro font-medium text-state-success mb-1.5">Your Region's Financing Partner</p>
                     {partners.map(function(p) {
                       return (
-                        <div key={p.id} className="text-ds-micro text-zinc-400 space-y-0.5">
+                        <div key={p.id} className="text-ds-micro text-muted space-y-0.5">
                           <p className="text-strong font-medium">{p.name}</p>
                           <p>{p.description}</p>
                           <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1 text-ds-micro">
-                            <span className="text-zinc-500">Advance rate:</span>
-                            <span className="font-mono text-zinc-300">{(p.advanceRate * 100).toFixed(0)}%</span>
-                            <span className="text-zinc-500">Fees:</span>
-                            <span className="font-mono text-zinc-300">{p.feeRange}</span>
-                            <span className="text-zinc-500">Turnaround:</span>
-                            <span className="font-mono text-zinc-300">{p.turnaroundDays}</span>
-                            <span className="text-zinc-500">Deal size:</span>
-                            <span className="font-mono text-zinc-300">{p.minDealSize} – {p.maxDealSize}</span>
+                            <span className="text-muted">Advance rate:</span>
+                            <span className="font-mono text-strong">{(p.advanceRate * 100).toFixed(0)}%</span>
+                            <span className="text-muted">Fees:</span>
+                            <span className="font-mono text-strong">{p.feeRange}</span>
+                            <span className="text-muted">Turnaround:</span>
+                            <span className="font-mono text-strong">{p.turnaroundDays}</span>
+                            <span className="text-muted">Deal size:</span>
+                            <span className="font-mono text-strong">{p.minDealSize} – {p.maxDealSize}</span>
                           </div>
                         </div>
                       );
                     })}
-                    <p className="text-ds-micro text-zinc-600 mt-1.5">
+                    <p className="text-ds-micro text-faint mt-1.5">
                       This financing option is available to qualifying brands on the financed track.
                     </p>
                   </div>
@@ -653,19 +653,19 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
           {step === 5 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-strong mb-1">Mandatory Legal Agreements</h2>
-              <p className="text-xs text-zinc-500 mb-2">
+              <p className="text-xs text-muted mb-2">
                 Please review and accept both agreements below. You must scroll through each
                 section and click "I have read and agree" for each one before you can continue.
               </p>
 
               {/* 4.1 — Logistics SLAs & Carrier Alignment */}
               <div className="border border-hairline rounded-ds-md overflow-hidden">
-                <div className="bg-ink-900/80 border-b border-hairline px-4 py-2.5">
+                <div className="bg-surface/80 border-b border-hairline px-4 py-2.5">
                   <h3 className="text-xs font-semibold text-strong">
                     4.1 — Logistics SLAs & Carrier Alignment
                   </h3>
                 </div>
-                <div className="bg-ink-900 border-hairline p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                <div className="bg-surface border-hairline p-4 max-h-36 overflow-y-auto text-xs text-muted leading-relaxed">
                   <p className="mb-3">
                     The Supplier explicitly acknowledges that all logistical executions under
                     this Agreement must strictly align with retail-channel vendor core metrics.
@@ -687,7 +687,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     }
                     className="w-3.5 h-3.5 accent-brass-500"
                   />
-                  <label htmlFor="agreement-logistics" className="text-ds-micro text-zinc-400 cursor-pointer select-none">
+                  <label htmlFor="agreement-logistics" className="text-ds-micro text-muted cursor-pointer select-none">
                     I have read and agree to the Logistics SLAs &amp; Carrier Alignment terms
                   </label>
                 </div>
@@ -695,12 +695,12 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
               {/* 4.2 — Automated Chargeback Remediation & Financial Indemnity */}
               <div className="border border-hairline rounded-ds-md overflow-hidden">
-                <div className="bg-ink-900/80 border-b border-hairline px-4 py-2.5">
+                <div className="bg-surface/80 border-b border-hairline px-4 py-2.5">
                   <h3 className="text-xs font-semibold text-strong">
                     4.2 — Automated Chargeback Remediation & Financial Indemnity
                   </h3>
                 </div>
-                <div className="bg-ink-900 border-hairline p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                <div className="bg-surface border-hairline p-4 max-h-36 overflow-y-auto text-xs text-muted leading-relaxed">
                   <p className="mb-3">
                     In the event that the retail channel issues an operational chargeback,
                     cost-deduction, or logistical penalty resulting from Supplier
@@ -726,7 +726,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     }
                     className="w-3.5 h-3.5 accent-brass-500"
                   />
-                  <label htmlFor="agreement-chargeback" className="text-ds-micro text-zinc-400 cursor-pointer select-none">
+                  <label htmlFor="agreement-chargeback" className="text-ds-micro text-muted cursor-pointer select-none">
                     I have read and agree to the Chargeback Remediation &amp; Financial Indemnity terms
                   </label>
                 </div>
@@ -744,7 +744,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 unsupported consequence claim (AV-003). The rule itself now comes from its
                 ONE owner (`PO_ACK_ONBOARDING_STATEMENT`).
               */}
-              <p className="text-xs text-zinc-500 mb-2">
+              <p className="text-xs text-muted mb-2">
                 Please review the following operational information. This is a required step —
                 pricing, packaging and the channel's purchase-order acknowledgement rule are
                 what a successful partnership is built on.

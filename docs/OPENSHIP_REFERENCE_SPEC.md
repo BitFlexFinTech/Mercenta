@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2401/92 ink=848/114 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=1832/69 ink=759/110 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -944,6 +944,19 @@ Every row below was measured in this repository this session.
 > became `soft` (the declared `--mr-text-soft` step); `brass-*` became `accent-*`. One
 > validator assertion was repointed (`validate-shared-surfaces` — the live-chat trigger's
 > text class), never weakened.
+>
+> **Re-measured again 2026-11-21 (§BATCH 6 — the signed-in brand portal):** grey moved
+> 2401 → **1832** sites across **69** files (−569) and ink 848 → **759** (−89), because all
+> 23 files in `src/components/brand/` were migrated onto the canonical ladder — **zero
+> legacy sites remain in that folder.** `zinc-*` became the declared text ladder;
+> `border-zinc-300` became `border-hairline-strong`; `bg-zinc-500/10` became `bg-tint`;
+> `brass-*` became `accent-*`; `bg-ink-*` became `bg-surface-*`. The shim generator's
+> resolver gained the rest of the text ladder (`strong` · `faint` · `soft` · `active`) —
+> without them an alpha utility such as `text-strong/90` would have gone dark, which the
+> generator REFUSES to allow. One stale e2e assertion was repointed: `uiux-redesign`
+> asserted five `homepage-*` test ids that are rendered NOWHERE in `src/`, while its own
+> comment claimed the list had already been updated (rule 10 — verified false, not
+> assumed); it now asserts the default design's real `<section aria-label="…">` anchors.
 >
 > **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
 > header's dropdown panel was the last site in that component still painted with the

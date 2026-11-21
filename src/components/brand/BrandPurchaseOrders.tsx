@@ -504,18 +504,18 @@ export function BrandPurchaseOrders() {
         description="Review, accept or reject purchase orders from the UK retail network"
         meta={
           <>{pendingPOs ? (
-            <span className="text-ds-label text-zinc-500" role="status" aria-live="polite">
+            <span className="text-ds-label text-muted" role="status" aria-live="polite">
               Loading your order queue…
             </span>
           ) : (
           <>
-            <span className="text-ds-label text-zinc-500">
-              Showing <span className="font-mono text-zinc-300">{filteredPos.length}</span> of{' '}
-              <span className="font-mono text-zinc-300">{pos.length}</span>
+            <span className="text-ds-label text-muted">
+              Showing <span className="font-mono text-strong">{filteredPos.length}</span> of{' '}
+              <span className="font-mono text-strong">{pos.length}</span>
             </span>
-            <span className="text-ds-label text-zinc-500">
+            <span className="text-ds-label text-muted">
               Queue value{' '}
-              <span className="font-mono text-zinc-300">
+              <span className="font-mono text-strong">
                 £{pos.reduce((sum, p) => sum + p.poValue, 0).toLocaleString()}
               </span>
             </span>
@@ -529,13 +529,13 @@ export function BrandPurchaseOrders() {
               onChange={(e) => setPoSearch(e.target.value)}
               placeholder="Search PO number…"
               aria-label="Search purchase orders"
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-3 py-1.5 text-xs text-strong w-52 focus:outline-none focus:border-brass-500/40"
+              className="bg-surface border border-hairline rounded-ds-sm px-3 py-1.5 text-xs text-strong w-52 focus:outline-none focus:border-accent-500/40"
             />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label="Filter by status"
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
+              className="bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong cursor-pointer"
             >
               <option value="all">Status: all</option>
               {PO_STATUS_ORDER.map((s) => (
@@ -543,7 +543,7 @@ export function BrandPurchaseOrders() {
               ))}
             </select>
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-faint sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -557,7 +557,7 @@ export function BrandPurchaseOrders() {
               />
               <Button
                 variant="ghost"
-                className="text-ds-label text-zinc-400 hover:text-strong"
+                className="text-ds-label text-muted hover:text-strong"
                 onClick={() =>
                   downloadCsv(
                     `mercenta-pos-${viewingBrandId_ ?? 'all'}.csv`,
@@ -681,7 +681,7 @@ export function BrandPurchaseOrders() {
                   onClick={() => setExpandedPO(expanded ? null : po.id)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-brass">{po.poNumber}</span>
+                    <span className="font-mono text-xs text-accent">{po.poNumber}</span>
                     <StatusBadge
                       className="text-ds-micro"
                       dataStatus={poStatusPresentation(po.status).dataStatus}
@@ -694,13 +694,13 @@ export function BrandPurchaseOrders() {
                         and does not change the DOM order of any existing button or
                         input (the E4 lesson). */}
                     {po.simulated === true && (
-                      <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+                      <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
                     )}
                   </div>
-                  <div className="font-mono text-ds-micro text-zinc-600 mt-1">
+                  <div className="font-mono text-ds-micro text-faint mt-1">
                     {orderDateLabel(po.orderDate)} · {po.lineItems.length} line item(s)
                     {po.freightTerm && (
-                      <span className="ml-2 text-zinc-500">
+                      <span className="ml-2 text-muted">
                         · {po.freightTerm === 'collect' ? 'Freight Collect' : 'Freight Prepaid'}
                         {po.freightTerm === 'collect' && po.shipWindowEnd
                           ? ` · Ship by ${new Date(po.shipWindowEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
@@ -814,7 +814,7 @@ export function BrandPurchaseOrders() {
                        */
                       <Button
                         variant="ghost"
-                        className="text-xs text-zinc-400 hover:text-strong"
+                        className="text-xs text-muted hover:text-strong"
                         data-testid={`po-packing-correction-${po.poNumber}`}
                         onClick={() => (correctionPO === po.id ? setCorrectionPO(null) : beginCorrection(po))}
                       >
@@ -826,7 +826,7 @@ export function BrandPurchaseOrders() {
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      className="text-xs text-zinc-400 hover:text-strong"
+                      className="text-xs text-muted hover:text-strong"
                       onClick={() =>
                         setContactingPO(
                           contactingPO?.id === po.id && contactingPO.mode === 'message'
@@ -839,7 +839,7 @@ export function BrandPurchaseOrders() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="text-xs text-zinc-400 hover:text-strong"
+                      className="text-xs text-muted hover:text-strong"
                       onClick={() =>
                         setContactingPO(
                           contactingPO?.id === po.id && contactingPO.mode === 'call'
@@ -889,7 +889,7 @@ export function BrandPurchaseOrders() {
                   §BATCH 2b (`AV-006`) — the same panel also serves an AMENDMENT
                   when the channel's update window is open. */}
               {ackingPO === po.id && (canAct || canAmend) && (
-                <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 space-y-3">
+                <div className="mt-3 bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 space-y-3">
                   <p className="text-ds-label text-state-success">
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
@@ -933,8 +933,8 @@ export function BrandPurchaseOrders() {
                     const backOrderAllowed = canBackOrderLine(li);
                     return (
                       <div key={li.sku} className="flex flex-wrap items-center gap-2 text-ds-label">
-                        <span className="font-mono text-zinc-300 w-20">{li.sku}</span>
-                        <span className="text-zinc-500 w-40 truncate">{li.productName}</span>
+                        <span className="font-mono text-strong w-20">{li.sku}</span>
+                        <span className="text-muted w-40 truncate">{li.productName}</span>
                         <select
                           value={a.ackStatus}
                           onChange={(e) =>
@@ -946,7 +946,7 @@ export function BrandPurchaseOrders() {
                               },
                             }))
                           }
-                          className="bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
+                          className="bg-surface border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
                           data-testid={`po-ack-status-${li.sku}`}
                           data-backorder-allowed={backOrderAllowed ? 'true' : 'false'}
                         >
@@ -956,14 +956,14 @@ export function BrandPurchaseOrders() {
                         </select>
                         {!backOrderAllowed && (
                           <span
-                            className="text-ds-micro text-zinc-500"
+                            className="text-ds-micro text-muted"
                             data-testid={`po-backorder-blocked-${li.sku}`}
                           >
                             {backOrderAvailabilityLabel(li)}
                           </span>
                         )}
                         {a.ackStatus !== 'rejected' && (
-                          <label className="text-zinc-500">
+                          <label className="text-muted">
                             Qty
                             <input
                               type="number"
@@ -976,14 +976,14 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], acknowledgedQty: Number(e.target.value) },
                                 }))
                               }
-                              className="w-16 ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
+                              className="w-16 ml-1 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                             <span className="ml-1">/ {li.quantity}</span>
                           </label>
                         )}
                         {/* §Batch-3 — unit price input for cost-price consistency check */}
                         {a.ackStatus !== 'rejected' && (
-                          <label className="text-zinc-500">
+                          <label className="text-muted">
                             Unit price £
                             <input
                               type="number"
@@ -996,12 +996,12 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], unitPrice: Number(e.target.value) },
                                 }))
                               }
-                              className="w-20 ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
+                              className="w-20 ml-1 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                           </label>
                         )}
                         {a.ackStatus === 'backordered' && (
-                          <label className="text-zinc-500">
+                          <label className="text-muted">
                             Ship by
                             <input
                               type="date"
@@ -1012,7 +1012,7 @@ export function BrandPurchaseOrders() {
                                   [li.sku]: { ...prev[li.sku], scheduledShipDate: e.target.value },
                                 }))
                               }
-                              className="ml-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
+                              className="ml-1 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                             />
                           </label>
                         )}
@@ -1025,7 +1025,7 @@ export function BrandPurchaseOrders() {
                                 [li.sku]: { ...prev[li.sku], rejectionCode: e.target.value },
                               }))
                             }
-                            className="bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
+                            className="bg-surface border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong"
                           >
                             <option value="">Rejection code…</option>
                             {PO_REJECTION_CODES.map((c) => (
@@ -1048,8 +1048,8 @@ export function BrandPurchaseOrders() {
                   <p className="text-ds-label text-state-danger font-medium">
                     Mercenta's draft — the rejection the retail channel requires
                   </p>
-                  <p className="text-ds-micro text-zinc-400">{onBehalfDraft.ruleText}</p>
-                  <p className="text-ds-micro text-zinc-400" data-testid={`po-onbehalf-draft-id-${po.poNumber}`}>
+                  <p className="text-ds-micro text-muted">{onBehalfDraft.ruleText}</p>
+                  <p className="text-ds-micro text-muted" data-testid={`po-onbehalf-draft-id-${po.poNumber}`}>
                     Draft <span className="font-mono">{onBehalfDraft.draftId}</span> · drafted by Mercenta
                     (automatic) for {brandLabel} · reason code{' '}
                     <span className="font-mono">{onBehalfDraft.rejectionCode}</span>
@@ -1060,14 +1060,14 @@ export function BrandPurchaseOrders() {
                       ? ` · on-behalf stage ${new Date(onBehalfDraft.autoRejectAt).toLocaleString('en-GB')}`
                       : ''}
                   </p>
-                  <p className="text-ds-micro text-amber-300" data-testid={`po-onbehalf-state-${po.poNumber}`}>
+                  <p className="text-ds-micro text-state-warning" data-testid={`po-onbehalf-state-${po.poNumber}`}>
                     {onBehalfDraft.brandMayStillDecide
                       ? 'You may still decide for yourself inside the 24-hour window — approving lets Mercenta perform the required rejection for you.'
                       : 'The 24-hour window has closed: the documented action past the limit is a rejection, and an acceptance is refused.'}
                   </p>
                   <ul className="space-y-0.5">
                     {onBehalfDraft.lines.map((l) => (
-                      <li key={l.sku} className="text-ds-micro text-zinc-300 font-mono">
+                      <li key={l.sku} className="text-ds-micro text-strong font-mono">
                         {l.sku} · {l.productName} · reject {l.quantity} @ £{l.unitPrice} · {l.rejectionCode}
                       </li>
                     ))}
@@ -1086,7 +1086,7 @@ export function BrandPurchaseOrders() {
               {/* §P13 / S4 — the recorded draft and the brand's approval of it */}
               {po.onBehalfDraft?.approvedAt && (
                 <p
-                  className="mt-2 text-ds-micro text-zinc-500"
+                  className="mt-2 text-ds-micro text-muted"
                   data-testid={`po-onbehalf-approved-${po.poNumber}`}
                 >
                   On-behalf rejection draft <span className="font-mono">{po.onBehalfDraft.id}</span> approved by{' '}
@@ -1113,12 +1113,12 @@ export function BrandPurchaseOrders() {
                     <p className="text-ds-label text-state-info font-medium">
                       Mercenta channel action — you are not required to file anything
                     </p>
-                    <p className="text-ds-micro text-zinc-400">
+                    <p className="text-ds-micro text-muted">
                       Your decision was issued to Mercenta as an instruction. Mercenta submits the
                       acknowledgement, raises the routing request and files the ASN on your behalf.
                     </p>
                     {instruction.state === 'pending_mercenta_action' && (
-                      <p className="text-ds-micro text-amber-300" data-testid={`po-mercenta-pending-${po.poNumber}`}>
+                      <p className="text-ds-micro text-state-warning" data-testid={`po-mercenta-pending-${po.poNumber}`}>
                         Pending — Mercenta is submitting the acknowledgement to the retail channel.
                       </p>
                     )}
@@ -1129,21 +1129,21 @@ export function BrandPurchaseOrders() {
                       </p>
                     )}
                     {o?.channelAcknowledgement?.ok && (
-                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-ack-${po.poNumber}`}>
+                      <p className="text-ds-micro text-strong" data-testid={`po-mercenta-ack-${po.poNumber}`}>
                         Acknowledgement transmitted by Mercenta — {o.channelAcknowledgement.acknowledgementId} ·{' '}
                         {o.channelAcknowledgement.status}
                         {o.channelAcknowledgement.mode === 'mock' ? ' · simulated (no live channel call)' : ''}
                       </p>
                     )}
                     {o?.routingRequest && (
-                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-routing-${po.poNumber}`}>
+                      <p className="text-ds-micro text-strong" data-testid={`po-mercenta-routing-${po.poNumber}`}>
                         {o.routingRequest.raised
                           ? `Routing request raised by Mercenta — ${o.routingRequest.reference} · ${routingCarrierLabel(o.routingRequest)}`
                           : `Routing request not applicable — ${o.routingRequest.reference}`}
                       </p>
                     )}
                     {o?.asn && (
-                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-asn-${po.poNumber}`}>
+                      <p className="text-ds-micro text-strong" data-testid={`po-mercenta-asn-${po.poNumber}`}>
                         {o.asn.filed
                           ? `ASN filed by Mercenta — ${o.asn.reference}${o.asn.shipmentId ? ` · consignment ${o.asn.shipmentId}` : ''}`
                           : `ASN — ${o.asn.note ?? 'not filed'}`}
@@ -1151,7 +1151,7 @@ export function BrandPurchaseOrders() {
                     )}
                     {/* The brand's packing correction is a separate instruction with its own action. */}
                     {correction && correction !== instruction && (
-                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-correction-${po.poNumber}`}>
+                      <p className="text-ds-micro text-strong" data-testid={`po-mercenta-correction-${po.poNumber}`}>
                         {correctionOutcome?.asn?.filed
                           ? `Packing correction recorded — Mercenta filed the ASN from it (${correctionOutcome.asn.reference}).`
                           : correctionOutcome?.refusedReason
@@ -1176,7 +1176,7 @@ export function BrandPurchaseOrders() {
                   </p>
                   <table className="w-full text-ds-label">
                     <thead>
-                      <tr className="text-zinc-500">
+                      <tr className="text-muted">
                         <th className="text-left py-1">SKU</th>
                         <th className="text-right py-1">Acknowledged</th>
                         <th className="text-right py-1">Packed qty</th>
@@ -1187,8 +1187,8 @@ export function BrandPurchaseOrders() {
                         .filter((l) => l.ackStatus !== 'rejected')
                         .map((l) => (
                           <tr key={l.sku}>
-                            <td className="py-1 font-mono text-zinc-400">{l.sku}</td>
-                            <td className="py-1 text-right font-mono text-zinc-400">
+                            <td className="py-1 font-mono text-muted">{l.sku}</td>
+                            <td className="py-1 text-right font-mono text-muted">
                               {l.acknowledgedQty ?? l.quantity}
                             </td>
                             <td className="py-1 text-right">
@@ -1200,19 +1200,19 @@ export function BrandPurchaseOrders() {
                                 onChange={(e) =>
                                   setCorrectionCartons((prev) => ({ ...prev, [l.sku]: Number(e.target.value) }))
                                 }
-                                className="w-20 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong text-right"
+                                className="w-20 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-strong text-right"
                               />
                             </td>
                           </tr>
                         ))}
                     </tbody>
                   </table>
-                  <label className="block text-ds-label text-zinc-500">
+                  <label className="block text-ds-label text-muted">
                     Note for Mercenta (optional)
                     <input
                       value={correctionNote}
                       onChange={(e) => setCorrectionNote(e.target.value)}
-                      className="block w-full mt-0.5 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-strong"
+                      className="block w-full mt-0.5 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-strong"
                     />
                   </label>
                   {/* §P4 — Mercenta's routing status (read-only; the brand files nothing). */}
@@ -1232,7 +1232,7 @@ export function BrandPurchaseOrders() {
                     <Button className="text-xs" onClick={() => submitCorrection(po)}>
                       Send packing correction to Mercenta
                     </Button>
-                    <Button variant="ghost" className="text-xs text-zinc-500" onClick={() => setCorrectionPO(null)}>
+                    <Button variant="ghost" className="text-xs text-muted" onClick={() => setCorrectionPO(null)}>
                       Close
                     </Button>
                   </div>
@@ -1244,7 +1244,7 @@ export function BrandPurchaseOrders() {
                 <div className="mt-4 pt-3 border-t border-hairline space-y-3">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-zinc-600">
+                      <tr className="text-faint">
                         <th className="text-left py-1">SKU</th>
                         <th className="text-left py-1">Product</th>
                         <th className="text-right py-1">Qty</th>
@@ -1255,8 +1255,8 @@ export function BrandPurchaseOrders() {
                     <tbody>
                       {po.lineItems.map((li) => (
                         <tr key={li.sku}>
-                          <td className="py-1 font-mono text-zinc-400">{li.sku}</td>
-                          <td className="py-1 text-zinc-300">{li.productName}</td>
+                          <td className="py-1 font-mono text-muted">{li.sku}</td>
+                          <td className="py-1 text-strong">{li.productName}</td>
                           <td className="py-1 text-right font-mono">{li.quantity}</td>
                           <td className="py-1 text-right font-mono">£{li.unitPrice}</td>
                           <td className="py-1 text-right font-mono">
@@ -1272,16 +1272,16 @@ export function BrandPurchaseOrders() {
                       once the date passed — a consequence no channel source
                       states. That announcement is removed. */}
                   {po.lineItems.some((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline) && (
-                    <div className="border border-amber-500/20 bg-amber-500/5 rounded-ds-md p-2">
-                      <p className="text-ds-micro font-medium text-amber-300 mb-1">{BACKORDER_RESTOCK_TARGET.heading}</p>
+                    <div className="border border-state-warning/20 bg-amber-500/5 rounded-ds-md p-2">
+                      <p className="text-ds-micro font-medium text-state-warning mb-1">{BACKORDER_RESTOCK_TARGET.heading}</p>
                       <div className="space-y-1">
                         {po.lineItems.filter((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline).map((l) => {
                           const deadline = new Date(l.backorderRestockDeadline + 'T00:00:00Z');
                           const daysLeft = Math.ceil((deadline.getTime() - Date.now()) / 86400000);
                           return (
                             <div key={l.sku} className="flex items-center justify-between text-ds-micro">
-                              <span className="font-mono text-zinc-400">{l.sku}</span>
-                              <span className={daysLeft <= 0 ? 'text-red-400 font-medium' : daysLeft <= 7 ? 'text-amber-400' : 'text-zinc-500'}>
+                              <span className="font-mono text-muted">{l.sku}</span>
+                              <span className={daysLeft <= 0 ? 'text-red-400 font-medium' : daysLeft <= 7 ? 'text-state-warning' : 'text-muted'}>
                                 {daysLeft <= 0
                                   ? BACKORDER_RESTOCK_TARGET.overdueLabel
                                   : daysLeft + " day(s) to Mercenta's restock target (" + new Date(l.backorderRestockDeadline as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')'
@@ -1291,17 +1291,17 @@ export function BrandPurchaseOrders() {
                           );
                         })}
                       </div>
-                      <p className="text-ds-micro text-zinc-600 mt-1">{BACKORDER_RESTOCK_TARGET.attributionNote}</p>
+                      <p className="text-ds-micro text-faint mt-1">{BACKORDER_RESTOCK_TARGET.attributionNote}</p>
                     </div>
                   )}
 
                   {/* §Batch-3 — Acknowledgment history per line */}
                   {po.lineItems.some((l) => l.ackHistory && l.ackHistory.length > 0) && (
                     <div className="border border-hairline rounded-ds-md p-2">
-                      <p className="text-ds-micro font-medium text-zinc-500 mb-1">Acknowledgment History</p>
+                      <p className="text-ds-micro font-medium text-muted mb-1">Acknowledgment History</p>
                       <table className="w-full text-ds-micro">
                         <thead>
-                          <tr className="text-zinc-600">
+                          <tr className="text-faint">
                             <th className="text-left py-0.5">SKU</th>
                             <th className="text-center py-0.5">Date</th>
                             <th className="text-center py-0.5">Status</th>
@@ -1316,8 +1316,8 @@ export function BrandPurchaseOrders() {
                             .flatMap((l) =>
                               l.ackHistory!.map((h) => (
                                 <tr key={`${l.sku}-${h.acknowledgedAt}`}>
-                                  <td className="py-0.5 font-mono text-zinc-400">{l.sku}</td>
-                                  <td className="py-0.5 text-center text-zinc-500">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
+                                  <td className="py-0.5 font-mono text-muted">{l.sku}</td>
+                                  <td className="py-0.5 text-center text-muted">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
                                   <td className="py-0.5 text-center">
                                     <StatusBadge
                                       className="text-ds-micro"
@@ -1327,9 +1327,9 @@ export function BrandPurchaseOrders() {
                                       {ackStatusPresentation(h.ackStatus).label}
                                     </StatusBadge>
                                   </td>
-                                  <td className="py-0.5 text-right font-mono text-zinc-400">{h.acknowledgedQty}</td>
-                                  <td className="py-0.5 text-right font-mono text-zinc-400">£{h.unitPrice.toFixed(2)}</td>
-                                  <td className="py-0.5 text-zinc-500">{h.rejectionCode ?? '—'}</td>
+                                  <td className="py-0.5 text-right font-mono text-muted">{h.acknowledgedQty}</td>
+                                  <td className="py-0.5 text-right font-mono text-muted">£{h.unitPrice.toFixed(2)}</td>
+                                  <td className="py-0.5 text-muted">{h.rejectionCode ?? '—'}</td>
                                 </tr>
                               ))
                             )}
@@ -1339,7 +1339,7 @@ export function BrandPurchaseOrders() {
                   )}
 
                   {isFinanced && (po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-ds-label text-state-success flex items-start gap-2">
+                    <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 text-ds-label text-state-success flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         Accepted — Mercenta is handling fulfilment and financing for this
@@ -1366,7 +1366,7 @@ export function BrandPurchaseOrders() {
         })}
         {!pendingPOs && filteredPos.length === 0 && (
           <Card className="p-8 text-center">
-            <p className="text-xs text-zinc-600">No purchase orders for this brand yet.</p>
+            <p className="text-xs text-faint">No purchase orders for this brand yet.</p>
           </Card>
         )}
       </div>
@@ -1389,7 +1389,7 @@ export function BrandPurchaseOrders() {
         footer={
           previewRecord ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-micro text-zinc-600">
+              <span className="text-ds-micro text-faint">
                 {previewRecord.simulated === true
                   ? 'Operational simulation record'
                   : 'Recorded purchase order'}
@@ -1491,7 +1491,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
       )}
       {latest?.reviewReason && (
         <p
-          className="mt-1.5 text-ds-micro text-amber-300"
+          className="mt-1.5 text-ds-micro text-state-warning"
           data-testid={`po-revision-review-${po.poNumber}`}
         >
           {latest.reviewReason}
@@ -1499,7 +1499,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
       )}
       {state.acknowledgementStale && (
         <p
-          className="mt-1.5 text-ds-micro text-amber-300"
+          className="mt-1.5 text-ds-micro text-state-warning"
           data-testid={`po-revision-stale-${po.poNumber}`}
         >
           Your acknowledgement answers an earlier version of this order, so it must be updated
@@ -1531,7 +1531,7 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
   if (divergences.length === 0) return null;
   return (
     <div
-      className="mt-3 rounded-ds-md border border-amber-500/20 bg-amber-500/10 p-3"
+      className="mt-3 rounded-ds-md border border-state-warning/20 bg-amber-500/10 p-3"
       data-testid={`ack-price-notice-${po.poNumber}`}
     >
       <p className="text-ds-label text-state-warning">{ACK_PRICE_DISCREPANCY_TITLE}</p>
@@ -1564,15 +1564,15 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
     <div
       className={cn(
         'mt-3 rounded-ds-md border p-3',
-        duty.held ? 'border-amber-500/20 bg-amber-500/10' : 'border-hairline bg-tint'
+        duty.held ? 'border-state-warning/20 bg-amber-500/10' : 'border-hairline bg-tint'
       )}
       data-testid={`po-channel-hold-${po.poNumber}`}
     >
-      <p className={cn('text-ds-label', duty.held ? 'text-state-warning' : 'text-zinc-300')}>
+      <p className={cn('text-ds-label', duty.held ? 'text-state-warning' : 'text-strong')}>
         {duty.held ? 'Retail channel hold: this order is on hold' : 'Retail channel hold lifted'}
       </p>
-      <p className="mt-1.5 text-ds-micro text-zinc-300/90">{duty.statement}</p>
-      <p className="mt-1.5 text-ds-micro text-zinc-500">{duty.ruleText}</p>
+      <p className="mt-1.5 text-ds-micro text-strong/90">{duty.statement}</p>
+      <p className="mt-1.5 text-ds-micro text-muted">{duty.ruleText}</p>
     </div>
   );
 }
@@ -1590,7 +1590,7 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
   if (lines.length === 0) return null;
   return (
     <div
-      className="mt-3 rounded-ds-md border border-amber-500/20 bg-amber-500/10 p-3"
+      className="mt-3 rounded-ds-md border border-state-warning/20 bg-amber-500/10 p-3"
       data-testid={`po-implicit-rejections-${po.poNumber}`}
     >
       <p className="text-ds-label text-state-warning">
@@ -1631,11 +1631,11 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
       data-testid={`po-on-behalf-authorisation-${po.poNumber}`}
       data-authorisation-state={authority.state}
     >
-      <p className="text-ds-label text-zinc-300">
+      <p className="text-ds-label text-strong">
         Mercenta deciding this order for you: {authority.stateLabel}
       </p>
-      <p className="mt-1 text-ds-micro leading-snug text-zinc-500">{authority.statement}</p>
-      <p className="mt-1 text-ds-micro leading-snug text-zinc-500">{authority.ruleText}</p>
+      <p className="mt-1 text-ds-micro leading-snug text-muted">{authority.statement}</p>
+      <p className="mt-1 text-ds-micro leading-snug text-muted">{authority.ruleText}</p>
       {authority.state !== 'granted' && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <input
@@ -1643,7 +1643,7 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
             onChange={(e) => setNote(e.target.value)}
             placeholder="Say what Mercenta may do (your own words)"
             aria-label="What Mercenta may do on your behalf, in your own words"
-            className="min-w-[16rem] flex-1 rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1 text-ds-micro text-strong"
+            className="min-w-[16rem] flex-1 rounded-ds-sm border border-hairline bg-surface px-2 py-1 text-ds-micro text-strong"
             data-testid={`po-on-behalf-note-${po.poNumber}`}
           />
           <Button
@@ -1685,7 +1685,7 @@ function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor:
         </Button>
       )}
       {notice && (
-        <p className="mt-1.5 text-ds-micro text-brass-300" data-testid={`po-on-behalf-notice-${po.poNumber}`}>
+        <p className="mt-1.5 text-ds-micro text-accent-300" data-testid={`po-on-behalf-notice-${po.poNumber}`}>
           {notice}
         </p>
       )}
@@ -1738,7 +1738,7 @@ function SubmitCompletenessNotice({
   );
   return (
     <p
-      className={`text-ds-micro ${verdict.statement ? 'text-state-warning/80' : 'text-zinc-400'}`}
+      className={`text-ds-micro ${verdict.statement ? 'text-state-warning/80' : 'text-muted'}`}
       data-testid={`po-submit-completeness-${po.poNumber}`}
       data-completeness={verdict.complete ? 'complete' : 'incomplete'}
     >
@@ -1797,7 +1797,7 @@ function BrandPoPreviewBody({
           {status.label}
         </StatusBadge>
         {po.simulated === true && (
-          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+          <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
         )}
         {ackBadge && (
           <span title={ackWindow.reason}>
@@ -1847,20 +1847,20 @@ function BrandPoPreviewBody({
 
       {po.rejectionReason && (
         <section aria-label="Rejection reason">
-          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Rejection reason
           </h3>
-          <p className="text-ds-label leading-snug text-zinc-400">{po.rejectionReason}</p>
+          <p className="text-ds-label leading-snug text-muted">{po.rejectionReason}</p>
         </section>
       )}
 
       <section aria-label="Lines">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Lines
         </h3>
         <div className="overflow-hidden rounded-ds-md border border-hairline">
           <table className="w-full text-left text-ds-label">
-            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-zinc-500">
+            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-muted">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -1874,10 +1874,10 @@ function BrandPoPreviewBody({
                 const ack = ackStatusPresentation(line.ackStatus);
                 return (
                   <tr key={line.sku}>
-                    <td className="px-2 py-1.5 font-mono text-zinc-400">{line.sku}</td>
-                    <td className="px-2 py-1.5 text-zinc-200">{line.productName}</td>
-                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.quantity}</td>
-                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.unitPrice.toFixed(2)}</td>
+                    <td className="px-2 py-1.5 font-mono text-muted">{line.sku}</td>
+                    <td className="px-2 py-1.5 text-strong">{line.productName}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-strong">{line.quantity}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-strong">{line.unitPrice.toFixed(2)}</td>
                     <td className="px-2 py-1.5">
                       <StatusBadge className="text-ds-micro" dataStatus={ack.dataStatus} tone={ack.tone}>
                         {ack.label}

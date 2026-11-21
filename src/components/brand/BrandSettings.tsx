@@ -85,34 +85,34 @@ function CommercialRelationshipSection({ brandId }: { brandId: string }) {
             <Badge className={cn(
               'text-ds-micro',
               model === 'commission_agent'
-                ? 'bg-emerald-500/15 text-emerald-300'
-                : 'bg-blue-500/15 text-blue-300'
+                ? 'bg-state-success/10 text-state-success'
+                : 'bg-state-info/10 text-state-info'
             )}>
               {COMMERCIAL_MODELS[model].label}
             </Badge>
-            {record && <span className="text-ds-micro text-zinc-600">recorded {record.recordedAt.slice(0, 10)}</span>}
+            {record && <span className="text-ds-micro text-faint">recorded {record.recordedAt.slice(0, 10)}</span>}
           </div>
-          <p className="text-xs text-zinc-400 mb-3">{COMMERCIAL_MODELS[model].summary}</p>
+          <p className="text-xs text-muted mb-3">{COMMERCIAL_MODELS[model].summary}</p>
           <dl className="space-y-1 text-ds-label font-mono">
             {model === 'commission_agent' ? (
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Mercenta commission</dt>
-                <dd className="text-zinc-300">{record?.commissionRatePct ?? 0}% of the retail-channel value</dd>
+                <dt className="text-muted">Mercenta commission</dt>
+                <dd className="text-strong">{record?.commissionRatePct ?? 0}% of the retail-channel value</dd>
               </div>
             ) : (
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Brand share of retail-channel revenue</dt>
-                <dd className="text-zinc-300">{record?.brandAcquisitionSharePct ?? 0}%</dd>
+                <dt className="text-muted">Brand share of retail-channel revenue</dt>
+                <dd className="text-strong">{record?.brandAcquisitionSharePct ?? 0}%</dd>
               </div>
             )}
           </dl>
         </>
       ) : (
-        <p className="text-xs text-amber-300" data-testid="brand-commercial-not-selected">
+        <p className="text-xs text-state-warning" data-testid="brand-commercial-not-selected">
           {COMMERCIAL_MODEL_NOT_SELECTED_LABEL} — contact your Mercenta account manager.
         </p>
       )}
-      <p className="text-ds-micro text-zinc-600 mt-3">
+      <p className="text-ds-micro text-faint mt-3">
         This commercial agreement is private between your brand and Mercenta. It is separate from —
         and can never change, waive or replace — the retail-channel compliance documentation your
         products require. Changes are made by Mercenta and recorded in the audit trail.
@@ -128,7 +128,7 @@ function BankSection({ brandId }: { brandId: string }) {
   const [note, setNote] = useState<string | null>(null);
   const [_version, setVersion] = useState(0);
 
-  if (!bankInfo) return <p className="text-xs text-zinc-600">Banking details not configured.</p>;
+  if (!bankInfo) return <p className="text-xs text-faint">Banking details not configured.</p>;
 
   const fields: { key: keyof BrandBankInfo; label: string; value: string }[] = [
     { key: 'accountHolderName', label: 'Account Holder', value: bankInfo.accountHolderName },
@@ -156,20 +156,20 @@ function BankSection({ brandId }: { brandId: string }) {
     <Card title={`Bank Information — ${bankInfo.currency}`}>
       <div className="space-y-2">
         {bankInfo.status === 'pending_approval' && bankInfo.requestedChange && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2 text-ds-label text-amber-300 mb-2">
+          <div className="bg-amber-500/10 border border-state-warning/20 rounded-ds-md p-2 text-ds-label text-state-warning mb-2">
             Pending approval: {bankInfo.requestedChange.field} → {bankInfo.requestedChange.requestedValue}
           </div>
         )}
         {fields.map(({ key, label, value }) => (
           <div key={key} className="flex items-center gap-2 border-b border-hairline pb-2">
-            <span className="text-ds-label text-zinc-500 w-28 flex-shrink-0">{label}</span>
-            <span className="text-ds-label text-zinc-300 font-mono flex-1">{value || '—'}</span>
+            <span className="text-ds-label text-muted w-28 flex-shrink-0">{label}</span>
+            <span className="text-ds-label text-strong font-mono flex-1">{value || '—'}</span>
             <input
               value={requested[key] ?? ''}
               onChange={(e) => updateField(key, e.target.value)}
               placeholder="New value..."
               aria-label={`New value for ${label}`}
-              className="w-28 bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-0.5 text-ds-micro text-zinc-300"
+              className="w-28 bg-surface border border-hairline rounded-ds-sm px-1.5 py-0.5 text-ds-micro text-strong"
             />
           </div>
         ))}
@@ -178,7 +178,7 @@ function BankSection({ brandId }: { brandId: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for change..."
-            className="flex-1 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro"
+            className="flex-1 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro"
           />
           <Button className="text-ds-micro" onClick={() => {
             const active = fields.find((f) => requested[f.key]?.trim());
@@ -187,7 +187,7 @@ function BankSection({ brandId }: { brandId: string }) {
             Submit Change
           </Button>
         </div>
-        {note && <p className="text-ds-micro text-zinc-500">{note}</p>}
+        {note && <p className="text-ds-micro text-muted">{note}</p>}
       </div>
     </Card>
   );
@@ -210,18 +210,18 @@ function LoginSection() {
         are replaced by the plain fact. `npm run validate:ui-wiring` fails if a
         control labelled "Change Password" or "Enable 2FA" ever returns.
       */}
-      <div className="space-y-3 text-xs text-zinc-300">
+      <div className="space-y-3 text-xs text-strong">
         <div className="flex items-center justify-between border-b border-hairline pb-2">
           <span>Sign-in method</span>
-          <span className="text-ds-micro text-zinc-500">Role-based — no Mercenta password to change</span>
+          <span className="text-ds-micro text-muted">Role-based — no Mercenta password to change</span>
         </div>
         <div className="flex items-center justify-between border-b border-hairline pb-2">
           <span>Two-factor authentication</span>
-          <span className="text-ds-micro text-zinc-500">Not offered — contacts use their own provider’s 2FA</span>
+          <span className="text-ds-micro text-muted">Not offered — contacts use their own provider’s 2FA</span>
         </div>
         <div className="flex items-center justify-between pb-2">
           <span>Active sessions</span>
-          <span className="text-ds-micro text-zinc-500">1 active session</span>
+          <span className="text-ds-micro text-muted">1 active session</span>
         </div>
       </div>
     </Card>
@@ -251,9 +251,9 @@ function PermissionsSection({ brandId }: { brandId: string }) {
   };
 
   const ROLE_BADGE: Record<BrandPermissionRole, string> = {
-    Owner: 'bg-brass-500/15 text-brass-300 border-brass-500/20',
-    Shipping: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-    Accounts: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+    Owner: 'bg-accent-500/15 text-accent-300 border-accent-500/20',
+    Shipping: 'bg-state-info/10 text-state-info border-blue-500/20',
+    Accounts: 'bg-state-success/10 text-state-success border-state-success/20',
     Compliance: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   };
 
@@ -263,26 +263,26 @@ function PermissionsSection({ brandId }: { brandId: string }) {
         {members.map((m) => (
           <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-hairline">
             <div>
-              <span className="text-xs text-zinc-300">{m.name}</span>
-              <span className="text-ds-micro text-zinc-600 ml-2">{m.email}</span>
+              <span className="text-xs text-strong">{m.name}</span>
+              <span className="text-ds-micro text-faint ml-2">{m.email}</span>
             </div>
             <div className="flex items-center gap-2">
               <Badge className={cn('text-ds-micro', ROLE_BADGE[m.role])}>{m.role}</Badge>
-              {!m.active && <Badge className="text-ds-micro bg-zinc-500/10 text-zinc-400">Inactive</Badge>}
-              <button onClick={() => { removeTeamMember(m.id); setVersion((v) => v + 1); }} className="text-zinc-600 hover:text-red-400">
+              {!m.active && <Badge className="text-ds-micro bg-tint text-muted">Inactive</Badge>}
+              <button onClick={() => { removeTeamMember(m.id); setVersion((v) => v + 1); }} className="text-faint hover:text-red-400">
                 <Trash2 className="w-3 h-3" />
               </button>
             </div>
           </div>
         ))}
-        {members.length === 0 && <p className="text-xs text-zinc-600 py-2">No team members invited yet.</p>}
+        {members.length === 0 && <p className="text-xs text-faint py-2">No team members invited yet.</p>}
       </div>
       {showInvite ? (
         <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <Input label="Name" value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} />
           <Input label="Email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} />
           <select value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value as BrandPermissionRole })}
-            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-zinc-300">
+            className="w-full bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong">
             <option value="Owner">Owner</option><option value="Shipping">Shipping</option><option value="Accounts">Accounts</option><option value="Compliance">Compliance</option>
           </select>
           <div className="flex gap-2">
@@ -315,12 +315,12 @@ function OutagesSection({ brandId }: { brandId: string }) {
 
   return (
     <Card title="Purchase Order Outages">
-      <p className="text-ds-micro text-zinc-600 mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
+      <p className="text-ds-micro text-faint mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
       {outages.map((o) => (
         <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-hairline">
           <div>
-            <span className="text-ds-label text-zinc-300">{o.startDate} → {o.endDate}</span>
-            <p className="text-ds-micro text-zinc-500">{o.reason}</p>
+            <span className="text-ds-label text-strong">{o.startDate} → {o.endDate}</span>
+            <p className="text-ds-micro text-muted">{o.reason}</p>
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge
@@ -331,12 +331,12 @@ function OutagesSection({ brandId }: { brandId: string }) {
               {poOutageStatusPresentation(o.status).label}
             </StatusBadge>
             {o.status === 'active' && (
-              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-ds-micro text-zinc-500 hover:text-red-400">Cancel</button>
+              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-red-400">Cancel</button>
             )}
           </div>
         </div>
       ))}
-      {outages.length === 0 && <p className="text-xs text-zinc-600 py-2">No outages declared.</p>}
+      {outages.length === 0 && <p className="text-xs text-faint py-2">No outages declared.</p>}
       {showNew ? (
         <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <div className="grid grid-cols-2 gap-2">
@@ -385,19 +385,19 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
       {addrs.map((a) => (
         <div key={a.id} className="py-2 border-b border-hairline">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-zinc-300 font-medium">{a.label}</span>
-            {a.isDefault && <Badge className="text-ds-micro bg-brass-500/15 text-brass-300">Default</Badge>}
+            <span className="text-xs text-strong font-medium">{a.label}</span>
+            {a.isDefault && <Badge className="text-ds-micro bg-accent-500/15 text-accent-300">Default</Badge>}
           </div>
-          <p className="text-ds-micro text-zinc-500">{a.companyName}</p>
-          <p className="text-ds-micro text-zinc-500">{a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ''}</p>
-          <p className="text-ds-micro text-zinc-500">{a.city}, {a.postalCode}, {a.country}</p>
+          <p className="text-ds-micro text-muted">{a.companyName}</p>
+          <p className="text-ds-micro text-muted">{a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ''}</p>
+          <p className="text-ds-micro text-muted">{a.city}, {a.postalCode}, {a.country}</p>
           <div className="flex items-center gap-2 mt-1">
-            {!a.isDefault && <button onClick={() => setDefault(a.id)} className="text-ds-micro text-zinc-500 hover:text-brass-400">Set default</button>}
-            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-ds-micro text-zinc-500 hover:text-red-400">Remove</button>
+            {!a.isDefault && <button onClick={() => setDefault(a.id)} className="text-ds-micro text-muted hover:text-accent-400">Set default</button>}
+            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-red-400">Remove</button>
           </div>
         </div>
       ))}
-      {addrs.length === 0 && <p className="text-xs text-zinc-600 py-2">No return addresses configured.</p>}
+      {addrs.length === 0 && <p className="text-xs text-faint py-2">No return addresses configured.</p>}
       {showNew ? (
         <div className="mt-3 space-y-2 border-t border-hairline pt-3">
           <Input label="Label" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="UK Returns — Standard" />
@@ -433,10 +433,10 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
 
   return (
     <Card title="Compliance Reference">
-      <p className="text-ds-micro text-zinc-600 mb-3">View-only reference to your compliance documents. Manage documents through the Compliance hub.</p>
+      <p className="text-ds-micro text-faint mb-3">View-only reference to your compliance documents. Manage documents through the Compliance hub.</p>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-hairline text-xs text-zinc-500">
+          <tr className="border-b border-hairline text-xs text-muted">
             <th className="text-left font-medium px-2 py-2">Document Type</th>
             <th className="text-left font-medium px-2 py-2">Status</th>
             <th className="text-right font-medium px-2 py-2">Uploaded</th>
@@ -445,7 +445,7 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
         <tbody className="divide-y divide-hairline-06">
           {docs.map((d) => (
             <tr key={d.id}>
-              <td className="px-2 py-1.5 text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</td>
+              <td className="px-2 py-1.5 text-xs text-strong capitalize">{d.type.replace(/_/g, ' ')}</td>
               <td className="px-2 py-1.5">
                 <StatusBadge
                   className="text-ds-micro"
@@ -455,10 +455,10 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
                   {complianceDocStatusPresentation(d.status).label}
                 </StatusBadge>
               </td>
-              <td className="px-2 py-1.5 text-xs text-zinc-600 text-right">{d.expiryDate?.slice(0, 10) || '—'}</td>
+              <td className="px-2 py-1.5 text-xs text-faint text-right">{d.expiryDate?.slice(0, 10) || '—'}</td>
             </tr>
           ))}
-          {docs.length === 0 && <tr><td colSpan={3} className="px-2 py-3 text-xs text-zinc-600">No compliance documents filed.</td></tr>}
+          {docs.length === 0 && <tr><td colSpan={3} className="px-2 py-3 text-xs text-faint">No compliance documents filed.</td></tr>}
         </tbody>
       </table>
     </Card>
@@ -496,20 +496,20 @@ function NotificationsSection({ brandId }: { brandId: string }) {
 
   return (
     <Card title="Notification Preferences">
-      <p className="text-ds-micro text-zinc-600 mb-3">Choose which events you want to be notified about and through which channels.</p>
+      <p className="text-ds-micro text-faint mb-3">Choose which events you want to be notified about and through which channels.</p>
       {prefs.map((p) => (
         <div key={p.id} className="flex items-center justify-between py-2 border-b border-hairline">
           <div className="flex-1">
-            <span className={cn('text-xs', p.enabled ? 'text-zinc-300' : 'text-zinc-600')}>{EVENT_LABELS[p.eventType]}</span>
+            <span className={cn('text-xs', p.enabled ? 'text-strong' : 'text-faint')}>{EVENT_LABELS[p.eventType]}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => toggleChannel(p, 'email')} className={cn('p-1 rounded-ds-sm', p.channels.includes('email') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
+            <button onClick={() => toggleChannel(p, 'email')} className={cn('p-1 rounded-ds-sm', p.channels.includes('email') ? 'text-accent-400 bg-accent-500/10' : 'text-faint')}>
               <Mail className="w-3 h-3" />
             </button>
-            <button onClick={() => toggleChannel(p, 'in_app')} className={cn('p-1 rounded-ds-sm', p.channels.includes('in_app') ? 'text-brass-400 bg-brass-500/10' : 'text-zinc-600')}>
+            <button onClick={() => toggleChannel(p, 'in_app')} className={cn('p-1 rounded-ds-sm', p.channels.includes('in_app') ? 'text-accent-400 bg-accent-500/10' : 'text-faint')}>
               <Bell className="w-3 h-3" />
             </button>
-            <button onClick={() => toggleEnabled(p)} className={cn('p-1 rounded-ds-sm', p.enabled ? 'text-emerald-400' : 'text-zinc-600')}>
+            <button onClick={() => toggleEnabled(p)} className={cn('p-1 rounded-ds-sm', p.enabled ? 'text-state-success' : 'text-faint')}>
               {p.enabled ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
             </button>
           </div>
@@ -531,12 +531,12 @@ function ContactsSection({ brandId: _brandId }: { brandId: string }) {
 
   return (
     <Card title="Contacts">
-      <p className="text-ds-micro text-zinc-600 mb-3">Your primary contact information — shared with Mercenta for operational comms.</p>
+      <p className="text-ds-micro text-faint mb-3">Your primary contact information — shared with Mercenta for operational comms.</p>
       {!edit ? (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Signatory:</span><span className="text-zinc-300">{brandProfile.signatory || '—'}</span></div>
-          <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Email:</span><span className="text-zinc-300">{brandProfile.email || '—'}</span></div>
-          <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Phone:</span><span className="text-zinc-300">{brandProfile.phone || '—'}</span></div>
+          <div className="flex items-center gap-2 text-xs"><span className="text-muted w-20">Signatory:</span><span className="text-strong">{brandProfile.signatory || '—'}</span></div>
+          <div className="flex items-center gap-2 text-xs"><span className="text-muted w-20">Email:</span><span className="text-strong">{brandProfile.email || '—'}</span></div>
+          <div className="flex items-center gap-2 text-xs"><span className="text-muted w-20">Phone:</span><span className="text-strong">{brandProfile.phone || '—'}</span></div>
           <Button className="text-ds-micro" onClick={() => setEdit(true)}>Edit</Button>
         </div>
       ) : (
@@ -544,7 +544,7 @@ function ContactsSection({ brandId: _brandId }: { brandId: string }) {
           <Input label="Signatory name" value={form.signatory} onChange={(e) => setForm({ ...form, signatory: e.target.value })} />
           <Input label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <p className="text-ds-micro text-zinc-600">Changes require admin approval and route through the profile change request flow.</p>
+          <p className="text-ds-micro text-faint">Changes require admin approval and route through the profile change request flow.</p>
           <div className="flex gap-2">
             <Button className="text-ds-micro" onClick={handleSave}>Request Change</Button>
             <Button className="text-ds-micro" variant="secondary" onClick={() => setEdit(false)}>Cancel</Button>
@@ -557,7 +557,7 @@ function ContactsSection({ brandId: _brandId }: { brandId: string }) {
 function AgreementsSection() {
   return (
     <div>
-      <p className="text-xs text-zinc-600 mb-3">Your distribution agreements and contracts with Mercenta Partners.</p>
+      <p className="text-xs text-faint mb-3">Your distribution agreements and contracts with Mercenta Partners.</p>
       <BrandContractView />
     </div>
   );
@@ -568,11 +568,11 @@ function ToursSection({ brandId }: { brandId: string }) {
   const progress = useTourProgress(brandId);
   return (
     <Card title="Guided Tours">
-      <p className="text-xs text-zinc-500 mb-3">
+      <p className="text-xs text-muted mb-3">
         Re-run any onboarding tour whenever you need a refresher. Restarting a tour resumes it from its first
         step and never touches your account, products, or orders.
       </p>
-      <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-ink-850">
+      <ul className="divide-y divide-hairline-06 rounded-ds-md border border-hairline bg-surface-raised">
         {ALL_TOUR_DEFINITIONS.map((t) => {
           const completed = isTourCompleted(brandId, t.id);
           const skipped = isTourSkipped(brandId, t.id);
@@ -583,7 +583,7 @@ function ToursSection({ brandId }: { brandId: string }) {
             <li key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
               <span className="min-w-0 flex-1">
                 <span className="block text-xs font-medium text-strong truncate">{t.name}</span>
-                <span className="block text-ds-label text-zinc-500 truncate leading-snug">{t.description}</span>
+                <span className="block text-ds-label text-muted truncate leading-snug">{t.description}</span>
               </span>
               <StatusBadge tone={tone} dataStatus={state.toLowerCase().replace(' ', '-')}>{state}</StatusBadge>
               <Button
@@ -627,8 +627,8 @@ export function BrandSettings() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-ds-md transition-colors',
               activeTab === id
-                ? 'text-strong border-b-2 border-brass-500 bg-tint'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-tint'
+                ? 'text-strong border-b-2 border-accent-500 bg-tint'
+                : 'text-muted hover:text-strong hover:bg-tint'
             )}
           >
             <TabIcon className="w-3.5 h-3.5" />

@@ -128,10 +128,10 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           eyebrow="BRAND PORTAL · REPORTING"
           title="Reports"
           description={`Performance metrics for ${brandProfile.businessName || 'your brand'}.`}
-          meta={<span className="text-ds-label text-zinc-500">No accepted activity in the selected period yet.</span>}
+          meta={<span className="text-ds-label text-muted">No accepted activity in the selected period yet.</span>}
         />
         <Card title="Reports">
-          <p className="text-xs text-zinc-600">No purchase orders yet for {brandProfile.businessName || 'your brand'} in the selected period.</p>
+          <p className="text-xs text-faint">No purchase orders yet for {brandProfile.businessName || 'your brand'} in the selected period.</p>
         </Card>
         {/* §Phase G1 — the deductions ledger is independent of the reporting
             period, so it renders (with its own honest empty state) on every
@@ -149,17 +149,17 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
         description={`Performance metrics for ${brandProfile.businessName || 'your brand'}`}
         toolbar={
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
               Reporting period
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex overflow-hidden rounded-ds-md border border-hairline bg-ink-850" role="group" aria-label="Reporting period">
+              <div className="flex overflow-hidden rounded-ds-md border border-hairline bg-surface-raised" role="group" aria-label="Reporting period">
                 {([30, 60, 90] as Period[]).map((p) => (
                   <button key={p} onClick={() => setPeriod(p)}
                     aria-pressed={period === p}
                     data-state={period === p ? 'active' : 'idle'}
                     className={cn('px-3 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
-                      period === p ? 'bg-ink-700 text-strong' : 'text-zinc-500 hover:text-zinc-300')}>
+                      period === p ? 'bg-surface-hover text-strong' : 'text-muted hover:text-strong')}>
                     Last {p} days
                   </button>
                 ))}
@@ -184,14 +184,14 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           const Icon = m.icon;
           return (
             <button key={m.label} type="button" onClick={() => setDrillCard(m.label)}
-              className="bg-ink-850 border border-hairline hover:border-hairline-strong rounded-ds-lg p-4 text-left transition-all">
+              className="bg-surface-raised border border-hairline hover:border-hairline-strong rounded-ds-lg p-4 text-left transition-all">
               <div className="flex items-center gap-2 mb-2">
-                <Icon className="w-4 h-4 text-zinc-500" />
-                <span className="text-ds-micro text-zinc-500 font-medium">{m.label}</span>
+                <Icon className="w-4 h-4 text-muted" />
+                <span className="text-ds-micro text-muted font-medium">{m.label}</span>
               </div>
               <div className="text-xl font-bold text-strong">{m.value}</div>
               <div className="flex items-center gap-1 mt-1">
-                <span className={cn('text-ds-micro', m.trendUp ? 'text-emerald-400' : 'text-zinc-500')}>{m.trend}</span>
+                <span className={cn('text-ds-micro', m.trendUp ? 'text-state-success' : 'text-muted')}>{m.trend}</span>
               </div>
             </button>
           );
@@ -213,7 +213,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          ) : <p className="text-xs text-zinc-600 text-center py-8">No shipped POs in this period.</p>}
+          ) : <p className="text-xs text-faint text-center py-8">No shipped POs in this period.</p>}
         </Card>
         <Card title="Dispatch Volume (shipped)" subtitle="Monthly units shipped">
           {dispatchChart.length > 0 ? (
@@ -228,7 +228,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          ) : <p className="text-xs text-zinc-600 text-center py-8">No shipped POs in this period.</p>}
+          ) : <p className="text-xs text-faint text-center py-8">No shipped POs in this period.</p>}
         </Card>
       </div>
 
@@ -240,10 +240,10 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             const pct = rp.length > 0 ? Math.round((count/rp.length)*100) : 0;
             if (count === 0) return null;
             return (
-              <div key={s} className="bg-ink-850 border border-hairline rounded-ds-md px-3 py-2 text-center min-w-[80px]">
+              <div key={s} className="bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-center min-w-[80px]">
                 <div className="text-lg font-bold text-strong">{count}</div>
-                <div className="text-ds-micro text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
-                <div className="text-ds-micro text-zinc-600">{pct}%</div>
+                <div className="text-ds-micro text-muted capitalize">{s.replace(/_/g, ' ')}</div>
+                <div className="text-ds-micro text-faint">{pct}%</div>
               </div>
             );
           })}
@@ -253,56 +253,56 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
       {/* Drill-down modal */}
       {drillCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover backdrop-blur-sm" onClick={() => setDrillCard(null)}>
-          <div className="bg-ink-850 border border-hairline rounded-ds-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-surface-raised border border-hairline rounded-ds-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
               <h3 className="text-sm font-semibold text-strong">{drillCard}</h3>
-              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
+              <button onClick={() => setDrillCard(null)} className="text-muted hover:text-strong"><X className="w-4 h-4" /></button>
             </div>
             <div className="px-5 py-4 space-y-3">
               {drillCard === 'ASIN Confirmation Rate' && (
                 <div className="space-y-2">
-                  <p className="text-xs text-zinc-400">{confirmedLines} of {totalLines} lines confirmed ({asinRate}%)</p>
+                  <p className="text-xs text-muted">{confirmedLines} of {totalLines} lines confirmed ({asinRate}%)</p>
                   <div className="h-2 bg-tint rounded-full overflow-hidden">
-                    <div className="h-full bg-brass-500 rounded-full transition-all" style={{ width: asinRate + '%' }} />
+                    <div className="h-full bg-accent-500 rounded-full transition-all" style={{ width: asinRate + '%' }} />
                   </div>
                 </div>
               )}
               {drillCard === 'Sourceable Products OOS' && (
                 <div className="space-y-2">
-                  <p className="text-xs text-zinc-400">{outOfStock} of {products.length} products out of stock</p>
+                  <p className="text-xs text-muted">{outOfStock} of {products.length} products out of stock</p>
                   {products.filter((p) => !p.isAvailable).map((p) => (
                     <div key={p.sku} className="flex items-center justify-between text-xs border-b border-hairline py-1">
-                      <span className="text-zinc-300">{p.name}</span>
-                      <span className="text-zinc-500 font-mono">{p.sku}</span>
+                      <span className="text-strong">{p.name}</span>
+                      <span className="text-muted font-mono">{p.sku}</span>
                     </div>
                   ))}
                 </div>
               )}
               {drillCard === 'Open PO Quantity' && (
                 <div className="space-y-2">
-                  <p className="text-xs text-zinc-400">{openPOQty} units across {openPOs.length} open POs</p>
+                  <p className="text-xs text-muted">{openPOQty} units across {openPOs.length} open POs</p>
                   {openPOs.map((po) => (
                     <div key={po.id} className="flex items-center justify-between text-xs border-b border-hairline py-1">
-                      <span className="text-zinc-300">{po.poNumber}</span>
-                      <span className="text-zinc-500 font-mono">{po.lineItems.reduce((s,l) => s + l.quantity, 0)} units</span>
+                      <span className="text-strong">{po.poNumber}</span>
+                      <span className="text-muted font-mono">{po.lineItems.reduce((s,l) => s + l.quantity, 0)} units</span>
                     </div>
                   ))}
                 </div>
               )}
               {drillCard === 'Net PPM' && (
                 <div className="text-center py-4">
-                  <p className="text-3xl font-bold text-brass-400 font-mono">\\u00a3{netPPM.toLocaleString()}</p>
-                  <p className="text-xs text-zinc-500 mt-2">Per 1000 units shipped</p>
+                  <p className="text-3xl font-bold text-accent-400 font-mono">\\u00a3{netPPM.toLocaleString()}</p>
+                  <p className="text-xs text-muted mt-2">Per 1000 units shipped</p>
                 </div>
               )}
               {drillCard === 'On-Hand Inventory' && (
                 <div className="space-y-2">
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-muted">
                     {canonicalOnHand === undefined
                       ? 'No inventory recorded for this tenant yet.'
                       : `${canonicalOnHand} units on hand, derived from the movement ledger`}
                   </p>
-                  <p className="text-ds-micro text-zinc-600">
+                  <p className="text-ds-micro text-faint">
                     Source: the canonical inventory ledger (§P8) — the same figures the Inventory
                     surface shows. Nothing is estimated here.
                   </p>

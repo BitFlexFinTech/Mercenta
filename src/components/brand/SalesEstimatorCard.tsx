@@ -23,9 +23,9 @@ const gbp = (n: number) =>
   `£${n.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 const CONFIDENCE_CLASS: Record<string, string> = {
-  low: 'bg-amber-500/15 text-amber-300',
-  medium: 'bg-blue-500/15 text-blue-300',
-  high: 'bg-emerald-500/15 text-emerald-300',
+  low: 'bg-state-warning/10 text-state-warning',
+  medium: 'bg-state-info/10 text-state-info',
+  high: 'bg-state-success/10 text-state-success',
 };
 
 export function SalesEstimatorCard() {
@@ -78,9 +78,9 @@ export function SalesEstimatorCard() {
 
   return (
     <Card title="Retail-Channel Sales Estimator">
-      <p className="text-ds-label text-zinc-500 mb-3">
+      <p className="text-ds-label text-muted mb-3">
         Enter what you know about the product. You get an{' '}
-        <strong className="text-zinc-400">estimated</strong> sales range and the Mercenta economics
+        <strong className="text-muted">estimated</strong> sales range and the Mercenta economics
         under your agreed commercial model ({COMMERCIAL_MODELS[model].label}).
       </p>
 
@@ -111,7 +111,7 @@ export function SalesEstimatorCard() {
 
       <div className="rounded-ds-md border border-hairline p-3" data-testid="sales-estimate-result">
         <div className="flex items-center gap-2 mb-2">
-          <Calculator className="w-3.5 h-3.5 text-brass-400" />
+          <Calculator className="w-3.5 h-3.5 text-accent-400" />
           <span className="text-xs font-medium text-strong">Estimated monthly sales</span>
           <Badge className={`text-ds-micro ${CONFIDENCE_CLASS[estimate.confidence]}`}>
             {estimate.confidence} confidence
@@ -119,26 +119,26 @@ export function SalesEstimatorCard() {
         </div>
         <div className="grid gap-2 sm:grid-cols-3 text-ds-label font-mono">
           <div>
-            <p className="text-zinc-500">Orders / month</p>
-            <p className="text-zinc-200">
+            <p className="text-muted">Orders / month</p>
+            <p className="text-strong">
               {estimate.estimatedMonthlyOrders.low} – {estimate.estimatedMonthlyOrders.high}
             </p>
           </div>
           <div>
-            <p className="text-zinc-500">Units / month</p>
-            <p className="text-zinc-200">
+            <p className="text-muted">Units / month</p>
+            <p className="text-strong">
               {estimate.estimatedMonthlyUnits.low} – {estimate.estimatedMonthlyUnits.high}
             </p>
           </div>
           <div>
-            <p className="text-zinc-500">Revenue / month</p>
-            <p className="text-emerald-300">
+            <p className="text-muted">Revenue / month</p>
+            <p className="text-state-success">
               {gbp(estimate.estimatedMonthlyRevenueGbp.low)} –{' '}
               {gbp(estimate.estimatedMonthlyRevenueGbp.high)}
             </p>
           </div>
         </div>
-        <p className="text-ds-micro text-zinc-500 mt-2">
+        <p className="text-ds-micro text-muted mt-2">
           Midpoint revenue {gbp(estimate.estimatedMonthlyRevenueGbp.mid)}/month ·{' '}
           {gbp(estimate.estimatedAnnualRevenueGbp.mid)}/year. {estimate.confidenceReason}
         </p>
@@ -146,12 +146,12 @@ export function SalesEstimatorCard() {
 
       <div className="mt-3 space-y-1.5">
         {estimate.disclaimers.map((d) => (
-          <p key={d} className="text-ds-micro text-zinc-600 flex items-start gap-1.5">
+          <p key={d} className="text-ds-micro text-faint flex items-start gap-1.5">
             <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
             {d}
           </p>
         ))}
-        <p className="text-ds-micro text-zinc-600">
+        <p className="text-ds-micro text-faint">
           Data providers: {providerModes.map((p) => `${p.provider} → ${p.mode}`).join(' · ')} — no live
           data connection is claimed or used.
         </p>
@@ -168,19 +168,19 @@ export function SalesEstimatorCard() {
             data-testid="born-to-run-result"
           >
             <p className="text-xs font-medium text-strong mb-1">Launch modelling — simulation only</p>
-            <p className="text-zinc-400 font-mono">
+            <p className="text-muted font-mono">
               New to the retail channel: {bornToRun.newToAmazon ? 'yes' : 'no'} · projected initial
               demand {bornToRun.projectedInitialMonthlyOrders} orders/month · suggested first
               quantity {bornToRun.suggestedLaunchQuantity} units · estimated launch revenue{' '}
               {gbp(bornToRun.estimatedLaunchRevenueGbp)}
             </p>
-            <p className="text-zinc-400 font-mono mt-1">{bornToRun.economics.formula}</p>
-            <p className="text-ds-micro text-amber-300/90 mt-1">
+            <p className="text-muted font-mono mt-1">{bornToRun.economics.formula}</p>
+            <p className="text-ds-micro text-state-warning/90 mt-1">
               Programme status: {bornToRun.programmeStatus} — Mercenta does not claim retail-channel
               approval and this model submits nothing to the retail channel.
             </p>
             {bornToRun.disclaimers.map((d) => (
-              <p key={d} className="text-ds-micro text-zinc-600 mt-1">{d}</p>
+              <p key={d} className="text-ds-micro text-faint mt-1">{d}</p>
             ))}
           </div>
         )}

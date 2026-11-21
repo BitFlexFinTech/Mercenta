@@ -122,22 +122,22 @@ export function ComplianceHub() {
       {/* Importer of Record — handled by Mercenta, never the brand */}
       <Card title="Importer of Record — handled by Mercenta">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-1 pb-1">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
+          <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-state-success" />
               <span className="text-xs font-medium text-strong">UK EORI Number</span>
             </div>
-            <p className="text-ds-label text-zinc-400">
+            <p className="text-ds-label text-muted">
               Held by Mercenta as Importer of Record — <span className="font-mono">{MERCENTA_EORI}</span>.
               You never need to register.
             </p>
           </div>
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3">
+          <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-state-success" />
               <span className="text-xs font-medium text-strong">UK VAT Registration</span>
             </div>
-            <p className="text-ds-label text-zinc-400">
+            <p className="text-ds-label text-muted">
               Mercenta's VAT number is used on all imports —{' '}
               <span className="font-mono">{MERCENTA_VAT}</span>. Auto-applied to every document.
             </p>
@@ -157,7 +157,7 @@ export function ComplianceHub() {
 
       {/* Auto-generated customs documentation */}
       <Card title="Customs Documentation — auto-generated, pre-filled">
-        <p className="text-ds-label text-zinc-500 px-1 pb-3">
+        <p className="text-ds-label text-muted px-1 pb-3">
           Generated from your purchase-order data and product master. Review each
           pre-filled document and confirm — no manual form-filling required.
         </p>
@@ -167,7 +167,7 @@ export function ComplianceHub() {
           <LoadingState rows={3} label="Loading documentation for your accepted orders…" />
         )}
         {!posQuery.isPending && docBundles.length === 0 && (
-          <p className="text-xs text-zinc-600 px-1 py-2">
+          <p className="text-xs text-faint px-1 py-2">
             No accepted purchase orders yet — documents are generated automatically
             once a PO is accepted.
           </p>
@@ -177,10 +177,10 @@ export function ComplianceHub() {
             <div key={po.id} className="bg-tint border border-hairline rounded-ds-md p-4">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <span className="font-mono text-xs text-brass">{po.poNumber}</span>
-                  <span className="text-ds-label text-zinc-500 ml-2">{brandName}</span>
+                  <span className="font-mono text-xs text-accent">{po.poNumber}</span>
+                  <span className="text-ds-label text-muted ml-2">{brandName}</span>
                 </div>
-                <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20 capitalize">
+                <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20 capitalize">
                   {po.status.replace(/_/g, ' ')}
                 </Badge>
               </div>
@@ -192,14 +192,14 @@ export function ComplianceHub() {
                       key={doc.type + confirmTick}
                       onClick={() => { setPreviewDoc(doc); setPreviewPoId(po.id); }}
                       className={cn(
-                        'text-left bg-ink-900 border rounded-ds-md p-3 transition-colors group',
-                        confirmed ? 'border-emerald-500/30' : 'border-hairline hover:border-brass/40'
+                        'text-left bg-surface border rounded-ds-md p-3 transition-colors group',
+                        confirmed ? 'border-emerald-500/30' : 'border-hairline hover:border-accent/40'
                       )}
                     >
                       <div className="flex items-start justify-between">
-                        <FileCheck2 className="w-4 h-4 text-brass mb-1.5" />
+                        <FileCheck2 className="w-4 h-4 text-accent mb-1.5" />
                         {confirmed && (
-                          <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+                          <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20">
                             Confirmed
                           </Badge>
                         )}
@@ -207,12 +207,12 @@ export function ComplianceHub() {
                       <div className="text-ds-label font-medium text-strong">{doc.title}</div>
                       <ul className="mt-1 space-y-0.5">
                         {doc.preFilled.slice(0, 2).map((f) => (
-                          <li key={f.label} className="font-mono text-ds-micro text-zinc-600 truncate">
+                          <li key={f.label} className="font-mono text-ds-micro text-faint truncate">
                             {f.label}: {f.value}
                           </li>
                         ))}
                       </ul>
-                      <span className="inline-flex items-center gap-1 text-ds-micro text-brass mt-2 opacity-70 group-hover:opacity-100">
+                      <span className="inline-flex items-center gap-1 text-ds-micro text-accent mt-2 opacity-70 group-hover:opacity-100">
                         <Eye className="w-3 h-3" /> {confirmed ? 'Review' : <>Review &amp; confirm</>}
                       </span>
                     </button>
@@ -233,8 +233,8 @@ export function ComplianceHub() {
               srcDoc={previewDoc.html}
               className="w-full h-[60vh]"
             />
-            <div className="p-4 flex items-center justify-between bg-ink-850">
-              <span className="text-xs text-zinc-400">
+            <div className="p-4 flex items-center justify-between bg-surface-raised">
+              <span className="text-xs text-muted">
                 {previewDoc.title} — pre-filled from PO data. Confirming records your confirmation of these values.
               </span>
               <div className="flex gap-2">
@@ -377,15 +377,15 @@ function ComplianceUploadCard({
     if (!doc.expiryDate) return null;
     const days = Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     if (doc.status === 'expired' || days < 0) return { label: 'Expired', color: 'bg-red-500/15 text-red-300' };
-    if (days <= 30) return { label: 'Expires in ' + days + 'd', color: 'bg-amber-500/15 text-amber-300' };
-    if (days <= 60) return { label: 'Expires in ' + days + 'd', color: 'bg-blue-500/15 text-blue-300' };
+    if (days <= 30) return { label: 'Expires in ' + days + 'd', color: 'bg-state-warning/10 text-state-warning' };
+    if (days <= 60) return { label: 'Expires in ' + days + 'd', color: 'bg-state-info/10 text-state-info' };
     return null;
   }
 
   if (!brandId) {
     return (
       <Card title="Compliance Documents" subtitle="Upload required compliance documents">
-        <p className="text-xs text-zinc-600 px-1 py-4">Sign in to manage compliance documents.</p>
+        <p className="text-xs text-faint px-1 py-4">Sign in to manage compliance documents.</p>
       </Card>
     );
   }
@@ -393,7 +393,7 @@ function ComplianceUploadCard({
   return (
     <Card title="Compliance Documents" subtitle="Upload required documents to clear the compliance gate">
       <div className="space-y-3 p-1">
-        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-state-success border border-emerald-500/20' : 'bg-amber-500/10 text-state-warning border border-amber-500/20')}>
+        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-state-success border border-state-success/20' : 'bg-amber-500/10 text-state-warning border border-state-warning/20')}>
           {gate.cleared ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>
@@ -410,9 +410,9 @@ function ComplianceUploadCard({
               <div key={type} data-record-id={type} className="flex items-center justify-between py-2.5 gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>
+                    <span className="text-xs text-strong capitalize truncate">{type.replace(/_/g, ' ')}</span>
                     {row && row.scope === 'conditional' && (
-                      <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">conditional</Badge>
+                      <Badge className="text-ds-micro bg-tint text-muted border-hairline">conditional</Badge>
                     )}
                     {expiry && (
                       <Badge className={cn('text-ds-micro', expiry.color)}>
@@ -421,10 +421,10 @@ function ComplianceUploadCard({
                     )}
                   </div>
                   {row && row.blockingReason && (
-                    <p className="text-ds-micro text-zinc-500 mt-0.5 truncate">{row.blockingReason}</p>
+                    <p className="text-ds-micro text-muted mt-0.5 truncate">{row.blockingReason}</p>
                   )}
                   {verification && (
-                    <p className="text-ds-micro text-zinc-600 mt-0.5 truncate">
+                    <p className="text-ds-micro text-faint mt-0.5 truncate">
                       {`${verification.simulated ? 'Simulated verification' : verification.external ? 'External verification' : 'Automated verification'} — ${verification.result} (${verification.providerId}${verification.simulated ? ', simulated' : ''})`}
                     </p>
                   )}
@@ -452,9 +452,9 @@ function ComplianceUploadCard({
             );
           })}
         </div>
-        {uploaded && <p className="text-ds-micro text-emerald-400">Document uploaded and marked for review.</p>}
+        {uploaded && <p className="text-ds-micro text-state-success">Document uploaded and marked for review.</p>}
         {replacementNote && <p className="text-ds-micro text-red-300">{replacementNote}</p>}
-        <p className="text-ds-micro text-zinc-600">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
+        <p className="text-ds-micro text-faint">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
       </div>
     </Card>
   );

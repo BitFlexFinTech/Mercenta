@@ -136,7 +136,7 @@ export function BrandSupport() {
           title="Support & Cases"
           description="Open a case with Mercenta and follow its progress."
         />
-        <Card className="p-5 text-sm text-zinc-400">
+        <Card className="p-5 text-sm text-muted">
           No brand session is active, so there is no tenant to raise a case for.
         </Card>
       </WorkspaceFrame>
@@ -174,7 +174,7 @@ export function BrandSupport() {
         title="Support & Cases"
         description="Tell Mercenta what has happened. Mercenta checks your own platform data and our guidance first, then answers you — and handles the retail channel itself where that is needed."
         meta={
-          <span className="text-ds-label text-zinc-500">
+          <span className="text-ds-label text-muted">
             {brandProfile.businessName || 'Your brand'} · {cases.length} case{cases.length === 1 ? '' : 's'} on record
           </span>
         }
@@ -183,17 +183,17 @@ export function BrandSupport() {
         rail={
           <Card className="p-4 space-y-2" data-state="brand-case-guidance">
             <h3 className="text-sm font-semibold text-strong">Guidance for this category</h3>
-            <p className="text-ds-label text-zinc-500">{CATEGORY_LABELS[category]}</p>
+            <p className="text-ds-label text-muted">{CATEGORY_LABELS[category]}</p>
             {guidance.length === 0 ? (
-              <p className="text-ds-label text-amber-300">
+              <p className="text-ds-label text-state-warning">
                 Mercenta has no published guidance for this category — it will be reviewed personally.
               </p>
             ) : (
               <ul className="space-y-2">
                 {guidance.map((a) => (
                   <li key={a.id} className="border-t border-hairline pt-2 first:border-0 first:pt-0">
-                    <p className="text-ds-label font-medium text-zinc-200">{a.title}</p>
-                    <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{a.summary}</p>
+                    <p className="text-ds-label font-medium text-strong">{a.title}</p>
+                    <p className="mt-0.5 text-ds-label leading-snug text-muted">{a.summary}</p>
                   </li>
                 ))}
               </ul>
@@ -260,13 +260,13 @@ export function BrandSupport() {
                 <StatusBadge tone={VERDICT_TONE[preview.verdict]} dataStatus={preview.verdict}>
                   {BRAND_VERDICT_LABELS[preview.verdict]}
                 </StatusBadge>
-                <p className="text-ds-label text-zinc-500">
+                <p className="text-ds-label text-muted">
                   {preview.reasons[preview.reasons.length - 1]}
                 </p>
               </div>
             )}
             {notice && (
-              <p className="text-ds-label text-brass-300" data-state="brand-case-notice">
+              <p className="text-ds-label text-accent-300" data-state="brand-case-notice">
                 {notice}
               </p>
             )}
@@ -279,7 +279,7 @@ export function BrandSupport() {
         >
           <Card className="p-4 space-y-3" data-state="brand-case-list">
             {cases.length === 0 ? (
-              <p className="text-ds-label text-zinc-500">You have not raised any cases yet.</p>
+              <p className="text-ds-label text-muted">You have not raised any cases yet.</p>
             ) : (
               cases.map((c) => {
                 const sufficiency = evaluateCaseSufficiency(c);
@@ -290,9 +290,9 @@ export function BrandSupport() {
                     data-state="brand-case-row"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-ds-label text-brass-300">{c.caseRef ?? c.id}</span>
-                      <span className="min-w-[160px] flex-1 text-ds-label text-zinc-200">{c.subject}</span>
-                      <span className="text-ds-micro text-zinc-500">
+                      <span className="font-mono text-ds-label text-accent-300">{c.caseRef ?? c.id}</span>
+                      <span className="min-w-[160px] flex-1 text-ds-label text-strong">{c.subject}</span>
+                      <span className="text-ds-micro text-muted">
                         {c.caseCategory ? CATEGORY_LABELS[c.caseCategory] : 'Support'}
                       </span>
                     </div>
@@ -308,24 +308,24 @@ export function BrandSupport() {
                         {c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : 'With Mercenta'}
                       </StatusBadge>
                       {sufficiency.verdict !== 'not_applicable' && (
-                        <span className="text-ds-micro text-zinc-500">
+                        <span className="text-ds-micro text-muted">
                           {BRAND_VERDICT_LABELS[sufficiency.verdict]}
                         </span>
                       )}
                     </div>
                     {c.resolution && (
-                      <p className="text-ds-label text-zinc-400" data-state="brand-case-resolution">
+                      <p className="text-ds-label text-muted" data-state="brand-case-resolution">
                         Mercenta: {c.resolution.note}
                       </p>
                     )}
                     {c.providerResponse && (
-                      <p className="text-ds-label text-zinc-400" data-state="brand-case-provider-response">
+                      <p className="text-ds-label text-muted" data-state="brand-case-provider-response">
                         Retail channel{c.amazonCase?.simulated ? ' (simulated)' : ''}:{' '}
                         {c.providerResponse.response}
                       </p>
                     )}
                     {!c.resolution && !c.providerResponse && c.escalationState === 'awaiting_brand_info' && (
-                      <p className="text-ds-label text-amber-300">
+                      <p className="text-ds-label text-state-warning">
                         Mercenta needs more information from you to continue.
                       </p>
                     )}

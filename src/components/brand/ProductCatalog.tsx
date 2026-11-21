@@ -202,7 +202,7 @@ export function ProductCatalog() {
       />
 
       {!gateCleared && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-4 text-sm text-state-warning">
+        <div className="bg-amber-500/10 border border-state-warning/20 rounded-ds-md p-4 text-sm text-state-warning">
           <div className="flex items-center gap-2 mb-2 font-medium">
             <ShieldAlert className="w-4 h-4" />
             Catalog Sync Disabled — Compliance Gate{' '}
@@ -219,7 +219,7 @@ export function ProductCatalog() {
               </li>
             ))}
             {gate.blocking.map((b) => (
-              <li key={b.type} className="text-amber-300">
+              <li key={b.type} className="text-state-warning">
                 • Pending review: {b.type.replace(/_/g, ' ')} ({b.status})
               </li>
             ))}
@@ -237,19 +237,19 @@ export function ProductCatalog() {
       {gateCleared && (
         <div className="bg-tint border border-hairline rounded-ds-md p-4 text-xs">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-zinc-300">
+            <div className="text-strong">
               <span className="font-medium text-strong">Catalog readiness</span>{' '}
               · {products.length} product{products.length === 1 ? '' : 's'} in your catalog ·{' '}
               {incompleteCount === 0
                 ? 'all product information complete'
                 : `${incompleteCount} product(s) still missing required information`}
             </div>
-            <Badge className={cn('text-ds-micro', 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20')}>
+            <Badge className={cn('text-ds-micro', 'bg-state-success/10 text-state-success border-state-success/20')}>
               Compliance gate cleared
             </Badge>
           </div>
           {incompleteCount > 0 && (
-            <ul className="mt-2 space-y-1 text-amber-300">
+            <ul className="mt-2 space-y-1 text-state-warning">
               {[...completenessBySku.entries()]
                 .filter(([, c]) => !c.complete)
                 .map(([sku, c]) => (
@@ -260,7 +260,7 @@ export function ProductCatalog() {
             </ul>
           )}
           {incompleteCount === 0 && (
-            <p className="mt-2 text-zinc-500">
+            <p className="mt-2 text-muted">
               Products may be submitted. Submissions run through the retail-channel seam and are
               processed in SIMULATION until live credentials are configured.
             </p>
@@ -269,7 +269,7 @@ export function ProductCatalog() {
       )}
 
       {submissionNotice && (
-        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-zinc-300">
+        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-xs text-strong">
           {submissionNotice}
         </div>
       )}
@@ -328,20 +328,20 @@ export function ProductCatalog() {
                 const state = deriveAsinState(identifier, !!latestSubmissionForSku(p.sku));
                 return (
                   <div data-testid={`catalog-asin-${p.sku}`}>
-                    <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
-                    <div className="text-ds-micro font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
+                    <div className="text-xs font-mono text-muted">{p.sku}</div>
+                    <div className="text-ds-micro font-mono text-faint mt-0.5">{p.barcode}</div>
                     <div className="text-ds-micro mt-0.5">
                       {identifier ? (
                         <>
-                          <span className="font-mono text-zinc-300">{identifier.asin}</span>
-                          <span className="text-zinc-600">
+                          <span className="font-mono text-strong">{identifier.asin}</span>
+                          <span className="text-faint">
                             {' '}
                             · {identifier.source === 'brand_declared' ? 'brand' : 'channel'}
                             {identifier.simulated ? ' (simulated)' : ''}
                           </span>
                         </>
                       ) : (
-                        <span className="text-zinc-600">{ASIN_STATE_LABELS[state]}</span>
+                        <span className="text-faint">{ASIN_STATE_LABELS[state]}</span>
                       )}
                     </div>
                   </div>
@@ -361,7 +361,7 @@ export function ProductCatalog() {
               label: 'UK MSRP (£)',
               align: 'right',
               render: (p) => (
-                <span className="text-sm text-zinc-300">£{p.ukRetailPrice.toFixed(2)}</span>
+                <span className="text-sm text-strong">£{p.ukRetailPrice.toFixed(2)}</span>
               ),
             },
             {
@@ -369,7 +369,7 @@ export function ProductCatalog() {
               label: 'Commodity Code',
               hideBelow: 'lg',
               render: (p) => (
-                <span className="text-xs font-mono text-zinc-400">{p.commodityCode}</span>
+                <span className="text-xs font-mono text-muted">{p.commodityCode}</span>
               ),
             },
             {
@@ -377,9 +377,9 @@ export function ProductCatalog() {
               label: 'Case Pack',
               hideBelow: 'lg',
               render: (p) => (
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted">
                   {p.unitsPerCase ?? '—'} units/case
-                  {p.caseOrderable && <span className="ml-1 text-brass-400">(case orderable)</span>}
+                  {p.caseOrderable && <span className="ml-1 text-accent-400">(case orderable)</span>}
                 </span>
               ),
             },
@@ -388,7 +388,7 @@ export function ProductCatalog() {
               label: 'Tax Code',
               hideBelow: 'lg',
               render: (p) => (
-                <span className="text-xs font-mono text-zinc-400">
+                <span className="text-xs font-mono text-muted">
                   {p.productTaxCode ?? 'A_GEN_TAX'}
                 </span>
               ),
@@ -401,8 +401,8 @@ export function ProductCatalog() {
                 <Badge
                   className={
                     p.vatStatus === 'Zero-rated'
-                      ? 'bg-blue-500/15 text-blue-300 border-blue-500/20'
-                      : 'bg-zinc-500/15 text-zinc-300 border-zinc-500/20'
+                      ? 'bg-state-info/10 text-state-info border-blue-500/20'
+                      : 'bg-tint text-strong border-hairline'
                   }
                 >
                   {p.vatStatus}
@@ -416,12 +416,12 @@ export function ProductCatalog() {
               hideBelow: 'lg',
               render: (p) =>
                 p.hazmat ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-amber-400">
+                  <span className="inline-flex items-center gap-1 text-xs text-state-warning">
                     <Flame className="w-3 h-3" />
                     Yes
                   </span>
                 ) : (
-                  <span className="text-xs text-zinc-600">No</span>
+                  <span className="text-xs text-faint">No</span>
                 ),
             },
             {
@@ -429,7 +429,7 @@ export function ProductCatalog() {
               label: 'Dimensions (cm)',
               hideBelow: 'lg',
               render: (p) => (
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted">
                   {p.length}×{p.width}×{p.height}
                 </span>
               ),
@@ -439,7 +439,7 @@ export function ProductCatalog() {
               label: 'Weight',
               align: 'right',
               hideBelow: 'lg',
-              render: (p) => <span className="text-xs text-zinc-400">{p.weight} kg</span>,
+              render: (p) => <span className="text-xs text-muted">{p.weight} kg</span>,
             },
             {
               key: 'availability',
@@ -461,7 +461,7 @@ export function ProductCatalog() {
                     className={cn(
                       'text-ds-micro px-2 py-0.5 rounded-full font-medium transition-colors',
                       isAvailable
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-state-success/10 text-state-success'
                         : 'bg-red-500/15 text-red-300'
                     )}
                   >
@@ -476,7 +476,7 @@ export function ProductCatalog() {
               align: 'right',
               hideBelow: 'lg',
               render: (p) => (
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-muted">
                   {p.leadTimeDays != null ? `${p.leadTimeDays}d` : '—'}
                 </span>
               ),
@@ -490,9 +490,9 @@ export function ProductCatalog() {
                 const complete = completenessBySku.get(p.sku)?.complete ?? false;
                 if (!sub) {
                   return complete ? (
-                    <span className="text-ds-micro text-zinc-500">Ready to submit</span>
+                    <span className="text-ds-micro text-muted">Ready to submit</span>
                   ) : (
-                    <span className="text-ds-micro text-amber-300">Incomplete</span>
+                    <span className="text-ds-micro text-state-warning">Incomplete</span>
                   );
                 }
                 return (
@@ -500,12 +500,12 @@ export function ProductCatalog() {
                     className={cn(
                       'text-ds-micro px-2 py-0.5 rounded-full font-medium',
                       sub.status === 'live'
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-state-success/10 text-state-success'
                         : sub.status === 'rejected'
                         ? 'bg-red-500/15 text-red-300'
                         : sub.status === 'under_amazon_review'
-                        ? 'bg-blue-500/15 text-blue-300'
-                        : 'bg-zinc-500/15 text-zinc-300'
+                        ? 'bg-state-info/10 text-state-info'
+                        : 'bg-tint text-strong'
                     )}
                   >
                     {SUBMISSION_STATUS_LABELS[sub.status]}
@@ -522,7 +522,7 @@ export function ProductCatalog() {
                 <div className="flex flex-col items-center gap-1">
                   <button
                     onClick={() => setEditingSku(p.sku)}
-                    className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors"
+                    className="text-ds-micro text-accent-400 hover:text-accent-300 transition-colors"
                   >
                     Edit Cost
                   </button>
@@ -533,7 +533,7 @@ export function ProductCatalog() {
                         <button
                           onClick={() => void handlePollSubmission(sub.id)}
                           disabled={busySku === sub.id}
-                          className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                          className="text-ds-micro text-accent-400 hover:text-accent-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
                         >
                           <RefreshCw className="w-3 h-3" />
                           {busySku === sub.id ? 'Polling…' : 'Check result'}
@@ -546,7 +546,7 @@ export function ProductCatalog() {
                         onClick={() => void handleSubmitForSubmission(p)}
                         disabled={!gateCleared || !ready || busySku === p.sku}
                         title={ready ? 'Submit through the retail-channel seam' : 'Product information is incomplete'}
-                        className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
+                        className="text-ds-micro text-accent-400 hover:text-accent-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
                       >
                         <Send className="w-3 h-3" />
                         {busySku === p.sku ? 'Submitting…' : sub ? 'Resubmit' : 'Submit'}
@@ -641,18 +641,18 @@ function AddProductPanel({
         className="absolute inset-0 bg-surface-hover backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md bg-ink-850 border-l border-hairline h-full overflow-y-auto animate-slide-up">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline sticky top-0 bg-ink-850 z-10">
+      <div className="relative w-full max-w-md bg-surface-raised border-l border-hairline h-full overflow-y-auto animate-slide-up">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-hairline sticky top-0 bg-surface-raised z-10">
           <h3 className="text-sm font-semibold text-strong">
             {guidanceAcked ? 'Add New Product' : 'Before You Add a Product'}
           </h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-strong">
+          <button onClick={onClose} className="text-muted hover:text-strong">
             <X className="w-4 h-4" />
           </button>
         </div>
         {!guidanceAcked ? (
           <div className="p-5 space-y-4">
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-muted">
               {/*
                 §P13 / S8 — REPOINTED (old contract recorded): this line used to read
                 *"Please review this quick guidance on pricing, packaging, and PO
@@ -727,7 +727,7 @@ function AddProductPanel({
           />
           {/* §Batch-21 — Product image set with Amazon-standard validation */}
           <div className="border-t border-hairline pt-3 mt-2">
-            <p className="text-ds-micro text-zinc-500 font-medium mb-2 flex items-center gap-1">
+            <p className="text-ds-micro text-muted font-medium mb-2 flex items-center gap-1">
               <ImageUp className="w-3 h-3" /> Product Images
             </p>
             <ImageSetEditor
@@ -767,20 +767,20 @@ function AddProductPanel({
               type="checkbox"
               checked={form.hazmat}
               onChange={(e) => setForm({ ...form, hazmat: e.target.checked })}
-              className="rounded-ds-sm border-hairline-strong bg-ink-900 text-brass-500 focus:ring-brass-500/30"
+              className="rounded-ds-sm border-hairline-strong bg-surface text-accent-500 focus:ring-accent-500/30"
             />
-            <span className="text-xs text-zinc-400">Contains hazardous materials</span>
+            <span className="text-xs text-muted">Contains hazardous materials</span>
           </label>
           <div className="pt-2">
             {gateBlocked && (
-              <p className="mb-2 text-ds-label text-amber-300 flex items-center gap-1.5">
+              <p className="mb-2 text-ds-label text-state-warning flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" /> Submission disabled — compliance gate not cleared.
               </p>
             )}
             {!gateBlocked && !completeness.complete && (
-              <div className="mb-2 text-ds-label text-amber-300">
+              <div className="mb-2 text-ds-label text-state-warning">
                 <p>Missing required information:</p>
-                <ul className="mt-1 space-y-0.5 text-amber-300/90">
+                <ul className="mt-1 space-y-0.5 text-state-warning/90">
                   {completeness.missingLabels.map((l) => (
                     <li key={l}>
                       • {l}
@@ -824,9 +824,9 @@ function CostEditPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover">
-      <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-80 shadow-ds-overlay">
+      <div className="bg-surface-raised border border-hairline rounded-ds-lg p-5 w-80 shadow-ds-overlay">
         <h3 className="text-sm font-semibold text-strong mb-1">Edit Item Cost</h3>
-        <p className="text-ds-micro text-zinc-500 mb-4">
+        <p className="text-ds-micro text-muted mb-4">
           {product.name} · {product.sku}
         </p>
         <div className="space-y-3">
