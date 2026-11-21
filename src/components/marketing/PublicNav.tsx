@@ -144,7 +144,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                      with the logo. The duplicate group is deleted (nine groups
                      now), and `whitespace-nowrap` plus a tighter `px-2.5` leave
                      about 75px spare at 1440px so no label can wrap again. */
-                  className="flex items-center gap-1 whitespace-nowrap rounded-ds-sm px-2.5 py-2 text-ds-body text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
+                  className="flex items-center gap-1 whitespace-nowrap rounded-ds-sm px-2.5 py-2 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
                 >
                   {item.label}
                   <ChevronDown
@@ -157,7 +157,13 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                   <div
                     role="menu"
                     aria-label={item.label}
-                    className="absolute left-0 top-full mt-2 w-64 border border-hairline bg-ink-800/70 backdrop-blur-xl py-2 shadow-ds-overlay"
+                    /* §BATCH 2 (2026-11-21) — the panel keeps the reference's
+                       TRANSLUCENT, blurred treatment (a theme surface at partial
+                       opacity over the page behind it), but now reads that
+                       surface from the theme token instead of the legacy
+                       `ink` alias. `validate-shared-surfaces` requires both
+                       properties, so the token form keeps the contract intact. */
+                    className="absolute left-0 top-full mt-2 w-64 border border-[var(--mr-hairline)] bg-[var(--mr-surface-overlay)]/95 backdrop-blur-xl py-2 shadow-ds-overlay"
                   >
                     {item.children.map((child, i) => (
                       <a
@@ -173,7 +179,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                         }}
                         onKeyDown={(e) => onItemKeyDown(e, i, item.children.length)}
                         className={cn(
-                          'block px-4 py-2 text-ds-body transition-colors hover:bg-[var(--mr-hover-tint)]',
+                          'block px-4 py-2 font-mono text-ds-label uppercase tracking-[0.14em] transition-colors hover:bg-[var(--mr-hover-tint)]',
                           currentPage === child.page
                             ? 'text-[var(--mr-accent)]'
                             : 'text-[var(--mr-text-muted)] hover:text-[var(--mr-text-strong)]'
@@ -188,12 +194,25 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
             );
           })}
 
+          {/* §HOMEPAGE CONCEPT 3 (2026-11-21) — THE TWO HEADER UTILITY ACTIONS.
+              Both open the same portal environment. Partner Login stays the
+              solid accent action (it is the primary conversion for a returning
+              partner); Request Partner Access is the quieter secondary action so
+              the header keeps one clear hierarchy. Both are rendered as buttons
+              so the keyboard path and the `onOpenPortal` contract are unchanged. */}
           <button
             onClick={onOpenPortal}
             data-testid={PRE_AUDIT_TESTIDS.headerUtility}
-            className="ml-3 bg-[var(--mr-accent)] px-4 py-2 text-ds-label font-semibold text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
+            className="ml-3 whitespace-nowrap bg-[var(--mr-accent)] px-4 py-2 font-mono text-ds-label font-semibold uppercase tracking-[0.14em] text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
           >
             Partner Login
+          </button>
+          <button
+            onClick={onOpenPortal}
+            data-testid="public-nav-request-access"
+            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-ds-label uppercase tracking-[0.14em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
+          >
+            Request Partner Access
           </button>
         </div>
 
@@ -227,7 +246,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                   handleNav('home');
                 }}
                 className={cn(
-                  'block py-3 text-base',
+                  'block py-3 font-mono text-ds-label uppercase tracking-[0.16em]',
                   currentPage === 'home' ? 'text-[var(--mr-accent)]' : 'text-[var(--mr-text-muted)]'
                 )}
               >
@@ -238,7 +257,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                   key={item.label}
                   onClick={() => setMobileGroup(item.label)}
                   data-testid={`public-nav-mobile-group-${item.label.toLowerCase()}`}
-                  className="flex w-full items-center justify-between border-t border-hairline py-3 text-left text-base text-[var(--mr-text-muted)]"
+                  className="flex w-full items-center justify-between border-t border-hairline py-3 text-left font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-muted)]"
                 >
                   {item.label}
                   <ChevronDown className="h-4 w-4 -rotate-90" aria-hidden="true" />
@@ -249,9 +268,19 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                   closeAll();
                   onOpenPortal();
                 }}
-                className="mt-4 w-full bg-[var(--mr-accent)] px-4 py-3 text-base font-semibold text-[var(--mr-on-accent)]"
+                className="mt-4 w-full bg-[var(--mr-accent)] px-4 py-3 font-mono text-ds-label font-semibold uppercase tracking-[0.14em] text-[var(--mr-on-accent)]"
               >
                 Partner Login
+              </button>
+              <button
+                onClick={() => {
+                  closeAll();
+                  onOpenPortal();
+                }}
+                data-testid="public-nav-mobile-request-access"
+                className="mt-2 w-full border border-[var(--mr-hairline)] px-4 py-3 font-mono text-ds-label font-semibold uppercase tracking-[0.14em] text-[var(--mr-text-strong)]"
+              >
+                Request Partner Access
               </button>
             </>
           ) : (
@@ -276,7 +305,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                     handleNav(child.page);
                   }}
                   className={cn(
-                    'block border-t border-hairline py-3 text-base',
+                    'block border-t border-[var(--mr-hairline)] py-3 font-mono text-ds-label uppercase tracking-[0.14em]',
                     currentPage === child.page
                       ? 'text-[var(--mr-accent)]'
                       : 'text-[var(--mr-text-muted)]'

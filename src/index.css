@@ -302,6 +302,51 @@ textarea:focus-visible {
   animation: tracker-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+/* ── §HOMEPAGE CONCEPT 3 (2026-11-21) — THE TWO MISSING ANIMATIONS ─────────
+   The approved Concept 3 direction draws its step connectors as a dashed line
+   that travels, and its closing band as a moving tagline strip. Both were
+   declared only in the blueprint's Tailwind v4 stylesheet, so neither existed
+   in this app. They are added here as PLAIN CSS (this project is Tailwind v3)
+   and use the SAME class names the approved design uses, so the markup needs no
+   translation.
+
+   `dash` drives a dashed stroke's offset forward — the connector between two
+   journey steps reads as "the route is moving" without any element entering or
+   leaving. `marquee` slides a doubled strip by exactly half its width, so the
+   loop is seamless.
+
+   Both are pure decoration: nothing depends on them to be readable or operable,
+   and BOTH are disabled under `prefers-reduced-motion` below. */
+@keyframes dash {
+  to { stroke-dashoffset: -24; }
+}
+.animate-dash {
+  animation: dash 1.4s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+/* ── §HOMEPAGE CONCEPT 3 — THE CONSTRUCTION GRID ───────────────────────────
+   A 64px hairline grid behind the hero and the infrastructure band. It is the
+   one visual signature the approved Concept 3 direction carries across both
+   appearances, and it is drawn FROM THE THEME rather than from a literal: the
+   line is the active appearance's own hairline at reduced strength, so it reads
+   on black and on white without a second colour being introduced. `--mr-hairline`
+   is declared identically in both appearances (src/config/themes.ts), so this
+   utility can never fall out of step with the design system. */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--mr-hairline) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--mr-hairline) 55%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
 /* Scroll reveal — elements start hidden/offset, .is-revealed brings them in.
    Applied only when the user has no reduced-motion preference (see below). */
 .reveal {
@@ -316,7 +361,13 @@ textarea:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-route-dot,
-  .animate-tracker-ping {
+  .animate-tracker-ping,
+  /* §HOMEPAGE CONCEPT 3 — the two new decorative animations are covered by the
+     SAME guarantee as the two original ones. A visitor who asks their system to
+     reduce motion sees the dashed connector as a static dashed line and the
+     tagline strip as a still strip; neither loses any meaning. */
+  .animate-dash,
+  .animate-marquee {
     animation: none;
   }
   /* With motion reduced, reveal elements are simply visible — no transform */

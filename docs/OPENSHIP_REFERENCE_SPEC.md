@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-20 grey=2832/123 ink=935/116 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2832/123 ink=934/115 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -905,6 +905,12 @@ Every row below was measured in this repository this session.
 > repointed from `border-zinc-300` to the `border-hairline-strong` role token — a
 > text-brightness token that was being borrowed for a structural border (near-white in
 > the dark appearance). Ink is unchanged at 934/115. No other figure moved.
+>
+> **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
+> header's dropdown panel was the last site in that component still painted with the
+> legacy `bg-ink-800/70` alias. It now reads the theme's raised-surface token, so ink
+> moved 935/116 → 934/115 sites and files. Grey is unchanged at 2832/123. This is a
+> REDUCTION, never an increase — the ratchet ceiling (grey 2866 / ink 974) is untouched.
 >
 > **§MEASURED-BATCH10-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
 >

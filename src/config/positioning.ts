@@ -767,7 +767,22 @@ export const PUBLIC_FOOTER_COLUMNS: readonly PublicFooterColumn[] = [
   { kind: 'links', heading: PUBLIC_NAV[1].label, links: PUBLIC_NAV[1].children },
   { kind: 'links', heading: PUBLIC_NAV[2].label, links: PUBLIC_NAV[2].children },
   { kind: 'links', heading: PUBLIC_NAV[3].label, links: PUBLIC_NAV[3].children },
-  { kind: 'links', heading: PUBLIC_NAV[4].label, links: PUBLIC_NAV[4].children },
+  /**
+   * §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — PUBLIC_NAV[4]
+   * ("Categories") IS NOT A FOOTER COLUMN.
+   *
+   * MEASURED DEFECT: that group's ONLY child is "Category Specialization", which
+   * is already listed under PUBLIC_NAV[2] ("Solutions"). Rendering both groups in
+   * the footer therefore printed the same link twice — one destination, two tab
+   * stops, duplicate content — and `e2e/public-chrome.spec.ts` failed on the
+   * strict-mode violation. The static validator could not see it because it
+   * collects the referenced ids into a Set.
+   *
+   * The approved footer shape is EIGHT link columns plus the ten product
+   * categories; this group's destination is already published by Solutions, so
+   * the footer now renders exactly eight. The HEADER keeps all nine groups — a
+   * menu may surface a destination in two places, a sitemap may not.
+   */
   { kind: 'links', heading: PUBLIC_NAV[5].label, links: PUBLIC_NAV[5].children },
   { kind: 'links', heading: PUBLIC_NAV[6].label, links: PUBLIC_NAV[6].children },
   { kind: 'links', heading: PUBLIC_NAV[7].label, links: PUBLIC_NAV[7].children },

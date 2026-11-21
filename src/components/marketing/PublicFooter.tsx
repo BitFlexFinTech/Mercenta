@@ -80,6 +80,25 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
   const linkClass =
     'text-ds-label text-[var(--mr-text-muted)] hover:text-[var(--mr-accent)] transition-colors cursor-pointer block py-0.5 text-left';
 
+  /**
+   * §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — EACH DESTINATION IS
+   * PUBLISHED ONCE.
+   *
+   * MEASURED DEFECT: `PUBLIC_NAV` legitimately offers "Category Specialization"
+   * in TWO groups (Solutions and Categories), so the footer — which renders every
+   * group's children — printed the same link twice. The browser spec
+   * `e2e/public-chrome.spec.ts` caught it as a strict-mode violation; the static
+   * validator could not, because it collects the referenced ids into a Set and a
+   * Set collapses duplicates. A sitemap that lists one destination twice is a real
+   * defect (duplicate content, two tab stops for one page), so the footer now
+   * records what it has already published and skips a repeat.
+   *
+   * The HEADER is deliberately unchanged: a menu may offer the same destination in
+   * two places without being wrong. Only the footer, whose job is an exhaustive
+   * and unambiguous sitemap, is de-duplicated.
+   */
+  const renderedPages = new Set<string>();
+
   return (
     <footer className="border-t border-hairline bg-[var(--mr-surface)]">
       <div className="mx-auto max-w-7xl px-6 py-14">
@@ -120,7 +139,13 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
                 );
               }
               const legalPages = new Set<string>([PUBLIC_LINK.privacy.page, PUBLIC_LINK.terms.page]);
-              const children = column.links.filter((child) => !legalPages.has(child.page));
+              const children = column.links.filter((child) => {
+                if (legalPages.has(child.page)) return false;
+                /* §EACH DESTINATION ONCE — see the note on `renderedPages`. */
+                if (renderedPages.has(child.page)) return false;
+                renderedPages.add(child.page);
+                return true;
+              });
               if (children.length === 0) return null;
               return (
                 <div key={column.heading}>
@@ -142,22 +167,14 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
               );
             })}
 
-            <div>
-              <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
-                Product Categories
-              </h4>
-              <div>
-                {APPROVED_CATEGORIES.map((cat) => (
-                  <span
-                    key={cat}
-                    className="block py-0.5 text-ds-label text-[var(--mr-text-muted)]"
-                  >
-                    {cat}
-                  </span>
-                ))}
-              </div>
-            </div>
-
+            {/* §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — the hardcoded
+                "Product Categories" block that used to sit here is DELETED. The
+                column model already declares a `kind: 'categories'` column, which
+                renders the same ten APPROVED_CATEGORIES. Two owners meant the
+                footer printed the heading and the full list TWICE, and the
+                approved categories were being retyped in a second place — the
+                exact single-source-of-truth violation the model exists to
+                prevent. The model's column is now the only one. */}
             <div>
               <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
                 Legal
