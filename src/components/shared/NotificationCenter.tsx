@@ -574,7 +574,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
           items.length === 0
             ? 'text-zinc-500 hover:text-zinc-300'
             : highCount > 0
-              ? 'text-state-critical'
+              ? 'text-state-danger'
               : 'text-state-warning'
         )}
         onClick={() => setOpen((o) => !o)}
@@ -587,7 +587,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
           <span
             className={cn(
               'absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full text-ds-micro font-bold flex items-center justify-center px-0.5',
-              highCount > 0 ? 'bg-state-critical text-strong' : 'bg-state-warning text-on-fill'
+              highCount > 0 ? 'bg-state-danger text-strong' : 'bg-state-warning text-on-fill'
             )}
           >
             {items.length}
@@ -612,7 +612,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                   items.length === 0
                     ? 'bg-state-success/10 border-state-success/20 text-state-success'
                     : highCount > 0
-                      ? 'bg-state-critical/10 border-state-critical/20 text-state-critical'
+                      ? 'bg-state-danger/10 border-state-danger/20 text-state-danger'
                       : 'bg-state-warning/10 border-state-warning/20 text-state-warning'
                 )}
               >
@@ -653,7 +653,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                       aria-hidden="true"
                       className={cn(
                         'mt-0.5 w-4 h-4 rounded-full flex items-center justify-center',
-                        tone === 'critical' ? 'bg-state-critical/10 text-state-critical' : 'bg-state-warning/10 text-state-warning'
+                        tone === 'critical' ? 'bg-state-danger/10 text-state-danger' : 'bg-state-warning/10 text-state-warning'
                       )}
                     >
                       <Icon className="w-3 h-3" />

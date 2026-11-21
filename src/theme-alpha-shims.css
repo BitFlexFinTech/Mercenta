@@ -119,8 +119,7 @@
 .bg-amber-500\/50{background-color:color-mix(in srgb, var(--mr-accent) 50%, transparent)}
 .bg-state-success\/10{background-color:color-mix(in srgb, var(--mr-state-success) 10%, transparent)}
 .border-state-success\/20{border-color:color-mix(in srgb, var(--mr-state-success) 20%, transparent)}
-.bg-state-critical\/10{background-color:color-mix(in srgb, var(--mr-state-critical) 10%, transparent)}
-.border-state-critical\/20{border-color:color-mix(in srgb, var(--mr-state-critical) 20%, transparent)}
+.border-state-danger\/20{border-color:color-mix(in srgb, var(--mr-state-critical) 20%, transparent)}
 .bg-state-warning\/10{background-color:color-mix(in srgb, var(--mr-state-warning) 10%, transparent)}
 .border-state-warning\/20{border-color:color-mix(in srgb, var(--mr-state-warning) 20%, transparent)}
 .bg-amber-500\/20{background-color:color-mix(in srgb, var(--mr-accent) 20%, transparent)}
@@ -137,7 +136,6 @@
 .border-state-info\/25{border-color:color-mix(in srgb, var(--mr-state-info) 25%, transparent)}
 .border-brass-500\/25{border-color:color-mix(in srgb, var(--mr-accent) 25%, transparent)}
 .bg-state-info\/10{background-color:color-mix(in srgb, var(--mr-state-info) 10%, transparent)}
-.border-state-danger\/20{border-color:color-mix(in srgb, var(--mr-state-critical) 20%, transparent)}
 .bg-brass-300\/15{background-color:color-mix(in srgb, var(--mr-accent-300) 15%, transparent)}
 .bg-brass-500\/12{background-color:color-mix(in srgb, var(--mr-accent) 12%, transparent)}
 .bg-brass-500\/30{background-color:color-mix(in srgb, var(--mr-accent) 30%, transparent)}

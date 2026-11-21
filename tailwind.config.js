@@ -166,6 +166,33 @@ export default {
         background: 'var(--mr-bg)',
         foreground: 'var(--mr-text-strong)',
         muted: 'var(--mr-text-muted)',
+        /**
+         * §BRAND REDESIGN (2026-11-21) — THE MISSING TEXT-LADDER STEPS, AND THE
+         * DEFECT THIS FIXES.
+         *
+         * The legacy-styling migration (OpenShip Batch 10) repointed 1,663 literal
+         * `white`/`black` sites onto the theme's text ladder and named the target
+         * `text-strong`. The name was NEVER DECLARED here, so Tailwind emitted no
+         * rule for it: `text-strong` was a DEAD CLASS in **97 files**, and the text
+         * fell back to whatever it inherited. The tokens are genuinely different
+         * (`--mr-text` is #E8E8E8 / #333333; `--mr-text-strong` is #FFFFFF /
+         * #000000), so "strong" text was measurably NOT strong on either
+         * appearance — the same defect shape as the invisible footer logo.
+         *
+         * Measured before the fix (rule 10 §5 — a check that finds nothing is a
+         * FAILURE): `resolveConfig(...).theme.colors.strong` === `undefined`, and
+         * the built stylesheet contained no `.text-strong` rule while containing
+         * `.text-[var(--mr-text-strong)]`.
+         *
+         * Declared here as the WHOLE ladder the tokens already define, so no
+         * sibling step can be missed the same way. `scripts/validate-theme-classes-
+         * resolve.mjs` now FAILS if any theme-ladder class the code uses cannot be
+         * resolved by the config.
+         */
+        strong: 'var(--mr-text-strong)',
+        faint: 'var(--mr-text-faint)',
+        soft: 'var(--mr-text-soft)',
+        active: 'var(--mr-text-active)',
         canvas: 'var(--mr-bg)',
         /* NOTE: `amber` is declared ONCE, in the brand-hue block below — its
            `accent` sub-key is merged there. A second `amber:` key here would be
@@ -188,6 +215,11 @@ export default {
           raised: 'var(--mr-surface-raised)',
           overlay: 'var(--mr-surface-overlay)',
           hover: 'var(--mr-surface-hover)',
+          /* §BRAND REDESIGN (2026-11-21) — `--mr-surface-tint` has existed as a
+             token since §UI/UX Wave 1, but this key was never declared, so
+             `bg-surface-tint` was a DEAD CLASS in 3 files (TourEngine,
+             OnboardingWizard, ui.tsx) — including the tour's own panel fill. */
+          tint: 'var(--mr-surface-tint)',
         },
         /**
          * §OPENSHIP BATCH 4 (2026-10-15) — the FLOATING-SURFACE hover tint.
