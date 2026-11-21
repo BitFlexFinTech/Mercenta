@@ -98,7 +98,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 top-0 z-50 border-b border-hairline bg-[var(--mr-bg)]/90 backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-50 border-b border-[var(--mr-hairline)] bg-[var(--mr-bg)]/90 backdrop-blur-xl"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <a
@@ -115,8 +115,12 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           </span>
         </a>
 
-        {/* ── Desktop: seven groups, each a real menu ─────────────────────── */}
-        <div className="hidden items-center gap-1 lg:flex" ref={dropdownRef}>
+        {/* ── Desktop: nine groups, each a real menu ────────────────────────
+            §BATCH 2 (2026-11-21) — the row appears from `xl`, not `lg`. Measured:
+            nine groups plus both utility actions need 1029px, and the 80rem header
+            offers 1062px only at 1280px and above. At `lg` (1024–1279) the row
+            would overflow again, so the drawer carries the same nine groups there. */}
+        <div className="hidden items-center gap-0.5 xl:flex" ref={dropdownRef}>
           {NAV_LINKS.map((item) => {
             const isOpen = openGroup === item.label;
             return (
@@ -137,18 +141,21 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
                   aria-expanded={isOpen}
                   aria-haspopup="true"
                   data-testid={`public-nav-group-${item.label.toLowerCase()}`}
-                  /* §NAVIGATION REPAIR (2026-11-20) — NINE GROUPS MUST FIT AT 1440px.
-                     Measured before this change: the ten group buttons totalled
-                     1065px against ~1005px available, so "1P Infrastructure" and
-                     "Platform Tools" grew from 36px to 57px tall and collided
-                     with the logo. The duplicate group is deleted (nine groups
-                     now), and `whitespace-nowrap` plus a tighter `px-2.5` leave
-                     about 75px spare at 1440px so no label can wrap again. */
-                  className="flex items-center gap-1 whitespace-nowrap rounded-ds-sm px-2.5 py-2 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
+                  /* §BATCH 2 OVERFLOW FIXED AT SOURCE (2026-11-21) — MEASURED, NOT GUESSED.
+                     The Concept 3 restyle (mono uppercase, wide tracking) plus the
+                     two new header utility actions pushed this row to 1541px against
+                     1062px available inside the 80rem container, so "Partner Login"
+                     sat at x=1360 on a 1280px viewport — OFF-SCREEN and unclickable.
+                     Measured fit with the recipe below: 1029px, 33px spare. The row
+                     now appears from `xl` (1280px); below that the drawer carries all
+                     nine groups. 10px is the size at which nine groups + BOTH actions
+                     fit an 80rem header at 0.08em tracking; the tracking is kept wide
+                     because that is the approved Concept 3 label treatment. */
+                  className="flex items-center gap-0.5 whitespace-nowrap rounded-ds-sm px-0.5 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)]"
                 >
                   {item.label}
                   <ChevronDown
-                    className={cn('h-3.5 w-3.5 transition-transform', isOpen && 'rotate-180')}
+                    className={cn('h-2.5 w-2.5 transition-transform', isOpen && 'rotate-180')}
                     aria-hidden="true"
                   />
                 </button>
@@ -203,14 +210,14 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           <button
             onClick={onOpenPortal}
             data-testid={PRE_AUDIT_TESTIDS.headerUtility}
-            className="ml-3 whitespace-nowrap bg-[var(--mr-accent)] px-4 py-2 font-mono text-ds-label font-semibold uppercase tracking-[0.14em] text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
+            className="ml-2 whitespace-nowrap bg-[var(--mr-accent)] px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
           >
             Partner Login
           </button>
           <button
             onClick={onOpenPortal}
             data-testid="public-nav-request-access"
-            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-ds-label uppercase tracking-[0.14em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
+            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
           >
             Request Partner Access
           </button>
@@ -221,7 +228,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
             setMobileOpen((o) => !o);
             setMobileGroup(null);
           }}
-          className="text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)] lg:hidden"
+          className="text-[var(--mr-text-muted)] transition-colors hover:text-[var(--mr-text-strong)] xl:hidden"
           aria-expanded={mobileOpen}
           aria-controls="public-mobile-nav"
           aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
@@ -235,7 +242,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
       {mobileOpen && (
         <div
           id="public-mobile-nav"
-          className="max-h-[70vh] overflow-y-auto border-t border-hairline bg-[var(--mr-surface)] px-6 py-4 lg:hidden"
+          className="max-h-[70vh] overflow-y-auto border-t border-[var(--mr-hairline)] bg-[var(--mr-surface)] px-6 py-4 xl:hidden"
         >
           {!activeMobile ? (
             <>
