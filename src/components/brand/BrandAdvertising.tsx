@@ -136,19 +136,19 @@ export function BrandAdvertising() {
           description="Budget, spend and campaign performance for your tenant only."
         />
         <Card title="Advertising performance">
-          <p className="text-xs text-zinc-600">No advertising surface without a tenant session.</p>
+          <p className="text-xs text-faint">No advertising surface without a tenant session.</p>
         </Card>
       </WorkspaceFrame>
     );
   }
 
   const kpis = [
-    { label: 'Monthly budget', value: gbp(budget?.monthlyBudgetGbp ?? 0), icon: <Wallet className="w-4 h-4 text-zinc-300" /> },
-    { label: 'Spend to date', value: gbp(budget?.spendToDateGbp ?? 0), icon: <CircleDollarSign className="w-4 h-4 text-amber-300" /> },
-    { label: 'Remaining budget', value: gbp(remaining), icon: <Gauge className="w-4 h-4 text-violet-300" /> },
-    { label: 'Utilisation', value: pct(utilPct), icon: <TrendingUp className="w-4 h-4 text-emerald-300" /> },
-    { label: 'ACOS', value: pct(budget?.acos ?? null), icon: <Percent className="w-4 h-4 text-rose-300" /> },
-    { label: 'TACOS', value: pct(budget?.tacos ?? null), icon: <Percent className="w-4 h-4 text-sky-300" /> },
+    { label: 'Monthly budget', value: gbp(budget?.monthlyBudgetGbp ?? 0), icon: <Wallet className="w-4 h-4 text-strong" /> },
+    { label: 'Spend to date', value: gbp(budget?.spendToDateGbp ?? 0), icon: <CircleDollarSign className="w-4 h-4 text-state-warning" /> },
+    { label: 'Remaining budget', value: gbp(remaining), icon: <Gauge className="w-4 h-4 text-state-muted" /> },
+    { label: 'Utilisation', value: pct(utilPct), icon: <TrendingUp className="w-4 h-4 text-state-success" /> },
+    { label: 'ACOS', value: pct(budget?.acos ?? null), icon: <Percent className="w-4 h-4 text-state-danger" /> },
+    { label: 'TACOS', value: pct(budget?.tacos ?? null), icon: <Percent className="w-4 h-4 text-state-info" /> },
 ];
 return (
     <WorkspaceFrame testId="brand-advertising" className="space-y-4">
@@ -157,14 +157,14 @@ return (
         title="Your advertising performance"
         description={`Budget, spend and campaign performance for ${brandName} — your tenant only.`}
         status={
-          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+          <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">
             <Info className="w-3 h-3 mr-1" /> Simulated — no live ad connection
           </Badge>
         }
       />
 
-      {notice && <p className="text-ds-label text-emerald-400" data-testid="ba-notice">{notice}</p>}
-      {error && <p className="text-ds-label text-rose-400" data-testid="ba-error">{error}</p>}
+      {notice && <p className="text-ds-label text-state-success" data-testid="ba-notice">{notice}</p>}
+      {error && <p className="text-ds-label text-state-danger" data-testid="ba-error">{error}</p>}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {adsLoading
@@ -176,7 +176,7 @@ return (
             ))
           : kpis.map((t) => (
               <Card key={t.label} className="p-4">
-                <div className="flex items-center gap-2 text-ds-micro uppercase tracking-wide text-zinc-500 mb-2">
+                <div className="flex items-center gap-2 text-ds-micro uppercase tracking-wide text-muted mb-2">
                   {t.icon}
                   {t.label}
                 </div>
@@ -189,23 +189,23 @@ return (
         {adsLoading ? (
           <LoadingState rows={4} label="Loading campaigns…" />
         ) : campaigns.length === 0 ? (
-          <p className="text-xs text-zinc-500 px-3 py-3" data-testid="ba-no-campaigns">No campaigns are set up for your brand yet.</p>
+          <p className="text-xs text-muted px-3 py-3" data-testid="ba-no-campaigns">No campaigns are set up for your brand yet.</p>
         ) : (
           <DataTable<AdCampaign>
             columns={[
               { key: 'name', label: 'Campaign', primary: true, render: (c) => <span className="font-medium text-strong">{c.name}</span> },
-              { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-ds-micro', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
-              { key: 'monthlyBudgetGbp', label: 'Budget', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.monthlyBudgetGbp)}</span> },
-              { key: 'spendToDateGbp', label: 'Spend', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.spendToDateGbp)}</span> },
-              { key: 'clicks', label: 'Clicks', align: 'right', hideBelow: 'lg', render: (c) => <span className="font-mono text-xs text-zinc-300">{c.clicks.toLocaleString()}</span> },
-              { key: 'acos', label: 'ACOS', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{pct(c.acos)}</span> },
+              { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-ds-micro', c.status === 'active' ? 'bg-state-success/10 text-state-success border-state-success/20' : 'bg-state-warning/10 text-state-warning border-state-warning/20')}>{c.status}</Badge> },
+              { key: 'monthlyBudgetGbp', label: 'Budget', align: 'right', render: (c) => <span className="font-mono text-xs text-strong">{gbp(c.monthlyBudgetGbp)}</span> },
+              { key: 'spendToDateGbp', label: 'Spend', align: 'right', render: (c) => <span className="font-mono text-xs text-strong">{gbp(c.spendToDateGbp)}</span> },
+              { key: 'clicks', label: 'Clicks', align: 'right', hideBelow: 'lg', render: (c) => <span className="font-mono text-xs text-strong">{c.clicks.toLocaleString()}</span> },
+              { key: 'acos', label: 'ACOS', align: 'right', render: (c) => <span className="font-mono text-xs text-strong">{pct(c.acos)}</span> },
             ]}
             rows={campaigns}
             rowKey={(c) => c.id}
             emptyMessage="No campaign rows."
             dataTable="brand-ad-campaigns"
             onRowClick={(c) => setSelectedCampaign(c.id)}
-            rowClassName={(c) => (c.id === selectedCampaign ? 'bg-brass-500/[0.06] cursor-pointer' : 'cursor-pointer')}
+            rowClassName={(c) => (c.id === selectedCampaign ? 'bg-tint cursor-pointer' : 'cursor-pointer')}
           />
         )}
       </Card>
@@ -224,8 +224,8 @@ return (
                 ['ACOS', pct(selectedCampaignRow.acos)],
                 ['Budget', gbp(selectedCampaignRow.monthlyBudgetGbp)],
               ].map(([k, v]) => (
-                <div key={String(k)} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-2">
-                  <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
+                <div key={String(k)} className="rounded-ds-md border border-hairline bg-surface-raised px-3 py-2">
+                  <div className="text-ds-micro uppercase tracking-wide text-muted">{k}</div>
                   <div className="mt-1 font-medium text-strong">{v}</div>
                 </div>
               ))}
@@ -236,7 +236,7 @@ return (
 
       <div data-testid="ba-recommendation-card">
         <h3 className="text-sm font-semibold text-strong mb-2 flex items-center gap-1.5">
-          <TrendingUp className="w-4 h-4 text-brass-400" /> Recommended monthly advertising budget
+          <TrendingUp className="w-4 h-4 text-[var(--mr-accent)]" /> Recommended monthly advertising budget
         </h3>
         {adsLoading ? (
           <Card className="p-4">
@@ -244,29 +244,29 @@ return (
           </Card>
         ) : recommendations.length === 0 ? (
           <Card className="p-4">
-            <p className="text-xs text-zinc-500">Mercenta has not prepared a budget recommendation for you yet.</p>
+            <p className="text-xs text-muted">Mercenta has not prepared a budget recommendation for you yet.</p>
           </Card>
         ) : (
           <Card className="p-4">
-            <p className="text-ds-label text-zinc-500 mb-3">
+            <p className="text-ds-label text-muted mb-3">
               Mercenta prepares a recommended monthly budget from deterministic estimates. Nothing is spent until you
               approve, amend or reject it — your decision is recorded and attributed.
             </p>
             <div className="space-y-3">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="rounded-ds-md border border-hairline bg-ink-850 px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
+                <div key={rec.id} className="rounded-ds-md border border-hairline bg-surface-raised px-3 py-3" data-testid={`ba-recommendation-row-${rec.id}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-xs font-medium text-strong">{rec.month}</span>
-                      <span className="text-ds-label text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
+                      <span className="text-ds-label text-muted font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
                     </div>
-                    <Badge className={cn('text-ds-micro', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
+                    <Badge className={cn('text-ds-micro', rec.status === 'proposed' ? 'bg-state-info/10 text-state-info border-state-info/20' : rec.status === 'approved' ? 'bg-state-success/10 text-state-success border-state-success/20' : rec.status === 'amended' ? 'bg-state-warning/10 text-state-warning border-state-warning/20' : 'bg-state-danger/10 text-state-danger border-state-danger/20')}>
                       {REC_STATUS_LABEL[rec.status]}
                     </Badge>
                   </div>
-                  <p className="text-ds-label text-zinc-500 mt-1.5">{rec.basis}</p>
+                  <p className="text-ds-label text-muted mt-1.5">{rec.basis}</p>
                   {rec.reviewedAt && (
-                    <p className="text-ds-micro text-zinc-600 mt-1">
+                    <p className="text-ds-micro text-faint mt-1">
                       Decided {rec.reviewedAt.slice(0, 16).replace('T', ' ')} · final £{(rec.amendedBudgetGbp ?? 0).toLocaleString('en-GB')}/mo{rec.note ? ` · note: ${rec.note}` : ''}
                     </p>
                   )}

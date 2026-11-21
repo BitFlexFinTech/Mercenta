@@ -117,7 +117,19 @@ if (recorded) {
  * comment could certify a dead rule as live. The reader now takes the strings the parser sees; the
  * ceiling is lowered to the TRUE counts, and lower is the direction that matters.
  */
-const CEILING = { grey: 2866, ink: 974, literal: 0, uncovered: 0 };
+/**
+ * §BATCH 4b (2026-11-21) — LOWERED FROM grey 2,866 / ink 974 to the counts this
+ * batch measured after migrating the two advertising screens onto the theme
+ * ladder: the brand surface `src/components/brand/BrandAdvertising.tsx` and the
+ * admin surface `src/components/admin/AmazonAdsDashboard.tsx` now use only the
+ * declared tokens (`text-strong` · `text-muted` · `text-faint` · `bg-surface-raised`
+ * · `bg-tint` · `border-hairline` · `bg-[var(--mr-accent)]`) and the canonical
+ * state tones (`state-success` · `state-warning` · `state-danger` · `state-info`
+ * · `state-muted`) instead of the legacy `zinc`/`ink`/`brass` aliases and the
+ * legacy Tailwind palette. The ceiling is lowered to the measured value, as this
+ * check's own note above requires.
+ */
+const CEILING = { grey: 2785, ink: 929, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);

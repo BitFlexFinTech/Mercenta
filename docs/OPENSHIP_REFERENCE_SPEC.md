@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2832/123 ink=934/115 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=2785/121 ink=929/115 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -905,6 +905,17 @@ Every row below was measured in this repository this session.
 > repointed from `border-zinc-300` to the `border-hairline-strong` role token — a
 > text-brightness token that was being borrowed for a structural border (near-white in
 > the dark appearance). Ink is unchanged at 934/115. No other figure moved.
+>
+> **Re-measured again 2026-11-21 (§BATCH 4b — the advertising screens):** grey moved
+> 2832 → **2785** sites across **121** files (−47) and ink 934 → **929** (−5), because the
+> two advertising surfaces — `src/components/brand/BrandAdvertising.tsx` (brand) and
+> `src/components/admin/AmazonAdsDashboard.tsx` (admin) — were migrated off the legacy
+> `zinc`/`ink`/`brass` aliases and the legacy Tailwind palette onto the declared theme
+> ladder (`text-strong` · `text-muted` · `text-faint` · `bg-surface-raised` · `bg-tint` ·
+> `border-hairline` · `bg-[var(--mr-accent)]`) and the canonical state tones
+> (`state-success` · `state-warning` · `state-danger` · `state-info` · `state-muted`).
+> The ratchet ceiling in `scripts/validate-legacy-styling-migration.mjs` was lowered to
+> these figures in the SAME change, as this document's own note requires.
 >
 > **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
 > header's dropdown panel was the last site in that component still painted with the
