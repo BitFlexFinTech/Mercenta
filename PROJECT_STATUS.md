@@ -4,19 +4,115 @@
 ## CURRENT RESUME STATE
 <!-- Machine-readable. The ten fields below are read by scripts/validate-resume-state.mjs; the
      RULES APPLIED line is read by scripts/validate-rules-application.mjs. Updated 2026-11-19. -->
-RULES APPLIED THIS SESSION: MODE: IMPLEMENT · EXPERTS: senior-software-engineer, ux-product-analyst · WHY: continuing an approved multi-batch redesign — the approved Concept 3 homepage was registered as a fifth, additive design and every guard that pinned the literal "four designs" was repointed rather than weakened.
-LAST COMPLETED TASK: **BATCH 3 — THE CONCEPT 3 HOMEPAGE, REGISTERED AS DESIGN E (ADDITIVE).** `src/components/marketing/home/DesignE.tsx` added and registered in `homepageDesign.ts`, `designRegistry.ts` and `HomeDesigns.tsx`; every string is read from `homepageContent.ts` and every image from `homepageImagery.ts` (single source of truth — nothing hardcoded). It renders the approved hero as a 12-column split (copy in columns 1–6, the live `HeroTracker` in columns 7–12 inside a reserved-height panel so there is zero layout shift), the construction grid drawn from theme tokens, a hairline manifest strip, "Four ways to work with Mercenta" as four modular tiles (MOD 01–04), and "Five steps. One tracked route." as a sticky left visual beside five numbered stage panels joined by animated dashed connectors. Design A (Monolith) remains the owner's fixed default; E is chosen in Super Admin → Homepage Editor. `e2e/homepage-designs.spec.ts` was extended to the fifth design, and `validate-e6-brand-surfaces`, `validate-theme-foundation` and `validate-uiux-redesign` were REPOINTED to derive the count instead of pinning the literal four.
-CURRENT VERIFIED STATE: **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Batches 0–3 of the Concept 3 integration are committed and pushed. `validate:all` **198 PASS / 0 FAIL**, typecheck **0**, build **EXIT 0**. NOT deployed: the owner's directive holds deployment until Batches 5–6 are complete and the full site is visually verified.
+RULES APPLIED THIS SESSION: MODE: IMPLEMENT · EXPERTS: senior-software-engineer, ux-product-analyst, project-manager · WHY: the owner approved a five-batch redesign plan, so this session records that plan in the project and then fixes the foundation defect the first batch depends on.
+LAST COMPLETED TASK: **BATCH 4a — THE FOUNDATION DEFECT UNDER THE WHOLE REDESIGN, FIXED AT SOURCE WITH A GATE.** `text-strong` — the class the legacy-styling migration gave to 1,663 sites — was NEVER DECLARED in `tailwind.config.js`, so it was a **DEAD CLASS in 97 files**: "strong" text silently inherited its parent instead, and `--mr-text` (#E8E8E8 / #333333) is genuinely different from `--mr-text-strong` (#FFFFFF / #000000). Declared the whole text ladder (`strong` · `faint` · `soft` · `active`) plus the missing `surface.tint`, which also un-deadened `bg-surface-tint` in 3 files (the guided tour's own panel among them). The new gate then found a SECOND real defect: `NotificationCenter` used `state-critical` (bare) in 4 places where the declared key is `danger` — repointed to `state-danger` and the shims regenerated. New gate `scripts/validate-theme-classes-resolve.mjs`, proved able to fail. Full record: `§BATCH 4a` above.
+CURRENT VERIFIED STATE: **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Batches 0–4a are committed and pushed. `validate:all` **199 PASS / 0 FAIL**, typecheck **0**, build **EXIT 0**, `theme-visual` + `accessibility` **25 passed** (axe: 0 violations), `app-shell` + `brand-advertising` **31 passed**. NOT deployed: the owner's directive holds deployment until the last batch is complete and the full site is visually verified.
 CURRENT BRANCH: `redesign/foundation`
-LAST VERIFIED COMMIT: `a525de4` — "feat(homepage): add the approved Concept 3 direction as Design E, additively".
-GITHUB PUSH: pushed to `origin/redesign/foundation` at `a525de4` (this state record is committed on top of it and changes no application runtime).
-DEMO DEPLOYMENT: NOT DEPLOYED — the owner's directive holds deployment until Batches 5–6 are complete and the full site is visually verified.
-LIVE VERIFICATION: NOT VERIFIED — nothing was deployed, so there was nothing live to check. All verification was LOCAL: `validate:all` 198 PASS / 0 FAIL, typecheck 0, production build EXIT 0, and the homepage designs exercised in a browser in BOTH appearances.
-OUTSTANDING BLOCKER: **THREE items, NONE of which blocks the build — and, per the standing decision, credentials are never a build blocker.** (1) **Google refuses image generation**: the free tier returns `429 RESOURCE_EXHAUSTED` with `limit: 0` — the key is VALID but needs BILLING switched on for Cloud project `749947866534`. Not required: the FREE CC0 image route was taken instead. (2) **The Integrations wizard cannot store a key**: `vite build` never loads `.env.deploy`, so `isSupabaseConfigured` is false and there is no Vault. That is a DECISION waiting on the owner: load `.env.deploy`, or delete it as dead configuration. (3) **A RECORDING GAP, NOT A BLOCKER:** the redesign's own batch list (Batches 0–6) existed only in the planning session and is NOT written down in the repository, so the next session must confirm Batches 4–6 with the owner rather than infer them.
-NEXT TASK: **BATCH 4 — THE REMAINING SURFACES ON THE CONCEPT 3 DESIGN LANGUAGE (BUILD WORK — SCOPE TO BE CONFIRMED WITH THE OWNER IN ONE LINE BEFORE WORK STARTS).** The repository does not record what Batches 4–6 were defined as. The strongest evidence in this repository is that Batch 4 was the BRAND-FACING SURFACES: the in-progress edits were on `src/components/brand/BrandAdvertising.tsx`, and its guards and spec (`scripts/lint-wording.mjs`, `src/lib/discovery/wordingSafety.ts`, `scripts/validate-amazon-ads.mjs`, `e2e/brand-advertising.spec.ts`) had all been read for it. Whatever the batch turns out to be, it must keep the Amazon wording safeguards and the tenant scoping untouched.
-EXACT NEXT STARTING POINT: `src/components/brand/BrandAdvertising.tsx` (the file the in-progress Batch 4 edits were on) → the rest of `src/components/brand/` → `e2e/brand-advertising.spec.ts` (the existing coverage to extend) → `scripts/lint-wording.mjs` + `src/lib/discovery/wordingSafety.ts` (the wording guards that must keep passing). If the owner confirms a different Batch 4, start from the surface they name instead.
+LAST VERIFIED COMMIT: `a424ed8` — "fix(theme): text-strong was a DEAD CLASS in 97 files — declare the missing ladder, and gate the whole class".
+GITHUB PUSH: pushed to `origin/redesign/foundation` at `a424ed8` (this state record is committed on top of it and changes no application runtime).
+DEMO DEPLOYMENT: NOT DEPLOYED — the owner's directive holds deployment until the last batch is complete and the full site is visually verified.
+LIVE VERIFICATION: NOT VERIFIED — nothing was deployed, so there was nothing live to check. All verification was LOCAL: `validate:all` 199/0, typecheck 0, build EXIT 0, and 56 browser tests passed across the theme, accessibility, shell and advertising suites.
+OUTSTANDING BLOCKER: **THREE items, NONE of which blocks the build — and, per the standing decision, credentials are never a build blocker.** (1) **Google refuses image generation**: the free tier returns `429 RESOURCE_EXHAUSTED` with `limit: 0` — the key is VALID but needs BILLING switched on for Cloud project `749947866534`. Not required: the FREE CC0 image route was taken instead. (2) **The Integrations wizard cannot store a key**: `vite build` never loads `.env.deploy`, so `isSupabaseConfigured` is false and there is no Vault. That is a DECISION waiting on the owner: load `.env.deploy`, or delete it as dead configuration. (3) **The four PRINT documents** keep their original navy and red-brown print colours: recolouring them was REVERTED because they sit under PROTECTED paths that refuse without Founder authorisation. **The Creative Studio and the Campaigns & Assets library are NOT built** — a named decision, recorded under `§BRAND REDESIGN — THE BATCH PLAN`.
+NEXT TASK: **BATCH 4b — THE ADVERTISING SCREEN RESTYLE (BUILD WORK, OWNER-CONFIRMED 2026-11-21).** Restyle `src/components/brand/BrandAdvertising.tsx` and `src/components/admin/AmazonAdsDashboard.tsx` onto the approved Concept 3 language. The figures, the per-tenant separation and the Amazon wording safeguards stay UNTOUCHED. The whole plan, and the owner's other two DECISIONS, are recorded under `§BRAND REDESIGN — THE BATCH PLAN, RECORDED IN THE PROJECT` above.
+EXACT NEXT STARTING POINT: `src/components/brand/BrandAdvertising.tsx` → `src/components/admin/AmazonAdsDashboard.tsx` → `e2e/brand-advertising.spec.ts` (the existing coverage that must keep passing) → `src/components/shared/workspace.tsx` (the shared primitives both already use) → `src/components/marketing/home/designShared.tsx` (the approved look to match).
+PLAIN SUMMARY (OWNER-FACING): **I found a fault that would have quietly broken the whole new look, and I fixed it before building anything on top of it.** The project had been given a set of text colours to use, but the name of the most important one — "strong" text — was never actually set up, so **it did nothing at all in 97 files**. The text still showed, so nobody noticed: it quietly used a slightly duller grey instead of the proper white-on-dark and black-on-light. **The same fault hit a panel colour in 3 files**, including the guided tour's own panel. **A second, smaller fault turned up while checking:** the notification bell's red "needs attention" colour had the wrong name in 4 places, so it lost its colour. All of it is fixed, and there is now an **automatic check that fails if any colour name we use is not actually set up** — I proved it works by deliberately breaking it and watching it fail. **Everything passes: 199 automatic checks, the type check, the production build, and 56 checks that drive the real website.** **Nothing has been published**, and nothing has been sent to the live site. **Next:** the advertising screen — the second screen in your approved design.
 PLAIN SUMMARY (OWNER-FACING): **The approved Concept 3 homepage is now built and saved as a fifth homepage you can pick in the admin Homepage Editor — everything passes locally, and nothing has been published.** It is added, not swapped: the homepage visitors see today is unchanged until you choose the new one. The new homepage shows the headline you approved on the left and the live shipment tracker on the right, then "Four ways to work with Mercenta" as four blocks, then the five-step journey with the dashed line between the steps. Every check passes: 198 automatic checks, the type check, and the production build. **Nothing has been published to the live website**, because you said to hold that until the last batches are done and you have looked at the whole site. **One thing I need from you:** the list of the remaining batches (4, 5 and 6) was only in our earlier conversation and is not written into the project, so please confirm in a line what Batch 4 should be — my best evidence says it is the brand-side advertising screen, and I will start there unless you say otherwise.
 PLAIN SUMMARY (OWNER-FACING): **The menu is fixed, the wording is fixed, and the four homepages finally look like four different homepages — everything passes locally but nothing has been saved or published.** Seventeen menu links used to open a blank screen; they now open real pages, and a new automatic check fails the build if a menu link ever points at nothing. The homepage used to say "Amazon" to visitors while the safety check claimed zero problems — the check had been told to skip that file; it now reads it. The menu no longer collides with the logo at laptop width. **For pictures:** paid generation is ruled out and Google's free tier refuses it outright, so twelve real photographs were fetched from a free public-domain library — no cost, no watermark, no licence obligation — and committed so the live site contacts no third party. **The four designs** are genuinely different now, all keeping the same three buttons and the same tracking animation. **Nothing has been saved, pushed or published**, because you have not said to. **One thing only if you ever want it:** Google-generated images need billing switched on — nothing needs it today.
+## §BRAND REDESIGN — THE BATCH PLAN, RECORDED IN THE PROJECT (2026-11-21)
+
+**WHY THIS SECTION EXISTS.** The redesign's own batch list (Batches 0–6) was held ONLY in the session that
+planned it and was written NOWHERE in the repository. When that conversation was compacted the plan was lost,
+and both the owner and the next session had to reconstruct it from evidence. That is the defect this section
+fixes: **the plan now lives in the project, not in a conversation.**
+
+**WHAT THE APPROVED DESIGN ACTUALLY IS.** The approved blueprint is
+`0. Company Documents/2. Branding/Homepage design/New final/mercenta-market-entry-main/`, and it contains
+EXACTLY TWO application screens:
+
+1. the **homepage** — built as `DesignE.tsx` (Batch 3);
+2. **Ads Management** (route `/ads-management`, titled *"Mercenta Ads Management — Brand Partner Portal"*) —
+   **NOT built.** It has three tabs: **Performance** · **Creative Studio** · **Campaigns & Assets**.
+
+**THE OWNER'S DECISIONS (2026-11-21).**
+
+- Batch 4 = **the advertising screen restyle** — CONFIRMED.
+- The **Creative Studio and the Campaigns & Assets library are NOT built now.** They are new functionality, not
+  a restyle, and creating Amazon ads is a wording-sensitive area with its own safety gates. They are recorded
+  below as a SEPARATE, NAMED future decision so they cannot be lost.
+- The redesign is carried **through the whole signed-in product** — not the visitor pages only — CONFIRMED.
+
+**THE MEASURED SIZE** (from `npm run measure:legacy` plus a per-area count, 2026-11-21):
+
+| Area | old grey uses | old ink uses | files |
+|---|---|---|---|
+| Admin (signed in as Mercenta) | 1,727 | 502 | 46 |
+| Brand portal (signed in as a brand) | 585 | 182 | 21 |
+| Shared building blocks (used by every screen) | 325 | 135 | 19 |
+| App frame (top bar, sidebar) | 36 | 14 | 3 |
+| Public marketing pages | 24 | 53 | 16 |
+| **Total** | **≈2,700** | **≈890** | **≈105** |
+
+`scripts/validate-legacy-styling-migration.mjs` holds a **RATCHET** (`grey 2866 · ink 974`) that may only fall,
+so progress is measurable and cannot slip back. Measured today: `grey 2832 · ink 934`.
+
+**THE PLAN — FIVE BATCHES, SHARED PRIMITIVES FIRST.**
+
+- **BATCH 4 — the advertising screen (the approved design's second screen).** Restyle
+  `src/components/brand/BrandAdvertising.tsx` and `src/components/admin/AmazonAdsDashboard.tsx`. The figures,
+  the per-tenant separation and the Amazon wording safeguards are UNTOUCHED.
+  **Sub-step 4a (added by rule 07):** a FOUNDATION DEFECT found while reading those two files — recorded under
+  §BATCH 4a below.
+- **BATCH 5 — the shared building blocks** (`src/components/shared/**` 19 files · `src/components/layout/**`
+  3 files · the canonical UI kit). Done FIRST on purpose: one change lifts every screen.
+- **BATCH 6 — the signed-in Brand portal** — the remaining ~21 brand screens.
+- **BATCH 7 — the signed-in Admin area** — the ~46 admin screens (the largest batch).
+- **BATCH 8 — the full visual pass, then publish** — every screen in a real browser in both appearances, then
+  `demo.mercenta.co.uk` (the publish the owner is holding until this point).
+
+**§DEFERRED — THE TWO NEW SCREENS (a named decision, not a lost one).** The **Creative Studio** and the
+**Campaigns & Assets library** shown in the approved blueprint do not exist in the product (verified: no
+ad-size list, no creative, and no asset library anywhere in `src/`). Building them is NEW functionality and a
+product decision. They are recorded here so a future session cannot mistake them for missing restyle work, and
+so the owner's "not now" is not silently re-opened.
+
+
+## §BATCH 4a — THE FOUNDATION DEFECT UNDER THE WHOLE REDESIGN: `text-strong` WAS A DEAD CLASS IN 97 FILES (2026-11-21)
+
+**Status: FIXED at source, with a gate. Commit `a424ed8`.**
+
+1. **WHAT WAS WRONG.** The legacy-styling migration (OpenShip Batch 10) repointed 1,663 literal
+   `white`/`black` sites onto the theme's text ladder and named its target **`text-strong`**. That name was
+   **never declared** in `tailwind.config.js`, so Tailwind emitted **no rule for it**. Measured before the fix:
+   `resolveConfig(...).theme.colors.strong` was `undefined`, and the built stylesheet contained
+   `.text-[var(--mr-text-strong)]` but **no `.text-strong`**. It was a **dead class in 97 files**.
+2. **WHY IT MATTERED, MEASURABLY.** `--mr-text` is `#E8E8E8` (dark) / `#333333` (light) while
+   `--mr-text-strong` is `#FFFFFF` / `#000000`. So "strong" text was **not strong on either appearance** — it
+   silently inherited its parent's colour. Nothing could catch it: a class that emits no CSS cannot fail
+   typecheck, the build, 198 validators, or any browser test.
+3. **FIXED AT SOURCE (rule 07).** The whole text ladder the tokens already define is now declared
+   (`strong` · `faint` · `soft` · `active`), plus the missing `surface.tint` key — which also made
+   **`bg-surface-tint` a dead class in 3 files** (`TourEngine`, `OnboardingWizard`, `ui.tsx`), including the
+   guided-tour panel's own fill.
+4. **A SECOND REAL DEFECT, FOUND BY THE NEW GATE.** `NotificationCenter.tsx` used **`state-critical`** (bare)
+   in 4 places, but the declared state key is **`danger`** — so the notification tone lost its colour.
+   Repointed to `state-danger`; the auto-generated alpha shims were regenerated to match (1 insertion,
+   3 deletions).
+5. **NEW GATE (rule 07 §4) — `scripts/validate-theme-classes-resolve.mjs`.** It discovers the token vocabulary
+   from its OWNER (`src/config/themes.ts`, never a retyped list), loads the Tailwind config through
+   `resolveConfig`, and **FAILS** if any colour-family class the source uses does not resolve to a colour. It
+   **FAILS LOUDLY when the discovery returns nothing** (rule 10 §5), and it is auto-discovered by
+   `validate:all` (rule 09 §4).
+6. **PROVED ABLE TO FAIL.** `strong` was removed from the config → the gate **FAILED**, naming
+   `"text-strong" (97 file(s))` → the file was restored **byte-identical** (sha256 `cf37e11d…` before and
+   after) → the gate **PASSED**.
+7. **EVIDENCE.** `validate:all` **199 PASS / 0 FAIL** (199, not 198 — the new gate is auto-discovered) ·
+   typecheck **0** · build **EXIT 0** · `theme-visual` + `accessibility` **25 passed** (axe: **0 violations**) ·
+   `app-shell` + `brand-advertising` **31 passed**.
+
+**WHY THIS BELONGS IN BATCH 4.** Batch 4 restyles the advertising screens onto this very ladder. Fixing the
+ladder FIRST means Batch 4 — and Batches 5–7 — are built on a foundation that actually renders, instead of
+propagating a class that does nothing.
+
 ## §CLICKUP PROJECT ENVIRONMENT — BUILT 2026-11-19
 
 **A GOVERNANCE/TOOLING increment: it changes NO application runtime behaviour**, so the three-way
