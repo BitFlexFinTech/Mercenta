@@ -114,14 +114,14 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
   function hp() { if (!canMutate) return; updateProductCost(product.sku, ep); setSv('Price updated.'); setTimeout(function() { setSv(null); }, 3000); }
   return (
     <div className='fixed inset-0 z-50 bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4'>
-      <div className='bg-ink-850 border border-hairline rounded-ds-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
+      <div className='bg-surface-raised border border-hairline rounded-ds-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
         <div className='flex items-center justify-between px-5 py-4 border-b border-hairline'>
-          <div className='flex items-center gap-3'><Package className='w-5 h-5 text-brass-400' /><div><h2 className='text-sm font-semibold text-strong'>{product.name}</h2><p className='text-ds-micro text-zinc-500 font-mono'>{product.sku} · {product.barcode}</p></div></div>
-          <button onClick={onClose} className='text-zinc-400 hover:text-strong'><X className='w-4 h-4' /></button>
+          <div className='flex items-center gap-3'><Package className='w-5 h-5 text-accent-400' /><div><h2 className='text-sm font-semibold text-strong'>{product.name}</h2><p className='text-ds-micro text-muted font-mono'>{product.sku} · {product.barcode}</p></div></div>
+          <button onClick={onClose} className='text-muted hover:text-strong'><X className='w-4 h-4' /></button>
         </div>
         <div className='flex gap-1 px-5 pt-3 border-b border-hairline'>
           {['detail', 'images', 'pricing', 'inventory'].map(function(t) { return (
-            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t', tab === t ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : t === 'pricing' ? 'Pricing' : 'Inventory'}</button>
+            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t', tab === t ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : t === 'pricing' ? 'Pricing' : 'Inventory'}</button>
           );})}
         </div>
         <div className='flex-1 overflow-y-auto p-5 space-y-4'>
@@ -129,34 +129,34 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
           {tab === 'detail' && (
             <div className='grid grid-cols-2 gap-4 text-xs'>
               <div className='space-y-2'>
-                <div><span className='text-zinc-500'>Brand</span><p className='text-strong font-medium'>{bn}</p></div>
-                <div><span className='text-zinc-500'>Category</span><p className='text-strong font-medium'>{bc}</p></div>
-                <div><span className='text-zinc-500'>Commodity Code</span><p className='text-strong font-mono'>{product.commodityCode}</p></div>
-                <div><span className='text-zinc-500'>VAT Status</span><p className='text-strong'>{product.vatStatus}</p></div>
-                <div><span className='text-zinc-500'>Hazmat</span><p className='text-strong'>{product.hazmat ? 'Yes' : 'No'}</p></div>
+                <div><span className='text-muted'>Brand</span><p className='text-strong font-medium'>{bn}</p></div>
+                <div><span className='text-muted'>Category</span><p className='text-strong font-medium'>{bc}</p></div>
+                <div><span className='text-muted'>Commodity Code</span><p className='text-strong font-mono'>{product.commodityCode}</p></div>
+                <div><span className='text-muted'>VAT Status</span><p className='text-strong'>{product.vatStatus}</p></div>
+                <div><span className='text-muted'>Hazmat</span><p className='text-strong'>{product.hazmat ? 'Yes' : 'No'}</p></div>
               </div>
               <div className='space-y-2'>
-                <div><span className='text-zinc-500'>Unit Price (Ex-Works)</span><p className='text-strong font-mono'>GBP {product.exWorksPrice.toFixed(2)}</p></div>
-                <div><span className='text-zinc-500'>UK Retail Price</span><p className='text-strong font-mono'>GBP {product.ukRetailPrice.toFixed(2)}</p></div>
-                <div><span className='text-zinc-500'>Dimensions</span><p className='text-strong font-mono'>{product.length} × {product.width} × {product.height} cm</p></div>
-                <div><span className='text-zinc-500'>Weight</span><p className='text-strong font-mono'>{product.weight} kg</p></div>
+                <div><span className='text-muted'>Unit Price (Ex-Works)</span><p className='text-strong font-mono'>GBP {product.exWorksPrice.toFixed(2)}</p></div>
+                <div><span className='text-muted'>UK Retail Price</span><p className='text-strong font-mono'>GBP {product.ukRetailPrice.toFixed(2)}</p></div>
+                <div><span className='text-muted'>Dimensions</span><p className='text-strong font-mono'>{product.length} × {product.width} × {product.height} cm</p></div>
+                <div><span className='text-muted'>Weight</span><p className='text-strong font-mono'>{product.weight} kg</p></div>
                 {product.unitsPerCase != null && (
-                  <div><span className='text-zinc-500'>Units Per Case</span><p className='text-strong font-mono'>{product.unitsPerCase} {product.caseOrderable ? '(orderable)' : ''}</p></div>
+                  <div><span className='text-muted'>Units Per Case</span><p className='text-strong font-mono'>{product.unitsPerCase} {product.caseOrderable ? '(orderable)' : ''}</p></div>
                 )}
               </div>
               {/* Availability edit section */}
               <div className='col-span-2 border-t border-hairline pt-3 mt-2'>
-                <p className='text-zinc-400 mb-2 font-medium'>Availability</p>
+                <p className='text-muted mb-2 font-medium'>Availability</p>
                 <div className='flex items-center gap-4'>
-                  <label className='flex items-center gap-2 text-zinc-300'>
+                  <label className='flex items-center gap-2 text-strong'>
                     <input type='checkbox' checked={av} onChange={function(e) { setAv(e.target.checked); }}
-                      className='rounded-ds-sm border-hairline-strong bg-ink-900 accent-brass-500' />
+                      className='rounded-ds-sm border-hairline-strong bg-surface accent-[var(--mr-accent)]' />
                     Available for new POs
                   </label>
                   <div className='flex items-center gap-2'>
-                    <span className='text-zinc-500 text-ds-micro'>Lead time:</span>
+                    <span className='text-muted text-ds-micro'>Lead time:</span>
                     <input type='number' value={lt} min={1} max={90} onChange={function(e) { setLt(parseInt(e.target.value) || 1); }}
-                      className='w-16 bg-ink-900 border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong text-center' /> days
+                      className='w-16 bg-surface border border-hairline rounded-ds-sm px-1.5 py-1 text-xs text-strong text-center' /> days
                   </div>
                   <Button className='text-ds-micro' data-state="catalog-save-availability" disabled={!canMutate}
                     title={canMutate ? undefined : 'View-only staff cannot change product availability'} onClick={ha}>Save Availability</Button>
@@ -166,21 +166,21 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                   DERIVED (canonical prerequisites + canonical submission store);
                   simulated provenance is stated explicitly, never implied live. */}
               <div className='col-span-2 border-t border-hairline pt-3 mt-2'>
-                <p className='text-zinc-400 mb-2 font-medium'>Catalog readiness &amp; submission</p>
+                <p className='text-muted mb-2 font-medium'>Catalog readiness &amp; submission</p>
                 <div className='grid grid-cols-2 gap-3'>
                   <div>
-                    <span className='text-zinc-500'>Product information</span>
+                    <span className='text-muted'>Product information</span>
                     {(() => {
                       const c = evaluateProductCompleteness(product as unknown as Record<string, unknown>);
                       return (
-                        <p className={c.complete ? 'text-emerald-400' : 'text-amber-300'}>
+                        <p className={c.complete ? 'text-state-success' : 'text-state-warning'}>
                           {c.complete ? 'Complete' : `Missing: ${c.missingLabels.join(', ')}`}
                         </p>
                       );
                     })()}
                   </div>
                   <div>
-                    <span className='text-zinc-500'>Submission</span>
+                    <span className='text-muted'>Submission</span>
                     {submission ? (
                       <p className='text-strong'>
                         {SUBMISSION_STATUS_LABELS[submission.status]}
@@ -189,7 +189,7 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                         {submission.rejectionReason ? ` — ${submission.rejectionReason}` : ''}
                       </p>
                     ) : (
-                      <p className='text-zinc-500'>Not yet submitted</p>
+                      <p className='text-muted'>Not yet submitted</p>
                     )}
                   </div>
                 </div>
@@ -210,17 +210,17 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
           {tab === 'pricing' && (
             <div className='space-y-3 max-w-sm'>
               <div>
-                <label className='text-ds-micro text-zinc-500 font-medium block mb-1'>Ex-Works Price (GBP)</label>
+                <label className='text-ds-micro text-muted font-medium block mb-1'>Ex-Works Price (GBP)</label>
                 <input type='number' step='0.01' value={ep} onChange={function(e) { setEp(Number(e.target.value)); }}
-                  className='w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-sm text-strong' />
+                  className='w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-sm text-strong' />
               </div>
-              <div className='text-ds-micro text-zinc-500 space-y-1'>
-                <p>UK Retail: <span className='font-mono text-zinc-300'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
-                <p>Implied margin: <span className='font-mono text-zinc-300'>{((product.ukRetailPrice - ep) / product.ukRetailPrice * 100).toFixed(1)}%</span></p>
+              <div className='text-ds-micro text-muted space-y-1'>
+                <p>UK Retail: <span className='font-mono text-strong'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
+                <p>Implied margin: <span className='font-mono text-strong'>{((product.ukRetailPrice - ep) / product.ukRetailPrice * 100).toFixed(1)}%</span></p>
               </div>
               <Button className='text-xs' data-state="catalog-update-price" disabled={!canMutate}
                 title={canMutate ? undefined : 'View-only staff cannot change product pricing'} onClick={hp}>Update Price</Button>
-              {sv && <p className='text-ds-micro text-emerald-400'>{sv}</p>}
+              {sv && <p className='text-ds-micro text-state-success'>{sv}</p>}
             </div>
           )}
           {/* ── §P8 Inventory Tab — decision 5 / decision 10 ── */}
@@ -228,56 +228,56 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
             <div className='space-y-4' data-testid="catalog-inventory-tab">
               <div className='grid grid-cols-2 gap-3 text-xs'>
                 <div>
-                  <span className='text-zinc-500 block mb-1'>Position (derived from the ledger)</span>
+                  <span className='text-muted block mb-1'>Position (derived from the ledger)</span>
                   {inventory ? (
-                    <div className='space-y-0.5 text-zinc-200'>
+                    <div className='space-y-0.5 text-strong'>
                       <p>On hand: <span className='font-mono'>{inventory.onHand}</span> · committed: <span className='font-mono'>{inventory.committed}</span> · inbound: <span className='font-mono'>{inventory.inbound}</span></p>
-                      <p>Available: <span className={cn('font-mono', inventory.available < 0 ? 'text-red-300' : 'text-strong')}>{inventory.available}</span> · safety stock: <span className='font-mono'>{inventory.safetyStock}</span> · unit: {INVENTORY_UOM_LABELS[inventory.uom]}</p>
-                      <p className={inventory.status === 'in_stock' ? 'text-emerald-400' : inventory.status === 'out_of_stock' ? 'text-red-300' : 'text-amber-300'}>{INVENTORY_STATUS_LABELS[inventory.status]}</p>
+                      <p>Available: <span className={cn('font-mono', inventory.available < 0 ? 'text-state-danger' : 'text-strong')}>{inventory.available}</span> · safety stock: <span className='font-mono'>{inventory.safetyStock}</span> · unit: {INVENTORY_UOM_LABELS[inventory.uom]}</p>
+                      <p className={inventory.status === 'in_stock' ? 'text-state-success' : inventory.status === 'out_of_stock' ? 'text-state-danger' : 'text-state-warning'}>{INVENTORY_STATUS_LABELS[inventory.status]}</p>
                     </div>
                   ) : (
-                    <p className='text-zinc-500'>No inventory record for this product.</p>
+                    <p className='text-muted'>No inventory record for this product.</p>
                   )}
                 </div>
                 <div data-testid="catalog-inventory-identifier">
-                  <span className='text-zinc-500 block mb-1'>Channel identifier</span>
+                  <span className='text-muted block mb-1'>Channel identifier</span>
                   {inventory?.asin ? (
-                    <div className='space-y-0.5 text-zinc-200'>
+                    <div className='space-y-0.5 text-strong'>
                       <p className='font-mono'>{inventory.asin}</p>
-                      <p className='text-ds-micro text-zinc-500'>
+                      <p className='text-ds-micro text-muted'>
                         {inventory.asinSource ? ASIN_SOURCE_LABELS[inventory.asinSource] : ''}
                         {inventory.asinSimulated ? ' (simulated placeholder)' : ''}
                       </p>
                     </div>
                   ) : (
-                    <p className='text-zinc-500'>No identifier recorded yet.</p>
+                    <p className='text-muted'>No identifier recorded yet.</p>
                   )}
                 </div>
               </div>
-              <p className='text-ds-micro text-zinc-500 leading-relaxed'>{INVENTORY_DERIVATION_BASIS}</p>
+              <p className='text-ds-micro text-muted leading-relaxed'>{INVENTORY_DERIVATION_BASIS}</p>
 
               <div className='border-t border-hairline pt-3 space-y-2'>
-                <p className='text-zinc-400 font-medium'>Override the channel identifier</p>
+                <p className='text-muted font-medium'>Override the channel identifier</p>
                 <div className='flex flex-wrap gap-2'>
                   <input value={overrideAsin} onChange={function(e) { setOverrideAsin(e.target.value); }}
                     placeholder='Identifier (10 alphanumeric)' disabled={!canMutate}
-                    className='bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong' />
+                    className='bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong' />
                   <input value={overrideReason} onChange={function(e) { setOverrideReason(e.target.value); }}
                     placeholder='Reason (required)' disabled={!canMutate}
-                    className='bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong flex-1 min-w-[12rem]' />
+                    className='bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong flex-1 min-w-[12rem]' />
                   <Button className='text-xs' data-state="catalog-override-identifier" disabled={!canMutate}
                     title={canMutate ? undefined : 'View-only staff cannot override the identifier'}
                     onClick={handleOverrideAsin}>Record identifier</Button>
                 </div>
-                {invNotice && <p className='text-ds-micro text-amber-300' data-testid="catalog-inventory-notice">{invNotice}</p>}
-                <ul className='text-ds-micro text-zinc-500 space-y-0.5'>
+                {invNotice && <p className='text-ds-micro text-state-warning' data-testid="catalog-inventory-notice">{invNotice}</p>}
+                <ul className='text-ds-micro text-muted space-y-0.5'>
                   {ASIN_RULES.map(function(r) { return <li key={r}>• {r}</li>; })}
                 </ul>
               </div>
 
               <div className='border-t border-hairline pt-3 space-y-2' data-testid="catalog-inventory-channel-push">
-                <p className='text-zinc-400 font-medium'>Push stock to the channel</p>
-                <p className='text-ds-micro text-zinc-500 leading-relaxed'>
+                <p className='text-muted font-medium'>Push stock to the channel</p>
+                <p className='text-ds-micro text-muted leading-relaxed'>
                   submitInventoryUpdate — Mercenta reports this position to the channel. The quantity
                   is DERIVED from the movement ledger above, never typed in; only Eaches/Cases are
                   pushed, and a case push needs the product's own case pack.
@@ -285,18 +285,18 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                 <Button className='text-xs' data-state="catalog-inventory-push" disabled={!canMutate || pushBusy}
                   title={canMutate ? undefined : 'View-only staff cannot push stock to the channel'}
                   onClick={handlePushStock}>Report stock to channel</Button>
-                {pushNotice && <p className='text-ds-micro text-amber-300' data-testid="catalog-inventory-push-notice">{pushNotice}</p>}
+                {pushNotice && <p className='text-ds-micro text-state-warning' data-testid="catalog-inventory-push-notice">{pushNotice}</p>}
               </div>
 
               <div className='border-t border-hairline pt-3'>
-                <p className='text-zinc-400 font-medium mb-1'>Movement ledger ({ledger.length})</p>
-                <ul className='max-h-40 overflow-y-auto space-y-0.5 text-ds-micro text-zinc-400' data-testid="catalog-inventory-ledger">
+                <p className='text-muted font-medium mb-1'>Movement ledger ({ledger.length})</p>
+                <ul className='max-h-40 overflow-y-auto space-y-0.5 text-ds-micro text-muted' data-testid="catalog-inventory-ledger">
                   {ledger.map(function(m) { return (
                     <li key={m.id} className='flex flex-wrap gap-x-3'>
                       <span className='font-mono'>{m.recordedAt.slice(0, 10)}</span>
                       <span>{m.type}</span>
                       <span className='font-mono'>{m.quantityDelta > 0 ? '+' : ''}{m.quantityDelta}</span>
-                      <span className='text-zinc-600'>{m.enteredQuantity} {m.enteredUom} · {m.bucket} · {m.actorId}</span>
+                      <span className='text-faint'>{m.enteredQuantity} {m.enteredUom} · {m.bucket} · {m.actorId}</span>
                     </li>
                   ); })}
                 </ul>
@@ -482,20 +482,20 @@ export function CatalogManagerAdmin() {
         description="Every catalogue record, its owning brand tenant and its channel-submission state. Product readiness is derived from the same canonical submission records the brand sees."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {filteredProducts.length} of {products.length} products
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">{brands.length} brands</span>
-            <span className="font-mono text-ds-label text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-ds-label text-muted">{brands.length} brands</span>
+            <span className="font-mono text-ds-label text-muted">focus: {focus.replace(/_/g, ' ')}</span>
           </>
         }
         toolbar={
           <div className='flex items-center gap-1.5 flex-wrap'>
-            <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
+            <Filter className='w-3.5 h-3.5 text-muted mr-1' />
             <button onClick={function() { setCategoryFilter('all'); }}
               data-testid="catalog-cat-all"
               className={cn('px-2.5 py-1 rounded-ds-md text-ds-label font-medium transition-colors',
-                categoryFilter === 'all' ? 'bg-brass-500 text-strong' : 'bg-tint text-zinc-400 hover:text-strong hover:bg-tint'
+                categoryFilter === 'all' ? 'bg-accent-500 text-on-accent' : 'bg-tint text-muted hover:text-strong hover:bg-tint'
               )}>
               All ({products.length})
             </button>
@@ -506,7 +506,7 @@ export function CatalogManagerAdmin() {
                 <button key={cat} onClick={function() { setCategoryFilter(cat); }}
                   data-testid={`catalog-cat-${cat}`}
                   className={cn('px-2.5 py-1 rounded-ds-md text-ds-label font-medium transition-colors',
-                    categoryFilter === cat ? 'bg-brass-500 text-strong' : 'bg-tint text-zinc-400 hover:text-strong hover:bg-tint'
+                    categoryFilter === cat ? 'bg-accent-500 text-on-accent' : 'bg-tint text-muted hover:text-strong hover:bg-tint'
                   )}>
                   {cat} ({count})
                 </button>
@@ -531,13 +531,13 @@ export function CatalogManagerAdmin() {
                   { label: 'Category filter', value: categoryFilter === 'all' ? 'All approved categories' : categoryFilter },
                 ]}
               />
-              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-muted">
                 A catalogue item becomes PO-eligible only once its compliance documents are
                 approved — the compliance gate is enforced in the domain, not on this screen.
               </p>
             </ContextPanel>
             <ContextPanel title="Channel submission">
-              <p className="text-ds-label leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-muted">
                 Submission state is the canonical record the brand also sees; entries marked
                 &ldquo;(sim)&rdquo; are deterministic simulation and no channel API was contacted.
               </p>

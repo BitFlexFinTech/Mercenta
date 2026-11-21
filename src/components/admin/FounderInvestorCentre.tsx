@@ -139,13 +139,13 @@ export function FounderInvestorCentre() {
     <div className="space-y-4" data-testid="founder-investor-centre">
       <Card title="Founder Investor Centre">
         <div className="flex items-start gap-2">
-          <Crown className="w-4 h-4 text-brass-400 mt-0.5 flex-shrink-0" />
+          <Crown className="w-4 h-4 text-accent-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted">
               Private Super Admin material for investor meetings. Figures are read from the same
               canonical modules the platform uses, so they cannot drift from the product.
             </p>
-            <p className="text-ds-micro text-amber-300/90 flex items-start gap-1.5 mt-2">
+            <p className="text-ds-micro text-state-warning/90 flex items-start gap-1.5 mt-2">
               <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
               {FOUNDER_HONESTY_NOTICE}
             </p>
@@ -196,7 +196,7 @@ export function FounderInvestorCentre() {
           </Button>
         </div>
         {notice && (
-          <p className="text-ds-label text-brass-300 mt-2" data-testid="founder-document-notice">
+          <p className="text-ds-label text-accent-300 mt-2" data-testid="founder-document-notice">
             {notice}
           </p>
         )}
@@ -212,7 +212,7 @@ export function FounderInvestorCentre() {
                 'rounded-ds-md px-3 py-1.5 text-xs transition-ds',
                 tab === t.id
                   ? 'bg-tint text-strong'
-                  : 'text-zinc-500 hover:bg-tint hover:text-zinc-300'
+                  : 'text-muted hover:bg-tint hover:text-strong'
               )}
             >
               {t.label}
@@ -225,7 +225,7 @@ export function FounderInvestorCentre() {
         <div className="space-y-3" data-testid="founder-pitches">
           {FOUNDER_PITCHES.map((p) => (
             <Card key={p.id} title={`${p.label} — ${p.duration}`}>
-              <p className="text-xs text-zinc-300 whitespace-pre-line leading-relaxed">{p.body}</p>
+              <p className="text-xs text-strong whitespace-pre-line leading-relaxed">{p.body}</p>
             </Card>
           ))}
         </div>
@@ -235,7 +235,7 @@ export function FounderInvestorCentre() {
         <div className="space-y-3" data-testid="founder-model">
           {FOUNDER_BUSINESS_MODEL.map((s) => (
             <Card key={s.id} title={s.title}>
-              <p className="text-xs text-zinc-300 whitespace-pre-line leading-relaxed">{s.body}</p>
+              <p className="text-xs text-strong whitespace-pre-line leading-relaxed">{s.body}</p>
             </Card>
           ))}
         </div>
@@ -247,7 +247,7 @@ export function FounderInvestorCentre() {
             {FOUNDER_TALKING_POINTS.map((t) => (
               <div key={t.id} className="border-b border-hairline pb-2">
                 <p className="text-xs font-medium text-strong">{t.title}</p>
-                <p className="text-ds-label text-zinc-400 mt-0.5">{t.body}</p>
+                <p className="text-ds-label text-muted mt-0.5">{t.body}</p>
               </div>
             ))}
           </div>
@@ -268,7 +268,7 @@ export function FounderInvestorCentre() {
                   {q.question}
                 </button>
                 {openQuestion === q.id && (
-                  <p className="px-3 pb-3 text-ds-label text-zinc-400 leading-relaxed">{q.answer}</p>
+                  <p className="px-3 pb-3 text-ds-label text-muted leading-relaxed">{q.answer}</p>
                 )}
               </div>
             ))}
@@ -283,11 +283,11 @@ export function FounderInvestorCentre() {
               <div key={s.id} className="border-b border-hairline pb-2">
                 <div className="flex items-center gap-2">
                   <p className="text-xs font-medium text-strong">{s.label}</p>
-                  <span className="text-ds-micro text-brass-300">{s.targetTime}</span>
+                  <span className="text-ds-micro text-accent-300">{s.targetTime}</span>
                 </div>
-                <p className="text-ds-label text-zinc-400 mt-0.5">{s.direction}</p>
-                <p className="text-ds-label text-zinc-500 mt-0.5">
-                  <span className="text-zinc-400">Cue:</span> {s.cue}
+                <p className="text-ds-label text-muted mt-0.5">{s.direction}</p>
+                <p className="text-ds-label text-muted mt-0.5">
+                  <span className="text-muted">Cue:</span> {s.cue}
                 </p>
               </div>
             ))}

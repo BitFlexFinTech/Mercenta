@@ -269,7 +269,7 @@ export function DeductionsLedger() {
             </div>
           )}
           {disputingId && (
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
+            <div className="bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 space-y-2">
               <p className="text-ds-label text-state-info">
                 {DEDUCTION_DISPUTE_WINDOW.attributionNote} Provide the evidence
                 that supports your claim — shipping documents, proof of delivery, or carton photos.
@@ -304,7 +304,7 @@ export function DeductionsLedger() {
             </div>
           )}
           {notice && <p className="text-ds-label text-state-success">{notice}</p>}
-          {error && <p className="text-ds-label text-red-300">{error}</p>}
+          {error && <p className="text-ds-label text-state-danger">{error}</p>}
         </div>
 
         {/* ── Outcomes ───────────────────────────────────────────────── */}
@@ -316,7 +316,7 @@ export function DeductionsLedger() {
           <p className="text-ds-label text-muted">
             A dispute is decided by the retail channel, not by you. It can be{' '}
             <span className="text-state-success">Won</span> (the deduction is refunded),{' '}
-            <span className="text-red-300">Lost</span> (the deduction stands) or{' '}
+            <span className="text-state-danger">Lost</span> (the deduction stands) or{' '}
             <span className="text-state-warning">Partially resolved</span> (part of the amount is
             refunded). The recorded outcome is shown against the deduction in the ledger above.
           </p>

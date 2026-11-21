@@ -122,7 +122,7 @@ export function ComplianceHub() {
       {/* Importer of Record — handled by Mercenta, never the brand */}
       <Card title="Importer of Record — handled by Mercenta">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-1 pb-1">
-          <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3">
+          <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-state-success" />
               <span className="text-xs font-medium text-strong">UK EORI Number</span>
@@ -132,7 +132,7 @@ export function ComplianceHub() {
               You never need to register.
             </p>
           </div>
-          <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3">
+          <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-4 h-4 text-state-success" />
               <span className="text-xs font-medium text-strong">UK VAT Registration</span>
@@ -376,7 +376,7 @@ function ComplianceUploadCard({
   function expiryStatus(doc: { status: string; expiryDate?: string }) {
     if (!doc.expiryDate) return null;
     const days = Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-    if (doc.status === 'expired' || days < 0) return { label: 'Expired', color: 'bg-red-500/15 text-red-300' };
+    if (doc.status === 'expired' || days < 0) return { label: 'Expired', color: 'bg-state-danger/10 text-state-danger' };
     if (days <= 30) return { label: 'Expires in ' + days + 'd', color: 'bg-state-warning/10 text-state-warning' };
     if (days <= 60) return { label: 'Expires in ' + days + 'd', color: 'bg-state-info/10 text-state-info' };
     return null;
@@ -393,7 +393,7 @@ function ComplianceUploadCard({
   return (
     <Card title="Compliance Documents" subtitle="Upload required documents to clear the compliance gate">
       <div className="space-y-3 p-1">
-        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-state-success border border-state-success/20' : 'bg-amber-500/10 text-state-warning border border-state-warning/20')}>
+        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-state-success/10 text-state-success border border-state-success/20' : 'bg-state-warning/10 text-state-warning border border-state-warning/20')}>
           {gate.cleared ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>
@@ -453,7 +453,7 @@ function ComplianceUploadCard({
           })}
         </div>
         {uploaded && <p className="text-ds-micro text-state-success">Document uploaded and marked for review.</p>}
-        {replacementNote && <p className="text-ds-micro text-red-300">{replacementNote}</p>}
+        {replacementNote && <p className="text-ds-micro text-state-danger">{replacementNote}</p>}
         <p className="text-ds-micro text-faint">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
       </div>
     </Card>

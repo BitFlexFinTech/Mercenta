@@ -77,7 +77,7 @@ function ImageUploader({
         <div className="mb-2 space-y-0.5">
           {checks.map((c) => (
             <div key={c.id} className="flex items-center gap-1.5 text-ds-micro">
-              {c.passed ? <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 flex-shrink-0" /> : <AlertTriangle className={cn('w-2.5 h-2.5 flex-shrink-0', c.severity === 'error' ? 'text-red-400' : 'text-state-warning')} />}
+              {c.passed ? <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 flex-shrink-0" /> : <AlertTriangle className={cn('w-2.5 h-2.5 flex-shrink-0', c.severity === 'error' ? 'text-state-danger' : 'text-state-warning')} />}
               <span className={cn(c.passed ? 'text-muted' : 'text-muted')}>{c.label}</span>
             </div>
           ))}
@@ -86,7 +86,7 @@ function ImageUploader({
       {editable && (
         <div className="flex items-center gap-2 pt-1 border-t border-hairline">
           <Button className="text-ds-micro" onClick={handleMockUpload}><ImageUp className="w-3 h-3 mr-1" />{currentImage?.url ? 'Replace' : 'Upload'}</Button>
-          {currentImage?.url && <button onClick={() => onImageChange(createProductImage(slot, '📸', true))} className="text-ds-micro text-muted hover:text-red-400"><X className="w-3 h-3" /></button>}
+          {currentImage?.url && <button onClick={() => onImageChange(createProductImage(slot, '📸', true))} className="text-ds-micro text-muted hover:text-state-danger"><X className="w-3 h-3" /></button>}
         </div>
       )}
     </div>

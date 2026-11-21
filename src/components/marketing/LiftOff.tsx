@@ -41,7 +41,7 @@ export function LiftOff({
       <main className="pt-24 pb-16">
         <section className="px-6 pb-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {LIFT_OFF_WORDMARK}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">
@@ -56,9 +56,9 @@ export function LiftOff({
         <section className="border-t border-hairline px-6 py-16">
           <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
             {LIFT_OFF_PUBLIC_POINTS.map((p) => (
-              <div key={p.title} className="rounded-ds-lg border border-hairline bg-ink-850 p-5">
-                <p className="font-display text-base font-semibold text-parchment">{p.title}</p>
-                <p className="mt-2 text-sm leading-relaxed text-steel">{p.body}</p>
+              <div key={p.title} className="rounded-ds-lg border border-hairline bg-surface-raised p-5">
+                <p className="font-display text-base font-semibold text-soft">{p.title}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{p.body}</p>
               </div>
             ))}
           </div>

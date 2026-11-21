@@ -941,7 +941,14 @@ const UKMF_NAV = read('src/components/marketing/PublicNav.tsx');
 const UKMF_CFG = read('src/config/ukMarketFit.ts');
 check('the pre-audit surface reuses the public nav', UKMF_SRC.includes('<PublicNav'));
 check('the pre-audit surface reuses the public footer', UKMF_SRC.includes('<PublicFooter'));
-check('the pre-audit surface uses the canonical ink surfaces', UKMF_SRC.includes('bg-ink-900') && UKMF_SRC.includes('bg-ink-850'));
+check(
+  'the pre-audit surface uses the canonical ink surfaces',
+  /* §REPOINTED §BATCH 7 (2026-11-21) — `bg-ink-900`/`bg-ink-850` became
+     `bg-surface`/`bg-surface-raised`. Same subject (the surface takes a THEME surface
+     role rather than a literal); the canonical names are now the expected ones. The
+     negative lookahead keeps each exact, so a different STEP would not satisfy it. */
+  /bg-surface(?!-)/.test(UKMF_SRC) && UKMF_SRC.includes('bg-surface-raised')
+);
 check('the pre-audit surface uses the display font for headings', UKMF_SRC.includes('font-display'));
 /*
  * §UI/UX Wave 3 — REPOINTED.
@@ -992,8 +999,11 @@ check(
 check('the pre-audit surface renders no literal white text', !/\btext-white\b/.test(UKMF_CODE));
 check(
   'the pre-audit surface opens with the canonical public eyebrow',
+  /* §REPOINTED §BATCH 7 (2026-11-21) — `text-brass` became `text-accent`. Same subject
+     (the eyebrow's canonical type + colour step); only the canonical accent class name
+     moved. */
   UKMF_CODE.includes('{PUBLIC_CATEGORY}') &&
-    UKMF_CODE.includes('font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]')
+    UKMF_CODE.includes('font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]')
 );
 check(
   'the pre-audit surface renders the PUBLIC research reason, never the operator string',

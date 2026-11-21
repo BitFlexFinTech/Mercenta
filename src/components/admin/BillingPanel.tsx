@@ -124,7 +124,7 @@ export function BillingPanel() {
   return (
     <WorkspaceFrame className="space-y-4">
       <DemoBanner />
-      {!stripeLive && (<div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
+      {!stripeLive && (<div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
 
       {/* §Sprint — workspace header + interactive metric band over the SAME
           canonical billing functions; the metric tiles are real drill-downs
@@ -135,11 +135,11 @@ export function BillingPanel() {
         description="Brand Subscriptions, commission invoices and remittance statements. Gross PO value − commission − deductions = net paid per payout period."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">Period 2026-08-01 → 2026-08-31</span>
-            <span className="font-mono text-ds-label text-zinc-500">Showing {visibleBrands.length} of {allBrands.length} brands</span>
+            <span className="font-mono text-ds-label text-muted">Period 2026-08-01 → 2026-08-31</span>
+            <span className="font-mono text-ds-label text-muted">Showing {visibleBrands.length} of {allBrands.length} brands</span>
           </>
         }
-        actions={<div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-emerald-400" aria-hidden="true" /></div>}
+        actions={<div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-state-success" aria-hidden="true" /></div>}
         toolbar={
           <SegmentedControl
             ariaLabel="Billing focus"
@@ -171,13 +171,13 @@ export function BillingPanel() {
           return (<Card key={b.id} className="p-0 overflow-hidden">
             <div className="px-4 py-3 border-b border-hairline flex items-center justify-between">
               <span className="text-sm font-medium text-strong">{b.profile.businessName}</span>
-              {sub && <Badge className={cn('text-ds-micro', sub.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-zinc-500/15 text-zinc-400')}>{sub.planTier}</Badge>}
+              {sub && <Badge className={cn('text-ds-micro', sub.status === 'active' ? 'bg-state-success/10 text-state-success' : 'bg-tint text-muted')}>{sub.planTier}</Badge>}
             </div>
             <div className="p-4 space-y-2">
-              <div className="flex items-center justify-between text-ds-label"><span className="text-zinc-500">Invoice</span><span className="font-mono text-zinc-200">&pound;{inv.subtotalGbp.toFixed(2)} <span className="text-zinc-500 text-ds-micro">{inv.number}</span></span></div>
-              <div className="flex items-center justify-between text-ds-label"><span className="text-zinc-500">Shipping</span><span className={cn('font-mono', marginTotal >= 0 ? 'text-emerald-300' : 'text-red-300')}>&pound;{marginTotal.toFixed(2)}</span></div>
-              <div className="flex items-center justify-between text-ds-label"><span className="text-zinc-500">Deductions</span><span className="font-mono text-red-300">&pound;{deductionsTotal.toFixed(2)}</span></div>
-              {inv.notes.length > 0 && <p className="text-ds-micro text-zinc-600">{inv.notes.join(' &middot; ')}</p>}
+              <div className="flex items-center justify-between text-ds-label"><span className="text-muted">Invoice</span><span className="font-mono text-strong">&pound;{inv.subtotalGbp.toFixed(2)} <span className="text-muted text-ds-micro">{inv.number}</span></span></div>
+              <div className="flex items-center justify-between text-ds-label"><span className="text-muted">Shipping</span><span className={cn('font-mono', marginTotal >= 0 ? 'text-state-success' : 'text-state-danger')}>&pound;{marginTotal.toFixed(2)}</span></div>
+              <div className="flex items-center justify-between text-ds-label"><span className="text-muted">Deductions</span><span className="font-mono text-state-danger">&pound;{deductionsTotal.toFixed(2)}</span></div>
+              {inv.notes.length > 0 && <p className="text-ds-micro text-faint">{inv.notes.join(' &middot; ')}</p>}
             </div>
             <div className="px-4 py-2 border-t border-hairline flex justify-end">
               <Button variant="ghost" className="text-ds-micro" disabled={brandComms.length === 0}
@@ -194,17 +194,17 @@ export function BillingPanel() {
           const stmt = generateRemittanceStatement({ brandName: b.profile.businessName, periodStart: '2026-08-01', periodEnd: '2026-08-31', statementNumber: 'RS-2026-08-' + b.id.slice(0, 8), lines: brandLineItems });
           const empty = stmt.lines.length === 0;
           return (<div key={b.id} className="flex items-center justify-between bg-tint border border-hairline rounded-ds-md px-4 py-2.5">
-            <div><div className="text-xs font-medium text-strong">{b.profile.businessName}</div><div className="text-ds-micro text-zinc-500 font-mono">{stmt.statementNumber} &middot; net paid <span className={empty ? 'text-zinc-600' : 'text-emerald-300'}>&pound;{stmt.netPaid.toFixed(2)}</span>{empty && ' &middot; no settled POs'}</div></div>
-            <Button variant="ghost" className="text-ds-label text-brass" disabled={empty}
+            <div><div className="text-xs font-medium text-strong">{b.profile.businessName}</div><div className="text-ds-micro text-muted font-mono">{stmt.statementNumber} &middot; net paid <span className={empty ? 'text-faint' : 'text-state-success'}>&pound;{stmt.netPaid.toFixed(2)}</span>{empty && ' &middot; no settled POs'}</div></div>
+            <Button variant="ghost" className="text-ds-label text-accent" disabled={empty}
               onClick={function() { const w = window.open('', '_blank'); if (w) { w.document.write(stmt.html); w.document.close(); } }}>View statement</Button>
           </div>);})}
         </div>
-        <p className="text-ds-micro text-zinc-600 mt-3">Gross PO value &minus; commission &minus; deductions = net paid per payout period.</p>
+        <p className="text-ds-micro text-faint mt-3">Gross PO value &minus; commission &minus; deductions = net paid per payout period.</p>
       </Card>
         </div>
         <div className="space-y-3">
           <ContextPanel title="How billing works">
-            <p className="text-ds-label leading-snug text-zinc-400">
+            <p className="text-ds-label leading-snug text-muted">
               Every figure above comes from the canonical billing functions
               (<code>generateInvoice</code>, <code>generateRemittanceStatement</code>) over the same
               stores the finance workflow writes — nothing is re-derived for this screen.
@@ -223,7 +223,7 @@ export function BillingPanel() {
             />
           </ContextPanel>
           <ContextPanel title="Payout rails">
-            <p className="text-ds-label leading-snug text-zinc-400">
+            <p className="text-ds-label leading-snug text-muted">
               Payoneer is the default payout rail and Wise the secondary. Stripe bills the flat
               subscription only and is explicitly refused as a payout rail, as is Xero. No payout
               leaves Mercenta without explicit human approval.

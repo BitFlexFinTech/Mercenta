@@ -32,20 +32,20 @@ import {
  * `npm run validate:duplicate-owners`.
  */
 const LINK_ICONS: Record<string, {icon:string;color:string;label:string}> = {
-  verified:{icon:'\u2705',color:'text-emerald-400',label:'Verified'},
-  unreachable:{icon:'\u274c',color:'text-red-400',label:'Unreachable'},
-  no_content:{icon:'\u274c',color:'text-red-400',label:'No content'},
-  not_found:{icon:'\u274c',color:'text-red-400',label:'Not found'},
-  unverified_manual_check:{icon:'\u26a0\ufe0f',color:'text-amber-400',label:'Unverified \u2014 manual check needed'},
+  verified:{icon:'\u2705',color:'text-state-success',label:'Verified'},
+  unreachable:{icon:'\u274c',color:'text-state-danger',label:'Unreachable'},
+  no_content:{icon:'\u274c',color:'text-state-danger',label:'No content'},
+  not_found:{icon:'\u274c',color:'text-state-danger',label:'Not found'},
+  unverified_manual_check:{icon:'\u26a0\ufe0f',color:'text-state-warning',label:'Unverified \u2014 manual check needed'},
 };
 const PRODUCT_CATS = ['Health & Personal Care','Home','Baby','Office Products','Kitchen','Consumer Electronics','Automotive','Grocery','Apparel','Personal Computer','Other'];
 const SOURCE_OPTS = ['Embassy Referral','Direct Outreach','Inbound Application','Partnership','Other'];
 const mailClient = createMockMailClient();
 
 function LinkStatus({status}: {status:string|null}) {
-  if (!status) return <span className="text-xs text-zinc-600">Not provided</span>;
+  if (!status) return <span className="text-xs text-faint">Not provided</span>;
   const info = LINK_ICONS[status];
-  if (!info) return <span className="text-xs text-zinc-400">{status}</span>;
+  if (!info) return <span className="text-xs text-muted">{status}</span>;
   return <span className={cn("text-xs",info.color)}>{info.icon} {info.label}</span>;
 }
 function ManualBrandForm({onDone}:{onDone:()=>void}) {
@@ -81,29 +81,29 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
   };
 
   return(<div className="space-y-4">
-    {err&&<div className="bg-red-500/10 border border-red-500/30 rounded-ds-md p-3 text-sm text-red-400">{err}</div>}
+    {err&&<div className="bg-state-danger/10 border border-red-500/30 rounded-ds-md p-3 text-sm text-state-danger">{err}</div>}
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Brand legal name"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Primary contact"/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Company Name *</label><input type="text" value={cn} onChange={e=>setCn(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Brand legal name"/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Contact Name *</label><input type="text" value={ct} onChange={e=>setCt(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="Primary contact"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="brand@example.com"/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="e.g. Zimbabwe"/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Email *</label><input type="email" value={em} onChange={e=>setEm(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="brand@example.com"/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Country *</label><input type="text" value={co} onChange={e=>setCo(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="e.g. Zimbabwe"/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="0"/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Category</label><select value={cat} onChange={e=>setCat(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{PRODUCT_CATS.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">SKUs</label><input type="number" value={sk} onChange={e=>setSk(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="0"/></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://..."/></div>
+    <div><label className="block text-xs font-medium text-muted mb-1.5">Website</label><input type="text" value={wu} onChange={e=>setWu(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://..."/></div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://instagram.com/..."/></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://facebook.com/..."/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Instagram</label><input type="text" value={ig} onChange={e=>setIg(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://instagram.com/..."/></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong" placeholder="https://facebook.com/..."/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
+      <div><label className="block text-xs font-medium text-muted mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
     </div>
-    <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>
+    <div><label className="block text-xs font-medium text-muted mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-surface-raised border border-hairline rounded-ds-md px-3 py-2 text-sm text-strong placeholder-faint resize-none" placeholder="Admin-only notes..."/></div>
     <div className="flex gap-2"><Button onClick={submit} disabled={busy}><UserPlus className="w-4 h-4"/>{busy?'Creating...':'Create Brand Account'}</Button><Button variant="ghost" onClick={onDone}>Cancel</Button></div>
   </div>);
 }
@@ -163,7 +163,7 @@ return(<div className="space-y-4">
       <h2 className="text-sm font-semibold text-strong">Brand Applications ({demoApplications.length})</h2>
       <Button variant="accent" onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
     </div>
-    {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-ds-md p-3 text-sm text-emerald-400">{msg}</div>}
+    {msg&&<div className="bg-state-success/10 border border-emerald-500/30 rounded-ds-md p-3 text-sm text-state-success">{msg}</div>}
     {/* §Phase D — decision queue. Counts are DERIVED from the store (never
         hand-written) and every tile drills into the list below: a static number
         with no drill-down is incomplete. */}
@@ -175,24 +175,24 @@ return(<div className="space-y-4">
           <button key={f} type="button" aria-pressed={active} data-state={active?'active':'inactive'}
             onClick={()=>setFilter(f)}
             className={cn('text-left px-3 py-2.5 rounded-ds-md border transition-ds',
-              active?'bg-brass-500/15 border-brass-500/40':'bg-tint border-hairline hover:border-hairline-strong')}>
+              active?'bg-accent-500/15 border-accent-500/40':'bg-tint border-hairline hover:border-hairline-strong')}>
             <div className="text-lg font-semibold text-strong tabular-nums">{count}</div>
-            <div className="text-ds-label text-zinc-400">{f==='all'?'All applications':applicationStatusPresentation(f).label}</div>
+            <div className="text-ds-label text-muted">{f==='all'?'All applications':applicationStatusPresentation(f).label}</div>
           </button>
         );
       })}
     </div>
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600"/>
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-faint"/>
       <input type="text" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by company name..."
-        className="w-full bg-zinc-900 border border-hairline rounded-ds-md pl-9 pr-4 py-2 text-sm text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"/>
+        className="w-full bg-surface-raised border border-hairline rounded-ds-md pl-9 pr-4 py-2 text-sm text-strong placeholder-faint focus:outline-none focus:border-accent-500/40"/>
     </div>
-    {apps.length===0?(<div className="text-center py-12 text-zinc-500 text-sm">No applications found.</div>):(
+    {apps.length===0?(<div className="text-center py-12 text-muted text-sm">No applications found.</div>):(
       <div className="space-y-3">{apps.map(app=>(
         <Card key={app.id}>
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
-              <div><h3 className="text-sm font-semibold text-strong">{app.companyName}</h3><p className="text-xs text-zinc-500">{app.country} · {app.category}</p></div>
+              <div><h3 className="text-sm font-semibold text-strong">{app.companyName}</h3><p className="text-xs text-muted">{app.country} · {app.category}</p></div>
               <StatusBadge
                 tone={applicationStatusPresentation(app.status).tone}
                 dataStatus={applicationStatusPresentation(app.status).dataStatus}
@@ -205,22 +205,22 @@ return(<div className="space-y-4">
                   able to read it here. Before this increment a phone was optional and
                   the card showed SKUs / Revenue / Submitted only: a required contact
                   number that the reviewer could not see would be collected and lost. */}
-              <div><span className="text-zinc-600">Phone:</span><span className="text-zinc-300 ml-1">{app.phone}</span></div>
-              <div><span className="text-zinc-600">SKUs:</span><span className="text-zinc-300 ml-1">{app.skuCount??'N/A'}</span></div>
-              <div><span className="text-zinc-600">Revenue:</span><span className="text-zinc-300 ml-1">{app.monthlyRevenue??'N/A'}</span></div>
-              <div><span className="text-zinc-600">Submitted:</span><span className="text-zinc-300 ml-1">{new Date(app.createdAt).toLocaleDateString()}</span></div>
+              <div><span className="text-faint">Phone:</span><span className="text-strong ml-1">{app.phone}</span></div>
+              <div><span className="text-faint">SKUs:</span><span className="text-strong ml-1">{app.skuCount??'N/A'}</span></div>
+              <div><span className="text-faint">Revenue:</span><span className="text-strong ml-1">{app.monthlyRevenue??'N/A'}</span></div>
+              <div><span className="text-faint">Submitted:</span><span className="text-strong ml-1">{new Date(app.createdAt).toLocaleDateString()}</span></div>
             </div>
-            {app.description&&<p className="text-xs text-zinc-400 mb-3 line-clamp-2">{app.description}</p>}
+            {app.description&&<p className="text-xs text-muted mb-3 line-clamp-2">{app.description}</p>}
             <div className="flex flex-wrap gap-3 mb-3">
-              {app.websiteUrl&&<span className="flex items-center gap-1 text-xs text-blue-400"><ExternalLink className="w-3 h-3"/> Website <LinkStatus status={app.websiteStatus}/></span>}
+              {app.websiteUrl&&<span className="flex items-center gap-1 text-xs text-state-info"><ExternalLink className="w-3 h-3"/> Website <LinkStatus status={app.websiteStatus}/></span>}
               {app.instagramUrl&&<span className="flex items-center gap-1 text-xs text-pink-400"><ExternalLink className="w-3 h-3"/> Instagram <LinkStatus status={app.instagramStatus}/></span>}
-              {app.facebookUrl&&<span className="flex items-center gap-1 text-xs text-blue-400"><ExternalLink className="w-3 h-3"/> Facebook <LinkStatus status={app.facebookStatus}/></span>}
+              {app.facebookUrl&&<span className="flex items-center gap-1 text-xs text-state-info"><ExternalLink className="w-3 h-3"/> Facebook <LinkStatus status={app.facebookStatus}/></span>}
             </div>
-            {app.referralSource&&<p className="text-ds-micro text-zinc-600 mb-3">Heard via: {app.referralSource}</p>}
+            {app.referralSource&&<p className="text-ds-micro text-faint mb-3">Heard via: {app.referralSource}</p>}
             {app.adminNotes&&(
-              <div className="bg-amber-500/5 border border-amber-500/20 rounded-ds-md p-2 mb-3">
-                <p className="text-ds-micro text-amber-300/80 font-medium mb-0.5">Admin notes:</p>
-                <p className="text-xs text-zinc-400">{app.adminNotes}</p>
+              <div className="bg-amber-500/5 border border-state-warning/20 rounded-ds-md p-2 mb-3">
+                <p className="text-ds-micro text-state-warning/80 font-medium mb-0.5">Admin notes:</p>
+                <p className="text-xs text-muted">{app.adminNotes}</p>
               </div>
             )}
             {(app.status==='pending'||app.status==='flagged'||app.status==='info_requested')&&(

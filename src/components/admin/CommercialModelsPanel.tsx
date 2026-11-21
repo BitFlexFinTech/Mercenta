@@ -93,17 +93,17 @@ export function CommercialModelsPanel() {
   return (
     <div className="space-y-4">
       <Card title="Commercial relationship — the two models">
-        <p className="text-xs text-zinc-400 mb-3">
+        <p className="text-xs text-muted mb-3">
           A brand's commercial relationship with Mercenta is{' '}
-          <strong className="text-zinc-200">internal</strong> and chosen at onboarding. It is a
+          <strong className="text-strong">internal</strong> and chosen at onboarding. It is a
           separate concept from the retail-channel compliance documents the brand's products
           require:{' '}
           {COMMERCIAL_MODEL_CANNOT_CHANGE_COMPLIANCE ? (
-            <span className="text-emerald-300">
+            <span className="text-state-success">
               changing Model A ↔ Model B can never add, remove or waive a compliance requirement
             </span>
           ) : (
-            <span className="text-red-300">SEPARATION BROKEN — investigate immediately</span>
+            <span className="text-state-danger">SEPARATION BROKEN — investigate immediately</span>
           )}
           . Changes after onboarding are restricted to {COMMERCIAL_MODEL_CHANGEABLE_BY.join(', ')} and
           are always audited.
@@ -111,39 +111,39 @@ export function CommercialModelsPanel() {
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-ds-md border border-hairline p-3" data-testid="model-a-illustration">
             <div className="flex items-center gap-2 mb-1.5">
-              <Badge className="bg-emerald-500/15 text-emerald-300">Model A</Badge>
+              <Badge className="bg-state-success/10 text-state-success">Model A</Badge>
               <span className="text-xs font-medium text-strong">
                 {COMMERCIAL_MODELS.commission_agent.label}
               </span>
             </div>
             <dl className="space-y-1 text-ds-label font-mono">
-              <div className="flex justify-between"><dt className="text-zinc-500">Retail-channel PO</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Commission rate</dt><dd className="text-zinc-200">{DEMO_MODEL_A_BRAND_A.commissionRatePct}%</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Mercenta commission</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Brand economic amount</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_A_BRAND_A.brandAmountGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Retail-channel PO</dt><dd className="text-strong">{gbp(DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Commission rate</dt><dd className="text-strong">{DEMO_MODEL_A_BRAND_A.commissionRatePct}%</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Mercenta commission</dt><dd className="text-state-success">{gbp(DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Brand economic amount</dt><dd className="text-strong">{gbp(DEMO_MODEL_A_BRAND_A.brandAmountGbp)}</dd></div>
             </dl>
-            <p className="text-ds-micro text-zinc-500 mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
+            <p className="text-ds-micro text-muted mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
           </div>
 
           <div className="rounded-ds-md border border-hairline p-3" data-testid="model-b-illustration">
             <div className="flex items-center gap-2 mb-1.5">
-              <Badge className="bg-blue-500/15 text-blue-300">Model B</Badge>
+              <Badge className="bg-state-info/10 text-state-info">Model B</Badge>
               <span className="text-xs font-medium text-strong">
                 {COMMERCIAL_MODELS.buy_resell.label}
               </span>
             </div>
-            <p className="text-ds-micro text-zinc-500 mb-2">{COMMERCIAL_MODELS.buy_resell.summary}</p>
+            <p className="text-ds-micro text-muted mb-2">{COMMERCIAL_MODELS.buy_resell.summary}</p>
             <dl className="space-y-1 text-ds-label font-mono">
-              <div className="flex justify-between"><dt className="text-zinc-500">Retail-channel revenue</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Brand acquisition cost</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp)}</dd></div>
-              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-zinc-400">GROSS commercial spread</dt><dd className="text-amber-300">{gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Carrier</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.carrierCostGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Payment fees</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.paymentFeesGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Other agreed costs</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.otherAgreedFeesGbp)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Deductions</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.deductionsGbp)}</dd></div>
-              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-zinc-400">NET Mercenta margin</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Retail-channel revenue</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Brand acquisition cost</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp)}</dd></div>
+              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-muted">GROSS commercial spread</dt><dd className="text-state-warning">{gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Carrier</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.costs.carrierCostGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Payment fees</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.costs.paymentFeesGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Other agreed costs</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.costs.otherAgreedFeesGbp)}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Deductions</dt><dd className="text-strong">{gbp(DEMO_MODEL_B_BRAND_B.costs.deductionsGbp)}</dd></div>
+              <div className="flex justify-between border-t border-hairline pt-1"><dt className="text-muted">NET Mercenta margin</dt><dd className="text-state-success">{gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)}</dd></div>
             </dl>
-            <p className="text-ds-micro text-zinc-500 mt-2">
+            <p className="text-ds-micro text-muted mt-2">
               {gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)} is the commercial{' '}
               <em>spread</em>; {gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)} is the net margin
               after the stated costs. {DEMO_MODEL_B_BRAND_B.vat.basis}
@@ -155,7 +155,7 @@ export function CommercialModelsPanel() {
           <p className="text-xs font-medium text-strong mb-1">
             Shipping economics — canonical terms, derived (never hardcoded)
           </p>
-          <p className="text-ds-label font-mono text-zinc-400">
+          <p className="text-ds-label font-mono text-muted">
             DHL list {gbp(shipping.carrierListCost)} − negotiated discount{' '}
             {gbp(shipping.negotiatedDiscountAmount)} = carrier invoice{' '}
             {gbp(shipping.carrierInvoiceCost)} → brand charged {gbp(shipping.brandAmountCharged)} →
@@ -166,7 +166,7 @@ export function CommercialModelsPanel() {
       </Card>
 
       <Card title="Brands — recorded commercial relationship">
-        {message && <p className="text-xs text-brass-300 mb-2" data-testid="commercial-model-message">{message}</p>}
+        {message && <p className="text-xs text-accent-300 mb-2" data-testid="commercial-model-message">{message}</p>}
         <div className="mb-3 max-w-sm">
           <Input
             label="Reason (required for any change — audited)"
@@ -178,7 +178,7 @@ export function CommercialModelsPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-hairline text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-muted">
                 <th className="px-2 py-1.5">Brand</th>
                 <th className="px-2 py-1.5">Category</th>
                 <th className="px-2 py-1.5">Recorded model</th>
@@ -192,36 +192,36 @@ export function CommercialModelsPanel() {
               {rows.map(({ brand, record, resolution, requirementCount }) => (
                 <tr key={brand.id} className="border-b border-hairline" data-testid={`commercial-model-row-${brand.id}`}>
                   <td className="px-2 py-1.5 text-strong font-medium">{brand.profile.businessName}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{brand.category}</td>
+                  <td className="px-2 py-1.5 text-muted">{brand.category}</td>
                   <td className="px-2 py-1.5">
                     {resolution.ok ? (
                       <Badge
                         className={cn(
                           'text-ds-micro',
                           resolution.model === 'commission_agent'
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : 'bg-blue-500/15 text-blue-300'
+                            ? 'bg-state-success/10 text-state-success'
+                            : 'bg-state-info/10 text-state-info'
                         )}
                       >
                         {COMMERCIAL_MODELS[resolution.model as CommercialModel].label}
                       </Badge>
                     ) : (
-                      <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
+                      <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">
                         {COMMERCIAL_MODEL_NOT_SELECTED_LABEL}
                       </Badge>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-400 font-mono text-ds-micro">
+                  <td className="px-2 py-1.5 text-muted font-mono text-ds-micro">
                     {record
                       ? record.model === 'commission_agent'
                         ? `${record.commissionRatePct}% commission`
                         : `${record.brandAcquisitionSharePct}% acquisition share`
                       : '—'}
-                    {record && <span className="text-zinc-600"> · {record.source}</span>}
+                    {record && <span className="text-faint"> · {record.source}</span>}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-400">
+                  <td className="px-2 py-1.5 text-muted">
                     <span className="inline-flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                      <ShieldCheck className="w-3 h-3 text-state-success" />
                       {requirementCount} required — identical under either model
                     </span>
                   </td>
@@ -255,7 +255,7 @@ export function CommercialModelsPanel() {
             </tbody>
           </table>
         </div>
-        <p className="text-ds-micro text-zinc-600 mt-2">
+        <p className="text-ds-micro text-faint mt-2">
           {demoBrandCommercialModels.length} brands hold a recorded commercial relationship. The
           compliance column is computed by <code>getApplicableRequirements</code> and is deliberately
           shown beside the model column so the separation is visible, not merely asserted.
@@ -264,7 +264,7 @@ export function CommercialModelsPanel() {
 
       <Card title="Audit trail — commercial relationship">
         {rows.every((r) => commercialModelAuditFor(r.brand.id).length === 0) ? (
-          <p className="text-xs text-zinc-500" data-testid="commercial-model-audit-empty">
+          <p className="text-xs text-muted" data-testid="commercial-model-audit-empty">
             No operator changes recorded yet. Seeded demo assignments are marked <code>demo_seed</code>.
           </p>
         ) : (
@@ -272,13 +272,13 @@ export function CommercialModelsPanel() {
             {rows.flatMap((r) =>
               commercialModelAuditFor(r.brand.id).map((e) => (
                 <div key={e.id} className="flex items-start gap-2 text-ds-label border-b border-hairline pb-1.5">
-                  <ArrowRight className="w-3 h-3 text-zinc-600 mt-0.5 flex-shrink-0" />
+                  <ArrowRight className="w-3 h-3 text-faint mt-0.5 flex-shrink-0" />
                   <div className="min-w-0">
-                    <span className="text-zinc-300">{r.brand.profile.businessName}</span>
-                    <span className="text-zinc-500">
+                    <span className="text-strong">{r.brand.profile.businessName}</span>
+                    <span className="text-muted">
                       {' '}· {e.action} · {String(e.metadata?.model ?? '')}
                     </span>
-                    <p className="text-zinc-600">
+                    <p className="text-faint">
                       {e.actorId} — {e.reason} · compliance unchanged:{' '}
                       {String(e.metadata?.complianceUnchanged)} · {e.createdAt}
                     </p>
@@ -291,7 +291,7 @@ export function CommercialModelsPanel() {
       </Card>
 
       <Card title="Worked reverse-check — each brand's own agreed terms">
-        <p className="text-ds-micro text-zinc-500 mb-2">
+        <p className="text-ds-micro text-muted mb-2">
           The same canonical functions the investor demo uses, driven by each brand's recorded terms,
           so a brand's own numbers can never disagree with the demo's.
         </p>
@@ -304,7 +304,7 @@ export function CommercialModelsPanel() {
                 commissionRatePct: record?.commissionRatePct ?? 20,
               });
               return (
-                <p key={brand.id} className="text-zinc-400">{r.formula}</p>
+                <p key={brand.id} className="text-muted">{r.formula}</p>
               );
             }
             const r = computeBuyResellModel({
@@ -315,7 +315,7 @@ export function CommercialModelsPanel() {
               otherAgreedFeesGbp: 50,
               deductionsGbp: 0,
             });
-            return <p key={brand.id} className="text-zinc-400">{r.formula}</p>;
+            return <p key={brand.id} className="text-muted">{r.formula}</p>;
           })}
         </div>
       </Card>

@@ -27,16 +27,16 @@ export function InvestorPitchSection() {
     <Card className="p-4 mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <ChartPie className="w-4 h-4 text-brass-400" />
+          <ChartPie className="w-4 h-4 text-accent-400" />
           <span className="text-sm font-semibold text-strong">UK Import Market — Investor Data</span>
-          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">Super Admin</Badge>
         </div>
         <Button className="text-ds-micro" onClick={handleDownload}>
           <Download className="w-3 h-3 mr-1" /> Export Report
         </Button>
       </div>
 
-      <p className="text-ds-label text-zinc-500 mb-4">
+      <p className="text-ds-label text-muted mb-4">
         Full TAM/SAM breakdown by category for investor pitch materials. Sources cited:
         ONS UK Trade in Goods (SITC/HS classification). Includes methodology so the figures
         hold up to investor scrutiny.
@@ -47,12 +47,12 @@ export function InvestorPitchSection() {
         <TamSamBreakdown />
       </div>
 
-      <div className="mt-4 bg-ink-900 border border-hairline rounded-ds-md p-3">
+      <div className="mt-4 bg-surface border border-hairline rounded-ds-md p-3">
         <div className="flex items-center gap-2 mb-1.5">
-          <TrendingUp className="w-3.5 h-3.5 text-brass-400" />
+          <TrendingUp className="w-3.5 h-3.5 text-accent-400" />
           <span className="text-ds-label font-medium text-strong">Positioning Frame</span>
         </div>
-        <p className="text-ds-micro text-zinc-400 leading-relaxed">
+        <p className="text-ds-micro text-muted leading-relaxed">
           <em>&quot;We aren't a needle in a haystack — we are the haystack.&quot;</em> The UK imports over
           GBP {report.totalTamGbp.toFixed(0)}B annually in the {report.categories.length} wholesale categories
           Mercenta covers, of which GBP {report.totalSamGbp.toFixed(1)}B is addressable through its

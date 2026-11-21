@@ -45,10 +45,10 @@ function StatusWord({ status }: { status: InvestorDemoStage['status'] }) {
   const word = status === 'ok' ? 'OK' : status === 'blocked' ? 'BLOCKED' : 'ERROR';
   const cls =
     status === 'ok'
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+      ? 'bg-state-success/10 text-state-success border-state-success/20'
       : status === 'blocked'
-        ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-        : 'bg-red-500/15 text-red-300 border-red-500/20';
+        ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
+        : 'bg-state-danger/10 text-state-danger border-state-danger/20';
   return (
     <Badge className={cn('text-ds-micro border', cls)}>
       {icon}
@@ -120,10 +120,10 @@ export function InvestorDemoPanel() {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-strong flex items-center gap-2">
-              <Fingerprint className="w-4 h-4 text-brass-300" /> Investor demo — deterministic
+              <Fingerprint className="w-4 h-4 text-accent-300" /> Investor demo — deterministic
               end-to-end lifecycle
             </h3>
-            <p className="text-xs text-zinc-500 mt-1 leading-relaxed max-w-3xl">
+            <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
               Runs the whole platform lifecycle on the canonical domain: application → approval →
               onboarding → compliance → catalogue → purchase order → acknowledgement → fulfilment →
               shipment → delivery → returns → deductions → dispute → commission → payout → CRM →
@@ -132,16 +132,16 @@ export function InvestorDemoPanel() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20 uppercase tracking-wide">
               Simulation
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline uppercase tracking-wide">
               Deterministic
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline uppercase tracking-wide">
               <WifiOff className="w-3 h-3 mr-1" /> No live integration
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline uppercase tracking-wide">
               Demo / test data
             </Badge>
           </div>
@@ -173,19 +173,19 @@ export function InvestorDemoPanel() {
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset demo environment
           </Button>
-          <span className="text-ds-label text-zinc-500">
-            Tenant: <span className="font-mono text-zinc-400">{INVESTOR_DEMO_TENANT_ID}</span>
+          <span className="text-ds-label text-muted">
+            Tenant: <span className="font-mono text-muted">{INVESTOR_DEMO_TENANT_ID}</span>
           </span>
         </div>
 
         {lastResetAt && (
-          <p className="text-ds-label text-emerald-400 mt-2">
+          <p className="text-ds-label text-state-success mt-2">
             Demo environment reset at {new Date(lastResetAt).toLocaleTimeString()} — seeded data
             restored, scenario-created records removed.
           </p>
         )}
         {error && (
-          <p className="text-ds-label text-red-300 mt-2" role="alert">
+          <p className="text-ds-label text-state-danger mt-2" role="alert">
             {error}
           </p>
         )}
@@ -194,44 +194,44 @@ export function InvestorDemoPanel() {
       {run && (
         <Card className="p-4 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+            <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20">
               <CheckCircle2 className="w-3 h-3 mr-1" />{' '}
               <span data-state="investor-demo-summary">
                 {run.summary.ok}/{run.summary.total} stages OK
               </span>
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">
               blocked: {run.summary.blocked}
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">
               errors: {run.summary.error}
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">
               <WifiOff className="w-3 h-3 mr-1" /> network calls: {run.networkCalls}
             </Badge>
-            <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+            <Badge className="text-ds-micro bg-tint text-strong border-hairline">
               audit rows: {run.auditRows}
             </Badge>
           </div>
 
-          <div className="text-ds-label text-zinc-500 space-y-0.5">
+          <div className="text-ds-label text-muted space-y-0.5">
             <div>
-              Run <span className="font-mono text-zinc-400">{run.runId}</span> · brand{' '}
-              <span className="text-zinc-300">{run.brandName}</span> · onboarding{' '}
-              <span className="font-mono text-zinc-400">{run.onboardingId}</span>
+              Run <span className="font-mono text-muted">{run.runId}</span> · brand{' '}
+              <span className="text-strong">{run.brandName}</span> · onboarding{' '}
+              <span className="font-mono text-muted">{run.onboardingId}</span>
             </div>
             <div>
               Replay digest:{' '}
-              <span className="font-mono text-zinc-300" data-state="investor-demo-digest">
+              <span className="font-mono text-strong" data-state="investor-demo-digest">
                 {run.digest}
               </span>
               {replayIdentical === true && (
-                <span className="ml-2 text-emerald-400">
+                <span className="ml-2 text-state-success">
                   identical to the previous run — deterministic replay confirmed
                 </span>
               )}
               {replayIdentical === false && (
-                <span className="ml-2 text-amber-300">
+                <span className="ml-2 text-state-warning">
                   differs from the previous run (the environment changed since that run)
                 </span>
               )}
@@ -247,19 +247,19 @@ export function InvestorDemoPanel() {
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="min-w-0 flex items-start gap-2">
-                    <span className="font-mono text-ds-micro text-zinc-600 mt-0.5">
+                    <span className="font-mono text-ds-micro text-faint mt-0.5">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <div className="min-w-0">
-                      <span className="text-xs font-medium text-zinc-200">{stage.label}</span>
-                      <p className="text-ds-label text-zinc-500 mt-0.5 break-words">{stage.detail}</p>
+                      <span className="text-xs font-medium text-strong">{stage.label}</span>
+                      <p className="text-ds-label text-muted mt-0.5 break-words">{stage.detail}</p>
                     </div>
                   </div>
                   <StatusWord status={stage.status} />
                 </div>
                 {stage.entityIds.length > 0 && (
-                  <p className="text-ds-micro text-zinc-600 mt-1 break-all">
-                    <span className="text-zinc-500">records:</span>{' '}
+                  <p className="text-ds-micro text-faint mt-1 break-all">
+                    <span className="text-muted">records:</span>{' '}
                     <span className="font-mono">{stage.entityIds.join(', ')}</span>
                   </p>
                 )}
@@ -267,7 +267,7 @@ export function InvestorDemoPanel() {
             ))}
           </ol>
 
-          <p className="text-ds-label text-zinc-600 leading-relaxed">
+          <p className="text-ds-label text-faint leading-relaxed">
             Every stage above wrote canonical state that the product's own screens read back — the
             brand portal, the operator console, the deductions ledger, the payout ledger, the CRM
             timeline and the audit log. No live provider, email, payment or accounting system was
@@ -278,9 +278,9 @@ export function InvestorDemoPanel() {
 
       {!run && (
         <Card className="p-4">
-          <p className="text-ds-label text-zinc-500 leading-relaxed">
+          <p className="text-ds-label text-muted leading-relaxed">
             {INVESTOR_DEMO_STAGES.length} stages will run in order:{' '}
-            <span className="text-zinc-400">
+            <span className="text-muted">
               {INVESTOR_DEMO_STAGES.map((s) => s.label).join(' → ')}
             </span>
           </p>

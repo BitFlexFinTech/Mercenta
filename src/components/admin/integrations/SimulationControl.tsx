@@ -159,16 +159,16 @@ function EnvironmentSwitch() {
 
   return (
     <Card className="p-4" data-testid="environment-switch">
-      <div data-environment-banner={mode} className="mt-3 rounded-ds-md border border-hairline bg-tint p-2 text-ds-label text-zinc-300 flex items-start gap-2">
+      <div data-environment-banner={mode} className="mt-3 rounded-ds-md border border-hairline bg-tint p-2 text-ds-label text-strong flex items-start gap-2">
         <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
         <span>{isDemo ? 'DEMO MODE: you are viewing demo data. No real data or API calls.' : 'LIVE MODE: some integrations are not yet connected. Connect them in Settings.'}</span>
       </div>
       <div className="flex items-center justify-between gap-3 flex-wrap" data-environment-switch={mode}>
         <div>
           <h3 className="text-sm font-semibold text-strong flex items-center gap-2">
-            <Power className="w-4 h-4 text-brass-300" /> Platform environment
+            <Power className="w-4 h-4 text-accent-300" /> Platform environment
           </h3>
-          <p className="text-ds-label text-zinc-500 mt-0.5 max-w-2xl leading-relaxed">
+          <p className="text-ds-label text-muted mt-0.5 max-w-2xl leading-relaxed">
             {isDemo
               ? 'Demo — seeded data, every external provider simulated, no credential required. This is the platform default.'
               : 'Live — real data only. There is no seed fallback (an empty platform is correct), and a provider with no configured credentials is UNAVAILABLE, never simulated.'}
@@ -176,7 +176,7 @@ function EnvironmentSwitch() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {isEnvironmentOverridden() && (
-            <span data-environment-override className="text-ds-micro text-zinc-500">
+            <span data-environment-override className="text-ds-micro text-muted">
               override · default {defaultMode}
             </span>
           )}
@@ -184,8 +184,8 @@ function EnvironmentSwitch() {
             className={cn(
               'text-ds-micro uppercase tracking-wide border',
               isDemo
-                ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
+                : 'bg-state-success/10 text-state-success border-state-success/20'
             )}
           >
             {isDemo ? 'Demo' : 'Live'}
@@ -294,13 +294,13 @@ export function SimulationControl() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-base font-semibold text-strong flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-brass-300" /> Simulation Control Centre
+            <FlaskConical className="w-4 h-4 text-accent-300" /> Simulation Control Centre
           </h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Deterministic, simulation-only execution of the MERCENTA scenario engine. Never touches a live provider.
           </p>
         </div>
-        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
+        <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20 uppercase tracking-wide">
           Simulation only
         </Badge>
       </div>
@@ -331,11 +331,11 @@ export function SimulationControl() {
             <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset shared simulation state
           </Button>
         </div>
-        <p className="text-ds-label text-zinc-600 mt-2 leading-relaxed">
+        <p className="text-ds-label text-faint mt-2 leading-relaxed">
           Same seed ⇒ same record IDs (runId, PO, shipment, audit rows) — deterministic and reproducible.
-          Reset is <span className="text-zinc-400">partial</span>: clears the Mock SP-API submission state and event feed only;
+          Reset is <span className="text-muted">partial</span>: clears the Mock SP-API submission state and event feed only;
           it does not remove scenario-created PO/shipment/deduction/ticket records from the demo store.
-          {lastResetAt && <span className="block text-emerald-400 mt-1">Last reset: {new Date(lastResetAt).toLocaleString()}</span>}
+          {lastResetAt && <span className="block text-state-success mt-1">Last reset: {new Date(lastResetAt).toLocaleString()}</span>}
         </p>
       </Card>
 {/* Scenario list */}
@@ -350,11 +350,11 @@ export function SimulationControl() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm font-semibold text-strong">{meta.name}</h4>
-                    <Badge className="text-ds-micro uppercase tracking-wide bg-zinc-500/15 text-zinc-400 border-zinc-500/20">{id}</Badge>
+                    <Badge className="text-ds-micro uppercase tracking-wide bg-tint text-muted border-hairline">{id}</Badge>
                   </div>
-                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{meta.purpose}</p>
-                  <p className="text-ds-label text-zinc-600 mt-1 leading-relaxed max-w-2xl">
-                    <span className="text-zinc-400">Simulates:</span> {meta.simulates}
+                  <p className="text-xs text-muted mt-1 leading-relaxed">{meta.purpose}</p>
+                  <p className="text-ds-label text-faint mt-1 leading-relaxed max-w-2xl">
+                    <span className="text-muted">Simulates:</span> {meta.simulates}
                   </p>
                 </div>
                 <Button
@@ -369,11 +369,11 @@ export function SimulationControl() {
               {/* Safety status */}
               <div className="mt-3 flex items-center gap-2 flex-wrap">
                 {safe ? (
-                  <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+                  <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20">
                     <ShieldCheck className="w-3 h-3 mr-1" /> Simulation-safe
                   </Badge>
                 ) : (
-                  <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
+                  <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">
                     <AlertTriangle className="w-3 h-3 mr-1" /> Refused — provider not simulation-safe: {unsafeProviders.join(', ')}
                   </Badge>
                 )}
@@ -392,10 +392,10 @@ export function SimulationControl() {
 function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitted: number } }) {
   const statusCls =
     result.status === 'ok'
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+      ? 'bg-state-success/10 text-state-success border-state-success/20'
       : result.status === 'safety_refused'
-      ? 'bg-red-500/15 text-red-300 border-red-500/20'
-      : 'bg-amber-500/15 text-amber-300 border-amber-500/20';
+      ? 'bg-state-danger/10 text-state-danger border-state-danger/20'
+      : 'bg-state-warning/10 text-state-warning border-state-warning/20';
   const statusLabel =
     result.status === 'ok' ? 'Succeeded'
     : result.status === 'safety_refused' ? 'Safety refused' : 'Error';
@@ -408,21 +408,21 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
             {result.status === 'ok' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <AlertTriangle className="w-3 h-3 mr-1" />}
             {statusLabel}
           </Badge>
-          <span className="text-ds-label text-zinc-500">runId: <span className="font-mono text-zinc-400">{result.runId}</span></span>
+          <span className="text-ds-label text-muted">runId: <span className="font-mono text-muted">{result.runId}</span></span>
         </div>
-        <div className="text-ds-label text-zinc-500">
+        <div className="text-ds-label text-muted">
           {result.auditIds.length} audit row{result.auditIds.length === 1 ? '' : 's'} · {result.eventsEmitted} event{result.eventsEmitted === 1 ? '' : 's'} · {result.steps.length} step{result.steps.length === 1 ? '' : 's'}
         </div>
       </div>
 
       {result.safetyReason && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-red-300">
+        <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-state-danger">
           {result.safetyReason}
         </div>
       )}
 
       {result.error && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-state-warning">
+        <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-state-warning">
           {result.error}
         </div>
       )}
@@ -431,15 +431,15 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
 
       {result.steps.length > 0 && (
         <div className="space-y-1">
-          <div className="text-ds-micro font-semibold text-zinc-500 uppercase tracking-wide">State transitions</div>
+          <div className="text-ds-micro font-semibold text-muted uppercase tracking-wide">State transitions</div>
           <ol className="space-y-1">
             {result.steps.map((s) => (
               <li key={s.step} className="flex items-center gap-2 text-ds-label">
-                <span className="font-mono text-zinc-600 w-5 flex-shrink-0">{s.step}.</span>
-                <span className="text-zinc-300">{s.action}</span>
+                <span className="font-mono text-faint w-5 flex-shrink-0">{s.step}.</span>
+                <span className="text-strong">{s.action}</span>
                 {s.from && s.to && (
-                  <span className="text-zinc-500">
-                    <span className="font-mono text-zinc-500">{s.from}</span> → <span className="font-mono text-zinc-400">{s.to}</span>
+                  <span className="text-muted">
+                    <span className="font-mono text-muted">{s.from}</span> → <span className="font-mono text-muted">{s.to}</span>
                   </span>
                 )}
               </li>
@@ -467,8 +467,8 @@ function CreatedEntities({ result }: { result: ScenarioResult }) {
     <div className="flex flex-wrap gap-x-5 gap-y-1">
       {items.map((it) => (
         <div key={it.label} className="text-ds-label">
-          <span className="text-zinc-500">{it.label}: </span>
-          <span className="font-mono text-zinc-300">{it.value}</span>
+          <span className="text-muted">{it.label}: </span>
+          <span className="font-mono text-strong">{it.value}</span>
         </div>
       ))}
     </div>

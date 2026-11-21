@@ -79,12 +79,12 @@ export function MonitoringDashboard() {
       {/* Dependabot section */}
       <Card className="p-3">
         <div className="flex items-center gap-2 mb-2">
-          <Shield className="w-4 h-4 text-brass-400" />
+          <Shield className="w-4 h-4 text-accent-400" />
           <span className="text-xs font-medium text-strong">Dependency Monitoring</span>
-          <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Configured</Badge>
+          <Badge className="text-ds-micro bg-state-success/10 text-state-success">Configured</Badge>
         </div>
-        <p className="text-ds-micro text-zinc-500 leading-relaxed">
-          Dependabot is configured in <code className="text-brass-400">.github/dependabot.yml</code>.
+        <p className="text-ds-micro text-muted leading-relaxed">
+          Dependabot is configured in <code className="text-accent-400">.github/dependabot.yml</code>.
           Scans npm and GitHub Actions dependencies weekly. Alerts appear as GitHub Security
           Advisories and are also triaged through the alert system below.
         </p>
@@ -97,7 +97,7 @@ export function MonitoringDashboard() {
         </div>
         <div className="divide-y divide-hairline-06">
           {entries.length === 0 && (
-            <div className="px-4 py-3 text-ds-label text-zinc-500">
+            <div className="px-4 py-3 text-ds-label text-muted">
               No health checks have been run in this session. Press &ldquo;Run Health Check&rdquo; to read
               the platform&rsquo;s current readiness.
             </div>
@@ -110,14 +110,14 @@ export function MonitoringDashboard() {
                     ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                   <div>
-                    <p className="text-ds-label text-zinc-300">{e.summary}</p>
-                    <p className="text-ds-micro text-zinc-600 font-mono">{new Date(e.timestamp).toLocaleString()}</p>
+                    <p className="text-ds-label text-strong">{e.summary}</p>
+                    <p className="text-ds-micro text-faint font-mono">{new Date(e.timestamp).toLocaleString()}</p>
                     {triageResults[e.id] && (
-                      <p className="text-ds-micro text-amber-400 mt-0.5">Triage: {triageResults[e.id]}</p>
+                      <p className="text-ds-micro text-state-warning mt-0.5">Triage: {triageResults[e.id]}</p>
                     )}
                   </div>
                 </div>
-                <Badge className={cn('text-ds-micro', e.healthy ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>
+                <Badge className={cn('text-ds-micro', e.healthy ? 'bg-state-success/10 text-state-success' : 'bg-state-warning/10 text-state-warning')}>
                   {e.healthy ? 'Healthy' : 'Degraded'}
                 </Badge>
               </div>

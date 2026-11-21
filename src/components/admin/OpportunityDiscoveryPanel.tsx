@@ -86,14 +86,14 @@ export function OpportunityDiscoveryPanel() {
             <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Compass className="w-4 h-4" /> Opportunity Discovery
             </h2>
-            <p className="text-ds-label text-zinc-500 mt-1">
+            <p className="text-ds-label text-muted mt-1">
               The second discovery layer over the same ASIN-level universe: UK brands,
               international brands, sports organisations, distributor channels and network routes.
               Ranked by estimated PO potential.{' '}
-              <span className="text-zinc-600">{PO_POTENTIAL_FORMULA}</span>
+              <span className="text-faint">{PO_POTENTIAL_FORMULA}</span>
             </p>
           </div>
-          <span className="text-ds-micro text-amber-300/90 border border-amber-400/20 rounded-ds-sm px-2 py-1 whitespace-nowrap">
+          <span className="text-ds-micro text-state-warning/90 border border-amber-400/20 rounded-ds-sm px-2 py-1 whitespace-nowrap">
             {CLAIM_LABELS.estimate}
           </span>
         </div>
@@ -111,12 +111,12 @@ export function OpportunityDiscoveryPanel() {
                   'text-left rounded-ds-md border px-2.5 py-2 transition-colors',
                   vertical === v
                     ? 'border-emerald-400/40 bg-emerald-500/[0.08]'
-                    : 'border-hairline bg-ink-850 hover:bg-tint'
+                    : 'border-hairline bg-surface-raised hover:bg-tint'
                 )}
               >
-                <p className="text-ds-micro text-zinc-500">{OPPORTUNITY_VERTICALS[v].label}</p>
+                <p className="text-ds-micro text-muted">{OPPORTUNITY_VERTICALS[v].label}</p>
                 <p className="text-sm font-bold text-strong">{r.count}</p>
-                <p className="text-ds-micro text-zinc-400 font-mono">
+                <p className="text-ds-micro text-muted font-mono">
                   PO {gbp(r.poPotentialGbp)} · Mercenta {gbp(r.mercentaRevenueGbp)}
                 </p>
               </button>
@@ -134,7 +134,7 @@ export function OpportunityDiscoveryPanel() {
             placeholder="Search brand or category..."
             className="text-xs py-1 w-52"
           />
-          <span className="text-xs text-zinc-600">
+          <span className="text-xs text-faint">
             {visible.length} ranked · {ineligible.length} ineligible
           </span>
         </div>
@@ -143,7 +143,7 @@ export function OpportunityDiscoveryPanel() {
             second table on this page silently captured their clicks and broke 19
             pre-existing specs. A labelled grid keeps the pre-existing DOM intact. */}
         <div role="table" aria-label="Ranked opportunities" className="w-full text-xs">
-          <div role="row" className="flex border-b bg-ink-850/50 text-zinc-500">
+          <div role="row" className="flex border-b bg-surface-raised/50 text-muted">
             {['#', 'Brand', 'Vertical', 'Cat', 'ASINs', 'Est. PO/mo', 'Mercenta est.', 'Weeks', 'Presence', 'CTA'].map(
               (h) => (
                 <span key={h} role="columnheader" className="px-2 py-1.5 flex-1 min-w-0 truncate">
@@ -163,36 +163,36 @@ export function OpportunityDiscoveryPanel() {
                 selected === r.id && 'bg-tint'
               )}
             >
-              <span className="px-2 py-1 text-zinc-500 flex-1 min-w-0 truncate">{r.rank}</span>
+              <span className="px-2 py-1 text-muted flex-1 min-w-0 truncate">{r.rank}</span>
               <span className="px-2 py-1 font-medium text-strong flex-1 min-w-0 truncate">
                 {r.brand}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-muted text-ds-micro flex-1 min-w-0 truncate">
                 {OPPORTUNITY_VERTICALS[r.vertical].label}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-muted text-ds-micro flex-1 min-w-0 truncate">
                 {r.category}
               </span>
-              <span className="px-2 py-1 text-zinc-300 flex-1 min-w-0 truncate">{r.asinCount}</span>
-              <span className="px-2 py-1 text-emerald-300 font-mono flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-strong flex-1 min-w-0 truncate">{r.asinCount}</span>
+              <span className="px-2 py-1 text-state-success font-mono flex-1 min-w-0 truncate">
                 {gbp(r.estimatedPoPotentialGbp)}
               </span>
-              <span className="px-2 py-1 text-zinc-200 font-mono flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-strong font-mono flex-1 min-w-0 truncate">
                 {gbp(r.estimatedMercentaRevenueGbp)}
               </span>
-              <span className="px-2 py-1 text-zinc-400 flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-muted flex-1 min-w-0 truncate">
                 {r.timeToRevenueWeeks}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-muted text-ds-micro flex-1 min-w-0 truncate">
                 {AMAZON_PRESENCE_LABELS[r.amazonPresence]}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-muted text-ds-micro flex-1 min-w-0 truncate">
                 {r.recommendedCta}
               </span>
             </div>
           ))}
           {visible.length === 0 && (
-            <p className="py-8 text-center text-zinc-600">No eligible opportunities match.</p>
+            <p className="py-8 text-center text-faint">No eligible opportunities match.</p>
           )}
         </div>
       </Card>
@@ -200,18 +200,18 @@ export function OpportunityDiscoveryPanel() {
       {/* §6 — ineligible records are SHOWN with the reason, never hidden. */}
       {ineligible.length > 0 && (
         <Card>
-          <h3 className="text-xs font-semibold text-amber-300 flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-state-warning flex items-center gap-2">
             <Ban className="w-3.5 h-3.5" /> Ineligible — outside the ten permitted categories
           </h3>
           <div className="mt-2 space-y-1">
             {ineligible.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between gap-2 bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5"
+                className="flex items-center justify-between gap-2 bg-surface-raised border border-hairline rounded-ds-md px-2 py-1.5"
               >
                 <div className="min-w-0 flex-1">
-                  <span className="text-xs font-medium text-zinc-300">{r.brand}</span>
-                  <p className="text-ds-micro text-amber-300/80 font-mono truncate">{r.eligibility.reason}</p>
+                  <span className="text-xs font-medium text-strong">{r.brand}</span>
+                  <p className="text-ds-micro text-state-warning/80 font-mono truncate">{r.eligibility.reason}</p>
                 </div>
                 <Button variant="tertiary" className="text-ds-micro px-2 py-1" onClick={() => setSelected(r.id)}>
                   Details
@@ -231,7 +231,7 @@ export function OpportunityDiscoveryPanel() {
         <h3 className="text-xs font-semibold text-strong flex items-center gap-2">
           <Trophy className="w-3.5 h-3.5" /> Sports / Team / Club opportunities
         </h3>
-        <p className="text-ds-micro text-amber-300/90 mt-1">{SEEDED_OPPORTUNITY_DISCLAIMER}</p>
+        <p className="text-ds-micro text-state-warning/90 mt-1">{SEEDED_OPPORTUNITY_DISCLAIMER}</p>
         <div className="mt-2 space-y-2">
           {sports.map((s) => (
             <div
@@ -242,16 +242,16 @@ export function OpportunityDiscoveryPanel() {
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span className="text-xs font-medium text-strong">{s.brand}</span>
-                  <span className="ml-2 text-ds-micro text-zinc-500">{s.category}</span>
+                  <span className="ml-2 text-ds-micro text-muted">{s.category}</span>
                 </div>
-                <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
+                <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">
                   {CLAIM_LABELS[s.claim]}
                 </Badge>
               </div>
-              <p className="text-zinc-400 mt-1">{s.productSummary}</p>
-              <p className="text-ds-micro text-zinc-500 mt-1">{s.sellerStatusEvidence}</p>
-              <p className="text-ds-micro text-zinc-500 mt-1">{s.distributionOpportunity}</p>
-              <p className="text-ds-micro text-emerald-300/90 mt-1">Next: {s.recommendedCta}</p>
+              <p className="text-muted mt-1">{s.productSummary}</p>
+              <p className="text-ds-micro text-muted mt-1">{s.sellerStatusEvidence}</p>
+              <p className="text-ds-micro text-muted mt-1">{s.distributionOpportunity}</p>
+              <p className="text-ds-micro text-state-success/90 mt-1">Next: {s.recommendedCta}</p>
             </div>
           ))}
         </div>
@@ -265,13 +265,13 @@ export function OpportunityDiscoveryPanel() {
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-xs font-semibold text-strong">
               {current.brand}
-              <span className="ml-2 text-ds-micro font-normal text-zinc-500">
+              <span className="ml-2 text-ds-micro font-normal text-muted">
                 {OPPORTUNITY_VERTICALS[current.vertical].label}
               </span>
             </h3>
             <button
               type="button"
-              className="text-ds-micro text-zinc-500 hover:text-zinc-300 flex items-center gap-1"
+              className="text-ds-micro text-muted hover:text-strong flex items-center gap-1"
               onClick={() => setSelected(null)}
             >
               <ChevronDown className="w-3 h-3" /> Close
@@ -279,50 +279,50 @@ export function OpportunityDiscoveryPanel() {
           </div>
 
           <div className="grid gap-2 sm:grid-cols-3 mt-2 text-ds-label">
-            <p className="text-zinc-400">
-              Eligibility: <span className="text-zinc-200">{current.eligibility.reason}</span>
+            <p className="text-muted">
+              Eligibility: <span className="text-strong">{current.eligibility.reason}</span>
             </p>
-            <p className="text-zinc-400">
-              Geography: <span className="text-zinc-200">{current.geography.sourceMarketLabel}</span> →{' '}
+            <p className="text-muted">
+              Geography: <span className="text-strong">{current.geography.sourceMarketLabel}</span> →{' '}
               {current.geography.destinationMarket}
             </p>
-            <p className="text-zinc-400">
+            <p className="text-muted">
               Seller evidence:{' '}
-              <span className="text-zinc-200">{AUTHORISATION_LABELS[current.authorisationIndicator]}</span>
+              <span className="text-strong">{AUTHORISATION_LABELS[current.authorisationIndicator]}</span>
             </p>
-            <p className="text-zinc-400">
-              Distribution: <span className="text-zinc-200">{current.distributionOpportunity}</span>
+            <p className="text-muted">
+              Distribution: <span className="text-strong">{current.distributionOpportunity}</span>
             </p>
-            <p className="text-zinc-400">
+            <p className="text-muted">
               Existing distributor:{' '}
-              <span className="text-zinc-200">{current.existingDistributorEvidence}</span>
+              <span className="text-strong">{current.existingDistributorEvidence}</span>
             </p>
-            <p className="text-zinc-400">
-              Decision-maker: <span className="text-zinc-200">{current.decisionMaker}</span>
+            <p className="text-muted">
+              Decision-maker: <span className="text-strong">{current.decisionMaker}</span>
             </p>
-            <p className="text-zinc-400">
+            <p className="text-muted">
               Est. PO potential/mo:{' '}
-              <span className="text-emerald-300 font-mono">{gbp(current.estimatedPoPotentialGbp)}</span>
+              <span className="text-state-success font-mono">{gbp(current.estimatedPoPotentialGbp)}</span>
             </p>
-            <p className="text-zinc-400">
+            <p className="text-muted">
               Mercenta est./mo:{' '}
-              <span className="text-zinc-200 font-mono">{gbp(current.estimatedMercentaRevenueGbp)}</span>{' '}
+              <span className="text-strong font-mono">{gbp(current.estimatedMercentaRevenueGbp)}</span>{' '}
               ({current.recommendedCommercialModel})
             </p>
-            <p className="text-zinc-400">
-              Claim: <span className="text-amber-300">{CLAIM_LABELS[current.claim]}</span> ·{' '}
-              <span className="text-zinc-500">{current.estimateLabel}</span>
+            <p className="text-muted">
+              Claim: <span className="text-state-warning">{CLAIM_LABELS[current.claim]}</span> ·{' '}
+              <span className="text-muted">{current.estimateLabel}</span>
             </p>
           </div>
 
 {current.topAsins.length > 0 && (
             <div className="mt-3">
-              <p className="text-ds-micro text-zinc-500 mb-1">
+              <p className="text-ds-micro text-muted mb-1">
                 ASIN evidence (from the existing BI engine)
               </p>
               <table className="w-full text-ds-micro">
                 <thead>
-                  <tr className="border-b border-hairline text-zinc-500">
+                  <tr className="border-b border-hairline text-muted">
                     {['ASIN', 'Title', 'Price', 'Sellers', 'BSR', 'Reviews', 'Est. units/mo', 'Est. rev/mo'].map(
                       (h) => (
                         <th key={h} className="px-1.5 py-1 text-left">{h}</th>
@@ -332,7 +332,7 @@ export function OpportunityDiscoveryPanel() {
                 </thead>
                 <tbody>
                   {current.topAsins.map((a) => (
-                    <tr key={a.asin} className="border-b border-hairline text-zinc-300">
+                    <tr key={a.asin} className="border-b border-hairline text-strong">
                       <td className="px-1.5 py-1 font-mono">{a.asin}</td>
                       <td className="px-1.5 py-1">{a.title}</td>
                       <td className="px-1.5 py-1">£{a.price.toFixed(2)}</td>
@@ -361,7 +361,7 @@ export function OpportunityDiscoveryPanel() {
             </Button>
           </div>
           {estimate && (
-            <p className="text-ds-micro text-zinc-500 mt-2 font-mono">
+            <p className="text-ds-micro text-muted mt-2 font-mono">
               {estimate.estimateLabel}: {estimate.estimatedMonthlyUnits.low}–
               {estimate.estimatedMonthlyUnits.high} units/mo · {estimate.confidence} confidence ·{' '}
               {estimate.dataSource}

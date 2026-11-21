@@ -34,9 +34,9 @@ const ORIGIN_LABELS: Record<string, string> = {
 };
 
 const STEP_STYLES: Record<string, string> = {
-  pending: 'bg-tint text-zinc-400 border-hairline',
-  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  done: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  pending: 'bg-tint text-muted border-hairline',
+  in_progress: 'bg-state-info/10 text-state-info border-state-info/20',
+  done: 'bg-state-success/10 text-state-success border-state-success/20',
 };
 
 export function OnboardingPipeline() {
@@ -114,7 +114,7 @@ export function OnboardingPipeline() {
   return (
     <Card title="Onboarding Pipeline">
       <div className="px-1 pb-1 space-y-3" data-section="onboarding-pipeline">
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           Canonical onboarding records for brands handed off into the platform — from a qualified
           acquisition opportunity, an approved partner application, or an operator-created brand.
           Each row can be operated inline: record acceptance, complete the ordered steps, then
@@ -132,8 +132,8 @@ export function OnboardingPipeline() {
               className={cn(
                 'px-2 py-1 rounded-ds-sm border transition-colors',
                 filter === chip.key
-                  ? 'bg-brass-500/15 text-brass border-brass/30'
-                  : 'text-zinc-400 border-hairline hover:text-strong'
+                  ? 'bg-accent-500/15 text-accent border-accent/30'
+                  : 'text-muted border-hairline hover:text-strong'
               )}
             >
               {chip.label}: <span className="font-mono text-strong">{chip.value}</span>
@@ -141,19 +141,19 @@ export function OnboardingPipeline() {
           ))}
         </div>
 
-        {notice && <p className="text-ds-label text-emerald-400" data-notice="ok">{notice}</p>}
-        {error && <p className="text-ds-label text-red-300" data-notice="error">{error}</p>}
+        {notice && <p className="text-ds-label text-state-success" data-notice="ok">{notice}</p>}
+        {error && <p className="text-ds-label text-state-danger" data-notice="error">{error}</p>}
 
-        <div className="text-ds-micro text-zinc-500" data-section="persistence-status">
+        <div className="text-ds-micro text-muted" data-section="persistence-status">
           Persistence:{' '}
           <span
             className={cn(
               'font-mono',
               persistence.state === 'failed'
-                ? 'text-red-400'
+                ? 'text-state-danger'
                 : persistence.state === 'durable'
-                  ? 'text-emerald-300'
-                  : 'text-zinc-400'
+                  ? 'text-state-success'
+                  : 'text-muted'
             )}
           >
             {persistence.state}
@@ -168,7 +168,7 @@ export function OnboardingPipeline() {
             description="Start onboarding from a qualified opportunity (Brand Intelligence → prospect → Outreach) or approve a partner application to create the first onboarding record."
           />
         ) : visible.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">No onboarding records in this state.</p>
+          <p className="text-ds-label text-faint">No onboarding records in this state.</p>
         ) : (
           <div className="divide-y divide-hairline-06">
             {visible.map((row) => (
@@ -180,10 +180,10 @@ export function OnboardingPipeline() {
                 >
                   <span className="min-w-0">
                     <span className="text-xs font-medium text-strong inline-flex items-center gap-1.5">
-                      <ClipboardList className="w-3 h-3 text-brass-400" />
+                      <ClipboardList className="w-3 h-3 text-accent-400" />
                       {row.onboarding.businessName}
                     </span>
-                    <span className="block text-ds-micro text-zinc-500 font-mono">
+                    <span className="block text-ds-micro text-muted font-mono">
                       {row.onboarding.brandId} · {ORIGIN_LABELS[row.onboarding.origin] ?? row.onboarding.origin} ·{' '}
                       {row.stepsDone}/{row.stepsTotal} steps
                       {row.onboarding.prospectId ? ` · prospect ${row.onboarding.prospectId}` : ''}
@@ -200,7 +200,7 @@ export function OnboardingPipeline() {
                     </StatusBadge>
                     <ChevronRight
                       className={cn(
-                        'w-3.5 h-3.5 text-zinc-500 transition-transform',
+                        'w-3.5 h-3.5 text-muted transition-transform',
                         openId === row.onboarding.id && 'rotate-90'
                       )}
                     />
@@ -242,11 +242,11 @@ function OnboardingDetail({
   return (
     <div className="border border-hairline rounded-ds-md p-3 mb-2 space-y-2" data-section="onboarding-detail">
       {row.opportunity && (
-        <p className="text-ds-micro text-zinc-400">
+        <p className="text-ds-micro text-muted">
           Originating opportunity{' '}
-          <span className="font-mono text-zinc-300">{row.opportunity.id}</span> · stage{' '}
+          <span className="font-mono text-strong">{row.opportunity.id}</span> · stage{' '}
           <span className="capitalize">{row.opportunity.stage}</span> · BI {row.opportunity.biScore}/100 ·
-          brand <span className="text-zinc-300">{row.prospectBrand ?? o.businessName}</span>
+          brand <span className="text-strong">{row.prospectBrand ?? o.businessName}</span>
         </p>
       )}
       <ol className="space-y-1">
@@ -256,10 +256,10 @@ function OnboardingDetail({
             data-onboarding-step={s.id}
             className="flex items-center justify-between gap-2 border-b border-hairline pb-1"
           >
-            <span className="text-ds-label text-zinc-300">
-              <span className="font-mono text-ds-micro text-zinc-500 mr-1.5">{s.id}</span>
+            <span className="text-ds-label text-strong">
+              <span className="font-mono text-ds-micro text-muted mr-1.5">{s.id}</span>
               {s.label}
-              {s.completedBy && <span className="text-ds-micro text-zinc-600 ml-1.5">by {s.completedBy}</span>}
+              {s.completedBy && <span className="text-ds-micro text-faint ml-1.5">by {s.completedBy}</span>}
             </span>
             {/* The shared Button primitive only forwards `data-state`, so the step
                 identity lives on this wrapper — the machine-readable contract the
@@ -302,7 +302,7 @@ function OnboardingDetail({
             <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />Complete onboarding
           </Button>
         ) : (
-          <p className="text-ds-micro text-emerald-300">
+          <p className="text-ds-micro text-state-success">
             Operational brand — tenant {o.brandId}
             {o.completedAt ? ` (completed ${o.completedAt.slice(0, 10)})` : ''}.
             {o.acceptedAt ? ` Accepted ${o.acceptedAt.slice(0, 10)}.` : ''}
@@ -315,7 +315,7 @@ function OnboardingDetail({
             leaving the link silently absent. */}
         {o.poRulesAcknowledgedAt ? (
           <p
-            className="text-ds-micro text-emerald-300/90"
+            className="text-ds-micro text-state-success/90"
             data-onboarding-po-rules="acknowledged"
             data-po-rules-text={o.poRulesRuleText ?? ''}
           >
@@ -324,17 +324,17 @@ function OnboardingDetail({
             this record.
           </p>
         ) : o.status !== 'completed' ? (
-          <p className="text-ds-micro text-amber-300/80" data-onboarding-po-rules="outstanding">
+          <p className="text-ds-micro text-state-warning/80" data-onboarding-po-rules="outstanding">
             PO acknowledgement rule not yet acknowledged — the brand acknowledges it in the operational-guidance
             step of its onboarding wizard.
           </p>
         ) : null}
-        <span className="text-ds-micro text-zinc-600">
+        <span className="text-ds-micro text-faint">
           record <span className="font-mono">{o.id}</span> · initiated {o.initiatedAt.slice(0, 10)} by{' '}
           {o.initiatedBy}
         </span>
         {!canMutate && (
-          <span className="text-ds-micro text-amber-300">Read-only account — onboarding actions are refused.</span>
+          <span className="text-ds-micro text-state-warning">Read-only account — onboarding actions are refused.</span>
         )}
       </div>
     </div>

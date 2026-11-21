@@ -81,25 +81,25 @@ export function CompliancePanel() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-strong">Compliance — Companies House &amp; HMRC</h3>
-            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+            <p className="text-xs text-muted mt-1 leading-relaxed">
               Simulated government-provider workflows: brand company verification at the registrar and
               VAT status/filing with HMRC. Every action runs through the SAME adapter contracts a live
               connection will use — today the deterministic mock bodies execute (no real government
               endpoint is contacted). Actions are refused unless the provider mode is positively{' '}
-              <span className="text-amber-300">SIMULATION</span>.
+              <span className="text-state-warning">SIMULATION</span>.
             </p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <Badge className={cn('text-ds-micro border', chSafe ? 'bg-amber-500/15 text-amber-300 border-amber-500/20' : 'bg-red-500/15 text-red-300 border-red-500/20')}>
+            <Badge className={cn('text-ds-micro border', chSafe ? 'bg-state-warning/10 text-state-warning border-state-warning/20' : 'bg-state-danger/10 text-state-danger border-state-danger/20')}>
               Companies House: {String(modeOf(modes, 'companies_house'))}
             </Badge>
-            <Badge className={cn('text-ds-micro border', hmrcSafe ? 'bg-amber-500/15 text-amber-300 border-amber-500/20' : 'bg-red-500/15 text-red-300 border-red-500/20')}>
+            <Badge className={cn('text-ds-micro border', hmrcSafe ? 'bg-state-warning/10 text-state-warning border-state-warning/20' : 'bg-state-danger/10 text-state-danger border-state-danger/20')}>
               HMRC: {String(modeOf(modes, 'hmrc'))}
             </Badge>
           </div>
         </div>
         {(!chSafe || !hmrcSafe) && (
-          <div className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-state-warning">
+          <div className="mt-3 bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-2.5 text-ds-label text-state-warning">
             One or more compliance providers is not resolved as SIMULATION. Actions for that provider are
             refused at the boundary and by the engine. Open Integrations to set the provider to simulation
             (or connect real credentials there later — no code change).
@@ -132,7 +132,7 @@ export function CompliancePanel() {
               label: 'Company no.',
               render: (b) => {
                 const v = verifications.find((x) => x.brandId === b.id);
-                return <span className="font-mono text-ds-label text-zinc-400">{v?.companyNumber ?? '—'}</span>;
+                return <span className="font-mono text-ds-label text-muted">{v?.companyNumber ?? '—'}</span>;
               },
             },
             {
@@ -145,10 +145,10 @@ export function CompliancePanel() {
                     className={cn(
                       'text-ds-micro',
                       !v
-                        ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
+                        ? 'bg-tint text-muted border-hairline'
                         : v.status === 'verified'
-                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                          : 'bg-red-500/15 text-red-300 border-red-500/20'
+                          ? 'bg-state-success/10 text-state-success border-state-success/20'
+                          : 'bg-state-danger/10 text-state-danger border-state-danger/20'
                     )}
                   >
                     {v ? v.status.replace(/_/g, ' ') : 'unverified'}
@@ -162,7 +162,7 @@ export function CompliancePanel() {
               hideBelow: 'lg',
               render: (b) => {
                 const v = verifications.find((x) => x.brandId === b.id);
-                return <span className="text-ds-micro text-zinc-500">{v?.source ?? '—'}</span>;
+                return <span className="text-ds-micro text-muted">{v?.source ?? '—'}</span>;
               },
             },
           ]}
@@ -190,7 +190,7 @@ export function CompliancePanel() {
           {Object.entries(outcome)
             .filter(([k]) => k.startsWith('ch-'))
             .map(([k, v]) => (
-              <div key={k} className="text-ds-micro font-mono text-zinc-500">{k}: {v}</div>
+              <div key={k} className="text-ds-micro font-mono text-muted">{k}: {v}</div>
             ))}
         </div>
       </Card>
@@ -218,7 +218,7 @@ export function CompliancePanel() {
               key: 'vrn',
               label: 'VRN (sim)',
               render: (b) => (
-                <span className="font-mono text-ds-label text-zinc-400">
+                <span className="font-mono text-ds-label text-muted">
                   MOCK-VRN-{b.id.slice(-6)}
                 </span>
               ),
@@ -264,18 +264,18 @@ export function CompliancePanel() {
         />
 
         <div className="mt-3">
-          <div className="text-ds-micro font-semibold text-zinc-500 uppercase tracking-wide">Filing history</div>
+          <div className="text-ds-micro font-semibold text-muted uppercase tracking-wide">Filing history</div>
           <div className="mt-1 space-y-1 max-h-[180px] overflow-y-auto">
             {filings.length === 0 ? (
-              <div className="text-ds-label text-zinc-600">No simulated filings yet — run Sync + File above.</div>
+              <div className="text-ds-label text-faint">No simulated filings yet — run Sync + File above.</div>
             ) : (
               filings.slice(0, 8).map((f) => (
-                <div key={f.id} className="flex items-center justify-between text-ds-micro font-mono text-zinc-500">
+                <div key={f.id} className="flex items-center justify-between text-ds-micro font-mono text-muted">
                   <span>{f.brandId.slice(0, -4)}</span>
-                  <Badge className={cn('text-ds-micro border', f.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : 'bg-amber-500/15 text-amber-300 border-amber-500/20')}>
+                  <Badge className={cn('text-ds-micro border', f.status === 'accepted' ? 'bg-state-success/10 text-state-success border-state-success/20' : 'bg-state-warning/10 text-state-warning border-state-warning/20')}>
                     {f.status}
                   </Badge>
-                  <span className="text-zinc-600 truncate">{f.period} · {f.submissionId ?? (f.rejectionReason ?? '')}</span>
+                  <span className="text-faint truncate">{f.period} · {f.submissionId ?? (f.rejectionReason ?? '')}</span>
                 </div>
               ))
             )}
@@ -286,14 +286,14 @@ export function CompliancePanel() {
           {Object.entries(outcome)
             .filter(([k]) => k.startsWith('hmrc-'))
             .map(([k, v]) => (
-              <div key={k} className="text-ds-micro font-mono text-zinc-500">{k}: {v}</div>
+              <div key={k} className="text-ds-micro font-mono text-muted">{k}: {v}</div>
             ))}
         </div>
 
-        <p className="mt-3 text-ds-micro text-zinc-600 leading-relaxed">
+        <p className="mt-3 text-ds-micro text-faint leading-relaxed">
           Safe mock configuration (simulation): Companies House key{' '}
-          <span className="font-mono text-zinc-400">mock:ch-demo-key</span> · HMRC client{' '}
-          <span className="font-mono text-zinc-400">mock:hmrc-demo-client</span>. Live credentials, when
+          <span className="font-mono text-muted">mock:ch-demo-key</span> · HMRC client{' '}
+          <span className="font-mono text-muted">mock:hmrc-demo-client</span>. Live credentials, when
           entered in Integrations, activate the same workflows with zero code change.
         </p>
       </Card>

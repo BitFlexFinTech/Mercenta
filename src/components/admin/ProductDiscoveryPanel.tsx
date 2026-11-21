@@ -83,26 +83,26 @@ export function ProductDiscoveryPanel() {
   rows.sort((a, b) => b.estRevenue - a.estRevenue);
 
   const demandTone: Record<string, string> = {
-    High: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-    Medium: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-    Low: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-    Limited: 'text-zinc-500 bg-zinc-500/10 border-zinc-500/30',
+    High: 'text-state-success bg-state-success/10 border-emerald-500/30',
+    Medium: 'text-state-info bg-blue-500/10 border-blue-500/30',
+    Low: 'text-state-warning bg-state-warning/10 border-amber-500/30',
+    Limited: 'text-muted bg-tint border-hairline',
   };
 
 return (
 <Card title="Product Discovery (internal)" className="mt-2">
-      <p className="text-ds-label text-zinc-400">
+      <p className="text-ds-label text-muted">
         Top candidate products by stored marketplace evidence. Derived from the canonical BI ASIN seam —
-        <span className="text-zinc-300">simulated/estimated</span> until Keepa/Amazon credentials are live
+        <span className="text-strong">simulated/estimated</span> until Keepa/Amazon credentials are live
         (then the same evidence seam carries real values). No network calls are made by this view.
       </p>
-      <p className="text-ds-micro text-zinc-600 mt-1 flex items-start gap-1.5">
-        <Info className="w-3.5 h-3.5 text-zinc-500 shrink-0" /> Demand: High (est sales ≥ 500/mo or ≥ 2000 reviews) · Medium (≥100/mo or ≥400 reviews) · Low (signal present) · Limited (no measurable signal). Qualitative derivation — not a Mercenta score.
+      <p className="text-ds-micro text-faint mt-1 flex items-start gap-1.5">
+        <Info className="w-3.5 h-3.5 text-muted shrink-0" /> Demand: High (est sales ≥ 500/mo or ≥ 2000 reviews) · Medium (≥100/mo or ≥400 reviews) · Low (signal present) · Limited (no measurable signal). Qualitative derivation — not a Mercenta score.
       </p>
       <div className="overflow-x-auto mt-2">
         <table className="w-full text-ds-label" data-table="product-discovery">
           <thead>
-            <tr className="text-left text-zinc-500 border-b border-hairline">
+            <tr className="text-left text-muted border-b border-hairline">
               <th className="py-1 px-2">Brand</th>
               <th className="py-1 px-2">Product</th>
               <th className="py-1 px-2">Category</th>
@@ -118,26 +118,26 @@ return (
           <tbody className="divide-y divide-hairline-06">
             {rows.slice(0, 60).map((r) => (
               <tr key={`${r.prospectId}-${r.asin}`} className="hover:bg-tint">
-                <td className="py-1 px-2 font-mono text-zinc-300">{r.brand}</td>
-                <td className="py-1 px-2 text-zinc-200 truncate max-w-[220px]">{r.product}</td>
-                <td className="py-1 px-2 text-zinc-400">{r.category}{r.eligible ? '' : ' ⚠'}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.price ? `£${r.price.toFixed(2)}` : '—'}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.bsr ?? '—'}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.reviews.toLocaleString()}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.estSales.toLocaleString()}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">£{r.estRevenue.toLocaleString()}</td>
-                <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.sellers}</td>
+                <td className="py-1 px-2 font-mono text-strong">{r.brand}</td>
+                <td className="py-1 px-2 text-strong truncate max-w-[220px]">{r.product}</td>
+                <td className="py-1 px-2 text-muted">{r.category}{r.eligible ? '' : ' ⚠'}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">{r.price ? `£${r.price.toFixed(2)}` : '—'}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">{r.bsr ?? '—'}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">{r.reviews.toLocaleString()}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">{r.estSales.toLocaleString()}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">£{r.estRevenue.toLocaleString()}</td>
+                <td className="py-1 px-2 text-right font-mono text-strong">{r.sellers}</td>
                 <td className="py-1 px-2"><Badge className={cn('text-ds-micro', demandTone[r.demand] ?? demandTone.Limited)}>{r.demand}</Badge></td>
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={10} className="py-3 text-center text-zinc-600">No product evidence in the canonical universe yet.</td></tr>
+              <tr><td colSpan={10} className="py-3 text-center text-faint">No product evidence in the canonical universe yet.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-      <p className="text-ds-micro text-zinc-600 mt-2 flex items-center gap-1.5">
-        <PackageSearch className="w-3.5 h-3.5 text-zinc-500" /> {rows.length} product records across {new Set(rows.map((r) => r.brand)).size} candidate brands (disqualified prospects excluded).
+      <p className="text-ds-micro text-faint mt-2 flex items-center gap-1.5">
+        <PackageSearch className="w-3.5 h-3.5 text-muted" /> {rows.length} product records across {new Set(rows.map((r) => r.brand)).size} candidate brands (disqualified prospects excluded).
       </p>
     </Card>
   );

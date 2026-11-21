@@ -191,9 +191,9 @@ function formatReport(r: GrantsInvestorsReport): string {
     <Card className="p-4 mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <BadgeDollarSign className="w-4 h-4 text-brass-400" />
+          <BadgeDollarSign className="w-4 h-4 text-accent-400" />
           <span className="text-sm font-semibold text-strong">Grants & Investors</span>
-          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-2">
           {report && <Button className="text-ds-micro" onClick={handleDownload}><Download className="w-3 h-3 mr-1" /> Download</Button>}
@@ -203,88 +203,88 @@ function formatReport(r: GrantsInvestorsReport): string {
         </div>
       </div>
 
-      <p className="text-ds-label text-zinc-500 mb-3">
+      <p className="text-ds-label text-muted mb-3">
         Discovers grants and investors from legitimate public sources (Innovate UK/UKRI, gov.uk).
         Applications and outreach are AI-drafted and staged for review — <strong>never sent
         automatically</strong>. Requires an explicit internal approval — Mercenta never sends.
       </p>
 
-      {error && <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300 mb-3">{error}</div>}
+      {error && <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-xs text-state-danger mb-3">{error}</div>}
 
       {draftNotice && (
-        <div className="bg-brass-500/10 border border-brass-500/20 rounded-ds-md p-3 text-xs text-brass-300 mb-3 flex items-center justify-between">
+        <div className="bg-accent-500/10 border border-accent-500/20 rounded-ds-md p-3 text-xs text-accent-300 mb-3 flex items-center justify-between">
           <span>{draftNotice}</span>
-          <button onClick={() => setDraftNotice(null)} className="text-brass-400 hover:text-brass-300"><X className="w-3 h-3" /></button>
+          <button onClick={() => setDraftNotice(null)} className="text-accent-400 hover:text-accent-300"><X className="w-3 h-3" /></button>
         </div>
       )}
 {!report && !loading && (
         <div className="text-center py-8">
-          <BadgeDollarSign className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-          <p className="text-xs text-zinc-500">Run research to discover grants and investor opportunities</p>
+          <BadgeDollarSign className="w-10 h-10 text-faint mx-auto mb-3" />
+          <p className="text-xs text-muted">Run research to discover grants and investor opportunities</p>
         </div>
       )}
 
       {loading && (
         <div className="text-center py-6">
-          <div className="animate-pulse text-xs text-zinc-400">Researching grants and investors...</div>
+          <div className="animate-pulse text-xs text-muted">Researching grants and investors...</div>
         </div>
       )}
 
       {report && (
         <>
           <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-ink-900 rounded-ds-md p-2">
-              <p className="text-ds-micro text-zinc-500">Grants</p>
+            <div className="bg-surface rounded-ds-md p-2">
+              <p className="text-ds-micro text-muted">Grants</p>
               <p className="text-sm font-semibold text-strong">{report.grants.length}</p>
             </div>
-            <div className="bg-ink-900 rounded-ds-md p-2">
-              <p className="text-ds-micro text-zinc-500">Investors</p>
+            <div className="bg-surface rounded-ds-md p-2">
+              <p className="text-ds-micro text-muted">Investors</p>
               <p className="text-sm font-semibold text-strong">{report.investors.length}</p>
             </div>
-            <div className="bg-ink-900 rounded-ds-md p-2">
-              <p className="text-ds-micro text-zinc-500">Drafts</p>
-              <p className="text-sm font-semibold text-brass-400">{grantsDrafts.length + investorDrafts.length}</p>
+            <div className="bg-surface rounded-ds-md p-2">
+              <p className="text-ds-micro text-muted">Drafts</p>
+              <p className="text-sm font-semibold text-accent-400">{grantsDrafts.length + investorDrafts.length}</p>
             </div>
           </div>
 
           <div className="flex gap-1 mb-3 border-b border-hairline">
-            <button onClick={() => setTab('grants')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'grants' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Grants ({report.grants.length})</button>
-            <button onClick={() => setTab('investors')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'investors' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Investors ({report.investors.length})</button>
-            <button onClick={() => setTab('drafts')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'drafts' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>Drafts ({grantsDrafts.length + investorDrafts.length})</button>
+            <button onClick={() => setTab('grants')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'grants' ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}>Grants ({report.grants.length})</button>
+            <button onClick={() => setTab('investors')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'investors' ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}>Investors ({report.investors.length})</button>
+            <button onClick={() => setTab('drafts')} className={cn('px-3 py-1.5 text-xs font-medium rounded-t transition-colors', tab === 'drafts' ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}>Drafts ({grantsDrafts.length + investorDrafts.length})</button>
           </div>
 {tab === 'grants' && (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {report.grants.map((g) => {
                 const isSelected = selectedGrant === g.id;
                 return (
-                  <div key={g.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-hairline hover:border-hairline-strong')}
+                  <div key={g.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-accent-500/10 border-accent-500/30' : 'bg-surface border-hairline hover:border-hairline-strong')}
                     onClick={() => setSelectedGrant(isSelected ? null : g.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-medium text-strong truncate">{g.title}</span>
-                          <Badge className={cn('text-ds-micro', g.status === 'open' ? 'bg-emerald-500/15 text-emerald-300' : g.status === 'closing_soon' ? 'bg-amber-500/15 text-amber-300' : 'bg-red-500/15 text-red-300')}>{g.status.replace(/_/g, ' ')}</Badge>
+                          <Badge className={cn('text-ds-micro', g.status === 'open' ? 'bg-state-success/10 text-state-success' : g.status === 'closing_soon' ? 'bg-state-warning/10 text-state-warning' : 'bg-state-danger/10 text-state-danger')}>{g.status.replace(/_/g, ' ')}</Badge>
                         </div>
-                        <div className="text-ds-micro text-zinc-500 mt-0.5">{g.provider} — {g.amountRange} — Deadline: {g.deadline}</div>
+                        <div className="text-ds-micro text-muted mt-0.5">{g.provider} — {g.amountRange} — Deadline: {g.deadline}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold font-mono text-emerald-400">{g.fitScore}</div>
-                        <p className="text-ds-micro text-zinc-600">/100</p>
+                        <div className="text-sm font-bold font-mono text-state-success">{g.fitScore}</div>
+                        <p className="text-ds-micro text-faint">/100</p>
                       </div>
                     </div>
                     {isSelected && (
                       <div className="mt-2 pt-2 border-t border-hairline space-y-1.5">
-                        <p className="text-ds-micro text-zinc-400 leading-relaxed">{g.fitReason}</p>
-                        <p className="text-ds-micro text-zinc-500"><span className="text-zinc-400">Eligibility:</span> {g.eligibility}</p>
+                        <p className="text-ds-micro text-muted leading-relaxed">{g.fitReason}</p>
+                        <p className="text-ds-micro text-muted"><span className="text-muted">Eligibility:</span> {g.eligibility}</p>
                         <div className="flex gap-2 pt-1">
                           {!g.draftStarted && !g.submitted && (
                             <Button className="text-ds-micro" onClick={() => { handleDraftGrant(g); setSelectedGrant(null); }}>
                               Apply — Draft Application
                             </Button>
                           )}
-                          {g.submitted && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Submitted</Badge>}
-                          {g.draftStarted && !g.submitted && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">Draft staged</Badge>}
+                          {g.submitted && <Badge className="text-ds-micro bg-state-success/10 text-state-success">Submitted</Badge>}
+                          {g.draftStarted && !g.submitted && <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">Draft staged</Badge>}
                         </div>
                       </div>
                     )}
@@ -298,33 +298,33 @@ function formatReport(r: GrantsInvestorsReport): string {
               {report.investors.map((inv) => {
                 const isSelected = selectedInvestor === inv.id;
                 return (
-                  <div key={inv.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-brass-500/10 border-brass-500/30' : 'bg-ink-900 border-hairline hover:border-hairline-strong')}
+                  <div key={inv.id} className={cn('rounded-ds-md border p-2.5 cursor-pointer transition-all', isSelected ? 'bg-accent-500/10 border-accent-500/30' : 'bg-surface border-hairline hover:border-hairline-strong')}
                     onClick={() => setSelectedInvestor(isSelected ? null : inv.id)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-medium text-strong truncate">{inv.name}</span>
-                          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{inv.type.replace(/_/g, ' ')}</Badge>
+                          <Badge className="text-ds-micro bg-tint text-muted">{inv.type.replace(/_/g, ' ')}</Badge>
                         </div>
-                        <div className="text-ds-micro text-zinc-500 mt-0.5">{inv.investmentRange} — {inv.stage.replace(/_/g, ' ')} — {inv.sectors.slice(0, 3).join(', ')}</div>
+                        <div className="text-ds-micro text-muted mt-0.5">{inv.investmentRange} — {inv.stage.replace(/_/g, ' ')} — {inv.sectors.slice(0, 3).join(', ')}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold font-mono text-emerald-400">{inv.fitScore}</div>
-                        <p className="text-ds-micro text-zinc-600">/100</p>
+                        <div className="text-sm font-bold font-mono text-state-success">{inv.fitScore}</div>
+                        <p className="text-ds-micro text-faint">/100</p>
                       </div>
                     </div>
                     {isSelected && (
                       <div className="mt-2 pt-2 border-t border-hairline space-y-1.5">
-                        <p className="text-ds-micro text-zinc-400 leading-relaxed">{inv.fitReason}</p>
+                        <p className="text-ds-micro text-muted leading-relaxed">{inv.fitReason}</p>
                         <div className="flex gap-2 pt-1">
                           {!inv.draftStarted && !inv.contacted && (
                             <Button className="text-ds-micro" onClick={() => { handleDraftInvestor(inv); setSelectedInvestor(null); }}>
                               Reach Out — Draft Email
                             </Button>
                           )}
-                          {inv.contacted && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Contacted</Badge>}
-                          {inv.draftStarted && !inv.contacted && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">Draft staged</Badge>}
+                          {inv.contacted && <Badge className="text-ds-micro bg-state-success/10 text-state-success">Contacted</Badge>}
+                          {inv.draftStarted && !inv.contacted && <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">Draft staged</Badge>}
                         </div>
                       </div>
                     )}
@@ -336,14 +336,14 @@ function formatReport(r: GrantsInvestorsReport): string {
 {tab === 'drafts' && (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {grantsDrafts.length === 0 && investorDrafts.length === 0 && (
-                <p className="text-xs text-zinc-600 text-center py-4">No drafts yet. Click &quot;Apply&quot; or &quot;Reach Out&quot; on a grant or investor to create a draft.</p>
+                <p className="text-xs text-faint text-center py-4">No drafts yet. Click &quot;Apply&quot; or &quot;Reach Out&quot; on a grant or investor to create a draft.</p>
               )}
               {grantsDrafts.map((d) => (
-                <div key={d.grantId} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
+                <div key={d.grantId} className="bg-surface rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-strong">{d.grantTitle}</span>
-                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
+                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-state-warning/10 text-state-warning' : 'bg-state-success/10 text-state-success')}>{internalStatusLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
                       <Button className="text-ds-micro" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
@@ -354,15 +354,15 @@ function formatReport(r: GrantsInvestorsReport): string {
                       )}
                     </div>
                   </div>
-                  {d.approvedAt && <p className="text-ds-micro text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external submission is recorded</p>}
+                  {d.approvedAt && <p className="text-ds-micro text-faint mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external submission is recorded</p>}
                 </div>
               ))}
               {investorDrafts.map((d) => (
-                <div key={d.investorId} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
+                <div key={d.investorId} className="bg-surface rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-strong">{d.investorName}</span>
-                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalOutreachLabel(d.status)}</Badge>
+                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-state-warning/10 text-state-warning' : 'bg-state-success/10 text-state-success')}>{internalOutreachLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
                       <Button className="text-ds-micro" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
@@ -373,7 +373,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                       )}
                     </div>
                   </div>
-                  {d.approvedAt && <p className="text-ds-micro text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external send is recorded</p>}
+                  {d.approvedAt && <p className="text-ds-micro text-faint mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external send is recorded</p>}
                 </div>
               ))}
             </div>
@@ -381,12 +381,12 @@ function formatReport(r: GrantsInvestorsReport): string {
 
           {draftContent && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={() => setDraftContent(null)}>
-              <div className="bg-ink-850 border border-hairline rounded-ds-lg p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-surface-raised border border-hairline rounded-ds-lg p-5 w-[600px] max-h-[80vh] overflow-y-auto shadow-ds-overlay" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-strong">Draft Preview</h3>
-                  <button onClick={() => setDraftContent(null)} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
+                  <button onClick={() => setDraftContent(null)} className="text-muted hover:text-strong"><X className="w-4 h-4" /></button>
                 </div>
-                <pre className="text-xs text-zinc-300 whitespace-pre-wrap font-sans leading-relaxed">{draftContent}</pre>
+                <pre className="text-xs text-strong whitespace-pre-wrap font-sans leading-relaxed">{draftContent}</pre>
               </div>
             </div>
           )}
@@ -396,14 +396,14 @@ function formatReport(r: GrantsInvestorsReport): string {
 
     <Card className="p-4" title="Founder funding & accelerator pipeline">
       <div className="space-y-3" data-testid="funding-pipeline">
-        <p className="text-ds-micro text-amber-300/90 flex items-start gap-1.5">
+        <p className="text-ds-micro text-state-warning/90 flex items-start gap-1.5">
           <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
           {FUNDING_PIPELINE_DISCLAIMER}
         </p>
 
         {fundingNotice && (
           <div
-            className="bg-ink-900 border border-hairline rounded-ds-md p-2.5 text-ds-label text-zinc-300"
+            className="bg-surface border border-hairline rounded-ds-md p-2.5 text-ds-label text-strong"
             data-testid="funding-notice"
           >
             {fundingNotice}
@@ -417,34 +417,34 @@ function formatReport(r: GrantsInvestorsReport): string {
           return (
             <div
               key={o.id}
-              className="bg-ink-900 rounded-ds-md border border-hairline p-3"
+              className="bg-surface rounded-ds-md border border-hairline p-3"
               data-testid={`funding-opportunity-${o.id}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-strong">
                     {o.organisation}
-                    <Badge className="text-ds-micro ml-2 bg-tint text-zinc-300">
+                    <Badge className="text-ds-micro ml-2 bg-tint text-strong">
                       {FUNDING_OPPORTUNITY_TYPE_LABELS[o.opportunityType]}
                     </Badge>
                   </p>
-                  <p className="text-ds-micro text-zinc-500 mt-0.5">{o.geography}</p>
+                  <p className="text-ds-micro text-muted mt-0.5">{o.geography}</p>
                   <a
                     href={o.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-ds-micro text-sky-300/90 hover:underline"
+                    className="text-ds-micro text-state-info/90 hover:underline"
                   >
                     {o.url}
                   </a>
                 </div>
                 <span data-testid={`funding-stage-${o.id}`}>
-                  <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
+                  <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">
                     {FUNDING_STAGE_LABELS[entry?.stage ?? 'discovered']}
                   </Badge>
                 </span>
               </div>
-              <div className="mt-2 space-y-0.5 text-ds-micro text-zinc-400">
+              <div className="mt-2 space-y-0.5 text-ds-micro text-muted">
                 <p>
                   {o.fundingAmount
                     ? `Amount: ${o.fundingAmount.value} [${CLAIM_LABELS[o.fundingAmount.claim]}]`
@@ -464,7 +464,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                     'NOT STATED in the research — verify on the programme site'}
                 </p>
                 <p>Required documents: {o.requiredDocuments.join(' · ')}</p>
-                <p className="text-zinc-500">Next action: {entry?.nextAction ?? o.nextAction}</p>
+                <p className="text-muted">Next action: {entry?.nextAction ?? o.nextAction}</p>
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -484,7 +484,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input
-                  className="bg-ink-850 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-zinc-200 w-44"
+                  className="bg-surface-raised border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong w-44"
                   placeholder="Programme reference"
                   value={submissionRefs[o.id] ?? ''}
                   onChange={(e) =>
@@ -492,7 +492,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                   }
                   data-testid={`funding-submission-ref-${o.id}`}
                 />
-                <label className="flex items-center gap-1.5 text-ds-micro text-zinc-400">
+                <label className="flex items-center gap-1.5 text-ds-micro text-muted">
                   <input
                     type="checkbox"
                     checked={submissionConfirmed.includes(o.id)}
@@ -516,7 +516,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               </div>
 
               {entry?.submission && (
-                <p className="text-ds-micro text-emerald-300/90 mt-1">
+                <p className="text-ds-micro text-state-success/90 mt-1">
                   Recorded: {entry.submission.reference} · {entry.submission.submittedAt} · by{' '}
                   {entry.submission.recordedBy}
                 </p>
@@ -527,15 +527,15 @@ function formatReport(r: GrantsInvestorsReport): string {
 
         {fundingDraft && (
           <div
-            className="bg-ink-900 border border-hairline rounded-ds-md p-3"
+            className="bg-surface border border-hairline rounded-ds-md p-3"
             data-testid="funding-draft"
           >
-            <p className="text-ds-label text-zinc-300">
+            <p className="text-ds-label text-strong">
               {fundingDraft.submissionStatus} · wording gate:{' '}
               {fundingDraft.lintPassed ? 'PASS' : `FAIL (${fundingDraft.lintReasons.join('; ')})`} ·
               basis: {fundingDraft.basis}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-hairline rounded-ds-md p-2 mt-2 max-h-60 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-ds-micro text-strong bg-surface-raised border border-hairline rounded-ds-md p-2 mt-2 max-h-60 overflow-y-auto">
               {fundingDraft.content}
             </pre>
           </div>

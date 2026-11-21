@@ -40,15 +40,15 @@ function LockedPipeline({ onGoToIntegrations }: { onGoToIntegrations?: () => voi
         description="Catalog submissions, purchase orders and deductions."
       />
 
-      <Card className="p-8 bg-ink-850 border-hairline">
+      <Card className="p-8 bg-surface-raised border-hairline">
         <div className="max-w-md mx-auto text-center">
           <div className="w-12 h-12 rounded-full bg-tint flex items-center justify-center mx-auto mb-4">
-            <PlugZap className="w-6 h-6 text-zinc-500" />
+            <PlugZap className="w-6 h-6 text-muted" />
           </div>
           <h3 className="text-sm font-semibold text-strong mb-2">
             Connect Amazon SP-API to enable this
           </h3>
-          <p className="text-xs text-zinc-500 leading-relaxed mb-5">
+          <p className="text-xs text-muted leading-relaxed mb-5">
             Catalog submission, purchase-order polling and shipment confirmation all run
             through the Selling Partner API connection managed in Integration Settings.
             Every feature on this page stays locked until that card shows a verified
@@ -142,18 +142,18 @@ function UnlockedPipeline() {
             <div key={sub.id} className="flex items-start justify-between gap-4 px-1 py-3">
               <div className="min-w-0">
                 <div className="text-sm font-medium text-strong truncate">{sub.productName}</div>
-                <div className="text-ds-label font-mono text-zinc-600 mt-0.5">
+                <div className="text-ds-label font-mono text-faint mt-0.5">
                   {sub.sku}
                   {sub.asin ? ` · ASIN ${sub.asin}` : ''} · submitted{' '}
                   {new Date(sub.submittedAt).toLocaleDateString()}
                 </div>
                 {sub.status === 'rejected' && sub.rejectionReason && (
-                  <div className="mt-1.5 bg-red-500/10 border border-red-500/20 rounded-ds-sm p-2 text-ds-label text-red-300 flex items-start gap-1.5">
+                  <div className="mt-1.5 bg-state-danger/10 border border-state-danger/20 rounded-ds-sm p-2 text-ds-label text-state-danger flex items-start gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                     <span>
                       {sub.rejectionReason}
                       <br />
-                      <span className="text-red-400/70">
+                      <span className="text-state-danger/70">
                         Needs human review — never auto-resubmitted.
                       </span>
                     </span>
@@ -170,14 +170,14 @@ function UnlockedPipeline() {
                 </StatusBadge>
                 {/* §Phase E5 (G2) — truthful provenance on the admin submission list. */}
                 {sub.simulated && (
-                  <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                  <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-accent-500/15 text-accent-400 border border-accent-500/20">(sim)</span>
                 )}
                 {/* §Phase E5 (G9) — ONE canonical latest-submission derivation: the
                     SAME `demoStore.latestSubmissionForProduct` the E3 domain and the
                     Global Catalog use, so a superseded record can never be mistaken
                     for the product's current state. */}
                 {latestSubmissionForProduct(sub.brandId, sub.sku)?.id !== sub.id && (
-                  <span className="text-ds-micro text-zinc-500">superseded</span>
+                  <span className="text-ds-micro text-muted">superseded</span>
                 )}
               </div>
             </div>
@@ -199,9 +199,9 @@ function UnlockedPipeline() {
                   <span className="font-mono text-xs text-strong">{po.poNumber}</span>
                   {/* §Phase E5 (G2) — simulated POs are identified, never implied real. */}
                   {po.simulated === true && (
-                    <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                    <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-accent-500/15 text-accent-400 border border-accent-500/20">(sim)</span>
                   )}
-                  <span className="text-ds-micro text-zinc-500">{brandNames.get(po.brandId) ?? po.brandId}</span>
+                  <span className="text-ds-micro text-muted">{brandNames.get(po.brandId) ?? po.brandId}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <StatusBadge
@@ -211,7 +211,7 @@ function UnlockedPipeline() {
                   >
                     {poStatusPresentation(po.status).label}
                   </StatusBadge>
-                  <span className="font-mono text-xs text-zinc-400">
+                  <span className="font-mono text-xs text-muted">
                     £{po.poValue.toLocaleString()}
                   </span>
                   <StatusBadge
@@ -223,7 +223,7 @@ function UnlockedPipeline() {
                   </StatusBadge>
                   <button
                     onClick={() => setDetailPoId(po.id)}
-                    className="p-1 text-zinc-500 hover:text-strong transition-colors"
+                    className="p-1 text-muted hover:text-strong transition-colors"
                     title="View PO detail"
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -276,7 +276,7 @@ function UnlockedPipeline() {
                   {d.type.replace(/_/g, ' ')}
                   {/* §Phase E5 (G2) — in-cell marker only: column indices are
                       deliberately unchanged for the existing dispute assertions. */}
-                  {d.simulated && <span className="ml-1 text-ds-micro text-brass-400">(sim)</span>}
+                  {d.simulated && <span className="ml-1 text-ds-micro text-accent-400">(sim)</span>}
                 </span>
               ),
             },
@@ -287,10 +287,10 @@ function UnlockedPipeline() {
                 <span className="text-xs">
                   {d.reason}
                   {d.dispute && (
-                    <span className="mt-1 block text-ds-micro text-zinc-500">
+                    <span className="mt-1 block text-ds-micro text-muted">
                       Disputed {d.dispute.openedAt}: {d.dispute.notes}
                       {d.dispute.outcome && (
-                        <span className="ml-1 capitalize text-zinc-400">
+                        <span className="ml-1 capitalize text-muted">
                           → outcome: {d.dispute.outcome}
                         </span>
                       )}
@@ -327,7 +327,7 @@ function UnlockedPipeline() {
                   {d.status === 'open' && disputingId !== d.id && (
                     <Button
                       variant="ghost"
-                      className="text-ds-label text-blue-300"
+                      className="text-ds-label text-state-info"
                       onClick={() => {
                         setDisputingId(d.id);
                         setDisputeNotes('');
@@ -342,7 +342,7 @@ function UnlockedPipeline() {
                         <Button
                           key={o}
                           variant="ghost"
-                          className="text-ds-micro capitalize text-zinc-400 hover:text-strong"
+                          className="text-ds-micro capitalize text-muted hover:text-strong"
                           onClick={() => void closeDispute(d.id, o)}
                         >
                           {o}
@@ -358,7 +358,7 @@ function UnlockedPipeline() {
 
         {/* Dispute note entry */}
         {disputingId && (
-          <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
+          <div className="mt-3 bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 space-y-2">
             <p className="text-ds-label text-state-info">
               Opening a dispute marks this deduction as disputed and records your
               pushback notes for tracking against the retail channel.
@@ -368,7 +368,7 @@ function UnlockedPipeline() {
               onChange={(e) => setDisputeNotes(e.target.value)}
               rows={2}
               placeholder="Evidence / grounds for the dispute…"
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong"
             />
             <Button className="text-xs" disabled={!disputeNotes.trim()} onClick={() => void openDispute(disputingId)}>
               Record dispute
@@ -431,13 +431,13 @@ export function DeliveryReconciliation({
   return (
     <Card title="Delivery Reconciliation — received vs confirmed">
       <div className="px-1 pb-2 space-y-2">
-        <p className="text-ds-micro text-zinc-600 max-w-2xl">
+        <p className="text-ds-micro text-faint max-w-2xl">
           When the retail channel logs what actually arrived, record it here.
           Shortfalls against confirmed quantities raise shortage deductions
           automatically — operations and billing stay reconciled by construction.
         </p>
         {eligible.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">No POs awaiting delivery reconciliation.</p>
+          <p className="text-ds-label text-faint">No POs awaiting delivery reconciliation.</p>
         ) : (
           <>
             <select
@@ -447,7 +447,7 @@ export function DeliveryReconciliation({
                 setReceived({});
                 setResult(null);
               }}
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+              className="bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong"
             >
               <option value="">Select a PO…</option>
               {eligible.map((p) => (
@@ -464,9 +464,9 @@ export function DeliveryReconciliation({
                     li.acknowledgedQty ?? (li.ackStatus === 'accepted' ? li.quantity : 0);
                   return (
                     <div key={li.sku} className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-ds-label text-zinc-300 w-24 truncate">{li.sku}</span>
-                      <span className="text-ds-micro text-zinc-500 w-56 truncate">{li.productName}</span>
-                      <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">
+                      <span className="font-mono text-ds-label text-strong w-24 truncate">{li.sku}</span>
+                      <span className="text-ds-micro text-muted w-56 truncate">{li.productName}</span>
+                      <Badge className="text-ds-micro bg-tint text-muted border-hairline">
                         confirmed {confirmed || '—'}
                       </Badge>
                       <input
@@ -478,7 +478,7 @@ export function DeliveryReconciliation({
                           setReceived((prev) => ({ ...prev, [li.sku]: Number(e.target.value) }))
                         }
                         disabled={!canCurrentUserMutate}
-                        className="w-28 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-label text-strong disabled:opacity-50"
+                        className="w-28 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-ds-label text-strong disabled:opacity-50"
                       />
                     </div>
                   );
@@ -494,7 +494,7 @@ export function DeliveryReconciliation({
                   Record delivery & reconcile
                 </Button>
                 {!canCurrentUserMutate && (
-                  <span className="text-ds-micro text-zinc-600 ml-2">view-only staff</span>
+                  <span className="text-ds-micro text-faint ml-2">view-only staff</span>
                 )}
               </div>
             )}
@@ -504,8 +504,8 @@ export function DeliveryReconciliation({
                 className={cn(
                   'rounded-ds-md p-3 text-ds-label border',
                   result.shortfalls.length === 0
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-state-success'
-                    : 'bg-amber-500/10 border-amber-500/20 text-state-warning'
+                    ? 'bg-state-success/10 border-state-success/20 text-state-success'
+                    : 'bg-state-warning/10 border-state-warning/20 text-state-warning'
                 )}
               >
                 {result.shortfalls.length === 0 ? (

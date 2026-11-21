@@ -14,7 +14,7 @@
  * WHY THE UTILITY CLASSES ARE TRANSLATED, NOT COPIED
  * --------------------------------------------------
  * The approved blueprint is a standalone Tailwind v4 page that writes literal
- * colours (`bg-ink`, `text-paper`, `bg-white/5`) and Tailwind v4-only syntax.
+ * colours (`bg-surface`, `text-paper`, `bg-white/5`) and Tailwind v4-only syntax.
  * This application is Tailwind v3 with a theme-token ladder (`--mr-*`), and its
  * legacy-styling gate FAILS on reintroduced literal colour families. So every
  * class here is the token equivalent of the blueprint's intent: the same

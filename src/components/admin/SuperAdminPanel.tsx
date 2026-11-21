@@ -250,10 +250,10 @@ export function SuperAdminPanel() {
         description="Master control matrix — staff, roles & channel assignments, plus platform-wide oversight of brands, operational work, finance, compliance, integrations, provider state and audit. Nothing on this surface is exposed to a brand session."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">{staff.length} staff</span>
-            <span className="font-mono text-ds-label text-zinc-500">{brands.length} brand tenants</span>
-            <span className="font-mono text-ds-label text-zinc-500">{allWork.length} work items</span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">{staff.length} staff</span>
+            <span className="font-mono text-ds-label text-muted">{brands.length} brand tenants</span>
+            <span className="font-mono text-ds-label text-muted">{allWork.length} work items</span>
+            <span className="font-mono text-ds-label text-muted">
               acting as {canCurrentUserMutate ? 'full admin' : 'view-only ops'}
             </span>
           </>
@@ -270,8 +270,8 @@ export function SuperAdminPanel() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-1.5 rounded-ds-md text-xs font-medium transition-colors',
                     activeTab === tab.id
-                      ? 'bg-brass-500 text-strong shadow-ds-subtle'
-                      : 'text-zinc-400 hover:text-strong hover:bg-tint'
+                      ? 'bg-accent-500 text-strong shadow-ds-subtle'
+                      : 'text-muted hover:text-strong hover:bg-tint'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -311,18 +311,18 @@ export function SuperAdminPanel() {
                   .sort((a, b) => b[1] - a[1])
                   .slice(0, 8)
                   .map(([source, count]) => (
-                    <li key={source} className="flex items-center justify-between text-ds-label text-zinc-400">
+                    <li key={source} className="flex items-center justify-between text-ds-label text-muted">
                       <span>{WORK_SOURCE_LABELS[source as keyof typeof WORK_SOURCE_LABELS]}</span>
-                      <span className="font-mono text-zinc-500">{count}</span>
+                      <span className="font-mono text-muted">{count}</span>
                     </li>
                   ))}
                 {allWork.length === 0 && (
-                  <li className="text-ds-label text-zinc-500">No open operational work.</li>
+                  <li className="text-ds-label text-muted">No open operational work.</li>
                 )}
               </ul>
             </ContextPanel>
             <ContextPanel title="Tenant isolation">
-              <p className="text-ds-label leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-muted">
                 This surface is Super-Admin-only. Brand sessions never receive platform-wide work,
                 finance, compliance or audit data — the domain refuses it, not just the navigation.
               </p>
@@ -348,29 +348,29 @@ export function SuperAdminPanel() {
           }
         >
           {oversight === 'brands' ? (
-            <ul className="divide-y divide-hairline-06 overflow-hidden rounded-ds-lg border border-hairline bg-ink-850">
+            <ul className="divide-y divide-hairline-06 overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised">
               {brands.map((b) => (
                 <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-brand-${b.id}`}>
                   <span className="text-xs font-medium text-strong">{b.profile.businessName}</span>
-                  <span className="font-mono text-ds-micro text-zinc-500">
+                  <span className="font-mono text-ds-micro text-muted">
                     {b.category} · {b.track} · {b.contractStatus}
                   </span>
                 </li>
               ))}
-              {brands.length === 0 && <li className="px-3.5 py-3 text-ds-label text-zinc-500">No brand tenants.</li>}
+              {brands.length === 0 && <li className="px-3.5 py-3 text-ds-label text-muted">No brand tenants.</li>}
             </ul>
           ) : (
-            <ul className="divide-y divide-hairline-06 overflow-hidden rounded-ds-lg border border-hairline bg-ink-850">
+            <ul className="divide-y divide-hairline-06 overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised">
               {oversightRows.map((w) => (
                 <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-work-${w.id}`}>
                   <span className="text-xs font-medium text-strong">{w.title}</span>
-                  <span className="font-mono text-ds-micro text-zinc-500">
+                  <span className="font-mono text-ds-micro text-muted">
                     {WORK_SOURCE_LABELS[w.source]} · {w.tenantId ?? 'platform'} · {w.dueDate ?? 'no deadline'}
                   </span>
                 </li>
               ))}
               {oversightRows.length === 0 && (
-                <li className="px-3.5 py-3 text-ds-label text-zinc-500">Nothing matches this view.</li>
+                <li className="px-3.5 py-3 text-ds-label text-muted">Nothing matches this view.</li>
               )}
             </ul>
           )}
@@ -386,18 +386,18 @@ export function SuperAdminPanel() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-ds-md bg-tint flex items-center justify-center">
-              <Globe2 className={cn('w-5 h-5', EU_MARKET_ENABLED ? 'text-emerald-400' : 'text-zinc-600')} />
+              <Globe2 className={cn('w-5 h-5', EU_MARKET_ENABLED ? 'text-state-success' : 'text-faint')} />
             </div>
             <div>
               <div className="text-sm font-medium text-strong">EU Market Module</div>
-              <p className="text-ds-label text-zinc-500 mt-0.5 max-w-md">
+              <p className="text-ds-label text-muted mt-0.5 max-w-md">
                 EU distribution capability (CE marking, EU EORI, REACH/GPSR).
                 Currently disabled — UK-only operations. Enable when strategy
                 expands; the module scaffolding is preserved.
               </p>
             </div>
           </div>
-          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+          <Badge className="text-ds-micro bg-tint text-muted border-hairline">
             {EU_MARKET_ENABLED ? 'Enabled' : 'Disabled — future capability'}
           </Badge>
         </div>
@@ -406,23 +406,23 @@ export function SuperAdminPanel() {
       {/* §Batch-14 — Shipping Markup Config */}
       <Card className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <DollarSign className="w-4 h-4 text-brass-400" />
+          <DollarSign className="w-4 h-4 text-accent-400" />
           <span className="text-xs font-semibold text-strong">Shipping Markup Configuration</span>
-          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
+          <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20 ml-auto">
             Integrated Logistics Revenue
           </Badge>
         </div>
-        <p className="text-ds-label text-zinc-500 mb-3">
+        <p className="text-ds-label text-muted mb-3">
           Set the markup percentage applied per carrier. The brand sees the marked-up price
           in the shipping cost estimate. Markup revenue is tracked in the shipping margin ledger.
         </p>
         <div className="space-y-2">
           {demoCarrierMarkup.map((cfg) => (
-            <div key={cfg.id} className="flex items-center gap-3 bg-ink-900 rounded-ds-md p-2.5">
-              <Truck className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+            <div key={cfg.id} className="flex items-center gap-3 bg-surface rounded-ds-md p-2.5">
+              <Truck className="w-3.5 h-3.5 text-muted flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <span className="text-xs font-medium text-strong">{cfg.label}</span>
-                <span className="text-ds-micro text-zinc-600 ml-2">
+                <span className="text-ds-micro text-faint ml-2">
                   ({cfg.carrier === 'global' ? 'fallback for all carriers' : cfg.carrier})
                 </span>
               </div>
@@ -440,9 +440,9 @@ export function SuperAdminPanel() {
                     // Force re-render
                     setMarkupVersion((v) => v + 1);
                   }}
-                  className="w-20 bg-ink-850 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong text-right font-mono focus:outline-none focus:border-brass-500/40"
+                  className="w-20 bg-surface-raised border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong text-right font-mono focus:outline-none focus:border-accent-500/40"
                 />
-                <span className="text-ds-micro text-zinc-500 w-4">%</span>
+                <span className="text-ds-micro text-muted w-4">%</span>
                 <button
                   onClick={() => {
                     updateCarrierMarkup(cfg.id, { active: !cfg.active });
@@ -451,8 +451,8 @@ export function SuperAdminPanel() {
                   className={cn(
                     'p-1 rounded-ds-sm text-ds-micro border transition-colors',
                     cfg.active
-                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                      : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
+                      ? 'bg-state-success/10 text-state-success border-emerald-500/30'
+                      : 'bg-tint text-muted border-hairline'
                   )}
                   title={cfg.active ? 'Active' : 'Disabled'}
                 >
@@ -472,13 +472,13 @@ export function SuperAdminPanel() {
           across the admin surfaces that enforce canCurrentUserMutate. */}
       <Card className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <span className="text-xs text-zinc-500 font-medium whitespace-nowrap">
+          <span className="text-xs text-muted font-medium whitespace-nowrap">
             Acting as staff:
           </span>
           <select
             value={actingStaffId}
             onChange={(e) => setActingStaffId(e.target.value)}
-            className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer"
+            className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer"
           >
             {staff.map((s) => (
               <option key={s.id} value={s.id}>
@@ -490,8 +490,8 @@ export function SuperAdminPanel() {
             className={cn(
               'text-ds-micro',
               canCurrentUserMutate
-                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+                ? 'bg-state-success/10 text-state-success border-state-success/20'
+                : 'bg-state-warning/10 text-state-warning border-state-warning/20'
             )}
           >
             {canCurrentUserMutate ? 'Mutations allowed' : 'View-only — mutations blocked'}
@@ -503,22 +503,22 @@ export function SuperAdminPanel() {
       <div className="grid grid-cols-3 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-3.5 h-3.5 text-brass-400" />
-            <span className="text-xs text-zinc-500 font-medium">Total Staff</span>
+            <Users className="w-3.5 h-3.5 text-accent-400" />
+            <span className="text-xs text-muted font-medium">Total Staff</span>
           </div>
           <div className="text-2xl font-bold text-strong">{staff.length}</div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Power className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-xs text-zinc-500 font-medium">Active</span>
+            <Power className="w-3.5 h-3.5 text-state-success" />
+            <span className="text-xs text-muted font-medium">Active</span>
           </div>
           <div className="text-2xl font-bold text-strong">{activeCount}</div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-xs text-zinc-500 font-medium">Channels</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-state-info" />
+            <span className="text-xs text-muted font-medium">Channels</span>
           </div>
           <div className="text-2xl font-bold text-strong">{CHANNEL_OPTIONS.length}</div>
         </Card>
@@ -599,7 +599,7 @@ export function SuperAdminPanel() {
               key: 'email',
               label: 'Email',
               render: (member) => (
-                <span className="font-mono text-xs text-zinc-400">{member.email}</span>
+                <span className="font-mono text-xs text-muted">{member.email}</span>
               ),
             },
             {
@@ -610,10 +610,10 @@ export function SuperAdminPanel() {
                   value={member.role}
                   aria-label={`Role for ${member.name}`}
                   onChange={(e) => updateStaffRole(member.id, e.target.value as StaffRole)}
-                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1 text-xs text-strong focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                  className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1 text-xs text-strong focus:outline-none focus:border-accent-500/40 cursor-pointer"
                 >
                   {ROLE_OPTIONS.map((r) => (
-                    <option key={r.value} value={r.value} className="bg-ink-900">
+                    <option key={r.value} value={r.value} className="bg-surface">
                       {r.label}
                     </option>
                   ))}
@@ -628,10 +628,10 @@ export function SuperAdminPanel() {
                   value={member.channel}
                   aria-label={`Channel for ${member.name}`}
                   onChange={(e) => updateStaffChannel(member.id, e.target.value)}
-                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1 text-xs text-strong focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                  className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1 text-xs text-strong focus:outline-none focus:border-accent-500/40 cursor-pointer"
                 >
                   {CHANNEL_OPTIONS.map((c) => (
-                    <option key={c} value={c} className="bg-ink-900">
+                    <option key={c} value={c} className="bg-surface">
                       {c}
                     </option>
                   ))}
@@ -649,10 +649,10 @@ export function SuperAdminPanel() {
                     updateStaffTier(member.id, e.target.value as StaffMember['permissionTier'])
                   }
                   className={cn(
-                    'bg-ink-900 border rounded-ds-sm px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
+                    'bg-surface border rounded-ds-sm px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
                     member.permissionTier === 'full'
-                      ? 'border-emerald-500/30 text-emerald-300'
-                      : 'border-amber-500/30 text-amber-300'
+                      ? 'border-emerald-500/30 text-state-success'
+                      : 'border-amber-500/30 text-state-warning'
                   )}
                 >
                   <option value="full">Full admin</option>
@@ -669,8 +669,8 @@ export function SuperAdminPanel() {
                   className={cn(
                     'text-ds-micro',
                     member.active
-                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                      : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
+                      ? 'bg-state-success/10 text-state-success border-state-success/20'
+                      : 'bg-tint text-muted border-hairline'
                   )}
                 >
                   {member.active ? 'Active' : 'Inactive'}
@@ -685,7 +685,7 @@ export function SuperAdminPanel() {
                 <span className="flex items-center justify-end gap-2">
                   <button
                     onClick={() => toggleStaffActive(member.id)}
-                    className="p-1.5 rounded-ds-sm hover:bg-tint text-zinc-500 hover:text-emerald-400 transition-colors"
+                    className="p-1.5 rounded-ds-sm hover:bg-tint text-muted hover:text-state-success transition-colors"
                     title={member.active ? 'Deactivate' : 'Activate'}
                     aria-label={member.active ? `Deactivate ${member.name}` : `Activate ${member.name}`}
                   >
@@ -693,7 +693,7 @@ export function SuperAdminPanel() {
                   </button>
                   <button
                     onClick={() => removeStaff(member.id)}
-                    className="p-1.5 rounded-ds-sm hover:bg-tint text-zinc-500 hover:text-red-400 transition-colors"
+                    className="p-1.5 rounded-ds-sm hover:bg-tint text-muted hover:text-state-danger transition-colors"
                     title="Delete"
                     aria-label={`Delete ${member.name}`}
                   >

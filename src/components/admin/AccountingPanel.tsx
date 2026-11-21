@@ -325,28 +325,28 @@ export function AccountingPanel() {
         description="Xero is the accounting and reconciliation layer — it is NOT the bank. Connection state, the 28-day reseed tracker, the financial summary, brand payouts and the deterministic finance work items all read the same canonical records."
         status={
           connected === null ? (
-            <Badge className="bg-tint text-zinc-400">
+            <Badge className="bg-tint text-muted">
               <Loader2 className="w-3 h-3 animate-spin" /> Checking Xero
             </Badge>
           ) : connected ? (
-            <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+            <Badge className="bg-state-success/10 text-state-success border-state-success/20">
               <CheckCircle2 className="w-3 h-3" /> Xero Connected{demoMode ? ' (Demo)' : ''}
             </Badge>
           ) : (
-            <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/20">
+            <Badge className="bg-state-warning/10 text-state-warning border-state-warning/20">
               <AlertTriangle className="w-3 h-3" /> Xero not connected
             </Badge>
           )
         }
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {allCommissions.length} commissions
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {pendingPayouts.length} pending payouts
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">{financeWork.length} finance work items</span>
+            <span className="font-mono text-ds-label text-muted">{financeWork.length} finance work items</span>
           </>
         }
         actions={
@@ -402,25 +402,25 @@ export function AccountingPanel() {
               />
               <ul className="mt-2 space-y-1.5">
                 {financeWork.slice(0, 5).map((w) => (
-                  <li key={w.id} className="text-ds-label leading-snug text-zinc-400">
-                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                  <li key={w.id} className="text-ds-label leading-snug text-muted">
+                    <span className="font-medium text-strong">{WORK_SOURCE_LABELS[w.source]}</span>
                     {' · '}
                     {w.title}
-                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                    {w.dueDate && <span className="font-mono text-faint"> · due {w.dueDate}</span>}
                   </li>
                 ))}
                 {financeWork.length === 0 && (
-                  <li className="text-ds-label text-zinc-500">No open finance work.</li>
+                  <li className="text-ds-label text-muted">No open finance work.</li>
                 )}
               </ul>
-              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-muted">
                 An issued invoice with no settled payment becomes an <em>Invoice due</em> work item
                 with its declared payment-terms deadline; settling the payment resolves it and stops
                 its reminder.
               </p>
             </ContextPanel>
             <ContextPanel title="Money chain">
-              <p className="text-ds-label leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-muted">
                 PO → invoice → payment → reconciliation → Xero → payout proposal → human approval →
                 Payoneer → settlement. Xero is the accounting layer, never the bank; Stripe bills the
                 subscription only and is refused as a payout rail.
@@ -445,23 +445,23 @@ export function AccountingPanel() {
                     .slice(-5)
                     .reverse()
                     .map((r) => (
-                      <li key={r.number} className="text-ds-label leading-snug text-zinc-400">
-                        <span className="font-mono text-zinc-200">{r.number}</span>
+                      <li key={r.number} className="text-ds-label leading-snug text-muted">
+                        <span className="font-mono text-strong">{r.number}</span>
                         {' · '}
                         {r.voidedAt ? 'void — never reusable' : 'in force'}
                       </li>
                     ))}
                   {invoiceLedgerRows.length === 0 && (
-                    <li className="text-ds-label text-zinc-500">
+                    <li className="text-ds-label text-muted">
                       No invoice number has been allocated yet.
                     </li>
                   )}
                 </ul>
-                <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+                <p className="mt-2 text-ds-label leading-snug text-muted">
                   Numbers are unique and are never reused; a zero-value invoice fails; a wrong invoice
                   is cancelled and re-sent under a NEW Invoice ID.
                 </p>
-                <p className="mt-1 text-ds-label leading-snug text-zinc-500">
+                <p className="mt-1 text-ds-label leading-snug text-muted">
                   Receivables and upcoming payments are {PAYMENT_DERIVATION_BASIS}.
                 </p>
               </div>
@@ -487,20 +487,20 @@ export function AccountingPanel() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 flex-wrap items-center gap-3">
             {connected === null ? (
-              <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+              <Loader2 className="w-5 h-5 text-muted animate-spin" />
             ) : connected ? (
-              <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+              <Badge className="bg-state-success/10 text-state-success border-state-success/20">
                 <CheckCircle2 className="w-3 h-3" />
                 Xero Connected{demoMode ? ' (Demo)' : ''}
               </Badge>
             ) : (
-              <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/20">
+              <Badge className="bg-state-warning/10 text-state-warning border-state-warning/20">
                 <AlertTriangle className="w-3 h-3" />
                 Xero Not Connected — Add API credentials
               </Badge>
             )}
             {lastSync && (
-              <span className="text-ds-label text-zinc-500">
+              <span className="text-ds-label text-muted">
                 <Clock className="w-3 h-3 inline mr-1" />
                 Last sync: {new Date(lastSync).toLocaleString()}
               </span>
@@ -521,35 +521,35 @@ export function AccountingPanel() {
           </div>
         </div>
 {error && (
-          <div className="mt-3 bg-red-500/10 border border-red-500/20 rounded-ds-md p-2.5 text-ds-label text-red-300">{error}</div>
+          <div className="mt-3 bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-2.5 text-ds-label text-state-danger">{error}</div>
         )}
         {seedMessage && (
-          <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-emerald-300">{seedMessage}</div>
+          <div className="mt-3 bg-state-success/10 border border-state-success/20 rounded-ds-md p-2.5 text-ds-label text-state-success">{seedMessage}</div>
         )}
 
         {showCredentialForm && (
           <div className="mt-4 space-y-3 border border-hairline rounded-ds-md p-4">
-            <h4 className="text-xs font-medium text-zinc-400">Xero API Credentials</h4>
+            <h4 className="text-xs font-medium text-muted">Xero API Credentials</h4>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-ds-label text-zinc-500 mb-1">Client ID</label>
+                <label className="block text-ds-label text-muted mb-1">Client ID</label>
                 <input value={credClientId} onChange={(e) => setCredClientId(e.target.value)}
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-id" />
+                  className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-id" />
               </div>
               <div>
-                <label className="block text-ds-label text-zinc-500 mb-1">Client Secret</label>
+                <label className="block text-ds-label text-muted mb-1">Client Secret</label>
                 <input value={credClientSecret} onChange={(e) => setCredClientSecret(e.target.value)}
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-secret" />
+                  className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-client-secret" />
               </div>
               <div>
-                <label className="block text-ds-label text-zinc-500 mb-1">Tenant ID</label>
+                <label className="block text-ds-label text-muted mb-1">Tenant ID</label>
                 <input value={credTenantId} onChange={(e) => setCredTenantId(e.target.value)}
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-tenant-id" />
+                  className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-tenant-id" />
               </div>
               <div>
-                <label className="block text-ds-label text-zinc-500 mb-1">Access Token</label>
+                <label className="block text-ds-label text-muted mb-1">Access Token</label>
                 <input value={credAccessToken} onChange={(e) => setCredAccessToken(e.target.value)}
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-access-token" />
+                  className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong" placeholder="xero-access-token" />
               </div>
             </div>
             <Button onClick={handleSaveCredentials} size="sm" disabled={!credClientId || !credAccessToken}>
@@ -561,30 +561,30 @@ export function AccountingPanel() {
 {demoMode && (
         <Card title="28-Day Reset Tracker" className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-muted">
               Days since last reseed:{' '}
               <span className="text-strong font-semibold">{daysSinceReseed ?? '—'}</span>
               {' / 28'}
             </span>
             {remainingDays !== null && remainingDays <= 3 && (
-              <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/20">
+              <Badge className="bg-state-warning/10 text-state-warning border-state-warning/20">
                 <AlertTriangle className="w-3 h-3" />
                 {remainingDays} days until reset
               </Badge>
             )}
           </div>
           {daysSinceReseed !== null && (
-            <div className="w-full bg-ink-900 rounded-full h-2.5 mb-2">
+            <div className="w-full bg-surface rounded-full h-2.5 mb-2">
               <div
                 className={cn(
                   'h-2.5 rounded-full transition-all duration-500',
-                  remainingDays && remainingDays <= 3 ? 'bg-amber-500' : 'bg-brass-500',
+                  remainingDays && remainingDays <= 3 ? 'bg-amber-500' : 'bg-accent-500',
                 )}
                 style={{ width: `${Math.min(100, (daysSinceReseed / 28) * 100)}%` }}
               />
             </div>
           )}
-          <p className="text-ds-label text-zinc-500">
+          <p className="text-ds-label text-muted">
             {remainingDays !== null
               ? `Next expected reset: ${new Date(Date.now() + remainingDays * 86400000).toLocaleDateString()}`
               : 'Not connected — reseed tracking unavailable'}
@@ -596,31 +596,31 @@ export function AccountingPanel() {
         {summary ? (
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-tint rounded-ds-md p-3">
-              <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
+              <div className="flex items-center gap-1.5 text-state-success mb-1">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Revenue</span>
               </div>
               <span className="text-lg font-semibold text-strong">£{summary.revenue.toLocaleString()}</span>
             </div>
             <div className="bg-tint rounded-ds-md p-3">
-              <div className="flex items-center gap-1.5 text-rose-400 mb-1">
+              <div className="flex items-center gap-1.5 text-state-danger mb-1">
                 <TrendingDown className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Expenses</span>
               </div>
               <span className="text-lg font-semibold text-strong">£{summary.expenses.toLocaleString()}</span>
             </div>
             <div className="bg-tint rounded-ds-md p-3">
-              <div className="flex items-center gap-1.5 text-brass-400 mb-1">
+              <div className="flex items-center gap-1.5 text-accent-400 mb-1">
                 <DollarSign className="w-3.5 h-3.5" />
                 <span className="text-ds-label font-medium uppercase tracking-wider">Net Profit</span>
               </div>
-              <span className={cn('text-lg font-semibold', summary.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400')}>
+              <span className={cn('text-lg font-semibold', summary.netProfit >= 0 ? 'text-state-success' : 'text-state-danger')}>
                 £{summary.netProfit.toLocaleString()}
               </span>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-zinc-500 italic">Connect Xero to see financial summary.</p>
+          <p className="text-xs text-muted italic">Connect Xero to see financial summary.</p>
         )}
       </Card>
 
@@ -633,7 +633,7 @@ export function AccountingPanel() {
           real Xero remittance sync is a separate feature; until it exists the card
           states its status honestly and offers no control.
         */}
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-muted">
           {connected ? 'Xero connected. Remittance statements from Amazon are reconciled in simulation.' : 'Connect Xero to enable Amazon remittance sync.'}
         </p>
       </Card>
@@ -645,9 +645,9 @@ export function AccountingPanel() {
           mock-first transfer seam, so the action has a real consequence
           (commission → paid + canonical audit row). */}
       <Card title="Brand Payouts" className="p-5">
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-muted">
           Brand net share per settled commission (PO value − commission). Transfers run in
-          <span className="text-amber-300"> simulation</span> until Stripe Connect credentials are
+          <span className="text-state-warning"> simulation</span> until Stripe Connect credentials are
           configured.
         </p>
 
@@ -662,25 +662,25 @@ export function AccountingPanel() {
               className={cn(
                 'rounded-ds-md border p-2.5 text-left transition-colors',
                 payoutFilter === m.key
-                  ? 'border-brass-500/40 bg-brass-500/10'
+                  ? 'border-accent-500/40 bg-accent-500/10'
                   : 'border-hairline bg-tint hover:border-hairline-strong'
               )}
             >
-              <p className="text-ds-micro uppercase tracking-wider text-zinc-500">{m.label}</p>
+              <p className="text-ds-micro uppercase tracking-wider text-muted">{m.label}</p>
               <p className="font-mono text-base font-semibold text-strong">{m.value}</p>
-              <p className="text-ds-micro text-zinc-500">{m.sub}</p>
+              <p className="text-ds-micro text-muted">{m.sub}</p>
             </button>
           ))}
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-strong border-hairline">
             {pendingPayouts.length} pending
           </Badge>
-          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-strong border-hairline">
             {settledCount} settled
           </Badge>
-          <span className="text-ds-micro text-brass-300">
+          <span className="text-ds-micro text-accent-300">
             Filtered: {payoutFilter} ({payoutRows.length} shown) ·{' '}
             <button type="button" className="underline" onClick={() => setPayoutFilter('pending')}>
               clear
@@ -688,12 +688,12 @@ export function AccountingPanel() {
           </span>
         </div>
         {payoutNotice && (
-          <div className="mb-3 mt-3 rounded-ds-md border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-ds-label text-emerald-300">
+          <div className="mb-3 mt-3 rounded-ds-md border border-state-success/20 bg-state-success/10 p-2.5 text-ds-label text-state-success">
             {payoutNotice}
           </div>
         )}
         {payoutError && (
-          <div className="mb-3 mt-3 rounded-ds-md border border-red-500/20 bg-red-500/10 p-2.5 text-ds-label text-red-300">
+          <div className="mb-3 mt-3 rounded-ds-md border border-state-danger/20 bg-state-danger/10 p-2.5 text-ds-label text-state-danger">
             {payoutError}
           </div>
         )}
@@ -741,14 +741,14 @@ export function AccountingPanel() {
               render: (c) => (
                 <span>
                   <span className="text-xs font-medium text-strong">{brandName(c.brandId)}</span>
-                  <span className="block font-mono text-ds-micro text-zinc-500">{c.id}</span>
+                  <span className="block font-mono text-ds-micro text-muted">{c.id}</span>
                 </span>
               ),
             },
             {
               key: 'purchaseOrderId',
               label: 'PO',
-              render: (c) => <span className="font-mono text-xs text-zinc-400">{c.purchaseOrderId}</span>,
+              render: (c) => <span className="font-mono text-xs text-muted">{c.purchaseOrderId}</span>,
             },
             {
               key: 'poValue',
@@ -762,7 +762,7 @@ export function AccountingPanel() {
               label: 'Commission',
               align: 'right',
               hideBelow: 'lg',
-              render: (c) => <span className="font-mono text-xs text-zinc-500">−£{c.commissionAmount.toFixed(2)}</span>,
+              render: (c) => <span className="font-mono text-xs text-muted">−£{c.commissionAmount.toFixed(2)}</span>,
             },
             {
               key: 'netShare',
@@ -782,13 +782,13 @@ export function AccountingPanel() {
                 // §M6 — the payment identity actually reconciled to this PO.
                 const rec = getReconciliationForPo(poIdForCommission(c.purchaseOrderId));
                 if (!rec) {
-                  return <span className="text-ds-label text-amber-300">awaiting remittance</span>;
+                  return <span className="text-ds-label text-state-warning">awaiting remittance</span>;
                 }
                 const p = reconciliationStatePresentation(rec.state);
                 return (
                   <span className="flex flex-col gap-0.5">
                     <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>{p.label}</StatusBadge>
-                    <span className="font-mono text-ds-micro text-zinc-500">{rec.paymentId}</span>
+                    <span className="font-mono text-ds-micro text-muted">{rec.paymentId}</span>
                   </span>
                 );
               },
@@ -807,10 +807,10 @@ export function AccountingPanel() {
                   <span className="flex flex-col items-center gap-0.5">
                     <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>{p.label}</StatusBadge>
                     {payout?.state === 'failed' && payout.failureReason && (
-                      <span className="text-ds-micro text-red-300">{payout.failureReason}</span>
+                      <span className="text-ds-micro text-state-danger">{payout.failureReason}</span>
                     )}
                     {payout?.state === 'pending' && payout.blockedReason && (
-                      <span className="text-ds-micro text-amber-300">{payout.blockedReason}</span>
+                      <span className="text-ds-micro text-state-warning">{payout.blockedReason}</span>
                     )}
                   </span>
                 );
@@ -835,7 +835,7 @@ export function AccountingPanel() {
               align: 'right',
               hideBelow: 'lg',
               render: (c) => (
-                <span className="font-mono text-ds-label text-zinc-500">
+                <span className="font-mono text-ds-label text-muted">
                   {new Date(c.createdAt).toLocaleDateString()}
                 </span>
               ),
@@ -861,8 +861,8 @@ export function AccountingPanel() {
           with a real consequence: it is what makes a payout eligible (or blocks
           it when an account is suspended under review). */}
       <Card title="Payout destinations" className="p-5">
-        <p className="text-xs text-zinc-400">
-          Brand accounts. A payout can only be submitted to a <span className="text-emerald-300">verified</span>{' '}
+        <p className="text-xs text-muted">
+          Brand accounts. A payout can only be submitted to a <span className="text-state-success">verified</span>{' '}
           destination; suspending an account blocks it immediately.
         </p>
         <div className="mt-3 divide-y divide-hairline-06">
@@ -877,7 +877,7 @@ export function AccountingPanel() {
               >
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-strong truncate">{d.accountName}</div>
-                  <div className="font-mono text-ds-micro text-zinc-500">
+                  <div className="font-mono text-ds-micro text-muted">
                     {d.accountRefMasked} · {d.bankName}
                   </div>
                 </div>
@@ -887,7 +887,7 @@ export function AccountingPanel() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-ds-label text-emerald-300"
+                      className="text-ds-label text-state-success"
                       disabled={!!destinationBusyId}
                       onClick={() => void reviewDestination(d.id, 'verified')}
                     >
@@ -898,7 +898,7 @@ export function AccountingPanel() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-ds-label text-red-300"
+                      className="text-ds-label text-state-danger"
                       disabled={!!destinationBusyId}
                       onClick={() => void reviewDestination(d.id, 'suspended')}
                     >
@@ -910,11 +910,11 @@ export function AccountingPanel() {
             );
           })}
           {destinationRows.length === 0 && (
-            <p className="py-3 text-xs text-zinc-500">No brand payout destinations on file.</p>
+            <p className="py-3 text-xs text-muted">No brand payout destinations on file.</p>
           )}
         </div>
         {destinationNotice && (
-          <p className="mt-3 text-ds-label text-zinc-400" data-testid="destination-notice">{destinationNotice}</p>
+          <p className="mt-3 text-ds-label text-muted" data-testid="destination-notice">{destinationNotice}</p>
         )}
       </Card>
 
@@ -925,10 +925,10 @@ export function AccountingPanel() {
           until it exists the card reports its last-sync status only.
         */}
         <div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-muted">
             Last infra cost sync: {lastSync ? new Date(lastSync).toLocaleString() : 'Never'}
           </p>
-          <p className="text-ds-label text-zinc-500 mt-1">
+          <p className="text-ds-label text-muted mt-1">
             Month-to-date infrastructure costs will sync via Penny Pincher when connected.
           </p>
         </div>

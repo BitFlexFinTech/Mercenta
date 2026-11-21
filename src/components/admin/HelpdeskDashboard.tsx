@@ -16,9 +16,9 @@ import {
   type CaseSufficiencyVerdict,
 } from '@/lib/helpdesk/kbSufficiency';
 import { Inbox, AlertTriangle, Clock, User, Send, Filter, Search, Bot, ArrowUpRight, ShieldCheck, ExternalLink } from 'lucide-react';
-const PB: Record<TicketPriority, string> = { urgent: 'bg-red-500/15 text-red-300', high: 'bg-amber-500/15 text-amber-300', medium: 'bg-blue-500/15 text-blue-300', low: 'bg-zinc-500/15 text-zinc-400' };
+const PB: Record<TicketPriority, string> = { urgent: 'bg-state-danger/10 text-state-danger', high: 'bg-state-warning/10 text-state-warning', medium: 'bg-state-info/10 text-state-info', low: 'bg-tint text-muted' };
 const PI: Record<TicketPriority, typeof AlertTriangle> = { urgent: AlertTriangle, high: AlertTriangle, medium: Clock, low: Inbox };
-const SC: Record<TicketStatus, string> = { open: 'bg-emerald-500/15 text-emerald-300', pending: 'bg-amber-500/15 text-amber-300', resolved: 'bg-zinc-500/15 text-zinc-400' };
+const SC: Record<TicketStatus, string> = { open: 'bg-state-success/10 text-state-success', pending: 'bg-state-warning/10 text-state-warning', resolved: 'bg-tint text-muted' };
 /** §Brief §6 — the Knowledge Base sufficiency verdict, rendered (never colour-only). */
 const SUFFICIENCY_TONE: Record<CaseSufficiencyVerdict, StatusTone> = {
   internally_resolvable: 'success',
@@ -29,9 +29,9 @@ const SUFFICIENCY_TONE: Record<CaseSufficiencyVerdict, StatusTone> = {
 function slaInd(deadline?: string, status?: TicketStatus): { label: string; cls: string } | null {
   if (!deadline || status === 'resolved') return null;
   const h = Math.round((new Date(deadline).getTime() - Date.now()) / 3600000);
-  if (h < 0) return { label: `OVERDUE ${Math.abs(h)}h`, cls: 'text-red-400 font-semibold' };
-  if (h < 4) return { label: `${h}h left`, cls: 'text-amber-400' };
-  return { label: `${h}h`, cls: 'text-zinc-500' };
+  if (h < 0) return { label: `OVERDUE ${Math.abs(h)}h`, cls: 'text-state-danger font-semibold' };
+  if (h < 4) return { label: `${h}h left`, cls: 'text-state-warning' };
+  return { label: `${h}h`, cls: 'text-muted' };
 }
 
 function useAiSug(brandId: string, _ctx: string): string | null {
@@ -166,7 +166,7 @@ return (
         title="Helpdesk"
         description="Brand support cases reviewed by Mercenta before any channel escalation. Mercenta operates the channel relationship — a brand never contacts the channel directly."
         meta={
-          <span className="font-mono text-ds-label text-zinc-500">
+          <span className="font-mono text-ds-label text-muted">
             {metrics.openCount} open · {metrics.pendingCount} pending · {metrics.unassignedCount} unassigned
           </span>
         }
@@ -175,29 +175,29 @@ return (
           escalation to Amazon. Nothing here sends a raw brand report to Amazon. */}
       <Card className="p-3 space-y-2" data-state="helpdesk-cases-panel">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-brass-400" />
+          <ShieldCheck className="w-4 h-4 text-accent-400" />
           <h3 className="text-sm font-semibold text-strong">Brand cases — Mercenta review queue</h3>
-          <span className="text-ds-label text-zinc-500">
+          <span className="text-ds-label text-muted">
             {listCasesAwaitingReview().length} awaiting review · {listAllCases().length} total
           </span>
         </div>
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           A brand case is never sent straight to Amazon. Mercenta reviews and corrects it first; only an
           approved case may be escalated, where the integration is in simulation it is labelled as such.
         </p>
         <div className="space-y-1.5">
           {listCasesAwaitingReview().length === 0 && (
-            <p className="text-ds-label text-zinc-600">No cases awaiting review.</p>
+            <p className="text-ds-label text-faint">No cases awaiting review.</p>
           )}
           {listCasesAwaitingReview().map((c) => {
             const sufficiency = evaluateCaseSufficiency(c);
             return (
               <div key={c.id} className="space-y-1 border-t border-hairline pt-1.5" data-state="case-review-row">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-ds-label font-mono text-brass-300">{c.caseRef ?? c.id}</span>
-                  <span className="text-ds-label text-zinc-300 flex-1 min-w-[180px]">{c.subject}</span>
-                  <span className="text-ds-micro text-zinc-500">{brandName(c.brandId)}</span>
-                  <span className="text-ds-micro text-amber-300" data-state="case-state">
+                  <span className="text-ds-label font-mono text-accent-300">{c.caseRef ?? c.id}</span>
+                  <span className="text-ds-label text-strong flex-1 min-w-[180px]">{c.subject}</span>
+                  <span className="text-ds-micro text-muted">{brandName(c.brandId)}</span>
+                  <span className="text-ds-micro text-state-warning" data-state="case-state">
                     {c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : 'Unreviewed'}
                   </span>
                   <span className="flex gap-1">
@@ -207,7 +207,7 @@ return (
                     <Button variant="ghost" className="text-ds-micro px-2 py-0.5" onClick={() => handleCaseReview(c.id, 'request_info')}>
                       Request info
                     </Button>
-                    <Button variant="ghost" className="text-ds-micro px-2 py-0.5 text-red-300" onClick={() => handleCaseReview(c.id, 'reject')}>
+                    <Button variant="ghost" className="text-ds-micro px-2 py-0.5 text-state-danger" onClick={() => handleCaseReview(c.id, 'reject')}>
                       Reject
                     </Button>
                   </span>
@@ -219,7 +219,7 @@ return (
                     {CASE_SUFFICIENCY_LABELS[sufficiency.verdict]}
                   </StatusBadge>
                   {sufficiency.articleIds.length > 0 && (
-                    <span className="text-ds-micro text-zinc-500" data-state="case-kb">
+                    <span className="text-ds-micro text-muted" data-state="case-kb">
                       Knowledge Base:{' '}
                       {sufficiency.articleIds
                         .map((id) => getKnowledgeArticle(id)?.title ?? id)
@@ -229,7 +229,7 @@ return (
                 </div>
                 <ul className="space-y-0.5">
                   {sufficiency.reasons.map((r, i) => (
-                    <li key={i} className="text-ds-micro text-zinc-500">
+                    <li key={i} className="text-ds-micro text-muted">
                       {r}
                     </li>
                   ))}
@@ -239,7 +239,7 @@ return (
                     {sufficiency.context.map((ctx, i) => (
                       <li
                         key={i}
-                        className={cn('text-ds-micro', ctx.resolved ? 'text-zinc-500' : 'text-amber-300')}
+                        className={cn('text-ds-micro', ctx.resolved ? 'text-muted' : 'text-state-warning')}
                       >
                         {ctx.resolved ? 'Verified · ' : 'Unverified · '}
                         {ctx.detail}
@@ -253,11 +253,11 @@ return (
         </div>
         {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').length > 0 && (
           <div className="space-y-1.5 border-t border-hairline pt-2">
-            <p className="text-ds-label text-zinc-400">Reviewed — ready to escalate to Amazon:</p>
+            <p className="text-ds-label text-muted">Reviewed — ready to escalate to Amazon:</p>
             {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2">
-                <span className="text-ds-label font-mono text-brass-300">{c.caseRef ?? c.id}</span>
-                <span className="text-ds-label text-zinc-300 flex-1 min-w-[160px]">{c.subject}</span>
+                <span className="text-ds-label font-mono text-accent-300">{c.caseRef ?? c.id}</span>
+                <span className="text-ds-label text-strong flex-1 min-w-[160px]">{c.subject}</span>
                 <Button className="text-ds-micro px-2 py-0.5" onClick={() => void handleCaseEscalate(c.id)}>
                   <ExternalLink className="w-3 h-3 mr-1" /> Escalate to Amazon
                 </Button>
@@ -267,13 +267,13 @@ return (
         )}
         {listAllCases().some((c) => c.amazonCase) && (
           <div className="space-y-1 border-t border-hairline pt-2">
-            <p className="text-ds-label text-zinc-400">Provider cases (truthful state):</p>
+            <p className="text-ds-label text-muted">Provider cases (truthful state):</p>
             {listAllCases().filter((c) => c.amazonCase).map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2 text-ds-label">
-                <span className="font-mono text-brass-300">{c.caseRef ?? c.id}</span>
-                <span className="font-mono text-zinc-400">{c.amazonCase?.referenceId}</span>
-                <span className="text-zinc-500">{c.amazonCase?.simulated ? 'Simulation — no live Amazon case' : 'Live Amazon case'}</span>
-                <span className="text-emerald-300">{c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : ''}</span>
+                <span className="font-mono text-accent-300">{c.caseRef ?? c.id}</span>
+                <span className="font-mono text-muted">{c.amazonCase?.referenceId}</span>
+                <span className="text-muted">{c.amazonCase?.simulated ? 'Simulation — no live Amazon case' : 'Live Amazon case'}</span>
+                <span className="text-state-success">{c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : ''}</span>
               </div>
             ))}
           </div>
@@ -282,7 +282,7 @@ return (
             The response is typed by the operator; the platform never invents one. */}
         {listAllCases().filter((c) => c.amazonCase && !c.providerResponse).length > 0 && (
           <div className="space-y-2 border-t border-hairline pt-2" data-state="case-response-panel">
-            <p className="text-ds-label text-zinc-400">
+            <p className="text-ds-label text-muted">
               Record the retail channel&rsquo;s response as received. Nothing is generated or inferred.
             </p>
             <Input
@@ -304,8 +304,8 @@ return (
             />
             {listAllCases().filter((c) => c.amazonCase && !c.providerResponse).map((c) => (
               <div key={c.id} className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-ds-label text-brass-300">{c.caseRef ?? c.id}</span>
-                <span className="min-w-[140px] flex-1 text-ds-label text-zinc-300">{c.subject}</span>
+                <span className="font-mono text-ds-label text-accent-300">{c.caseRef ?? c.id}</span>
+                <span className="min-w-[140px] flex-1 text-ds-label text-strong">{c.subject}</span>
                 <Button className="text-ds-micro px-2 py-0.5" data-state="case-record-response" onClick={() => handleCaseResponse(c.id)}>
                   Record response
                 </Button>
@@ -315,7 +315,7 @@ return (
         )}
         {listAllCases().filter((c) => c.providerResponse && c.escalationState !== 'resolved' && c.escalationState !== 'closed').length > 0 && (
           <div className="space-y-2 border-t border-hairline pt-2" data-state="case-resolve-panel">
-            <p className="text-ds-label text-zinc-400">
+            <p className="text-ds-label text-muted">
               Resolve the case with a note the brand will read.
             </p>
             <Input
@@ -328,8 +328,8 @@ return (
               .filter((c) => c.providerResponse && c.escalationState !== 'resolved' && c.escalationState !== 'closed')
               .map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-ds-label text-brass-300">{c.caseRef ?? c.id}</span>
-                  <span className="min-w-[140px] flex-1 text-ds-label text-zinc-300">{c.subject}</span>
+                  <span className="font-mono text-ds-label text-accent-300">{c.caseRef ?? c.id}</span>
+                  <span className="min-w-[140px] flex-1 text-ds-label text-strong">{c.subject}</span>
                   <Button className="text-ds-micro px-2 py-0.5" data-state="case-resolve" onClick={() => handleCaseResolve(c.id)}>
                     Resolve case
                   </Button>
@@ -339,21 +339,21 @@ return (
         )}
       </Card>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-        <Card className="p-3"><p className="text-zinc-500">Open</p><p className="text-xl font-bold text-strong mt-1">{metrics.openCount}</p></Card>
-        <Card className="p-3"><p className="text-zinc-500">Pending</p><p className="text-xl font-bold text-amber-400 mt-1">{metrics.pendingCount}</p></Card>
-        <Card className="p-3"><p className="text-zinc-500">Resolved Today</p><p className="text-xl font-bold text-emerald-400 mt-1">{metrics.resolvedToday}</p></Card>
-        <Card className="p-3 border-red-500/20"><p className="text-zinc-500">SLA Overdue</p><p className="text-xl font-bold text-red-400 mt-1">{overdueCount}</p></Card>
-        <Card className="p-3"><p className="text-zinc-500">Unassigned</p><p className="text-xl font-bold text-zinc-300 mt-1">{metrics.unassignedCount}</p></Card>
+        <Card className="p-3"><p className="text-muted">Open</p><p className="text-xl font-bold text-strong mt-1">{metrics.openCount}</p></Card>
+        <Card className="p-3"><p className="text-muted">Pending</p><p className="text-xl font-bold text-state-warning mt-1">{metrics.pendingCount}</p></Card>
+        <Card className="p-3"><p className="text-muted">Resolved Today</p><p className="text-xl font-bold text-state-success mt-1">{metrics.resolvedToday}</p></Card>
+        <Card className="p-3 border-state-danger/20"><p className="text-muted">SLA Overdue</p><p className="text-xl font-bold text-state-danger mt-1">{overdueCount}</p></Card>
+        <Card className="p-3"><p className="text-muted">Unassigned</p><p className="text-xl font-bold text-strong mt-1">{metrics.unassignedCount}</p></Card>
       </div>
       <div className="grid grid-cols-12 gap-4">
         <Card className="col-span-12 md:col-span-4 p-0 overflow-hidden">
           <div className="p-3 border-b border-hairline space-y-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" />
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tickets…"
                 aria-label="Search tickets"
-                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-surface border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-faint focus:outline-none focus:border-accent-500/40" />
             </div>
             {/* §Wave-3 Part 4 — the filter chip rows WRAP. They were single-line
                 `flex` rows inside a `p-0 overflow-hidden` card, so at 768px the
@@ -362,7 +362,7 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'open', 'pending', 'resolved'] as const).map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
-                  className={'px-2 py-1 rounded-ds-sm ' + (statusFilter === s ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-strong')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (statusFilter === s ? 'bg-accent-500/20 text-accent-300' : 'text-muted hover:text-strong')}>
                   {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
@@ -370,7 +370,7 @@ return (
             <div className="flex flex-wrap gap-1 text-ds-micro">
               {(['all', 'urgent', 'high', 'medium', 'low'] as const).map((p) => (
                 <button key={p} onClick={() => setPriorityFilter(p)}
-                  className={'px-2 py-1 rounded-ds-sm ' + (priorityFilter === p ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-strong')}>
+                  className={'px-2 py-1 rounded-ds-sm ' + (priorityFilter === p ? 'bg-accent-500/20 text-accent-300' : 'text-muted hover:text-strong')}>
                   {p === 'all' ? 'All' : p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
@@ -382,22 +382,22 @@ return (
               const sla = slaInd(t.slaDeadline, t.status);
               return (
                 <button key={t.id} onClick={() => { setSelectedTicketId(t.id); markTicketSeen(t.id); }}
-                  className={'w-full text-left px-3 py-2.5 ' + (selectedTicketId === t.id ? 'bg-brass-500/10' : 'hover:bg-tint')}>
+                  className={'w-full text-left px-3 py-2.5 ' + (selectedTicketId === t.id ? 'bg-accent-500/10' : 'hover:bg-tint')}>
                   <div className="flex items-center justify-between gap-1.5 mb-0.5">
                     <span className="text-xs font-medium text-strong truncate">{brandName(t.brandId)}</span>
-                    <Icon className={'w-3 h-3 ' + (t.priority === 'urgent' ? 'text-red-400' : t.priority === 'high' ? 'text-amber-400' : 'text-zinc-500')} />
+                    <Icon className={'w-3 h-3 ' + (t.priority === 'urgent' ? 'text-state-danger' : t.priority === 'high' ? 'text-state-warning' : 'text-muted')} />
                   </div>
-                  <p className="text-ds-micro text-zinc-500 truncate">{t.lastMessagePreview}</p>
+                  <p className="text-ds-micro text-muted truncate">{t.lastMessagePreview}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className={'text-ds-micro px-1.5 py-0.5 rounded-ds-sm ' + SC[t.status]}>{t.status}</span>
                     <span className={'text-ds-micro px-1.5 py-0.5 rounded-ds-sm ' + PB[t.priority]}>{t.priority}</span>
                     {sla && <span className={'text-ds-micro ' + sla.cls}>{sla.label}</span>}
-                    {!t.seenByStaff && <span className="w-1.5 h-1.5 rounded-full bg-brass-500" />}
+                    {!t.seenByStaff && <span className="w-1.5 h-1.5 rounded-full bg-accent-500" />}
                   </div>
                 </button>
               );
             })}
-            {filteredTickets.length === 0 && <p className="text-xs text-zinc-600 text-center py-6">No tickets match.</p>}
+            {filteredTickets.length === 0 && <p className="text-xs text-faint text-center py-6">No tickets match.</p>}
           </div>
         </Card>
         <Card className="col-span-12 md:col-span-8 p-4">
@@ -406,7 +406,7 @@ return (
               <div className="flex items-start justify-between gap-3 border-b border-hairline pb-3">
                 <div>
                   <h3 className="text-sm font-semibold text-strong">{selectedTicket.subject}</h3>
-                  <div className="flex items-center gap-2 mt-1 text-ds-micro text-zinc-500">
+                  <div className="flex items-center gap-2 mt-1 text-ds-micro text-muted">
                     <span>{brandName(selectedTicket.brandId)}</span> <span>·</span>
                     <span>{selectedTicket.source === 'live_chat' ? 'Live Chat' : selectedTicket.source}</span> <span>·</span>
                     <span>{new Date(selectedTicket.createdAt).toLocaleDateString()}</span>
@@ -414,22 +414,22 @@ return (
                 </div>
                 <select value={selectedTicket.status} onChange={(e) => { updateTicketStatus(selectedTicket.id, e.target.value as TicketStatus, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket status"
-                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
+                  className="bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   {(['open', 'pending', 'resolved'] as const).map((s) => (<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>))}
                 </select>
               </div>
               <div className="flex items-center gap-3 text-ds-micro">
-                <User className="w-3 h-3 text-zinc-500" />
+                <User className="w-3 h-3 text-muted" />
                 <select value={selectedTicket.assignedToStaffId ?? ''} onChange={(e) => { assignTicket(selectedTicket.id, e.target.value, actingStaff?.id); bumpStore(); }}
                   aria-label="Assign ticket to"
-                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
+                  className="bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   <option value="">Unassigned</option>
                   {staff.filter((s: any) => s.active).map((s: any) => (<option key={s.id} value={s.id}>{s.name}</option>))}
                 </select>
-                <Filter className="w-3 h-3 text-zinc-500" />
+                <Filter className="w-3 h-3 text-muted" />
                 <select value={selectedTicket.priority} onChange={(e) => { setTicketPriority(selectedTicket.id, e.target.value as TicketPriority, actingStaff?.id); bumpStore(); }}
                   aria-label="Ticket priority"
-                  className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
+                  className="bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-ds-micro text-strong">
                   {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (<option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>))}
                 </select>
                 {selectedTicket.slaDeadline && (() => {
@@ -441,34 +441,34 @@ return (
                 {/* §Wave 3 Part 5 — "No messages yet." was shown on a selected
                     ticket whose messages were still resolving. */}
                 {helpdeskPending && <LoadingState rows={3} label="Loading ticket messages…" />}
-                {!helpdeskPending && ticketMessages.length === 0 && <p className="text-xs text-zinc-600 py-4">No messages yet.</p>}
+                {!helpdeskPending && ticketMessages.length === 0 && <p className="text-xs text-faint py-4">No messages yet.</p>}
                 {ticketMessages.map((m: any) => (
                   <div key={m.id} className={'flex ' + (m.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
-                    <div className={'max-w-[80%] rounded-ds-lg px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-tint text-zinc-300')}>
+                    <div className={'max-w-[80%] rounded-ds-lg px-3 py-2 text-xs ' + (m.direction === 'outbound' ? 'bg-accent-500/15 text-strong' : 'bg-tint text-strong')}>
                       <p className="whitespace-pre-wrap">{m.body}</p>
-                      <p className="mt-1 text-ds-micro text-zinc-500 font-mono">{new Date(m.createdAt).toLocaleString()}</p>
+                      <p className="mt-1 text-ds-micro text-muted font-mono">{new Date(m.createdAt).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
               </div>
               {aiSuggestion && (
-                <div className="border border-brass-500/20 bg-brass-500/5 rounded-ds-md p-2.5">
+                <div className="border border-accent-500/20 bg-accent-500/5 rounded-ds-md p-2.5">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Bot className="w-3 h-3 text-brass-400" />
-                    <span className="text-ds-micro font-medium text-brass-300">AI Suggested Reply</span>
-                    <button onClick={() => setReplyDraft(aiSuggestion)} className="ml-auto text-ds-micro text-zinc-500 hover:text-strong">
+                    <Bot className="w-3 h-3 text-accent-400" />
+                    <span className="text-ds-micro font-medium text-accent-300">AI Suggested Reply</span>
+                    <button onClick={() => setReplyDraft(aiSuggestion)} className="ml-auto text-ds-micro text-muted hover:text-strong">
                       <ArrowUpRight className="w-3 h-3 inline" /> Use
                     </button>
                   </div>
-                  <p className="text-ds-micro text-zinc-400 italic">{aiSuggestion}</p>
+                  <p className="text-ds-micro text-muted italic">{aiSuggestion}</p>
                 </div>
               )}
               <div className="space-y-2 pt-2 border-t border-hairline">
                 <textarea value={replyDraft} onChange={(e) => setReplyDraft(e.target.value)}
                   rows={3} placeholder="Type a reply…"
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40" />
+                  className="w-full bg-surface border border-hairline rounded-ds-md px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40" />
                 <div className="flex items-center justify-between">
-                  {replyNote && <span className="text-ds-micro text-zinc-500">{replyNote}</span>}
+                  {replyNote && <span className="text-ds-micro text-muted">{replyNote}</span>}
                   <Button className="text-xs ml-auto" disabled={!replyDraft.trim()} onClick={handleSendReply}>
                     <Send className="w-3 h-3 mr-1.5" /> Send Reply
                   </Button>
@@ -476,7 +476,7 @@ return (
               </div>
             </div>
           ) : (
-            <p className="text-xs text-zinc-600 text-center py-8">Select a ticket.</p>
+            <p className="text-xs text-faint text-center py-8">Select a ticket.</p>
           )}
         </Card>
       </div>

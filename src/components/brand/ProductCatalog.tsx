@@ -202,7 +202,7 @@ export function ProductCatalog() {
       />
 
       {!gateCleared && (
-        <div className="bg-amber-500/10 border border-state-warning/20 rounded-ds-md p-4 text-sm text-state-warning">
+        <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-4 text-sm text-state-warning">
           <div className="flex items-center gap-2 mb-2 font-medium">
             <ShieldAlert className="w-4 h-4" />
             Catalog Sync Disabled — Compliance Gate{' '}
@@ -214,7 +214,7 @@ export function ProductCatalog() {
           </p>
           <ul className="mt-2 text-xs space-y-1">
             {gate.missing.map((m) => (
-              <li key={m} className="text-red-300">
+              <li key={m} className="text-state-danger">
                 • Missing: {m.replace(/_/g, ' ')}
               </li>
             ))}
@@ -228,7 +228,7 @@ export function ProductCatalog() {
       )}
 
       {gateError && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300">
+        <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-xs text-state-danger">
           {gateError}
         </div>
       )}
@@ -401,7 +401,7 @@ export function ProductCatalog() {
                 <Badge
                   className={
                     p.vatStatus === 'Zero-rated'
-                      ? 'bg-state-info/10 text-state-info border-blue-500/20'
+                      ? 'bg-state-info/10 text-state-info border-state-info/20'
                       : 'bg-tint text-strong border-hairline'
                   }
                 >
@@ -462,7 +462,7 @@ export function ProductCatalog() {
                       'text-ds-micro px-2 py-0.5 rounded-full font-medium transition-colors',
                       isAvailable
                         ? 'bg-state-success/10 text-state-success'
-                        : 'bg-red-500/15 text-red-300'
+                        : 'bg-state-danger/10 text-state-danger'
                     )}
                   >
                     {isAvailable ? 'In Stock' : 'OOS'}
@@ -502,7 +502,7 @@ export function ProductCatalog() {
                       sub.status === 'live'
                         ? 'bg-state-success/10 text-state-success'
                         : sub.status === 'rejected'
-                        ? 'bg-red-500/15 text-red-300'
+                        ? 'bg-state-danger/10 text-state-danger'
                         : sub.status === 'under_amazon_review'
                         ? 'bg-state-info/10 text-state-info'
                         : 'bg-tint text-strong'

@@ -195,10 +195,10 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         description="The founder-only operating centre: business, brands, acquisition, operations, finance, compliance, automation, AI and audit — every figure derived from canonical records, with the exact next action for each. The ONE action list is Work Management (Operations), which now also carries the founder console; this screen keeps the founder's CONTROLS and DECISIONS."
         meta={
           <>
-            <span className="text-ds-label text-zinc-500">As at {model.generatedFor}</span>
-            <span className="text-ds-label text-zinc-500">{model.counts.openWork} open work</span>
-            <span className="text-ds-label text-zinc-500">{model.counts.overdueWork} overdue</span>
-            <span className="text-ds-label text-zinc-500">{model.counts.automationDeclared} automations</span>
+            <span className="text-ds-label text-muted">As at {model.generatedFor}</span>
+            <span className="text-ds-label text-muted">{model.counts.openWork} open work</span>
+            <span className="text-ds-label text-muted">{model.counts.overdueWork} overdue</span>
+            <span className="text-ds-label text-muted">{model.counts.automationDeclared} automations</span>
           </>
         }
         toolbar={
@@ -245,7 +245,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               }
             >
               {integrationIssues.length === 0 ? (
-                <p className="text-ds-label text-zinc-400" data-testid="control-integrations-clear">
+                <p className="text-ds-label text-muted" data-testid="control-integrations-clear">
                   No provider is reporting an error. Modes are declared per provider in Integration Settings; an
                   UNKNOWN mode is never treated as simulation.
                 </p>
@@ -253,44 +253,44 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 <ul className="space-y-1.5" data-testid="control-integration-issues">
                   {integrationIssues.map((i) => (
                     <li key={i.id} className="text-ds-label">
-                      <span className="text-zinc-200">{i.id.replace(/_/g, ' ')}</span>
-                      <span className="ml-1 text-ds-micro text-zinc-500">{String(i.mode)}</span>
-                      <span className="block text-ds-micro text-red-300">{String(i.state?.error)}</span>
+                      <span className="text-strong">{i.id.replace(/_/g, ' ')}</span>
+                      <span className="ml-1 text-ds-micro text-muted">{String(i.mode)}</span>
+                      <span className="block text-ds-micro text-state-danger">{String(i.state?.error)}</span>
                     </li>
                   ))}
                 </ul>
               )}
             </ContextPanel>
-            <ContextPanel title="Data provenance" action={<span className="text-ds-micro text-zinc-500">canonical</span>}>
+            <ContextPanel title="Data provenance" action={<span className="text-ds-micro text-muted">canonical</span>}>
               <ul className="space-y-1.5">
                 {model.dataSources.map((d) => (
                   <li key={d.label} className="text-ds-label">
-                    <span className="text-zinc-300">{d.label}</span>
-                    <span className="block text-ds-micro text-zinc-600">{d.value}</span>
+                    <span className="text-strong">{d.label}</span>
+                    <span className="block text-ds-micro text-faint">{d.value}</span>
                   </li>
                 ))}
               </ul>
             </ContextPanel>
             <ContextPanel
               title="Automation"
-              action={<span className="text-ds-micro text-zinc-500">{model.automationSummary.declared} declared</span>}
+              action={<span className="text-ds-micro text-muted">{model.automationSummary.declared} declared</span>}
             >
               <ul className="space-y-1">
-                <li className="flex justify-between text-ds-label"><span className="text-zinc-400">Succeeded</span><span className="font-mono text-zinc-200">{model.automationSummary.succeeded}</span></li>
-                <li className="flex justify-between text-ds-label"><span className="text-zinc-400">Failed</span><span className="font-mono text-zinc-200">{model.automationSummary.failed}</span></li>
-                <li className="flex justify-between text-ds-label"><span className="text-zinc-400">Awaiting approval</span><span className="font-mono text-zinc-200">{model.automationSummary.awaitingApproval}</span></li>
-                <li className="flex justify-between text-ds-label"><span className="text-zinc-400">Not yet run</span><span className="font-mono text-zinc-200">{model.automationSummary.neverRun}</span></li>
+                <li className="flex justify-between text-ds-label"><span className="text-muted">Succeeded</span><span className="font-mono text-strong">{model.automationSummary.succeeded}</span></li>
+                <li className="flex justify-between text-ds-label"><span className="text-muted">Failed</span><span className="font-mono text-strong">{model.automationSummary.failed}</span></li>
+                <li className="flex justify-between text-ds-label"><span className="text-muted">Awaiting approval</span><span className="font-mono text-strong">{model.automationSummary.awaitingApproval}</span></li>
+                <li className="flex justify-between text-ds-label"><span className="text-muted">Not yet run</span><span className="font-mono text-strong">{model.automationSummary.neverRun}</span></li>
               </ul>
-              <p className="mt-2 text-ds-micro text-zinc-600" data-testid="automation-scheduler">
+              <p className="mt-2 text-ds-micro text-faint" data-testid="automation-scheduler">
                 Scheduler: {model.scheduler.chosen} · no timer · $0 · {model.scheduler.newDependencies.length} new
                 dependencies.
               </p>
             </ContextPanel>
             <ContextPanel title="AI" action={<Badge className="text-ds-micro">{model.ai.state.replace(/_/g, ' ')}</Badge>}>
-              <p className="text-ds-label text-zinc-400" data-testid="ai-state">
+              <p className="text-ds-label text-muted" data-testid="ai-state">
                 {model.ai.reason}
               </p>
-              <p className="mt-1.5 text-ds-micro text-zinc-600">{model.ai.degradation}</p>
+              <p className="mt-1.5 text-ds-micro text-faint">{model.ai.degradation}</p>
             </ContextPanel>
             <ContextPanel title="Recent activity">
               <ActivityFeed
@@ -300,7 +300,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   meta: `${a.reason} · ${a.actor}`,
                   at: a.at,
                 }))}
-                empty={<p className="text-ds-label text-zinc-600">No audit records yet this session.</p>}
+                empty={<p className="text-ds-label text-faint">No audit records yet this session.</p>}
               />
             </ContextPanel>
           </>
@@ -344,14 +344,14 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </Button>
           }
         >
-          <p className="text-ds-label text-zinc-400">
+          <p className="text-ds-label text-muted">
             {model.counts.openWork} open item(s) · {model.counts.criticalWork} critical ·{' '}
             {model.counts.overdueWork} overdue · {model.counts.approvalsPending} approval(s) awaiting your decision.
           </p>
         </WorkspaceSection>
 
         {notice && (
-          <p className="text-ds-label text-zinc-400" data-testid="control-notice">
+          <p className="text-ds-label text-muted" data-testid="control-notice">
             {notice}
           </p>
         )}
@@ -363,7 +363,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The founder's standing questions, declared once. Every answer names the CANONICAL owner that deterministically computes its data — AI may SUMMARISE an answer but never supply the data behind one, so canonical deterministic data stays the source of truth."
             domain="orders"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="founder-intelligence-status">
+              <span className="text-ds-micro text-muted" data-testid="founder-intelligence-status">
                 {model.founderIntelligence.questionCount} questions · AI may only summarise
               </span>
             }
@@ -371,20 +371,20 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="founder-intelligence-questions">
               {model.founderIntelligence.questions.map((q) => (
                 <li key={q.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                  <p className="text-ds-label text-zinc-200">{q.question}</p>
-                  <p className="mt-1 text-ds-micro text-zinc-500">{q.about}</p>
-                  <p className="mt-1 font-mono text-ds-micro text-zinc-600">{q.dataOwner}</p>
+                  <p className="text-ds-label text-strong">{q.question}</p>
+                  <p className="mt-1 text-ds-micro text-muted">{q.about}</p>
+                  <p className="mt-1 font-mono text-ds-micro text-faint">{q.dataOwner}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="founder-intelligence-refusal">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="founder-intelligence-refusal">
               Fail-closed proof: AI supplying the data for “{model.founderIntelligence.exampleRefusal.question}” →{' '}
               {model.founderIntelligence.exampleRefusal.refusal}. {model.founderIntelligence.exampleRefusal.reason}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="founder-intelligence-rule">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="founder-intelligence-rule">
               {model.founderIntelligence.rules.join(' ')}
             </p>
-            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="founder-intelligence-basis">
+            <p className="mt-2 text-ds-micro text-muted" data-testid="founder-intelligence-basis">
               {model.founderIntelligence.basis} {model.founderIntelligence.disclaimer}
             </p>
           </WorkspaceSection>
@@ -398,7 +398,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The end-to-end acquisition → capital → operations loop, declared once: discovery → Explore UK Market Fit → qualification → outreach → onboarding → product readiness → commercial terms → Mercenta purchase → supply-route analysis → capital requirement → financing eligibility → financing → supplier purchase → Vendor operations → PO → fulfilment → invoice → payment → repayment → margin → Founder Intelligence. Every stage names the CANONICAL owner that deterministically owns its behaviour; the moves are DERIVED from the ordered list, so the loop is forward-only and closes into the founder's own intelligence — an illegal move is refused rather than guessed."
             domain="orders"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="control-integrated-loop-status">
+              <span className="text-ds-micro text-muted" data-testid="control-integrated-loop-status">
                 {model.integratedLoop.stageCount} stages · forward-only · closes into Founder Intelligence
               </span>
             }
@@ -406,11 +406,11 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-integrated-loop">
               {model.integratedLoop.stages.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-strong">
                     {s.label}
                   </span>
                   {i < model.integratedLoop.stageCount - 1 && (
-                    <span className="text-ds-micro text-zinc-600">→</span>
+                    <span className="text-ds-micro text-faint">→</span>
                   )}
                 </li>
               ))}
@@ -418,20 +418,20 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-integrated-loop-stages">
               {model.integratedLoop.stages.map((s) => (
                 <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                  <p className="text-ds-label text-zinc-200">{s.label}</p>
-                  <p className="mt-1 text-ds-micro text-zinc-500">{s.about}</p>
-                  <p className="mt-1 font-mono text-ds-micro text-zinc-600">{s.dataOwner}</p>
+                  <p className="text-ds-label text-strong">{s.label}</p>
+                  <p className="mt-1 text-ds-micro text-muted">{s.about}</p>
+                  <p className="mt-1 font-mono text-ds-micro text-faint">{s.dataOwner}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-refusal">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-integrated-loop-refusal">
               Fail-closed proof: {model.integratedLoop.exampleRefusal.from} → {model.integratedLoop.exampleRefusal.to} →{' '}
               {model.integratedLoop.exampleRefusal.refusal}. {model.integratedLoop.exampleRefusal.reason}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-rule">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-integrated-loop-rule">
               {model.integratedLoop.rules.join(' ')}
             </p>
-            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-basis">
+            <p className="mt-2 text-ds-micro text-muted" data-testid="control-integrated-loop-basis">
               {model.integratedLoop.basis} {model.integratedLoop.disclaimer}
             </p>
           </WorkspaceSection>
@@ -447,16 +447,16 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="Acquisition intelligence operating at scale over the REAL research sources: the dimensions it scales over (brand profile, product catalogue, demand signal, competition landscape, company register, decision-maker contact) and the research sources that may supply them — each REUSING a canonical integration-registry provider. A signal may rest only on a DECLARED source that SUPPLIES its dimension and whose provider is genuinely available; an unknown dimension, an unknown source, a source that does not supply the dimension, and a signal with no available provider are all refused — when no provider is available NO value is produced, never fabricated. AI may only summarise."
             domain="orders"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="acquisition-intelligence-rule">
+              <span className="text-ds-micro text-muted" data-testid="acquisition-intelligence-rule">
                 {model.acquisitionIntelligence.requiresNamedSource && model.acquisitionIntelligence.neverFabricates && model.acquisitionIntelligence.sourcesReused
                   ? 'Real source required · never fabricated'
                   : 'INTELLIGENCE RULE NOT ENFORCED'}
               </span>
             }
           >
-            <p className="text-ds-micro text-zinc-500">
+            <p className="text-ds-micro text-muted">
               Dimensions:{' '}
-              <span className="text-zinc-400" data-testid="control-acquisition-intelligence-dimensions">
+              <span className="text-muted" data-testid="control-acquisition-intelligence-dimensions">
                 {model.acquisitionIntelligence.dimensions.map((d) => d.label).join(' · ')}
               </span>
             </p>
@@ -464,34 +464,34 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.acquisitionIntelligence.sources.map((s) => (
                 <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <span className="flex justify-between gap-3">
-                    <span className="text-ds-label text-zinc-200">{s.label}</span>
-                    <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
+                    <span className="text-ds-label text-strong">{s.label}</span>
+                    <span className="font-mono text-ds-micro text-muted">{s.available ? 'available' : 'not available'}</span>
                   </span>
-                  <span className="mt-1 block font-mono text-ds-micro text-zinc-600">{s.providerId}</span>
-                  <span className="mt-1 block text-ds-micro text-zinc-500">{s.suppliedLabels.join(', ')}</span>
+                  <span className="mt-1 block font-mono text-ds-micro text-faint">{s.providerId}</span>
+                  <span className="mt-1 block text-ds-micro text-muted">{s.suppliedLabels.join(', ')}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-real">
-              Real acquisition signals produced: <span className="font-mono text-zinc-300">{model.acquisitionIntelligence.realSignalCount}</span> — {model.acquisitionIntelligence.availableSourceCount} of {model.acquisitionIntelligence.sources.length} research source(s) available; every signal below is an unmistakable demonstration and is refused.
+            <p className="mt-4 text-ds-micro text-muted" data-testid="control-acquisition-intelligence-real">
+              Real acquisition signals produced: <span className="font-mono text-strong">{model.acquisitionIntelligence.realSignalCount}</span> — {model.acquisitionIntelligence.availableSourceCount} of {model.acquisitionIntelligence.sources.length} research source(s) available; every signal below is an unmistakable demonstration and is refused.
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-acquisition-intelligence-demonstrations">
               {model.acquisitionIntelligence.demonstrations.map((d) => (
                 <li key={d.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">{d.dimensionLabel} · {d.sourceLabel}</span>
-                    <span className="font-mono text-zinc-400">{d.allowed ? 'allowed' : d.refusal}</span>
+                    <span className="text-strong">{d.dimensionLabel} · {d.sourceLabel}</span>
+                    <span className="font-mono text-muted">{d.allowed ? 'allowed' : d.refusal}</span>
                   </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-refusal">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-acquisition-intelligence-refusal">
               Fail-closed proof: {model.acquisitionIntelligence.exampleRefusal.refusal} — {model.acquisitionIntelligence.exampleRefusal.reason}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-rule-text">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-acquisition-intelligence-rule-text">
               {model.acquisitionIntelligence.rules.join(' ')}
             </p>
-            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-basis">
+            <p className="mt-2 text-ds-micro text-muted" data-testid="control-acquisition-intelligence-basis">
               {model.acquisitionIntelligence.basis} {model.acquisitionIntelligence.disclaimer}
             </p>
           </WorkspaceSection>
@@ -507,16 +507,16 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The six §PHASE 1 UK opportunity states A–F at scale: for each state, the EVIDENCE it rests on — each evidence source REUSING a canonical integration-registry provider. A state may be asserted only when it names a DECLARED evidence source and every one of its sources is backed by a genuinely available provider; an unknown state, a state with no evidence and a state naming an unknown source are all refused — when no provider is available NO state is asserted, never fabricated. The states feed the UK Market Fit → qualification → outreach chain."
             domain="orders"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="uk-opportunity-states-rule">
+              <span className="text-ds-micro text-muted" data-testid="uk-opportunity-states-rule">
                 {model.ukOpportunityStates.requiresEvidence && model.ukOpportunityStates.neverFabricates && model.ukOpportunityStates.reusesClasses
                   ? 'Evidence required · never fabricated'
                   : 'STATE RULE NOT ENFORCED'}
               </span>
             }
           >
-            <p className="text-ds-micro text-zinc-500">
+            <p className="text-ds-micro text-muted">
               Chain:{' '}
-              <span className="text-zinc-400" data-testid="control-uk-opportunity-states-chain">
+              <span className="text-muted" data-testid="control-uk-opportunity-states-chain">
                 {model.ukOpportunityStates.chainStages.map((s) => s.label).join(' → ')}
               </span>
             </p>
@@ -524,34 +524,34 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.ukOpportunityStates.evidenceSources.map((s) => (
                 <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                   <span className="flex justify-between gap-3">
-                    <span className="text-ds-label text-zinc-200">{s.label}</span>
-                    <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
+                    <span className="text-ds-label text-strong">{s.label}</span>
+                    <span className="font-mono text-ds-micro text-muted">{s.available ? 'available' : 'not available'}</span>
                   </span>
-                  <span className="mt-1 block font-mono text-ds-micro text-zinc-600">{s.providerId}</span>
+                  <span className="mt-1 block font-mono text-ds-micro text-faint">{s.providerId}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-real">
-              States asserted: <span className="font-mono text-zinc-300">{model.ukOpportunityStates.realAssertedCount}</span> — {model.ukOpportunityStates.availableEvidenceSourceCount} of {model.ukOpportunityStates.evidenceSources.length} evidence source(s) available; every state below is refused because the evidence behind it is not available.
+            <p className="mt-4 text-ds-micro text-muted" data-testid="control-uk-opportunity-states-real">
+              States asserted: <span className="font-mono text-strong">{model.ukOpportunityStates.realAssertedCount}</span> — {model.ukOpportunityStates.availableEvidenceSourceCount} of {model.ukOpportunityStates.evidenceSources.length} evidence source(s) available; every state below is refused because the evidence behind it is not available.
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-uk-opportunity-states-states">
               {model.ukOpportunityStates.states.map((st) => (
                 <li key={st.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">{st.id} — {st.label}</span>
-                    <span className="font-mono text-zinc-400">{st.assertable ? 'asserted' : st.refusal}</span>
+                    <span className="text-strong">{st.id} — {st.label}</span>
+                    <span className="font-mono text-muted">{st.assertable ? 'asserted' : st.refusal}</span>
                   </span>
-                  <span className="text-ds-micro text-zinc-600">Evidence: {st.evidenceLabels.join(' · ')}</span>
+                  <span className="text-ds-micro text-faint">Evidence: {st.evidenceLabels.join(' · ')}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-refusal">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-uk-opportunity-states-refusal">
               Fail-closed proof: {model.ukOpportunityStates.exampleRefusal.refusal} — {model.ukOpportunityStates.exampleRefusal.reason}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-rule-text">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-uk-opportunity-states-rule-text">
               {model.ukOpportunityStates.rules.join(' ')}
             </p>
-            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-basis">
+            <p className="mt-2 text-ds-micro text-muted" data-testid="control-uk-opportunity-states-basis">
               {model.ukOpportunityStates.basis} {model.ukOpportunityStates.disclaimer}
             </p>
           </WorkspaceSection>
@@ -584,7 +584,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="A brand progresses through a topic LEARN → WATCH → DO → VALIDATE → COMPLETE. LEARN reads the canonical Knowledge Base article and WATCH completes the canonical guided tour; VALIDATE is a gate satisfied only by a real signal — a topic is never complete merely because the brand said so."
               domain="communications"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="learning-loop-gate">
+                <span className="text-ds-micro text-muted" data-testid="learning-loop-gate">
                   {model.learningLoop.validateRequiresEvidence ? 'VALIDATE is a gate' : 'VALIDATION NOT ENFORCED'}
                 </span>
               }
@@ -592,26 +592,26 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="learning-loop-stages">
                 {model.learningLoop.stages.map((s) => (
                   <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">
                       {s.label}
                       {s.gate ? ' · gate' : ''}
                     </p>
-                    <p className="mt-1 text-ds-label text-zinc-300">{s.meaning}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{s.action}</p>
+                    <p className="mt-1 text-ds-label text-strong">{s.meaning}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{s.action}</p>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="learning-loop-demo">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                <p className="text-ds-micro uppercase tracking-wide text-muted">
                   DEMO topic ({model.learningLoop.topicCount} canonical topic(s)) — {model.learningLoop.demo.label}
                   {model.learningLoop.demo.academyStage ? ` · academy stage ${model.learningLoop.demo.academyStage}` : ''}
                 </p>
-                <p className="mt-1 text-ds-label text-zinc-300">
+                <p className="mt-1 text-ds-label text-strong">
                   current stage: <span className="font-mono">{model.learningLoop.demo.currentStage}</span> ·{' '}
                   {model.learningLoop.demo.complete ? 'complete' : 'not complete'}
                 </p>
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="learning-loop-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="learning-loop-basis">
                 {model.learningLoop.basis} {model.learningLoop.disclaimer}
               </p>
             </WorkspaceSection>
@@ -625,7 +625,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="A brand works through the five canonical stages — Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations — and then the final readiness stage. Each stage's topics come from the canonical educational gaps, and a topic counts only once its learning loop reaches VALIDATE. The final readiness stage is a result, never a button."
               domain="communications"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="curriculum-readiness-rule">
+                <span className="text-ds-micro text-muted" data-testid="curriculum-readiness-rule">
                   {model.onboardingCurriculum.finalReadinessRequiresAllStages
                     ? 'Readiness requires every stage'
                     : 'READINESS NOT ENFORCED'}
@@ -635,22 +635,22 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="curriculum-stages">
                 {model.onboardingCurriculum.stages.map((s) => (
                   <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">
                       {s.order}. {s.label}
                       {s.gating ? ' · teaching' : s.kind === 'readiness' ? ' · final' : ' · orientation'}
                     </p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">
+                    <p className="mt-1 text-ds-micro text-muted">
                       {s.topicCount} topic{s.topicCount === 1 ? '' : 's'}
                     </p>
                   </li>
                 ))}
               </ol>
               <div className="mt-4" data-testid="curriculum-demo">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                <p className="text-ds-micro uppercase tracking-wide text-muted">
                   DEMO position ({model.onboardingCurriculum.topicCount} canonical topic(s)) —{' '}
                   {model.onboardingCurriculum.demo.currentStageLabel}
                 </p>
-                <p className="mt-1 text-ds-label text-zinc-300">
+                <p className="mt-1 text-ds-label text-strong">
                   current stage:{' '}
                   <span className="font-mono">{model.onboardingCurriculum.demo.currentStageId}</span> ·{' '}
                   {model.onboardingCurriculum.demo.readinessReached
@@ -658,7 +658,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                     : 'not yet catalogue-ready'}
                 </p>
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="curriculum-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="curriculum-basis">
                 {model.onboardingCurriculum.basis} {model.onboardingCurriculum.disclaimer}
               </p>
             </WorkspaceSection>
@@ -672,7 +672,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="Every real field on a real screen carries a short “why do we need this?” explanation, linked to the canonical Knowledge Base article that teaches it (Learn) and the canonical guided tour of that screen (Watch). The help text is never duplicated, and an unknown field or a missing article is refused rather than guessed."
               domain="communications"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="contextual-education-rule">
+                <span className="text-ds-micro text-muted" data-testid="contextual-education-rule">
                   {model.contextualEducation.reuseCanonicalKb && model.contextualEducation.attachToRealScreens
                     ? 'Linked to the Knowledge Base + tours'
                     : 'KB LINK NOT ENFORCED'}
@@ -682,8 +682,8 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="contextual-education-screens">
                 {model.contextualEducation.screens.map((s) => (
                   <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.label}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">{s.label}</p>
+                    <p className="mt-1 text-ds-micro text-muted">
                       {s.fieldCount} field{s.fieldCount === 1 ? '' : 's'}
                       {s.tourName ? ` · tour: ${s.tourName}` : ''}
                     </p>
@@ -693,26 +693,26 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="mt-4 space-y-2" data-testid="contextual-education-fields">
                 {model.contextualEducation.explanations.map((e) => (
                   <li key={e.key} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-label text-zinc-300">
+                    <p className="text-ds-label text-strong">
                       <span className="font-mono">{e.screenLabel}</span> · {e.label}
                     </p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{e.why}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-600">Learn more: {e.articleTitle}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{e.why}</p>
+                    <p className="mt-1 text-ds-micro text-faint">Learn more: {e.articleTitle}</p>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="contextual-education-demo">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                <p className="text-ds-micro uppercase tracking-wide text-muted">
                   DEMO field ({model.contextualEducation.explanationCount} explanation(s))
                   {model.contextualEducation.demo ? ` — ${model.contextualEducation.demo.label}` : ''}
                 </p>
                 {model.contextualEducation.demo && (
-                  <p className="mt-1 text-ds-label text-zinc-300">
+                  <p className="mt-1 text-ds-label text-strong">
                     {model.contextualEducation.demo.why} Learn more: {model.contextualEducation.demo.articleTitle}
                   </p>
                 )}
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="contextual-education-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="contextual-education-basis">
                 {model.contextualEducation.basis} {model.contextualEducation.disclaimer}
               </p>
             </WorkspaceSection>
@@ -727,7 +727,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="Each canonical journey through the real screens — used once and reused by the E2E test, the tutorial recording and the onboarding walkthrough. The steps are derived from the canonical guided tour, so the three consumers can never describe the same journey differently, and the data-tour anchors are the same contract the E2E test drives."
               domain="communications"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="shared-workflows-rule">
+                <span className="text-ds-micro text-muted" data-testid="shared-workflows-rule">
                   {model.sharedWorkflows.oneOwner && model.sharedWorkflows.reuseCanonicalTours && model.sharedWorkflows.mapToRealE2eSpecs
                     ? 'One automation · three consumers'
                     : 'SHARED WORKFLOW NOT ENFORCED'}
@@ -736,7 +736,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <ul className="mb-4 flex flex-wrap gap-2" data-testid="shared-workflows-consumers">
                 {model.sharedWorkflows.consumers.map((c) => (
-                  <li key={c.id} className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-400">
+                  <li key={c.id} className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-muted">
                     {c.label}
                   </li>
                 ))}
@@ -744,27 +744,27 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="space-y-2" data-testid="shared-workflows-list">
                 {model.sharedWorkflows.workflows.map((w) => (
                   <li key={w.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-label text-zinc-300">{w.label}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{w.description}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-600">
+                    <p className="text-ds-label text-strong">{w.label}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{w.description}</p>
+                    <p className="mt-1 text-ds-micro text-faint">
                       {w.stepCount} step{w.stepCount === 1 ? '' : 's'} · tour: {w.tourName} · test: {w.e2eSpec} · Learn: {w.articleTitle}
                     </p>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="shared-workflows-demo">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                <p className="text-ds-micro uppercase tracking-wide text-muted">
                   DEMO workflow ({model.sharedWorkflows.workflowCount} workflow(s))
                   {model.sharedWorkflows.demo ? ` — ${model.sharedWorkflows.demo.label}` : ''}
                 </p>
                 {model.sharedWorkflows.demo && (
-                  <p className="mt-1 text-ds-micro text-zinc-500">
+                  <p className="mt-1 text-ds-micro text-muted">
                     {model.sharedWorkflows.demo.stepCount} steps · {model.sharedWorkflows.demo.consumerCount} consumers · anchors:{' '}
                     <span className="font-mono">{model.sharedWorkflows.demo.anchors.join(', ')}</span>
                   </p>
                 )}
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="shared-workflows-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="shared-workflows-basis">
                 {model.sharedWorkflows.basis} {model.sharedWorkflows.disclaimer}
               </p>
             </WorkspaceSection>
@@ -782,46 +782,46 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="The tutorial recordings that teach each canonical journey: one recording per shared workflow (the workflow ids reused, never re-declared), each declaring the UI version it is compatible with, its own version and its reusable asset. A recording is current only when its asset genuinely exists and its compatible UI version equals the served version; an uncaptured tutorial is pending and a recording on an older UI version is detected as outdated — never shown as if it worked."
               domain="communications"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="tutorial-recordings-rule">
+                <span className="text-ds-micro text-muted" data-testid="tutorial-recordings-rule">
                   {model.tutorialRecordings.oneOwner && model.tutorialRecordings.reusesSharedWorkflows && model.tutorialRecordings.declaresCompatibleUiVersion && model.tutorialRecordings.detectsOutdated
                     ? 'Versioned · outdated detected'
                     : 'TUTORIAL RULE NOT ENFORCED'}
                 </span>
               }
             >
-              <p className="text-ds-micro text-zinc-500">
+              <p className="text-ds-micro text-muted">
                 Served UI version:{' '}
-                <span className="font-mono text-zinc-400" data-testid="control-tutorial-recordings-served">
+                <span className="font-mono text-muted" data-testid="control-tutorial-recordings-served">
                   {model.tutorialRecordings.servedUiVersion}
                 </span>{' '}
-                · assets: <span className="font-mono text-zinc-400">{model.tutorialRecordings.assetDir}</span>
+                · assets: <span className="font-mono text-muted">{model.tutorialRecordings.assetDir}</span>
               </p>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-tutorial-recordings-counts">
-                Current: <span className="font-mono text-zinc-300">{model.tutorialRecordings.currentCount}</span> · Outdated: <span className="font-mono text-zinc-300">{model.tutorialRecordings.outdatedCount}</span> · Pending: <span className="font-mono text-zinc-300">{model.tutorialRecordings.pendingCount}</span> of {model.tutorialRecordings.recordingCount} recording(s) across {model.tutorialRecordings.workflowCount} workflow(s); every tutorial is pending because no recording asset has been captured yet.
+              <p className="mt-3 text-ds-micro text-muted" data-testid="control-tutorial-recordings-counts">
+                Current: <span className="font-mono text-strong">{model.tutorialRecordings.currentCount}</span> · Outdated: <span className="font-mono text-strong">{model.tutorialRecordings.outdatedCount}</span> · Pending: <span className="font-mono text-strong">{model.tutorialRecordings.pendingCount}</span> of {model.tutorialRecordings.recordingCount} recording(s) across {model.tutorialRecordings.workflowCount} workflow(s); every tutorial is pending because no recording asset has been captured yet.
               </p>
               <ul className="mt-4 space-y-2" data-testid="control-tutorial-recordings-list">
                 {model.tutorialRecordings.recordings.map((t) => (
                   <li key={t.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <span className="flex justify-between gap-3">
-                      <span className="text-ds-label text-zinc-300">{t.title}</span>
-                      <span className="font-mono text-ds-micro text-zinc-400">{t.playable ? 'current' : t.refusal}</span>
+                      <span className="text-ds-label text-strong">{t.title}</span>
+                      <span className="font-mono text-ds-micro text-muted">{t.playable ? 'current' : t.refusal}</span>
                     </span>
-                    <span className="mt-1 block text-ds-micro text-zinc-600">
+                    <span className="mt-1 block text-ds-micro text-faint">
                       workflow: {t.workflowLabel} · compatible UI: {t.compatibleUiVersion} · v{t.tutorialVersion} · {t.asset}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="control-tutorial-recordings-examples">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Live rules (computed, not written)</p>
-                <p className="mt-1 text-ds-micro text-zinc-500">
-                  Current: <span className="font-mono text-zinc-400">{model.tutorialRecordings.exampleCurrent.refusal ?? 'current'}</span>
+                <p className="text-ds-micro uppercase tracking-wide text-muted">Live rules (computed, not written)</p>
+                <p className="mt-1 text-ds-micro text-muted">
+                  Current: <span className="font-mono text-muted">{model.tutorialRecordings.exampleCurrent.refusal ?? 'current'}</span>
                 </p>
-                <p className="mt-1 text-ds-micro text-zinc-500">
-                  Outdated: <span className="font-mono text-zinc-400">{model.tutorialRecordings.exampleOutdated.refusal ?? model.tutorialRecordings.exampleOutdated.status}</span> — {model.tutorialRecordings.exampleOutdated.reason}
+                <p className="mt-1 text-ds-micro text-muted">
+                  Outdated: <span className="font-mono text-muted">{model.tutorialRecordings.exampleOutdated.refusal ?? model.tutorialRecordings.exampleOutdated.status}</span> — {model.tutorialRecordings.exampleOutdated.reason}
                 </p>
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-tutorial-recordings-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="control-tutorial-recordings-basis">
                 {model.tutorialRecordings.basis} {model.tutorialRecordings.disclaimer}
               </p>
             </WorkspaceSection>
@@ -843,39 +843,39 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="The durable credential architecture: one contract per integration provider, derived from the canonical registry (which are OAuth or API-key and which secret fields each requires — reused, never re-declared). A credential is usable only when the provider is declared, a value is stored, the credential is enabled, every required field is present and the store is durable. The in-memory store held today is not durable, so no provider resolves as a production credential; only a mask is ever read back, never the value."
               domain="risk"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="credential-vault-rule">
+                <span className="text-ds-micro text-muted" data-testid="credential-vault-rule">
                   {model.credentialVault.oneOwner && model.credentialVault.reusesProviderFieldOwner && model.credentialVault.masksReadback && model.credentialVault.neverExposesValue && model.credentialVault.failsClosed
                     ? 'Durable · masked · fail-closed'
                     : 'VAULT RULE NOT ENFORCED'}
                 </span>
               }
             >
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-credential-vault-counts">
-                Usable: <span className="font-mono text-zinc-300">{model.credentialVault.usableCount}</span> · Stored: <span className="font-mono text-zinc-300">{model.credentialVault.storedCount}</span> · Disabled: <span className="font-mono text-zinc-300">{model.credentialVault.disabledCount}</span> of {model.credentialVault.providerCount} provider(s); the store is {model.credentialVault.durableStore ? 'durable' : 'in-memory (not durable)'}, so no credential resolves as a production credential yet.
+              <p className="mt-3 text-ds-micro text-muted" data-testid="control-credential-vault-counts">
+                Usable: <span className="font-mono text-strong">{model.credentialVault.usableCount}</span> · Stored: <span className="font-mono text-strong">{model.credentialVault.storedCount}</span> · Disabled: <span className="font-mono text-strong">{model.credentialVault.disabledCount}</span> of {model.credentialVault.providerCount} provider(s); the store is {model.credentialVault.durableStore ? 'durable' : 'in-memory (not durable)'}, so no credential resolves as a production credential yet.
               </p>
               <ul className="mt-4 space-y-2" data-testid="control-credential-vault-list">
                 {model.credentialVault.providers.map((p) => (
                   <li key={p.providerId} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <span className="flex justify-between gap-3">
-                      <span className="text-ds-label text-zinc-300">{p.providerId}</span>
-                      <span className="font-mono text-ds-micro text-zinc-400">{p.usable ? 'usable' : p.refusal}</span>
+                      <span className="text-ds-label text-strong">{p.providerId}</span>
+                      <span className="font-mono text-ds-micro text-muted">{p.usable ? 'usable' : p.refusal}</span>
                     </span>
-                    <span className="mt-1 block text-ds-micro text-zinc-600">
+                    <span className="mt-1 block text-ds-micro text-faint">
                       {p.authMethod} · fields: {p.secretFieldKeys.length > 0 ? p.secretFieldKeys.join(', ') : '—'} · {p.masked ?? 'no value stored'}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="control-credential-vault-examples">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Live rules (computed, not written)</p>
-                <p className="mt-1 text-ds-micro text-zinc-500" data-testid="control-credential-vault-example-usable">
-                  Durable: <span className="font-mono text-zinc-400">{model.credentialVault.exampleUsable.usable ? 'usable' : model.credentialVault.exampleUsable.refusal}</span> — {model.credentialVault.exampleUsable.reason}
+                <p className="text-ds-micro uppercase tracking-wide text-muted">Live rules (computed, not written)</p>
+                <p className="mt-1 text-ds-micro text-muted" data-testid="control-credential-vault-example-usable">
+                  Durable: <span className="font-mono text-muted">{model.credentialVault.exampleUsable.usable ? 'usable' : model.credentialVault.exampleUsable.refusal}</span> — {model.credentialVault.exampleUsable.reason}
                 </p>
-                <p className="mt-1 text-ds-micro text-zinc-500" data-testid="control-credential-vault-example-notdurable">
-                  In-memory: <span className="font-mono text-zinc-400">{model.credentialVault.exampleNotDurable.refusal ?? (model.credentialVault.exampleNotDurable.usable ? 'usable' : 'unknown')}</span> — {model.credentialVault.exampleNotDurable.reason}
+                <p className="mt-1 text-ds-micro text-muted" data-testid="control-credential-vault-example-notdurable">
+                  In-memory: <span className="font-mono text-muted">{model.credentialVault.exampleNotDurable.refusal ?? (model.credentialVault.exampleNotDurable.usable ? 'usable' : 'unknown')}</span> — {model.credentialVault.exampleNotDurable.reason}
                 </p>
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-credential-vault-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="control-credential-vault-basis">
                 {model.credentialVault.basis} {model.credentialVault.disclaimer}
               </p>
             </WorkspaceSection>
@@ -893,7 +893,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="PRODUCT OPPORTUNITY → commercial assessment → information needed → reassessment → commercially ready → next readiness stage. Every row opens the underlying record and the work it raised."
               domain="finance"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="commercial-guidance-topics">
+                <span className="text-ds-micro text-muted" data-testid="commercial-guidance-topics">
                   {model.commercial.brandGuidanceTopics} brand guidance topic(s)
                 </span>
               }
@@ -969,7 +969,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="Locale, DISPLAY currency and SETTLEMENT currency are three separate concepts. A detected country produces a SUGGESTION only — an explicit choice always wins — and a brand's settlement currency comes from its commercial terms, never from the reader's locale."
               domain="finance"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="localisation-concepts">
+                <span className="text-ds-micro text-muted" data-testid="localisation-concepts">
                   {model.localisation.conceptsSeparate ? 'Three separate concepts' : 'CONCEPTS COLLAPSED'}
                 </span>
               }
@@ -977,84 +977,84 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="localisation-concepts-grid">
                 {model.localisation.concepts.map((c) => (
                   <li key={c.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{c.label}</p>
-                    <p className="mt-1 text-ds-label text-zinc-300">{c.description}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{c.source}</p>
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">{c.label}</p>
+                    <p className="mt-1 text-ds-label text-strong">{c.description}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{c.source}</p>
                   </li>
                 ))}
               </ul>
               <div className="mt-4" data-testid="localisation-markets">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                <p className="text-ds-micro uppercase tracking-wide text-muted">
                   Canonical source markets ({model.localisation.markets.length}) — suggested locale · display currency
                 </p>
                 <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
                   {model.localisation.markets.map((m) => (
                     <li key={m.countryCode} className="flex justify-between gap-3 text-ds-label">
-                      <span className="text-zinc-300">{m.countryLabel}</span>
-                      <span className="font-mono text-zinc-400">
+                      <span className="text-strong">{m.countryLabel}</span>
+                      <span className="font-mono text-muted">
                         {m.suggestedLocale} · {m.suggestedDisplayCurrency}
                       </span>
                     </li>
                   ))}
                 </ul>
               </div>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="localisation-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="localisation-basis">
                 {model.localisation.basis} {model.localisation.disclaimer}
               </p>
               {/* §PHASE 9 — the localization / SEO / hreflang framework (formats, timezones, hreflang). */}
               <div className="mt-5 border-t border-hairline pt-4" data-testid="localisation-seo">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Localization, SEO &amp; hreflang</p>
-                  <span className="text-ds-micro text-zinc-500" data-testid="localisation-seo-served">
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">Localization, SEO &amp; hreflang</p>
+                  <span className="text-ds-micro text-muted" data-testid="localisation-seo-served">
                     Served languages: {model.localisationSeo.servedContentLocales.join(', ')} · hreflang {model.localisationSeo.hreflangDefault} + {model.localisationSeo.hreflangXDefault}
                   </span>
                 </div>
                 <div className="mt-3" data-testid="localisation-seo-alt">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">
                     Public routes ({model.localisationSeo.publicRouteCount}) — self-referencing hreflang
                   </p>
                   <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
                     {model.localisationSeo.publicRouteAlternates.map((r) => (
                       <li key={r.path} className="flex justify-between gap-3 text-ds-label">
-                        <span className="font-mono text-zinc-400">{r.path}</span>
-                        <span className="text-zinc-400">{r.alternates.map((a) => a.hreflang).join(' · ')}</span>
+                        <span className="font-mono text-muted">{r.path}</span>
+                        <span className="text-muted">{r.alternates.map((a) => a.hreflang).join(' · ')}</span>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-1 text-ds-micro text-zinc-500">
+                  <p className="mt-1 text-ds-micro text-muted">
                     {model.localisationSeo.refusedNonPublic} private/unknown path(s) refused — a hreflang alternate requires a public route.
                   </p>
                 </div>
                 <div className="mt-3" data-testid="localisation-seo-formats">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">
                     Locale formats ({model.localisationSeo.formatCount}) — number · date · clock
                   </p>
                   <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
                     {model.localisationSeo.formatConventions.map((c) => (
                       <li key={c.locale} className="flex justify-between gap-3 text-ds-label">
-                        <span className="font-mono text-zinc-400">{c.locale}</span>
-                        <span className="text-zinc-400">{c.numbersExample} · {c.dateExample} · {c.timeCycle}</span>
+                        <span className="font-mono text-muted">{c.locale}</span>
+                        <span className="text-muted">{c.numbersExample} · {c.dateExample} · {c.timeCycle}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div className="mt-3" data-testid="localisation-seo-timezones">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">
                     Market timezones ({model.localisationSeo.marketCount})
                   </p>
                   <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
                     {model.localisationSeo.markets.map((m) => (
                       <li key={m.countryCode} className="flex justify-between gap-3 text-ds-label">
-                        <span className="text-zinc-300">{m.countryLabel}</span>
-                        <span className="font-mono text-zinc-400">{m.timezone}</span>
+                        <span className="text-strong">{m.countryLabel}</span>
+                        <span className="font-mono text-muted">{m.timezone}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <p className="mt-3 text-ds-micro text-zinc-500" data-testid="localisation-seo-rule">
+                <p className="mt-3 text-ds-micro text-muted" data-testid="localisation-seo-rule">
                   {model.localisationSeo.rules.join(' ')}
                 </p>
-                <p className="mt-2 text-ds-micro text-zinc-500" data-testid="localisation-seo-basis">
+                <p className="mt-2 text-ds-micro text-muted" data-testid="localisation-seo-basis">
                   {model.localisationSeo.basis} {model.localisationSeo.disclaimer}
                 </p>
               </div>
@@ -1065,7 +1065,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="Mercenta's retail-channel relationship rests on nine authoritative documents (vendor agreement, current policies, additional terms, channel communications, programme documentation, API agreements, trademark permissions, written permissions, account instructions). A claim may rest only on a source Mercenta actually holds AND has verified — nothing is verified with the channel today, so every relationship claim fails closed."
               domain="finance"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="amazon-governance-status">
+                <span className="text-ds-micro text-muted" data-testid="amazon-governance-status">
                   {model.amazonGovernance.programmeStatus} · {model.amazonGovernance.verifiedCount} verified / {model.amazonGovernance.sourceCount}
                 </span>
               }
@@ -1074,22 +1074,22 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.amazonGovernance.sources.map((s) => (
                   <li key={s.id} className="rounded-ds-md border border-hairline bg-tint p-3">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.id}</p>
-                      <span className={`text-ds-micro ${s.status === 'verified' ? 'text-emerald-400' : 'text-amber-400'}`}>{s.status}</span>
+                      <p className="text-ds-micro uppercase tracking-wide text-muted">{s.id}</p>
+                      <span className={`text-ds-micro ${s.status === 'verified' ? 'text-state-success' : 'text-state-warning'}`}>{s.status}</span>
                     </div>
-                    <p className="mt-1 text-ds-label text-zinc-300">{s.label}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{s.governs}</p>
-                    <p className="mt-1 font-mono text-ds-micro text-zinc-600">{s.canonicalOwner}</p>
+                    <p className="mt-1 text-ds-label text-strong">{s.label}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{s.governs}</p>
+                    <p className="mt-1 font-mono text-ds-micro text-faint">{s.canonicalOwner}</p>
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="amazon-governance-refusal">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="amazon-governance-refusal">
                 Fail-closed proof: “{model.amazonGovernance.exampleRefusal.claim}” → {model.amazonGovernance.exampleRefusal.refusal}. {model.amazonGovernance.exampleRefusal.reason}
               </p>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="amazon-governance-rule">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="amazon-governance-rule">
                 {model.amazonGovernance.rules.join(' ')}
               </p>
-              <p className="mt-2 text-ds-micro text-zinc-500" data-testid="amazon-governance-basis">
+              <p className="mt-2 text-ds-micro text-muted" data-testid="amazon-governance-basis">
                 {model.amazonGovernance.basis} {model.amazonGovernance.disclaimer}
               </p>
             </WorkspaceSection>
@@ -1099,7 +1099,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               description="Every country is classified into one or more of six roles. The marketplace role is a published fact, cited to the channel's own marketplace-IDs reference; a brand-origin market is the canonical source-market list; the priority roles are Mercenta's own decisions. Zimbabwe is an operating/home market and is never a marketplace."
               domain="finance"
               action={
-                <span className="text-ds-micro text-zinc-500" data-testid="country-framework-zimbabwe">
+                <span className="text-ds-micro text-muted" data-testid="country-framework-zimbabwe">
                   {model.countryFramework.zimbabweNeverMarketplace ? 'Zimbabwe never a marketplace' : 'ZIMBABWE IS MARKED A MARKETPLACE'}
                 </span>
               }
@@ -1107,15 +1107,15 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="country-framework-roles">
                 {model.countryFramework.roles.map((role) => (
                   <li key={role.id} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{role.label}</p>
-                    <p className="mt-1 text-ds-label text-zinc-300">{role.description}</p>
-                    <p className="mt-1 text-ds-micro text-zinc-500">
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">{role.label}</p>
+                    <p className="mt-1 text-ds-label text-strong">{role.description}</p>
+                    <p className="mt-1 text-ds-micro text-muted">
                       {role.kind === 'factual' ? 'Factual' : 'Policy'} · {model.countryFramework.byRole[role.id]} country(ies)
                     </p>
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="country-framework-basis">
+              <p className="mt-3 text-ds-micro text-muted" data-testid="country-framework-basis">
                 {model.countryFramework.basis} {model.countryFramework.disclaimer} Source: {model.countryFramework.source}
               </p>
             </WorkspaceSection>
@@ -1164,20 +1164,20 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   { label: 'Converted', count: model.acquisitionConversion.counts.converted, sub: `${formatRate(model.acquisitionConversion.rates.conversionRate)} of contacted` },
                 ].map((funnel) => (
                   <div key={funnel.label} className="rounded-ds-md border border-hairline bg-tint p-3">
-                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{funnel.label}</p>
-                    <p className="mt-1 font-mono text-lg text-zinc-100">{funnel.count}</p>
-                    <p className="text-ds-micro text-brass-300">{funnel.sub}</p>
+                    <p className="text-ds-micro uppercase tracking-wide text-muted">{funnel.label}</p>
+                    <p className="mt-1 font-mono text-lg text-strong">{funnel.count}</p>
+                    <p className="text-ds-micro text-accent-300">{funnel.sub}</p>
                   </div>
                 ))}
               </div>
               {model.acquisitionConversion.byCategory.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">By category</p>
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">By category</p>
                   <ul className="mt-1 space-y-1" data-testid="control-conversion-by-category">
                     {model.acquisitionConversion.byCategory.map((s) => (
                       <li key={s.key} className="flex justify-between gap-3 text-ds-label">
-                        <span className="text-zinc-300">{s.key}</span>
-                        <span className="font-mono text-zinc-400">
+                        <span className="text-strong">{s.key}</span>
+                        <span className="font-mono text-muted">
                           {s.counts.contacted} contacted · {s.counts.replied} replied · {s.counts.converted} converted
                         </span>
                       </li>
@@ -1230,7 +1230,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               domain="intelligence"
             >
               {preAuditNotice && (
-                <p className="mb-3 text-ds-label text-zinc-300" data-testid="control-preaudit-notice">
+                <p className="mb-3 text-ds-label text-strong" data-testid="control-preaudit-notice">
                   {preAuditNotice}
                 </p>
               )}
@@ -1332,13 +1332,13 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 { label: 'Replays deduped', value: String(model.objectResolution.replays), sub: 'duplicates contained' },
               ].map((tile) => (
                 <div key={tile.label} className="rounded-ds-md border border-hairline bg-tint p-3">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
-                  <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
-                  <p className="text-ds-micro text-brass-300">{tile.sub}</p>
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">{tile.label}</p>
+                  <p className="mt-1 font-mono text-lg text-strong">{tile.value}</p>
+                  <p className="text-ds-micro text-accent-300">{tile.sub}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-object-resolution-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-object-resolution-basis">
               {model.objectResolution.basis}
             </p>
             <Queue
@@ -1435,20 +1435,20 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 },
               ].map((tile) => (
                 <div key={tile.label} className="rounded-ds-md border border-hairline bg-tint p-3">
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
-                  <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
-                  <p className="text-ds-micro text-brass-300">{tile.sub}</p>
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">{tile.label}</p>
+                  <p className="mt-1 font-mono text-lg text-strong">{tile.value}</p>
+                  <p className="text-ds-micro text-accent-300">{tile.sub}</p>
                 </div>
               ))}
             </div>
             {model.capitalRequirement.concentration.length > 0 && (
               <div className="mt-4">
-                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Concentration by brand</p>
+                <p className="text-ds-micro uppercase tracking-wide text-muted">Concentration by brand</p>
                 <ul className="mt-1 space-y-1" data-testid="control-capital-concentration">
                   {model.capitalRequirement.concentration.map((c) => (
                     <li key={c.brandId} className="flex justify-between gap-3 text-ds-label">
-                      <span className="text-zinc-300">{c.brandName}</span>
-                      <span className="font-mono text-zinc-400">
+                      <span className="text-strong">{c.brandName}</span>
+                      <span className="font-mono text-muted">
                         {formatGbp(c.advanceGbp)} · {c.sharePct.toFixed(1)}%
                         {c.breachesLimit ? ' · over limit' : ''}
                       </span>
@@ -1457,7 +1457,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 </ul>
               </div>
             )}
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-capital-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-capital-basis">
               {model.capitalRequirement.facility.label}. {model.capitalRequirement.facility.disclaimer}
             </p>
           </WorkspaceSection>
@@ -1479,9 +1479,9 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   key={b.routeId}
                   className="rounded-ds-md border border-hairline bg-tint p-3"
                 >
-                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{b.label}</p>
-                  <p className="mt-1 font-mono text-lg text-zinc-100">{b.count}</p>
-                  <p className="text-ds-micro text-brass-300">{formatGbp(b.advanceGbp)} advance</p>
+                  <p className="text-ds-micro uppercase tracking-wide text-muted">{b.label}</p>
+                  <p className="mt-1 font-mono text-lg text-strong">{b.count}</p>
+                  <p className="text-ds-micro text-accent-300">{formatGbp(b.advanceGbp)} advance</p>
                 </div>
               ))}
             </div>
@@ -1492,21 +1492,21 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label"
                 >
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">
+                    <span className="text-strong">
                       {d.brandName} · {d.purchaseId}
                     </span>
-                    <span className="font-mono text-zinc-400">
+                    <span className="font-mono text-muted">
                       {d.routeId
                         ? (model.financingRouting.routes.find((r) => r.routeId === d.routeId)?.label ??
                           d.routeId)
                         : 'refused — queued for review'}
                     </span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">{d.rationale}</span>
+                  <span className="text-ds-micro text-muted">{d.rationale}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financing-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-financing-basis">
               {model.financingRouting.basis} {model.financingRouting.label}.{' '}
               {model.financingRouting.disclaimer}
             </p>
@@ -1524,7 +1524,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="Every financing partner moves through ONE forward-only lifecycle — Researched → Qualified → Target → Contacted → Engaged → Due diligence → Terms → Pilot → Active partner — with Rejected and Parked as off-ramps. A provider is never marked ACTIVE merely because it was researched: Active partner is reachable only through a completed Pilot, and an illegal move is refused rather than guessed."
             domain="finance"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="financier-lifecycle-rule">
+              <span className="text-ds-micro text-muted" data-testid="financier-lifecycle-rule">
                 {model.financierLifecycle.activeRequiresPilot && model.financierLifecycle.forwardOnly
                   ? 'ACTIVE requires a completed PILOT'
                   : 'LIFECYCLE NOT ENFORCED'}
@@ -1534,18 +1534,18 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-financier-lifecycle">
               {model.financierLifecycle.stages.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-strong">
                     {s.label}
                   </span>
                   {i < model.financierLifecycle.stageCount - 1 && (
-                    <span className="text-ds-micro text-zinc-600">→</span>
+                    <span className="text-ds-micro text-faint">→</span>
                   )}
                 </li>
               ))}
             </ol>
-            <p className="mt-2 text-ds-micro text-zinc-500">
+            <p className="mt-2 text-ds-micro text-muted">
               Off-ramps:{' '}
-              <span className="text-zinc-400">
+              <span className="text-muted">
                 {model.financierLifecycle.offRamps.map((o) => o.label).join(' · ')}
               </span>
             </p>
@@ -1553,16 +1553,16 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.financierLifecycle.candidates.map((c) => (
                 <li key={c.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">{c.label}</span>
-                    <span className="font-mono text-zinc-400">{c.stageLabel}</span>
+                    <span className="text-strong">{c.label}</span>
+                    <span className="font-mono text-muted">{c.stageLabel}</span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">
+                  <span className="text-ds-micro text-muted">
                     Next: {c.nextStages.length ? c.nextStages.map((n) => n.label).join(' · ') : 'terminal'}
                   </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-lifecycle-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-financier-lifecycle-basis">
               {model.financierLifecycle.basis} {model.financierLifecycle.disclaimer}
             </p>
           </WorkspaceSection>
@@ -1579,7 +1579,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The founder capital workspace: overview, business model, Vendor infrastructure, acquisition pipeline, purchase volumes, supplier payment requirements, capital requirements, facility request, repayment model, risk controls, evidence, documents, contact history, meetings, follow-ups and pitch preparation. Every financial figure comes from its deterministic canonical owner — AI may help prepare and explain the narrative only, never a number."
             domain="finance"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="pitch-workspace-rule">
+              <span className="text-ds-micro text-muted" data-testid="pitch-workspace-rule">
                 {model.pitchWorkspace.financialsDeterministic && model.pitchWorkspace.oneOwner
                   ? 'Financial figures stay deterministic'
                   : 'FINANCIALS NOT ENFORCED'}
@@ -1593,27 +1593,27 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label"
                 >
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">
+                    <span className="text-strong">
                       {s.label}
-                      {s.required && <span className="ml-2 text-ds-micro text-zinc-500">required</span>}
+                      {s.required && <span className="ml-2 text-ds-micro text-muted">required</span>}
                     </span>
-                    <span className="font-mono text-zinc-400">{s.kindLabel}</span>
+                    <span className="font-mono text-muted">{s.kindLabel}</span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">
+                  <span className="text-ds-micro text-muted">
                     {s.sourceOwner ? `Source: ${s.sourceOwner}` : 'Mercenta prose'}
                     {s.aiMayDraft ? ' · AI may draft' : ''}
                   </span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-pitch-workspace-readiness">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-pitch-workspace-readiness">
               {model.pitchWorkspace.requiresAllRequiredSections
                 ? model.pitchWorkspace.readiness.ready
                   ? 'Ready — every required section is present.'
                   : `Not ready — required section missing: ${model.pitchWorkspace.readiness.missingRequired.join(', ')}.`
                 : 'READINESS NOT ENFORCED'}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-pitch-workspace-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-pitch-workspace-basis">
               {model.pitchWorkspace.basis} {model.pitchWorkspace.disclaimer}
             </p>
           </WorkspaceSection>
@@ -1631,7 +1631,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The ordered approach Mercenta runs over the financing-partner universe: declared channels, touchpoint types and a deterministic follow-up cadence of day OFFSETS. Outreach begins at the TARGET stage and is forward-only — a follow-up requires a provider already at CONTACTED or beyond — and a touchpoint naming an unknown channel, type or stage is refused rather than guessed."
             domain="finance"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="founder-outreach-rule">
+              <span className="text-ds-micro text-muted" data-testid="founder-outreach-rule">
                 {model.founderOutreach.requiresTargetStage && model.founderOutreach.followUpRequiresContact
                   ? 'Outreach begins at TARGET · follow-up requires a contact'
                   : 'PIPELINE NOT ENFORCED'}
@@ -1641,18 +1641,18 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             <ol className="flex flex-wrap items-center gap-1" data-testid="control-founder-outreach-cadence">
               {model.founderOutreach.cadence.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-1">
-                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-zinc-300">
+                  <span className="rounded-full border border-hairline bg-tint px-3 py-1 text-ds-micro text-strong">
                     Day {s.dayOffset} · {s.typeLabel}
                   </span>
                   {i < model.founderOutreach.cadenceCount - 1 && (
-                    <span className="text-ds-micro text-zinc-600">→</span>
+                    <span className="text-ds-micro text-faint">→</span>
                   )}
                 </li>
               ))}
             </ol>
-            <p className="mt-2 text-ds-micro text-zinc-500">
+            <p className="mt-2 text-ds-micro text-muted">
               Channels:{' '}
-              <span className="text-zinc-400">
+              <span className="text-muted">
                 {model.founderOutreach.channels.map((c) => c.label).join(' · ')}
               </span>
             </p>
@@ -1660,18 +1660,18 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.founderOutreach.demoTouchpoints.map((t) => (
                 <li key={t.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">
+                    <span className="text-strong">
                       {t.providerStageLabel} · {t.channelLabel} · {t.typeLabel}
                     </span>
-                    <span className="font-mono text-zinc-400">
+                    <span className="font-mono text-muted">
                       {t.allowed ? 'allowed' : t.refusal}
                     </span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">{t.providerLabel}</span>
+                  <span className="text-ds-micro text-muted">{t.providerLabel}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-founder-outreach-basis">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-founder-outreach-basis">
               {model.founderOutreach.basis} {model.founderOutreach.disclaimer}
             </p>
           </WorkspaceSection>
@@ -1689,22 +1689,22 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="The REAL financing-partner universe — banks and PO / inventory / trade / receivables financiers, working-capital, SME and e-commerce finance providers and alternative-credit funds across the UK, Europe, Africa, the US and other markets. Every provider must carry the FULL record: a legal name, a declared type, at least one declared market, a NAMED, PUBLISHED source and a LAST-RESEARCHED date. An unknown type or market, an unsourced or undated entry, and an illustrative placeholder are all refused — no provider is ever invented."
             domain="finance"
             action={
-              <span className="text-ds-micro text-zinc-500" data-testid="financier-universe-rule">
+              <span className="text-ds-micro text-muted" data-testid="financier-universe-rule">
                 {model.financierUniverse.requiresNamedSource && model.financierUniverse.requiresResearchDate && model.financierUniverse.failsClosed
                   ? 'Named source + research date required'
                   : 'UNIVERSE NOT ENFORCED'}
               </span>
             }
           >
-            <p className="text-ds-micro text-zinc-500">
+            <p className="text-ds-micro text-muted">
               Provider types:{' '}
-              <span className="text-zinc-400" data-testid="control-financier-universe-types">
+              <span className="text-muted" data-testid="control-financier-universe-types">
                 {model.financierUniverse.providerTypes.map((t) => t.label).join(' · ')}
               </span>
             </p>
-            <p className="mt-1 text-ds-micro text-zinc-500">
+            <p className="mt-1 text-ds-micro text-muted">
               Markets:{' '}
-              <span className="text-zinc-400" data-testid="control-financier-universe-markets">
+              <span className="text-muted" data-testid="control-financier-universe-markets">
                 {model.financierUniverse.markets.map((m) => m.label).join(' · ')}
               </span>
             </p>
@@ -1712,34 +1712,34 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.financierUniverse.recordFields.map((f) => (
                 <li key={f.key} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">{f.label}</span>
-                    <span className="font-mono text-zinc-400">{f.requiredForRealEntry ? 'required' : 'optional'}</span>
+                    <span className="text-strong">{f.label}</span>
+                    <span className="font-mono text-muted">{f.requiredForRealEntry ? 'required' : 'optional'}</span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">{f.requirement}</span>
+                  <span className="text-ds-micro text-muted">{f.requirement}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-financier-universe-real">
-              Real providers in the universe: <span className="font-mono text-zinc-300">{model.financierUniverse.realCount}</span> — none has been researched yet; every entry below is an unmistakable placeholder.
+            <p className="mt-4 text-ds-micro text-muted" data-testid="control-financier-universe-real">
+              Real providers in the universe: <span className="font-mono text-strong">{model.financierUniverse.realCount}</span> — none has been researched yet; every entry below is an unmistakable placeholder.
             </p>
             <ul className="mt-2 space-y-1" data-testid="control-financier-universe-placeholders">
               {model.financierUniverse.illustrative.map((r) => (
                 <li key={r.id} className="flex flex-col gap-0.5 border-b border-hairline pb-1 text-ds-label">
                   <span className="flex justify-between gap-3">
-                    <span className="text-zinc-300">{r.providerTypeLabel} · {r.marketLabels.join(', ')}</span>
-                    <span className="font-mono text-zinc-400">{r.allowed ? 'allowed' : r.refusal}</span>
+                    <span className="text-strong">{r.providerTypeLabel} · {r.marketLabels.join(', ')}</span>
+                    <span className="font-mono text-muted">{r.allowed ? 'allowed' : r.refusal}</span>
                   </span>
-                  <span className="text-ds-micro text-zinc-500">{r.legalName}</span>
+                  <span className="text-ds-micro text-muted">{r.legalName}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-universe-refusal">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-financier-universe-refusal">
               Fail-closed proof: {model.financierUniverse.exampleRefusal.refusal} — {model.financierUniverse.exampleRefusal.reason}
             </p>
-            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-universe-rule-text">
+            <p className="mt-3 text-ds-micro text-muted" data-testid="control-financier-universe-rule-text">
               {model.financierUniverse.rules.join(' ')}
             </p>
-            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-financier-universe-basis">
+            <p className="mt-2 text-ds-micro text-muted" data-testid="control-financier-universe-basis">
               {model.financierUniverse.basis} {model.financierUniverse.disclaimer}
             </p>
           </WorkspaceSection>
@@ -1782,7 +1782,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 data-testid="automation-halt-panel"
                 data-halted={halt.halted ? 'true' : 'false'}
               >
-                <p className="text-ds-label text-zinc-300" data-testid="automation-halt-state">
+                <p className="text-ds-label text-strong" data-testid="automation-halt-state">
                   {halt.halted
                     ? `HALTED — ${halt.reason} (by ${halt.actor}, ${halt.at}). Every automation is skipped until this is cleared.`
                     : `Running normally — ${halt.reason}`}
@@ -1814,11 +1814,11 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               domain="risk"
             >
             <div className="overflow-hidden rounded-ds-lg border border-hairline" data-testid="automation-table">
-              <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px bg-tint text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                <span className="bg-ink-900 px-3 py-2">Automation</span>
-                <span className="bg-ink-900 px-3 py-2">Status</span>
-                <span className="bg-ink-900 px-3 py-2">Next run</span>
-                <span className="bg-ink-900 px-3 py-2">Controls</span>
+              <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px bg-tint text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
+                <span className="bg-surface px-3 py-2">Automation</span>
+                <span className="bg-surface px-3 py-2">Status</span>
+                <span className="bg-surface px-3 py-2">Next run</span>
+                <span className="bg-surface px-3 py-2">Controls</span>
               </div>
               {model.automation.map((h) => (
                 <div
@@ -1826,21 +1826,21 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   data-testid={`automation-row-${h.id}`}
                   className="grid grid-cols-[1.4fr_0.8fr_0.8fr_1.6fr] gap-px border-t border-hairline bg-tint text-ds-label"
                 >
-                  <div className="bg-ink-900 px-3 py-2">
-                    <p className="text-zinc-200">{h.name}</p>
-                    <p className="text-ds-micro text-zinc-600">{h.cadence}</p>
+                  <div className="bg-surface px-3 py-2">
+                    <p className="text-strong">{h.name}</p>
+                    <p className="text-ds-micro text-faint">{h.cadence}</p>
                   </div>
-                  <div className="bg-ink-900 px-3 py-2">
+                  <div className="bg-surface px-3 py-2">
                     <span data-testid={`automation-status-${h.id}`}>
                       <Badge className="text-ds-micro">{h.status.replace(/_/g, ' ')}</Badge>
                     </span>
-                    {!h.enabled && <p className="mt-1 text-ds-micro text-amber-300">disabled: {h.enabledReason}</p>}
+                    {!h.enabled && <p className="mt-1 text-ds-micro text-state-warning">disabled: {h.enabledReason}</p>}
                     {h.approvalsPending > 0 && (
-                      <p className="mt-1 text-ds-micro text-amber-300">{h.approvalsPending} awaiting approval</p>
+                      <p className="mt-1 text-ds-micro text-state-warning">{h.approvalsPending} awaiting approval</p>
                     )}
                   </div>
-                  <div className="bg-ink-900 px-3 py-2 font-mono text-ds-micro text-zinc-400">{h.nextRunAt}</div>
-                  <div className="flex flex-wrap items-center gap-1.5 bg-ink-900 px-3 py-2">
+                  <div className="bg-surface px-3 py-2 font-mono text-ds-micro text-muted">{h.nextRunAt}</div>
+                  <div className="flex flex-wrap items-center gap-1.5 bg-surface px-3 py-2">
                     <Button
                       variant="secondary"
                       size="sm"
@@ -1908,7 +1908,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                     {h.lastRun && (
                       <button
                         type="button"
-                        className="text-ds-micro text-sky-300/90 hover:underline"
+                        className="text-ds-micro text-state-info/90 hover:underline"
                         onClick={() => setDrawerRun(h.lastRun)}
                       >
                         Last run
@@ -1966,10 +1966,10 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.dependencies.map((d) => (
                   <li key={d.providerId} className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-ds-label text-zinc-200">{d.label}</span>
+                      <span className="text-ds-label text-strong">{d.label}</span>
                       <Badge className="text-ds-micro">{d.mode.replace(/_/g, ' ')}</Badge>
                     </div>
-                    <p className="mt-1 text-ds-micro text-zinc-500">{d.degradation}</p>
+                    <p className="mt-1 text-ds-micro text-muted">{d.degradation}</p>
                   </li>
                 ))}
               </ul>
@@ -1987,38 +1987,38 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             >
               <div className="space-y-3" data-testid="ai-brief">
                 {!brief ? (
-                  <p className="text-ds-label text-zinc-500">Composing the brief…</p>
+                  <p className="text-ds-label text-muted">Composing the brief…</p>
                 ) : (
                   <>
                     <div className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-ds-label font-semibold text-zinc-200">Narrative</span>
+                        <span className="text-ds-label font-semibold text-strong">Narrative</span>
                         <span data-testid="ai-narrative-basis">
                           <Badge className="text-ds-micro">
                             {brief.narrative.basis === 'ai_interpretation' ? 'AI interpretation' : 'deterministic'}
                           </Badge>
                         </span>
                       </div>
-                      <p className="mt-1 text-ds-label text-zinc-300" data-testid="ai-narrative">
+                      <p className="mt-1 text-ds-label text-strong" data-testid="ai-narrative">
                         {brief.narrative.text}
                       </p>
-                      <p className="mt-1 text-ds-micro text-zinc-600">{brief.narrative.reason}</p>
+                      <p className="mt-1 text-ds-micro text-faint">{brief.narrative.reason}</p>
                     </div>
                     {brief.facts.sections.map((s) => (
                       <div key={s.id} className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-ds-label font-semibold text-zinc-200">{s.title}</span>
+                          <span className="text-ds-label font-semibold text-strong">{s.title}</span>
                           <Badge className="text-ds-micro">canonical facts</Badge>
                         </div>
                         <ul className="mt-1 space-y-0.5">
                           {s.lines.slice(0, 6).map((l, i) => (
-                            <li key={i} className="text-ds-label text-zinc-400">
+                            <li key={i} className="text-ds-label text-muted">
                               {l}
                             </li>
                           ))}
                         </ul>
                         {s.sources.length > 0 && (
-                          <p className="mt-1 text-ds-micro text-zinc-600">
+                          <p className="mt-1 text-ds-micro text-faint">
                             sources: {s.sources.slice(0, 4).map((x) => `${x.type}:${x.id}`).join(', ')}
                           </p>
                         )}
@@ -2026,16 +2026,16 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                     ))}
                     {brief.facts.recommendedActions.length > 0 && (
                       <div className="rounded-ds-md border border-hairline bg-tint px-3 py-2">
-                        <span className="text-ds-label font-semibold text-zinc-200">Recommended next actions</span>
+                        <span className="text-ds-label font-semibold text-strong">Recommended next actions</span>
                         <ul className="mt-1 space-y-1">
                           {brief.facts.recommendedActions.map((a) => (
                             <li key={a.label} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
-                              <span className="text-zinc-300">
-                                {a.label} <span className="text-zinc-600">— {a.reason}</span>
+                              <span className="text-strong">
+                                {a.label} <span className="text-faint">— {a.reason}</span>
                               </span>
                               <button
                                 type="button"
-                                className="text-sky-300/90 hover:underline"
+                                className="text-state-info/90 hover:underline"
                                 onClick={() => go(a.destination)}
                               >
                                 Open
@@ -2065,7 +2065,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 aria-label="Ask Mercenta a question"
-                className="min-w-[240px] flex-1 rounded-ds-md border border-hairline bg-ink-850 px-3 py-2 text-ds-label text-zinc-200 outline-none focus:border-hairline-strong"
+                className="min-w-[240px] flex-1 rounded-ds-md border border-hairline bg-surface-raised px-3 py-2 text-ds-label text-strong outline-none focus:border-hairline-strong"
               />
               <Button
                 variant="secondary"
@@ -2089,25 +2089,25 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   </span>
                   <Badge className="text-ds-micro">canonical</Badge>
                 </div>
-                <p className="mt-1 text-ds-label text-zinc-200">{answer.answer}</p>
+                <p className="mt-1 text-ds-label text-strong">{answer.answer}</p>
                 <ul className="mt-1.5 space-y-0.5">
                   {answer.facts.slice(0, 6).map((f, i) => (
-                    <li key={i} className="text-ds-label text-zinc-400">
+                    <li key={i} className="text-ds-label text-muted">
                       {f}
                     </li>
                   ))}
                 </ul>
                 {answer.sources.length > 0 && (
-                  <p className="mt-1 text-ds-micro text-zinc-600">
+                  <p className="mt-1 text-ds-micro text-faint">
                     sources: {answer.sources.slice(0, 5).map((s) => `${s.type}:${s.id}`).join(', ')}
                   </p>
                 )}
-                <p className="mt-1.5 text-ds-micro text-zinc-600">
+                <p className="mt-1.5 text-ds-micro text-faint">
                   AI narrative: {answer.narrative.basis} — {answer.narrative.reason}
                 </p>
               </div>
             )}
-            <p className="mt-2 text-ds-micro text-zinc-600">
+            <p className="mt-2 text-ds-micro text-faint">
               Try: What needs my attention today? · Which invoices are overdue? · Which acquisition prospects need
               follow-up? · What automation failed recently?
             </p>
@@ -2128,7 +2128,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 at: a.at,
                 onOpen: () => go('audit_log'),
               }))}
-              empty={<p className="text-ds-label text-zinc-600">No audit records yet this session.</p>}
+              empty={<p className="text-ds-label text-faint">No audit records yet this session.</p>}
             />
           </WorkspaceSection>
         )}
@@ -2158,8 +2158,8 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                   : []),
               ]}
             />
-            <p className="mt-3 text-ds-label text-zinc-400">{drawerPreAudit.recommendedNextStep}</p>
-            <p className="mt-3 text-ds-micro text-zinc-600">
+            <p className="mt-3 text-ds-label text-muted">{drawerPreAudit.recommendedNextStep}</p>
+            <p className="mt-3 text-ds-micro text-faint">
               A pre-audit can never create a brand tenant. Converting this prospect requires the
               canonical onboarding lifecycle to complete.
             </p>
@@ -2204,27 +2204,27 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             />
 
             <div className="mt-4" data-testid="commercial-readiness-conditions">
-              <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                 Evaluated conditions — why this route
               </p>
               <ul className="mt-1.5 space-y-1.5">
                 {[...drawerCommercial.unmet, ...drawerCommercial.unevaluable].length === 0 && (
-                  <li className="text-ds-label text-zinc-400">
+                  <li className="text-ds-label text-muted">
                     Every declared commercial condition is satisfied, so the gate selected Ready.
                   </li>
                 )}
                 {drawerCommercial.unmet.map((c) => (
                   <li key={`unmet-${c.id}`} className="text-ds-label">
                     <span className="text-state-danger">Unmet</span>
-                    <span className="text-zinc-300"> · {c.label}</span>
-                    <span className="block text-ds-micro text-zinc-500">{c.observed}</span>
+                    <span className="text-strong"> · {c.label}</span>
+                    <span className="block text-ds-micro text-muted">{c.observed}</span>
                   </li>
                 ))}
                 {drawerCommercial.unevaluable.map((c) => (
                   <li key={`unevaluable-${c.id}`} className="text-ds-label">
                     <span className="text-state-warning">Could not be evaluated</span>
-                    <span className="text-zinc-300"> · {c.label}</span>
-                    <span className="block text-ds-micro text-zinc-500">{c.reason}</span>
+                    <span className="text-strong"> · {c.label}</span>
+                    <span className="block text-ds-micro text-muted">{c.reason}</span>
                   </li>
                 ))}
               </ul>
@@ -2232,12 +2232,12 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
 
             {drawerCommercial.missingInputs.length > 0 && (
               <div className="mt-4" data-testid="commercial-readiness-missing-inputs">
-                <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
                   Missing information
                 </p>
                 <ul className="mt-1.5 space-y-1">
                   {drawerCommercial.missingInputs.map((m) => (
-                    <li key={m} className="text-ds-label text-zinc-400">
+                    <li key={m} className="text-ds-label text-muted">
                       {m}
                     </li>
                   ))}
@@ -2245,9 +2245,9 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               </div>
             )}
 
-            <p className="mt-4 text-ds-label text-zinc-300">{drawerCommercial.nextStep}</p>
-            <p className="mt-3 text-ds-micro text-zinc-600">{drawerCommercial.moqDisclaimer}</p>
-            <p className="mt-3 text-ds-micro text-zinc-600">
+            <p className="mt-4 text-ds-label text-strong">{drawerCommercial.nextStep}</p>
+            <p className="mt-3 text-ds-micro text-faint">{drawerCommercial.moqDisclaimer}</p>
+            <p className="mt-3 text-ds-micro text-faint">
               Commercial readiness states that the information Mercenta holds passes the declared checks. It is
               not a purchase order, a demand forecast, a margin or an approval.
             </p>
@@ -2279,7 +2279,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             />
             <ul className="mt-3 space-y-1">
               {drawerRun.notes.map((n, i) => (
-                <li key={i} className="text-ds-label text-zinc-400">
+                <li key={i} className="text-ds-label text-muted">
                   {n}
                 </li>
               ))}

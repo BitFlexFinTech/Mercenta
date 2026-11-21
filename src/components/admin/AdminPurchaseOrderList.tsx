@@ -330,18 +330,18 @@ return (
         description={`${pos.length} POs across ${brands.length} brands — read from the retail channel, routed to the correct brand, acknowledged, and filed as ASNs on their behalf`}
         meta={
           <>
-            <span className="text-ds-label text-zinc-500">
+            <span className="text-ds-label text-muted">
               Queue value{' '}
-              <span className="font-mono text-zinc-300">
+              <span className="font-mono text-strong">
                 GBP {queueMetrics.value.toLocaleString()}
               </span>
             </span>
-            <span className="text-ds-label text-zinc-500">
-              Awaiting action <span className="font-mono text-zinc-300">{queueMetrics.awaiting}</span>
+            <span className="text-ds-label text-muted">
+              Awaiting action <span className="font-mono text-strong">{queueMetrics.awaiting}</span>
             </span>
             {queueMetrics.simulated > 0 && (
-              <span className="text-ds-label text-zinc-500">
-                Simulated <span className="font-mono text-zinc-300">{queueMetrics.simulated}</span>
+              <span className="text-ds-label text-muted">
+                Simulated <span className="font-mono text-strong">{queueMetrics.simulated}</span>
               </span>
             )}
           </>
@@ -349,12 +349,12 @@ return (
         actions={
           <>
             {ingestError && (
-              <span className="text-ds-micro text-red-400" role="alert">
+              <span className="text-ds-micro text-state-danger" role="alert">
                 {ingestError}
               </span>
             )}
             {ingestResult && !ingestError && (
-              <span className="text-ds-micro text-emerald-400" role="status" data-state="po-ingest-summary">
+              <span className="text-ds-micro text-state-success" role="status" data-state="po-ingest-summary">
                 {ingestResult.ok
                   ? `${ingestResult.polled} read · ${ingestResult.ingested} filed · ${ingestResult.alreadyPresent} already held · ${ingestResult.refused} refused`
                   : 'Channel read failed'}
@@ -378,15 +378,15 @@ return (
         toolbar={
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[180px] flex-1 sm:max-w-md">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" aria-hidden="true" />
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search purchase orders"
                 placeholder="Search by PO number or brand…"
-                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-surface border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-faint focus:outline-none focus:border-accent-500/40" />
             </div>
             <select value={statusFilter} onChange={function(e) { setStatusFilter(e.target.value); }}
               aria-label="Filter by status"
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong focus:outline-none focus:border-brass-500/40">
+              className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong focus:outline-none focus:border-accent-500/40">
               <option value="all">All Statuses</option>
               {STATUS_ORDER.map(function(s) { return (<option key={s} value={s}>{s.replace(/_/g, ' ')}</option>); })}
             </select>
@@ -398,14 +398,14 @@ return (
               className={cn(
                 'rounded-ds-md border px-2.5 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
                 simOnly
-                  ? 'border-brass-500/40 bg-brass-500/15 text-brass-300'
-                  : 'border-hairline bg-tint text-zinc-400 hover:text-zinc-200'
+                  ? 'border-accent-500/40 bg-accent-500/15 text-accent-300'
+                  : 'border-hairline bg-tint text-muted hover:text-strong'
               )}
             >
               Simulated only
             </button>
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-faint sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -435,20 +435,20 @@ return (
                 ].map(function(row) {
                   return (
                     <div key={row.label} className="flex items-center justify-between gap-3">
-                      <dt className="text-ds-label text-zinc-500">{row.label}</dt>
-                      <dd className="font-mono text-ds-label text-zinc-200">{row.value}</dd>
+                      <dt className="text-ds-label text-muted">{row.label}</dt>
+                      <dd className="font-mono text-ds-label text-strong">{row.value}</dd>
                     </div>
                   );
                 })}
               </dl>
-              <p className="mt-2 border-t border-hairline pt-2 text-ds-micro leading-snug text-zinc-600">
+              <p className="mt-2 border-t border-hairline pt-2 text-ds-micro leading-snug text-faint">
                 Every figure is derived from the canonical purchase-order and deduction
                 stores — nothing is estimated.
               </p>
             </ContextPanel>
             <ContextPanel title="Status distribution">
               {queueMetrics.total === 0 ? (
-                <p className="text-ds-label text-zinc-500">No purchase orders to summarise.</p>
+                <p className="text-ds-label text-muted">No purchase orders to summarise.</p>
               ) : (
                 <ul className="space-y-1.5" data-testid="po-status-distribution">
                   {STATUS_ORDER.map(function(s) {
@@ -459,7 +459,7 @@ return (
                         <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
                           {p.label}
                         </StatusBadge>
-                        <span className="font-mono text-ds-label text-zinc-300">{n}</span>
+                        <span className="font-mono text-ds-label text-strong">{n}</span>
                       </li>
                     );
                   })}
@@ -515,9 +515,9 @@ return (
         >
           <div className="space-y-2" data-testid="channel-po-ingestion">
             <div className="flex flex-wrap items-center gap-2 text-ds-label">
-              <span className="text-zinc-500">
+              <span className="text-muted">
                 Channel read{' '}
-                <span className="font-mono text-zinc-300" data-state="channel-mode">
+                <span className="font-mono text-strong" data-state="channel-mode">
                   {ingestResult
                     ? ingestResult.mode === 'mock'
                       ? 'Simulation (mock)'
@@ -528,7 +528,7 @@ return (
                 </span>
               </span>
               {ingestResult?.mode === 'mock' && (
-                <span className="rounded-ds-sm border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
+                <span className="rounded-ds-sm border border-accent-500/20 bg-accent-500/15 px-1.5 py-0.5 text-ds-micro text-accent-400">
                   Simulated read — no live channel call was made
                 </span>
               )}
@@ -562,7 +562,7 @@ return (
               </Button>
               {revisionNotice && (
                 <span
-                  className="text-ds-micro text-brass-400"
+                  className="text-ds-micro text-accent-400"
                   role="status"
                   data-state="po-revision-simulate-summary"
                 >
@@ -612,7 +612,7 @@ return (
               </Button>
               {holdNotice && (
                 <span
-                  className="text-ds-micro text-brass-400"
+                  className="text-ds-micro text-accent-400"
                   role="status"
                   data-state="po-hold-simulate-summary"
                 >
@@ -622,11 +622,11 @@ return (
             </div>
 
             {ingestError ? (
-              <p className="text-ds-label text-red-400" role="alert">
+              <p className="text-ds-label text-state-danger" role="alert">
                 {ingestError}
               </p>
             ) : !ingestResult ? (
-              <p className="text-ds-label text-zinc-500">
+              <p className="text-ds-label text-muted">
                 No channel read has been performed in this session. Nothing is created inside Mercenta —
                 purchase orders arrive from the retail channel.
               </p>
@@ -641,14 +641,14 @@ return (
                   ].map(function(row) {
                     return (
                       <div key={row.label} className="flex items-center gap-2">
-                        <dt className="text-zinc-500">{row.label}</dt>
-                        <dd className="font-mono text-zinc-200">{row.value}</dd>
+                        <dt className="text-muted">{row.label}</dt>
+                        <dd className="font-mono text-strong">{row.value}</dd>
                       </div>
                     );
                   })}
                 </dl>
                 {ingestResult.outcomes.length === 0 ? (
-                  <p className="text-ds-label text-zinc-500">
+                  <p className="text-ds-label text-muted">
                     The channel returned no purchase orders for this read.
                   </p>
                 ) : (
@@ -667,13 +667,13 @@ return (
                                 type="button"
                                 data-testid={`channel-po-open-${o.channelPurchaseOrderId}`}
                                 onClick={function() { setPreviewPoId(o.po!.id); }}
-                                className="font-mono text-ds-label text-zinc-200 underline-offset-2 hover:underline"
+                                className="font-mono text-ds-label text-strong underline-offset-2 hover:underline"
                                 title="Open the filed purchase order"
                               >
                                 {o.channelPurchaseOrderId}
                               </button>
                             ) : (
-                              <span className="font-mono text-ds-label text-zinc-400">
+                              <span className="font-mono text-ds-label text-muted">
                                 {o.channelPurchaseOrderId}
                               </span>
                             )}
@@ -682,20 +682,20 @@ return (
                               className={cn(
                                 'rounded-ds-sm px-1.5 py-0.5 text-ds-micro capitalize',
                                 o.status === 'ingested'
-                                  ? 'bg-emerald-500/15 text-emerald-300'
+                                  ? 'bg-state-success/10 text-state-success'
                                   : o.status === 'already_present'
-                                    ? 'bg-tint text-zinc-400'
-                                    : 'bg-red-500/15 text-red-300'
+                                    ? 'bg-tint text-muted'
+                                    : 'bg-state-danger/10 text-state-danger'
                               )}
                             >
                               {o.status.replace(/_/g, ' ')}
                             </span>
-                            <span className="text-ds-micro text-zinc-500">
+                            <span className="text-ds-micro text-muted">
                               {o.brandId ? brandName(o.brandId) : 'Not routed'}
                             </span>
                           </span>
                           {o.reason && (
-                            <span className="max-w-[56ch] text-ds-micro leading-snug text-zinc-500">
+                            <span className="max-w-[56ch] text-ds-micro leading-snug text-muted">
                               {o.reason}
                             </span>
                           )}
@@ -729,17 +729,17 @@ return (
                       <span className="font-mono text-xs text-strong font-medium">{po.poNumber}</span>
                       {/* §Phase E5 (G2) — truthful provenance on the admin PO list. */}
                       {po.simulated === true && (
-                        <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                        <span className="text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-accent-500/15 text-accent-400 border border-accent-500/20">(sim)</span>
                       )}
                       <span className={cn('text-ds-micro px-1.5 py-0.5 rounded-ds-sm capitalize',
-                        po.status === 'received' ? 'bg-blue-500/15 text-blue-300' :
-                        po.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
-                        po.status === 'rejected' ? 'bg-red-500/15 text-red-300' :
+                        po.status === 'received' ? 'bg-state-info/10 text-state-info' :
+                        po.status === 'accepted' ? 'bg-state-success/10 text-state-success' :
+                        po.status === 'rejected' ? 'bg-state-danger/10 text-state-danger' :
                         po.status === 'shipped' || po.status === 'delivered' ? 'bg-purple-500/15 text-purple-300' :
-                        'bg-amber-500/15 text-amber-300'
+                        'bg-state-warning/10 text-state-warning'
                       )}>{po.status.replace(/_/g, ' ')}</span>
-                      <span className="font-mono text-ds-micro text-zinc-500">GBP {po.poValue.toLocaleString()}</span>
-                      <span className="text-ds-micro text-zinc-600">{po.lineItems.length} items</span>
+                      <span className="font-mono text-ds-micro text-muted">GBP {po.poValue.toLocaleString()}</span>
+                      <span className="text-ds-micro text-faint">{po.lineItems.length} items</span>
                       {po.acknowledgedAt && <span className="text-ds-micro text-emerald-500/70">Acknowledged</span>}
                       {poDeductions.length > 0 && <span className="text-ds-micro text-amber-500/70">{poDeductions.length} deduction(s)</span>}
                     </div>
@@ -748,13 +748,13 @@ return (
                         type="button"
                         data-testid={`po-preview-${po.id}`}
                         onClick={function() { setPreviewPoId(po.id); }}
-                        className="rounded-ds-sm border border-hairline px-2 py-1 text-ds-micro font-medium text-zinc-300 transition-ds duration-ds-fast hover:border-hairline-strong hover:text-strong"
+                        className="rounded-ds-sm border border-hairline px-2 py-1 text-ds-micro font-medium text-strong transition-ds duration-ds-fast hover:border-hairline-strong hover:text-strong"
                         title="Preview record"
                       >
                         Preview
                       </button>
                       <button onClick={function() { setSelectedPoId(po.id); }}
-                        className="p-1.5 text-zinc-500 hover:text-strong" title="View detail">
+                        className="p-1.5 text-muted hover:text-strong" title="View detail">
                         <Eye className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -765,7 +765,7 @@ return (
           </Card>
         );})}
         {grouped.length === 0 && (
-          <Card className="p-8 text-center"><p className="text-xs text-zinc-600">No purchase orders match your filters.</p></Card>
+          <Card className="p-8 text-center"><p className="text-xs text-faint">No purchase orders match your filters.</p></Card>
         )}
           </div>
         </WorkspaceSection>
@@ -784,7 +784,7 @@ return (
         footer={
           previewPo ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-micro text-zinc-600">
+              <span className="text-ds-micro text-faint">
                 {previewPo.simulated === true
                   ? 'Operational simulation record'
                   : 'Recorded purchase order'}
@@ -886,7 +886,7 @@ function PoPreviewBody({
           </span>
         )}
         {po.simulated === true && (
-          <span className="rounded-ds-sm border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
+          <span className="rounded-ds-sm border border-accent-500/20 bg-accent-500/15 px-1.5 py-0.5 text-ds-micro text-accent-400">
             (sim)
           </span>
         )}
@@ -912,12 +912,12 @@ function PoPreviewBody({
       />
 
       <section aria-label="Lines">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Lines
         </h3>
         <div className="overflow-hidden rounded-ds-md border border-hairline">
           <table className="w-full text-left text-ds-label">
-            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-zinc-500">
+            <thead className="bg-tint text-ds-micro uppercase tracking-wider text-muted">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -931,10 +931,10 @@ function PoPreviewBody({
                 const ack = ackStatusPresentation(line.ackStatus);
                 return (
                   <tr key={line.sku}>
-                    <td className="px-2 py-1.5 font-mono text-zinc-400">{line.sku}</td>
-                    <td className="px-2 py-1.5 text-zinc-200">{line.productName}</td>
-                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.quantity}</td>
-                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">
+                    <td className="px-2 py-1.5 font-mono text-muted">{line.sku}</td>
+                    <td className="px-2 py-1.5 text-strong">{line.productName}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-strong">{line.quantity}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-strong">
                       {line.unitPrice.toFixed(2)}
                     </td>
                     <td className="px-2 py-1.5">
@@ -952,7 +952,7 @@ function PoPreviewBody({
 
       {(deductions.length > 0 || shipments.length > 0) && (
         <section aria-label="Finance and logistics">
-          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Finance &amp; logistics
           </h3>
           <RecordFieldList
@@ -966,11 +966,11 @@ function PoPreviewBody({
               {shipments.map(function(s) {
                 return (
                   <li key={s.id} className="flex flex-wrap items-center gap-2 text-ds-label">
-                    <span className="font-mono text-zinc-400">{s.reference}</span>
-                    <span className="text-zinc-300">{s.carrier}</span>
-                    <span className="text-zinc-500">{s.status}</span>
-                    {s.delayed && <span className="text-amber-400">delayed</span>}
-                    {s.exception && <span className="text-red-400">exception</span>}
+                    <span className="font-mono text-muted">{s.reference}</span>
+                    <span className="text-strong">{s.carrier}</span>
+                    <span className="text-muted">{s.status}</span>
+                    {s.delayed && <span className="text-state-warning">delayed</span>}
+                    {s.exception && <span className="text-state-danger">exception</span>}
                   </li>
                 );
               })}
@@ -980,7 +980,7 @@ function PoPreviewBody({
       )}
 
       <section aria-label="Activity">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Activity
         </h3>
         <ActivityFeed

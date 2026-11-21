@@ -39,7 +39,7 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
       <main className="pt-24 pb-16">
         <section className="px-6 pb-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">
@@ -54,11 +54,11 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
         <section className="border-t border-hairline px-6 py-12">
           <div className="mx-auto max-w-3xl space-y-3">
             {PUBLIC_FAQ.map((item) => (
-              <details key={item.q} className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-850">
-                <summary className="cursor-pointer px-6 py-4 font-display text-base font-semibold text-parchment transition-colors hover:bg-tint">
+              <details key={item.q} className="overflow-hidden rounded-ds-lg border border-hairline bg-surface-raised">
+                <summary className="cursor-pointer px-6 py-4 font-display text-base font-semibold text-soft transition-colors hover:bg-tint">
                   {item.q}
                 </summary>
-                <div className="px-6 pb-5 text-sm leading-relaxed text-steel">{item.a}</div>
+                <div className="px-6 pb-5 text-sm leading-relaxed text-muted">{item.a}</div>
               </details>
             ))}
           </div>
@@ -79,7 +79,7 @@ export function FAQ({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) 
             </button>
             <p className="mt-6 text-sm" style={{ color: 'var(--mr-text-muted)' }}>
               Something not covered here? Write to{' '}
-              <a href={`mailto:${PUBLIC_CONTACT_EMAIL}`} className="text-brass underline underline-offset-2">
+              <a href={`mailto:${PUBLIC_CONTACT_EMAIL}`} className="text-accent underline underline-offset-2">
                 {PUBLIC_CONTACT_EMAIL}
               </a>
               .

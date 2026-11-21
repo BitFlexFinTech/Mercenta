@@ -148,20 +148,20 @@ export function CommerceOperationsPanel() {
         <div>
           <h3 className="text-sm font-semibold text-strong">
             Operational commerce{' '}
-            <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
+            <Badge className="ml-1 text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">
               (sim)
             </Badge>
           </h3>
-          <p className="text-ds-label text-zinc-500 mt-0.5">
+          <p className="text-ds-label text-muted mt-0.5">
             Simulated purchase orders, shipments, receiving, invoices, payments and
             exceptions across every tenant. No live provider is contacted.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-strong border-hairline">
             {activityRows.length} activity step(s) · {simulatedCount} simulated
           </Badge>
-          <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-muted border-hairline">
             persistence: {persistence.state} · durable {String(persistence.durable)}
           </Badge>
         </div>
@@ -173,18 +173,18 @@ export function CommerceOperationsPanel() {
           domain; the disabled state is an affordance, never the authorisation. */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Operable simulated purchase orders ({simulatedPos.length})
           </p>
           {!canCurrentUserMutate && (
-            <span className="text-ds-micro text-zinc-600">
+            <span className="text-ds-micro text-faint">
               view-only staff — the domain refuses every mutation
             </span>
           )}
         </div>
 
         {simulatedPos.length === 0 && (
-          <p className="text-ds-label text-zinc-600">
+          <p className="text-ds-label text-faint">
             No simulated purchase orders yet. A brand raises one from Purchase Orders →
             “Operational commerce simulation”.
           </p>
@@ -204,15 +204,15 @@ export function CommerceOperationsPanel() {
           const cancelledInvoice = journal.find((i) => i.status === 'cancelled');
           const reason = cancelReason[po.id] ?? '';
           return (
-            <div key={po.id} className="rounded-ds-md border border-hairline bg-ink-850/60 p-3 space-y-2">
+            <div key={po.id} className="rounded-ds-md border border-hairline bg-surface-raised/60 p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
-                <span className="text-ds-micro text-zinc-500">{po.brandId}</span>
-                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+                <span className={cn(MONO, 'text-accent')}>{po.poNumber}</span>
+                <span className="text-ds-micro text-muted">{po.brandId}</span>
+                <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                   {po.status}
                 </Badge>
-                <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
-                <span className="text-ds-micro text-zinc-500">£{po.poValue.toFixed(2)}</span>
+                <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">(sim)</Badge>
+                <span className="text-ds-micro text-muted">£{po.poValue.toFixed(2)}</span>
                 {/* §P7 — the channel's receiving status, derived from the received
                     quantities. An unreceived PO cannot be invoiced (AV-018). */}
                 <span data-state="admin-commerce-receiving-status">
@@ -220,24 +220,24 @@ export function CommerceOperationsPanel() {
                     className={cn(
                       'text-ds-micro border-hairline',
                       receiving === 'received'
-                        ? 'bg-emerald-500/10 text-emerald-300'
+                        ? 'bg-state-success/10 text-state-success'
                         : receiving === 'partially_received'
-                          ? 'bg-amber-500/10 text-amber-300'
-                          : 'bg-tint text-zinc-400'
+                          ? 'bg-state-warning/10 text-state-warning'
+                          : 'bg-tint text-muted'
                     )}
                   >
                     receiving: {RECEIVING_STATUS_LABELS[receiving]}
                   </Badge>
                 </span>
                 {invoice && (
-                  <span data-state="admin-commerce-invoice-terms" className="text-ds-micro text-zinc-500">
+                  <span data-state="admin-commerce-invoice-terms" className="text-ds-micro text-muted">
                     · {invoice.number} ({invoice.status}){invoice.status !== 'cancelled' && (
                       <> · {invoiceTermDays(invoice)}-day terms · due {invoiceDueDate(invoice)} (derived)</>
                     )}
                   </span>
                 )}
                 {cancelledInvoice && (
-                  <span data-state="admin-commerce-cancelled-note" className="text-ds-micro text-amber-300/80">
+                  <span data-state="admin-commerce-cancelled-note" className="text-ds-micro text-state-warning/80">
                     · {cancelledInvoice.number} cancelled{cancelledInvoice.cancellationReason ? `: ${cancelledInvoice.cancellationReason}` : ''} —
                     the number stays consumed; the correction needs a NEW Invoice ID
                   </span>
@@ -256,7 +256,7 @@ export function CommerceOperationsPanel() {
                 <select
                   data-state="admin-commerce-terms-select"
                   aria-label={`Payment terms for ${po.poNumber} — carried on the invoice raised at receipt`}
-                  className="text-ds-label rounded-ds-sm border border-hairline bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
+                  className="text-ds-label rounded-ds-sm border border-hairline bg-surface-raised px-2 py-1 text-strong disabled:opacity-50"
                   value={chosenTerms}
                   disabled={busy || !!activeInvoice || !(n.receive || n.invoice)}
                   onChange={(e) =>
@@ -350,7 +350,7 @@ export function CommerceOperationsPanel() {
                     <input
                       data-state="admin-commerce-cancel-reason"
                       aria-label={`Cancellation reason for ${activeInvoice.number}`}
-                      className="text-ds-label rounded-ds-sm border border-hairline bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
+                      className="text-ds-label rounded-ds-sm border border-hairline bg-surface-raised px-2 py-1 text-strong placeholder:text-faint"
                       placeholder="Cancellation reason (required)"
                       value={reason}
                       disabled={busy}
@@ -395,14 +395,14 @@ export function CommerceOperationsPanel() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-state-danger">{error}</div>
+        <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-ds-label text-state-danger">{error}</div>
       )}
       {notice && (
         <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-state-info">{notice}</div>
       )}
 
       {activityRows.length === 0 ? (
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           No operational commerce activity yet. A brand drives the lifecycle from
           Purchase Orders → “Operational commerce simulation”.
         </p>
@@ -420,25 +420,25 @@ export function CommerceOperationsPanel() {
               label: 'Time',
               hideBelow: 'lg',
               render: (a) => (
-                <span className="font-mono text-zinc-500 whitespace-nowrap">{a.at.slice(11, 19)}</span>
+                <span className="font-mono text-muted whitespace-nowrap">{a.at.slice(11, 19)}</span>
               ),
             },
             {
               key: 'brandId',
               label: 'Brand',
-              render: (a) => <span className={cn(MONO, 'text-zinc-300 whitespace-nowrap')}>{a.brandId}</span>,
+              render: (a) => <span className={cn(MONO, 'text-strong whitespace-nowrap')}>{a.brandId}</span>,
             },
             {
               key: 'type',
               label: 'Step',
               primary: true,
-              render: (a) => <span className={cn(MONO, 'text-zinc-300')}>{a.type}</span>,
+              render: (a) => <span className={cn(MONO, 'text-strong')}>{a.type}</span>,
             },
             {
               key: 'status',
               label: 'State',
               render: (a) => (
-                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+                <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                   {a.status}
                 </Badge>
               ),
@@ -453,9 +453,9 @@ export function CommerceOperationsPanel() {
               label: 'Mode',
               render: (a) =>
                 a.simulated ? (
-                  <span className="text-ds-micro text-brass-400">(sim)</span>
+                  <span className="text-ds-micro text-accent-400">(sim)</span>
                 ) : (
-                  <span className="text-ds-micro text-zinc-500">live</span>
+                  <span className="text-ds-micro text-muted">live</span>
                 ),
             },
           ]}
@@ -464,34 +464,34 @@ export function CommerceOperationsPanel() {
 
       <div className="grid gap-3 md:grid-cols-3">
         <div className="space-y-1">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Simulated invoices ({invoices.ok ? invoices.value.length : 0})
           </p>
           {invoices.ok && invoices.value.length === 0 && (
-            <p className="text-ds-label text-zinc-600">None issued yet.</p>
+            <p className="text-ds-label text-faint">None issued yet.</p>
           )}
           {invoices.ok &&
             invoices.value.slice(0, 5).map((i) => (
-              <div key={i.id} className="text-ds-label text-zinc-400">
-                <span className={cn(MONO, 'text-brass')}>{i.number}</span> · {i.brandId} ·{' '}
-                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+              <div key={i.id} className="text-ds-label text-muted">
+                <span className={cn(MONO, 'text-accent')}>{i.number}</span> · {i.brandId} ·{' '}
+                <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                   {i.status}
                 </Badge>{' '}
                 £{i.subtotalGbp.toFixed(2)}
                 {i.status !== 'cancelled' && (
                   <>
                     {' '}· {invoiceTermDays(i)}d terms · due {invoiceDueDate(i)}{' '}
-                    <span className="text-ds-micro text-zinc-600">(derived)</span>
+                    <span className="text-ds-micro text-faint">(derived)</span>
                   </>
                 )}{' '}
-                <span className="text-ds-micro text-brass-400">(sim)</span>
+                <span className="text-ds-micro text-accent-400">(sim)</span>
               </div>
             ))}
           {/* §P7 / AV-022 — the invoice-number rules, stated where the numbers
               are handled (they are the reason this ledger is append-only). */}
           <ul data-state="admin-invoice-number-rules" className="mt-1 space-y-0.5">
             {INVOICE_NUMBER_RULES.map((rule) => (
-              <li key={rule} className="text-ds-micro text-zinc-600">
+              <li key={rule} className="text-ds-micro text-faint">
                 {rule}
               </li>
             ))}
@@ -504,7 +504,7 @@ export function CommerceOperationsPanel() {
               RECEIPT_INVOICE_AUTOMATION_STATEMENT.terms,
               RECEIPT_INVOICE_AUTOMATION_STATEMENT.correction,
             ].map((line) => (
-              <li key={line} className="text-ds-micro text-zinc-600">
+              <li key={line} className="text-ds-micro text-faint">
                 {line}
               </li>
             ))}
@@ -512,38 +512,38 @@ export function CommerceOperationsPanel() {
         </div>
 
         <div className="space-y-1">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Simulated payments ({payments.ok ? payments.value.length : 0})
           </p>
           {payments.ok && payments.value.length === 0 && (
-            <p className="text-ds-label text-zinc-600">None recorded yet.</p>
+            <p className="text-ds-label text-faint">None recorded yet.</p>
           )}
           {payments.ok &&
             payments.value.slice(0, 5).map((p) => (
-              <div key={p.id} className="text-ds-label text-zinc-400">
+              <div key={p.id} className="text-ds-label text-muted">
                 <span className={MONO}>{p.invoiceId}</span> · {p.brandId} · £
                 {p.amountGbp.toFixed(2)} · {p.method}{' '}
-                <span className="text-ds-micro text-brass-400">(sim)</span>
+                <span className="text-ds-micro text-accent-400">(sim)</span>
               </div>
             ))}
         </div>
 
         <div className="space-y-1">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             Exceptions / chargebacks ({exceptions.ok ? exceptions.value.length : 0})
           </p>
           {exceptions.ok && exceptions.value.length === 0 && (
-            <p className="text-ds-label text-zinc-600">None raised yet.</p>
+            <p className="text-ds-label text-faint">None raised yet.</p>
           )}
           {exceptions.ok &&
             exceptions.value.slice(0, 5).map((d) => (
-              <div key={d.id} className="text-ds-label text-zinc-400">
+              <div key={d.id} className="text-ds-label text-muted">
                 <span className={MONO}>{d.id}</span> · {d.brandId} · {d.type} ·{' '}
-                <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+                <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                   {d.status}
                 </Badge>{' '}
                 £{d.amountGbp.toFixed(2)}
-                {d.simulated && <span className="text-ds-micro text-brass-400"> (sim)</span>}
+                {d.simulated && <span className="text-ds-micro text-accent-400"> (sim)</span>}
                 {/*
                  * §Phase E2E — operator resolution. The outcome of a disputed
                  * deduction is a Mercenta operations decision, so it is made
@@ -556,7 +556,7 @@ export function CommerceOperationsPanel() {
                     data-state="commerce-operator-dispute"
                     data-deduction={d.id}
                   >
-                    <span className="text-ds-micro text-zinc-500">Resolve:</span>
+                    <span className="text-ds-micro text-muted">Resolve:</span>
                     {(['won', 'partial', 'lost'] as const).map((outcome) => (
                       <Button
                         key={outcome}

@@ -24,18 +24,18 @@ function WorkRailExtras({ actor }: { actor: string }) {
       <NewTaskPanel scope="admin" actor={actor} />
       <ContextPanel title="Where work comes from">
         {top.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">No open work right now.</p>
+          <p className="text-ds-label text-faint">No open work right now.</p>
         ) : (
           <ul className="space-y-1">
             {top.map(([src, n]) => (
               <li key={src} className="flex items-center justify-between gap-2 text-ds-label">
-                <span className="text-zinc-400">{src.replace(/_/g, ' ')}</span>
-                <span className="font-mono text-zinc-200">{n}</span>
+                <span className="text-muted">{src.replace(/_/g, ' ')}</span>
+                <span className="font-mono text-strong">{n}</span>
               </li>
             ))}
           </ul>
         )}
-        <p className="mt-2 text-ds-micro text-zinc-600">As at {demoToday()} · platform-wide.</p>
+        <p className="mt-2 text-ds-micro text-faint">As at {demoToday()} · platform-wide.</p>
       </ContextPanel>
     </>
   );

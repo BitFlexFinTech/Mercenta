@@ -46,18 +46,18 @@ function ThreadListItem({
       onClick={onClick}
       className={cn(
         'w-full text-left px-4 py-3 border-b border-hairline transition-colors',
-        active ? 'bg-brass-500/10' : 'hover:bg-tint'
+        active ? 'bg-accent-500/10' : 'hover:bg-tint'
       )}
     >
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="text-sm font-medium text-strong truncate">{thread.brandName}</span>
         {hot && (
-          <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 flex-shrink-0">
+          <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20 flex-shrink-0">
             <AlertTriangle className="w-3 h-3 mr-1" /> Hot lead
           </Badge>
         )}
       </div>
-      <p className="text-ds-label text-zinc-500 truncate">
+      <p className="text-ds-label text-muted truncate">
         {last ? last.body.slice(0, 60) : ''}
       </p>
     </button>
@@ -72,20 +72,20 @@ function MessageBubble({ m }: { m: Message }) {
         className={cn(
           'max-w-[75%] rounded-ds-lg px-4 py-3 text-xs leading-relaxed',
           outbound
-            ? 'bg-brass-500/15 text-zinc-200'
-            : 'bg-tint text-zinc-300'
+            ? 'bg-accent-500/15 text-strong'
+            : 'bg-tint text-strong'
         )}
       >
         {m.subject && (
           <div className="font-medium text-strong mb-1">{m.subject}</div>
         )}
         <div className="whitespace-pre-wrap">{m.body}</div>
-        <div className="mt-1.5 flex items-center gap-2 text-ds-micro font-mono text-zinc-500">
+        <div className="mt-1.5 flex items-center gap-2 text-ds-micro font-mono text-muted">
           <span>{new Date(m.createdAt).toLocaleString()}</span>
           <span>· {m.channel}</span>
           <span>· {m.sentBy}</span>
           {m.requiresHuman && (
-            <Badge className="text-ds-micro bg-red-500/20 text-red-300 border-red-500/30">
+            <Badge className="text-ds-micro bg-red-500/20 text-state-danger border-red-500/30">
               needs human
             </Badge>
           )}
@@ -250,11 +250,11 @@ export function MessagesHub() {
         description="Unified inbox — one thread per brand/lead, full history across automation and staff. Sending goes through the shared brand-communication layer; when no live provider is connected every send is logged as a labelled sandbox send, never claimed as delivered."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {visibleThreads.length} of {threads.length} threads
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">{allMessages.length} messages</span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">{allMessages.length} messages</span>
+            <span className="font-mono text-ds-label text-muted">
               {emailLive ? 'email live' : emailSandbox ? 'email sandbox' : 'sending disabled'}
             </span>
           </>
@@ -277,7 +277,7 @@ export function MessagesHub() {
                 'rounded-ds-md px-2.5 py-1 text-ds-label font-medium transition-colors',
                 needsHumanOnly
                   ? 'bg-red-500/20 text-state-danger'
-                  : 'bg-tint text-zinc-400 hover:bg-tint hover:text-strong'
+                  : 'bg-tint text-muted hover:bg-tint hover:text-strong'
               )}
             >
               Needs human only
@@ -289,8 +289,8 @@ export function MessagesHub() {
       <MetricBand items={metrics} columns={4} />
 
       {!emailLive && !emailSandbox && (
-        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-ds-label text-zinc-500 flex items-start gap-2">
-          <Lock className="w-3.5 h-3.5 mt-0.5 text-zinc-600 flex-shrink-0" />
+        <div className="bg-tint border border-hairline rounded-ds-md p-3 text-ds-label text-muted flex items-start gap-2">
+          <Lock className="w-3.5 h-3.5 mt-0.5 text-faint flex-shrink-0" />
           Power sending is disabled — connect Postmark or SendGrid in Integration
           Settings. Viewing threads and logging notes still works.
         </div>
@@ -309,24 +309,24 @@ export function MessagesHub() {
               />
               <ul className="mt-2 space-y-1.5">
                 {outreachWork.slice(0, 5).map((w) => (
-                  <li key={w.id} className="text-ds-label leading-snug text-zinc-400">
-                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                  <li key={w.id} className="text-ds-label leading-snug text-muted">
+                    <span className="font-medium text-strong">{WORK_SOURCE_LABELS[w.source]}</span>
                     {' · '}
                     {w.title}
-                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                    {w.dueDate && <span className="font-mono text-faint"> · due {w.dueDate}</span>}
                   </li>
                 ))}
                 {outreachWork.length === 0 && (
-                  <li className="text-ds-label text-zinc-500">No outreach follow-ups open.</li>
+                  <li className="text-ds-label text-muted">No outreach follow-ups open.</li>
                 )}
               </ul>
-              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-muted">
                 These are the same CRM follow-ups Work Management lists — resolving one there
                 clears it here.
               </p>
             </ContextPanel>
             <ContextPanel title="Delivery truth">
-              <p className="text-ds-label leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-muted">
                 Nothing on this screen claims a live delivery. Every send is attributed to its
                 actor, written to the brand thread and recorded in the platform audit log.
               </p>
@@ -350,7 +350,7 @@ export function MessagesHub() {
             />
           ))}
           {!commsPending && visibleThreads.length === 0 && (
-            <p className="px-4 py-4 text-ds-label text-zinc-600">No threads match the current filters.</p>
+            <p className="px-4 py-4 text-ds-label text-faint">No threads match the current filters.</p>
           )}
         </Card>
 
@@ -381,7 +381,7 @@ export function MessagesHub() {
           ) : commsPending ? (
             <LoadingState rows={4} label="Loading conversations…" />
           ) : (
-            <p className="text-xs text-zinc-600">No conversations yet.</p>
+            <p className="text-xs text-faint">No conversations yet.</p>
           )}
         </Card>
       </div>
@@ -417,10 +417,10 @@ function ComposeBox({
         onChange={(e) => setDraftBody(e.target.value)}
         rows={3}
         placeholder="Write a reply…"
-        className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
+        className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40"
       />
       <div className="flex items-center justify-between">
-        {sendNote && <span className="text-ds-label text-zinc-400">{sendNote}</span>}
+        {sendNote && <span className="text-ds-label text-muted">{sendNote}</span>}
         <Button
           className="text-xs ml-auto"
           disabled={!draftBody.trim()}

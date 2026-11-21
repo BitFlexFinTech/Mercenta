@@ -302,8 +302,8 @@ export function CommerceSimulationPanel() {
           className={cn(
             'rounded-ds-md p-3 text-ds-label border',
             eligibility.eligible
-              ? 'bg-emerald-500/10 border-state-success/20 text-state-success'
-              : 'bg-amber-500/10 border-state-warning/20 text-state-warning'
+              ? 'bg-state-success/10 border-state-success/20 text-state-success'
+              : 'bg-state-warning/10 border-state-warning/20 text-state-warning'
           )}
         >
           {eligibility.eligible ? (
@@ -321,7 +321,7 @@ export function CommerceSimulationPanel() {
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-state-danger">
+        <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-ds-label text-state-danger">
           {error}
         </div>
       )}

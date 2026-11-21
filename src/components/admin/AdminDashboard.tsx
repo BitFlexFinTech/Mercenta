@@ -946,13 +946,13 @@ export function AdminDashboard({
           }
           meta={
             <>
-              <span className="font-mono text-ds-label text-zinc-500">
+              <span className="font-mono text-ds-label text-muted">
                 £{awaitingValue.toLocaleString()} open PO value
               </span>
-              <span className="font-mono text-ds-label text-zinc-500">
+              <span className="font-mono text-ds-label text-muted">
                 {shipmentsAll.length} shipments in motion
               </span>
-              <span className="font-mono text-ds-label text-zinc-500">
+              <span className="font-mono text-ds-label text-muted">
                 {renewalsDue.length} renewals in window
               </span>
               {/*
@@ -962,7 +962,7 @@ export function AdminDashboard({
                 because its only other content (the Density / Group-rows Queue
                 options) was removed in the 2026-09-22 §Dashboard-cleanup pass.
               */}
-              <span className="hidden font-mono text-ds-label text-zinc-600 sm:inline">
+              <span className="hidden font-mono text-ds-label text-faint sm:inline">
                 ⌘K for records and destinations
               </span>
             </>
@@ -1002,7 +1002,7 @@ export function AdminDashboard({
                 }
               >
                 {docStatusSegments.length === 0 ? (
-                  <p className="text-xs text-zinc-500">No compliance documents recorded yet.</p>
+                  <p className="text-xs text-muted">No compliance documents recorded yet.</p>
                 ) : (
                   <MercentaDoughnut
                     segments={docStatusSegments}
@@ -1046,15 +1046,15 @@ export function AdminDashboard({
                    fulfilment exceptions).
               Every card that existed before P2 is still rendered.
             */}
-            <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
               Business position
             </h3>
             <MetricBand items={moneyTiles} columns={4} />
-            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
               Operations
             </h3>
             <MetricBand items={kpiTiles} columns={4} />
-            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
               Portfolio volume
             </h3>
             <MetricBand items={businessTiles} columns={4} />
@@ -1086,13 +1086,13 @@ export function AdminDashboard({
               </Button>
             }
           >
-            <div className="overflow-hidden rounded-ds-lg border border-hairline bg-ink-900">
+            <div className="overflow-hidden rounded-ds-lg border border-hairline bg-surface">
               <table className="w-full text-left">
                 <caption className="sr-only">
                   Recorded revenue by canonical stream, with each stream's source
                 </caption>
                 <thead>
-                  <tr className="border-b border-hairline text-ds-micro uppercase tracking-[0.14em] text-zinc-500">
+                  <tr className="border-b border-hairline text-ds-micro uppercase tracking-[0.14em] text-muted">
                     <th scope="col" className="px-3 py-2 font-semibold">Revenue stream</th>
                     <th scope="col" className="px-3 py-2 text-right font-semibold">Recorded</th>
                     <th scope="col" className="hidden px-3 py-2 font-semibold sm:table-cell">Basis</th>
@@ -1101,41 +1101,41 @@ export function AdminDashboard({
                 <tbody>
                   {costs.revenue.streams.map((s) => (
                     <tr key={s.id} className="border-b border-hairline last:border-b-0">
-                      <td className="px-3 py-2 text-xs text-zinc-200">{s.label}</td>
+                      <td className="px-3 py-2 text-xs text-strong">{s.label}</td>
                       <td className="px-3 py-2 text-right font-mono text-xs text-strong">
                         £{s.gbp.toLocaleString('en-GB')}
                       </td>
-                      <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">{s.source}</td>
+                      <td className="hidden px-3 py-2 text-ds-label text-muted sm:table-cell">{s.source}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="border-t border-hairline text-xs">
-                    <td className="px-3 py-2 text-zinc-400">Total recorded revenue</td>
+                    <td className="px-3 py-2 text-muted">Total recorded revenue</td>
                     <td className="px-3 py-2 text-right font-mono font-semibold text-strong">
                       £{costs.revenue.totalGbp.toLocaleString('en-GB')}
                     </td>
-                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                    <td className="hidden px-3 py-2 text-ds-label text-muted sm:table-cell">
                       canonical streams only
                     </td>
                   </tr>
                   <tr className="border-t border-hairline text-xs">
-                    <td className="px-3 py-2 text-zinc-400">Monthly operating cost base</td>
+                    <td className="px-3 py-2 text-muted">Monthly operating cost base</td>
                     <td className="px-3 py-2 text-right font-mono font-semibold text-strong">
                       £{costs.monthlyTotalGbp.toLocaleString('en-GB')}
                     </td>
-                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                    <td className="hidden px-3 py-2 text-ds-label text-muted sm:table-cell">
                       {costs.providers.length} provider line(s) + recorded AI usage
                     </td>
                   </tr>
                   <tr className="border-t border-hairline text-xs">
-                    <td className="px-3 py-2 text-zinc-400">
+                    <td className="px-3 py-2 text-muted">
                       Gross profit {costs.contribution.provisional ? '(provisional)' : ''}
                     </td>
                     <td className="px-3 py-2 text-right font-mono font-semibold text-strong">
                       £{costs.contribution.grossGbp.toLocaleString('en-GB')}
                     </td>
-                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                    <td className="hidden px-3 py-2 text-ds-label text-muted sm:table-cell">
                       margin {costs.contribution.marginPct}%
                     </td>
                   </tr>
@@ -1230,8 +1230,8 @@ export function AdminDashboard({
               />
             ) : (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="rounded-ds-lg border border-hairline bg-ink-900 px-3 py-3">
-                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                <div className="rounded-ds-lg border border-hairline bg-surface px-3 py-3">
+                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
                     By status
                   </h3>
                   <div className="pt-2">
@@ -1246,19 +1246,19 @@ export function AdminDashboard({
                     />
                   </div>
                 </div>
-                <div className="rounded-ds-lg border border-hairline bg-ink-900 px-3 py-3">
-                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                <div className="rounded-ds-lg border border-hairline bg-surface px-3 py-3">
+                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
                     By carrier
                   </h3>
                   <ul className="mt-2 space-y-1.5">
                     {carrierSegments.map((c) => (
                       <li key={c.label} className="flex items-center justify-between gap-2 text-xs">
-                        <span className="text-zinc-300">{c.label}</span>
-                        <span className="font-mono text-zinc-200">{c.value}</span>
+                        <span className="text-strong">{c.label}</span>
+                        <span className="font-mono text-strong">{c.value}</span>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-2.5 border-t border-hairline pt-2 text-ds-label text-zinc-500">
+                  <p className="mt-2.5 border-t border-hairline pt-2 text-ds-label text-muted">
                     {shipmentExceptions} exception(s) · {delayedShipments} delayed · £
                     {valueInMotion.toLocaleString('en-GB')} consignment value
                   </p>

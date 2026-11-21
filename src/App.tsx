@@ -13,7 +13,7 @@ const AdminShell = lazy(() => import('@/components/layout/AdminShell'));
    carrier shell. The two remaining product branches below are exhaustive. */
 
 const FALLBACK = (
-  <div className="flex items-center justify-center min-h-screen bg-ink-900">
+  <div className="flex items-center justify-center min-h-screen bg-surface">
     {/* §Wave 3 Part 5 — the app root's loading state is the canonical owner too. */}
     <LoadingState className="w-full max-w-md" rows={3} label="Loading Mercenta…" />
   </div>

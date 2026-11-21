@@ -54,18 +54,18 @@ export function DesignSystemShowcase() {
       <Breadcrumb items={[{ label: 'Super Admin' }, { label: 'Design System' }]} />
 {/* Typography */}
       <section className="space-y-2" aria-labelledby="ds-typography">
-        <h2 id="ds-typography" className="text-xs uppercase tracking-wider text-zinc-500">Typography</h2>
+        <h2 id="ds-typography" className="text-xs uppercase tracking-wider text-muted">Typography</h2>
         <p className="font-display text-3xl font-semibold text-strong">Display — Fraunces</p>
         <p className="text-2xl font-semibold text-strong">Page title</p>
         <p className="text-lg font-semibold text-strong">Section title</p>
-        <p className="text-sm text-zinc-300">Body — Plus Jakarta Sans. Regular reading copy.</p>
-        <p className="text-xs text-zinc-500">Label / caption — secondary info and meta.</p>
-        <p className="font-mono text-sm text-brass-300">Numeric / KPI — 12,480.50</p>
+        <p className="text-sm text-strong">Body — Plus Jakarta Sans. Regular reading copy.</p>
+        <p className="text-xs text-muted">Label / caption — secondary info and meta.</p>
+        <p className="font-mono text-sm text-accent-300">Numeric / KPI — 12,480.50</p>
       </section>
 
       {/* Buttons */}
       <section className="space-y-3" aria-labelledby="ds-buttons">
-        <h2 id="ds-buttons" className="text-xs uppercase tracking-wider text-zinc-500">Buttons</h2>
+        <h2 id="ds-buttons" className="text-xs uppercase tracking-wider text-muted">Buttons</h2>
         <div className="flex flex-wrap gap-3">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -80,7 +80,7 @@ export function DesignSystemShowcase() {
 
       {/* Statuses */}
       <section className="space-y-3" aria-labelledby="ds-status">
-        <h2 id="ds-status" className="text-xs uppercase tracking-wider text-zinc-500">Semantic status</h2>
+        <h2 id="ds-status" className="text-xs uppercase tracking-wider text-muted">Semantic status</h2>
         <div className="flex flex-wrap gap-3">
           {STATUS_TONES.map((s) => (
             <StatusBadge key={s.tone} tone={s.tone} dataStatus={s.tone}>{s.label}</StatusBadge>
@@ -90,7 +90,7 @@ export function DesignSystemShowcase() {
 
       {/* Alerts */}
       <section className="space-y-3" aria-labelledby="ds-alerts">
-        <h2 id="ds-alerts" className="text-xs uppercase tracking-wider text-zinc-500">Alerts</h2>
+        <h2 id="ds-alerts" className="text-xs uppercase tracking-wider text-muted">Alerts</h2>
         <Alert tone="success" title="Shipment delivered">Receipt matched confirmed quantities.</Alert>
         <Alert tone="warning" title="Acknowledgment due">PO must be acknowledged within 24h.</Alert>
         <Alert tone="error" title="Compliance gate blocked">Missing insurance certificate.</Alert>
@@ -99,7 +99,7 @@ export function DesignSystemShowcase() {
 
       {/* Forms */}
       <section className="space-y-4" aria-labelledby="ds-forms">
-        <h2 id="ds-forms" className="text-xs uppercase tracking-wider text-zinc-500">Form foundation</h2>
+        <h2 id="ds-forms" className="text-xs uppercase tracking-wider text-muted">Form foundation</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
             label="Business name"
@@ -126,7 +126,7 @@ export function DesignSystemShowcase() {
 
       {/* Tabs */}
       <section className="space-y-3" aria-labelledby="ds-tabs">
-        <h2 id="ds-tabs" className="text-xs uppercase tracking-wider text-zinc-500">Tabs</h2>
+        <h2 id="ds-tabs" className="text-xs uppercase tracking-wider text-muted">Tabs</h2>
         <Tabs
           ariaLabel="Showcase tabs"
           items={[
@@ -137,12 +137,12 @@ export function DesignSystemShowcase() {
           active={tab}
           onSelect={setTab}
         />
-        <p className="text-xs text-zinc-500">Active tab: {tab}</p>
+        <p className="text-xs text-muted">Active tab: {tab}</p>
       </section>
 
       {/* §UI/UX Wave 1 — Charts (delicate signature) */}
       <section className="space-y-3" aria-labelledby="ds-charts">
-        <h2 id="ds-charts" className="text-xs uppercase tracking-wider text-zinc-500">Charts</h2>
+        <h2 id="ds-charts" className="text-xs uppercase tracking-wider text-muted">Charts</h2>
         <Card>
           <div className="space-y-4">
             <MercentaLineChart
@@ -189,14 +189,14 @@ export function DesignSystemShowcase() {
 
       {/* §UI/UX Wave 1 — Identity (avatar + brand logo seam) */}
       <section className="space-y-3" aria-labelledby="ds-identity">
-        <h2 id="ds-identity" className="text-xs uppercase tracking-wider text-zinc-500">Identity seams</h2>
+        <h2 id="ds-identity" className="text-xs uppercase tracking-wider text-muted">Identity seams</h2>
         <Card>
           <div className="space-y-3">
             <div className="flex items-center gap-4">
               <Avatar name="Tadii Mercenta" email="tadii@mercenta.example" size="lg" />
               <Avatar name="Brand Partner" size="md" />
               <Avatar name="Tapatío" size="sm" />
-              <p className="text-xs text-zinc-500">Avatar — image seam, initials fallback, responsive sizes.</p>
+              <p className="text-xs text-muted">Avatar — image seam, initials fallback, responsive sizes.</p>
             </div>
             <div className="flex items-center gap-4">
               <img
@@ -209,7 +209,7 @@ export function DesignSystemShowcase() {
                 alt="Demo identity — Manchester United"
                 className="h-10 w-10 rounded-ds-md border border-hairline-strong"
               />
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted">
                 Brand logo identity seam — deterministic demo resolution (Manchester United → monogram), tenant-scoped override ahead.
               </p>
             </div>
@@ -219,7 +219,7 @@ export function DesignSystemShowcase() {
 
       {/* Table */}
       <section className="space-y-3" aria-labelledby="ds-table">
-        <h2 id="ds-table" className="text-xs uppercase tracking-wider text-zinc-500">DataTable foundation</h2>
+        <h2 id="ds-table" className="text-xs uppercase tracking-wider text-muted">DataTable foundation</h2>
         {loading ? (
           <div className="space-y-2">
             <Skeleton className="h-9 w-full" />
@@ -243,7 +243,7 @@ export function DesignSystemShowcase() {
 
       {/* Empty + Modal */}
       <section className="space-y-3" aria-labelledby="ds-feedback">
-        <h2 id="ds-feedback" className="text-xs uppercase tracking-wider text-zinc-500">Empty & overlays</h2>
+        <h2 id="ds-feedback" className="text-xs uppercase tracking-wider text-muted">Empty & overlays</h2>
         <Card className="p-0">
           <EmptyState title="No returns in this period" description="Returns will appear here once a return is authorised." />
         </Card>
@@ -267,7 +267,7 @@ export function DesignSystemShowcase() {
         title="Example dialog"
         footer={<Button onClick={() => setModalOpen(false)}>Close</Button>}
       >
-        <p className="text-sm text-zinc-300">
+        <p className="text-sm text-strong">
           This is the canonical Modal primitive — ESC and backdrop click close it; it is labelled and keyboard-accessible.
         </p>
       </Modal>

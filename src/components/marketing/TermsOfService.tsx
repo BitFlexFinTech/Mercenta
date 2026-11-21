@@ -140,7 +140,7 @@ export function TermsOfService({ onNavigate, onOpenPortal }: { onNavigate: (p: P
             <button
               type="button"
               onClick={() => onNavigate('privacy')}
-              className="text-brass underline underline-offset-2 transition-colors hover:text-brass-400"
+              className="text-accent underline underline-offset-2 transition-colors hover:text-accent-400"
             >
               {PUBLIC_LINK.privacy.label}
             </button>

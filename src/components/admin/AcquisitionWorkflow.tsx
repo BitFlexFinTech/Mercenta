@@ -54,29 +54,29 @@ import {
 import { Send, CheckCircle2, XCircle, Pencil, Sparkles, Mail, MessageSquareReply, Trophy, Building2, BadgeCheck } from 'lucide-react';
 
 const STAGE_STYLES: Record<string, string> = {
-  'awaiting approval': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-  approved: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  rejected: 'bg-red-500/15 text-red-300 border-red-500/20',
-  sent: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  'awaiting approval': 'bg-state-warning/10 text-state-warning border-state-warning/20',
+  approved: 'bg-state-success/10 text-state-success border-state-success/20',
+  rejected: 'bg-state-danger/10 text-state-danger border-state-danger/20',
+  sent: 'bg-state-info/10 text-state-info border-state-info/20',
   responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
-  qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  won: 'bg-brass/15 text-brass border-brass/30',
-  lost: 'bg-zinc-500/15 text-zinc-400 border-hairline',
+  qualified: 'bg-state-success/10 text-state-success border-state-success/20',
+  won: 'bg-accent/15 text-accent border-accent/30',
+  lost: 'bg-tint text-muted border-hairline',
   enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  'not enrolled': 'bg-tint text-zinc-400 border-hairline',
+  'not enrolled': 'bg-tint text-muted border-hairline',
 };
 
 /** §Phase E1 — onboarding status/step styling (existing palette only). */
 const ONBOARDING_STYLES: Record<string, string> = {
   initiated: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  completed: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  in_progress: 'bg-state-info/10 text-state-info border-state-info/20',
+  completed: 'bg-state-success/10 text-state-success border-state-success/20',
 };
 
 const ONBOARDING_STEP_STYLES: Record<string, string> = {
-  pending: 'bg-tint text-zinc-400 border-hairline',
-  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  done: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  pending: 'bg-tint text-muted border-hairline',
+  in_progress: 'bg-state-info/10 text-state-info border-state-info/20',
+  done: 'bg-state-success/10 text-state-success border-state-success/20',
 };
 
 /**
@@ -256,38 +256,38 @@ export function AcquisitionWorkflow({
             Badge primitive only accepts children/className, so putting a
             data-* attribute on it would silently render nothing. */}
         <span data-stage={stage}>
-          <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[stage] ?? 'text-zinc-400')}>
+          <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[stage] ?? 'text-muted')}>
             {stage}
           </Badge>
         </span>
-        <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+        <Badge className="text-ds-micro bg-tint text-strong border-hairline">
           BI score {prospect.score.total}/100 · {prospect.score.tier}
         </Badge>
         {row.region ? (
-          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-strong border-hairline">
             ICP region {row.region} · {row.lead?.segment}
           </Badge>
         ) : (
-          <Badge className="text-ds-micro bg-red-500/10 text-red-300 border-red-500/20">no ICP origin region</Badge>
+          <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">no ICP origin region</Badge>
         )}
-        <Badge className="text-ds-micro bg-tint text-zinc-400 border-hairline font-mono">
+        <Badge className="text-ds-micro bg-tint text-muted border-hairline font-mono">
           {prospect.id} → {row.lead?.id ?? '(unlinked)'}
         </Badge>
         {!canCurrentUserMutate && (
-          <Badge className="text-ds-micro bg-zinc-500/10 text-zinc-400 border-hairline">view-only account</Badge>
+          <Badge className="text-ds-micro bg-tint text-muted border-hairline">view-only account</Badge>
         )}
       </div>
 
-      {notice && <p className="text-ds-label text-emerald-400" data-notice="ok">{notice}</p>}
-      {error && <p className="text-ds-label text-red-300" data-notice="error">{error}</p>}
+      {notice && <p className="text-ds-label text-state-success" data-notice="ok">{notice}</p>}
+      {error && <p className="text-ds-label text-state-danger" data-notice="error">{error}</p>}
 
       {/* Why we are contacting this brand (BI evidence) -------------------- */}
-      <div className="bg-brass-500/5 border border-brass-500/15 rounded-ds-md p-3" data-section="evidence">
-        <p className="text-ds-micro font-semibold text-brass-300 uppercase mb-1">Why we are contacting this brand — BI evidence</p>
+      <div className="bg-accent-500/5 border border-accent-500/15 rounded-ds-md p-3" data-section="evidence">
+        <p className="text-ds-micro font-semibold text-accent-300 uppercase mb-1">Why we are contacting this brand — BI evidence</p>
         {whyContact ? (
-          <pre className="text-ds-label text-brass-300/90 whitespace-pre-wrap font-sans leading-relaxed">{whyContact}</pre>
+          <pre className="text-ds-label text-accent-300/90 whitespace-pre-wrap font-sans leading-relaxed">{whyContact}</pre>
         ) : (
-          <p className="text-ds-label text-zinc-500">
+          <p className="text-ds-label text-muted">
             Prepare a recommendation to attach the canonical Brand Intelligence evidence
             ({prospect.asins.length} ASINs · {prospect.contacts.length} contact(s) · score {prospect.score.total}/100).
           </p>
@@ -308,10 +308,10 @@ export function AcquisitionWorkflow({
         data-score-tier={intel.digest.scoreTier}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-ds-micro font-semibold text-zinc-400 uppercase">
+          <p className="text-ds-micro font-semibold text-muted uppercase">
             Canonical BI intelligence — {intel.digest.asinCount} ASINs · {intel.digest.contactCount} contact(s) · {intel.digest.evidenceCount} evidence
           </p>
-          <span className="text-ds-micro text-zinc-600 font-mono">by reference · {intel.prospectId}</span>
+          <span className="text-ds-micro text-faint font-mono">by reference · {intel.prospectId}</span>
         </div>
 
         {/* Score factors — the canonical seven dimensions, not recomputed */}
@@ -320,12 +320,12 @@ export function AcquisitionWorkflow({
             <span
               key={f.key}
               data-score-factor={f.key}
-              className="text-ds-micro bg-tint border border-hairline rounded-ds-sm px-1.5 py-0.5 text-zinc-400"
+              className="text-ds-micro bg-tint border border-hairline rounded-ds-sm px-1.5 py-0.5 text-muted"
             >
-              {f.label} <span className="text-zinc-200 font-mono">{intel.digest.scoreFactors[f.key]}</span>
+              {f.label} <span className="text-strong font-mono">{intel.digest.scoreFactors[f.key]}</span>
             </span>
           ))}
-          <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+          <Badge className="text-ds-micro bg-tint text-strong border-hairline">
             total {intel.digest.scoreTotal}/100 · {intel.digest.scoreTier}
           </Badge>
         </div>
@@ -335,7 +335,7 @@ export function AcquisitionWorkflow({
           <div className="overflow-x-auto" data-section="intelligence-asins">
             <table className="w-full text-ds-micro">
               <thead>
-                <tr className="text-zinc-500 text-left">
+                <tr className="text-muted text-left">
                   <th className="font-medium py-0.5 pr-2">ASIN</th>
                   <th className="font-medium py-0.5 pr-2">Title</th>
                   <th className="font-medium py-0.5 pr-2">BSR</th>
@@ -347,14 +347,14 @@ export function AcquisitionWorkflow({
               <tbody>
                 {intel.prospect.asins.map((a) => (
                   <tr key={a.asin} className="border-t border-hairline" data-asin={a.asin}>
-                    <td className="py-0.5 pr-2 font-mono text-zinc-400">{a.asin}</td>
-                    <td className="py-0.5 pr-2 text-zinc-300">{a.title}</td>
-                    <td className="py-0.5 pr-2 text-zinc-400">#{a.bsr}</td>
-                    <td className="py-0.5 pr-2 text-zinc-400">{a.sellerCount}</td>
-                    <td className="py-0.5 pr-2 text-zinc-400">
+                    <td className="py-0.5 pr-2 font-mono text-muted">{a.asin}</td>
+                    <td className="py-0.5 pr-2 text-strong">{a.title}</td>
+                    <td className="py-0.5 pr-2 text-muted">#{a.bsr}</td>
+                    <td className="py-0.5 pr-2 text-muted">{a.sellerCount}</td>
+                    <td className="py-0.5 pr-2 text-muted">
                       {a.estimatedRevenue ? `£${(a.estimatedRevenue / 1000).toFixed(0)}k` : 'n/a'}
                     </td>
-                    <td className="py-0.5 pr-2 text-zinc-500">{a.evidence.length}</td>
+                    <td className="py-0.5 pr-2 text-muted">{a.evidence.length}</td>
                   </tr>
                 ))}
               </tbody>
@@ -365,48 +365,48 @@ export function AcquisitionWorkflow({
         {/* Full contact set + distribution context */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div data-section="intelligence-contacts">
-            <p className="text-ds-micro text-zinc-500 uppercase mb-0.5">Contacts held by BI ({intel.digest.contactCount})</p>
+            <p className="text-ds-micro text-muted uppercase mb-0.5">Contacts held by BI ({intel.digest.contactCount})</p>
             {intel.prospect.contacts.length === 0 ? (
-              <p className="text-ds-micro text-zinc-600" data-empty="contacts">None held by BI — never fabricated.</p>
+              <p className="text-ds-micro text-faint" data-empty="contacts">None held by BI — never fabricated.</p>
             ) : (
               intel.prospect.contacts.map((c) => (
-                <p key={`${c.name}-${c.jobTitle}`} className="text-ds-micro text-zinc-300" data-contact={c.name}>
+                <p key={`${c.name}-${c.jobTitle}`} className="text-ds-micro text-strong" data-contact={c.name}>
                   {c.name}{c.jobTitle ? `, ${c.jobTitle}` : ''}
-                  <span className="text-zinc-500"> · {c.email ?? 'no email on record'} ({c.emailConfidence})</span>
+                  <span className="text-muted"> · {c.email ?? 'no email on record'} ({c.emailConfidence})</span>
                 </p>
               ))
             )}
           </div>
           <div className="space-y-0.5" data-section="intelligence-market">
-            <p className="text-ds-micro text-zinc-500 uppercase">Distribution, restrictions & growth</p>
+            <p className="text-ds-micro text-muted uppercase">Distribution, restrictions & growth</p>
             {intel.prospect.distributors.length === 0 ? (
-              <p className="text-ds-micro text-zinc-600">No distributor identified by BI.</p>
+              <p className="text-ds-micro text-faint">No distributor identified by BI.</p>
             ) : (
               intel.prospect.distributors.map((d) => (
-                <p key={d.company} className="text-ds-micro text-zinc-300">
+                <p key={d.company} className="text-ds-micro text-strong">
                   {d.company} — {d.territory}{d.exclusive ? ' (exclusive)' : ''}
                   {d.suggestedApproach ? ` · ${d.suggestedApproach.replace(/_/g, ' ')}` : ''}
                 </p>
               ))
             )}
             {intel.prospect.restrictions.map((r) => (
-              <p key={r.description} className="text-ds-micro text-amber-300/90">
+              <p key={r.description} className="text-ds-micro text-state-warning/90">
                 {r.severity} restriction — {r.description}
               </p>
             ))}
-            <p className="text-ds-micro text-zinc-400">
+            <p className="text-ds-micro text-muted">
               Wholesale programme: {intel.digest.wholesaleProgramme ? 'yes' : 'no'}
               {intel.prospect.wholesale.minimumOrderQuantity
                 ? ` · minimum order ${intel.prospect.wholesale.minimumOrderQuantity}`
                 : ' · minimum order not held'}
             </p>
             {intel.prospect.growthSignals.length > 0 && (
-              <p className="text-ds-micro text-zinc-400">
+              <p className="text-ds-micro text-muted">
                 Growth signals ({intel.prospect.growthSignals.length}):{' '}
                 {intel.prospect.growthSignals.map((g) => g.type.replace(/_/g, ' ')).join(', ')}
               </p>
             )}
-            <p className="text-ds-micro text-zinc-400">
+            <p className="text-ds-micro text-muted">
               {intel.prospect.category}
               {intel.prospect.countries?.length ? ` · ${intel.prospect.countries.join(', ')}` : ''}
               {intel.prospect.incumbentChallenged?.length
@@ -417,7 +417,7 @@ export function AcquisitionWorkflow({
         </div>
 
         {/* Provenance (canonical BI history) + lifecycle */}
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-ds-micro text-zinc-500" data-section="intelligence-provenance">
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-ds-micro text-muted" data-section="intelligence-provenance">
           <span data-provenance="runs">runs {intel.provenance.runIds.length}</span>
           <span data-provenance="timeline">timeline events {intel.provenance.changeEventIds.length}</span>
           <span data-provenance="snapshots">snapshots {intel.provenance.snapshotDates.length}</span>
@@ -428,7 +428,7 @@ export function AcquisitionWorkflow({
           <span>lastChecked {intel.lifecycle.lastChecked?.slice(0, 10) ?? 'not yet'}</span>
           <span>nextCheck {intel.lifecycle.nextCheck?.slice(0, 10) ?? 'not scheduled'}</span>
         </div>
-        <p className="text-ds-micro text-zinc-600">
+        <p className="text-ds-micro text-faint">
           Read live from the canonical Brand Intelligence record {intel.prospectId} — the same record Brand
           Intelligence and the CRM show. Nothing is copied into a second intelligence store.
         </p>
@@ -436,30 +436,30 @@ export function AcquisitionWorkflow({
 
       {/* Contact / targeting ---------------------------------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" data-section="targeting">
-        <div className="bg-ink-850 border border-hairline rounded-ds-md p-2.5">
-          <p className="text-ds-micro text-zinc-500 uppercase">Contact / decision-maker</p>
-          <p className="text-xs text-zinc-200 mt-0.5">
+        <div className="bg-surface-raised border border-hairline rounded-ds-md p-2.5">
+          <p className="text-ds-micro text-muted uppercase">Contact / decision-maker</p>
+          <p className="text-xs text-strong mt-0.5">
             {contact ? `${contact.name}${contact.jobTitle ? `, ${contact.jobTitle}` : ''}` : 'Not identified in the BI record'}
           </p>
-          <p className="text-ds-micro text-zinc-500 mt-0.5">
+          <p className="text-ds-micro text-muted mt-0.5">
             {contact?.email ?? 'hello@….example placeholder until a contact email is verified'}
           </p>
         </div>
-        <div className="bg-ink-850 border border-hairline rounded-ds-md p-2.5">
-          <p className="text-ds-micro text-zinc-500 uppercase">Channel</p>
-          <p className="text-xs text-zinc-200 mt-0.5">
+        <div className="bg-surface-raised border border-hairline rounded-ds-md p-2.5">
+          <p className="text-ds-micro text-muted uppercase">Channel</p>
+          <p className="text-xs text-strong mt-0.5">
             {current?.channel ?? 'email'} · {describeOutreachProvider(resolved.providerState)}
           </p>
-          <p className="text-ds-micro text-zinc-500 mt-0.5">Revisions: {relationship.outreach.length} · Messages logged: {messages.length}</p>
+          <p className="text-ds-micro text-muted mt-0.5">Revisions: {relationship.outreach.length} · Messages logged: {messages.length}</p>
         </div>
       </div>
 
       {/* Recommendation + human approval ---------------------------------- */}
       <div className="border border-hairline rounded-ds-md p-3 space-y-2" data-section="recommendation">
         <div className="flex items-center justify-between">
-          <p className="text-ds-micro font-semibold text-zinc-400 uppercase">Outreach recommendation</p>
+          <p className="text-ds-micro font-semibold text-muted uppercase">Outreach recommendation</p>
           {current && (
-            <span className="text-ds-micro text-zinc-500" data-revision={current.revision ?? 1}>
+            <span className="text-ds-micro text-muted" data-revision={current.revision ?? 1}>
               revision {current.revision ?? 1} · status {current.status}
               {current.transport ? ` · transport ${current.transport}` : ''}
             </span>
@@ -474,11 +474,11 @@ export function AcquisitionWorkflow({
               onChange={(e) => setBodyDraft(e.target.value)}
               disabled={!canApprove}
               rows={8}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40 disabled:opacity-70"
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40 disabled:opacity-70"
             />
           </>
         ) : (
-          <p className="text-ds-label text-zinc-500">
+          <p className="text-ds-label text-muted">
             No recommendation yet. Preparing one runs the canonical BI outreach generator over this
             prospect's real ASIN, score, contact and distributor evidence.
           </p>
@@ -500,7 +500,7 @@ export function AcquisitionWorkflow({
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="Rejection reason"
-                className="bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-ds-label text-strong"
+                className="bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-ds-label text-strong"
               />
               <Button className="text-xs" variant="danger" data-state="reject" onClick={handleReject} disabled={!canCurrentUserMutate}>
                 <XCircle className="w-3.5 h-3.5 mr-1.5" />Reject
@@ -523,32 +523,32 @@ export function AcquisitionWorkflow({
             </Button>
           )}
           {!canCurrentUserMutate && (
-            <span className="text-ds-micro text-amber-300">Read-only account — approval actions are refused.</span>
+            <span className="text-ds-micro text-state-warning">Read-only account — approval actions are refused.</span>
           )}
         </div>
       </div>
 
       {/* Responses -------------------------------------------------------- */}
       <div className="border border-hairline rounded-ds-md p-3" data-section="responses">
-        <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Responses ({responses.length})</p>
+        <p className="text-ds-micro font-semibold text-muted uppercase mb-1">Responses ({responses.length})</p>
         {responses.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">No response recorded yet.</p>
+          <p className="text-ds-label text-faint">No response recorded yet.</p>
         ) : (
           <div className="space-y-1.5">
             {responses.map((r) => (
-              <div key={r.id} className="bg-ink-850 border border-hairline rounded-ds-md p-2">
+              <div key={r.id} className="bg-surface-raised border border-hairline rounded-ds-md p-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className={cn('text-ds-micro', r.wantsHuman ? 'bg-emerald-500/15 text-emerald-300' : 'bg-tint text-zinc-300')}>
+                  <Badge className={cn('text-ds-micro', r.wantsHuman ? 'bg-state-success/10 text-state-success' : 'bg-tint text-strong')}>
                     {r.wantsHuman ? 'hot lead' : 'reply'}
                   </Badge>
-                  {r.simulated && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">simulated</Badge>}
-                  <span className="text-ds-micro font-mono text-zinc-500">
+                  {r.simulated && <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">simulated</Badge>}
+                  <span className="text-ds-micro font-mono text-muted">
                     {r.from} · {r.channel} · {r.receivedAt.slice(0, 16).replace('T', ' ')}
                   </span>
                 </div>
-                <p className="text-ds-label text-zinc-300 mt-1 whitespace-pre-wrap">{r.body}</p>
+                <p className="text-ds-label text-strong mt-1 whitespace-pre-wrap">{r.body}</p>
                 {r.classificationReason && (
-                  <p className="text-ds-micro text-zinc-500 mt-0.5">Classification: {r.classificationReason}</p>
+                  <p className="text-ds-micro text-muted mt-0.5">Classification: {r.classificationReason}</p>
                 )}
               </div>
             ))}
@@ -558,9 +558,9 @@ export function AcquisitionWorkflow({
 
       {/* Opportunity ------------------------------------------------------ */}
       <div className="border border-hairline rounded-ds-md p-3" data-section="opportunity">
-        <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Opportunity</p>
+        <p className="text-ds-micro font-semibold text-muted uppercase mb-1">Opportunity</p>
         {!opportunity ? (
-          <p className="text-ds-label text-zinc-600">No opportunity yet — it is created from a qualified brand response.</p>
+          <p className="text-ds-label text-faint">No opportunity yet — it is created from a qualified brand response.</p>
         ) : (
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -569,12 +569,12 @@ export function AcquisitionWorkflow({
                   {opportunity.stage}
                 </Badge>
               </span>
-              <span className="text-ds-micro text-zinc-400 font-mono">{opportunity.id}</span>
-              <span className="text-ds-micro text-zinc-400">BI snapshot {opportunity.biScore}/100 ({opportunity.biTier})</span>
-              <span className="text-ds-micro text-zinc-500">owner {opportunity.ownerStaffId}</span>
+              <span className="text-ds-micro text-muted font-mono">{opportunity.id}</span>
+              <span className="text-ds-micro text-muted">BI snapshot {opportunity.biScore}/100 ({opportunity.biTier})</span>
+              <span className="text-ds-micro text-muted">owner {opportunity.ownerStaffId}</span>
             </div>
             {opportunity.contactName && (
-              <p className="text-ds-label text-zinc-300">
+              <p className="text-ds-label text-strong">
                 {opportunity.contactName}{opportunity.contactEmail ? ` · ${opportunity.contactEmail}` : ''}
               </p>
             )}
@@ -598,12 +598,12 @@ export function AcquisitionWorkflow({
 
       {/* §Phase E1 — onboarding (opportunity → operational brand tenant) ---- */}
       <div className="border border-hairline rounded-ds-md p-3" data-section="onboarding">
-        <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Brand onboarding</p>
+        <p className="text-ds-micro font-semibold text-muted uppercase mb-1">Brand onboarding</p>
         {!opportunity ? (
-          <p className="text-ds-label text-zinc-600">Onboarding starts from a qualified opportunity.</p>
+          <p className="text-ds-label text-faint">Onboarding starts from a qualified opportunity.</p>
         ) : !onboarding ? (
           <div className="space-y-1.5">
-            <p className="text-ds-label text-zinc-500">
+            <p className="text-ds-label text-muted">
               No onboarding record yet. Starting it derives the brand tenant identity from this
               opportunity and links the two — the acquisition history is retained, not copied.
             </p>
@@ -616,7 +616,7 @@ export function AcquisitionWorkflow({
               <Building2 className="w-3.5 h-3.5 mr-1.5" />Start onboarding
             </Button>
             {!onboardingReady && (
-              <p className="text-ds-micro text-amber-300">
+              <p className="text-ds-micro text-state-warning">
                 Only a qualified or won opportunity can be onboarded.
               </p>
             )}
@@ -629,11 +629,11 @@ export function AcquisitionWorkflow({
                   {onboarding.status}
                 </Badge>
               </span>
-              <span className="text-ds-micro text-zinc-400 font-mono" data-onboarding-tenant>
+              <span className="text-ds-micro text-muted font-mono" data-onboarding-tenant>
                 {onboarding.brandId}
               </span>
-              <span className="text-ds-micro text-zinc-500 font-mono">{onboarding.id}</span>
-              <span className="text-ds-micro text-zinc-500">
+              <span className="text-ds-micro text-muted font-mono">{onboarding.id}</span>
+              <span className="text-ds-micro text-muted">
                 from {onboarding.opportunityId} · prospect {onboarding.prospectId}
               </span>
             </div>
@@ -644,8 +644,8 @@ export function AcquisitionWorkflow({
                   className="flex items-center justify-between gap-2 border-b border-hairline pb-1"
                   data-onboarding-step={s.id}
                 >
-                  <span className="text-ds-label text-zinc-300">
-                    <span className="font-mono text-ds-micro text-zinc-500 mr-1.5">{s.id}</span>
+                  <span className="text-ds-label text-strong">
+                    <span className="font-mono text-ds-micro text-muted mr-1.5">{s.id}</span>
                     {s.label}
                   </span>
                   <span className="flex items-center gap-2 flex-shrink-0">
@@ -680,7 +680,7 @@ export function AcquisitionWorkflow({
               </Button>
             )}
             {onboarding.status === 'completed' && (
-              <p className="text-ds-micro text-emerald-300">
+              <p className="text-ds-micro text-state-success">
                 Operational brand — tenant {onboarding.brandId}
                 {onboarding.completedAt ? ` (completed ${onboarding.completedAt.slice(0, 10)})` : ''}.
               </p>
@@ -692,27 +692,27 @@ export function AcquisitionWorkflow({
       {/* Relationship timeline + the ONE canonical message thread --------- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2" data-section="relationship">
         <div className="border border-hairline rounded-ds-md p-3">
-          <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1">Acquisition timeline ({events.length})</p>
+          <p className="text-ds-micro font-semibold text-muted uppercase mb-1">Acquisition timeline ({events.length})</p>
           {events.length === 0 ? (
-            <p className="text-ds-label text-zinc-600">No acquisition events yet.</p>
+            <p className="text-ds-label text-faint">No acquisition events yet.</p>
           ) : (
             <div className="space-y-1 max-h-[220px] overflow-y-auto pr-1">
               {events.slice().reverse().map((e) => (
                 <div key={e.id} className="text-ds-label border-b border-hairline pb-1">
-                  <span className="font-mono text-ds-micro text-zinc-500 mr-2">{e.type}</span>
-                  <span className="text-zinc-300">{e.summary}</span>
-                  {e.detail && <p className="text-ds-micro text-zinc-500">{e.detail}</p>}
+                  <span className="font-mono text-ds-micro text-muted mr-2">{e.type}</span>
+                  <span className="text-strong">{e.summary}</span>
+                  {e.detail && <p className="text-ds-micro text-muted">{e.detail}</p>}
                 </div>
               ))}
             </div>
           )}
         </div>
         <div className="border border-hairline rounded-ds-md p-3">
-          <p className="text-ds-micro font-semibold text-zinc-400 uppercase mb-1 flex items-center gap-1">
+          <p className="text-ds-micro font-semibold text-muted uppercase mb-1 flex items-center gap-1">
             <Mail className="w-3 h-3" /> Canonical conversation ({messages.length})
           </p>
           {messages.length === 0 ? (
-            <p className="text-ds-label text-zinc-600">No messages logged yet.</p>
+            <p className="text-ds-label text-faint">No messages logged yet.</p>
           ) : (
             <div className="space-y-1 max-h-[220px] overflow-y-auto pr-1">
               {messages.slice().reverse().map((m) => (
@@ -720,10 +720,10 @@ export function AcquisitionWorkflow({
                   key={m.id}
                   className={cn(
                     'rounded-ds-sm px-2 py-1.5 text-ds-label',
-                    m.direction === 'outbound' ? 'bg-brass-500/10 text-zinc-300' : 'bg-tint text-zinc-400'
+                    m.direction === 'outbound' ? 'bg-accent-500/10 text-strong' : 'bg-tint text-muted'
                   )}
                 >
-                  <span className="font-mono text-ds-micro text-zinc-500 mr-2">
+                  <span className="font-mono text-ds-micro text-muted mr-2">
                     {m.direction} · {m.channel} · {m.createdAt.slice(0, 16).replace('T', ' ')}
                   </span>
                   <span className="whitespace-pre-wrap">{m.subject ? `${m.subject} — ` : ''}{m.body.slice(0, 180)}</span>
@@ -731,7 +731,7 @@ export function AcquisitionWorkflow({
               ))}
             </div>
           )}
-          <p className="text-ds-micro text-zinc-600 mt-1">
+          <p className="text-ds-micro text-faint mt-1">
             Same thread as Admin → Messages (single canonical store keyed by {prospect.id}) — no duplicate conversation history.
           </p>
         </div>

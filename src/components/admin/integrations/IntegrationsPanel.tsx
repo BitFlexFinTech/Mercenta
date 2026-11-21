@@ -99,11 +99,11 @@ const SUMMARY_TILES: { id: HubFilter; label: string; hint: string; tone: 'succes
 ];
 
 const TILE_TONE_CLASSES: Record<'success' | 'warning' | 'info' | 'danger' | 'neutral', string> = {
-  success: 'text-emerald-300',
-  warning: 'text-amber-300',
-  info: 'text-blue-300',
-  danger: 'text-red-300',
-  neutral: 'text-zinc-300',
+  success: 'text-state-success',
+  warning: 'text-state-warning',
+  info: 'text-state-info',
+  danger: 'text-state-danger',
+  neutral: 'text-strong',
 };
 
 
@@ -124,35 +124,35 @@ const SIM_MOCK_LABELS: Record<string, string> = {
 function StatusBadge({ state }: { state: IntegrationState }) {
   if (state.status === 'connecting') {
     return (
-      <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20">
+      <Badge className="text-ds-micro bg-state-info/10 text-state-info border-state-info/20">
         <Loader2 className="w-3 h-3 animate-spin mr-1" /> Connecting…
       </Badge>
     );
   }
   if (state.status === 'connected') {
     return (
-      <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+      <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20">
         <CheckCircle2 className="w-3 h-3 mr-1" /> Connected
-        {state.sandbox && <span className="ml-1 text-amber-300">(Mock)</span>}
+        {state.sandbox && <span className="ml-1 text-state-warning">(Mock)</span>}
       </Badge>
     );
   }
   if (state.status === 'needs_attention') {
     return (
-      <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
+      <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">
         <AlertTriangle className="w-3 h-3 mr-1" /> Needs attention
       </Badge>
     );
   }
   if (state.status === 'code_received') {
     return (
-      <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+      <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">
         <CheckCircle2 className="w-3 h-3 mr-1" /> Code received
       </Badge>
     );
   }
   return (
-    <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+    <Badge className="text-ds-micro bg-tint text-muted border-hairline">
       Not connected
     </Badge>
   );
@@ -163,14 +163,14 @@ function ModeBadge({ mode }: { mode: IntegrationMode }) {
   const label = INTEGRATION_MODE_LABELS[mode];
   const cls =
     mode === 'live'
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+      ? 'bg-state-success/10 text-state-success border-state-success/20'
       : mode === 'simulation'
-      ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+      ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
       : mode === 'error'
-      ? 'bg-red-500/15 text-red-300 border-red-500/20'
+      ? 'bg-state-danger/10 text-state-danger border-state-danger/20'
       : mode === 'degraded'
       ? 'bg-orange-500/15 text-orange-300 border-orange-500/20'
-      : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
+      : 'bg-tint text-muted border-hairline';
   return (
     <Badge className={cn('text-ds-micro uppercase tracking-wide border', cls)}>
       {label}
@@ -232,33 +232,33 @@ function HealthPanel({
   return (
     <div className="bg-tint border border-hairline rounded-ds-md p-3 space-y-1 text-ds-label">
       <div className="flex items-center justify-between">
-        <span className="text-zinc-500">Auth</span>
-        <span className={health.authValid ? 'text-emerald-300' : 'text-red-300'}>
+        <span className="text-muted">Auth</span>
+        <span className={health.authValid ? 'text-state-success' : 'text-state-danger'}>
           {health.authValid ? 'Valid' : 'Not verified'}
         </span>
       </div>
       {health.lastSyncAt && (
         <div className="flex items-center justify-between">
-          <span className="text-zinc-500">Last sync</span>
-          <span className="font-mono text-zinc-300">{new Date(health.lastSyncAt).toLocaleString()}</span>
+          <span className="text-muted">Last sync</span>
+          <span className="font-mono text-strong">{new Date(health.lastSyncAt).toLocaleString()}</span>
         </div>
       )}
       {health.providerStatus && (
         <div className="flex items-center justify-between">
-          <span className="text-zinc-500">Provider</span>
-          <span className="font-mono text-zinc-300">{health.providerStatus}</span>
+          <span className="text-muted">Provider</span>
+          <span className="font-mono text-strong">{health.providerStatus}</span>
         </div>
       )}
       {health.errorCount > 0 && (
         <div className="flex items-center justify-between">
-          <span className="text-zinc-500">Errors</span>
-          <span className="text-red-300">{health.errorCount}</span>
+          <span className="text-muted">Errors</span>
+          <span className="text-state-danger">{health.errorCount}</span>
         </div>
       )}
       {health.lastErrorAt && (
         <div className="flex items-center justify-between">
-          <span className="text-zinc-500">Last error</span>
-          <span className="text-red-300">{new Date(health.lastErrorAt).toLocaleString()}</span>
+          <span className="text-muted">Last error</span>
+          <span className="text-state-danger">{new Date(health.lastErrorAt).toLocaleString()}</span>
         </div>
       )}
       <Button variant="ghost" size="sm" onClick={() => void check()} disabled={busy} className="text-xs mt-1">
@@ -315,8 +315,8 @@ function WizardStepper({
             className={cn(
               'text-ds-micro font-medium px-2 py-0.5 rounded-full border flex items-center gap-1',
               completed[s.id]
-                ? 'bg-brass-500/10 text-brass-300 border-brass-500/20'
-                : 'bg-tint text-zinc-500 border-hairline'
+                ? 'bg-accent-500/10 text-accent-300 border-accent-500/20'
+                : 'bg-tint text-muted border-hairline'
             )}
             data-state={completed[s.id] ? 'complete' : 'pending'}
           >
@@ -506,18 +506,18 @@ function ConnectWizard({ id, onClose }: WizardProps) {
 
   return (
     <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-ink-850 border-hairline">
+      <Card className="w-full max-w-lg bg-surface-raised border-hairline">
         <div className="flex items-center gap-3 mb-1">
-          <Plug className="w-5 h-5 text-brass-400" />
+          <Plug className="w-5 h-5 text-accent-400" />
           <h3 className="text-base font-semibold text-strong">Connect — {def.name}</h3>
         </div>
-        <p className="text-xs text-zinc-500 mb-5">{def.description}</p>
+        <p className="text-xs text-muted mb-5">{def.description}</p>
 
         <WizardStepper def={def} state={state} />
 
         {def.providerOptions && (
           <div className="mb-5">
-            <label className="text-xs font-medium text-zinc-400 mb-2 block">Provider</label>
+            <label className="text-xs font-medium text-muted mb-2 block">Provider</label>
             <div className="grid gap-2">
               {def.providerOptions.map((opt) => (
                 <button
@@ -526,8 +526,8 @@ function ConnectWizard({ id, onClose }: WizardProps) {
                   className={cn(
                     'text-left text-sm px-3 py-2.5 rounded-ds-md border transition-colors',
                     provider === opt.id
-                      ? 'border-brass-500/50 bg-brass-500/10 text-strong'
-                      : 'border-hairline text-zinc-400 hover:border-hairline-strong'
+                      ? 'border-accent-500/50 bg-accent-500/10 text-strong'
+                      : 'border-hairline text-muted hover:border-hairline-strong'
                   )}
                 >
                   {opt.label}
@@ -546,12 +546,12 @@ function ConnectWizard({ id, onClose }: WizardProps) {
               placeholder="Public application/client ID — not a secret"
             />
             {state?.status === 'code_received' && receivedCode ? (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-xs text-state-warning leading-relaxed">
+              <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3 text-xs text-state-warning leading-relaxed">
                 <strong>Authorization code received.</strong> Exchange it for
                 tokens via the server-side Edge Function to complete the connection.
               </div>
             ) : (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-state-info leading-relaxed">
+              <div className="bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 text-xs text-state-info leading-relaxed">
                 Clicking connect opens the provider's real consent screen in a
                 popup. The authorization code is exchanged server-side by the
                 <strong> spapi-token-exchange</strong> function and stored encrypted
@@ -574,7 +574,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
                 }
               />
             ))}
-            <p className="text-ds-label text-zinc-600">
+            <p className="text-ds-label text-faint">
               The key is tested live against {def.name} by the server before saving —
               no fake success. On success the key is stored encrypted in Supabase
               Vault and only its reference is kept here; it is never persisted
@@ -584,7 +584,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
         )}
 
         {stepError && (
-          <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300 flex items-start gap-2">
+          <div className="mb-4 bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-xs text-state-danger flex items-start gap-2">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             <span>{stepError}</span>
           </div>
@@ -703,9 +703,9 @@ export function IntegrationsPanel() {
         description="One-click connect for every external service — no API keys in .env files. Features stay locked until their card shows a verified Connected status. A provider is treated as simulation-safe ONLY when its mode positively resolves to simulation; UNKNOWN, unregistered, unconfigured, disabled, configuring, live, degraded and error are all treated as unsafe."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">{INTEGRATION_ORDER.length} providers</span>
-            <span className="font-mono text-ds-label text-zinc-500">{visibleIds.length} shown</span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">{INTEGRATION_ORDER.length} providers</span>
+            <span className="font-mono text-ds-label text-muted">{visibleIds.length} shown</span>
+            <span className="font-mono text-ds-label text-muted">
               {filter === 'all' ? 'no filter' : filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}
             </span>
           </>
@@ -721,8 +721,8 @@ export function IntegrationsPanel() {
               dataTestid="integrations-search"
             />
             <div className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
-              <span role="status" className="text-ds-label text-zinc-500">
+              <Search className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
+              <span role="status" className="text-ds-label text-muted">
                 {visibleIds.length} of {INTEGRATION_ORDER.length} providers shown
                 {filter !== 'all' &&
                   ` · ${filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}`}
@@ -745,7 +745,7 @@ export function IntegrationsPanel() {
         }
       />
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-state-info flex items-start gap-2">
+      <div className="bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 text-xs text-state-info flex items-start gap-2">
         <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live OAuth exchanges and test calls run as server-side Edge Functions with
@@ -780,7 +780,7 @@ export function IntegrationsPanel() {
             { label: 'Live network calls from this screen', value: '0' },
           ]}
         />
-        <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+        <p className="mt-2 text-ds-label leading-snug text-muted">
           Entering a real credential activates the already-built live path for that provider — no
           code change is required. Until then every workflow continues to run against its
           deterministic simulation, and no screen claims a live connection it does not have.
@@ -791,7 +791,7 @@ export function IntegrationsPanel() {
       {attentionIds.length > 0 && (
         <div
           role="alert"
-          className="bg-red-500/10 border border-red-500/25 rounded-ds-md p-3 text-xs text-state-danger flex items-start gap-2"
+          className="bg-state-danger/10 border border-red-500/25 rounded-ds-md p-3 text-xs text-state-danger flex items-start gap-2"
         >
           <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>
@@ -808,7 +808,7 @@ export function IntegrationsPanel() {
 
       {/* Provider list */}
       {visibleIds.length === 0 ? (
-        <Card className="p-2 bg-ink-850 border-hairline">
+        <Card className="p-2 bg-surface-raised border-hairline">
           <EmptyState
             title="No integrations match this view"
             description="Clear the filters to see every registered provider again. The Hub never hides an integration — a provider appears here as soon as it is registered."
@@ -835,7 +835,7 @@ export function IntegrationsPanel() {
                 <h2 className="text-sm font-semibold text-strong tracking-tight">
                   {INTEGRATION_CATEGORY_LABELS[row.category]}
                 </h2>
-                <p className="text-ds-label text-zinc-500 mt-0.5">
+                <p className="text-ds-label text-muted mt-0.5">
                   {CATEGORY_DESCRIPTIONS[row.category] ?? ''} · {row.count} provider
                   {row.count === 1 ? '' : 's'}
                 </p>
@@ -848,7 +848,7 @@ export function IntegrationsPanel() {
           const connected = state.status === 'connected';
           const mode = modes[id];
           return (
-            <Card key={id} className="p-5 bg-ink-850 border-hairline">
+            <Card key={id} className="p-5 bg-surface-raised border-hairline">
               <div data-mode={mode} data-connection={state.status} className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-start justify-between w-full">
                   <h3 className="text-sm font-semibold text-strong">{def.name}</h3>
@@ -858,7 +858,7 @@ export function IntegrationsPanel() {
                   </div>
                 </div>
               </div>
-              <p className="text-ds-label text-zinc-500 mb-3 leading-relaxed max-w-md">
+              <p className="text-ds-label text-muted mb-3 leading-relaxed max-w-md">
                 {def.description}
               </p>
 
@@ -872,13 +872,13 @@ export function IntegrationsPanel() {
                     .filter(([k]) => k !== 'sandbox')
                     .map(([k, v]) => (
                       <div key={k} className="flex justify-between text-ds-label">
-                        <span className="font-mono text-zinc-600">{k}</span>
-                        <span className="font-mono text-zinc-300">{v}</span>
+                        <span className="font-mono text-faint">{k}</span>
+                        <span className="font-mono text-strong">{v}</span>
                       </div>
                     ))}
                   <div className="flex justify-between text-ds-label">
-                    <span className="font-mono text-zinc-600">lastVerifiedAt</span>
-                    <span className="font-mono text-zinc-300">
+                    <span className="font-mono text-faint">lastVerifiedAt</span>
+                    <span className="font-mono text-strong">
                       {state.lastVerifiedAt
                         ? new Date(state.lastVerifiedAt).toLocaleString()
                         : '—'}
@@ -888,7 +888,7 @@ export function IntegrationsPanel() {
               )}
 
               {state.error && (
-                <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-ds-md p-2.5 text-ds-label text-red-300">
+                <div className="mb-3 bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-2.5 text-ds-label text-state-danger">
                   {state.error}
                 </div>
               )}
@@ -905,8 +905,8 @@ export function IntegrationsPanel() {
                   It remains a HINT, never a status: Mercenta holding a key is not
                   a verified connection, and it is never rendered as one. */}
               {serverSecrets[id] === true && mode !== 'live' && !connected && (
-                <div className="mb-3 bg-tint border border-hairline rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
-                  <strong className="text-zinc-300">Server-side key present.</strong>{' '}
+                <div className="mb-3 bg-tint border border-hairline rounded-ds-md p-2.5 text-ds-micro text-muted leading-relaxed">
+                  <strong className="text-strong">Server-side key present.</strong>{' '}
                   Mercenta holds a key for {def.name} on the server ({serverSecretNameFor(id) ?? 'a Vault secret'}),
                   so the live test call can run. Holding a key is not a verified connection —
                   complete the connect flow for a real status.
@@ -915,19 +915,19 @@ export function IntegrationsPanel() {
 
               {/* §Priority-1 — provider control plane: simulation mode + safe mock config */}
               {mode === 'simulation' && (
-                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-micro text-state-warning leading-relaxed">
+                <div className="mb-3 bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-2.5 text-ds-micro text-state-warning leading-relaxed">
                   <strong>Simulation mode.</strong> No live call is made and no real credential is
                   used or stored. Safe mock configuration: {SIM_MOCK_LABELS[`${id}:${state.provider ?? ''}`] ?? 'deterministic mock adapter (see workflow surfaces)'}. Enter real credentials below to switch to LIVE later — no code change.
                 </div>
               )}
               {state.disabled && (
-                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-ds-md p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-tint border border-hairline rounded-ds-md p-2.5 text-ds-micro text-muted leading-relaxed">
                   <strong>Disabled.</strong> Configuration kept; no workflow uses this provider.
                 </div>
               )}
 
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="text-ds-micro text-zinc-600">
+                <span className="text-ds-micro text-faint">
                   {mode === 'simulation' ? 'Simulation is executable with no credentials' : 'Operator: enable simulation to demonstrate workflows without credentials'}
                 </span>
                 <div className="flex items-center gap-2">
@@ -967,7 +967,7 @@ export function IntegrationsPanel() {
                     <Button
                       variant="ghost"
                       onClick={() => disconnect(id)}
-                      className="text-xs text-red-300 hover:text-state-danger"
+                      className="text-xs text-state-danger hover:text-state-danger"
                     >
                       <Unlink className="w-3.5 h-3.5 mr-1" /> Disconnect
                     </Button>

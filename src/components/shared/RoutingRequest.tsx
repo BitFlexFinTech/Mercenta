@@ -99,7 +99,7 @@ export function RoutingRequestIndicator({
    */
   if (routing?.raised) {
     return (
-      <div className="flex items-center gap-2 bg-emerald-500/10 border border-state-success/20 rounded-ds-md px-3 py-2">
+      <div className="flex items-center gap-2 bg-state-success/10 border border-state-success/20 rounded-ds-md px-3 py-2">
         <CheckCircle2 className="w-4 h-4 text-state-success flex-shrink-0" />
         <span className="text-ds-label text-state-success font-medium" data-testid="routing-raised-by-mercenta">
           Routing step raised by Mercenta · {routingCarrierLabel(routing)} · {routing.reference}
@@ -111,9 +111,9 @@ export function RoutingRequestIndicator({
   return (
     <div className={cn(
       'flex items-center gap-2 rounded-ds-md px-3 py-2 border',
-      countdown.overdue ? 'bg-red-500/10 border-red-500/20' : 'bg-amber-500/10 border-state-warning/20'
+      countdown.overdue ? 'bg-state-danger/10 border-state-danger/20' : 'bg-state-warning/10 border-state-warning/20'
     )}>
-      <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-state-warning')} />
+      <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-state-danger' : 'text-state-warning')} />
       <div className="flex-1 min-w-0">
         <p className={cn('text-ds-label font-medium', countdown.overdue ? 'text-state-danger' : 'text-state-warning')}>
           Routing step — Mercenta raises it (Freight Collect)
@@ -125,7 +125,7 @@ export function RoutingRequestIndicator({
       </div>
       <div className={cn(
         'text-ds-micro font-mono px-2 py-0.5 rounded-ds-sm',
-        countdown.overdue ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-state-warning'
+        countdown.overdue ? 'bg-red-500/20 text-state-danger' : 'bg-amber-500/20 text-state-warning'
       )}>
         <Clock className="w-3 h-3 inline mr-1" />{countdown.label}
       </div>
@@ -187,10 +187,10 @@ export function RoutingRequestStatus({
         deadline && (
           <div className="flex items-center gap-2">
             {isOverdue
-              ? <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+              ? <AlertTriangle className="w-3.5 h-3.5 text-state-danger" />
               : <Clock className="w-3.5 h-3.5 text-state-warning" />
             }
-            <span className={cn('text-ds-micro', isOverdue ? 'text-red-300' : 'text-state-warning')}>
+            <span className={cn('text-ds-micro', isOverdue ? 'text-state-danger' : 'text-state-warning')}>
               {isOverdue
                 ? 'OVERDUE — ship window closed ' + new Date(shipWindowEnd as string).toLocaleDateString('en-GB') + '. Ship at risk of rejection.'
                 : 'Mercenta readiness target: ' + deadline.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at ' + ROUTING_READINESS.cutoffHour + ':00 (Europe/London)'}

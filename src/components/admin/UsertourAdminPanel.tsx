@@ -27,7 +27,7 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-ds-micro text-zinc-500 hover:text-zinc-300 transition-colors"
+        className="flex items-center gap-1 text-ds-micro text-muted hover:text-strong transition-colors"
       >
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         {steps.length} step{steps.length !== 1 ? 's' : ''}
@@ -35,9 +35,9 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
       {open && (
         <ol className="mt-2 space-y-1.5 pl-4 list-decimal">
           {steps.map((s) => (
-            <li key={s.id} className="text-ds-micro text-zinc-400 leading-relaxed">
-              <span className="text-zinc-200">{s.title}</span>
-              <span className="text-zinc-500"> — {s.description.slice(0, 60)}{s.description.length > 60 ? '…' : ''}</span>
+            <li key={s.id} className="text-ds-micro text-muted leading-relaxed">
+              <span className="text-strong">{s.title}</span>
+              <span className="text-muted"> — {s.description.slice(0, 60)}{s.description.length > 60 ? '…' : ''}</span>
             </li>
           ))}
         </ol>
@@ -50,14 +50,14 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
 
 function TourCard({ tour }: { tour: TourDefinition }) {
   return (
-    <div className="relative flex flex-col rounded-ds-lg bg-ink-850 border border-hairline overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-ds-raised">
+    <div className="relative flex flex-col rounded-ds-lg bg-surface-raised border border-hairline overflow-hidden transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-ds-raised">
       {/* Preview area — step count summary */}
       <div className="flex min-h-0 flex-1 items-center justify-center bg-tint border-b border-hairline px-4 py-6">
         <div className="text-center">
-          <Layers className="w-8 h-8 text-brass-400/60 mx-auto mb-2" />
-          <div className="text-ds-label text-zinc-500">{tour.steps.length} guided steps</div>
+          <Layers className="w-8 h-8 text-accent-400/60 mx-auto mb-2" />
+          <div className="text-ds-label text-muted">{tour.steps.length} guided steps</div>
           {tour.autoStartViews && tour.autoStartViews.length > 0 && (
-            <div className="text-ds-micro text-zinc-600 mt-1">
+            <div className="text-ds-micro text-faint mt-1">
               Triggers on: {tour.autoStartViews.join(', ')}
             </div>
           )}
@@ -72,8 +72,8 @@ function TourCard({ tour }: { tour: TourDefinition }) {
             {tour.name}
           </span>
           <span className="flex shrink-0 items-center gap-1">
-            <span className={cn('w-1.5 h-1.5 rounded-full', tour.autoStart ? 'bg-emerald-400' : 'bg-zinc-500/40')} />
-            <span className={cn('text-ds-micro font-medium', tour.autoStart ? 'text-emerald-300' : 'text-zinc-500')}>
+            <span className={cn('w-1.5 h-1.5 rounded-full', tour.autoStart ? 'bg-emerald-400' : 'bg-state-muted/40')} />
+            <span className={cn('text-ds-micro font-medium', tour.autoStart ? 'text-state-success' : 'text-muted')}>
               {tour.autoStart ? 'Published' : 'Draft'}
             </span>
           </span>
@@ -82,21 +82,21 @@ function TourCard({ tour }: { tour: TourDefinition }) {
         {/* Row 2: badges */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {tour.forceFirst && (
-            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">Required</Badge>
+            <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">Required</Badge>
           )}
           {tour.autoStartViews && tour.autoStartViews.length > 0 && (
-            <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20">
+            <Badge className="text-ds-micro bg-state-info/10 text-state-info border-state-info/20">
               {tour.autoStartViews.length} trigger{tour.autoStartViews.length !== 1 ? 's' : ''}
             </Badge>
           )}
-          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+          <Badge className="text-ds-micro bg-tint text-muted border-hairline">
             {tour.steps.length} step{tour.steps.length !== 1 ? 's' : ''}
           </Badge>
         </div>
 
         {/* Row 3: description + actions */}
         <div className="flex items-start justify-between gap-2">
-          <p className="text-ds-micro text-zinc-500 leading-relaxed flex-1 line-clamp-2">
+          <p className="text-ds-micro text-muted leading-relaxed flex-1 line-clamp-2">
             {tour.description}
           </p>
           <div className="flex items-center gap-1 shrink-0">
@@ -141,16 +141,16 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover" onClick={onClose}>
       <div
-        className="w-[460px] bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay overflow-hidden"
+        className="w-[460px] bg-surface border border-hairline rounded-ds-lg shadow-ds-overlay overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div className="flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-brass-400" />
+            <HelpCircle className="w-4 h-4 text-accent-400" />
             <span className="text-sm font-medium text-strong">{tour.name}</span>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-strong transition-colors" aria-label="Close preview">
+          <button onClick={onClose} className="text-muted hover:text-strong transition-colors" aria-label="Close preview">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -159,28 +159,28 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
         <div className="px-5 py-6">
           <div className="flex items-center gap-1.5 mb-1">
             {tour.steps.map((_, i) => (
-              <span key={i} className={cn('w-2 h-2 rounded-full', i === stepIndex ? 'bg-brass-500' : 'bg-zinc-700')} />
+              <span key={i} className={cn('w-2 h-2 rounded-full', i === stepIndex ? 'bg-accent-500' : 'bg-surface-overlay')} />
             ))}
           </div>
-          <p className="text-ds-micro text-zinc-500 mb-3">
+          <p className="text-ds-micro text-muted mb-3">
             Step {stepIndex + 1} of {tour.steps.length} &middot; Position: {step.position}
           </p>
           <h4 className="text-sm font-semibold text-strong mb-2">{step.title}</h4>
-          <p className="text-xs text-zinc-400 leading-relaxed mb-4">{step.description}</p>
+          <p className="text-xs text-muted leading-relaxed mb-4">{step.description}</p>
 
           {/* Target selector info */}
           <div className="bg-tint border border-hairline rounded-ds-md px-3 py-2 mb-4">
-            <div className="text-ds-micro text-zinc-500">Target element</div>
-            <code className="text-ds-micro text-brass-300 font-mono">{step.targetSelector}</code>
+            <div className="text-ds-micro text-muted">Target element</div>
+            <code className="text-ds-micro text-accent-300 font-mono">{step.targetSelector}</code>
           </div>
 
           {/* Debug: show all steps in compact list */}
-          <details className="text-ds-micro text-zinc-500">
-            <summary className="cursor-pointer hover:text-zinc-300 transition-colors">All steps</summary>
+          <details className="text-ds-micro text-muted">
+            <summary className="cursor-pointer hover:text-strong transition-colors">All steps</summary>
             <ol className="mt-2 space-y-1 pl-4 list-decimal">
               {tour.steps.map((s, i) => (
-                <li key={s.id} className={cn(i === stepIndex ? 'text-zinc-200' : 'text-zinc-500')}>
-                  {s.title} — <span className="text-zinc-600">{s.targetSelector}</span>
+                <li key={s.id} className={cn(i === stepIndex ? 'text-strong' : 'text-muted')}>
+                  {s.title} — <span className="text-faint">{s.targetSelector}</span>
                 </li>
               ))}
             </ol>
@@ -310,10 +310,10 @@ export function UsertourAdminPanel() {
         description="Internal tour management — the guided onboarding tours defined for the brand portal. Tours are rendered by the built-in TourEngine at runtime; this surface manages and previews them, it does not replace them."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">{totalTours} tours</span>
-            <span className="font-mono text-ds-label text-zinc-500">{publishedCount} published</span>
-            <span className="font-mono text-ds-label text-zinc-500">{requiredCount} required</span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">{totalTours} tours</span>
+            <span className="font-mono text-ds-label text-muted">{publishedCount} published</span>
+            <span className="font-mono text-ds-label text-muted">{requiredCount} required</span>
+            <span className="font-mono text-ds-label text-muted">
               {visibleTours.length} in view
             </span>
           </>
@@ -326,14 +326,14 @@ export function UsertourAdminPanel() {
               onChange={(e) => setTourQuery(e.target.value)}
               placeholder="Search tours"
               data-testid="tours-search"
-              className="w-48 bg-ink-900 border border-hairline rounded-ds-md px-3 py-1.5 text-xs text-strong"
+              className="w-48 bg-surface border border-hairline rounded-ds-md px-3 py-1.5 text-xs text-strong"
             />
             <select
               aria-label="Tour status filter"
               value={tourStatus}
               onChange={(e) => setTourStatus(e.target.value as 'all' | 'published' | 'draft' | 'required')}
               data-testid="tours-status-filter"
-              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
             >
               <option value="all">Status: all</option>
               <option value="published">Published</option>
@@ -359,13 +359,13 @@ export function UsertourAdminPanel() {
         </div>
         {visibleTours.length === 0 && (
           <Card className="p-6">
-            <p className="text-xs text-zinc-600">No tours match the current filters.</p>
+            <p className="text-xs text-faint">No tours match the current filters.</p>
           </Card>
         )}
       </WorkspaceSection>
 
       <ContextPanel title="Tour engine">
-        <p className="text-ds-label leading-snug text-zinc-400">
+        <p className="text-ds-label leading-snug text-muted">
           Tours are launched by the TourEngine in the brand shell. Dismissal, step completion and
           force-first ordering are owned by that engine — this panel only lists and previews the
           definitions, so a tour can never be duplicated into a second implementation here.

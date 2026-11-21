@@ -164,14 +164,14 @@ export function ComplianceApprovals() {
         description="Per-brand cards · automated verification, then Founder / Super Admin review"
         meta={
           <>
-            <span className="text-ds-label text-zinc-500">
-              Documents on file <span className="font-mono text-zinc-300">{docMetrics.total}</span>
+            <span className="text-ds-label text-muted">
+              Documents on file <span className="font-mono text-strong">{docMetrics.total}</span>
             </span>
-            <span className="text-ds-label text-zinc-500">
-              Awaiting review <span className="font-mono text-zinc-300">{docMetrics.awaiting}</span>
+            <span className="text-ds-label text-muted">
+              Awaiting review <span className="font-mono text-strong">{docMetrics.awaiting}</span>
             </span>
-            <span className="text-ds-label text-zinc-500">
-              Brands <span className="font-mono text-zinc-300">{docMetrics.brands}</span>
+            <span className="text-ds-label text-muted">
+              Brands <span className="font-mono text-strong">{docMetrics.brands}</span>
             </span>
           </>
         }
@@ -189,7 +189,7 @@ export function ComplianceApprovals() {
               ]}
             />
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-faint sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -206,7 +206,7 @@ export function ComplianceApprovals() {
         }
       />
       {/* §M2 — the outcome of the last verification action, including refusals. */}
-      {note && <p className="text-ds-label text-zinc-400" data-testid="compliance-verification-note">{note}</p>}
+      {note && <p className="text-ds-label text-muted" data-testid="compliance-verification-note">{note}</p>}
 
       <MetricBand
         columns={4}
@@ -263,12 +263,12 @@ export function ComplianceApprovals() {
           compliance documents on file" about a brand that may simply not have
           loaded yet (measured in a real browser). */}
       {compliancePending && (
-        <Card className="p-2 bg-ink-850 border-hairline">
+        <Card className="p-2 bg-surface-raised border-hairline">
           <LoadingState rows={4} label="Loading compliance documents…" />
         </Card>
       )}
       {!compliancePending && brandMap.size === 0 && (
-        <Card className="p-2 bg-ink-850 border-hairline">
+        <Card className="p-2 bg-surface-raised border-hairline">
           <EmptyState
             title={reviewFilter === 'all' ? 'No compliance documents on file' : 'No documents match this filter'}
             description="A partner brand appears here with its per-document review state as soon as Mercenta holds a document record for it. Approving a document is what clears that brand's compliance gate."
@@ -283,23 +283,23 @@ export function ComplianceApprovals() {
         const pending = brandDocs.filter(function(d) { return d.status === 'under_review' || d.status === 'uploaded'; }).length;
         const approved = brandDocs.filter(function(d) { return d.status === 'approved'; }).length;
         const isExpanded = expandedBrandId === brandId;
-        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-hairline rounded-ds-lg overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-hairline-strong')}>
+        return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-surface-raised border border-hairline rounded-ds-lg overflow-hidden', isExpanded ? 'ring-1 ring-accent-500/30' : 'hover:border-hairline-strong')}>
           <button onClick={function() { setExpandedBrandId(isExpanded ? null : brandId); }} className="w-full text-left p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-strong">{brandName}</div><div className="text-ds-micro text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
-            <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
+            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-accent-400 flex-shrink-0" /><div><div className="text-sm font-medium text-strong">{brandName}</div><div className="text-ds-micro text-muted mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
+            <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted" /> : <ChevronRight className="w-3.5 h-3.5 text-muted" />}</div>
           </button>
           {isExpanded && (<div className="border-t border-hairline divide-y divide-hairline-06">{brandDocs.map(function(d) { return (<div key={d.id} data-density={density} className={cn('flex items-center justify-between px-4', density === 'compact' ? 'py-2' : 'py-2.5')}>
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xs text-zinc-300 capitalize truncate">{d.type.replace(/_/g, ' ')}</span>
-              <span className="text-ds-micro text-zinc-600">v{d.version ?? 1}</span>
+              <span className="text-xs text-strong capitalize truncate">{d.type.replace(/_/g, ' ')}</span>
+              <span className="text-ds-micro text-faint">v{d.version ?? 1}</span>
               <StatusBadge className="text-ds-micro" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge>
               {d.verificationStatus && (
                 <StatusBadge className="text-ds-micro" dataStatus={documentVerificationStatusPresentation(d.verificationStatus).dataStatus} tone={documentVerificationStatusPresentation(d.verificationStatus).tone}>{documentVerificationStatusPresentation(d.verificationStatus).label}</StatusBadge>
               )}
-              {d.supersedesDocumentId && <span className="text-ds-micro text-zinc-600">replaces v{(d.version ?? 2) - 1}</span>}
+              {d.supersedesDocumentId && <span className="text-ds-micro text-faint">replaces v{(d.version ?? 2) - 1}</span>}
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-ds-micro" data-state={'doc-preview-' + d.id} onClick={function() { setDrawerId(d.id); }}>Preview</Button><Button variant="ghost" className="text-ds-micro" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-ds-micro text-emerald-300" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-ds-micro text-red-300" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
-          </div>);})}<p className="text-ds-micro text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
+            <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-ds-micro" data-state={'doc-preview-' + d.id} onClick={function() { setDrawerId(d.id); }}>Preview</Button><Button variant="ghost" className="text-ds-micro" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-ds-micro text-state-success" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-ds-micro text-state-danger" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-ds-micro text-accent" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-ds-micro text-accent" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
+          </div>);})}<p className="text-ds-micro text-faint px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);
       })}</div>}
       </WorkspaceSection>
@@ -317,7 +317,7 @@ export function ComplianceApprovals() {
         footer={
           drawerDoc ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-micro text-zinc-600">
+              <span className="text-ds-micro text-faint">
                 Version {drawerDoc.version ?? 1} · actions attributed to the operator
               </span>
               <div className="flex items-center gap-2">
@@ -347,17 +347,17 @@ export function ComplianceApprovals() {
         const bundle = previewBundle;
         const docBrand = brandsList.find(function(b) { return b.id === preview.brandId; });
         return (<div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+          <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-surface-raised border-hairline">
             <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
               <span className="text-sm font-semibold text-strong capitalize">{preview.type.replace(/_/g, ' ')} — {docBrand?.profile.businessName}</span>
-              <button onClick={function() { setPreviewId(null); }} className="text-zinc-400 hover:text-strong">✕</button>
+              <button onClick={function() { setPreviewId(null); }} className="text-muted hover:text-strong">✕</button>
             </div>
             <iframe title="doc-preview" srcDoc={bundle?.html ?? '<p>No preview.</p>'} className="w-full h-[60vh] bg-tint" />
             <div className="flex justify-end gap-2 p-4 border-t border-hairline">
               <Button variant="ghost" onClick={function() { setPreviewId(null); }}>Close</Button>
               <Button onClick={function() { void manual(preview.id, 'approve'); }} className="text-xs"><CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve (manual)</Button>
-              <Button variant="ghost" onClick={function() { void manual(preview.id, 'reject'); }} className="text-xs text-red-300"><XCircle className="w-3.5 h-3.5 mr-1" /> Reject</Button>
-              <Button variant="ghost" onClick={function() { void runAutomated(preview.id); }} className="text-xs text-brass">Verify (automated)</Button>
+              <Button variant="ghost" onClick={function() { void manual(preview.id, 'reject'); }} className="text-xs text-state-danger"><XCircle className="w-3.5 h-3.5 mr-1" /> Reject</Button>
+              <Button variant="ghost" onClick={function() { void runAutomated(preview.id); }} className="text-xs text-accent">Verify (automated)</Button>
             </div>
           </Card>
         </div>);
@@ -413,18 +413,18 @@ function ComplianceDocPreviewBody({
 
       {note && (
         <section aria-label="Last verification outcome">
-          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Last verification outcome
           </h3>
-          <p className="text-ds-label leading-snug text-zinc-400">{note}</p>
+          <p className="text-ds-label leading-snug text-muted">{note}</p>
         </section>
       )}
 
       <section aria-label="Gate effect">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Gate effect
         </h3>
-        <p className="text-ds-label leading-snug text-zinc-500">
+        <p className="text-ds-label leading-snug text-muted">
           {doc.status === 'approved'
             ? 'This document satisfies its requirement for the products in scope.'
             : 'This document does not yet satisfy its requirement — the affected products stay behind the compliance gate.'}

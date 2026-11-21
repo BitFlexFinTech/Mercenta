@@ -112,14 +112,14 @@ export function PartnershipsCentre() {
   return (
     <div className="space-y-4" data-testid="partnerships-centre">
       <Card title="Trade-programme & partner routes (prospective)">
-        <p className="text-ds-micro text-amber-300/90 flex items-start gap-1.5 mb-3">
+        <p className="text-ds-micro text-state-warning/90 flex items-start gap-1.5 mb-3">
           <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
           {TRADE_PARTNERSHIP_DISCLAIMER}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs" data-testid="partner-targets-table">
             <thead>
-              <tr className="border-b border-hairline text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-muted">
                 <th className="px-2 py-1.5">Route</th>
                 <th className="px-2 py-1.5">Kind</th>
                 <th className="px-2 py-1.5">Market</th>
@@ -137,13 +137,13 @@ export function PartnershipsCentre() {
                   onClick={() => setSelected(t)}
                 >
                   <td className="px-2 py-1.5 text-strong">{t.name}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{t.kind}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{t.market}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">
+                  <td className="px-2 py-1.5 text-muted">{t.kind}</td>
+                  <td className="px-2 py-1.5 text-muted">{t.market}</td>
+                  <td className="px-2 py-1.5 text-muted">
                     {t.programme ? TRADE_PROGRAMMES[t.programme].label : '—'}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-500 text-ds-micro">{t.objective}</td>
-                  <td className="px-2 py-1.5 text-ds-micro text-amber-300/80">
+                  <td className="px-2 py-1.5 text-muted text-ds-micro">{t.objective}</td>
+                  <td className="px-2 py-1.5 text-ds-micro text-state-warning/80">
                     {partnerTargetStatusLabel(t)}
                   </td>
                 </tr>
@@ -155,23 +155,23 @@ export function PartnershipsCentre() {
 
       <Card title="Measured pipeline — brands discovered to onboarded">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-ds-label font-mono">
-          <p className="text-zinc-400">
-            Discovered: <span className="text-zinc-200">{pipeline.stages.discovered}</span>
+          <p className="text-muted">
+            Discovered: <span className="text-strong">{pipeline.stages.discovered}</span>
           </p>
-          <p className="text-zinc-400">
-            Contacted: <span className="text-zinc-200">{pipeline.stages.contacted}</span>
+          <p className="text-muted">
+            Contacted: <span className="text-strong">{pipeline.stages.contacted}</span>
           </p>
-          <p className="text-zinc-400">
-            Qualified: <span className="text-zinc-200">{pipeline.stages.qualified}</span>
+          <p className="text-muted">
+            Qualified: <span className="text-strong">{pipeline.stages.qualified}</span>
           </p>
-          <p className="text-zinc-400">
-            Onboarded: <span className="text-emerald-300">{pipeline.stages.onboarded}</span>
+          <p className="text-muted">
+            Onboarded: <span className="text-state-success">{pipeline.stages.onboarded}</span>
           </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs" data-testid="partnership-pipeline-table">
             <thead>
-              <tr className="border-b border-hairline text-left text-zinc-500">
+              <tr className="border-b border-hairline text-left text-muted">
                 <th className="px-2 py-1.5">Route</th>
                 <th className="px-2 py-1.5">Discovered</th>
                 <th className="px-2 py-1.5">Contacted</th>
@@ -182,17 +182,17 @@ export function PartnershipsCentre() {
             <tbody>
               {pipeline.byProgramme.map((b) => (
                 <tr key={b.label} className="border-b border-hairline">
-                  <td className="px-2 py-1.5 text-zinc-300">{b.label}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{b.discovered}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{b.contacted}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{b.qualified}</td>
-                  <td className="px-2 py-1.5 text-zinc-400">{b.onboarded}</td>
+                  <td className="px-2 py-1.5 text-strong">{b.label}</td>
+                  <td className="px-2 py-1.5 text-muted">{b.discovered}</td>
+                  <td className="px-2 py-1.5 text-muted">{b.contacted}</td>
+                  <td className="px-2 py-1.5 text-muted">{b.qualified}</td>
+                  <td className="px-2 py-1.5 text-muted">{b.onboarded}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="text-ds-micro text-zinc-600 mt-2">
+        <p className="text-ds-micro text-faint mt-2">
           Counts come from the canonical prospect store and the market-access tags recorded in Brand
           Intelligence — the same records, not a separate CRM.
         </p>
@@ -202,7 +202,7 @@ export function PartnershipsCentre() {
         <div className="grid gap-2 sm:grid-cols-3">
           <div>
             <p className="text-xs font-medium text-strong">{selected.name}</p>
-            <p className="text-ds-micro text-zinc-500">{selected.objective}</p>
+            <p className="text-ds-micro text-muted">{selected.objective}</p>
           </div>
           <Input
             label="Recipient address"
@@ -218,16 +218,16 @@ export function PartnershipsCentre() {
 
         {draft && (
           <div className="mt-3 space-y-2" data-testid="partner-outreach-draft">
-            <p className="text-ds-label text-zinc-400">
-              <span className="text-zinc-500">Subject:</span> {draft.subject}
+            <p className="text-ds-label text-muted">
+              <span className="text-muted">Subject:</span> {draft.subject}
             </p>
-            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-hairline rounded-ds-md p-3">
+            <pre className="whitespace-pre-wrap text-ds-label text-strong bg-surface border border-hairline rounded-ds-md p-3">
               {draft.text}
             </pre>
-            <p className="text-ds-micro text-zinc-500">
+            <p className="text-ds-micro text-muted">
               Basis: {draft.basis} · wording gate: {draft.lintPassed ? 'PASS' : `FAIL (${draft.lintReasons.join('; ')})`}
             </p>
-            <label className="flex items-center gap-2 text-ds-label text-zinc-400">
+            <label className="flex items-center gap-2 text-ds-label text-muted">
               <input
                 type="checkbox"
                 checked={confirmed}
@@ -241,11 +241,11 @@ export function PartnershipsCentre() {
               {sending ? 'Sending…' : 'Send now'}
             </Button>
             {sendResult && (
-              <p className="text-ds-label text-brass-300" data-testid="partner-send-result">
+              <p className="text-ds-label text-accent-300" data-testid="partner-send-result">
                 {sendResult}
               </p>
             )}
-            <p className="text-ds-micro text-zinc-600">
+            <p className="text-ds-micro text-faint">
               With no verified email connection the canonical mail seam returns the mock client, so a
               send produces a <code>mock:msg-…</code> id and makes zero network calls.
             </p>
@@ -255,35 +255,35 @@ export function PartnershipsCentre() {
 
       <Card title="Fundraising plan">
         <div className="flex items-start gap-2 mb-2">
-          <PiggyBank className="w-4 h-4 text-brass-400 mt-0.5 flex-shrink-0" />
+          <PiggyBank className="w-4 h-4 text-accent-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-zinc-300">
+            <p className="text-xs text-strong">
               Target {gbp(FUNDRAISING_PLAN.targetGbp)} · committed{' '}
-              <span className="text-amber-300">{gbp(FUNDRAISING_PLAN.committedGbp)}</span> ·
+              <span className="text-state-warning">{gbp(FUNDRAISING_PLAN.committedGbp)}</span> ·
               commitments claimed: {String(FUNDRAISING_PLAN.commitmentsClaimed)}
             </p>
-            <p className="text-ds-micro text-zinc-500 mt-0.5">{FUNDRAISING_PLAN.instrument}</p>
-            <p className="text-ds-micro text-zinc-600 mt-1">{FUNDRAISING_PLAN.note}</p>
+            <p className="text-ds-micro text-muted mt-0.5">{FUNDRAISING_PLAN.instrument}</p>
+            <p className="text-ds-micro text-faint mt-1">{FUNDRAISING_PLAN.note}</p>
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <div>
-            <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Use of funds</p>
+            <p className="text-ds-micro uppercase tracking-wider text-muted mb-1">Use of funds</p>
             {FUNDRAISING_PLAN.useOfFunds.map((u) => (
               <div key={u.label} className="border-b border-hairline py-1.5">
-                <p className="text-ds-label text-zinc-300">
-                  {u.label} — <span className="text-brass-300">{u.pct}%</span>
+                <p className="text-ds-label text-strong">
+                  {u.label} — <span className="text-accent-300">{u.pct}%</span>
                 </p>
-                <p className="text-ds-micro text-zinc-600">{u.note}</p>
+                <p className="text-ds-micro text-faint">{u.note}</p>
               </div>
             ))}
           </div>
           <div>
-            <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Milestones</p>
+            <p className="text-ds-micro uppercase tracking-wider text-muted mb-1">Milestones</p>
             {FUNDRAISING_PLAN.milestones.map((m) => (
               <div key={m.label} className="border-b border-hairline py-1.5">
-                <p className="text-ds-label text-zinc-300">{m.label}</p>
-                <p className="text-ds-micro text-zinc-600">{m.detail}</p>
+                <p className="text-ds-label text-strong">{m.label}</p>
+                <p className="text-ds-micro text-faint">{m.detail}</p>
               </div>
             ))}
           </div>

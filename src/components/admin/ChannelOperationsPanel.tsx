@@ -280,11 +280,11 @@ export function ChannelOperationsPanel() {
       <div>
         <h3 className="text-sm font-semibold text-strong">
           Channel operations{' '}
-          <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
+          <Badge className="ml-1 text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">
             Mercenta-side
           </Badge>
         </h3>
-        <p className="text-ds-label text-zinc-500 mt-0.5">
+        <p className="text-ds-label text-muted mt-0.5">
           The retail channel's documented vendor operations beyond the purchase-order read. A brand
           never calls these — Mercenta performs every channel action as the account holder.
         </p>
@@ -293,7 +293,7 @@ export function ChannelOperationsPanel() {
       {(notice || error) && (
         <p
           data-state={error ? 'channel-ops-error' : 'channel-ops-notice'}
-          className={error ? 'text-ds-label text-red-300' : 'text-ds-label text-emerald-300'}
+          className={error ? 'text-ds-label text-state-danger' : 'text-ds-label text-state-success'}
         >
           {error ?? notice}
         </p>
@@ -302,7 +302,7 @@ export function ChannelOperationsPanel() {
       {/* ── 1. THE RECEIVING SYNC (`getPurchaseOrdersStatus`) ─────────────── */}
       <section className="space-y-2" data-testid="channel-receiving-sync">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-muted">
             1 · Receiving sync — the channel's own status
           </p>
           <Button
@@ -314,14 +314,14 @@ export function ChannelOperationsPanel() {
             Read channel receiving status
           </Button>
         </div>
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           Source S5 / register AV-018: the channel's fulfilment-centre receiving status and received
           quantity. The reading is REPORTED, never written — a simulated reading can never become a
           canonical receipt.
         </p>
         {receiving && (
           <div className="space-y-1">
-            <p data-state="channel-receiving-mode" className="text-ds-label text-zinc-300">
+            <p data-state="channel-receiving-mode" className="text-ds-label text-strong">
               {receiving.mode === 'mock'
                 ? 'Simulation (mock) — simulated channel read; no live channel call was made'
                 : receiving.mode === 'real'
@@ -333,7 +333,7 @@ export function ChannelOperationsPanel() {
                 <li
                   key={reading.channelPurchaseOrderId}
                   data-reading={reading.differs ? 'differs' : 'agrees'}
-                  className="rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1 text-ds-label text-zinc-300"
+                  className="rounded-ds-sm border border-hairline bg-surface-raised/60 px-2 py-1 text-ds-label text-strong"
                 >
                   <span className="font-mono">{reading.channelPurchaseOrderId}</span> · channel:{' '}
                   {RECEIVING_STATUS_LABELS[reading.channelReceivingStatus]} · Mercenta:{' '}
@@ -352,8 +352,8 @@ export function ChannelOperationsPanel() {
                       data-state={`ack-verification-${ackVerification[reading.poId].state}`}
                       className={
                         ackVerification[reading.poId].atRisk
-                          ? 'mt-0.5 block text-ds-micro text-amber-300'
-                          : 'mt-0.5 block text-ds-micro text-zinc-400'
+                          ? 'mt-0.5 block text-ds-micro text-state-warning'
+                          : 'mt-0.5 block text-ds-micro text-muted'
                       }
                     >
                       Acknowledgement: {ackVerification[reading.poId].stateLabel} —{' '}
@@ -372,8 +372,8 @@ export function ChannelOperationsPanel() {
                       data-state={`asn-before-receipt-${asnVerdict[reading.poId].state}`}
                       className={
                         asnVerdict[reading.poId].exposed
-                          ? 'mt-0.5 block text-ds-micro text-amber-300'
-                          : 'mt-0.5 block text-ds-micro text-zinc-400'
+                          ? 'mt-0.5 block text-ds-micro text-state-warning'
+                          : 'mt-0.5 block text-ds-micro text-muted'
                       }
                     >
                       ASN before receipt: {asnVerdict[reading.poId].stateLabel} —{' '}
@@ -393,8 +393,8 @@ export function ChannelOperationsPanel() {
                       data-state={`pickup-lead-time-${pickupVerdict[reading.poId].state}`}
                       className={
                         pickupVerdict[reading.poId].state === 'within_lead_time'
-                          ? 'mt-0.5 block text-ds-micro text-zinc-400'
-                          : 'mt-0.5 block text-ds-micro text-amber-300'
+                          ? 'mt-0.5 block text-ds-micro text-muted'
+                          : 'mt-0.5 block text-ds-micro text-state-warning'
                       }
                     >
                       Channel pickup lead time: {pickupVerdict[reading.poId].statement}
@@ -409,7 +409,7 @@ export function ChannelOperationsPanel() {
                   {reading.simulated ? (
                     <span
                       data-state="channel-apply-refused"
-                      className="mt-0.5 block text-ds-micro text-amber-300"
+                      className="mt-0.5 block text-ds-micro text-state-warning"
                     >
                       Not applied — this reading is SIMULATED, and a simulated channel reading is
                       never written as a canonical receipt. Configure live channel credentials to
@@ -427,7 +427,7 @@ export function ChannelOperationsPanel() {
                         Apply as canonical receipt
                       </Button>
                       {applyResults[reading.poId] && (
-                        <span data-state="channel-apply-result" className="text-ds-micro text-zinc-400">
+                        <span data-state="channel-apply-result" className="text-ds-micro text-muted">
                           {applyResults[reading.poId]}
                         </span>
                       )}
@@ -437,7 +437,7 @@ export function ChannelOperationsPanel() {
               ))}
             </ul>
             {receiving.unknownPurchaseOrderIds.length > 0 && (
-              <p data-state="channel-receiving-unknown" className="text-ds-label text-zinc-500">
+              <p data-state="channel-receiving-unknown" className="text-ds-label text-muted">
                 The channel does not know {receiving.unknownPurchaseOrderIds.length} of the purchase
                 orders asked about ({receiving.unknownPurchaseOrderIds.slice(0, 4).join(', ')}
                 {receiving.unknownPurchaseOrderIds.length > 4 ? ', …' : ''}) — reported, never read as
@@ -447,7 +447,7 @@ export function ChannelOperationsPanel() {
             {receiving.refused.length > 0 && (
               <ul className="space-y-1" data-testid="channel-receiving-refusals">
                 {receiving.refused.map((refusal) => (
-                  <li key={refusal.channelPurchaseOrderId} className="text-ds-label text-amber-300">
+                  <li key={refusal.channelPurchaseOrderId} className="text-ds-label text-state-warning">
                     {refusal.channelPurchaseOrderId}: {refusal.reason}
                   </li>
                 ))}
@@ -459,16 +459,16 @@ export function ChannelOperationsPanel() {
 
       {/* ── 2. THE ROUTING INSTRUCTIONS (`getShipmentDetails`) ────────────── */}
       <section className="space-y-2" data-testid="channel-routing-instructions">
-        <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-wide text-muted">
           2 · Routing instructions — the channel's ARN
         </p>
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           A shipment request is submitted when a purchase order is accepted. The channel returns
           routing instructions — including the ARN — only AFTER carrier assignment, so this read is
           the later step that advances the collect chain. No ARN is ever invented.
         </p>
         {routingRows.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">
+          <p className="text-ds-label text-faint">
             No accepted purchase order carries a channel shipment request yet.
           </p>
         ) : (
@@ -476,9 +476,9 @@ export function ChannelOperationsPanel() {
             {routingRows.map((instruction) => (
               <li
                 key={instruction.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-surface-raised/60 px-2 py-1"
               >
-                <span className="text-ds-label text-zinc-300">
+                <span className="text-ds-label text-strong">
                   <span className="font-mono">{instruction.poNumber}</span> ·{' '}
                   {instruction.outcome?.routingRequest?.channelShipmentRequestId ?? 'no channel reference'}{' '}
                   ·{' '}
@@ -496,7 +496,7 @@ export function ChannelOperationsPanel() {
                   Read channel routing instructions
                 </Button>
                 {routingResult[instruction.id] && (
-                  <span data-state="channel-routing-result" className="text-ds-label text-zinc-400">
+                  <span data-state="channel-routing-result" className="text-ds-label text-muted">
                     {routingResult[instruction.id]}
                   </span>
                 )}
@@ -505,7 +505,7 @@ export function ChannelOperationsPanel() {
           </ul>
         )}
         {!canCurrentUserMutate && routingRows.length > 0 && (
-          <p className="text-ds-micro text-zinc-600">
+          <p className="text-ds-micro text-faint">
             view-only staff — recording the channel's response changes canonical state, so the domain
             refuses it
           </p>
@@ -514,16 +514,16 @@ export function ChannelOperationsPanel() {
 
       {/* ── 3. INVOICE SUBMISSION (`submitInvoices`) ──────────────────────── */}
       <section className="space-y-2" data-testid="channel-invoice-submission">
-        <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-wide text-muted">
           3 · Invoice submission — hand an issued invoice to the channel
         </p>
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           The invoice goes AS THE REGISTRY ISSUED IT: its number, date and total are the canonical
           record's. A cancelled invoice is never sent, and a reused number is refused by the channel
           (AV-022).
         </p>
         {invoiceRows.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">No issued invoice is waiting to be sent.</p>
+          <p className="text-ds-label text-faint">No issued invoice is waiting to be sent.</p>
         ) : (
           <ul className="space-y-1">
             {invoiceRows.map((invoice) => {
@@ -532,9 +532,9 @@ export function ChannelOperationsPanel() {
                 <li
                   key={invoice.id}
                   data-record-id={invoice.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-ink-850/60 px-2 py-1"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-ds-sm border border-hairline bg-surface-raised/60 px-2 py-1"
                 >
-                  <span className="text-ds-label text-zinc-300">
+                  <span className="text-ds-label text-strong">
                     <span className="font-mono">{invoice.number}</span> · £
                     {invoice.subtotalGbp.toFixed(2)} · {invoice.poNumber}
                   </span>
@@ -551,7 +551,7 @@ export function ChannelOperationsPanel() {
                     <span
                       data-state={result.refusal ? 'channel-invoice-refused' : 'channel-invoice-submitted'}
                       className={
-                        result.refusal ? 'text-ds-label text-amber-300' : 'text-ds-label text-zinc-400'
+                        result.refusal ? 'text-ds-label text-state-warning' : 'text-ds-label text-muted'
                       }
                     >
                       {result.refusal ??
@@ -569,13 +569,13 @@ export function ChannelOperationsPanel() {
 
       {/* ── 4. THE SHIPMENT-LABEL RULE (`getShipmentLabels`) ─────────────── */}
       <section className="space-y-1" data-testid="channel-shipment-labels">
-        <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+        <p className="text-ds-micro uppercase tracking-wide text-muted">
           4 · Channel shipment labels — not available in this region
         </p>
-        <p data-state="channel-labels-rule" className="text-ds-label text-zinc-400">
+        <p data-state="channel-labels-rule" className="text-ds-label text-muted">
           {labels.available ? labels.reason : `Refused by rule: ${labels.reason}`}
         </p>
-        <p className="text-ds-micro text-zinc-600">
+        <p className="text-ds-micro text-faint">
           {CHANNEL_SHIPMENT_LABEL_RULE.label} — {CHANNEL_SHIPMENT_LABEL_RULE.source}
         </p>
       </section>

@@ -32,10 +32,10 @@ function UrgencyBadge({ renewalDate }: { renewalDate: string }) {
   const urgency = renewalUrgency(renewalDate, new Date().toISOString());
   if (urgency === 'ok') return null;
   const map: Record<string, string> = {
-    expired: 'bg-red-500/15 text-red-300 border-red-500/20',
-    '7d': 'bg-red-500/15 text-red-300 border-red-500/20',
-    '30d': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-    '60d': 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+    expired: 'bg-state-danger/10 text-state-danger border-state-danger/20',
+    '7d': 'bg-state-danger/10 text-state-danger border-state-danger/20',
+    '30d': 'bg-state-warning/10 text-state-warning border-state-warning/20',
+    '60d': 'bg-state-info/10 text-state-info border-state-info/20',
   };
   const label = urgency === 'expired' ? 'Expired' : `≤ ${urgency.replace('d', '')} days`;
   return <Badge className={cn('text-ds-micro', map[urgency])}>{label}</Badge>;
@@ -111,14 +111,14 @@ export function ContractsAdminPanel() {
       />
 
       {lastEnvelope && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-state-success">
+        <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-2.5 text-ds-label text-state-success">
           Last e-sign envelope sent: <code className="font-mono">{lastEnvelope}</code>
         </div>
       )}
 
       {!esignLive && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
-          <Lock className="w-3.5 h-3.5 mt-0.5 text-amber-300 flex-shrink-0" />
+        <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
+          <Lock className="w-3.5 h-3.5 mt-0.5 text-state-warning flex-shrink-0" />
           <span>
             E-signature runs in <strong>(Mock) mode</strong> — envelopes are
             simulated (ids like <code>mock:env-…</code>, lifecycles advance on
@@ -146,10 +146,10 @@ export function ContractsAdminPanel() {
                   className={cn(
                     'text-ds-micro',
                     c.status === 'active' || c.status === 'signed'
-                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                      ? 'bg-state-success/10 text-state-success border-state-success/20'
                       : c.status === 'draft'
-                        ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
-                        : 'bg-blue-500/15 text-blue-300 border-blue-500/20'
+                        ? 'bg-tint text-muted border-hairline'
+                        : 'bg-state-info/10 text-state-info border-state-info/20'
                   )}
                 >
                   {CONTRACT_STATUS_LABELS[c.status]}
@@ -164,7 +164,7 @@ export function ContractsAdminPanel() {
                 <span className="whitespace-nowrap">
                   <button
                     onClick={() => setViewingContract(c)}
-                    className="text-ds-label text-brass hover:underline mr-3 inline-flex items-center gap-1"
+                    className="text-ds-label text-accent hover:underline mr-3 inline-flex items-center gap-1"
                   >
                     <Eye className="w-3 h-3" /> View
                   </button>
@@ -290,14 +290,14 @@ function GenerateModal({
 
   return (
     <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-xl bg-ink-850 border-hairline max-h-[85vh] overflow-y-auto">
+      <Card className="w-full max-w-xl bg-surface-raised border-hairline max-h-[85vh] overflow-y-auto">
         <div className="flex items-center gap-3 mb-1">
-          <FileText className="w-5 h-5 text-brass" />
+          <FileText className="w-5 h-5 text-accent" />
           <h3 className="text-base font-semibold text-strong">
             New Contract — {brand.profile.businessName}
           </h3>
         </div>
-        <p className="text-xs text-zinc-500 mb-4">
+        <p className="text-xs text-muted mb-4">
           Pre-filled from the brand's fulfillment-track assessment ({track.replace(/_/g, ' ')}).
         </p>
 
@@ -305,11 +305,11 @@ function GenerateModal({
           <Input label="Commission (%)" value={rate} onChange={(e) => setRate(e.target.value)} />
           <Input label="Monthly Fee (£)" value={fee} onChange={(e) => setFee(e.target.value)} />
           <div>
-            <label className="text-xs font-medium text-zinc-400 mb-1.5 block">Track</label>
+            <label className="text-xs font-medium text-muted mb-1.5 block">Track</label>
             <select
               value={track}
               onChange={(e) => setTrack(e.target.value as FulfillmentTrack)}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer"
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer"
             >
               <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
               <option value="financed">{fulfillmentTrackLabel('financed')}</option>
@@ -318,12 +318,12 @@ function GenerateModal({
           </div>
         </div>
 
-        <pre className="bg-ink rounded-ds-md border border-hairline p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
+        <pre className="bg-surface rounded-ds-md border border-hairline p-3 text-ds-micro text-muted whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
           {previewText}
         </pre>
 
         {!esignLive && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-state-warning mb-3 flex items-start gap-1.5">
+          <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-2.5 text-ds-label text-state-warning mb-3 flex items-start gap-1.5">
             <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             No verified e-sign connection — the envelope will be SIMULATED
             (mock client, id like mock:env-…).
@@ -356,24 +356,24 @@ function ContractVersionHistory({ contracts, currentVersion }: { contracts: Cont
         return (
           <div key={c.id} className="relative flex gap-4 pb-6 last:pb-0">
             {!isLast && <div className="absolute left-[11px] top-5 bottom-0 w-px bg-tint" />}
-            <div className={cn('w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-ink-850 z-10', isCurrent ? 'bg-brass-500' : c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500' : 'bg-zinc-600')}>
+            <div className={cn('w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-hairline z-10', isCurrent ? 'bg-accent-500' : c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500' : 'bg-surface-hover')}>
               {isCurrent ? <FileText className="w-3 h-3 text-strong" /> : <Clock className="w-3 h-3 text-strong" />}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-medium text-strong">Version {c.version}{isCurrent && <span className="text-ds-micro text-brass-400 ml-1.5">(Current)</span>}</span>
-                <Badge className={cn('text-ds-micro', c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : c.status === 'draft' ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20' : 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>{CONTRACT_STATUS_LABELS[c.status]}</Badge>
+                <span className="text-xs font-medium text-strong">Version {c.version}{isCurrent && <span className="text-ds-micro text-accent-400 ml-1.5">(Current)</span>}</span>
+                <Badge className={cn('text-ds-micro', c.status === 'active' || c.status === 'signed' ? 'bg-state-success/10 text-state-success border-state-success/20' : c.status === 'draft' ? 'bg-tint text-muted border-hairline' : 'bg-state-info/10 text-state-info border-state-info/20')}>{CONTRACT_STATUS_LABELS[c.status]}</Badge>
               </div>
-              <div className="text-ds-micro text-zinc-500 space-y-0.5">
+              <div className="text-ds-micro text-muted space-y-0.5">
                 <span>{c.type.replace(/_/g, ' ')} - {c.commissionRate}% - {c.monthlyFee}/mo - {c.fulfillmentTrack.replace(/_/g, ' ')}</span>
                 <div className="flex items-center gap-3"><span>Effective: {c.effectiveDate}</span><span>Renewal: {c.renewalDate}</span></div>
-                {c.signatories.length > 0 && <div className="flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /><span className="text-emerald-400/80">{c.signatories.length} signator{c.signatories.length === 1 ? 'y' : 'ies'}</span></div>}
+                {c.signatories.length > 0 && <div className="flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3 text-state-success" /><span className="text-state-success/80">{c.signatories.length} signator{c.signatories.length === 1 ? 'y' : 'ies'}</span></div>}
               </div>
             </div>
           </div>
         );
       })}
-      {sorted.length === 0 && <p className="text-xs text-zinc-600 text-center py-6">No version history available.</p>}
+      {sorted.length === 0 && <p className="text-xs text-faint text-center py-6">No version history available.</p>}
     </div>
   );
 }
@@ -401,21 +401,21 @@ function ContractDetailModal({ contract, allContracts, brands, canMutate, actor,
   const handleTerminate = () => { terminateContract(contract.id, actor, 'Terminated from the Contract Cycle console'); onClose(); };
   return (
     <div className="fixed inset-0 z-[60] bg-surface-hover backdrop-blur-sm flex items-center justify-center p-4">
-      <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-hairline">
+      <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-surface-raised border-hairline">
         <div className="flex items-center justify-between px-5 py-4 border-b border-hairline">
           <div>
-            <h3 className="text-sm font-semibold text-strong">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-ds-micro ml-2', 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
-            <p className="text-ds-micro text-zinc-500 mt-0.5">{contract.fulfillmentTrack.replace(/_/g, ' ')} track - {contract.commissionRate}% - {contract.monthlyFee}/mo</p>
+            <h3 className="text-sm font-semibold text-strong">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-ds-micro ml-2', 'bg-state-info/10 text-state-info border-state-info/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
+            <p className="text-ds-micro text-muted mt-0.5">{contract.fulfillmentTrack.replace(/_/g, ' ')} track - {contract.commissionRate}% - {contract.monthlyFee}/mo</p>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-strong"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="text-muted hover:text-strong"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex gap-1 px-5 pt-3 border-b border-hairline">
-          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'document' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
-          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'history' ? 'text-strong border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
+          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'document' ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
+          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'history' ? 'text-strong border-b-2 border-accent-500' : 'text-muted hover:text-strong')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
         </div>
         {tab === 'document' && (
           <>
-            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
+            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-strong whitespace-pre-wrap font-mono">
               {buildDistributionAgreement({ businessName: brandName, commissionRate: contract.commissionRate, monthlyFee: contract.monthlyFee, category: brandCategory, fulfillmentTrack: contract.fulfillmentTrack === 'unassigned' ? 'financed' : contract.fulfillmentTrack })}
             </pre>
             <div className="flex items-center justify-between px-5 py-3 border-t border-hairline">
@@ -431,7 +431,7 @@ function ContractDetailModal({ contract, allContracts, brands, canMutate, actor,
         )}
         {tab === 'history' && (
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <p className="text-ds-label text-zinc-500 mb-4">{brandVersions.length} version(s) of {brandName}'s distribution agreement.</p>
+            <p className="text-ds-label text-muted mb-4">{brandVersions.length} version(s) of {brandName}'s distribution agreement.</p>
             <ContractVersionHistory contracts={brandVersions} currentVersion={contract.version} />
           </div>
         )}

@@ -25,9 +25,9 @@ type Row = {
 
 function TrackBadge({ track }: { track: FulfillmentTrack }) {
   const map: Record<FulfillmentTrack, string> = {
-    direct_fulfillment: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-    financed: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-    unassigned: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20',
+    direct_fulfillment: 'bg-state-success/10 text-state-success border-state-success/20',
+    financed: 'bg-state-info/10 text-state-info border-state-info/20',
+    unassigned: 'bg-tint text-muted border-hairline',
   };
   const label = fulfillmentTrackLabel(track);
   return <Badge className={cn('text-ds-micro', map[track])}>{label}</Badge>;
@@ -35,7 +35,7 @@ function TrackBadge({ track }: { track: FulfillmentTrack }) {
 
 function NeedsReviewBadge() {
   return (
-    <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+    <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">
       Needs review
     </Badge>
   );
@@ -45,14 +45,14 @@ function ScoreBar({ label, value, max }: { label: string; value: number; max: nu
   return (
     <div>
       <div className="flex justify-between text-ds-label mb-1">
-        <span className="text-zinc-400">{label}</span>
+        <span className="text-muted">{label}</span>
         <span className="font-mono text-strong">
           {value}/{max}
         </span>
       </div>
       <div className="h-1.5 bg-tint rounded-full overflow-hidden">
         <div
-          className="h-full bg-brass-500/70 rounded-full"
+          className="h-full bg-accent-500/70 rounded-full"
           style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
         />
       </div>
@@ -158,21 +158,21 @@ export function FulfillmentTrackPanel() {
       />
 
       {/* Tab bar */}
-      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-hairline rounded-ds-lg p-1">
+      <div className="flex items-center gap-1 flex-wrap bg-surface-raised border border-hairline rounded-ds-lg p-1">
         {TABS.map(function(tab) {
           const Icon = tab.icon;
           return (
             <button key={tab.id} onClick={function() { setActiveTab(tab.id); }}
               className={cn('flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md text-xs font-medium transition-colors',
-                activeTab === tab.id ? 'bg-brass-500 text-strong' : 'text-zinc-400 hover:text-strong hover:bg-tint')}>
+                activeTab === tab.id ? 'bg-accent-500 text-strong' : 'text-muted hover:text-strong hover:bg-tint')}>
               <Icon className="w-3.5 h-3.5" /> {tab.label}
             </button>
           );
         })}
         <div className="ml-auto flex items-center gap-2">
-          {recalcMsg && <span className="text-ds-label text-emerald-400">{recalcMsg}</span>}
+          {recalcMsg && <span className="text-ds-label text-state-success">{recalcMsg}</span>}
           <button onClick={handleRecalc}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-ds-md text-xs font-medium bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-colors">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-ds-md text-xs font-medium bg-state-info/10 text-state-info hover:bg-blue-500/25 transition-colors">
             <RefreshCw className="w-3.5 h-3.5" /> Bulk Recalculate
           </button>
         </div>
@@ -185,7 +185,7 @@ export function FulfillmentTrackPanel() {
         <select
           value={trackFilter}
           onChange={(e) => setTrackFilter(e.target.value as FulfillmentTrack | 'all')}
-          className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer"
+          className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer"
         >
           {TRACK_FILTERS.map((f) => (
             <option key={f.value} value={f.value}>
@@ -193,27 +193,27 @@ export function FulfillmentTrackPanel() {
             </option>
           ))}
         </select>
-        <label className="text-xs text-zinc-500 flex items-center gap-1.5">
+        <label className="text-xs text-muted flex items-center gap-1.5">
           Score ≥
           <input
             type="number"
             value={minScore}
             onChange={(e) => setMinScore(e.target.value)}
             placeholder="0"
-            className="w-16 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong"
+            className="w-16 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong"
           />
         </label>
-        <label className="text-xs text-zinc-500 flex items-center gap-1.5">
+        <label className="text-xs text-muted flex items-center gap-1.5">
           Score ≤
           <input
             type="number"
             value={maxScore}
             onChange={(e) => setMaxScore(e.target.value)}
             placeholder="100"
-            className="w-16 bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong"
+            className="w-16 bg-surface border border-hairline rounded-ds-sm px-2 py-1 text-xs text-strong"
           />
         </label>
-        <span className="text-ds-label text-zinc-600 ml-auto">
+        <span className="text-ds-label text-faint ml-auto">
           {filtered.length} of {rows.length} brands
         </span>
       </div>
@@ -246,7 +246,7 @@ export function FulfillmentTrackPanel() {
             {
               key: 'category',
               label: 'Category',
-              render: ({ brand }) => <span className="text-xs text-zinc-400">{brand?.category ?? '—'}</span>,
+              render: ({ brand }) => <span className="text-xs text-muted">{brand?.category ?? '—'}</span>,
             },
             {
               key: 'totalScore',
@@ -256,7 +256,7 @@ export function FulfillmentTrackPanel() {
                 <span
                   className={cn(
                     'font-mono font-semibold',
-                    isBorderline(score.totalScore) && !score.manualOverride ? 'text-amber-300' : 'text-strong'
+                    isBorderline(score.totalScore) && !score.manualOverride ? 'text-state-warning' : 'text-strong'
                   )}
                 >
                   {score.totalScore}
@@ -279,7 +279,7 @@ export function FulfillmentTrackPanel() {
                     Manual override
                   </Badge>
                 ) : (
-                  <span className="text-ds-label text-zinc-600">Auto</span>
+                  <span className="text-ds-label text-faint">Auto</span>
                 ),
             },
             {
@@ -288,7 +288,7 @@ export function FulfillmentTrackPanel() {
               align: 'right',
               hideBelow: 'lg',
               render: ({ score }) => (
-                <span className="font-mono text-ds-label text-zinc-500">
+                <span className="font-mono text-ds-label text-muted">
                   {new Date(score.lastCalculated).toLocaleDateString()}
                 </span>
               ),
@@ -328,7 +328,7 @@ function DetailView({
     <div className="p-6 space-y-4 max-w-[1100px] mx-auto">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-strong transition-colors"
+        className="flex items-center gap-1.5 text-xs text-muted hover:text-strong transition-colors"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Back to list
       </button>
@@ -338,7 +338,7 @@ function DetailView({
           <h2 className="text-lg font-semibold text-strong">
             {brand?.profile.businessName ?? score.brandId}
           </h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {brand?.category ?? '—'} · Last calculated{' '}
             {new Date(score.lastCalculated).toLocaleString()}
           </p>
@@ -372,7 +372,7 @@ function DetailView({
           ];
           return (
             <div className="mt-4 border-t border-hairline pt-4">
-              <h4 className="text-xs font-medium text-zinc-400 mb-3">Score Radar</h4>
+              <h4 className="text-xs font-medium text-muted mb-3">Score Radar</h4>
               <ResponsiveContainer width="100%" height={240}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke={CHART.grid} />
@@ -385,7 +385,7 @@ function DetailView({
           );
         })()}
         {borderline && (
-          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
+          <div className="mt-4 bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
             <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             Score falls in the 55–74 borderline band — auto-assignment is held for
             manual review and batched into the daily digest rather than applied silently.
@@ -396,7 +396,7 @@ function DetailView({
       {/* Manual override */}
       <Card title="Manual Override">
         <div className="space-y-3">
-          <p className="text-ds-label text-zinc-600">
+          <p className="text-ds-label text-faint">
             Overrides take precedence over the scoring engine and are logged to the
             audit trail.
           </p>
@@ -404,7 +404,7 @@ function DetailView({
             <select
               value={overrideTrack}
               onChange={(e) => setOverrideTrack(e.target.value as FulfillmentTrack)}
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer"
+              className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer"
             >
               <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
               <option value="financed">{fulfillmentTrackLabel('financed')}</option>
@@ -415,7 +415,7 @@ function DetailView({
               value={overrideReason}
               onChange={(e) => setOverrideReason(e.target.value)}
               placeholder="Reason (required — logged to audit trail)"
-              className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
+              className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
             />
           </div>
           <button
@@ -424,8 +424,8 @@ function DetailView({
             className={cn(
               'text-xs font-medium px-4 py-2 rounded-ds-md transition-colors',
               overrideReason.trim()
-                ? 'bg-brass-500 hover:bg-brass-400 text-strong'
-                : 'bg-tint text-zinc-600 cursor-not-allowed'
+                ? 'bg-accent-500 hover:bg-accent-400 text-strong'
+                : 'bg-tint text-faint cursor-not-allowed'
             )}
           >
             Apply Override
@@ -443,12 +443,12 @@ function DetailView({
               { label: 'Available Headroom', value: '£—' },
             ].map((f) => (
               <div key={f.label}>
-                <div className="text-ds-micro text-zinc-600 font-medium mb-1">{f.label}</div>
+                <div className="text-ds-micro text-faint font-medium mb-1">{f.label}</div>
                 <div className="text-sm font-mono text-strong">{f.value}</div>
               </div>
             ))}
           </div>
-          <p className="text-ds-micro text-zinc-600 mt-3">
+          <p className="text-ds-micro text-faint mt-3">
             Placeholder fields — a real PO-finance provider is not wired yet.
           </p>
         </Card>
@@ -477,7 +477,7 @@ function ComparisonView({ rows, onSelectBrand }: { rows: Row[]; onSelectBrand: (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-hairline text-xs text-zinc-500">
+            <tr className="border-b border-hairline text-xs text-muted">
               <th className="text-left font-medium px-3 py-2">Brand</th>
               <th className="text-right font-medium px-3 py-2">Total</th>
               <th className="text-right font-medium px-3 py-2">History</th><th className="text-right font-medium px-3 py-2">Export</th>
@@ -493,12 +493,12 @@ function ComparisonView({ rows, onSelectBrand }: { rows: Row[]; onSelectBrand: (
                   className="hover:bg-tint transition-colors cursor-pointer">
                   <td className="px-3 py-2 text-xs font-medium text-strong">{brand?.profile.businessName ?? score.brandId}</td>
                   <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.totalScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.tradingHistoryScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.exportExperienceScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.scaleScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.workingCapitalScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.categoryRiskScore}</td>
-                  <td className="px-3 py-2 text-right font-mono text-xs text-zinc-300">{score.reliabilityScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.tradingHistoryScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.exportExperienceScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.scaleScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.workingCapitalScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.categoryRiskScore}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs text-strong">{score.reliabilityScore}</td>
                   <td className="px-3 py-2"><TrackBadge track={score.track} /></td>
                 </tr>
               );
@@ -535,57 +535,57 @@ function WhatIfSimulator() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-1">
         <div className="space-y-3">
           <div>
-            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Years Exporting</label>
+            <label className="text-ds-micro text-muted font-medium block mb-1">Years Exporting</label>
             <input type="number" value={inputs.yearsExporting} onChange={function(e) { set('yearsExporting', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={inputs.priorUkEuExport} onChange={function(e) { set('priorUkEuExport', e.target.checked); }} />
-            <span className="text-xs text-zinc-300">Prior UK/EU export</span>
+            <span className="text-xs text-strong">Prior UK/EU export</span>
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={inputs.hasEori} onChange={function(e) { set('hasEori', e.target.checked); }} />
-            <span className="text-xs text-zinc-300">Has EORI number</span>
+            <span className="text-xs text-strong">Has EORI number</span>
           </div>
           <div>
-            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Annual Revenue (GBP)</label>
+            <label className="text-ds-micro text-muted font-medium block mb-1">Annual Revenue (GBP)</label>
             <input type="number" value={inputs.annualRevenueGbp} onChange={function(e) { set('annualRevenueGbp', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
           </div>
           <div>
-            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Catalog Size (SKUs)</label>
+            <label className="text-ds-micro text-muted font-medium block mb-1">Catalog Size (SKUs)</label>
             <input type="number" value={inputs.catalogSize} onChange={function(e) { set('catalogSize', Number(e.target.value)); }}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong" />
           </div>
           <div>
-            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Working Capital</label>
+            <label className="text-ds-micro text-muted font-medium block mb-1">Working Capital</label>
             <select value={inputs.workingCapitalAnswer} onChange={function(e) { set('workingCapitalAnswer', e.target.value as any); }}
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer">
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong cursor-pointer">
               <option value="yes">Yes</option><option value="partially">Partially</option><option value="no">No</option>
             </select>
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={inputs.hazmatOrPerishableCategory} onChange={function(e) { set('hazmatOrPerishableCategory', e.target.checked); }} />
-            <span className="text-xs text-zinc-300">Hazmat / perishable category</span>
+            <span className="text-xs text-strong">Hazmat / perishable category</span>
           </div>
         </div>
         <div className="space-y-4">
           <div className="text-center">
             <div className="text-5xl font-bold text-strong">{result.components.totalScore}</div>
-            <div className="text-xs text-zinc-500 mt-1">Total Score</div>
+            <div className="text-xs text-muted mt-1">Total Score</div>
             <div className="mt-2"><TrackBadge track={result.proposedTrack} /></div>
-            {result.needsManualReview && <div className="mt-2 text-ds-micro text-amber-400">Borderline score — needs manual review</div>}
+            {result.needsManualReview && <div className="mt-2 text-ds-micro text-state-warning">Borderline score — needs manual review</div>}
           </div>
           <div className="space-y-2">
             {COMPONENTS.map(function(c) {
               return (
                 <div key={c.label}>
                   <div className="flex justify-between text-ds-micro mb-0.5">
-                    <span className="text-zinc-500">{c.label}</span>
-                    <span className="text-zinc-300 font-mono">{c.value}/{c.max}</span>
+                    <span className="text-muted">{c.label}</span>
+                    <span className="text-strong font-mono">{c.value}/{c.max}</span>
                   </div>
                   <div className="h-1.5 bg-tint rounded-full overflow-hidden">
-                    <div className="h-full bg-brass-500/70 rounded-full" style={{ width: (c.value / c.max * 100) + '%' }} />
+                    <div className="h-full bg-accent-500/70 rounded-full" style={{ width: (c.value / c.max * 100) + '%' }} />
                   </div>
                 </div>
               );
@@ -601,13 +601,13 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
   const selected = rows.find(function(r) { return r.score.brandId === selectedBrandId; });
   if (!rows.length) {
-    return <Card title="Score History"><p className="text-xs text-zinc-600 p-4">No score data available.</p></Card>;
+    return <Card title="Score History"><p className="text-xs text-faint p-4">No score data available.</p></Card>;
   }
   return (
     <Card title="Score History" subtitle="Score changes tracked over time">
       <div className="space-y-3 p-1">
         <select value={selectedBrandId ?? ''} onChange={function(e) { setSelectedBrandId(e.target.value || null); }}
-          className="bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer">
+          className="bg-surface border border-hairline rounded-ds-sm px-2.5 py-1.5 text-xs text-strong cursor-pointer">
           <option value="">Select a brand...</option>
           {rows.map(function(r) {
             return <option key={r.score.brandId} value={r.score.brandId}>{r.brand?.profile.businessName ?? r.score.brandId}</option>;
@@ -618,26 +618,26 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-semibold text-strong">{selected.brand?.profile.businessName ?? selected.score.brandId}</span>
-                <span className="text-xs text-zinc-500 ml-2">{selected.brand?.category ?? ''}</span>
+                <span className="text-xs text-muted ml-2">{selected.brand?.category ?? ''}</span>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-strong">{selected.score.totalScore}</div>
-                <div className="text-ds-micro text-zinc-500">Last: {new Date(selected.score.lastCalculated).toLocaleDateString()}</div>
+                <div className="text-ds-micro text-muted">Last: {new Date(selected.score.lastCalculated).toLocaleDateString()}</div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-ds-micro">
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Track:</span> <span className="text-strong">{selected.score.track.replace(/_/g, ' ')}</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Override:</span> <span className="text-strong">{selected.score.manualOverride ? 'Yes' : 'No'}</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">History:</span> <span className="text-strong">{selected.score.tradingHistoryScore}/20</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Export:</span> <span className="text-strong">{selected.score.exportExperienceScore}/15</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Scale:</span> <span className="text-strong">{selected.score.scaleScore}/20</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Working Cap:</span> <span className="text-strong">{selected.score.workingCapitalScore}/20</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Category:</span> <span className="text-strong">{selected.score.categoryRiskScore}/15</span></div>
-              <div className="bg-ink-900 rounded-ds-sm p-2"><span className="text-zinc-500">Reliability:</span> <span className="text-strong">{selected.score.reliabilityScore}/10</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Track:</span> <span className="text-strong">{selected.score.track.replace(/_/g, ' ')}</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Override:</span> <span className="text-strong">{selected.score.manualOverride ? 'Yes' : 'No'}</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">History:</span> <span className="text-strong">{selected.score.tradingHistoryScore}/20</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Export:</span> <span className="text-strong">{selected.score.exportExperienceScore}/15</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Scale:</span> <span className="text-strong">{selected.score.scaleScore}/20</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Working Cap:</span> <span className="text-strong">{selected.score.workingCapitalScore}/20</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Category:</span> <span className="text-strong">{selected.score.categoryRiskScore}/15</span></div>
+              <div className="bg-surface rounded-ds-sm p-2"><span className="text-muted">Reliability:</span> <span className="text-strong">{selected.score.reliabilityScore}/10</span></div>
             </div>
           </div>
         )}
-        <p className="text-ds-micro text-zinc-600">Score history updates when "Bulk Recalculate" is run.</p>
+        <p className="text-ds-micro text-faint">Score history updates when "Bulk Recalculate" is run.</p>
       </div>
     </Card>
   );

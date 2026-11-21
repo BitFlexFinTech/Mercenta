@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=1832/69 ink=759/110 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=6/1 ink=468/97 literal=0/0**
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -957,6 +957,38 @@ Every row below was measured in this repository this session.
 > asserted five `homepage-*` test ids that are rendered NOWHERE in `src/`, while its own
 > comment claimed the list had already been updated (rule 10 — verified false, not
 > assumed); it now asserts the default design's real `<section aria-label="…">` anchors.
+>
+> **Re-measured again 2026-11-21 (§BATCH 7 — the admin area, and the finish of the sweep):**
+> grey moved 1832 → **6** sites in **1** file and ink 848 → **468**, because the signed-in
+> ADMIN area (all 56 files in `src/components/admin/`) was migrated AND the sweep was then
+> finished across every remaining `.tsx`/`.ts` source — `src/components/auth/`,
+> `src/components/marketing/`, `src/components/design/`, `src/App.tsx`,
+> `src/components/ui.tsx`. `steel` became `muted`; `parchment` became `soft`; the four
+> `accent-brass-500` accent-colour utilities became `accent-[var(--mr-accent)]`; and a
+> **REAL CONTRAST DEFECT** was fixed: a SOLID accent fill paired with `text-strong` (which
+> is WHITE in the dark appearance — 2.34:1 on the orange) was repointed to
+> `text-on-accent` in **11 sites across 7 files**, per quoted class string so a ternary's
+> tint branch was never touched.
+>
+> **THE LAST 6 GREY SITES ARE `BLOCKED`, NOT DONE.** They live in
+> `src/lib/intelligence/intelligenceTypes.ts` — the `TIER_COLORS` map — and `src/lib` is a
+> **declared PROTECTED path** (business logic) in `scripts/validate-data-preservation.mjs`
+> and the E6 guard. The change was made, the guards REFUSED it, and it was **REVERTED**.
+> The file's `bg-zinc-500/10|5` tints are also not a pure rename (they resolve to
+> `--mr-text-muted`, not to the `bg-tint` token used elsewhere), so the change needs a
+> review rather than a blanket substitution. **Next action:** the owner authorises the
+> two `TIER_COLORS` lines, or they stay as they are.
+>
+> **THE REMAINING 468 INK SITES ARE `surface-*`, WHICH IS NOT LEGACY** — see the §FINDING
+> above: `--mr-surface*` is the canonical token name, so this family cannot reach zero by
+> migration.
+>
+> **T1 REPOINTED, AND MADE STRONGER.** `validate-legacy-styling-migration` T1 required BOTH
+> families to be non-empty; that would FORCE A FALSE STATE once a family is legitimately
+> exhausted (a finished migration failing its own gate, which invites keeping legacy
+> classes just to keep the number non-zero). It now requires a non-vacuous walk, at least
+> one family with subjects, AND a **positive control** (`bg-surface` must be found), which
+> proves the reader is parsing real class strings.
 >
 > **Re-measured 2026-11-21** during the Concept 3 header restyle: the public
 > header's dropdown panel was the last site in that component still painted with the

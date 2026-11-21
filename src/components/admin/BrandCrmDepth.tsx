@@ -22,14 +22,14 @@ import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
 const KIND_STYLES: Record<TimelineEntry['kind'], string> = {
-  message: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+  message: 'bg-blue-500/10 text-state-info border-state-info/20',
   call: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
-  note: 'bg-tint text-zinc-300 border-hairline',
-  task: 'bg-brass-500/10 text-brass-300 border-brass-500/20',
-  system_po: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-  system_contract: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
-  system_compliance: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-  system_deduction: 'bg-red-500/10 text-red-300 border-red-500/20',
+  note: 'bg-tint text-strong border-hairline',
+  task: 'bg-accent-500/10 text-accent-300 border-accent-500/20',
+  system_po: 'bg-state-success/10 text-state-success border-state-success/20',
+  system_contract: 'bg-violet-500/10 text-state-muted border-violet-500/20',
+  system_compliance: 'bg-state-warning/10 text-state-warning border-state-warning/20',
+  system_deduction: 'bg-state-danger/10 text-state-danger border-state-danger/20',
 };
 
 /**
@@ -78,7 +78,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               onClick={() => setTab(t)}
               className={cn(
                 'px-2 py-1 rounded-ds-sm text-ds-label capitalize',
-                tab === t ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-strong'
+                tab === t ? 'bg-accent-500/15 text-accent-300' : 'text-muted hover:text-strong'
               )}
             >
               {t}
@@ -92,29 +92,29 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
         </div>
 
         {error && (
-          <p className="text-ds-label text-red-300 bg-red-500/10 border border-red-500/20 rounded-ds-sm px-2 py-1 mb-2">
+          <p className="text-ds-label text-state-danger bg-state-danger/10 border border-state-danger/20 rounded-ds-sm px-2 py-1 mb-2">
             {error}
           </p>
         )}
 
         {tab === 'timeline' && (
           <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
-            <p className="text-ds-micro text-zinc-600">
+            <p className="text-ds-micro text-faint">
               {timeline.length} events — messages, calls, notes, tasks and system events in one feed.
             </p>
             {timeline.map((e) => (
               <div key={e.id} className="border-b border-hairline pb-1.5">
                 <div className="flex items-center gap-2">
                   <Badge className={cn('text-ds-micro', KIND_STYLES[e.kind])}>{e.label}</Badge>
-                  <span className="text-ds-micro font-mono text-zinc-600">
+                  <span className="text-ds-micro font-mono text-faint">
                     {new Date(e.at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-ds-label text-zinc-400 mt-0.5">{e.detail}</p>
+                <p className="text-ds-label text-muted mt-0.5">{e.detail}</p>
               </div>
             ))}
             {timeline.length === 0 && (
-              <p className="text-ds-label text-zinc-600">No activity yet.</p>
+              <p className="text-ds-label text-faint">No activity yet.</p>
             )}
           </div>
         )}
@@ -127,11 +127,11 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
             <div className="flex items-end gap-2">
               <div className="flex-1">
-                <label className="block text-ds-micro text-zinc-500 mb-1">Assign to</label>
+                <label className="block text-ds-micro text-muted mb-1">Assign to</label>
                 <select
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
-                  className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300"
+                  className="w-full bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong"
                 >
                   {staff.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -167,7 +167,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               </Button>
             </div>
             {brandTasks.length === 0 && (
-              <p className="text-ds-label text-zinc-600">No tasks for this brand yet.</p>
+              <p className="text-ds-label text-faint">No tasks for this brand yet.</p>
             )}
             {brandTasks.map((t) => {
               const assignee = staff.find((s) => s.id === t.assignedToStaffId);
@@ -175,16 +175,16 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               return (
                 <div key={t.id} className="flex items-center justify-between gap-2 border-b border-hairline py-1">
                   <div>
-                    <span className={cn('text-ds-label', t.status === 'done' ? 'text-zinc-600 line-through' : 'text-zinc-200')}>
+                    <span className={cn('text-ds-label', t.status === 'done' ? 'text-faint line-through' : 'text-strong')}>
                       {t.title}
                     </span>
-                    <span className="text-ds-micro text-zinc-600 ml-2">
+                    <span className="text-ds-micro text-faint ml-2">
                       due {t.dueDate} · {assignee?.name ?? 'unassigned'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {overdue && (
-                      <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">overdue</Badge>
+                      <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">overdue</Badge>
                     )}
                     <button
                       onClick={() => {
@@ -196,8 +196,8 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       className={cn(
                         'text-ds-micro px-2 py-0.5 rounded-ds-sm border',
                         canCurrentUserMutate
-                          ? 'border-hairline-strong text-zinc-400 hover:text-strong hover:border-brass-500/40'
-                          : 'border-hairline text-zinc-700 cursor-not-allowed'
+                          ? 'border-hairline-strong text-muted hover:text-strong hover:border-accent-500/40'
+                          : 'border-hairline text-faint cursor-not-allowed'
                       )}
                     >
                       {t.status === 'open' ? 'Mark done' : 'Reopen'}
@@ -216,7 +216,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               onChange={(e) => setNoteBody(e.target.value)}
               rows={2}
               placeholder="Internal note (timestamped, attributed — never shown to the brand)…"
-              className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-brass-500/40"
+              className="w-full bg-surface border border-hairline rounded-ds-sm px-3 py-2 text-xs text-strong focus:outline-none focus:border-accent-500/40"
             />
             <Button
               variant="accent"
@@ -232,15 +232,15 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               Add Note
             </Button>
             {brandNotes.length === 0 && (
-              <p className="text-ds-label text-zinc-600">No internal notes yet.</p>
+              <p className="text-ds-label text-faint">No internal notes yet.</p>
             )}
             {brandNotes.map((n) => (
               <div key={n.id} className="border-b border-hairline pb-1.5">
-                <span className="text-ds-micro font-mono text-zinc-600">
+                <span className="text-ds-micro font-mono text-faint">
                   {new Date(n.createdAt).toLocaleString()} ·{' '}
                   {staff.find((s) => s.id === n.authorStaffId)?.name ?? n.authorStaffId}
                 </span>
-                <p className="text-ds-label text-zinc-300 mt-0.5">{n.body}</p>
+                <p className="text-ds-label text-strong mt-0.5">{n.body}</p>
               </div>
             ))}
           </div>
@@ -250,7 +250,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
         {tab === 'relationship' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-ds-micro text-zinc-500 mb-1">Lifecycle stage</label>
+              <label className="block text-ds-micro text-muted mb-1">Lifecycle stage</label>
               <div className="grid grid-cols-5 gap-1">
                 {CRM_LIFECYCLE_STAGES.map((stage: CrmLifecycleStage) => (
                   <button
@@ -264,8 +264,8 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                     className={cn(
                       'text-ds-micro px-1 py-1.5 rounded-ds-md border capitalize transition-colors',
                       meta.lifecycleStage === stage
-                        ? 'border-brass-500/50 bg-brass-500/10 text-strong'
-                        : 'border-hairline text-zinc-400',
+                        ? 'border-accent-500/50 bg-accent-500/10 text-strong'
+                        : 'border-hairline text-muted',
                       !canCurrentUserMutate && 'cursor-not-allowed opacity-50'
                     )}
                   >
@@ -276,11 +276,11 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
 
             <div>
-              <label className="block text-ds-micro text-zinc-500 mb-1">Segmentation tags</label>
+              <label className="block text-ds-micro text-muted mb-1">Segmentation tags</label>
               <div className="flex items-center gap-1 flex-wrap mb-1">
-                {meta.tags.length === 0 && <span className="text-ds-micro text-zinc-600">none</span>}
+                {meta.tags.length === 0 && <span className="text-ds-micro text-faint">none</span>}
                 {meta.tags.map((t) => (
-                  <Badge key={t} className="text-ds-micro bg-violet-500/15 text-violet-300 border-violet-500/20">
+                  <Badge key={t} className="text-ds-micro bg-violet-500/15 text-state-muted border-violet-500/20">
                     {t}
                   </Badge>
                 ))}
@@ -306,7 +306,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
 
             <div>
-              <label className="block text-ds-micro text-zinc-500 mb-1">Account owner</label>
+              <label className="block text-ds-micro text-muted mb-1">Account owner</label>
               <select
                 value={meta.accountOwnerStaffId ?? ''}
                 disabled={!canCurrentUserMutate}
@@ -315,7 +315,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                   setBrandAccountOwner(brandId, e.target.value || null, actingStaffId);
                   bump();
                 }}
-                className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-zinc-300 disabled:opacity-50"
+                className="w-full bg-surface border border-hairline rounded-ds-sm px-2 py-1.5 text-xs text-strong disabled:opacity-50"
               >
                 <option value="">(unassigned)</option>
                 {staff.map((s) => (

@@ -25,7 +25,7 @@
  *
  * WHAT WAS WRONG — none of it visible to a typecheck or a build:
  *
- *  1. IT DID NOT TAKE THE SHELL THEME. The root was `bg-ink text-parchment`, with
+ *  1. IT DID NOT TAKE THE SHELL THEME. The root was `bg-surface text-soft`, with
  *     no `data-shell-theme`, so the light-shell remap layer never activated
  *     inside the page: two secondary buttons rendered LITERAL `text-white`
  *     (invisible on a light surface) and the hairline borders stayed white-alpha.
@@ -94,9 +94,9 @@ const COUNTRIES = [
 ];
 
 const field =
-  'w-full rounded-ds-md border border-hairline-strong bg-ink-900 px-3 py-2 text-sm text-parchment placeholder:text-zinc-600 focus:border-palette-indigo focus:outline-none';
-const labelCls = 'mb-1.5 block text-xs font-medium text-steel';
-const hintCls = 'mt-1 text-ds-label text-zinc-500';
+  'w-full rounded-ds-md border border-hairline-strong bg-surface px-3 py-2 text-sm text-soft placeholder:text-faint focus:border-palette-indigo focus:outline-none';
+const labelCls = 'mb-1.5 block text-xs font-medium text-muted';
+const hintCls = 'mt-1 text-ds-label text-muted';
 
 function StepRail({ current }: { current: PreAuditStepId }) {
   const index = PRE_AUDIT_STEPS.findIndex((s) => s.id === current);
@@ -108,10 +108,10 @@ function StepRail({ current }: { current: PreAuditStepId }) {
           className={cn(
             'rounded-full border px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em]',
             i === index
-              ? 'border-palette-indigo bg-palette-indigo/10 text-parchment'
+              ? 'border-palette-indigo bg-palette-indigo/10 text-soft'
               : i < index
-                ? 'border-hairline-strong text-zinc-400'
-                : 'border-hairline text-zinc-600'
+                ? 'border-hairline-strong text-muted'
+                : 'border-hairline text-faint'
           )}
         >
           {i + 1}. {s.title}
@@ -246,13 +246,13 @@ export function ExploreUkMarketFit({
               assertion at 390px measures THIS page's eyebrow (it reads the FIRST
               `main p.font-mono`) instead of an element further down the page.
             */}
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="font-display text-3xl md:text-4xl font-semibold mt-4">
               {EXPLORE_UK_MARKET_FIT_CTA}
             </h1>
-            <p className="text-sm text-steel max-w-2xl mx-auto mt-4 leading-relaxed">
+            <p className="text-sm text-muted max-w-2xl mx-auto mt-4 leading-relaxed">
               {EXPLORE_UK_MARKET_FIT_SUMMARY}
             </p>
             {/*
@@ -266,12 +266,12 @@ export function ExploreUkMarketFit({
               not publish the vendor list of the services Mercenta buys.
             */}
             <div className="mt-5 flex flex-col items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-tint px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-hairline-strong bg-tint px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
                 <Info className="w-3 h-3" aria-hidden="true" />
                 {status.simulationSafe ? 'Simulated research' : 'Live research'}
               </span>
               <p
-                className="max-w-2xl text-ds-label text-zinc-500"
+                className="max-w-2xl text-ds-label text-muted"
                 data-testid={PRE_AUDIT_TESTIDS.researchSource}
               >
                 Research source: {status.label} — {status.publicReason}
@@ -283,11 +283,11 @@ export function ExploreUkMarketFit({
 
           {step === 'identity' && (
             <section
-              className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
+              className="bg-surface border border-hairline rounded-ds-lg p-6 md:p-8"
               data-testid={PRE_AUDIT_TESTIDS.step('identity')}
             >
               <h2 className="font-display text-xl font-semibold mb-1">Your brand</h2>
-              <p className="text-xs text-steel mb-6">{PRE_AUDIT_STEPS[0].rationale}</p>
+              <p className="text-xs text-muted mb-6">{PRE_AUDIT_STEPS[0].rationale}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls} htmlFor="ukmf-brand">Brand name</label>
@@ -365,7 +365,7 @@ export function ExploreUkMarketFit({
                 <button
                   type="button"
                   onClick={() => onNavigate('home')}
-                  className="text-xs text-zinc-400 hover:text-brass-400 transition-colors"
+                  className="text-xs text-muted hover:text-accent-400 transition-colors"
                 >
                   Back to the homepage
                 </button>
@@ -376,11 +376,11 @@ export function ExploreUkMarketFit({
 
           {step === 'products' && (
             <section
-              className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
+              className="bg-surface border border-hairline rounded-ds-lg p-6 md:p-8"
               data-testid={PRE_AUDIT_TESTIDS.step('products')}
             >
               <h2 className="font-display text-xl font-semibold mb-1">Your products</h2>
-              <p className="text-xs text-steel mb-6">{PRE_AUDIT_STEPS[1].rationale}</p>
+              <p className="text-xs text-muted mb-6">{PRE_AUDIT_STEPS[1].rationale}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls} htmlFor="ukmf-product">Product name</label>
@@ -543,7 +543,7 @@ export function ExploreUkMarketFit({
                 <button
                   type="button"
                   onClick={() => setStep('identity')}
-                  className="inline-flex items-center gap-2 border border-hairline-strong hover:border-brass/60 text-parchment px-5 py-3 rounded-ds-md transition-colors text-sm"
+                  className="inline-flex items-center gap-2 border border-hairline-strong hover:border-accent/60 text-soft px-5 py-3 rounded-ds-md transition-colors text-sm"
                   data-testid={PRE_AUDIT_TESTIDS.back}
                 >
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -579,7 +579,7 @@ export function ExploreUkMarketFit({
           {step === 'result' && snapshot && (
             <section data-testid={PRE_AUDIT_TESTIDS.step('result')}>
               <div
-                className="bg-ink-900 border border-hairline rounded-ds-lg p-6 md:p-8"
+                className="bg-surface border border-hairline rounded-ds-lg p-6 md:p-8"
                 data-testid={PRE_AUDIT_TESTIDS.result}
               >
                 <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -589,7 +589,7 @@ export function ExploreUkMarketFit({
                   >
                     {snapshot.qualificationLabel}
                   </span>
-                  <span className="rounded-full border border-hairline-strong px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-steel">
+                  <span className="rounded-full border border-hairline-strong px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-muted">
                     UK presence {snapshot.presenceLabel}
                   </span>
                   {snapshot.simulationLabel && (
@@ -604,14 +604,14 @@ export function ExploreUkMarketFit({
                 </div>
                 <h2 className="font-display text-2xl font-semibold mb-2">{snapshot.headline}</h2>
                 {snapshot.simulationLabel && (
-                  <p className="text-ds-label text-zinc-500 mb-4">{snapshot.simulationLabel}</p>
+                  <p className="text-ds-label text-muted mb-4">{snapshot.simulationLabel}</p>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   {snapshot.indicators.map((ind) => (
                     <div
                       key={ind.id}
-                      className="rounded-ds-lg border-t-[3px] border border-hairline bg-ink-850 p-5"
+                      className="rounded-ds-lg border-t-[3px] border border-hairline bg-surface-raised p-5"
                       style={{
                         borderTopColor:
                           ind.state === 'favourable'
@@ -624,10 +624,10 @@ export function ExploreUkMarketFit({
                       }}
                       data-testid={PRE_AUDIT_TESTIDS.indicator(ind.id)}
                     >
-                      <p className="font-mono text-ds-micro uppercase tracking-[0.2em] text-zinc-500">
+                      <p className="font-mono text-ds-micro uppercase tracking-[0.2em] text-muted">
                         {ind.label}
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-parchment">
+                      <p className="mt-2 text-sm font-semibold text-soft">
                         {ind.state === 'favourable'
                           ? 'Favourable'
                           : ind.state === 'workable'
@@ -636,15 +636,15 @@ export function ExploreUkMarketFit({
                               ? 'Constrained'
                               : 'Not established'}
                       </p>
-                      <p className="mt-2 text-xs leading-relaxed text-steel">{ind.rationale}</p>
-                      <p className="mt-3 text-ds-micro text-zinc-600">
+                      <p className="mt-2 text-xs leading-relaxed text-muted">{ind.rationale}</p>
+                      <p className="mt-3 text-ds-micro text-faint">
                         basis: {ind.basis} · confidence: {ind.confidence}
                         {ind.regulatory ? ' · regulatory, not commercial' : ''}
                       </p>
                     </div>
                   ))}
                 </div>
-                <p className="mt-4 text-ds-label text-zinc-500">
+                <p className="mt-4 text-ds-label text-muted">
                   These three indicators are deliberately separate. Catalogue eligibility is about
                   requirements, commercial opportunity is about the commercial case, and supply
                   viability is about supply reliability — none of them is a success score.
@@ -656,20 +656,20 @@ export function ExploreUkMarketFit({
                 {snapshot.sections.map((s) => (
                   <div
                     key={s.id}
-                    className="bg-ink-900 border border-hairline rounded-ds-lg p-6"
+                    className="bg-surface border border-hairline rounded-ds-lg p-6"
                     data-testid={PRE_AUDIT_TESTIDS.snapshotSection(s.id)}
                   >
                     <h3 className="font-display text-base font-semibold mb-3">{s.title}</h3>
                     <ul className="space-y-2">
                       {s.statements.map((t, i) => (
-                        <li key={i} className="flex gap-2 text-xs leading-relaxed text-steel">
-                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brass" aria-hidden="true" />
+                        <li key={i} className="flex gap-2 text-xs leading-relaxed text-muted">
+                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-accent" aria-hidden="true" />
                           <span>{t}</span>
                         </li>
                       ))}
                     </ul>
                     {s.unknowns.length > 0 && (
-                      <p className="mt-3 text-ds-micro text-zinc-600">
+                      <p className="mt-3 text-ds-micro text-faint">
                         Unknowns: {s.unknowns.length} — listed under Open Questions.
                       </p>
                     )}
@@ -679,13 +679,13 @@ export function ExploreUkMarketFit({
 
               {snapshot.openQuestions.length > 0 && (
                 <div
-                  className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6"
+                  className="mt-6 bg-surface border border-hairline rounded-ds-lg p-6"
                   data-testid={PRE_AUDIT_TESTIDS.openQuestions}
                 >
                   <h3 className="font-display text-base font-semibold mb-3">What is still open</h3>
                   <ul className="space-y-2">
                     {snapshot.openQuestions.map((q, i) => (
-                      <li key={i} className="flex gap-2 text-xs leading-relaxed text-steel">
+                      <li key={i} className="flex gap-2 text-xs leading-relaxed text-muted">
                         <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[var(--mr-palette-orange)]" aria-hidden="true" />
                         <span>{q}</span>
                       </li>
@@ -694,7 +694,7 @@ export function ExploreUkMarketFit({
                   <button
                     type="button"
                     onClick={supplyMissing}
-                    className="mt-4 text-xs text-brass-400 hover:text-brass transition-colors"
+                    className="mt-4 text-xs text-accent-400 hover:text-accent transition-colors"
                   >
                     Supply the missing information and re-run
                   </button>
@@ -703,13 +703,13 @@ export function ExploreUkMarketFit({
 
               {snapshot.educationalGaps.length > 0 && (
                 <div
-                  className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6"
+                  className="mt-6 bg-surface border border-hairline rounded-ds-lg p-6"
                   data-testid={PRE_AUDIT_TESTIDS.gap}
                 >
                   <h3 className="font-display text-base font-semibold mb-2">
                     Things you may not need to know yet
                   </h3>
-                  <p className="text-xs text-steel mb-4">
+                  <p className="text-xs text-muted mb-4">
                     Mercenta records these so that onboarding can teach them in context rather than
                     assuming them. Nothing here is required to finish this assessment.
                   </p>
@@ -717,7 +717,7 @@ export function ExploreUkMarketFit({
                     {snapshot.educationalGaps.map((g) => (
                       <span
                         key={g.id}
-                        className="rounded-full border border-hairline-strong px-3 py-1 text-ds-micro text-zinc-400"
+                        className="rounded-full border border-hairline-strong px-3 py-1 text-ds-micro text-muted"
                       >
                         {g.label} · stage {g.academyStage}
                       </span>
@@ -727,9 +727,9 @@ export function ExploreUkMarketFit({
               )}
 
 
-              <div className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6">
+              <div className="mt-6 bg-surface border border-hairline rounded-ds-lg p-6">
                 <h3 className="font-display text-base font-semibold mb-2">Recommended next step</h3>
-                <p className="text-xs leading-relaxed text-steel">
+                <p className="text-xs leading-relaxed text-muted">
                   {snapshot.recommendedNextStep.replace(/^Recommended next step:\s*/, '')}
                 </p>
 
@@ -758,7 +758,7 @@ export function ExploreUkMarketFit({
                     <button
                       type="button"
                       onClick={submitReview}
-                      className="inline-flex items-center gap-2 rounded-ds-md border border-hairline-strong hover:border-brass/60 px-5 py-2.5 text-sm text-parchment transition-colors"
+                      className="inline-flex items-center gap-2 rounded-ds-md border border-hairline-strong hover:border-accent/60 px-5 py-2.5 text-sm text-soft transition-colors"
                       data-testid={PRE_AUDIT_TESTIDS.requestReview}
                     >
                       Ask Mercenta to review this
@@ -767,12 +767,12 @@ export function ExploreUkMarketFit({
                 )}
               </div>
 
-              <div className="mt-6 bg-ink-900 border border-hairline rounded-ds-lg p-6">
-                <p className="text-ds-label leading-relaxed text-zinc-500">{snapshot.disclaimer}</p>
+              <div className="mt-6 bg-surface border border-hairline rounded-ds-lg p-6">
+                <p className="text-ds-label leading-relaxed text-muted">{snapshot.disclaimer}</p>
                 {snapshot.couldNotEstablish.length > 0 && (
                   <ul className="mt-3 space-y-1">
                     {snapshot.couldNotEstablish.map((c, i) => (
-                      <li key={i} className="text-ds-label text-zinc-600">{c}</li>
+                      <li key={i} className="text-ds-label text-faint">{c}</li>
                     ))}
                   </ul>
                 )}
@@ -782,14 +782,14 @@ export function ExploreUkMarketFit({
                     NOT published. The mode and the zero-network proof are the
                     honest facts a visitor needs; the plumbing identifier is not.
                   */
-                  <p className="mt-3 text-ds-micro text-zinc-600">
+                  <p className="mt-3 text-ds-micro text-faint">
                     Research mode {research.mode} · network calls {research.networkCalls}
                   </p>
                 )}
                 <button
                   type="button"
                   onClick={restart}
-                  className="mt-4 text-xs text-zinc-400 hover:text-brass-400 transition-colors"
+                  className="mt-4 text-xs text-muted hover:text-accent-400 transition-colors"
                   data-testid={PRE_AUDIT_TESTIDS.restart}
                 >
                   Run another assessment
@@ -799,21 +799,21 @@ export function ExploreUkMarketFit({
           )}
 
           {step === 'result' && !snapshot && (
-            <section className="bg-ink-900 border border-hairline rounded-ds-lg p-6">
-              <p className="text-sm text-steel">
+            <section className="bg-surface border border-hairline rounded-ds-lg p-6">
+              <p className="text-sm text-muted">
                 No result is available for this assessment. Nothing has been claimed.
               </p>
               <button
                 type="button"
                 onClick={restart}
-                className="mt-4 text-xs text-brass-400 hover:text-brass"
+                className="mt-4 text-xs text-accent-400 hover:text-accent"
               >
                 Start again
               </button>
             </section>
           )}
 
-          <p className="mt-10 text-center font-mono text-ds-micro uppercase tracking-[0.2em] text-zinc-600">
+          <p className="mt-10 text-center font-mono text-ds-micro uppercase tracking-[0.2em] text-faint">
             {UK_PRESENCE_CLASSES.length} declared UK presence classes · every indicator shows its
             basis, evidence, observed values, thresholds, confidence and unknowns
           </p>

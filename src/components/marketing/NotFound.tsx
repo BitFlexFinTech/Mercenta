@@ -41,7 +41,7 @@ export function NotFound({
       style={{ backgroundColor: 'var(--mr-bg)' }}
     >
       <div className="mx-auto max-w-lg text-center">
-        <p className="font-mono text-ds-micro uppercase tracking-[0.25em] text-brass">
+        <p className="font-mono text-ds-micro uppercase tracking-[0.25em] text-accent">
           Error 404
         </p>
         <h1
@@ -60,7 +60,7 @@ export function NotFound({
             onClick={onNavigate}
             className={cn(
               'inline-flex items-center gap-2 rounded-ds-md bg-palette-indigo px-5 py-2.5 text-sm font-semibold text-on-palette',
-              'transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass'
+              'transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
             )}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -71,8 +71,8 @@ export function NotFound({
             onClick={onOpenPortal}
             className={cn(
               'inline-flex items-center gap-2 rounded-ds-md border px-5 py-2.5 text-sm font-semibold',
-              'border-hairline-strong text-parchment transition-colors hover:bg-tint',
-              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass'
+              'border-hairline-strong text-soft transition-colors hover:bg-tint',
+              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
             )}
           >
             <LogIn className="h-4 w-4" aria-hidden="true" />

@@ -53,31 +53,31 @@ export function BankFinancingSection() {
     <Card className="p-4 mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Landmark className="w-4 h-4 text-brass-400" />
+          <Landmark className="w-4 h-4 text-accent-400" />
           <span className="text-sm font-semibold text-strong">Bank Financing Partners</span>
-          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-accent-500/15 text-accent-400 border-accent-500/20">Super Admin</Badge>
         </div>
         <Button className="text-ds-micro" onClick={handleDownload}>
           <Download className="w-3 h-3 mr-1" /> Export Pitch Deck
         </Button>
       </div>
 
-      <p className="text-ds-label text-zinc-500 mb-3">
+      <p className="text-ds-label text-muted mb-3">
         PO-financing bank/fintech partnerships per sourcing region. UK import TAM/SAM data
         incorporated. One relationship per major trade corridor — US, Europe, Africa.
       </p>
 
       <div className="grid grid-cols-3 gap-2 text-ds-micro mb-4">
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">Total UK Import TAM</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">Total UK Import TAM</p>
           <p className="font-semibold text-strong">GBP {report.totalTamGbp.toFixed(0)}B</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">Serviceable SAM</p>
-          <p className="font-semibold text-brass-400">GBP {report.totalSamGbp.toFixed(1)}B</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">Serviceable SAM</p>
+          <p className="font-semibold text-accent-400">GBP {report.totalSamGbp.toFixed(1)}B</p>
         </div>
-        <div className="bg-ink-900 rounded-ds-sm p-2 border border-hairline">
-          <p className="text-zinc-500">Categories</p>
+        <div className="bg-surface rounded-ds-sm p-2 border border-hairline">
+          <p className="text-muted">Categories</p>
           <p className="font-semibold text-strong">{report.categories.length}</p>
         </div>
       </div>
@@ -88,21 +88,21 @@ export function BankFinancingSection() {
             <p className="text-ds-label font-medium text-strong mb-1.5">{REGION_LABELS[region]}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {getFinancingPartnerForRegion(region).map(function(p: FinancingPartner) { return (
-                <div key={p.id} className="bg-ink-900 rounded-ds-md border border-hairline p-2.5">
+                <div key={p.id} className="bg-surface rounded-ds-md border border-hairline p-2.5">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-ds-label font-medium text-strong">{p.name}</span>
-                    {p.isMock && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>}
+                    {p.isMock && <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">(Mock)</Badge>}
                   </div>
-                  <p className="text-ds-micro text-zinc-500 mb-1.5">{p.description}</p>
+                  <p className="text-ds-micro text-muted mb-1.5">{p.description}</p>
                   <div className="grid grid-cols-2 gap-1.5 text-ds-micro">
-                    <span className="text-zinc-500">Advance:</span>
-                    <span className="text-zinc-300 font-mono text-right">{(p.advanceRate * 100).toFixed(0)}%</span>
-                    <span className="text-zinc-500">Fees:</span>
-                    <span className="text-zinc-300 font-mono text-right">{p.feeRange}</span>
-                    <span className="text-zinc-500">Turnaround:</span>
-                    <span className="text-zinc-300 font-mono text-right">{p.turnaroundDays}</span>
-                    <span className="text-zinc-500">Deal size:</span>
-                    <span className="text-zinc-300 font-mono text-right">{p.minDealSize} – {p.maxDealSize}</span>
+                    <span className="text-muted">Advance:</span>
+                    <span className="text-strong font-mono text-right">{(p.advanceRate * 100).toFixed(0)}%</span>
+                    <span className="text-muted">Fees:</span>
+                    <span className="text-strong font-mono text-right">{p.feeRange}</span>
+                    <span className="text-muted">Turnaround:</span>
+                    <span className="text-strong font-mono text-right">{p.turnaroundDays}</span>
+                    <span className="text-muted">Deal size:</span>
+                    <span className="text-strong font-mono text-right">{p.minDealSize} – {p.maxDealSize}</span>
                   </div>
                 </div>
               );})}
@@ -111,12 +111,12 @@ export function BankFinancingSection() {
         );})}
       </div>
 
-      <div className="mt-4 bg-emerald-500/5 border border-emerald-500/20 rounded-ds-md p-2.5">
+      <div className="mt-4 bg-emerald-500/5 border border-state-success/20 rounded-ds-md p-2.5">
         <div className="flex items-center gap-1.5 mb-1">
-          <AlertTriangle className="w-3 h-3 text-emerald-400" />
-          <span className="text-ds-micro font-medium text-emerald-300">Notable Partner — Africa</span>
+          <AlertTriangle className="w-3 h-3 text-state-success" />
+          <span className="text-ds-micro font-medium text-state-success">Notable Partner — Africa</span>
         </div>
-        <p className="text-ds-micro text-zinc-400 leading-relaxed">
+        <p className="text-ds-micro text-muted leading-relaxed">
           British International Investment (BII) is the UK government's own development finance institution,
           mandated to finance UK-Africa trade. Given Mercenta's DCTS-tariff sourcing
           from Zimbabwe and other African markets, BII is the most strategically-aligned

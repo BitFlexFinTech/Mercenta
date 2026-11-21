@@ -32,11 +32,11 @@ const REGIONS: { value: Lead['region']; label: string }[] = [
 ];
 
 const STAGE_COLORS: Record<string, string> = {
-  Scraped: 'border-zinc-500/30',
-  Enriched: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  Scraped: 'border-hairline',
+  Enriched: 'bg-state-info/10 text-state-info border-state-info/20',
   Sequenced: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  Replied: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  'Meeting Booked': 'bg-brass/15 text-brass border-brass/30',
+  Replied: 'bg-state-success/10 text-state-success border-state-success/20',
+  'Meeting Booked': 'bg-accent/15 text-accent border-accent/30',
 };
 
 export function MarketingHub() {
@@ -151,7 +151,7 @@ export function MarketingHub() {
         description="Lead sourcing, ICP fit scoring and outreach sequencing."
       />
 
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
+      <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live automated sourcing is not wired yet — CSV import is the
@@ -170,7 +170,7 @@ export function MarketingHub() {
             rows={2}
           />
           <div>
-            <label className="text-xs font-medium text-zinc-400 mb-1.5 block">
+            <label className="text-xs font-medium text-muted mb-1.5 block">
               Categories (approved list only — §13)
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -187,8 +187,8 @@ export function MarketingHub() {
                     className={cn(
                       'text-ds-micro px-2 py-1 rounded-full border transition-colors',
                       active
-                        ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
-                        : 'border-hairline text-zinc-500 hover:border-hairline-strong'
+                        ? 'bg-state-info/10 text-state-info border-blue-500/30'
+                        : 'border-hairline text-muted hover:border-hairline-strong'
                     )}
                   >
                     {cat}
@@ -212,8 +212,8 @@ export function MarketingHub() {
                     className={cn(
                       'text-ds-micro px-2 py-1 rounded-full border transition-colors',
                       active
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'border-hairline text-zinc-500 hover:border-hairline-strong'
+                        ? 'bg-state-success/10 text-state-success border-emerald-500/30'
+                        : 'border-hairline text-muted hover:border-hairline-strong'
                     )}
                   >
                     {r.label}
@@ -224,7 +224,7 @@ export function MarketingHub() {
             <span
               className={cn(
                 'text-ds-micro font-mono',
-                icpValid ? 'text-emerald-400' : 'text-red-400'
+                icpValid ? 'text-state-success' : 'text-state-danger'
               )}
             >
               ICP {icpValid ? 'valid' : 'incomplete'}
@@ -239,11 +239,11 @@ export function MarketingHub() {
       {/* §7 Discovery Engine — trade-body directories → OpenRouter → Companies House → Hunter → Instantly */}
       <Card title="Discovery Engine" subtitle="Find brand partners via trade-body directories and enrichment">
         <div className="space-y-3 p-1">
-          <p className="text-ds-label text-zinc-500 leading-relaxed">
+          <p className="text-ds-label text-muted leading-relaxed">
             Searches ZimTrade, KEPROBA, GEPA, and US Commercial Service directories for matching
             brands, scores fit via OpenRouter, enriches with Companies House data, finds verified
             emails via Hunter, and enrolls qualifying leads into the outreach sequence.
-            <span className="block mt-1 text-amber-400">Mock mode active — real credentials needed for live data.</span>
+            <span className="block mt-1 text-state-warning">Mock mode active — real credentials needed for live data.</span>
           </p>
           <div className="flex items-center gap-3">
             <Button onClick={runDiscovery} disabled={discoveryRunning || !icpValid}>
@@ -256,8 +256,8 @@ export function MarketingHub() {
             {discoveryResult && (
               <div className="flex items-center gap-3 text-xs">
                 <span className="text-strong font-medium">{discoveryResult.discovered} discovered</span>
-                <span className="text-emerald-400">{discoveryResult.enrolled} enrolled</span>
-                {discoveryResult.dropped > 0 && <span className="text-red-400">{discoveryResult.dropped} dropped</span>}
+                <span className="text-state-success">{discoveryResult.enrolled} enrolled</span>
+                {discoveryResult.dropped > 0 && <span className="text-state-danger">{discoveryResult.dropped} dropped</span>}
               </div>
             )}
           </div>
@@ -265,13 +265,13 @@ export function MarketingHub() {
             <div className="border border-hairline rounded-ds-md divide-y divide-hairline-06 max-h-48 overflow-y-auto">
               {discoveryResult.leads.map((l, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-2">
-                  <span className="text-xs text-zinc-300">{l.name}</span>
+                  <span className="text-xs text-strong">{l.name}</span>
                   {l.enrolled ? (
-                    <span className="text-ds-micro text-emerald-400 flex items-center gap-1">
+                    <span className="text-ds-micro text-state-success flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Enrolled
                     </span>
                   ) : (
-                    <span className="text-ds-micro text-zinc-500 flex items-center gap-1">
+                    <span className="text-ds-micro text-muted flex items-center gap-1">
                       <XCircle className="w-3 h-3" /> {l.reason ?? 'Dropped'}
                     </span>
                   )}
@@ -285,7 +285,7 @@ export function MarketingHub() {
       {/* Fit scoring summary + auto-enroll */}
       <Card title={`Fit Scoring — threshold ${FIT_THRESHOLD_PLACEHOLDER}`}>
         <div className="flex items-center justify-between px-1 pb-3">
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-muted">
             {autoEnrollable.length} lead(s) above threshold ready for auto-enrollment
           </span>
           <Button
@@ -304,7 +304,7 @@ export function MarketingHub() {
               <div key={lead.id} className="flex items-center justify-between px-1 py-2">
                 <div className="min-w-0">
                   <div className="text-xs font-medium text-strong truncate">{lead.company}</div>
-                  <div className="text-ds-micro text-zinc-600 font-mono">
+                  <div className="text-ds-micro text-faint font-mono">
                     {lead.region.toUpperCase()} · {lead.segment}
                     {/* §Phase C — canonical Brand Intelligence identity carried by the lead */}
                     {lead.prospectId ? ` · BI ${lead.prospectId}` : ' · unlinked'}
@@ -315,8 +315,8 @@ export function MarketingHub() {
                     className={cn(
                       'text-ds-micro font-mono',
                       fit >= FIT_THRESHOLD_PLACEHOLDER
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                        : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
+                        ? 'bg-state-success/10 text-state-success border-state-success/20'
+                        : 'bg-tint text-muted border-hairline'
                     )}
                   >
                     fit {fit}
@@ -346,10 +346,10 @@ export function MarketingHub() {
               (l) => (l.outreachStatus as PipelineStage) === stage
             );
             return (
-              <div key={stage} className="bg-ink-900 border border-hairline rounded-ds-md p-2.5">
+              <div key={stage} className="bg-surface border border-hairline rounded-ds-md p-2.5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-ds-micro font-medium text-zinc-400">{stage}</span>
-                  <span className="font-mono text-ds-micro text-zinc-600">
+                  <span className="text-ds-micro font-medium text-muted">{stage}</span>
+                  <span className="font-mono text-ds-micro text-faint">
                     {stageLeads.length}
                   </span>
                 </div>
@@ -362,20 +362,20 @@ export function MarketingHub() {
                       <div className="text-ds-label font-medium text-strong truncate">
                         {lead.company}
                       </div>
-                      <div className="font-mono text-ds-micro text-zinc-600 mt-0.5">
+                      <div className="font-mono text-ds-micro text-faint mt-0.5">
                         fit {lead.fitScore}
                       </div>
                     </div>
                   ))}
                   {stageLeads.length === 0 && (
-                    <p className="text-ds-micro text-zinc-700 italic">empty</p>
+                    <p className="text-ds-micro text-faint italic">empty</p>
                   )}
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-2.5 text-ds-micro text-state-info flex items-start gap-1.5">
+        <div className="mt-3 bg-blue-500/10 border border-state-info/20 rounded-ds-md p-2.5 text-ds-micro text-state-info flex items-start gap-1.5">
           <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
           Sequence pauses automatically the moment a lead replies — replied and
           booked leads never receive automated follow-ups.
@@ -387,11 +387,11 @@ export function MarketingHub() {
         <div className="space-y-1.5 px-1 pb-1">
           {SEQUENCE_STEPS.map((step) => (
             <div key={step.step} className="flex items-center gap-3 text-xs">
-              <Badge className="text-ds-micro bg-tint text-zinc-300 border-hairline">
+              <Badge className="text-ds-micro bg-tint text-strong border-hairline">
                 Day {step.dayOffset}
               </Badge>
-              <span className="text-zinc-300">{step.subjectTemplate}</span>
-              <span className="ml-auto text-ds-micro text-zinc-600">{step.purpose}</span>
+              <span className="text-strong">{step.subjectTemplate}</span>
+              <span className="ml-auto text-ds-micro text-faint">{step.purpose}</span>
             </div>
           ))}
         </div>
@@ -416,7 +416,7 @@ export function MarketingHub() {
               key: 'status',
               label: 'Status',
               render: (camp) => (
-                <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20">
+                <Badge className="text-ds-micro bg-state-info/10 text-state-info border-state-info/20">
                   {camp.status}
                 </Badge>
               ),
@@ -479,7 +479,7 @@ function CsvImport({ onImport }: { onImport: (csv: string) => void }) {
       >
         <Upload className="w-3.5 h-3.5 mr-1.5" /> Import leads
       </Button>
-      {result && <p className="text-ds-label text-emerald-400">{result}</p>}
+      {result && <p className="text-ds-label text-state-success">{result}</p>}
     </div>
   );
 }

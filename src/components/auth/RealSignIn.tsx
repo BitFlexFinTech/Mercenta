@@ -40,16 +40,16 @@ export function RealSignIn() {
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-6 flex items-center gap-2 text-xs">
-        <Lock className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
-        <span className="font-medium uppercase tracking-wider text-zinc-400">
+        <Lock className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+        <span className="font-medium uppercase tracking-wider text-muted">
           Secure sign-in
         </span>
       </div>
 
-      <h1 className="font-display text-2xl font-semibold text-parchment">
+      <h1 className="font-display text-2xl font-semibold text-soft">
         Sign in to Mercenta
       </h1>
-      <p className="mt-1 text-sm text-steel">
+      <p className="mt-1 text-sm text-muted">
         Use the account Mercenta set up for you.
       </p>
 

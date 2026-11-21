@@ -21,16 +21,16 @@ import { useCanonicalStoreVersion } from '@/data/queries';
 import { Target, Sparkles } from 'lucide-react';
 
 const STAGE_STYLES: Record<string, string> = {
-  'awaiting approval': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-  approved: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  rejected: 'bg-red-500/15 text-red-300 border-red-500/20',
-  sent: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  'awaiting approval': 'bg-state-warning/10 text-state-warning border-state-warning/20',
+  approved: 'bg-state-success/10 text-state-success border-state-success/20',
+  rejected: 'bg-state-danger/10 text-state-danger border-state-danger/20',
+  sent: 'bg-state-info/10 text-state-info border-state-info/20',
   responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
-  qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  won: 'bg-brass/15 text-brass border-brass/30',
-  lost: 'bg-zinc-500/15 text-zinc-400 border-hairline',
+  qualified: 'bg-state-success/10 text-state-success border-state-success/20',
+  won: 'bg-accent/15 text-accent border-accent/30',
+  lost: 'bg-tint text-muted border-hairline',
   enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  'not enrolled': 'bg-tint text-zinc-400 border-hairline',
+  'not enrolled': 'bg-tint text-muted border-hairline',
 };
 
 export function AcquisitionPipeline() {
@@ -79,7 +79,7 @@ export function AcquisitionPipeline() {
   return (
     <Card title="Acquisition Pipeline (BI-derived)">
       <div className="px-1 pb-1 space-y-3">
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           The acquisition universe IS the canonical Brand Intelligence prospect store — the real brands
           below carry their existing prospect identity into ICP targeting. No separate mock acquisition
           list exists.
@@ -95,24 +95,24 @@ export function AcquisitionPipeline() {
               aria-pressed={metricFilter === m.key}
               title={`Show the ${m.label.toLowerCase()}`}
               className={cn(
-                'bg-ink-850 border rounded-ds-md px-2 py-1.5 text-left transition-colors',
-                metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-hairline hover:border-hairline-strong'
+                'bg-surface-raised border rounded-ds-md px-2 py-1.5 text-left transition-colors',
+                metricFilter === m.key ? 'border-accent-500/50 bg-accent-500/10' : 'border-hairline hover:border-hairline-strong'
               )}
             >
-              <p className="text-ds-micro text-zinc-500 uppercase">{m.label}</p>
+              <p className="text-ds-micro text-muted uppercase">{m.label}</p>
               <p className="text-sm font-semibold text-strong font-mono">{m.value}</p>
             </button>
           ))}
         </div>
         {active && (
-          <p className="text-ds-micro text-brass-300">
+          <p className="text-ds-micro text-accent-300">
             Filtered: {active.label} ({rows.length} shown) ·{' '}
             <button type="button" className="underline" onClick={() => setMetricFilter(null)}>clear</button>
           </p>
         )}
 
-        {notice && <p className="text-ds-label text-emerald-400">{notice}</p>}
-        {error && <p className="text-ds-label text-red-300">{error}</p>}
+        {notice && <p className="text-ds-label text-state-success">{notice}</p>}
+        {error && <p className="text-ds-label text-state-danger">{error}</p>}
 
         {/* §Phase D — canonical DataTable (the `data-table` hook is preserved
             for the acceptance test's real row-count assertions). */}
@@ -130,10 +130,10 @@ export function AcquisitionPipeline() {
               render: (r) => (
                 <span>
                   <span className="inline-flex items-center gap-1.5 text-strong font-medium">
-                    <Target className="w-3 h-3 text-brass-400" />
+                    <Target className="w-3 h-3 text-accent-400" />
                     {r.prospect.brand}
                   </span>
-                  <span className="block text-ds-micro text-zinc-500">{r.prospect.category}</span>
+                  <span className="block text-ds-micro text-muted">{r.prospect.category}</span>
                 </span>
               ),
             },
@@ -145,12 +145,12 @@ export function AcquisitionPipeline() {
                   <span
                     className={cn(
                       'font-mono',
-                      r.prospect.score.total >= 80 ? 'text-emerald-400' : 'text-zinc-300'
+                      r.prospect.score.total >= 80 ? 'text-state-success' : 'text-strong'
                     )}
                   >
                     {r.prospect.score.total}
                   </span>
-                  <span className="text-ds-micro text-zinc-500"> {r.prospect.score.tier}</span>
+                  <span className="text-ds-micro text-muted"> {r.prospect.score.tier}</span>
                 </span>
               ),
             },
@@ -159,7 +159,7 @@ export function AcquisitionPipeline() {
               label: 'ICP identity',
               hideBelow: 'lg',
               render: (r) => (
-                <span className="font-mono text-ds-micro text-zinc-400">
+                <span className="font-mono text-ds-micro text-muted">
                   {r.lead?.id ?? '(no region)'}
                 </span>
               ),
@@ -167,13 +167,13 @@ export function AcquisitionPipeline() {
             {
               key: 'region',
               label: 'Region',
-              render: (r) => <span className="text-zinc-300">{r.region ?? '—'}</span>,
+              render: (r) => <span className="text-strong">{r.region ?? '—'}</span>,
             },
             {
               key: 'stage',
               label: 'Stage',
               render: (r) => (
-                <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>
+                <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[r.stage] ?? 'text-muted')}>
                   {r.stage}
                 </Badge>
               ),
@@ -202,7 +202,7 @@ export function AcquisitionPipeline() {
             },
           ]}
         />
-        <p className="text-ds-micro text-zinc-600">
+        <p className="text-ds-micro text-faint">
           Review, modify, approve/reject, send and record the response on the prospect's own record:
           Brand Intelligence → brand row → Outreach tab.
         </p>

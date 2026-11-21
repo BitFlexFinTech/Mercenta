@@ -159,7 +159,7 @@ export function LiveChatWidget() {
               <button
                 onClick={handleSend}
                 disabled={!draft.trim()}
-                className="w-8 h-8 rounded-ds-md bg-accent-500 hover:bg-accent-400 disabled:bg-surface-overlay disabled:text-muted text-strong flex items-center justify-center transition-colors flex-shrink-0"
+                className="w-8 h-8 rounded-ds-md bg-accent-500 hover:bg-accent-400 disabled:bg-surface-overlay disabled:text-muted text-on-accent flex items-center justify-center transition-colors flex-shrink-0"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>

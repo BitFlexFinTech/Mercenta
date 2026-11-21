@@ -35,11 +35,11 @@ const REASON_LABELS: Record<ReturnReason, string> = {
 };
 
 const REASON_BADGES: Record<ReturnReason, string> = {
-  defective: 'bg-red-500/15 text-red-300 border-red-500/20',
+  defective: 'bg-state-danger/10 text-state-danger border-state-danger/20',
   damaged_in_transit: 'bg-state-warning/10 text-state-warning border-state-warning/20',
   wrong_item: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   quality_issue: 'bg-orange-500/15 text-orange-300 border-orange-500/20',
-  customer_return: 'bg-state-info/10 text-state-info border-blue-500/20',
+  customer_return: 'bg-state-info/10 text-state-info border-state-info/20',
   compliance_issue: 'bg-state-danger/10 text-state-danger border-state-danger/20',
 };
 
@@ -195,7 +195,7 @@ export function BrandReturns() {
                 label: 'Deduction',
                 render: (r) =>
                   r.linkedDeductionId ? (
-                    <Badge className="text-ds-micro bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
+                    <Badge className="text-ds-micro bg-state-danger/10 text-state-danger">{r.linkedDeductionId}</Badge>
                   ) : (
                     <span className="text-faint">—</span>
                   ),

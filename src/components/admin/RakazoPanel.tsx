@@ -67,7 +67,7 @@ return (
       {/* ── Header row ────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-0 py-4">
         <div className="flex items-center gap-3">
-          <Bot className="w-5 h-5 text-emerald-400" />
+          <Bot className="w-5 h-5 text-state-success" />
           <h2 className="text-lg font-semibold text-strong">Rakazo Bot Dashboard</h2>
           <span
             className={cn(
@@ -92,7 +92,7 @@ return (
           <button
             onClick={openInNewTab}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
-                       bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
+                       bg-tint hover:bg-tint/[0.1] text-strong hover:text-strong
                        transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ return (
           <button
             onClick={handleRefresh}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm text-xs font-medium
-                       bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
+                       bg-tint hover:bg-tint/[0.1] text-strong hover:text-strong
                        transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -113,24 +113,24 @@ return (
       {/* ── Iframe (or error fallback) ──────────────────────────── */}
       <div className="flex-1 relative min-h-[300px]">
         {loadState === 'loading' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-ink-800/50 rounded-ds-md z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-surface-overlay/50 rounded-ds-md z-10">
             <div className="flex flex-col items-center gap-3">
-              <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
-              <span className="text-sm text-zinc-400">Connecting to Rakazo droplet…</span>
+              <RefreshCw className="w-8 h-8 text-state-success animate-spin" />
+              <span className="text-sm text-muted">Connecting to Rakazo droplet…</span>
             </div>
           </div>
         )}
 
         {loadState === 'error' ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 p-8 rounded-ds-lg border border-red-500/20 bg-red-500/5 max-w-md text-center">
-              <AlertTriangle className="w-10 h-10 text-red-400" />
+            <div className="flex flex-col items-center gap-4 p-8 rounded-ds-lg border border-state-danger/20 bg-red-500/5 max-w-md text-center">
+              <AlertTriangle className="w-10 h-10 text-state-danger" />
               <div>
-                <h3 className="text-base font-semibold text-red-300 mb-1">
+                <h3 className="text-base font-semibold text-state-danger mb-1">
                   Unable to reach Rakazo droplet
                 </h3>
-                <p className="text-sm text-zinc-400">
-                  The bot dashboard at <code className="text-xs bg-ink-700 px-1.5 py-0.5 rounded-ds-sm">{RAKAZO_URL}</code>{' '}
+                <p className="text-sm text-muted">
+                  The bot dashboard at <code className="text-xs bg-surface-hover px-1.5 py-0.5 rounded-ds-sm">{RAKAZO_URL}</code>{' '}
                   did not respond within {TIMEOUT_MS / 1000} seconds.
                 </p>
               </div>
@@ -138,7 +138,7 @@ return (
                 <button
                   onClick={openInNewTab}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
-                             bg-tint hover:bg-tint/[0.1] text-zinc-300 hover:text-strong
+                             bg-tint hover:bg-tint/[0.1] text-strong hover:text-strong
                              transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
@@ -147,7 +147,7 @@ return (
                 <button
                   onClick={retry}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
-                             bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-state-success
+                             bg-state-success/10 hover:bg-emerald-500/20 text-state-success hover:text-state-success
                              transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
@@ -172,7 +172,7 @@ return (
       </div>
 
       {/* ── Footer strip ───────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-0 py-3 text-xs text-zinc-500 border-t border-hairline mt-4">
+      <div className="flex items-center justify-between px-0 py-3 text-xs text-muted border-t border-hairline mt-4">
         <span>20 bots active · Demo mode</span>
         <span>Droplet: 24.144.86.50</span>
       </div>

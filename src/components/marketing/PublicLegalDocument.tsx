@@ -69,7 +69,7 @@ export function PublicLegalDocument({
             390px exactly as it does on the marketing pages.
           */}
           <div className="mx-auto max-w-3xl">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">{heading}</h1>
@@ -86,8 +86,8 @@ export function PublicLegalDocument({
           <div className="mx-auto max-w-3xl space-y-8">
             {sections.map((section) => (
               <section key={section.title}>
-                <h2 className="mb-2 font-display text-base font-semibold text-parchment">{section.title}</h2>
-                <div className="text-sm leading-relaxed text-steel">{section.body}</div>
+                <h2 className="mb-2 font-display text-base font-semibold text-soft">{section.title}</h2>
+                <div className="text-sm leading-relaxed text-muted">{section.body}</div>
               </section>
             ))}
           </div>
@@ -101,7 +101,7 @@ export function PublicLegalDocument({
 /** A link inside a legal document — one treatment, so the two documents match. */
 export function LegalLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a href={href} className="text-brass underline underline-offset-2 transition-colors hover:text-brass-400">
+    <a href={href} className="text-accent underline underline-offset-2 transition-colors hover:text-accent-400">
       {children}
     </a>
   );

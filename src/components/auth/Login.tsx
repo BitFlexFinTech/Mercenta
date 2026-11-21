@@ -39,9 +39,9 @@ const nationFlag = (nation: string): string => NATION_FLAGS[nation] ?? '🌐';
 
 /** Rotating accents so the demo cards don't render as one monochrome wall. */
 const ACCENTS = [
-  'border-amber-500/30 hover:bg-amber-500/10',
+  'border-amber-500/30 hover:bg-state-warning/10',
   'border-blue-500/30 hover:bg-blue-500/10',
-  'border-emerald-500/30 hover:bg-emerald-500/10',
+  'border-emerald-500/30 hover:bg-state-success/10',
 ];
 
 /**
@@ -61,7 +61,7 @@ const OPS_LOGINS: {
     label: 'Mercenta Admin Hub',
     description: 'Corporate control panel — departments & trade desk',
     icon: ShieldCheck,
-    color: 'border-blue-500/30 hover:bg-blue-500/10 text-blue-400',
+    color: 'border-blue-500/30 hover:bg-blue-500/10 text-state-info',
     environment: 'admin',
     role: 'Mercenta Admin',
   },
@@ -69,7 +69,7 @@ const OPS_LOGINS: {
     label: 'Super Admin — Tadii',
     description: 'Master staff & role matrix with full deployment control',
     icon: Crown,
-    color: 'border-red-500/30 hover:bg-red-500/10 text-red-400',
+    color: 'border-red-500/30 hover:bg-state-danger/10 text-state-danger',
     environment: 'admin',
     role: 'Super Admin',
   },
@@ -164,7 +164,7 @@ export function Login() {
    */
   if (authMode === 'real') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-950 px-6">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--mr-bg-deep)] px-6">
         <RealSignIn />
       </div>
     );
@@ -184,7 +184,7 @@ export function Login() {
         {/* Back to home */}
         <button
           onClick={() => setEnvironment('home')}
-          className="flex items-center gap-2 text-xs text-zinc-500 hover:text-strong transition-colors mb-8"
+          className="flex items-center gap-2 text-xs text-muted hover:text-strong transition-colors mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Home
@@ -197,7 +197,7 @@ export function Login() {
             <span className="text-xl font-semibold text-strong">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-strong mb-1">Partner Login</h1>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted">
             Access your brand portal or operations environment
           </p>
         </div>
@@ -205,8 +205,8 @@ export function Login() {
         {/* §Stage-17 — ALL seeded demo brands, derived from ALL_DEMO_BRANDS. */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-xs mb-3">
-            <Building2 className="w-3.5 h-3.5 text-brass-400" />
-            <span className="font-medium text-zinc-400 uppercase tracking-wider">
+            <Building2 className="w-3.5 h-3.5 text-accent-400" />
+            <span className="font-medium text-muted uppercase tracking-wider">
               Brand Partner Portals — all {portalCards.length} brands
             </span>
           </div>
@@ -218,31 +218,31 @@ export function Login() {
                   brand.canonical ? activateOnboardingBrand(brand.id) : activateDemoBrand(brand.id)
                 }
                 className={cn(
-                  'bg-ink-900 border rounded-ds-lg p-4 text-left transition-all group',
+                  'bg-surface border rounded-ds-lg p-4 text-left transition-all group',
                   ACCENTS[i % ACCENTS.length]
                 )}
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">{nationFlag(brand.nation)}</span>
-                  <span className="text-ds-micro font-medium text-zinc-400 uppercase tracking-wider truncate">
+                  <span className="text-ds-micro font-medium text-muted uppercase tracking-wider truncate">
                     {brand.category}
                   </span>
                   {brand.canonical && (
-                    <span className="ml-auto text-ds-micro font-medium text-brass-400 uppercase tracking-wider">
+                    <span className="ml-auto text-ds-micro font-medium text-accent-400 uppercase tracking-wider">
                       Onboarding
                     </span>
                   )}
                 </div>
                 <h3 className="text-sm font-semibold text-strong leading-snug">{brand.name}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <p className="text-xs text-muted mt-0.5">
                   {[brand.nation, brand.signatory].filter(Boolean).join(' · ') || 'Details pending'}
                 </p>
-                <p className="text-ds-label text-zinc-400 mt-2 leading-relaxed capitalize">
+                <p className="text-ds-label text-muted mt-2 leading-relaxed capitalize">
                   {brand.canonical
                     ? `${brand.onboardingStatus?.replace(/_/g, ' ')} · onboarding record`
                     : `${brand.track.replace(/_/g, ' ')} · contract ${brand.contractStatus.replace(/_/g, ' ')}`}
                 </p>
-                <div className="flex items-center gap-1 mt-3 text-xs text-brass-400 font-medium">
+                <div className="flex items-center gap-1 mt-3 text-xs text-accent-400 font-medium">
                   Enter as brand
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -255,7 +255,7 @@ export function Login() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs mb-2">
             <Lock className="w-3.5 h-3.5" />
-            <span className="font-medium text-zinc-400 uppercase tracking-wider">
+            <span className="font-medium text-muted uppercase tracking-wider">
               Operations & Control Access
             </span>
           </div>
@@ -266,7 +266,7 @@ export function Login() {
                 key={login.label}
                 onClick={() => signIn(login.environment, login.role)}
                 className={cn(
-                  'w-full bg-ink-900 border rounded-ds-lg p-4 text-left transition-all group',
+                  'w-full bg-surface border rounded-ds-lg p-4 text-left transition-all group',
                   login.color
                 )}
               >
@@ -276,9 +276,9 @@ export function Login() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-strong">{login.label}</h3>
-                    <p className="text-xs text-zinc-500 mt-0.5">{login.description}</p>
+                    <p className="text-xs text-muted mt-0.5">{login.description}</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-strong transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-faint group-hover:text-strong transition-colors" />
                 </div>
               </button>
             );
@@ -289,19 +289,19 @@ export function Login() {
         <div className="mt-8 text-center">
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-strong font-medium px-6 py-3 rounded-ds-md transition-colors"
+            className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-on-accent font-medium px-6 py-3 rounded-ds-md transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Request Partner Access
           </button>
-          <p className="text-xs text-zinc-600 mt-2">
+          <p className="text-xs text-faint mt-2">
             Don&apos;t have an account? Apply to distribute through {BRAND_NAME}&apos;s UK wholesale network
           </p>
         </div>
 
         {/* Demo mode notice */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-zinc-600">
+          <p className="text-xs text-faint">
             Mercenta Partners Investor Demo — data shown is illustrative.
             Production credentials and authentication can be activated at any time.
           </p>

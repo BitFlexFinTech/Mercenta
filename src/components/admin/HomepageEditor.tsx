@@ -74,13 +74,13 @@ function LintableTextarea({
   const lint = useMemo(() => lintOutwardWording(value), [value]);
   return (
     <div>
-      <label className="mb-1 block text-ds-micro font-medium text-zinc-500">{label}</label>
+      <label className="mb-1 block text-ds-micro font-medium text-muted">{label}</label>
       <textarea
         aria-label={label}
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
+        className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
       />
       {!lint.safe && (
         <p className="text-ds-micro text-stamp mt-1 flex items-center gap-1">
@@ -120,7 +120,7 @@ function PointsEditor({
         <LintableTextarea label="Section subheading" value={subheading} onChange={onChangeSubheading} />
       </div>
       <div className="space-y-2">
-        <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-muted">
           Points ({points.length})
         </p>
         {points.map((p, i) => (
@@ -268,12 +268,12 @@ export function HomepageEditor() {
             <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Revert
           </Button>
           {anyUnsafe ? (
-            <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
+            <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">
               <AlertTriangle className="w-3 h-3 mr-1" /> Unsafe wording blocks saving
             </Badge>
           ) : (
             status && (
-              <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+              <Badge className="text-ds-micro bg-state-success/10 text-state-success border-state-success/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> {status}
               </Badge>
             )
@@ -287,10 +287,10 @@ export function HomepageEditor() {
             renders the REAL `Home` component — so what the owner sees is what
             publishes. Previewing never publishes. */}
         <div className="mt-6 border-t border-hairline pt-5" data-testid="homepage-design-picker">
-          <p className="mb-1 text-ds-label uppercase tracking-wider text-zinc-500">
+          <p className="mb-1 text-ds-label uppercase tracking-wider text-muted">
             Homepage design
           </p>
-          <p className="mb-3 text-ds-micro text-zinc-500">
+          <p className="mb-3 text-ds-micro text-muted">
             Published:{' '}
             <span className="font-semibold text-strong">{HOMEPAGE_DESIGNS[publishedDesign].label}</span>
             {content.design !== publishedDesign && (
@@ -318,16 +318,16 @@ export function HomepageEditor() {
                   className={
                     'rounded-ds-lg border p-3 text-left transition-colors ' +
                     (active
-                      ? 'border-brass-500 bg-brass-500/10'
-                      : 'border-hairline bg-ink-850 hover:border-brass-500/40')
+                      ? 'border-accent-500 bg-accent-500/10'
+                      : 'border-hairline bg-surface-raised hover:border-accent-500/40')
                   }
                 >
                   <span className="block text-xs font-semibold text-strong">{d.label}</span>
-                  <span className="mt-1 block text-ds-micro leading-snug text-zinc-500">
+                  <span className="mt-1 block text-ds-micro leading-snug text-muted">
                     {d.description}
                   </span>
                   {publishedDesign === id && (
-                    <span className="mt-2 inline-block rounded-ds-sm border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-ds-micro text-emerald-300">
+                    <span className="mt-2 inline-block rounded-ds-sm border border-emerald-500/30 bg-state-success/10 px-1.5 py-0.5 text-ds-micro text-state-success">
                       Live
                     </span>
                   )}
@@ -375,7 +375,7 @@ export function HomepageEditor() {
             value={content.hero.subheading}
             onChange={(e) => setHero('subheading', e.target.value)}
             rows={4}
-            className="w-full bg-ink-900 border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
+            className="w-full bg-surface border border-hairline rounded-ds-sm px-2.5 py-2 text-xs text-strong"
           />
           {!lintOutwardWording(content.hero.subheading).safe && (
             <p className="text-ds-micro text-stamp mt-1">Unsafe wording in hero subheading</p>

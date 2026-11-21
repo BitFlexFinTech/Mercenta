@@ -42,7 +42,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
       <main className="pt-24 pb-16">
         <section className="px-6 pb-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">
@@ -62,7 +62,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
           <div className="mx-auto max-w-4xl">
             <ol className="space-y-4">
               {PUBLIC_HOW_IT_WORKS.map((step, i) => (
-                <li key={step.title} className="flex gap-4 rounded-ds-lg border border-hairline bg-ink-850 p-5">
+                <li key={step.title} className="flex gap-4 rounded-ds-lg border border-hairline bg-surface-raised p-5">
                   <span
                     aria-hidden="true"
                     className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ds-md font-mono text-ds-label"
@@ -71,8 +71,8 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="min-w-0">
-                    <h2 className="mb-1.5 font-display text-base font-semibold text-parchment">{step.title}</h2>
-                    <p className="text-sm leading-relaxed text-steel">{step.body}</p>
+                    <h2 className="mb-1.5 font-display text-base font-semibold text-soft">{step.title}</h2>
+                    <p className="text-sm leading-relaxed text-muted">{step.body}</p>
                   </div>
                 </li>
               ))}
@@ -92,11 +92,11 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
             </p>
             <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-tint md:grid-cols-2">
               {PUBLIC_BRAND_SPLIT.map((row) => (
-                <div key={row.keep} className="bg-ink-850 p-5">
-                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">You keep</p>
-                  <p className="mb-3 mt-1 font-display text-base font-semibold text-parchment">{row.keep}</p>
-                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">We carry</p>
-                  <p className="mt-1 text-sm leading-relaxed text-steel">{row.carried}</p>
+                <div key={row.keep} className="bg-surface-raised p-5">
+                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-accent">You keep</p>
+                  <p className="mb-3 mt-1 font-display text-base font-semibold text-soft">{row.keep}</p>
+                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-accent">We carry</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{row.carried}</p>
                 </div>
               ))}
             </div>

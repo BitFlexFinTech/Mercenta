@@ -44,7 +44,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
       <main className="pt-24 pb-16">
         <section className="px-6 pb-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">
@@ -68,13 +68,13 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
               {PUBLIC_BRAND_SPLIT.map((row, i) => (
                 <div
                   key={row.keep}
-                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-surface-raised p-5"
                   style={{ borderTopColor: CARRIED_DOMAIN[i % CARRIED_DOMAIN.length] }}
                 >
-                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">You keep</p>
-                  <p className="mb-3 mt-1 font-display text-base font-semibold text-parchment">{row.keep}</p>
-                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-brass">We carry</p>
-                  <p className="mt-1 text-sm leading-relaxed text-steel">{row.carried}</p>
+                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-accent">You keep</p>
+                  <p className="mb-3 mt-1 font-display text-base font-semibold text-soft">{row.keep}</p>
+                  <p className="font-mono uppercase text-ds-micro tracking-[0.14em] text-accent">We carry</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">{row.carried}</p>
                 </div>
               ))}
             </div>

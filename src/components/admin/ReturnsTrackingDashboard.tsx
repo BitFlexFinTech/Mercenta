@@ -137,22 +137,22 @@ return (
         description="Internal forwarding flow — received at warehouse to confirmed by brand"
         meta={
           <>
-            <span className="text-ds-label text-zinc-500">
-              Records <span className="font-mono text-zinc-300">{allTracking.length}</span>
+            <span className="text-ds-label text-muted">
+              Records <span className="font-mono text-strong">{allTracking.length}</span>
             </span>
-            <span className="text-ds-label text-zinc-500">
-              Confirmed <span className="font-mono text-zinc-300">{stats.confirmed}</span>
+            <span className="text-ds-label text-muted">
+              Confirmed <span className="font-mono text-strong">{stats.confirmed}</span>
             </span>
           </>
         }
         toolbar={
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[180px] flex-1 sm:max-w-md">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" aria-hidden="true" />
               <input type="text" value={searchQuery} onChange={function(e) { setSearchQuery(e.target.value); }}
                 aria-label="Search return tracking"
                 placeholder="Search by brand, tracking number, or return…"
-                className="w-full bg-ink-900 border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
+                className="w-full bg-surface border border-hairline rounded-ds-md pl-8 pr-3 py-1.5 text-xs text-strong placeholder-faint focus:outline-none focus:border-accent-500/40" />
             </div>
             <SegmentedControl
               ariaLabel="Filter by stage"
@@ -167,7 +167,7 @@ return (
               ]}
             />
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-faint sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -184,7 +184,7 @@ return (
         }
       />
 
-      {notice && <div role="status" className="mb-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-xs text-emerald-300">{notice}</div>}
+      {notice && <div role="status" className="mb-3 bg-state-success/10 border border-state-success/20 rounded-ds-md p-3 text-xs text-state-success">{notice}</div>}
 
       <MetricBand
         columns={4}
@@ -234,7 +234,7 @@ return (
               key: 'brand',
               label: 'Brand',
               hideBelow: 'lg',
-              render: (t) => <span className="font-medium text-zinc-200">{brandName(t.brandId)}</span>,
+              render: (t) => <span className="font-medium text-strong">{brandName(t.brandId)}</span>,
             },
             {
               key: 'return',
@@ -244,8 +244,8 @@ return (
                 const info = returnInfo(t.returnId);
                 return (
                   <span className="block">
-                    <span className="block text-zinc-300">{info?.productName ?? t.returnId}</span>
-                    <span className="block font-mono text-ds-micro text-zinc-600">
+                    <span className="block text-strong">{info?.productName ?? t.returnId}</span>
+                    <span className="block font-mono text-ds-micro text-faint">
                       {t.returnId} · {info?.quantity ?? '?'} units
                     </span>
                   </span>
@@ -258,8 +258,8 @@ return (
               hideBelow: 'sm',
               render: (t) => (
                 <span className="block">
-                  <span className="block font-mono text-ds-micro text-zinc-400">{t.inboundTrackingNumber}</span>
-                  <span className="block text-ds-micro text-zinc-600">{t.inboundCarrier}</span>
+                  <span className="block font-mono text-ds-micro text-muted">{t.inboundTrackingNumber}</span>
+                  <span className="block text-ds-micro text-faint">{t.inboundCarrier}</span>
                 </span>
               ),
             },
@@ -275,7 +275,7 @@ return (
                       <span
                         key={s.status}
                         aria-hidden="true"
-                        className={cn('h-2 w-2 rounded-full', i <= idx ? 'bg-brass-500' : 'bg-zinc-700')}
+                        className={cn('h-2 w-2 rounded-full', i <= idx ? 'bg-accent-500' : 'bg-surface-overlay')}
                       />
                     ))}
                     <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
@@ -292,11 +292,11 @@ return (
               render: (t) =>
                 t.forwardedTrackingNumber ? (
                   <span className="block">
-                    <span className="block font-mono text-ds-micro text-zinc-400">{t.forwardedTrackingNumber}</span>
-                    <span className="block text-ds-micro text-zinc-600">{t.forwardedCarrier}</span>
+                    <span className="block font-mono text-ds-micro text-muted">{t.forwardedTrackingNumber}</span>
+                    <span className="block text-ds-micro text-faint">{t.forwardedCarrier}</span>
                   </span>
                 ) : (
-                  <span className="text-zinc-600">—</span>
+                  <span className="text-faint">—</span>
                 ),
             },
           ]}
@@ -306,18 +306,18 @@ return (
       <div role="complementary" aria-label="Context" className="min-w-0 space-y-4">
         <ContextPanel title="Warehouse partner">
           <div className="flex items-center gap-2">
-            <Boxes className="h-4 w-4 text-brass-400" aria-hidden="true" />
+            <Boxes className="h-4 w-4 text-accent-400" aria-hidden="true" />
             <span className="text-xs font-medium text-strong">{DEMO_WAREHOUSE_PARTNER.name}</span>
-            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>
+            <Badge className="text-ds-micro bg-state-warning/10 text-state-warning">(Mock)</Badge>
           </div>
-          <p className="mt-1.5 text-ds-micro text-zinc-500">
+          <p className="mt-1.5 text-ds-micro text-muted">
             {DEMO_WAREHOUSE_PARTNER.address}, {DEMO_WAREHOUSE_PARTNER.postcode}
           </p>
-          <p className="mt-1.5 text-ds-micro leading-snug text-zinc-500">{DEMO_WAREHOUSE_PARTNER.notes}</p>
+          <p className="mt-1.5 text-ds-micro leading-snug text-muted">{DEMO_WAREHOUSE_PARTNER.notes}</p>
         </ContextPanel>
         <ContextPanel title="Forwarding stages">
           {allTracking.length === 0 ? (
-            <p className="text-ds-label text-zinc-500">No returns in the flow.</p>
+            <p className="text-ds-label text-muted">No returns in the flow.</p>
           ) : (
             <ol className="space-y-1.5">
               {STATUS_STEPS.map(function(s, i) {
@@ -328,7 +328,7 @@ return (
                     <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
                       {s.label}
                     </StatusBadge>
-                    <span className="font-mono text-ds-label text-zinc-300">{n}</span>
+                    <span className="font-mono text-ds-label text-strong">{n}</span>
                   </li>
                 );
               })}
@@ -351,7 +351,7 @@ return (
         footer={
           selectedTracking ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-micro text-zinc-600">
+              <span className="text-ds-micro text-faint">
                 {selectedTracking.status === 'confirmed_by_brand' ? 'Flow complete' : 'Next stage available'}
               </span>
               {selectedTracking.status !== 'confirmed_by_brand' && (
@@ -411,15 +411,15 @@ function ReturnPreviewBody({
 
       {tracking.qualityCheckNotes && (
         <section aria-label="Quality check notes">
-          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
             Quality check notes
           </h3>
-          <p className="text-ds-label leading-snug text-zinc-400">{tracking.qualityCheckNotes}</p>
+          <p className="text-ds-label leading-snug text-muted">{tracking.qualityCheckNotes}</p>
         </section>
       )}
 
       <section aria-label="Forwarding">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Forwarding
         </h3>
         <RecordFieldList
@@ -433,7 +433,7 @@ function ReturnPreviewBody({
       </section>
 
       <section aria-label="Stage timeline">
-        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-muted">
           Stage timeline
         </h3>
         <ol className="space-y-1.5">
@@ -443,12 +443,12 @@ function ReturnPreviewBody({
               <li key={s.status} className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className={cn('h-2 w-2 rounded-full', reached ? 'bg-brass-500' : 'bg-zinc-700')}
+                  className={cn('h-2 w-2 rounded-full', reached ? 'bg-accent-500' : 'bg-surface-overlay')}
                 />
-                <span className={cn('text-ds-label', reached ? 'text-zinc-200' : 'text-zinc-600')}>
+                <span className={cn('text-ds-label', reached ? 'text-strong' : 'text-faint')}>
                   {s.label}
                 </span>
-                <span className="ml-auto text-ds-micro text-zinc-600">
+                <span className="ml-auto text-ds-micro text-faint">
                   {reached ? 'reached' : 'pending'}
                 </span>
               </li>

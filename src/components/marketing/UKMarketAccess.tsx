@@ -50,7 +50,7 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
       <main className="pt-24 pb-16">
         <section className="px-6 pb-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-accent sm:text-ds-label sm:tracking-[0.25em]">
               {PUBLIC_CATEGORY}
             </p>
             <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">UK market access</h1>
@@ -73,11 +73,11 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
               {PUBLIC_BARRIERS.map((barrier, i) => (
                 <div
                   key={barrier.title}
-                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-ink-850 p-5"
+                  className="rounded-ds-lg border border-t-[3px] border-hairline bg-surface-raised p-5"
                   style={{ borderTopColor: BARRIER_DOMAIN[i % BARRIER_DOMAIN.length] }}
                 >
-                  <h3 className="mb-2 font-display text-base font-semibold text-parchment">{barrier.title}</h3>
-                  <p className="text-sm leading-relaxed text-steel">{barrier.body}</p>
+                  <h3 className="mb-2 font-display text-base font-semibold text-soft">{barrier.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted">{barrier.body}</p>
                 </div>
               ))}
             </div>
@@ -113,9 +113,9 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
             </h2>
             <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-hairline bg-tint md:grid-cols-2">
               {PUBLIC_AUDIENCES.map((audience) => (
-                <div key={audience.id} className="bg-ink-850 p-6">
-                  <h3 className="mb-2 font-display text-base font-semibold text-parchment">{audience.heading}</h3>
-                  <p className="text-sm leading-relaxed text-steel">{audience.body}</p>
+                <div key={audience.id} className="bg-surface-raised p-6">
+                  <h3 className="mb-2 font-display text-base font-semibold text-soft">{audience.heading}</h3>
+                  <p className="text-sm leading-relaxed text-muted">{audience.body}</p>
                 </div>
               ))}
             </div>

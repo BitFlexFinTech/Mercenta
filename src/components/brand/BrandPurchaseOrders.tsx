@@ -728,7 +728,7 @@ export function BrandPurchaseOrders() {
                     width where everything already fits. */}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   {po.status === 'rejected' && (
-                    <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 max-w-[220px] truncate">
+                    <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20 max-w-[220px] truncate">
                       {po.rejectionReason}
                     </Badge>
                   )}
@@ -889,7 +889,7 @@ export function BrandPurchaseOrders() {
                   §BATCH 2b (`AV-006`) — the same panel also serves an AMENDMENT
                   when the channel's update window is open. */}
               {ackingPO === po.id && (canAct || canAmend) && (
-                <div className="mt-3 bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 space-y-3">
+                <div className="mt-3 bg-state-success/10 border border-state-success/20 rounded-ds-md p-3 space-y-3">
                   <p className="text-ds-label text-state-success">
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
@@ -1042,7 +1042,7 @@ export function BrandPurchaseOrders() {
               {/* §P13 / S4 — THE ON-BEHALF REJECTION DRAFT MERCENTA PRODUCED FOR THE BRAND */}
               {onBehalfDraft && (
                 <div
-                  className="mt-3 bg-red-500/5 border border-red-500/20 rounded-ds-md p-3 space-y-2"
+                  className="mt-3 bg-red-500/5 border border-state-danger/20 rounded-ds-md p-3 space-y-2"
                   data-testid={`po-onbehalf-draft-${po.poNumber}`}
                 >
                   <p className="text-ds-label text-state-danger font-medium">
@@ -1123,7 +1123,7 @@ export function BrandPurchaseOrders() {
                       </p>
                     )}
                     {instruction.state === 'refused' && (
-                      <p className="text-ds-micro text-red-300" data-testid={`po-mercenta-refused-${po.poNumber}`}>
+                      <p className="text-ds-micro text-state-danger" data-testid={`po-mercenta-refused-${po.poNumber}`}>
                         Mercenta could not complete the channel action: {o?.refusedReason ?? 'reason not recorded'} —
                         no channel step was completed. Mercenta retries it as an attributed action.
                       </p>
@@ -1169,7 +1169,7 @@ export function BrandPurchaseOrders() {
                 PHYSICAL packing differs, and Mercenta re-files the document.
               */}
               {correctionPO === po.id && (
-                <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
+                <div className="mt-3 bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 space-y-2">
                   <p className="text-ds-label text-state-info">
                     Tell Mercenta how this consignment was actually packed. Mercenta re-files the ASN
                     with these quantities — you do not file the document and you do not choose the carrier.
@@ -1281,7 +1281,7 @@ export function BrandPurchaseOrders() {
                           return (
                             <div key={l.sku} className="flex items-center justify-between text-ds-micro">
                               <span className="font-mono text-muted">{l.sku}</span>
-                              <span className={daysLeft <= 0 ? 'text-red-400 font-medium' : daysLeft <= 7 ? 'text-state-warning' : 'text-muted'}>
+                              <span className={daysLeft <= 0 ? 'text-state-danger font-medium' : daysLeft <= 7 ? 'text-state-warning' : 'text-muted'}>
                                 {daysLeft <= 0
                                   ? BACKORDER_RESTOCK_TARGET.overdueLabel
                                   : daysLeft + " day(s) to Mercenta's restock target (" + new Date(l.backorderRestockDeadline as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')'
@@ -1339,7 +1339,7 @@ export function BrandPurchaseOrders() {
                   )}
 
                   {isFinanced && (po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                    <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 text-ds-label text-state-success flex items-start gap-2">
+                    <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-3 text-ds-label text-state-success flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         Accepted — Mercenta is handling fulfilment and financing for this
@@ -1349,7 +1349,7 @@ export function BrandPurchaseOrders() {
                     </div>
                   )}
                   {!isFinanced && po.status === 'accepted' && (
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-ds-label text-state-info flex items-start gap-2">
+                    <div className="bg-blue-500/10 border border-state-info/20 rounded-ds-md p-3 text-ds-label text-state-info flex items-start gap-2">
                       <Truck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         {fulfillmentTrackLabel('direct_fulfillment')} — Mercenta raises the shipment request and files the ASN
@@ -1466,7 +1466,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
       </p>
       {state.channelCancelled && (
         <p
-          className="mt-1 text-ds-label text-red-300"
+          className="mt-1 text-ds-label text-state-danger"
           data-testid={`po-revision-cancelled-${po.poNumber}`}
         >
           The retail channel cancelled this order.
@@ -1531,7 +1531,7 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
   if (divergences.length === 0) return null;
   return (
     <div
-      className="mt-3 rounded-ds-md border border-state-warning/20 bg-amber-500/10 p-3"
+      className="mt-3 rounded-ds-md border border-state-warning/20 bg-state-warning/10 p-3"
       data-testid={`ack-price-notice-${po.poNumber}`}
     >
       <p className="text-ds-label text-state-warning">{ACK_PRICE_DISCREPANCY_TITLE}</p>
@@ -1564,7 +1564,7 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
     <div
       className={cn(
         'mt-3 rounded-ds-md border p-3',
-        duty.held ? 'border-state-warning/20 bg-amber-500/10' : 'border-hairline bg-tint'
+        duty.held ? 'border-state-warning/20 bg-state-warning/10' : 'border-hairline bg-tint'
       )}
       data-testid={`po-channel-hold-${po.poNumber}`}
     >
@@ -1590,7 +1590,7 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
   if (lines.length === 0) return null;
   return (
     <div
-      className="mt-3 rounded-ds-md border border-state-warning/20 bg-amber-500/10 p-3"
+      className="mt-3 rounded-ds-md border border-state-warning/20 bg-state-warning/10 p-3"
       data-testid={`po-implicit-rejections-${po.poNumber}`}
     >
       <p className="text-ds-label text-state-warning">

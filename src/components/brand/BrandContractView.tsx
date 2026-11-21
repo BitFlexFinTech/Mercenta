@@ -16,10 +16,10 @@ function UrgencyBadge({ renewalDate, now }: { renewalDate: string; now: string }
   const urgency = renewalUrgency(renewalDate, now);
   if (urgency === 'ok') return null;
   const map: Record<string, string> = {
-    expired: 'bg-red-500/15 text-red-300 border-red-500/20',
-    '7d': 'bg-red-500/15 text-red-300 border-red-500/20',
+    expired: 'bg-state-danger/10 text-state-danger border-state-danger/20',
+    '7d': 'bg-state-danger/10 text-state-danger border-state-danger/20',
     '30d': 'bg-state-warning/10 text-state-warning border-state-warning/20',
-    '60d': 'bg-state-info/10 text-state-info border-blue-500/20',
+    '60d': 'bg-state-info/10 text-state-info border-state-info/20',
   };
   const label = urgency === 'expired' ? 'Expired' : `Renews in ≤ ${urgency.replace('d', '')} days`;
   return <Badge className={cn('text-ds-micro', map[urgency])}>{label}</Badge>;
@@ -117,7 +117,7 @@ export function BrandContractView() {
                   'text-ds-micro',
                   c.status === 'active' || c.status === 'signed'
                     ? 'bg-state-success/10 text-state-success border-state-success/20'
-                    : 'bg-state-info/10 text-state-info border-blue-500/20'
+                    : 'bg-state-info/10 text-state-info border-state-info/20'
                 )}
               >
                 {CONTRACT_STATUS_LABELS[c.status]}

@@ -57,7 +57,7 @@ const MONO = 'font-mono text-ds-label';
 const STATUS_TONE: Record<string, string> = {
   in_stock: 'bg-state-success/10 text-state-success border-state-success/20',
   below_safety_stock: 'bg-state-warning/10 text-state-warning border-state-warning/20',
-  out_of_stock: 'bg-red-500/15 text-red-300 border-red-500/20',
+  out_of_stock: 'bg-state-danger/10 text-state-danger border-state-danger/20',
 };
 
 export function BrandInventory() {
@@ -230,7 +230,7 @@ export function BrandInventory() {
       {error && (
         <div
           data-testid="inventory-error"
-          className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-xs text-red-300"
+          className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-xs text-state-danger"
         >
           {error}
         </div>
@@ -334,7 +334,7 @@ export function BrandInventory() {
               render: (r) => (
                 <span
                   data-testid={`inventory-available-${r.sku}`}
-                  className={cn(MONO, 'tabular-nums', r.available < 0 ? 'text-red-300' : 'text-strong')}
+                  className={cn(MONO, 'tabular-nums', r.available < 0 ? 'text-state-danger' : 'text-strong')}
                 >
                   {r.available}
                 </span>

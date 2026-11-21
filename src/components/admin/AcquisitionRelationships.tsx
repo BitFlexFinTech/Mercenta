@@ -24,12 +24,12 @@ import { AcquisitionWorkflow } from './AcquisitionWorkflow';
 import { Trophy, ChevronRight } from 'lucide-react';
 
 const STAGE_STYLES: Record<string, string> = {
-  qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  qualified: 'bg-state-success/10 text-state-success border-state-success/20',
   responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
-  won: 'bg-brass/15 text-brass border-brass/30',
-  lost: 'bg-zinc-500/15 text-zinc-400 border-hairline',
-  new: 'bg-tint text-zinc-300 border-hairline',
-  contacted: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  won: 'bg-accent/15 text-accent border-accent/30',
+  lost: 'bg-tint text-muted border-hairline',
+  new: 'bg-tint text-strong border-hairline',
+  contacted: 'bg-state-info/10 text-state-info border-state-info/20',
 };
 
 export function AcquisitionRelationships() {
@@ -48,12 +48,12 @@ export function AcquisitionRelationships() {
   return (
     <Card title="Acquisition Relationships (pre-onboarding)">
       <div className="px-1 pb-1 space-y-3">
-        <p className="text-ds-label text-zinc-500">
+        <p className="text-ds-label text-muted">
           Prospect-backed opportunities created from the Brand Intelligence acquisition workflow. Each
           row opens the canonical relationship context — outreach history, responses, the opportunity and
           the ONE message thread also shown in Admin → Messages.
         </p>
-        <div className="flex flex-wrap gap-2 text-ds-micro text-zinc-400">
+        <div className="flex flex-wrap gap-2 text-ds-micro text-muted">
           <span>In acquisition: <span className="text-strong font-mono">{summary.enrolled}</span></span>
           <span>Responses: <span className="text-strong font-mono">{summary.responded}</span></span>
           <span>Opportunities: <span className="text-strong font-mono">{summary.opportunities}</span></span>
@@ -62,16 +62,16 @@ export function AcquisitionRelationships() {
         </div>
 
         {/* §Phase D4 — honest persistence status (never claims storage it lacks). */}
-        <div className="text-ds-micro text-zinc-500" data-section="persistence-status">
+        <div className="text-ds-micro text-muted" data-section="persistence-status">
           Persistence:{' '}
           <span
             className={cn(
               'font-mono',
               persistence.state === 'failed'
-                ? 'text-red-400'
+                ? 'text-state-danger'
                 : persistence.state === 'durable'
-                  ? 'text-emerald-300'
-                  : 'text-zinc-400'
+                  ? 'text-state-success'
+                  : 'text-muted'
             )}
           >
             {persistence.state}
@@ -82,7 +82,7 @@ export function AcquisitionRelationships() {
         </div>
 
         {rows.length === 0 ? (
-          <p className="text-ds-label text-zinc-600">
+          <p className="text-ds-label text-faint">
             No acquisition opportunities yet. Run the workflow on a Brand Intelligence prospect
             (Brand Intelligence → brand → Outreach) to create one.
           </p>
@@ -96,15 +96,15 @@ export function AcquisitionRelationships() {
               >
                 <span className="min-w-0">
                   <span className="text-xs font-medium text-strong inline-flex items-center gap-1.5">
-                    <Trophy className="w-3 h-3 text-brass-400" />
+                    <Trophy className="w-3 h-3 text-accent-400" />
                     {r.prospect.brand}
                   </span>
-                  <span className="block text-ds-micro text-zinc-500 font-mono">
+                  <span className="block text-ds-micro text-muted font-mono">
                     {r.opportunity?.id} · BI {r.opportunity?.biScore}/100 · owner {r.opportunity?.ownerStaffId} · {r.responseCount} response(s)
                   </span>
                   {/* §Phase E1 — the hand-off status once onboarding has begun. */}
                   {onboarding && (
-                    <span className="block text-ds-micro text-zinc-500" data-onboarding-row={onboarding.status}>
+                    <span className="block text-ds-micro text-muted" data-onboarding-row={onboarding.status}>
                       Onboarding {onboarding.status.replace('_', ' ')} · tenant {onboarding.brandId}
                     </span>
                   )}
@@ -113,7 +113,7 @@ export function AcquisitionRelationships() {
                   <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[r.opportunity?.stage ?? 'new'])}>
                     {r.opportunity?.stage}
                   </Badge>
-                  <ChevronRight className={cn('w-3.5 h-3.5 text-zinc-500 transition-transform', openId === r.prospect.id && 'rotate-90')} />
+                  <ChevronRight className={cn('w-3.5 h-3.5 text-muted transition-transform', openId === r.prospect.id && 'rotate-90')} />
                 </span>
               </button>
             ))}
@@ -123,10 +123,10 @@ export function AcquisitionRelationships() {
         {open && (
           <div className="border border-hairline rounded-ds-md p-3" data-section="crm-acquisition-relationship">
             <div className="flex items-center justify-between pb-2">
-              <p className="text-ds-micro font-semibold text-zinc-400 uppercase">
+              <p className="text-ds-micro font-semibold text-muted uppercase">
                 Relationship — {open.prospect.brand}
               </p>
-              <span className="text-ds-micro text-zinc-600">live — reads the canonical store</span>
+              <span className="text-ds-micro text-faint">live — reads the canonical store</span>
             </div>
             <AcquisitionWorkflow prospectId={open.prospect.id} />
           </div>

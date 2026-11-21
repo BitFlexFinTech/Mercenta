@@ -103,27 +103,27 @@ export function CookieNotice({ onNavigate }: { onNavigate: (page: PublicLinkPage
       aria-label={PUBLIC_COOKIE_NOTICE_REGION}
       aria-live="polite"
       className={cn(
-        'fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-ink-850',
+        'fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-surface-raised',
         'md:inset-x-auto md:right-6 md:bottom-6 md:max-w-md md:rounded-ds-lg md:border md:shadow-ds-overlay'
       )}
     >
       <div className="mx-auto max-w-6xl px-6 py-5 md:px-5">
-        <h2 className="font-display text-sm font-semibold text-parchment">
+        <h2 className="font-display text-sm font-semibold text-soft">
           {PUBLIC_COOKIE_NOTICE.heading}
         </h2>
-        <p className="mt-2 text-ds-label leading-relaxed text-steel">{PUBLIC_COOKIE_NOTICE.body}</p>
+        <p className="mt-2 text-ds-label leading-relaxed text-muted">{PUBLIC_COOKIE_NOTICE.body}</p>
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
           <button
             type="button"
             onClick={acknowledge}
-            className="rounded-ds-md bg-palette-indigo px-4 py-2 text-xs font-semibold text-on-palette transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+            className="rounded-ds-md bg-palette-indigo px-4 py-2 text-xs font-semibold text-on-palette transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {PUBLIC_COOKIE_NOTICE.acknowledgeLabel}
           </button>
           <button
             type="button"
             onClick={() => onNavigate('privacy')}
-            className="text-xs font-medium text-steel underline underline-offset-4 transition-colors hover:text-brass-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+            className="text-xs font-medium text-muted underline underline-offset-4 transition-colors hover:text-accent-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {PUBLIC_COOKIE_NOTICE.policyLabel}
           </button>

@@ -78,7 +78,7 @@ return (
             <p className="text-xs text-faint mt-1">Required: name, SKU, barcode, exWorksPrice, ukRetailPrice, commodityCode, vatStatus, hazmat, length, width, height, weight</p>
             <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }} />
           </div>
-          {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+          {error && <p className="text-xs text-state-danger mt-2">{error}</p>}
         </div>
       )}
 
@@ -95,7 +95,7 @@ return (
             <div className="flex items-center gap-3 text-xs">
               <span className="text-muted">{fileName} &mdash; {summary.totalRows} rows</span>
               <span className="text-state-success">{validCount} valid</span>
-              {invalidCount > 0 && <span className="text-red-400">{invalidCount} invalid</span>}
+              {invalidCount > 0 && <span className="text-state-danger">{invalidCount} invalid</span>}
             </div>
             {summary.abortedReason && (
               <div className="flex items-center gap-1 text-ds-micro text-state-warning">
@@ -123,7 +123,7 @@ return (
                     <td className="px-2 py-1 text-strong truncate max-w-[200px]">{r.row?.name ?? '\u2014'}</td>
                     <td className="px-2 py-1 text-right text-strong">{r.row ? '\u00a3' + r.row.exWorksPrice.toFixed(2) : '\u2014'}</td>
                     <td className="px-2 py-1 text-center">
-                      {r.valid ? <CheckCircle2 className="w-3 h-3 text-state-success inline" /> : <span className="text-red-400 inline-flex items-center gap-1 cursor-help" title={r.errors?.join('; ')}><XCircle className="w-3 h-3" /></span>}
+                      {r.valid ? <CheckCircle2 className="w-3 h-3 text-state-success inline" /> : <span className="text-state-danger inline-flex items-center gap-1 cursor-help" title={r.errors?.join('; ')}><XCircle className="w-3 h-3" /></span>}
                     </td>
                   </tr>
                 ))}
@@ -132,7 +132,7 @@ return (
           </div>
 
           {rows.filter((r) => !r.valid).length > 0 && (
-            <div className="text-ds-micro text-red-300 space-y-0.5 max-h-20 overflow-y-auto">
+            <div className="text-ds-micro text-state-danger space-y-0.5 max-h-20 overflow-y-auto">
               {rows.filter((r) => !r.valid).slice(0, 5).map((r) => (
                 <p key={r.lineNumber}>Line {r.lineNumber}: {r.errors?.join('; ')}</p>
               ))}
@@ -147,7 +147,7 @@ return (
               </Button>
             )}
             {phase === 'preview' && summary.commit?.attempted && !summary.commit?.ok && (
-              <p className="text-xs text-red-400">{summary.commit.error}</p>
+              <p className="text-xs text-state-danger">{summary.commit.error}</p>
             )}
             <Button variant="ghost" className="text-xs" onClick={() => { setPhase('idle'); setRows([]); setSummary(null); setError(null); }}>
               Start Over
@@ -157,13 +157,13 @@ return (
       )}
 
       {phase === 'done' && summary?.commit?.ok && (
-        <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 flex items-center gap-2">
+        <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-3 flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-state-success" />
           <span className="text-xs text-state-success">Successfully imported {summary.commit.imported} product(s) into the catalog.</span>
         </div>
       )}
 
-      {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+      {error && <p className="text-xs text-state-danger mt-2">{error}</p>}
     </Card>
   );
 }

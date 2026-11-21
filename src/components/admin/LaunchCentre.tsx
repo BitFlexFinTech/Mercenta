@@ -112,31 +112,31 @@ export function LaunchCentre() {
             <h2 className="text-sm font-semibold text-strong flex items-center gap-2">
               <Megaphone className="w-4 h-4" /> Mercenta Launch Centre
             </h2>
-            <p className="text-ds-label text-zinc-500 mt-1">{LAUNCH_CENTRE_DISCLAIMER}</p>
+            <p className="text-ds-label text-muted mt-1">{LAUNCH_CENTRE_DISCLAIMER}</p>
           </div>
           <Button variant="tertiary" className="text-xs" onClick={() => setEditingProfile((v) => !v)}>
             {editingProfile ? 'Close profile editor' : 'Modify launch copy'}
           </Button>
         </div>
         <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
-          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
-            <p className="text-ds-micro text-zinc-500">Platforms</p>
+          <div className="rounded-ds-md border border-hairline bg-surface-raised px-2.5 py-2">
+            <p className="text-ds-micro text-muted">Platforms</p>
             <p className="text-sm font-bold text-strong">{summary.total}</p>
           </div>
-          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
-            <p className="text-ds-micro text-zinc-500">Accounts created</p>
+          <div className="rounded-ds-md border border-hairline bg-surface-raised px-2.5 py-2">
+            <p className="text-ds-micro text-muted">Accounts created</p>
             <p className="text-sm font-bold text-strong">{summary.accountsCreated}</p>
           </div>
-          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
-            <p className="text-ds-micro text-zinc-500">Profiles prepared</p>
+          <div className="rounded-ds-md border border-hairline bg-surface-raised px-2.5 py-2">
+            <p className="text-ds-micro text-muted">Profiles prepared</p>
             <p className="text-sm font-bold text-strong">{summary.prepared}</p>
           </div>
-          <div className="rounded-ds-md border border-hairline bg-ink-850 px-2.5 py-2">
-            <p className="text-ds-micro text-zinc-500">Submitted</p>
+          <div className="rounded-ds-md border border-hairline bg-surface-raised px-2.5 py-2">
+            <p className="text-ds-micro text-muted">Submitted</p>
             <p className="text-sm font-bold text-strong">{summary.submitted}</p>
           </div>
         </div>
-        {message && <p className="text-ds-micro text-emerald-300/90 mt-2">{message}</p>}
+        {message && <p className="text-ds-micro text-state-success/90 mt-2">{message}</p>}
       </Card>
 
       {editingProfile && (
@@ -148,16 +148,16 @@ export function LaunchCentre() {
               value={profile.tagline}
               onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
             />
-            <label className="text-ds-micro text-zinc-500">Short description</label>
+            <label className="text-ds-micro text-muted">Short description</label>
             <textarea
-              className="w-full bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-surface-raised border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-strong"
               rows={2}
               value={profile.shortDescription}
               onChange={(e) => setProfile({ ...profile, shortDescription: e.target.value })}
             />
-            <label className="text-ds-micro text-zinc-500">Long description</label>
+            <label className="text-ds-micro text-muted">Long description</label>
             <textarea
-              className="w-full bg-ink-850 border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-zinc-200"
+              className="w-full bg-surface-raised border border-hairline rounded-ds-md px-2 py-1.5 text-ds-label text-strong"
               rows={5}
               value={profile.longDescription}
               onChange={(e) => setProfile({ ...profile, longDescription: e.target.value })}
@@ -190,9 +190,9 @@ export function LaunchCentre() {
 <Card className="p-0 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b bg-ink-850/50">
+            <tr className="border-b bg-surface-raised/50">
               {['Platform', 'Channel', 'Account', 'Profile', 'Requirements', 'Actions'].map((h) => (
-                <th key={h} className="px-2 py-1.5 text-left text-zinc-500">{h}</th>
+                <th key={h} className="px-2 py-1.5 text-left text-muted">{h}</th>
               ))}
             </tr>
           </thead>
@@ -208,18 +208,18 @@ export function LaunchCentre() {
                   className="border-b cursor-pointer hover:bg-tint"
                 >
                   <td className="px-2 py-1.5 font-medium text-strong">{p.name}</td>
-                  <td className="px-2 py-1.5 text-zinc-400 text-ds-micro">
+                  <td className="px-2 py-1.5 text-muted text-ds-micro">
                     {CHANNEL_LABEL[p.submissionChannel]}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-300 text-ds-micro">
+                  <td className="px-2 py-1.5 text-strong text-ds-micro">
                     {r?.accountStatus ?? 'not_started'}
                   </td>
                   <td className="px-2 py-1.5 text-ds-micro">
-                    <span className={done ? 'text-emerald-300' : 'text-zinc-400'}>
+                    <span className={done ? 'text-state-success' : 'text-muted'}>
                       {r?.profileStatus ?? 'not_prepared'}
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 text-ds-micro text-amber-300/80">verify on platform</td>
+                  <td className="px-2 py-1.5 text-ds-micro text-state-warning/80">verify on platform</td>
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1">
                       <Button
@@ -259,7 +259,7 @@ export function LaunchCentre() {
                         href={p.requirementsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-ds-micro text-zinc-400 hover:text-zinc-200 px-1 inline-flex items-center gap-1"
+                        className="text-ds-micro text-muted hover:text-strong px-1 inline-flex items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="w-3 h-3" /> Open
@@ -286,22 +286,22 @@ export function LaunchCentre() {
         <Card>
           <h3 className="text-xs font-semibold text-strong">
             {selected.name}
-            <span className="ml-2 text-ds-micro font-normal text-zinc-500">
+            <span className="ml-2 text-ds-micro font-normal text-muted">
               {CHANNEL_LABEL[selected.submissionChannel]} · requirements{' '}
               {selected.requirementsVerified ? 'verified' : 'NOT yet verified'}
             </span>
           </h3>
-          <p className="text-ds-micro text-zinc-500 mt-1">{selected.audience}</p>
+          <p className="text-ds-micro text-muted mt-1">{selected.audience}</p>
 
           <div className="mt-2 space-y-1">
             {buildSubmissionChecklist(selected, selectedRecord).map((item) => (
-              <p key={item.label} className="text-ds-micro text-zinc-400">
-                <span className={item.done ? 'text-emerald-300' : 'text-amber-300'}>
+              <p key={item.label} className="text-ds-micro text-muted">
+                <span className={item.done ? 'text-state-success' : 'text-state-warning'}>
                   {item.done ? '✓' : '○'}
                 </span>{' '}
                 {item.label}
                 {item.verifyOnPlatform && (
-                  <span className="text-zinc-600"> — must be read on the platform itself</span>
+                  <span className="text-faint"> — must be read on the platform itself</span>
                 )}
               </p>
             ))}
@@ -312,7 +312,7 @@ export function LaunchCentre() {
               href={selected.siteUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-ds-micro text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
+              className="text-ds-micro text-muted hover:text-strong inline-flex items-center gap-1"
             >
               <ExternalLink className="w-3 h-3" /> Open {selected.name}
             </a>
@@ -320,14 +320,14 @@ export function LaunchCentre() {
               href={selected.signupUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-ds-micro text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
+              className="text-ds-micro text-muted hover:text-strong inline-flex items-center gap-1"
             >
               <ExternalLink className="w-3 h-3" /> Sign up / submit
             </a>
           </div>
 
-          <p className="text-ds-micro text-zinc-500 mt-2">Submission package (copyable)</p>
-          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-hairline rounded-ds-md p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
+          <p className="text-ds-micro text-muted mt-2">Submission package (copyable)</p>
+          <pre className="mt-1 whitespace-pre-wrap bg-surface border border-hairline rounded-ds-md p-2 text-ds-micro text-strong max-h-64 overflow-y-auto">
             {buildSubmissionPackage(selected, profile)}
           </pre>
         </Card>

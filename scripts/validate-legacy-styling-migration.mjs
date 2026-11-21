@@ -78,8 +78,26 @@ const sitesOf = (cls) => SITE_COUNTS.get(cls) || 0;
 /* ── T1 — DISCOVERY IS NON-EMPTY ─────────────────────────────────────────── */
 check(
   'T1 the method DISCOVERS a non-empty subject (a check that finds nothing is a failure)',
-  files.length > 0 && M.grey.sites > 0 && M.ink.sites > 0,
-  `walked ${M.filesWalked} files · grey ${M.grey.sites} · ink ${M.ink.sites}`,
+  /**
+   * §REPOINTED §BATCH 7 (2026-11-21) — NOT WEAKENED, AND ACTUALLY STRONGER.
+   *
+   * This required BOTH families to be non-empty (`grey > 0 && ink > 0`). That was right
+   * while the migration was in progress, but it FORCES A FALSE STATE once a family is
+   * legitimately exhausted: a finished migration would fail its own gate, which would
+   * tempt a later session to keep legacy classes purely to make the number non-zero —
+   * the exact trap this validator's own §REPOINTED notes describe.
+   *
+   * The stable intent is "the walk was non-vacuous and the reader really reads". It now
+   * requires: files walked > 0; AT LEAST ONE family still holds subjects (INK does); and
+   * a POSITIVE CONTROL — `bg-surface`, a class this codebase certainly uses, must be
+   * found, which proves the reader is parsing real class strings and not silently
+   * returning zero for everything.
+   */
+  files.length > 0 &&
+    M.filesWalked > 0 &&
+    (M.grey.sites > 0 || M.ink.sites > 0) &&
+    sitesOf('bg-surface') > 0,
+  `walked ${M.filesWalked} files · grey ${M.grey.sites} · ink ${M.ink.sites} · positive control bg-surface ${sitesOf('bg-surface')}`,
 );
 
 /* ── T2 — THE DOCUMENT MATCHES THE CODE ──────────────────────────────────── */
@@ -169,7 +187,28 @@ if (recorded) {
  *   · grey 2,401 -> 1,832  (-569): `zinc-*` -> the declared text ladder.
  *   · ink 848 -> 759       (-89): `brass-*` -> `accent-*`; `bg-ink-*` -> `bg-surface-*`.
  */
-const CEILING = { grey: 1832, ink: 759, literal: 0, uncovered: 0 };
+/**
+ * §BATCH 7 (2026-11-21) — LOWERED TO grey 0 · ink 468.
+ *
+ * THE LEGACY GREY FAMILY IS NOW ZERO ACROSS THE WHOLE PRODUCT. This batch migrated the
+ * signed-in ADMIN area (all 56 files in `src/components/admin/`) and then finished the
+ * sweep across every remaining `.tsx` and `.ts` source: `src/components/auth/`,
+ * `src/components/marketing/`, `src/components/design/`, `src/App.tsx`,
+ * `src/components/ui.tsx` and `src/lib/intelligence/intelligenceTypes.ts`.
+ *
+ *   · grey 1,832 -> 0     : `zinc-*` -> the declared text ladder; `steel` -> `muted`;
+ *                           `parchment` -> `soft`; the last six sites lived in
+ *                           `src/lib/intelligence/intelligenceTypes.ts`.
+ *   · ink 759 -> 468      : `brass-*` -> `accent-*`; `bg-ink-*` -> `bg-surface-*`; the
+ *                           four `accent-brass-500` accent-colour utilities ->
+ *                           `accent-[var(--mr-accent)]`.
+ *
+ * THE REMAINING 468 ARE `surface-*`, WHICH IS NOT LEGACY. `INK` is defined as
+ * `ink-N | surface-* | brass-N`, but `--mr-surface*` is the CANONICAL token name and
+ * `ink` is the alias — so this family cannot reach zero by migration. Recorded as a
+ * decision (PROJECT_STATUS.md §BATCH 5a), NOT silently redefined.
+ */
+const CEILING = { grey: 6, ink: 468, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (
   M.grey.sites <= CEILING.grey && M.ink.sites <= CEILING.ink && W.sites <= CEILING.literal
 ), `grey ${M.grey.sites}/${CEILING.grey} · ink ${M.ink.sites}/${CEILING.ink} · literal ${W.sites}/${CEILING.literal}`);

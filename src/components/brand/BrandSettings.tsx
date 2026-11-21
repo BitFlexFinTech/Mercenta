@@ -156,7 +156,7 @@ function BankSection({ brandId }: { brandId: string }) {
     <Card title={`Bank Information — ${bankInfo.currency}`}>
       <div className="space-y-2">
         {bankInfo.status === 'pending_approval' && bankInfo.requestedChange && (
-          <div className="bg-amber-500/10 border border-state-warning/20 rounded-ds-md p-2 text-ds-label text-state-warning mb-2">
+          <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-2 text-ds-label text-state-warning mb-2">
             Pending approval: {bankInfo.requestedChange.field} → {bankInfo.requestedChange.requestedValue}
           </div>
         )}
@@ -252,7 +252,7 @@ function PermissionsSection({ brandId }: { brandId: string }) {
 
   const ROLE_BADGE: Record<BrandPermissionRole, string> = {
     Owner: 'bg-accent-500/15 text-accent-300 border-accent-500/20',
-    Shipping: 'bg-state-info/10 text-state-info border-blue-500/20',
+    Shipping: 'bg-state-info/10 text-state-info border-state-info/20',
     Accounts: 'bg-state-success/10 text-state-success border-state-success/20',
     Compliance: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   };
@@ -269,7 +269,7 @@ function PermissionsSection({ brandId }: { brandId: string }) {
             <div className="flex items-center gap-2">
               <Badge className={cn('text-ds-micro', ROLE_BADGE[m.role])}>{m.role}</Badge>
               {!m.active && <Badge className="text-ds-micro bg-tint text-muted">Inactive</Badge>}
-              <button onClick={() => { removeTeamMember(m.id); setVersion((v) => v + 1); }} className="text-faint hover:text-red-400">
+              <button onClick={() => { removeTeamMember(m.id); setVersion((v) => v + 1); }} className="text-faint hover:text-state-danger">
                 <Trash2 className="w-3 h-3" />
               </button>
             </div>
@@ -331,7 +331,7 @@ function OutagesSection({ brandId }: { brandId: string }) {
               {poOutageStatusPresentation(o.status).label}
             </StatusBadge>
             {o.status === 'active' && (
-              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-red-400">Cancel</button>
+              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-state-danger">Cancel</button>
             )}
           </div>
         </div>
@@ -393,7 +393,7 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
           <p className="text-ds-micro text-muted">{a.city}, {a.postalCode}, {a.country}</p>
           <div className="flex items-center gap-2 mt-1">
             {!a.isDefault && <button onClick={() => setDefault(a.id)} className="text-ds-micro text-muted hover:text-accent-400">Set default</button>}
-            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-red-400">Remove</button>
+            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-ds-micro text-muted hover:text-state-danger">Remove</button>
           </div>
         </div>
       ))}

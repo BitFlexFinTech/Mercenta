@@ -221,7 +221,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       isDone
                         ? 'bg-emerald-500/20 text-state-success border border-emerald-500/30'
                         : isActive
-                        ? 'bg-accent-500 text-strong shadow-ds-raised'
+                        ? 'bg-accent-500 text-on-accent shadow-ds-raised'
                         : 'bg-surface-raised text-faint border border-hairline'
                     )}
                   >
@@ -571,7 +571,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 never a silent edit.
               </p>
 
-              <div className="bg-emerald-500/10 border border-state-success/20 rounded-ds-md p-3 text-xs text-muted">
+              <div className="bg-state-success/10 border border-state-success/20 rounded-ds-md p-3 text-xs text-muted">
                 System recommendation:{' '}
                 <span className="text-strong font-medium">
                   {fulfillmentTrackLabel(recommendedTrack)}
@@ -685,7 +685,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     onChange={(e) =>
                       setLegalAgreements({ ...legalAgreements, logisticsSla: e.target.checked })
                     }
-                    className="w-3.5 h-3.5 accent-brass-500"
+                    className="w-3.5 h-3.5 accent-[var(--mr-accent)]"
                   />
                   <label htmlFor="agreement-logistics" className="text-ds-micro text-muted cursor-pointer select-none">
                     I have read and agree to the Logistics SLAs &amp; Carrier Alignment terms
@@ -724,7 +724,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     onChange={(e) =>
                       setLegalAgreements({ ...legalAgreements, chargebackIndemnity: e.target.checked })
                     }
-                    className="w-3.5 h-3.5 accent-brass-500"
+                    className="w-3.5 h-3.5 accent-[var(--mr-accent)]"
                   />
                   <label htmlFor="agreement-chargeback" className="text-ds-micro text-muted cursor-pointer select-none">
                     I have read and agree to the Chargeback Remediation &amp; Financial Indemnity terms

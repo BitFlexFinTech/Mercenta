@@ -552,8 +552,12 @@ check('the form-level refusal is separately addressable', /data-cg-notice/.test(
 check('browser-native validation cannot pre-empt the declared messages', /noValidate/.test(formCode));
 check(
   'the form is now allowed (and required) to claim the phone is required — §PHONE REPOINTED',
-  /Phone Number <span className="text-red-400">\*<\/span>/.test(readSrc(FORM)) &&
-    !/Phone Number <span className="text-zinc-600">\(optional\)<\/span>/.test(readSrc(FORM)),
+  /* §REPOINTED §BATCH 7 (2026-11-21) — `text-red-400`/`text-zinc-600` became
+     `text-state-danger`/`text-faint`. The assertion's subject is unchanged (the phone
+     label is marked required in the CRITICAL colour, and no longer marked optional);
+     only the canonical class names it reads moved. */
+  /Phone Number <span className="text-state-danger">\*<\/span>/.test(readSrc(FORM)) &&
+    !/Phone Number <span className="text-faint">\(optional\)<\/span>/.test(readSrc(FORM)),
   'the label still disagrees with the domain about the phone'
 );
 

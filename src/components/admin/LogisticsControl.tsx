@@ -417,10 +417,10 @@ export function LogisticsControl({
         description="Operational view — shipments in transit, delays and exceptions by brand and PO. Shipment state feeds the canonical work layer, so an exception becomes an actionable item rather than a passive row."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">{shipments.length} shipments</span>
-            <span className="font-mono text-ds-label text-zinc-500">{groups.length} brands</span>
-            <span className="font-mono text-ds-label text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">{shipments.length} shipments</span>
+            <span className="font-mono text-ds-label text-muted">{groups.length} brands</span>
+            <span className="font-mono text-ds-label text-muted">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-ds-label text-muted">
               deterministic simulation · no live carrier call
             </span>
           </>
@@ -435,8 +435,8 @@ export function LogisticsControl({
                 data-testid={`logistics-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-ds-md bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-strong'
-                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-tint hover:text-strong'
+                    ? 'rounded-ds-md bg-accent-500 px-2.5 py-1 text-ds-label font-medium text-on-accent'
+                    : 'rounded-ds-md bg-tint px-2.5 py-1 text-ds-label font-medium text-muted hover:bg-tint hover:text-strong'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -463,24 +463,24 @@ export function LogisticsControl({
               />
               <ul className="mt-2 space-y-1.5">
                 {logisticsWork.slice(0, 5).map((w) => (
-                  <li key={w.id} className="text-ds-label leading-snug text-zinc-400">
-                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                  <li key={w.id} className="text-ds-label leading-snug text-muted">
+                    <span className="font-medium text-strong">{WORK_SOURCE_LABELS[w.source]}</span>
                     {' · '}
                     {w.title}
-                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                    {w.dueDate && <span className="font-mono text-faint"> · due {w.dueDate}</span>}
                   </li>
                 ))}
                 {logisticsWork.length === 0 && (
-                  <li className="text-ds-label text-zinc-500">No open logistics work.</li>
+                  <li className="text-ds-label text-muted">No open logistics work.</li>
                 )}
               </ul>
-              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-muted">
                 These are the same items Work Management and the derived calendar show — resolving
                 one there stops its reminder here too.
               </p>
             </ContextPanel>
             <ContextPanel title="Lifecycle">
-              <p className="text-ds-label leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-muted">
                 PO → acknowledgement → fulfilment → shipment → delivery → exception → resolution →
                 return → close. Every stage is deterministic simulation; nothing here is a live
                 carrier response.
@@ -507,7 +507,7 @@ export function LogisticsControl({
                       { label: 'Value', value: `£${selectedLeg.value.toLocaleString()}` },
                     ]}
                   />
-                  <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="admin-logistics-truth-reason">
+                  <p className="text-ds-micro leading-relaxed text-muted" data-testid="admin-logistics-truth-reason">
                     {selectedLeg.truthReason}
                   </p>
                   {selectedLeg.channelArranged && (
@@ -517,7 +517,7 @@ export function LogisticsControl({
                   )}
                 </div>
               ) : (
-                <p className="text-ds-label text-zinc-500" data-testid="admin-logistics-inspector-empty">
+                <p className="text-ds-label text-muted" data-testid="admin-logistics-inspector-empty">
                   Select a consignment in the table to see its route and evidence state.
                 </p>
               )}
@@ -527,7 +527,7 @@ export function LogisticsControl({
       >
       {focus !== 'all' && visibleGroups.length === 0 && (
         <Card className="p-4">
-          <p className="text-xs text-zinc-500">No shipments match the current focus.</p>
+          <p className="text-xs text-muted">No shipments match the current focus.</p>
         </Card>
       )}
 
@@ -537,11 +537,11 @@ export function LogisticsControl({
         // real state. A shipment can only exist once a PO reaches a shipping
         // status, so this is what "no operational shipments yet" looks like.
         <Card className="p-6">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-muted">
             No shipments are in transit. A shipment appears here only after one of
-            your purchase orders reaches <span className="text-zinc-200">ready to fulfil</span>,{' '}
-            <span className="text-zinc-200">shipped</span> or{' '}
-            <span className="text-zinc-200">delivered</span> — Mercenta never shows a
+            your purchase orders reaches <span className="text-strong">ready to fulfil</span>,{' '}
+            <span className="text-strong">shipped</span> or{' '}
+            <span className="text-strong">delivered</span> — Mercenta never shows a
             placeholder shipment.
           </p>
         </Card>
@@ -574,10 +574,10 @@ export function LogisticsControl({
                 label: 'PO',
                 primary: true,
                 render: (s) => (
-                  <span className="font-mono text-brass">
+                  <span className="font-mono text-accent">
                     {s.poNumber}
                     {poFor(s.poNumber)?.simulated === true && (
-                      <span className="ml-2 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-brass-500/15 text-brass-400 border border-brass-500/20">
+                      <span className="ml-2 text-ds-micro px-1.5 py-0.5 rounded-ds-sm bg-accent-500/15 text-accent-400 border border-accent-500/20">
                         (sim)
                       </span>
                     )}
@@ -593,7 +593,7 @@ export function LogisticsControl({
                 key: 'reference',
                 label: 'Reference',
                 hideBelow: 'lg',
-                render: (s) => <span className="font-mono text-zinc-400">{s.reference}</span>,
+                render: (s) => <span className="font-mono text-muted">{s.reference}</span>,
               },
               {
                 key: 'status',
@@ -607,12 +607,12 @@ export function LogisticsControl({
                         {p.label}
                       </StatusBadge>
                       {transit && s.delayed && (
-                        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+                        <Badge className="text-ds-micro bg-state-warning/10 text-state-warning border-state-warning/20">
                           Delayed
                         </Badge>
                       )}
                       {s.exception && (
-                        <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
+                        <Badge className="text-ds-micro bg-state-danger/10 text-state-danger border-state-danger/20">
                           Exception
                         </Badge>
                       )}
@@ -718,7 +718,7 @@ export function LogisticsControl({
         <Card
           title="Bi-Directional Manifest Management"
           subtitle="Change the milestone to push the update across every environment"
-          action={<RefreshCw className="w-4 h-4 text-zinc-500" />}
+          action={<RefreshCw className="w-4 h-4 text-muted" />}
         >
           <DataTable
             dataTable="carrier-manifest"
@@ -734,8 +734,8 @@ export function LogisticsControl({
                 primary: true,
                 render: (s) => (
                   <div>
-                    <div className="font-mono text-xs text-zinc-400">{s.reference}</div>
-                    <div className="mt-0.5 font-mono text-ds-micro text-zinc-600">
+                    <div className="font-mono text-xs text-muted">{s.reference}</div>
+                    <div className="mt-0.5 font-mono text-ds-micro text-faint">
                       {s.trackingNumber ?? '—'}
                     </div>
                   </div>
@@ -747,7 +747,7 @@ export function LogisticsControl({
                 render: (s) => (
                   <div>
                     <div className="text-sm font-medium text-strong">{s.title}</div>
-                    <div className="mt-0.5 text-xs text-zinc-500">{brandName(s.brandId)}</div>
+                    <div className="mt-0.5 text-xs text-muted">{brandName(s.brandId)}</div>
                   </div>
                 ),
               },
@@ -800,10 +800,10 @@ export function LogisticsControl({
                           });
                         }
                       }}
-                      className="w-full cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2.5 py-1.5 text-xs text-strong transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
+                      className="w-full cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2.5 py-1.5 text-xs text-strong transition-colors focus:border-accent-500/60 focus:outline-none md:w-auto"
                     >
                       {CARRIER_MILESTONES.map((opt) => (
-                        <option key={opt} value={opt} className="bg-ink-900">
+                        <option key={opt} value={opt} className="bg-surface">
                           {shipmentStatusPresentation(opt).label}
                         </option>
                       ))}
@@ -820,7 +820,7 @@ export function LogisticsControl({
                         DHL status → next milestone (sim)
                       </Button>
                       {lastCarrierResult[s.id] && (
-                        <div className="mt-1 font-mono text-ds-micro leading-tight text-zinc-500">
+                        <div className="mt-1 font-mono text-ds-micro leading-tight text-muted">
                           {lastCarrierResult[s.id]}
                         </div>
                       )}
@@ -837,7 +837,7 @@ export function LogisticsControl({
           subtitle="The requests this console made to the carrier adapter"
         >
           {apiLogs.length === 0 ? (
-            <p className="text-ds-label text-zinc-500">
+            <p className="text-ds-label text-muted">
               No carrier API requests yet. Advancing a milestone records its request here, with its
               payload — proof of what was asked and what came back.
             </p>
@@ -846,11 +846,11 @@ export function LogisticsControl({
               {apiLogs.map((log) => (
                 <div
                   key={log.id}
-                  className="rounded-ds-sm border border-hairline p-2 font-mono text-ds-label text-zinc-400"
+                  className="rounded-ds-sm border border-hairline p-2 font-mono text-ds-label text-muted"
                 >
-                  <span className="text-zinc-600">{log.timestamp}</span>{' '}
-                  <span className="text-brass-400">{log.method}</span> {log.endpoint}
-                  <span className="ml-2 text-emerald-400">{log.status}</span>
+                  <span className="text-faint">{log.timestamp}</span>{' '}
+                  <span className="text-accent-400">{log.method}</span> {log.endpoint}
+                  <span className="ml-2 text-state-success">{log.status}</span>
                 </div>
               ))}
             </div>

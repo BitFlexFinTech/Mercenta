@@ -18,7 +18,7 @@ import { PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
  * technology); they now render the canonical `LoadingState`.
  */
 const SUSPENSE_FALLBACK = (
-  <div className="flex min-h-screen items-center justify-center bg-ink p-6">
+  <div className="flex min-h-screen items-center justify-center bg-surface p-6">
     <LoadingState className="w-full max-w-md" rows={2} label="Loading this page…" />
   </div>
 );

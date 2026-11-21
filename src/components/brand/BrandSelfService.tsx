@@ -231,7 +231,7 @@ export function BrandSelfService() {
                         ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
                         : r.status === 'approved'
                           ? 'bg-state-success/10 text-state-success border-state-success/20'
-                          : 'bg-red-500/15 text-red-300 border-red-500/20'
+                          : 'bg-state-danger/10 text-state-danger border-state-danger/20'
                     )}
                   >
                     {r.status}

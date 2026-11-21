@@ -137,7 +137,7 @@ export function AdminAuditLog() {
     return (
       <div className="p-6 max-w-[1100px] mx-auto">
         <Card title="Admin Audit Log">
-          <p className="text-xs text-red-300">{loadError}</p>
+          <p className="text-xs text-state-danger">{loadError}</p>
         </Card>
       </div>
     );
@@ -151,17 +151,17 @@ export function AdminAuditLog() {
         description="Who did what, when — every significant admin action in one immutable record, searchable by actor, action, brand, entity and reason."
         meta={
           <>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {entries === null ? 'Loading…' : `${entries.length} entries`}
             </span>
-            <span className="font-mono text-ds-label text-zinc-500">
+            <span className="font-mono text-ds-label text-muted">
               {actions.length} distinct actions
             </span>
           </>
         }
         actions={
           <div className="flex items-center gap-2">
-            <ScrollText className="h-4 w-4 text-brass-400" aria-hidden="true" />
+            <ScrollText className="h-4 w-4 text-accent-400" aria-hidden="true" />
           </div>
         }
         toolbar={
@@ -177,7 +177,7 @@ export function AdminAuditLog() {
               onChange={(e) => setActionFilter(e.target.value)}
               aria-label="Action filter"
               data-testid="audit-action-filter"
-              className="cursor-pointer rounded-ds-sm border border-hairline bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+              className="cursor-pointer rounded-ds-sm border border-hairline bg-surface px-2 py-1.5 text-xs text-strong"
             >
               <option value="all">Action: all</option>
               {actions.map((a) => (
@@ -216,7 +216,7 @@ export function AdminAuditLog() {
               key: 'createdAt',
               label: 'When',
               render: (e) => (
-                <span className="font-mono text-ds-label text-zinc-500 whitespace-nowrap">
+                <span className="font-mono text-ds-label text-muted whitespace-nowrap">
                   {new Date(e.createdAt).toLocaleString()}
                 </span>
               ),
@@ -224,14 +224,14 @@ export function AdminAuditLog() {
             {
               key: 'actorId',
               label: 'Actor',
-              render: (e) => <span className="whitespace-nowrap text-zinc-300">{e.actorId}</span>,
+              render: (e) => <span className="whitespace-nowrap text-strong">{e.actorId}</span>,
             },
             {
               key: 'action',
               label: 'Action',
               primary: true,
               render: (e) => (
-                <Badge className="text-ds-micro bg-brass-500/10 text-brass-300 border-brass-500/20 whitespace-nowrap">
+                <Badge className="text-ds-micro bg-accent-500/10 text-accent-300 border-accent-500/20 whitespace-nowrap">
                   {e.action}
                 </Badge>
               ),
@@ -240,10 +240,10 @@ export function AdminAuditLog() {
               key: 'entityId',
               label: 'Entity',
               render: (e) => (
-                <span className={cn('font-mono text-zinc-400')}>
+                <span className={cn('font-mono text-muted')}>
                   {e.entityType}/{e.entityId}
                   {e.brandId && (
-                    <span className="block text-ds-micro text-zinc-600">brand: {e.brandId}</span>
+                    <span className="block text-ds-micro text-faint">brand: {e.brandId}</span>
                   )}
                 </span>
               ),
@@ -251,19 +251,19 @@ export function AdminAuditLog() {
             {
               key: 'reason',
               label: 'Reason',
-              render: (e) => <span className="text-zinc-400">{e.reason}</span>,
+              render: (e) => <span className="text-muted">{e.reason}</span>,
             },
           ]}
         />
         {entries !== null && (
-          <p className="text-ds-micro text-zinc-600 pt-2 px-1">
+          <p className="text-ds-micro text-faint pt-2 px-1">
             Showing {filtered.length} of {entries.length} entries.
           </p>
         )}
         </Card>
         <div className="space-y-3">
           <ContextPanel title="What this log is">
-            <p className="text-ds-label leading-snug text-zinc-400">
+            <p className="text-ds-label leading-snug text-muted">
               Every significant action — admin overrides, CRM activity, compliance review, payout
               approval, work-layer resolution — lands here with actor, action, entity, tenant and
               reason. History is never destroyed: an override adds a record, it never edits one.

@@ -150,11 +150,11 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
           </div>
 
           {/* ⚠ Cost-price lock-in warning — prominently flagged */}
-          <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label">
+          <div className="bg-state-danger/10 border border-state-danger/20 rounded-ds-md p-3 text-ds-label">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-state-danger flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-red-300 mb-1">⚠ Cost-Price Lock-In Warning</p>
+                <p className="font-medium text-state-danger mb-1">⚠ Cost-Price Lock-In Warning</p>
                 <p className="text-muted">
                   Once the retail channel accepts a cost price for a product,{' '}
                   <strong className="text-strong">it will auto-reject any attempt to increase it</strong>.{' '}
@@ -270,7 +270,7 @@ function PORejectionSection() {
             account, so it reviews avoidable rejections with the brand — stated as
             Mercenta's process and never as a channel rule.
           */}
-          <div className="bg-amber-500/10 border border-state-warning/20 rounded-ds-md p-3">
+          <div className="bg-state-warning/10 border border-state-warning/20 rounded-ds-md p-3">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-state-warning flex-shrink-0 mt-0.5" />
               <div>
@@ -336,7 +336,7 @@ function RequiredReadingAck({ ack, setAck }: { ack: boolean; setAck: (v: boolean
   return (
     <label className="flex items-start gap-2.5 cursor-pointer bg-surface rounded-ds-md p-3 border border-hairline hover:border-accent-500/30 transition-colors">
       <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)}
-        className="mt-0.5 accent-brass-500" />
+        className="mt-0.5 accent-[var(--mr-accent)]" />
       <div>
         <p className="text-xs text-strong font-medium">I acknowledge the guidance above</p>
         {/*
