@@ -225,7 +225,7 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
       await selectTheme(page, theme.id);
       const computed = await page.evaluate(() => {
         const el = document.createElement('button');
-        el.className = 'ds-btn-accent bg-brass-500';
+        el.className = 'ds-btn-accent bg-accent-500';
         el.textContent = 'probe';
         document.body.appendChild(el);
         const cs = getComputedStyle(el);
@@ -400,9 +400,9 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
         };
         // The primitive's own shape: BOTH cards carry the card fill, so the nested
         // rule has to beat the element's own utility — which is its whole point.
-        const outer = mk('ds-card bg-ink-850');
-        const inner = mk('ds-card bg-ink-850', outer);
-        const menu = mk('bg-ink-800/70 backdrop-blur-xl');
+        const outer = mk('ds-card bg-surface-raised');
+        const inner = mk('ds-card bg-surface-raised', outer);
+        const menu = mk('bg-surface-overlay/70 backdrop-blur-xl');
         const scrim = mk('absolute inset-0 backdrop-blur-lg');
         scrim.style.background = 'var(--mr-overlay-tint)';
         const tint = mk('bg-tint');

@@ -94,7 +94,25 @@ export function Badge({ children, className }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border',
+        /**
+         * §BATCH 8 (2026-11-21) — THE BADGE'S BORDER NOW HAS A COLOUR, AND THAT IS A
+         * DEFECT FIXED AT SOURCE (rule 07).
+         *
+         * The base declared `border` (a WIDTH) with NO colour, so every caller that did
+         * not set one of its own fell through to Tailwind's DEFAULT border colour
+         * (`#E5E7EB`, a light grey). Measured in a real browser across 80 screens: it
+         * appeared on VISIBLE borders in 11 of them, in BOTH appearances — a pale grey
+         * outline on the dark surface. **89 Badge call sites** set no border colour, so
+         * fixing the call sites would have been 89 edits with a 90th waiting; the
+         * primitive is the owner, so the primitive is where it is fixed.
+         *
+         * A caller's OWN border colour still wins: `border-hairline` is generated from
+         * the `hairline` key, which is declared BEFORE `state`/`accent` in
+         * `tailwind.config.js`, so those utilities are emitted later in the stylesheet
+         * and take precedence at equal specificity. VERIFIED in a real browser — the
+         * tinted badges on Market Intel still compute their own state colour.
+         */
+        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border border-hairline',
         className
       )}
     >

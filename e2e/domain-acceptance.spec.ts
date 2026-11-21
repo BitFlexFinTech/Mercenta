@@ -107,7 +107,7 @@ test.describe('Domain Acceptance Gate', () => {
     await expect(page.locator('button:has-text("Auto-enroll qualified (5)")').first()).toBeVisible({ timeout: 4000 });
 
     // Lead Pipeline buckets: Sequenced starts empty.
-    const sequencedBucket = page.locator('div.bg-ink-900').filter({ hasText: 'Sequenced' }).first();
+    const sequencedBucket = page.locator('div.bg-surface').filter({ hasText: 'Sequenced' }).first();
     await expect(sequencedBucket.locator('span.font-mono').first()).toHaveText('0', { timeout: 4000 });
     // Run auto-enroll → real stage transition, visible in the pipeline board,
     // and projected onto the canonical BI prospect (single source of truth).

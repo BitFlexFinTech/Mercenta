@@ -52,7 +52,7 @@ test.describe('Commercial relationship', () => {
     await page.getByTestId('commercial-model-buy_resell').click();
     await expect(page.getByTestId('commercial-model-buy_resell')).toHaveAttribute(
       'class',
-      /border-brass-500\/50/
+      /border-accent-500\/50/
     );
     await continueBtn.click();
     await page.waitForTimeout(700);

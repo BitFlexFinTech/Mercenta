@@ -161,6 +161,88 @@ function walk(dir) {
   }
 }
 walk(path.join(ROOT, 'src'));
+const srcClasses = new Set(used.keys());
+
+/**
+ * §BATCH 8 (2026-11-21) — A CLASS USED ONLY IN A TEST IS NOT EMITTED AT ALL.
+ *
+ * `tailwind.config.js` sets its `content` globs to the index file plus `src/` ONLY, so
+ * a class named ONLY inside `e2e/` is NEVER GENERATED. The migration retired the legacy
+ * names, so the last `src/` use of `bg-brass-500` and `bg-ink-*` disappeared — and FIVE
+ * e2e assertions were still probing them: a probe button built with `bg-brass-500`
+ * computed a TRANSPARENT background (the test failed), a locator `div.bg-ink-900` matched
+ * nothing, and two regexes expected `border-brass-500/50`. Each was measuring a class the
+ * product no longer has.
+ *
+ * Checking e2e names against the RESOLVED theme would not catch this — `brass-500` is
+ * still declared, so it resolves; it is the EMISSION that is missing. The honest test is
+ * therefore: every theme-ladder class a test names must ALSO be named in `src/`, which is
+ * the only tree Tailwind scans.
+ */
+const e2eUsed = new Map();
+(function walkE2e(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) walkE2e(p);
+    else if (/\.(tsx|ts)$/.test(e.name)) {
+      const text = fs.readFileSync(p, 'utf8').replace(/--mr-[a-z0-9-]+/g, '');
+      for (const m of text.matchAll(CLASS_RE)) {
+        const cls = m[0];
+        const name = cls.slice(cls.indexOf('-') + 1);
+        if (!roles.has(name)) continue;
+        if (!e2eUsed.has(cls)) e2eUsed.set(cls, new Set());
+        e2eUsed.get(cls).add(path.relative(ROOT, p));
+      }
+    }
+  }
+})(path.join(ROOT, 'e2e'));
+
+const orphaned = [...e2eUsed.entries()]
+  .filter(([cls]) => {
+    const name = cls.slice(cls.indexOf('-') + 1);
+    return !srcClasses.has(name);
+  })
+  .map(([cls, files]) => `${cls} (${[...files][0]})`);
+
+check(
+  'every theme-ladder class a TEST names is also named in src/ — otherwise Tailwind never emits it',
+  orphaned.length === 0,
+  orphaned.length === 0
+    ? `${e2eUsed.size} ladder class(es) named in e2e/, all emitted from src/`
+    : orphaned.slice(0, 8).join(' · ')
+);
+
+/**
+ * §BATCH 8 (2026-11-21) — THE ABSENCE GUARD (rule 08 §2): THE RETIRED FAMILIES MAY NOT
+ * BE NAMED IN A TEST AT ALL.
+ *
+ * The assertion above is the honest test, but prose in `src/` defeats it: a COMMENT
+ * mentioning `bg-brass-500` puts `brass-500` into the src set, so a test naming it would
+ * pass. This guard does not depend on that: `brass-*` and `ink-*` are RETIRED aliases
+ * (their canonical names are `accent-*` and `surface-*`), so a test that names one is
+ * measuring something the product no longer has — which is exactly what happened to five
+ * assertions, one of which failed only once the stale dev server was replaced.
+ */
+const RETIRED = /-((?:brass|ink)(?:-\d{2,3})?)(?![a-zA-Z0-9_-])/g;
+const retiredInTests = [];
+(function scanRetired(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) scanRetired(p);
+    else if (/\.(tsx|ts)$/.test(e.name)) {
+      const text = fs.readFileSync(p, 'utf8');
+      for (const m of text.matchAll(RETIRED)) {
+        retiredInTests.push(`${path.relative(ROOT, p)}: ${m[0]}`);
+      }
+    }
+  }
+})(path.join(ROOT, 'e2e'));
+
+check(
+  'ABSENCE GUARD — no e2e file names a RETIRED colour family (brass-* / ink-*)',
+  retiredInTests.length === 0,
+  retiredInTests.length === 0 ? 'none' : retiredInTests.slice(0, 6).join(' · ')
+);
 
 check(
   'classes were discovered in src/ (a check that finds nothing is a FAILURE)',
