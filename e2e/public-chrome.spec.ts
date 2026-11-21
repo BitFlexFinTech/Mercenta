@@ -67,7 +67,18 @@ test.describe('Public chrome — footer, cookie notice and nav labels (B4)', () 
 
   test('the header publishes the owner\'s labels and the footer agrees with them', async ({ page }) => {
     await page.goto('/');
-    const nav = page.locator('nav');
+    /**
+     * §BRAND REDESIGN (2026-11-19) — SCOPED TO THE HEADER NAV.
+     *
+     * A bare `locator('nav')` matches BOTH the header's `<nav aria-label="Main">`
+     * and the footer's `<nav aria-label="Footer">`. Once the redesign added a
+     * "Categories" group to the header, the footer's "All Categories" link also
+     * matched the name "Categories" and Playwright's strict mode refused the
+     * ambiguous locator. The header is the surface this test is about, so it is
+     * named explicitly instead of being found by a selector that also matches the
+     * footer.
+     */
+    const nav = page.getByRole('navigation', { name: 'Main' });
     for (const group of PUBLIC_NAV) {
       await expect(nav.getByRole('button', { name: group.label })).toBeVisible();
     }
@@ -121,9 +132,16 @@ test.describe('Public chrome — footer, cookie notice and nav labels (B4)', () 
   });
 
   test('the notice appears on an inner public page too, not only the homepage', async ({ page }) => {
-    const home = PUBLIC_NAV[1]?.children[0];
-    expect(home).toBeTruthy();
-    await page.goto(`/${home!.page}`);
+    /**
+     * §BRAND REDESIGN (2026-11-19) — resolved BY PAGE, not by index. The header
+     * went from two groups to seven, so `PUBLIC_NAV[1]` no longer means "the
+     * group the inner pages live in"; the lookup below asks the navigation owner
+     * for the inner page by name, so this test cannot silently start measuring a
+     * different destination than the one it names.
+     */
+    const inner = PUBLIC_NAV.flatMap((g) => g.children).find((l) => l.page === 'how-it-works');
+    expect(inner).toBeTruthy();
+    await page.goto(`/${inner!.page}`);
     await expect(page.locator('footer')).toBeVisible();
     await expect(page.locator(NOTICE_SELECTOR)).toBeVisible();
   });

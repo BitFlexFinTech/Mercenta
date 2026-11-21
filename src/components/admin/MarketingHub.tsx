@@ -151,7 +151,7 @@ export function MarketingHub() {
         description="Lead sourcing, ICP fit scoring and outreach sequencing."
       />
 
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live automated sourcing is not wired yet — CSV import is the
@@ -375,7 +375,7 @@ export function MarketingHub() {
             );
           })}
         </div>
-        <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-2.5 text-ds-micro text-blue-200 flex items-start gap-1.5">
+        <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-2.5 text-ds-micro text-state-info flex items-start gap-1.5">
           <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
           Sequence pauses automatically the moment a lead replies — replied and
           booked leads never receive automated follow-ups.

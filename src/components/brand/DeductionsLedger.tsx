@@ -270,7 +270,7 @@ export function DeductionsLedger() {
           )}
           {disputingId && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
-              <p className="text-ds-label text-blue-200">
+              <p className="text-ds-label text-state-info">
                 {DEDUCTION_DISPUTE_WINDOW.attributionNote} Provide the evidence
                 that supports your claim — shipping documents, proof of delivery, or carton photos.
               </p>

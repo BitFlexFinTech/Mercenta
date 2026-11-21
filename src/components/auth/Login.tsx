@@ -3,7 +3,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME } from '@/config/brand';
 import { ALL_DEMO_BRANDS, DEMO_LOGIN_BRAND_IDS } from '@/data/demoData';
 import { approvedApplicationBrands } from '@/data/applicationStore';
-import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { BrandMark } from '@/components/shared/BrandMark';
 import { cn } from '@/utils/cn';
 import type { Environment, SessionRole } from '@/types';
 import { environmentMode, subscribeEnvironment } from '@/config/environment';
@@ -193,11 +193,7 @@ export function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <img
-              src={brandMark}
-              alt="Mercenta Partners hexagon mark"
-              className="w-10 h-10"
-            />
+            <BrandMark alt="Mercenta Partners mark" className="w-10 h-10" />
             <span className="text-xl font-semibold text-strong">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-strong mb-1">Partner Login</h1>

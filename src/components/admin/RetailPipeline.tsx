@@ -359,7 +359,7 @@ function UnlockedPipeline() {
         {/* Dispute note entry */}
         {disputingId && (
           <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
-            <p className="text-ds-label text-blue-200">
+            <p className="text-ds-label text-state-info">
               Opening a dispute marks this deduction as disputed and records your
               pushback notes for tracking against the retail channel.
             </p>
@@ -504,8 +504,8 @@ export function DeliveryReconciliation({
                 className={cn(
                   'rounded-ds-md p-3 text-ds-label border',
                   result.shortfalls.length === 0
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
-                    : 'bg-amber-500/10 border-amber-500/20 text-amber-200'
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-state-success'
+                    : 'bg-amber-500/10 border-amber-500/20 text-state-warning'
                 )}
               >
                 {result.shortfalls.length === 0 ? (

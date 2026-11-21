@@ -541,7 +541,7 @@ test.describe('§OPENSHIP BATCH 6 — the top bar is surface and type only', () 
     expect(style.borderBottomWidth, 'the derivative edge is a real 1px hairline').toBe('1px');
 
     /*
-     * The edge is DERIVED: 40% of the theme's own border (minimal-light's #E8E8E8). Chrome
+     * The edge is DERIVED: 40% of the theme's own border. Chrome
      * resolves `color-mix()` into `color(srgb … / a)`, other engines may emit `rgba(…)`, so
      * BOTH notations are read — the assertion is on the composed VALUE, not on a spelling.
      */
@@ -550,7 +550,19 @@ test.describe('§OPENSHIP BATCH 6 — the top bar is surface and type only', () 
     const rgba = edge.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
     const redChannel = srgb ? Math.round(Number(srgb[1]) * 255) : rgba ? Number(rgba[1]) : NaN;
     const alpha = srgb ? Number(srgb[4]) : rgba?.[4] !== undefined ? Number(rgba[4]) : NaN;
-    expect(redChannel, `the derived edge keeps the theme border's own colour (${edge})`).toBe(232);
+    /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. This used to hardcode
+       the retired light theme's border (#E8E8E8 → red 232). The approved default is
+       now `brand-dark` (#2B2B2B → red 43), so a hardcoded channel would be measuring
+       a theme that no longer loads. The intent is unchanged and is now theme-agnostic:
+       the derived edge must keep the APPLIED theme's own border colour, read from the
+       theme's token in the same document. */
+    const expectedRed = await page.evaluate(() => {
+      const hex = getComputedStyle(document.documentElement).getPropertyValue('--mr-hairline').trim();
+      const m = hex.replace('#', '').match(/^([0-9a-f]{2})/i);
+      return m ? parseInt(m[1], 16) : NaN;
+    });
+    expect(Number.isNaN(expectedRed), 'the applied theme declares a readable --mr-hairline').toBe(false);
+    expect(redChannel, `the derived edge keeps the theme border's own colour (${edge})`).toBe(expectedRed);
     expect(alpha, "the edge is the reference's 40% of that border").toBeCloseTo(0.4, 2);
 
     /* The controls: the reference's 36px icon control and its 40px default button. */

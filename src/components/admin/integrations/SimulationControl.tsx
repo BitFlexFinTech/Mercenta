@@ -422,7 +422,7 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
       )}
 
       {result.error && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-sm px-2.5 py-1.5 text-ds-label text-state-warning">
           {result.error}
         </div>
       )}

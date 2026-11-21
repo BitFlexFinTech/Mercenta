@@ -518,7 +518,7 @@ function beginOnBehalfAsn() {
               className="bg-red-500/5 border border-red-500/20 rounded-ds-md p-3 space-y-2"
               data-testid={`admin-po-onbehalf-draft-${po.poNumber}`}
             >
-              <p className="text-ds-label text-red-200 font-medium">
+              <p className="text-ds-label text-state-danger font-medium">
                 On-behalf rejection draft — awaiting {brandName}'s approval
               </p>
               <p className="text-ds-micro text-zinc-400">{onBehalfRejectDraft.ruleText}</p>

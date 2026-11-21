@@ -1,7 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Mercenta mark">
-  <!-- Light-background variant: ink mark, transparent bg. Same diagonal split + waypoint dot identity. -->
-  <polygon points="16.7,35 60,10 103.3,35 103.3,85" fill="#0C1219"/>
-  <polygon points="16.7,35 103.3,85 60,110 16.7,85" fill="none" stroke="#0C1219" stroke-width="4" stroke-linejoin="round"/>
-  <circle cx="103.3" cy="85" r="6.5" fill="none" stroke="#0C1219" stroke-width="2.5"/>
-  <circle cx="103.3" cy="85" r="2.2" fill="#0C1219"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mercenta mark">
+  <!--
+    §BRAND REDESIGN (2026-11-19) — THE APPROVED MERCENTA MARK (lowercase m.).
+    Outlined path data copied VERBATIM from the approved brand master
+    (`Mercenta-Brand-Assets-For-iPad-2026-10-28/02-brand-icons/Mercenta-Mark-light.svg`).
+    The mark is NOT redrawn or approximated.
+
+    APPEARANCE-ADAPTIVE BY DESIGN: the glyph uses `currentColor`, so it takes the
+    surrounding text colour (white on the dark appearance, black on the light one)
+    from the theme, while the dot stays the brand orange. One asset, both
+    appearances, identical geometry — which is exactly what the brand guidelines
+    require ("geometry must remain identical, with only the intended
+    foreground/background inversion").
+  -->
+  <g transform="translate(55 169) scale(1.22)">
+    <path d="M0 172V43C0 14 15 0 44 0H66V23C81 7 100 0 122 0C153 0 173 13 185 37C203 12 226 0 254 0C298 0 319 25 319 69V172H258V79C258 54 250 42 230 42C209 42 198 58 198 81V172H137V79C137 54 129 42 109 42C88 42 77 58 77 81V172Z" fill="#000000"/>
+    <circle cx="350" cy="147" r="22" fill="#FF6A00"/>
+  </g>
 </svg>

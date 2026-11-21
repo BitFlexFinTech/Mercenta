@@ -25,7 +25,7 @@ import {
  * result is attached when it resolves. */
 import { verifyLinksNonBlocking } from '@/lib/verification/linkVerifier';
 import { ArrowLeft, Send, CheckCircle2, Globe, Instagram, Facebook, Search } from 'lucide-react';
-import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { BrandMark } from '@/components/shared/BrandMark';
 
 /**
  * §CG — the honeypot is positioned OFF-SCREEN rather than `display:none`, because
@@ -247,7 +247,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
         </button>
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <img src={brandMark} alt="Mercenta Partners hexagon mark" className="w-10 h-10" />
+            <BrandMark alt="Mercenta Partners mark" className="w-10 h-10" />
             <span className="text-xl font-semibold text-strong">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-strong mb-1">Request Partner Access</h1>

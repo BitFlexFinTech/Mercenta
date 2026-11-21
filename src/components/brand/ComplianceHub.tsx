@@ -393,7 +393,7 @@ function ComplianceUploadCard({
   return (
     <Card title="Compliance Documents" subtitle="Upload required documents to clear the compliance gate">
       <div className="space-y-3 p-1">
-        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-emerald-200 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-200 border border-amber-500/20')}>
+        <div className={cn('rounded-ds-md p-3 text-xs flex items-center gap-2', gate.cleared ? 'bg-emerald-500/10 text-state-success border border-emerald-500/20' : 'bg-amber-500/10 text-state-warning border border-amber-500/20')}>
           {gate.cleared ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>

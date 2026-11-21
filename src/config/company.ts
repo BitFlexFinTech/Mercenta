@@ -140,15 +140,38 @@ export const GOVERNMENT_SECRET_KINDS = [
 export type GovernmentSecretKind = (typeof GOVERNMENT_SECRET_KINDS)[number]['id'];
 
 /**
+ * §VAT REGISTRATION — OWNER-CONFIRMED (2026-11-19).
+ *
+ * Mercenta Partners Ltd has RECEIVED its VAT number. This SUPERSEDES the earlier
+ * "VAT registration … not yet in place" statement, which is removed everywhere.
+ *
+ * EORI is recorded here for INTERNAL use only. It must NEVER be published on the
+ * public website, the footer, marketing material or public company disclosures —
+ * an explicit owner instruction (2026-11-19).
+ */
+export const COMPANY_TAX_REGISTRATION = {
+  vatNumber: 'GB532445309',
+  vatRegistered: true,
+  /** INTERNAL ONLY — never publish. */
+  eoriNumber: 'GB532445309000',
+  eoriPublicationAllowed: false,
+} as const;
+
+/**
  * §16 — HMRC is READY but NOT CONNECTED. It must never be presented as live.
  * This flag is the single source of truth the panel, the store and the command
  * centre all read.
+ *
+ * §VAT (2026-11-19) — REPOINTED: the reason previously said VAT registration was
+ * "not yet in place". That is no longer true (see COMPANY_TAX_REGISTRATION), so
+ * it has been corrected rather than left as a stale claim. The remaining blocker
+ * is the API connection itself, not the registration.
  */
 export const HMRC_READINESS = {
   state: 'ready_not_connected' as const,
   reason:
-    'VAT registration and Making Tax Digital credentials are not yet in place for Mercenta Partners Ltd.',
-  blocker: 'Company VAT/tax setup must complete before HMRC can be connected.',
+    'Mercenta Partners Ltd is VAT-registered. The HMRC API connection and Making Tax Digital credentials have not yet been set up, so nothing is filed automatically.',
+  blocker: 'The HMRC API connection must be set up before HMRC can be connected.',
   providerId: 'hmrc' as const,
 };
 

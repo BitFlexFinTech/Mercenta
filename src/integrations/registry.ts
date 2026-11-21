@@ -116,6 +116,34 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Validate the key against the OpenRouter auth endpoint',
   },
+  /**
+   * §IMAGERY (2026-11-20) — Google Gemini.
+   *
+   * Generates the public site's marketing imagery (the four homepage designs).
+   * A single API-key field, stored in Supabase Vault by the connect wizard, so
+   * the key never reaches the browser bundle.
+   *
+   * HONEST LIMIT (verified 2026-11-20 against the live API): the free tier
+   * returns `limit: 0` for image generation — `429 RESOURCE_EXHAUSTED` on
+   * `generate_content_free_tier_requests`. Image generation therefore requires
+   * billing enabled on the Google Cloud project. Text models are unaffected.
+   */
+  gemini: {
+    id: 'gemini',
+    name: 'Google Gemini',
+    description:
+      'Image generation for the public site (four homepage designs). Requires billing enabled on the Google Cloud project — the free tier allows zero image requests.',
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'API Key',
+        placeholder: 'Paste the Google AI Studio API key (starts with AQ. or AIza)',
+        secret: true,
+      },
+    ],
+    testCallDescription: 'List one model from the Generative Language API to verify the key',
+  },
   hunter: {
     id: 'hunter',
     name: 'Hunter.io',
@@ -349,6 +377,9 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'amazon_ads',
   'lead_sourcing',
   'openrouter',
+  // §IMAGERY (2026-11-20) — Gemini's key lives in Vault like the other API-key
+  // providers, so it must be in the probe order for integration-secrets-status.
+  'gemini',
   'hunter',
   'instantly',
   'keepa',
@@ -402,6 +433,8 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   email: { category: 'communications', defaultMode: 'available', serverSecretName: 'POSTMARK_API_KEY' },
   lead_sourcing: { category: 'marketing', defaultMode: 'available' },
   openrouter: { category: 'ai', defaultMode: 'available', serverSecretName: 'OPENROUTER_API_KEY' },
+  // §IMAGERY (2026-11-20) — Gemini holds the imagery-generation key server-side.
+  gemini: { category: 'ai', defaultMode: 'available', serverSecretName: 'GEMINI_API_KEY' },
   hunter: { category: 'data', defaultMode: 'available', serverSecretName: 'HUNTER_API_KEY' },
   instantly: { category: 'marketing', defaultMode: 'available', serverSecretName: 'INSTANTLY_API_KEY' },
   keepa: { category: 'data', defaultMode: 'available' },

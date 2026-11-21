@@ -202,7 +202,7 @@ export function ProductCatalog() {
       />
 
       {!gateCleared && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-4 text-sm text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-4 text-sm text-state-warning">
           <div className="flex items-center gap-2 mb-2 font-medium">
             <ShieldAlert className="w-4 h-4" />
             Catalog Sync Disabled — Compliance Gate{' '}

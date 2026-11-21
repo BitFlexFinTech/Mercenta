@@ -137,9 +137,29 @@ try {
     .filter((u) => !locs.includes(u));
   test('sitemap.xml lists every declared public route', missingLoc.length === 0, missingLoc.join(', '));
   test('sitemap.xml lists no duplicate URL', new Set(locs).size === locs.length);
+  /**
+   * §NAVIGATION REPAIR (2026-11-20) — REPOINTED FROM SUBSTRING TO PATH SEGMENT.
+   *
+   * The check was `u.includes(prefix)`, a SUBSTRING test. That reported
+   * `/infrastructure/brand-registry` as a private path because the string
+   * contains `/brand` — the brand-portal prefix — when the path is plainly not
+   * under `/brand` at all. A gate that fails on a public page for looking like a
+   * private one is a defect, not a safeguard.
+   *
+   * This now mirrors `resolveRoute`'s OWN comparison exactly: a path is private
+   * only when it IS the prefix or sits BELOW it as a segment. A genuine private
+   * path (`/brand/anything`) is still caught — proved by mutation.
+   */
+  const isUnderPrivatePrefix = (url) => {
+    const path = url.replace(/^https?:\/\/[^/]+/, '');
+    return routes.PRIVATE_ROUTE_PREFIXES.some((p) => {
+      const prefix = p.endsWith('/') ? p.slice(0, -1) : p;
+      return path === prefix || path.startsWith(`${prefix}/`);
+    });
+  };
   test(
     'sitemap.xml lists NO private path',
-    !locs.some((u) => routes.PRIVATE_ROUTE_PREFIXES.some((p) => u.includes(p)))
+    !locs.some(isUnderPrivatePrefix)
     /**
      * §B7 (2026-09-29) — REPOINTED to the owner, not weakened.
      * OLD CONTRACT: a hand-written regex listing the private prefixes, including
@@ -258,7 +278,29 @@ try {
   test('the writer is the ONLY place that sets document.title at runtime', !read('src/main.tsx').includes('document.title'));
 
   /* ── H. No content generation ───────────────────────────────────────────── */
-  test('the route table is bounded and hand-declared (no generated pages)', declared.length <= 12, String(declared.length));
+  /* §SEO FOUNDATION (2026-11-19) — REPOINTED: the bound was 12 for the original
+   nine-route site. The approved scope is now 25 (the original nine plus the
+   sixteen content pages). The assertion is KEPT, and is still meaningful: it
+   fails the moment a route is generated rather than declared, because the
+   table's length would then be unbounded. The bound is a ceiling on the
+   APPROVED scope, not a weakening — a 26th route still fails. */
+  /**
+   * §NAVIGATION REPAIR (2026-11-20) — the ceiling is raised from 25 to 34.
+   *
+   * Nine genuinely missing pages were authored, because the navigation linked to
+   * them and every one rendered a blank screen:
+   *   /infrastructure/{vendor-of-record, import-compliance, brand-registry,
+   *                    pricing-governance, advertising-search, creative-assets,
+   *                    product-launch}
+   *   /solutions/institutional-partners
+   *   /resources/uk-retail-guide
+   *
+   * The assertion keeps its meaning — the table is still hand-declared and still
+   * bounded, so a generated page (which would make the length unbounded) still
+   * fails, and a 35th route still fails. The bound is a ceiling on APPROVED
+   * scope, and the Founder approved these nine.
+   */
+  test('the route table is bounded and hand-declared (no generated pages)', declared.length <= 34, String(declared.length));
 
   globalThis.fetch = originalFetch;
   console.log(`\n-- network calls during validation: ${networkCalls} --`);

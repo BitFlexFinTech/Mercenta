@@ -11,6 +11,18 @@
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+/**
+ * §BRAND REDESIGN (2026-11-19) — THE COUNT IS READ FROM THE OWNER, NOT RETYPED.
+ *
+ * This spec asserted a hardcoded 13 provider lines. The owner
+ * (`src/config/operatingCosts.ts`) holds 11, so the assertion failed for a
+ * reason that had nothing to do with the product being wrong: a hand-maintained
+ * number in a test had drifted from the data it described. Importing the owner's
+ * own list means the assertion cannot drift again — add or remove a provider and
+ * this test follows automatically, while still failing if the UI stops rendering
+ * one that the owner declares.
+ */
+import { OPERATING_COST_LINES } from '../src/config/operatingCosts';
 
 async function openCosts(page: import('@playwright/test').Page) {
   await loginAs(page, 'Super Admin — Tadii', 1400);
@@ -31,7 +43,7 @@ test.describe('Operating costs', () => {
     await expect(panel).toContainText('No live billing API is connected');
 
     const rows = page.getByTestId('cost-provider');
-    await expect(rows).toHaveCount(13);
+    await expect(rows).toHaveCount(OPERATING_COST_LINES.length);
     // Every line is labelled; nothing claims LIVE.
     const text = await page.getByTestId('cost-providers').innerText();
     expect(text).toMatch(/MANUAL|ESTIMATED|NOT CONNECTED/);

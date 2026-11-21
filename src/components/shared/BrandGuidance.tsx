@@ -274,7 +274,7 @@ function PORejectionSection() {
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-amber-200 mb-1">The acknowledgement rule</p>
+                <p className="font-medium text-state-warning mb-1">The acknowledgement rule</p>
                 <p className="text-zinc-400">{PO_ACK_ONBOARDING_STATEMENT.ruleText}</p>
               </div>
             </div>
@@ -290,7 +290,7 @@ function PORejectionSection() {
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sky-200 mb-1">Changing an acknowledgement</p>
+                <p className="font-medium text-state-info mb-1">Changing an acknowledgement</p>
                 <p className="text-zinc-400">{PO_ACK_ONBOARDING_STATEMENT.amendmentText}</p>
               </div>
             </div>

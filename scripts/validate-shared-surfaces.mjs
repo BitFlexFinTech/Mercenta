@@ -66,7 +66,7 @@ const UI_CODE = code(UI);
 
 /* ── 1. DISCOVER the five theme blocks from their own owner ───────────────── */
 
-const IDS = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
+const IDS = ['brand-dark', 'brand-light'];
 const blocks = {};
 for (const id of IDS) {
   const start = THEMES.indexOf(`    id: '${id}',`);
@@ -76,14 +76,32 @@ for (const id of IDS) {
   blocks[id] = start === -1 ? '' : THEMES.slice(start, end);
 }
 check(
-  'the five theme blocks were DISCOVERED from src/config/themes.ts (a check that finds nothing is a FAILURE)',
+  'the two appearance blocks were DISCOVERED from src/config/themes.ts (a check that finds nothing is a FAILURE)',
   Object.values(blocks).every((b) => b.length > 200),
   Object.entries(blocks).map(([id, b]) => `${id}:${b.length}`).join(' ')
 );
 
+/* §BRAND REDESIGN (2026-11-19) — the owner declares the brand colours ONCE
+   (`BRAND_PALETTE`) and each appearance READS them, so a token value can be an
+   identifier (`BRAND_PALETTE.darkBorder`) rather than a quoted literal. */
+const BRAND_PALETTE = (() => {
+  const from = THEMES.indexOf('export const BRAND_PALETTE');
+  const to = THEMES.indexOf('} as const', from);
+  const block = from === -1 || to === -1 ? '' : THEMES.slice(from, to);
+  const out = {};
+  for (const m of block.matchAll(/([A-Za-z]+):\s*'([^']*)'/g)) out[m[1]] = m[2];
+  return out;
+})();
+check(
+  'the brand palette was DISCOVERED from its owner (a check that finds nothing is a FAILURE)',
+  Object.keys(BRAND_PALETTE).length >= 5,
+  Object.keys(BRAND_PALETTE).join(', ')
+);
 const tokenValue = (id, token) => {
-  const m = blocks[id].match(new RegExp(`'${token}':\\s*'([^']*)'`));
-  return m ? m[1] : null;
+  const re = new RegExp("'" + token + "':\\s*(?:'([^']*)'|BRAND_PALETTE\\.(\\w+))");
+  const m = blocks[id].match(re);
+  if (!m) return null;
+  return m[1] !== undefined ? m[1] : (BRAND_PALETTE[m[2]] ?? null);
 };
 const surfaceRaised = (id) => tokenValue(id, '--mr-surface-raised');
 
@@ -94,11 +112,14 @@ const surfaceRaised = (id) => tokenValue(id, '--mr-surface-raised');
    resolved from each theme PLACE in the Owner mapping rather than from the old grouping of
    three light slots plus serious: minimal-light and serious implement OpenShip Light,
    professional implements DIM, fun implements DARK, and bold is preserved exactly. */
+/* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The old contract pinned
+   the four retired OpenShip slots (three light + `bold`). The owner now declares TWO
+   appearances, so the contract pins THOSE, read from `src/config/themes.ts`. */
 const CONTRACT = {
-  ['--mr-card-border']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.06)' : 'transparent'),
-  ['--mr-card-nested']: (id) => (id === 'bold' ? '#17181D' : id === 'professional' ? '#222222' : id === 'fun' ? '#141414' : '#F4F4F4'),
-  ['--mr-hover-tint']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.04)' : id === 'minimal-light' || id === 'serious' ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)'),
-  ['--mr-card-border-hover']: (id) => (id === 'bold' ? 'rgba(255,255,255,0.06)' : id === 'professional' ? 'rgba(255,255,255,0.14)' : id === 'fun' ? 'rgba(255,255,255,0.12)' : '#E0E0E0'),
+  ['--mr-card-border']: (id) => (id === 'brand-dark' ? BRAND_PALETTE.darkBorder : BRAND_PALETTE.lightBorder),
+  ['--mr-card-nested']: (id) => (id === 'brand-dark' ? '#161616' : BRAND_PALETTE.lightSurface),
+  ['--mr-hover-tint']: (id) => (id === 'brand-dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+  ['--mr-card-border-hover']: (id) => (id === 'brand-dark' ? '#3D3D3D' : '#BFBFBF'),
 };
 
 
@@ -110,11 +131,16 @@ for (const [token, expected] of Object.entries(CONTRACT)) {
   }
 }
 
+/* §BRAND REDESIGN — REPOINTED, NOT WEAKENED. The retired reference design made the
+   card BORDERLESS; the approved brand ladder separates cards with its own hairline.
+   The property that matters is unchanged: the card border is not a second colour — it
+   IS the appearance's own `--mr-hairline`. */
 for (const id of IDS) {
-  if (id === 'bold') continue;
   check(
-    `${id}: the card is BORDERLESS (the reference's own rule, spec §2.7)`,
-    tokenValue(id, '--mr-card-border') === 'transparent'
+    `${id}: the card border IS the appearance's own hairline (one owned value, not a second colour)`,
+    tokenValue(id, '--mr-card-border') !== null &&
+      tokenValue(id, '--mr-card-border') === tokenValue(id, '--mr-hairline'),
+    `border=${tokenValue(id, '--mr-card-border')} hairline=${tokenValue(id, '--mr-hairline')}`
   );
 }
 
@@ -127,12 +153,8 @@ for (const id of IDS) {
   const nested = tokenValue(id, '--mr-card-nested');
   const card = surfaceRaised(id);
   check(
-    `${id}: a nested card cannot VANISH (its fill differs from the card fill${id === 'bold' ? ', except in bold where it is identical by design' : ''})`,
-    nested !== null &&
-      card !== null &&
-      (id === 'bold'
-        ? nested.toUpperCase() === card.toUpperCase()
-        : nested.toUpperCase() !== card.toUpperCase()),
+    `${id}: a nested card cannot VANISH (its fill differs from the card fill)`,
+    nested !== null && card !== null && nested.toUpperCase() !== card.toUpperCase(),
     `nested=${nested} card=${card}`
   );
 }
@@ -230,25 +252,42 @@ const DROPDOWNS = [
 /**
  * The ROWS of a menu are asserted inside the menu REGION only: the file also holds
  * the trigger CONTROL, whose own hover legitimately stays as it was (this batch is
- * the menu surface, not the header chrome). The region starts at the translucent
- * surface class this batch introduced and runs to the end of the file.
+ * the menu surface, not the header chrome). The region starts at the menu surface
+ * class and runs to the end of the file.
+ *
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The design-system migration
+ * replaced the legacy `ink`/`tint` utility shims with theme tokens, so a menu surface
+ * is expressed EITHER as the legacy translucent `bg-ink-800/70` OR as the token form
+ * `bg-[var(--mr-surface-overlay)]/<alpha>`. Both name the SAME thing — a translucent,
+ * theme-derived surface — and the two requirements that matter still fail
+ * independently: the surface must be TRANSLUCENT and it must carry the reference's
+ * `backdrop-blur-xl`; and its rows must take a THEME hover, never the near-white
+ * legacy shim. The PublicNav dropdown was MEASURED to use an OPAQUE token surface, so
+ * it was brought back to the peers' translucent treatment in the same change.
  */
+const MENU_SURFACE = /bg-ink-800\/70|bg-\[var\(--mr-surface-overlay\)\]\/\d+/;
+const menuSurface = (src) => {
+  const m = code(src).match(MENU_SURFACE);
+  return m ? m[0] : '';
+};
 const menuRegion = (src) => {
   const c = code(src);
-  const i = c.indexOf('bg-ink-800/70');
-  return i === -1 ? '' : c.slice(i);
+  const m = c.match(MENU_SURFACE);
+  return m && m.index !== undefined ? c.slice(m.index) : '';
 };
 for (const [file, label] of DROPDOWNS) {
   const src = read(file);
   const region = menuRegion(src);
   check(
-    `${label} is TRANSLUCENT (bg-ink-800/70) with the reference's backdrop blur (spec §7.6)`,
-    src.includes('bg-ink-800/70') && src.includes('backdrop-blur-xl'),
+    `${label} is TRANSLUCENT (a theme surface at partial opacity) with the reference's backdrop blur (spec §7.6)`,
+    menuSurface(src).length > 0 && src.includes('backdrop-blur-xl'),
     file
   );
   check(
-    `${label}'s rows take their hover from the theme (hover:bg-tint), not the near-white legacy shim`,
-    region.length > 0 && region.includes('hover:bg-tint') && !region.includes('hover:bg-white/[0.04]'),
+    `${label}'s rows take their hover from the theme (hover:bg-tint or the token form), not the near-white legacy shim`,
+    region.length > 0 &&
+      (region.includes('hover:bg-tint') || region.includes('hover:bg-[var(--mr-hover-tint)]')) &&
+      !region.includes('hover:bg-white/[0.04]'),
     file
   );
 }
@@ -352,7 +391,7 @@ check(
 );
 const themesWithoutHairline = IDS.filter((id) => !blocks[id].includes("'--mr-hairline'"));
 check(
-  "every one of the five themes declares `--mr-hairline`, so the rail's derived edge is a real value in all of them",
+  "every appearance declares `--mr-hairline`, so the rail's derived edge is a real value in both",
   themesWithoutHairline.length === 0,
   `missing in: ${themesWithoutHairline.join(', ')}`
 );
@@ -702,18 +741,15 @@ check(
    still passed.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/** The hover edge is a no-op in `bold` — asserted FUNCTIONALLY, not by promise. */
-check(
-  'bold: the card hover edge IS its own card border, so the theme is preserved BY MECHANISM (the hover changes nothing)',
-  tokenValue('bold', '--mr-card-border-hover') === tokenValue('bold', '--mr-card-border'),
-  `hover=${tokenValue('bold', '--mr-card-border-hover')} border=${tokenValue('bold', '--mr-card-border')}`
-);
+/** §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The retired `bold`
+   exemption is gone with the theme it described. For BOTH appearances the card hover
+   edge is a REAL interaction state: it differs from the rest border. */
 for (const id of IDS) {
-  if (id === 'bold') continue;
   check(
-    `${id}: the card hover edge is a VISIBLE change from its borderless card (the reference's own interaction state)`,
-    tokenValue(id, '--mr-card-border-hover') !== tokenValue(id, '--mr-card-border'),
-    `hover=${tokenValue(id, '--mr-card-border-hover')}`
+    `${id}: the card hover edge is a VISIBLE change from its rest border (the reference's own interaction state)`,
+    tokenValue(id, '--mr-card-border-hover') !== null &&
+      tokenValue(id, '--mr-card-border-hover') !== tokenValue(id, '--mr-card-border'),
+    `hover=${tokenValue(id, '--mr-card-border-hover')} border=${tokenValue(id, '--mr-card-border')}`
   );
 }
 

@@ -395,10 +395,10 @@ export function CommerceOperationsPanel() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-red-200">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-ds-md p-3 text-ds-label text-state-danger">{error}</div>
       )}
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-sky-200">{notice}</div>
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-ds-label text-state-info">{notice}</div>
       )}
 
       {activityRows.length === 0 ? (

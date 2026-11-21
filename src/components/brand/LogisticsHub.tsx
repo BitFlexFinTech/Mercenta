@@ -286,7 +286,11 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
           </div>
         </dl>
 
-        <div className="mt-4 border-2 border-dashed border-zinc-300 p-4 text-center">
+        {/* §BRAND IDENTITY — was `border-zinc-300`, which mapped to the
+            `--mr-text-active` token (near-WHITE in the dark appearance) — a text
+            token borrowed for a structural border. The deliberate strong hairline
+            is the correct role for a visible dashed frame. */}
+        <div className="mt-4 border-2 border-dashed border-hairline-strong p-4 text-center">
           <div className="mb-2 text-ds-label text-zinc-600">Barcode</div>
           <div className="font-mono text-xl tracking-widest">{shipment.trackingNumber}</div>
           <div className="mt-3 flex justify-center gap-0.5">

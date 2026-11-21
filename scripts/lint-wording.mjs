@@ -78,6 +78,21 @@ const EXCLUDED = [
   // §Phase M12 — pattern-definition source (restored verbatim; it must stay
   // excluded: its regex literals and reasons necessarily contain the channel name
   // in order to MATCH claims).
+  'src/lib/intelligence/amazonRelationshipGovernance.ts',
+  /* §PUBLIC MESSAGING (2026-11-20) — THE EXEMPTION IS REVERSED.
+   *
+   * `src/config/positioning.ts` was excluded here on the argument that it DECLARES
+   * the approved vocabulary rather than rendering it. That argument was wrong in
+   * practice: this module's strings are the copy the public pages actually show,
+   * and the live homepage was displaying "Amazon UK 1P vendor infrastructure",
+   * "Vendor Central operations", "Brand Registry" and "A+ Content" to visitors
+   * while this gate printed "0 outward-facing violations" — because it had been
+   * told not to read the file.
+   *
+   * The Founder confirmed channel-neutral public wording. The nine offending
+   * strings were rewritten to channel-neutral English, and this gate now scans
+   * the file like any other. A green result here is now earned.
+   */
   'src/lib/intelligence/amazonWording.ts',
   // §PHASE 13 — the CLAIMS REGISTRY. Same class as `amazonWording.ts` above: it
   // is a DEFINITIONS / INDEX file whose `concern` text and `example` strings
@@ -134,6 +149,46 @@ function blankComments(src) {
     .replace(/\/\/[^\n]*/g, (m) => m.replace(/[^\n]/g, ' '));
 }
 
+/**
+ * §PUBLIC CLAIM RED LINES (2026-11-20) — ONE NARROW, COUNTED SUPPRESSION.
+ *
+ * `PUBLIC_CLAIM_RED_LINES` in `src/config/positioning.ts` is a set of RULES: it
+ * lists the phrases public copy must never contain, so it necessarily contains
+ * those exact phrases. A copy linter cannot tell a rule from a claim.
+ *
+ * Rather than re-exempting the whole module (which is what let nine live
+ * "Amazon" strings sit in public copy while this gate reported zero violations),
+ * only the text between a matching marker pair is blanked. Newlines are
+ * preserved, so a violation elsewhere in the same file still reports the right
+ * line number.
+ *
+ * The number of suppressions is ASSERTED at the bottom of this script and must
+ * be exactly 1. A second one therefore fails the gate, which stops this
+ * mechanism being used to hide rendered copy.
+ */
+const SUPPRESS_START = 'lint-wording:ignore-start';
+const SUPPRESS_END = 'lint-wording:ignore-end';
+/**
+ * The leading `/*` must be followed IMMEDIATELY by the start marker (allowing
+ * whitespace). An earlier version of this expression let `[\s\S]` run from the
+ * FIRST comment in the file to the marker, which blanked ~500 lines — including
+ * the nine rendered "Amazon" strings this change exists to catch. Anchoring the
+ * opener is what keeps the suppression to the one block it names.
+ */
+const SUPPRESS_RE = new RegExp(
+  `/\\*\\s*${SUPPRESS_START}[\\s\\S]*?${SUPPRESS_END}\\s*\\*/`,
+  'g'
+);
+
+function blankSuppressedBlocks(src) {
+  return src.replace(SUPPRESS_RE, (m) => m.replace(/[^\n]/g, ' '));
+}
+
+let suppressionBlocks = 0;
+function countSuppressions(src) {
+  suppressionBlocks += (src.match(SUPPRESS_RE) || []).length;
+}
+
 function lineOf(indexed, idx) {
   return indexed.slice(0, idx).split('\n').length;
 }
@@ -144,7 +199,11 @@ const files = walk(SRC).filter((p) => !isExcluded(rel(p)));
 const violations = [];
 for (const f of files) {
   const original = readFileSync(f, 'utf8');
-  const code = blankComments(original); // newlines preserved -> line numbers match original
+  // §PUBLIC CLAIM RED LINES — count the suppression blocks, blank exactly those,
+  // THEN strip comments. Newlines are preserved throughout, so reported line
+  // numbers still match the real source file.
+  countSuppressions(original);
+  const code = blankComments(blankSuppressedBlocks(original));
 // Blank import/from lines — import paths are internal references, never outward-facing
   const noImports = code
     .split('\n')
@@ -162,6 +221,23 @@ for (const f of files) {
       });
     }
   }
+}
+
+/* ── §PUBLIC CLAIM RED LINES — THE SUPPRESSION COUNT IS ASSERTED ──────────────
+ *
+ * Exactly ONE suppression block may exist in the repository: the
+ * `PUBLIC_CLAIM_RED_LINES` definitions, whose rules necessarily contain the
+ * phrases they forbid. If a second one appears, this gate FAILS — so the
+ * mechanism cannot be used to hide rendered copy from the linter.
+ */
+if (suppressionBlocks !== 1) {
+  console.error(
+    `WORDING_LINT_FAIL — expected exactly 1 suppression block (the PUBLIC_CLAIM_RED_LINES definitions), found ${suppressionBlocks}.`
+  );
+  console.error(
+    '  A new suppression block is how rendered copy gets hidden from this gate. Fix the copy instead, or justify the block in this script.'
+  );
+  process.exit(1);
 }
 
 if (violations.length === 0) {

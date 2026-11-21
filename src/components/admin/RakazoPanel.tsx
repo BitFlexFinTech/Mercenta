@@ -147,7 +147,7 @@ return (
                 <button
                   onClick={retry}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-sm text-sm font-medium
-                             bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-emerald-200
+                             bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-state-success
                              transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />

@@ -78,7 +78,34 @@ try {
     // CURRENT canonical call. The contract is identical: the hero's primary CTA
     // opens the assessment rather than the portal, and it carries its test id.
     HOME.includes("navigate('explore-uk-market-fit')") && HOME.includes('PRE_AUDIT_TESTIDS.cta'));
-  test('the homepage primary CTA carries the declared test id', HOME.includes('data-testid={PRE_AUDIT_TESTIDS.cta}'));
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The four homepage
+     designs render the CTA, so Home.tsx passes the id DOWN as a prop and the design
+     applies it. The contract is unchanged — the CTA in the DOM carries the declared
+     test id — and it is now asserted at BOTH ends of the wiring: Home.tsx passes
+     `primaryTestId={PRE_AUDIT_TESTIDS.cta}`, and the design component applies it as
+     `data-testid={primaryTestId}`. */
+  /*
+   * §BRAND REDESIGN (2026-11-20) — REPOINTED, NOT WEAKENED.
+   *
+   * `data-testid={primaryTestId}` used to live in `HomeDesigns.tsx`, which held
+   * all four designs. It now lives in `designShared.tsx`, the ONE module every
+   * design renders its CTA through (`HeroActions`, and `Closing` at the foot) —
+   * so a design cannot apply the wrong id, or none, because it does not write
+   * the button at all.
+   *
+   * STRONGER than the old check, which read a single file: this asserts the
+   * shared owner applies the id AND that all four design modules actually render
+   * that owner.
+   */
+  const DESIGN_MODULES = ['DesignA', 'DesignB', 'DesignC', 'DesignD'];
+  test(
+    'the homepage primary CTA carries the declared test id (passed by the shell, applied by the shared CTA owner, rendered by all four designs)',
+    HOME.includes('primaryTestId={PRE_AUDIT_TESTIDS.cta}') &&
+      read('src/components/marketing/home/designShared.tsx').includes('data-testid={primaryTestId}') &&
+      DESIGN_MODULES.every((n) =>
+        read(`src/components/marketing/home/${n}.tsx`).includes('<HeroActions')
+      )
+  );
   test('the hero no longer renders a competing Partner Login button',
     !/c\.hero\.secondaryCta/.test(HOME_COPY));
   test('Partner Login remains the header utility action', NAV.includes('Partner Login') && NAV.includes('PRE_AUDIT_TESTIDS.headerUtility'));

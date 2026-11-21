@@ -15,8 +15,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, X, ArrowUpRight } from 'lucide-react';
 
 // §UI/UX Wave 2 — series colours come from the canonical chart tokens
-// (`CHART.palette`); only the tooltip surface remains local.
-const INK_LIGHT = '#2A2A30';
+// (`CHART.palette`); the tooltip now uses theme tokens too (§BRAND IDENTITY).
 export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile } = useApp();
   // §UI/UX Wave 2 — one canonical chart language (grid/axis/stroke/palette from
@@ -238,4 +237,11 @@ function DrillModal({ card, onClose, data, onNavigate }: {
     </div>
   );
 }
-const CHART_TT = { background: INK_LIGHT, border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px', color: '#E4E4E7' };
+/* §BRAND IDENTITY — was hardcoded zinc (#2A2A30 / #E4E4E7). Now theme tokens. */
+const CHART_TT = {
+  background: 'var(--mr-surface-overlay)',
+  border: '1px solid var(--mr-hairline)',
+  borderRadius: '8px',
+  fontSize: '11px',
+  color: 'var(--mr-text)',
+};

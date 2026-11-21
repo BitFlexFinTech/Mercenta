@@ -164,7 +164,7 @@ export function AppShell({
       {/* Accessible skip link — first element in tab order. */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 bg-brass-500 px-3 py-2 rounded-ds-sm text-strong shadow-ds-overlay"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 bg-brass-500 px-3 py-2 rounded-ds-sm text-on-accent shadow-ds-overlay"
       >
         Skip to content
       </a>

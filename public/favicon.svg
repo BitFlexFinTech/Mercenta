@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Mercenta mark">
-  <polygon points="16.7,35 60,10 103.3,35 103.3,85" fill="#C9A15A"/>
-  <polygon points="16.7,35 103.3,85 60,110 16.7,85" fill="none" stroke="#C9A15A" stroke-width="4" stroke-linejoin="round"/>
-  <circle cx="103.3" cy="85" r="6.5" fill="none" stroke="#C9A15A" stroke-width="2.5"/>
-  <circle cx="103.3" cy="85" r="2.2" fill="#C9A15A"/>
+  <polygon points="16.7,35 60,10 103.3,35 103.3,85" fill="#FF6A00"/>
+  <polygon points="16.7,35 103.3,85 60,110 16.7,85" fill="none" stroke="#FF6A00" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="103.3" cy="85" r="6.5" fill="none" stroke="#FF6A00" stroke-width="2.5"/>
+  <circle cx="103.3" cy="85" r="2.2" fill="#FF6A00"/>
 </svg>

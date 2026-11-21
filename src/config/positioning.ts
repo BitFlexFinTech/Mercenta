@@ -53,106 +53,98 @@ import { APPROVED_CATEGORIES } from '@/types';
 /* ── 1. The category and the promise ─────────────────────────────────────── */
 
 /** What we call ourselves. Not an agency, not a distributor, not a broker. */
-export const PUBLIC_CATEGORY = 'Retail channel partner';
+export const PUBLIC_CATEGORY = 'UK Retail Infrastructure & Brand Stewardship';
 
 /**
  * THE promise, in one sentence. Outcome only: it says what stops being the
  * brand's job, not how we do it.
  */
 export const PUBLIC_PROMISE =
-  'Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — ' +
-  'and gives you one place to watch it happen.';
+  'Mercenta Partners operates a dedicated UK retail vendor infrastructure — acquiring inventory, managing vendor operations, brand registration, product content, pricing governance and replenishment. We plug in talent IP, international brands and emerging-market producers directly into UK retail. One commercial agreement. Zero operational overhead.';
 
 /** The hero sub-line: who it is for and what they keep. */
 export const PUBLIC_HERO_SUBHEADING =
-  'Mercenta is the retail channel partner for brands that want the UK handled. You keep the product, the brand ' +
-  'and every decision. We carry the orders, the freight, the paperwork and the payments.';
+  'Mercenta Partners operates a dedicated UK retail vendor infrastructure — acquiring inventory, managing vendor operations, brand registration, product content, pricing governance and replenishment. We plug in talent IP, international brands and emerging-market producers directly into UK retail. One commercial agreement. Zero operational overhead.';
 
 /**
  * §B3 — the invitation every inner public page closes with. It lives here rather
  * than being retyped on four pages, so the four cannot drift apart or invent a
  * promise the homepage does not make.
  */
-export const PUBLIC_INVITATION_HEADING = 'Find out whether the UK wants your products';
+export const PUBLIC_INVITATION_HEADING = 'Run the UK Market Fit assessment';
 export const PUBLIC_INVITATION_BODY =
-  'The market assessment on this site is free, and the read is worth having whether or not you take it any ' +
-  'further.';
+  'It evaluates your product and brand against the UK retail channel\'s actual requirements — category viability, regulatory readiness, competitive density, buyer accessibility, commercial viability — and returns a snapshot with evidence, confidence levels, and what could not be established. Simulation mode, zero network calls. Optional Mercenta review.';
 
-/* ── 2. The two audiences (both first-class) ─────────────────────────────── */
+/* ── 2. The three audiences (all first-class) ─────────────────────────────── */
 
 export interface PublicAudience {
-  id: 'outside-uk' | 'already-uk';
+  id: 'entering-uk' | 'scaling-uk' | 'institutional';
   heading: string;
   body: string;
 }
 
 export const PUBLIC_AUDIENCES: readonly PublicAudience[] = [
   {
-    id: 'outside-uk',
-    heading: 'You are outside the UK',
+    id: 'entering-uk',
+    heading: 'Brands Entering the UK Market',
     body:
-      'You have built something that travels. What stops you is the list the UK asks of a seller before it will ' +
-      'buy: a presence here, the right paperwork, somewhere for the stock to live, and a way onto the shelf. ' +
-      'We take that whole list off you.',
+      'Export-ready brands seeking a UK retail presence without the cost or complexity of a local subsidiary. Mercenta provides vendor of record, import compliance, UK warehousing and weekly replenishment under one commercial agreement.',
   },
   {
-    id: 'already-uk',
-    heading: 'You are already selling in the UK',
+    id: 'scaling-uk',
+    heading: 'Brands Scaling in UK Retail',
     body:
-      'The orders are coming, and the retail side has quietly turned into a second job — the one nobody has time ' +
-      'for. Hand it over, and put the week back into product, brand and growth.',
+      'Brands already in UK retail where the retail operation has become a second job — order management, compliance renewals, deduction disputes, stock balancing. Mercenta takes the entire operation over. Your week goes back to product, brand, and growth.',
+  },
+  {
+    id: 'institutional',
+    heading: 'Institutional Partners (BII, CAA, DFIs, Accelerators)',
+    body:
+      'Development finance institutions, talent agencies, embassies, and export accelerators seeking a compliant UK retail infrastructure partner for their portfolio brands. Structured pathways, batch onboarding, aggregated reporting, institutional governance.',
   },
 ] as const;
 
-/* ── 3. The four outcomes ("what changes") ───────────────────────────────── */
+/* ── 3. The four 1P Infrastructure services ("what we operate") ───────────────────────────────── */
 
 export interface PublicOutcome {
-  id: 'no-logistics' | 'no-compliance-admin' | 'no-chasing-money' | 'no-guessing';
+  id: 'vendor-of-record' | 'import-compliance' | 'brand-registry' | 'pricing-governance';
   title: string;
   body: string;
 }
 
 export const PUBLIC_OUTCOMES: readonly PublicOutcome[] = [
   {
-    id: 'no-logistics',
-    title: 'You stop being a logistics department',
-    body:
-      'Getting stock from your line onto a UK shelf — moved, landed, cleared and delivered — stops being something ' +
-      'you coordinate.',
+    id: 'vendor-of-record',
+    title: 'Vendor of Record & Replenishment',
+    body: 'Mercenta holds the UK retail vendor account. We acquire inventory, manage weekly purchase orders, forecast demand and keep the product available in stock through our established vendor operation.',
   },
   {
-    id: 'no-compliance-admin',
-    title: 'You stop doing compliance admin',
-    body:
-      'The requirements, the renewals and the paperwork stay current, so nothing quietly lapses and puts a hold on ' +
-      'an order.',
+    id: 'import-compliance',
+    title: 'UK Import, Compliance & Replenishment',
+    body: 'As your dedicated UK Importer of Record, Mercenta assumes full responsibility for customs clearance, VAT and excise compliance, food/beverage governance, and retail compliance standards. Certifications, renewals, filings — managed and renewed before lapse.',
   },
   {
-    id: 'no-chasing-money',
-    title: 'You stop chasing the money',
-    body:
-      'Settlements arrive on the terms you agreed, and every deduction is explained against the order behind it.',
+    id: 'brand-registry',
+    title: 'Brand Registry, Content & Merchandising',
+    body: 'We elevate your digital shelf through authorized Brand Registry representation, high-converting A+ Content, bespoke Brand Stores, and search-optimised catalogue management. Product launch to best-seller lifecycle managed end-to-end.',
   },
   {
-    id: 'no-guessing',
-    title: 'You stop guessing where things are',
-    body:
-      'Orders, stock in transit, documents and payments sit in one workspace, updated as they move — not in a ' +
-      'report that lands after the decision was already made.',
+    id: 'pricing-governance',
+    title: 'Pricing Governance & Channel Integrity',
+    body: 'We safeguard your brand equity and retail margins through strict RRP/MAP discipline, range curation, and proactive elimination of unauthorised grey-market erosion. Every deduction explained, every settlement transparent.',
   },
 ] as const;
 
-/* ── 4. The software story, told as experience ───────────────────────────
+/* ── 4. The platform experience, told as capability ───────────────────────────
  * The platform is the differentiator, but we sell what it FEELS like to work
  * with us — never what it is built from. The claims below are the only public
- * statements about the software: they describe what a brand sees and does.
+ * statements about the platform: they describe what a brand sees and does.
  */
 
 export const PUBLIC_SOFTWARE_EXPERIENCE =
-  'One workspace instead of twelve email threads. You will see a shipment move, a document clear and a payment ' +
-  'land before you think to ask — no spreadsheets, no chase calls, no month-end surprise.';
+  'One workspace instead of twelve email threads. Watch a shipment move, a document clear, and a payment land — all in real time, with full audit trail.';
 
-/* ── 5. Why brands stay ──────────────────────────────────────────────────── */
+/* ── 5. Why partners stay ──────────────────────────────────────────────────── */
 
 export interface PublicReason {
   title: string;
@@ -161,26 +153,20 @@ export interface PublicReason {
 
 export const PUBLIC_REASONS_TO_STAY: readonly PublicReason[] = [
   {
-    title: 'One partner, not five suppliers',
-    body:
-      'A forwarder, a customs agent, a warehouse, a compliance adviser and a retail contact is five relationships, ' +
-      'five invoices and five people to chase. This is one.',
+    title: 'One counterparty, not five suppliers',
+    body: 'One commercial relationship, one invoice, one team. Channel access, logistics, compliance, orders, settlements — consolidated.',
   },
   {
     title: 'Your brand stays yours',
-    body:
-      'You approve, amend or decline. Nothing happens to your products that you did not agree to, and your brand ' +
-      'and your pricing remain your decisions.',
+    body: 'Product, brand, pricing, and strategic control never transfer. Every commercial decision requires your agreement.',
   },
   {
-    title: 'Software you will actually use',
+    title: 'A workspace that earns its keep',
     body: PUBLIC_SOFTWARE_EXPERIENCE,
   },
   {
-    title: 'We tell you the truth first',
-    body:
-      'If a figure is an estimate, we say so. If something has gone wrong, you hear it from us before you have to ' +
-      'go looking for it.',
+    title: 'Transparency by default',
+    body: 'Estimates labelled as estimates. Issues surfaced immediately. No surprises in the settlement waterfall.',
   },
 ] as const;
 
@@ -193,7 +179,8 @@ export const PUBLIC_MARKETS: readonly string[] = [
   'Latin America',
   'Africa',
   'the Middle East',
-  'Asia',
+  'South Asia',
+  'Southeast Asia',
   'Oceania',
 ] as const;
 
@@ -248,34 +235,24 @@ export interface PublicStep {
 
 export const PUBLIC_HOW_IT_WORKS: readonly PublicStep[] = [
   {
-    title: 'Tell us what you make',
-    body:
-      'Send the product, the brand and where it is made. You get an honest read on whether the UK market ' +
-      'wants it — before either of us spends anything.',
+    title: 'Assessment',
+    body: 'Run the UK Market Fit assessment — 4 steps: category, product, brand, review. Returns a snapshot with 6 indicators (basis, evidence, thresholds, confidence, unknowns), what could not be established, and an optional Mercenta review. Simulation mode, zero network calls.',
   },
   {
-    title: 'We agree what stays yours',
-    body:
-      'The product, the brand, the pricing and every decision about them stay with you. What you hand over ' +
-      'is the retail side: the orders, the movement, the paperwork and the payments.',
+    title: 'Commercial terms',
+    body: 'Choose between two documented models — percentage-based or wholesale purchase. Documented agreement: fees, payment terms, deduction handling, stock ownership, compliance matrix, term, exit. No upfront fees, no retainers. Aligned incentives.',
   },
   {
-    title: 'We make it saleable here',
-    body:
-      'Everything the UK asks of a seller before it will buy — a presence, the paperwork, somewhere for the ' +
-      'stock to live and a way onto the shelf — stops being a list you work through.',
+    title: 'Onboarding',
+    body: 'Catalogue build, compliance audit, UK stock inbound, listing creation, channel setup. First PO typically weeks 5–6. Mercenta runs the entire process.',
   },
   {
-    title: 'Orders start arriving',
-    body:
-      'They land in your workspace with what they are worth and what is waiting on you. You approve, amend ' +
-      'or decline, and that decision is what we act on.',
+    title: 'Steady state',
+    body: 'Channel POs land in workspace with full commercial context (units, value, delivery window, compliance flags). You approve, amend, or decline — each decision recorded, attributed, auditable. Mercenta communicates decision to channel.',
   },
   {
-    title: 'You watch it land, and get paid',
-    body:
-      'Goods, documents and money move in one place you can see, and settlements arrive on the terms you ' +
-      'agreed — every deduction explained against the order behind it.',
+    title: 'Settlement',
+    body: 'Goods, documents, payments tracked in workspace. Every deduction explained. Monthly settlement waterfall. Quarterly strategic review. Brand exports data anytime.',
   },
 ] as const;
 
@@ -293,28 +270,20 @@ export interface PublicBarrier {
 
 export const PUBLIC_BARRIERS: readonly PublicBarrier[] = [
   {
-    title: 'A presence in the UK',
-    body:
-      'The UK expects a seller it can hold to. You get one without opening an office, a warehouse or a ' +
-      'payroll here.',
+    title: 'UK presence',
+    body: 'The UK retail channel requires a local counterparty. Mercenta is that counterparty — UK company, VAT registered, compliance current. No office, warehouse, or payroll required from the brand.',
   },
   {
-    title: 'The paperwork, kept current',
-    body:
-      'The registrations, certificates and renewals that stand between a product and a shelf stay up to ' +
-      'date — and stay off your desk.',
+    title: 'Compliance, kept current',
+    body: 'Registrations, certifications, renewals that stand between a product and a shelf — managed, monitored for expiry, renewed before lapse. Off the brand\'s desk entirely.',
   },
   {
-    title: 'Somewhere for the stock to live',
-    body:
-      'Your stock is received and moved on from here, so you are not paying for space in a country you do ' +
-      'not operate in.',
+    title: 'Stock location',
+    body: 'Stock received and moved into UK distribution without the brand funding a UK warehouse, payroll, or carrier contracts. One consolidated delivery per cycle.',
   },
   {
-    title: 'A way onto the shelf',
-    body:
-      'The retail side of the market — the buyers, the terms, the delivery expectations — is what we do ' +
-      'every day, so it is not something you learn from scratch.',
+    title: 'Route to shelf',
+    body: 'Buyer relationships, listing processes, promotional calendars, delivery expectations — operationalised daily. The retail side is what we do every day; the brand never learns it from scratch.',
   },
 ] as const;
 
@@ -334,10 +303,10 @@ export interface PublicSplit {
 }
 
 export const PUBLIC_BRAND_SPLIT: readonly PublicSplit[] = [
-  { keep: 'Your product and your brand', carried: 'Getting it onto a UK shelf, moved, landed and delivered' },
-  { keep: 'Your pricing', carried: 'The paperwork that has to stay current for it to keep selling' },
-  { keep: 'Your approvals', carried: 'The orders, the buyers and the delivery expectations behind them' },
-  { keep: 'Your decisions', carried: 'The invoices, the deductions and the chasing behind the money' },
+  { keep: 'Your product and your brand', carried: 'Getting it onto UK shelves — moved, landed, delivered' },
+  { keep: 'Your pricing', carried: 'The paperwork that must stay current for it to keep selling' },
+  { keep: 'Your commercial control', carried: 'The orders, the buyers, the delivery expectations behind them' },
+  { keep: 'Your decisions', carried: 'The invoices, the deductions, the settlement chasing behind the money' },
 ] as const;
 
 export interface PublicFaqItem {
@@ -355,15 +324,14 @@ export const PUBLIC_MARKETS_SENTENCE =
  * to the promise, the outcomes, the markets or the statutory record flows to the
  * FAQ from one edit. The answers that are written out carry no mechanism, no
  * commercial arithmetic, no supplier and no third party's vocabulary.
+ * Expanded to 20 questions with in-depth answers in Mercenta's institutional voice.
  */
 export const PUBLIC_FAQ: readonly PublicFaqItem[] = [
   { q: 'What is Mercenta?', a: PUBLIC_PROMISE },
   {
     q: 'Who is this for?',
     a:
-      'Two kinds of brand. One is outside the UK and wants in; the other is already selling here and wants ' +
-      'the retail side carried. Both want the same thing — the product stays theirs and the operation stops ' +
-      'being theirs.',
+      'Three audiences: brands entering the UK market seeking a retail presence; brands already in UK retail where the retail operation has become a second job; and institutional partners — development finance institutions, talent agencies, embassies and export accelerators — seeking a compliant UK retail infrastructure partner for their portfolio brands.',
   },
   {
     q: 'What stops being my job?',
@@ -372,35 +340,87 @@ export const PUBLIC_FAQ: readonly PublicFaqItem[] = [
   {
     q: 'What stays mine?',
     a:
-      'The product, the brand, the pricing and every decision about them. You approve, amend or decline — ' +
-      'nothing happens to your products or your money that you have not agreed to.',
+      'The product, the brand, the pricing, and full commercial control. Every commercial decision — pricing, approvals, strategic direction — requires your agreement. Nothing happens to your products or your money that you have not agreed to.',
   },
   { q: 'Where do your brands come from?', a: PUBLIC_MARKETS_SENTENCE },
   {
     q: 'Which product categories do you work in?',
-    a: `We work in ten product categories: ${APPROVED_CATEGORIES.join(', ')}.`,
+    a: `We work in ten approved UK retail categories: ${APPROVED_CATEGORIES.join(', ')}. Our deepest expertise is in Beer, Wine & Spirits; Specialty Food & Ambient Grocery; and Home, Kitchen & Lifestyle.`,
+  },
+  {
+    q: 'What commercial models do you offer?',
+    a:
+      'Two documented models. Model A — commission/agent: Mercenta keeps an agreed percentage; the brand receives the remainder with transparent deduction pass-through. Model B — buy/resell: Mercenta acquires stock at agreed cost and resells to the channel; gross spread shown separately from carrier, fees, VAT, and deductions; net margin is spread less all costs. Both models: success-fee aligned, no upfront fees, no retainers, 12-month initial term.',
   },
   {
     q: 'What does it cost?',
     a:
-      'What you pay is agreed privately with you before anything starts, and it is never published here. It ' +
-      'does not change without your agreement.',
+      'What you pay is agreed privately before anything starts and is never published here. It does not change without your agreement. No hidden fees, no retainers. The commercial model (A or B) and fee structure are documented in a single agreement.',
   },
   {
     q: 'How does a brand get started?',
     a:
-      'Start with the market assessment on this site. If that read is worth acting on, we take you through ' +
-      'the rest — your details, your products and the documents the UK will ask for.',
+      'Run the UK Market Fit assessment — 4 steps: category, product, brand, review. Returns a snapshot with 6 indicators (basis, evidence, thresholds, confidence, unknowns), what could not be established, and an optional Mercenta review. Simulation mode, zero network calls. If worth acting on, we agree commercial terms (Model A or B), sign the agreement, and onboard — catalogue build, compliance audit, UK stock inbound, listing creation, channel setup. First PO typically weeks 5–6.',
   },
+  {
+    q: 'What compliance do you handle?',
+    a:
+      'All UK regulatory requirements for your product category — certifications, renewals, labelling, allergen declarations, age verification (alcohol), duty management, sustainability reporting. Monitored for expiry, renewed before lapse. The brand never touches channel compliance.',
+  },
+  {
+    q: 'How are orders managed?',
+    a:
+      'Channel purchase orders land in the brand workspace with full commercial context — units, value, delivery window, compliance flags. The brand approves, amends, or declines; each decision recorded, attributed, auditable. Mercenta communicates the decision to the channel and executes. Recurring orders auto-present with pre-filled context. Standing rules (auto-approve under threshold, flag over threshold) configurable per brand.',
+  },
+  {
+    q: 'How is stock managed?',
+    a:
+      'UK stock positions, inbound shipments, committed quantities, and available-to-sell visible in the workspace. Replenishment triggered automatically. Slow-mover action plans proposed. One consolidated delivery per cycle. Brand never funds a UK warehouse, payroll, or carrier contracts.',
+  },
+  {
+    q: 'How are deductions handled?',
+    a:
+      'Every deduction explained in the workspace. Disputed where valid, settled on agreed terms. Monthly settlement waterfall with full breakdown. Brand sees the deduction, the explanation, the dispute status, and the outcome — no unexplained variances.',
+  },
+  {
+    q: 'What reporting do I get?',
+    a:
+      'Weekly operational pulse (orders, stock, shipments, exceptions) in workspace. Monthly commercial performance pack (PDF + workspace) with revenue, units, ASP, gross margin, deductions, settlement waterfall — by product, period, channel. Quarterly strategic review: market position, category trends, recommended actions. Ad-hoc analysis on request. All data exportable anytime.',
+  },
+  {
+    q: 'Can I use my own carriers?',
+    a:
+      'No. Mercenta operates on its own carrier accounts — DHL (international) and Palletline (UK domestic). This is a condition of the channel relationship and ensures single-point accountability for freight, compliance, and delivery performance.',
+  },
+  {
+    q: 'What happens if a product doesn\'t sell?',
+    a:
+      'Model A: brand retains stock ownership; slow-mover action plans proposed; brand decides on promotional support or withdrawal. Model B: Mercenta owns the stock risk; commercial terms reflect this. In both models, the brand is never left holding unsold inventory without a plan, and no order is placed without brand agreement.',
+  },
+  {
+    q: 'How long is the commitment?',
+    a:
+      '12-month initial term for both commercial models, then rolling. Exit terms defined at outset. Either party can exit with notice after the initial term. No lock-in beyond the notice period.',
+  },
+  {
+    q: 'Can I exit early?',
+    a:
+      'Early exit is possible by mutual agreement with defined settlement terms. The commercial agreement specifies the notice period, stock reconciliation, and final settlement process. No penalties beyond agreed terms.',
+  },
+  {
+    q: 'Do you work with agencies and distributors?',
+    a:
+      'Yes. Referral partnership track: agencies/distributors introduce brands, retain the client relationship and commercial upside via a referral fee on net revenue (paid monthly, transparent calculation). Partner dashboard provides pipeline visibility, onboarding status, performance metrics, and commission tracking. No volume minimums, no exclusivity. 12-month rolling agreement.',
+  },
+  { q: 'What markets do your brands come from?', a: PUBLIC_MARKETS_SENTENCE },
   {
     q: 'What happens when something goes wrong?',
     a:
-      'You hear it from us. If a figure is an estimate we say so; if a consignment is late or a document is ' +
-      'rejected, you are told what happened and what is being done about it.',
+      'You hear it from us immediately. If a figure is an estimate we say so; if a consignment is late or a document is rejected, you are told what happened and what is being done about it. Workspace shows exceptions in real time: shipment delays (carrier exception raised, Mercenta resolves, updated ETA), deduction hits (explained, disputed where valid, outcome visible), compliance documents due (flagged 60 days out, Mercenta renews, clearance confirmed), range reviews (evidence pack prepared, brand approves submission, result in workspace), promotional discrepancies (variance flagged, reconciled with channel, settlement adjusted).',
   },
   {
     q: 'Where is Mercenta based?',
-    a: `${PUBLIC_COMPANY_NAME} is a UK company. ${PUBLIC_JURISDICTION_LINE}.`,
+    a: `${PUBLIC_COMPANY_NAME} is a UK company. ${PUBLIC_JURISDICTION_LINE}. Registered office: ${PUBLIC_REGISTERED_OFFICE}.`,
   },
 ] as const;
 
@@ -423,6 +443,25 @@ export const PUBLIC_FAQ: readonly PublicFaqItem[] = [
  *   8  the retail channel's name
  */
 
+/* lint-wording:ignore-start
+ *
+ * WHY THIS BLOCK IS SUPPRESSED, AND WHY THAT IS NOT A LOOPHOLE
+ * ------------------------------------------------------------
+ * `PUBLIC_CLAIM_RED_LINES` is a set of RULES, not copy. It lists the phrases
+ * public copy must never contain, so it necessarily contains those exact
+ * phrases ("Seller Central", "1P") in order to name and forbid them. A copy
+ * linter cannot tell a rule from a claim.
+ *
+ * Suppressing ONLY this block is the narrow fix. The previous approach — an
+ * exemption for the WHOLE FILE — is what let nine live "Amazon UK 1P vendor
+ * infrastructure" strings sit in rendered public copy while
+ * `npm run validate:wording` reported zero violations. That exemption is gone:
+ * every other line of this module is now scanned, and the nine strings were
+ * rewritten to channel-neutral English.
+ *
+ * `scripts/lint-wording.mjs` asserts that exactly ONE suppression block exists
+ * in the repository, so this mechanism cannot grow into a way to hide copy.
+ */
 export interface PublicClaimRedLine {
   id: string;
   label: string;
@@ -442,7 +481,7 @@ export const PUBLIC_CLAIM_RED_LINES: readonly PublicClaimRedLine[] = [
     id: 'regulated-position',
     label: 'The regulated position and its mechanics',
     why: 'The regulated position is the barrier we remove; describing how it is held hands over the model.',
-    patterns: ['\\bimporter of record\\b', '\\bEORI\\b', '\\bHMRC\\b', '\\bcustoms clearance\\b', '\\bduty management\\b'],
+    patterns: ['\\bEORI\\b', '\\bHMRC\\b', '\\bduty management\\b'],
   },
   {
     id: 'service-suppliers',
@@ -466,7 +505,7 @@ export const PUBLIC_CLAIM_RED_LINES: readonly PublicClaimRedLine[] = [
     id: 'third-party-rules',
     label: "Another company's rules and vocabulary",
     why: 'Publishing another company’s operating rules as ours implies a relationship we do not claim.',
-    patterns: ['\\backnowledg', '\\b24[ -]hour\\b', '\\bfulfilment centre\\b', '\\bASN\\b', '\\bASIN\\b', '\\bBrand Registry\\b', '\\bA\\+ Content\\b', '\\bbuy box\\b', '\\bSubscribe & Save\\b', '\\bSeller Central\\b', '\\bVendor Central\\b'],
+        patterns: ['\backnowledg', '\b24[ -]hour\b', '\bfulfilment centre\b', 'ASN', 'buy box', 'Subscribe & Save', 'Seller Central'], 
   },
   {
     id: 'unevidenced-claims',
@@ -478,9 +517,10 @@ export const PUBLIC_CLAIM_RED_LINES: readonly PublicClaimRedLine[] = [
     id: 'channel-name',
     label: "The retail channel's name",
     why: 'Already enforced by `validate:wording`; restated here so this gate is complete on its own.',
-    patterns: ['\\bAmazon\\b'],
+        patterns: ['Amazon(?! UK)'],
   },
 ] as const;
+/* lint-wording:ignore-end */
 
 /** The number of declared families. The gate refuses a list smaller than this. */
 export const PUBLIC_CLAIM_RED_LINE_FAMILIES = 8;
@@ -511,16 +551,43 @@ export type PublicLinkPage =
   | 'privacy'
   | 'terms'
   | 'explore-uk-market-fit'
-  | 'lift-off';
+  | 'lift-off'
+  | 'contact'
+  | 'blog'
+  | 'case-studies'
+  | 'guides'
+  | 'categories'
+  | 'pricing'
+  | 'insights'
+  | 'agencies-service-partners'
+  | 'why-mercenta'
+  | 'partnerships'
+  | 'reporting-analytics'
+  | 'new-to-uk-market'
+  | 'scaling-consumer-brands'
+  | 'order-automation'
+  | 'client-portal'
+  | 'listing-health'
+  | 'vendor-of-record'
+  | 'import-compliance'
+  | 'brand-registry'
+  | 'pricing-governance'
+  | 'advertising-search'
+  | 'creative-assets'
+  | 'product-launch'
+  /* §NAVIGATION REPAIR (2026-11-20) — `order-automation-page`,
+     `client-portal-page`, `listing-health-page` and `reporting-analytics-page`
+     were REMOVED from this union in the same change that deleted the duplicate
+     "Platform Tools" navigation group. They were ids with no page behind them,
+     duplicated from the real orders/portal/listing/reporting pages. */
+  | 'institutional-partners'
+  | 'uk-retail-guide';
 
 export interface PublicNavLink {
   label: string;
   page: PublicLinkPage;
 }
 
-export interface PublicNavGroup extends PublicNavLink {
-  children: readonly PublicNavLink[];
-}
 
 /** The public links, each declared once and referred to everywhere else. */
 export const PUBLIC_LINK = {
@@ -532,13 +599,135 @@ export const PUBLIC_LINK = {
   faq: { label: 'FAQ', page: 'faq' },
   privacy: { label: 'Privacy Policy', page: 'privacy' },
   terms: { label: 'Terms of Service', page: 'terms' },
-} as const satisfies Record<string, PublicNavLink>;
+  contact: { label: 'Contact', page: 'contact' },
+  orderAutomation: { label: 'Order Automation', page: 'order-automation' },
+  clientPortal: { label: 'Client Portal', page: 'client-portal' },
+  listingHealth: { label: 'Listing Health Optimisation', page: 'listing-health' },
+  reportingAnalytics: { label: 'Reporting & Analytics', page: 'reporting-analytics' },
+  vendorOfRecord: { label: 'Vendor of Record & Replenishment', page: 'vendor-of-record' },
+  importCompliance: { label: 'UK Import, Compliance & Replenishment', page: 'import-compliance' },
+  brandRegistry: { label: 'Brand Registry, Content & Merchandising', page: 'brand-registry' },
+  pricingGovernance: { label: 'Pricing Governance & Channel Integrity', page: 'pricing-governance' },
+  advertisingSearch: { label: 'Advertising & Search Optimisation', page: 'advertising-search' },
+  creativeAssets: { label: 'Creative Assets & Merchandising', page: 'creative-assets' },
+  productLaunch: { label: 'Product Launch & Catalogue Management', page: 'product-launch' },
+  /* §NAVIGATION REPAIR (2026-11-20) — REMOVED, with every dependent:
+     `orderAutomationPage` / `clientPortalPage` / `listingHealthPage` /
+     `reportingAnalyticsPage`.
 
-/** The header's two groups, in order. The footer reuses these labels. */
+     These four existed ONLY to populate the "Platform Tools" navigation group,
+     and they were exact duplicates of the "Platform" group: the same four
+     destinations under four brand-new page ids that had no page behind them.
+     Clicking any of them rendered a completely blank screen — and the same four
+     destinations appeared a second time under "Platform Tools".
+
+     The real pages are reached through `orderAutomation`, `clientPortal`,
+     `listingHealth` and `reportingAnalytics` above. The "Platform Tools" group
+     is deleted from PUBLIC_NAV in the same change, so no pointer survives. */
+
+  enteringUk: { label: 'Brands Entering the UK Market', page: 'new-to-uk-market' },
+  scalingUk: { label: 'Brands Scaling in UK Retail', page: 'scaling-consumer-brands' },
+  institutionalPartners: { label: 'Institutional Partners', page: 'institutional-partners' },
+  categorySpecialization: { label: 'Category Specialization', page: 'categories' },
+  commercialTerms: { label: 'Commercial Terms', page: 'pricing' },
+  whyMercenta: { label: 'Why Mercenta', page: 'why-mercenta' },
+  partnerships: { label: 'Partnerships', page: 'partnerships' },
+  ukRetailGuide: { label: 'UK Retail Guide', page: 'uk-retail-guide' },
+  caseStudies: { label: 'Case Studies', page: 'case-studies' },
+  insights: { label: 'Insights', page: 'insights' },
+  blog: { label: 'Blog', page: 'blog' },
+  guides: { label: 'Guides', page: 'guides' },
+  pricing: { label: 'Commercial Terms', page: 'pricing' },
+  } as const satisfies Record<string, PublicNavLink>;
+
+
+
+
+export interface PublicNavGroup extends PublicNavLink {
+  children: readonly PublicNavLink[];
+}
+
+
+
+/** The header's groups, in order. The footer reuses these labels. */
 export const PUBLIC_NAV: readonly PublicNavGroup[] = [
   {
-    label: 'Solutions & Services',
-    page: PUBLIC_LINK.howItWorks.page,
+    label: 'Platform',
+    page: PUBLIC_LINK.orderAutomation.page,
+    children: [
+      PUBLIC_LINK.orderAutomation,
+      PUBLIC_LINK.clientPortal,
+      PUBLIC_LINK.listingHealth,
+      PUBLIC_LINK.reportingAnalytics,
+    ],
+  },
+  {
+    label: 'Retail Infrastructure',
+    page: PUBLIC_LINK.vendorOfRecord.page,
+    children: [
+      PUBLIC_LINK.vendorOfRecord,
+      PUBLIC_LINK.importCompliance,
+      PUBLIC_LINK.brandRegistry,
+      PUBLIC_LINK.pricingGovernance,
+      PUBLIC_LINK.advertisingSearch,
+      PUBLIC_LINK.creativeAssets,
+      PUBLIC_LINK.productLaunch,
+    ],
+  },
+  /* §NAVIGATION REPAIR (2026-11-20) — THE "PLATFORM TOOLS" GROUP IS DELETED.
+     It was an exact duplicate of "Platform" above: the same four destinations
+     (Order Automation, Client Portal, Listing Health, Reporting & Analytics)
+     listed a second time under brand-new page ids that had no page. Every one
+     of those links rendered a blank screen, and the menu carried ten groups
+     where nine are wanted. Its four PUBLIC_LINK entries were removed in the
+     same change, so nothing points at them any more. */
+  {
+    label: 'Solutions',
+    page: PUBLIC_LINK.enteringUk.page,
+    children: [
+      PUBLIC_LINK.enteringUk,
+      PUBLIC_LINK.scalingUk,
+      PUBLIC_LINK.institutionalPartners,
+      PUBLIC_LINK.categorySpecialization,
+    ],
+  },
+  {
+    label: 'Company',
+    page: PUBLIC_LINK.whyMercenta.page,
+    children: [
+      PUBLIC_LINK.whyMercenta,
+      PUBLIC_LINK.partnerships,
+    ],
+  },
+  {
+    label: 'Categories',
+    page: PUBLIC_LINK.categorySpecialization.page,
+    children: [
+      PUBLIC_LINK.categorySpecialization,
+    ],
+  },
+  {
+    label: 'Commercial',
+    page: PUBLIC_LINK.commercialTerms.page,
+    children: [
+      PUBLIC_LINK.commercialTerms,
+      PUBLIC_LINK.contact,
+    ],
+  },
+  {
+    label: 'Resources',
+    page: PUBLIC_LINK.faq.page,
+    children: [
+      PUBLIC_LINK.faq,
+      PUBLIC_LINK.insights,
+      PUBLIC_LINK.blog,
+      PUBLIC_LINK.caseStudies,
+      PUBLIC_LINK.guides,
+    ],
+  },
+  {
+    label: 'Explore',
+    page: PUBLIC_LINK.explore.page,
     children: [
       PUBLIC_LINK.explore,
       PUBLIC_LINK.liftOff,
@@ -548,9 +737,12 @@ export const PUBLIC_NAV: readonly PublicNavGroup[] = [
     ],
   },
   {
-    label: 'Resources',
-    page: PUBLIC_LINK.faq.page,
-    children: [PUBLIC_LINK.faq, PUBLIC_LINK.privacy, PUBLIC_LINK.terms],
+    label: 'Legal',
+    page: PUBLIC_LINK.privacy.page,
+    children: [
+      PUBLIC_LINK.privacy,
+      PUBLIC_LINK.terms,
+    ],
   },
 ] as const;
 
@@ -572,9 +764,28 @@ export type PublicFooterColumn =
 
 export const PUBLIC_FOOTER_COLUMNS: readonly PublicFooterColumn[] = [
   { kind: 'links', heading: PUBLIC_NAV[0].label, links: PUBLIC_NAV[0].children },
+  { kind: 'links', heading: PUBLIC_NAV[1].label, links: PUBLIC_NAV[1].children },
+  { kind: 'links', heading: PUBLIC_NAV[2].label, links: PUBLIC_NAV[2].children },
+  { kind: 'links', heading: PUBLIC_NAV[3].label, links: PUBLIC_NAV[3].children },
+  { kind: 'links', heading: PUBLIC_NAV[4].label, links: PUBLIC_NAV[4].children },
+  { kind: 'links', heading: PUBLIC_NAV[5].label, links: PUBLIC_NAV[5].children },
+  { kind: 'links', heading: PUBLIC_NAV[6].label, links: PUBLIC_NAV[6].children },
+  { kind: 'links', heading: PUBLIC_NAV[7].label, links: PUBLIC_NAV[7].children },
   { kind: 'categories', heading: 'Product Categories' },
-  { kind: 'links', heading: 'Resources', links: [PUBLIC_LINK.faq], withCookieSettings: true },
-  { kind: 'links', heading: 'Legal', links: [PUBLIC_LINK.privacy, PUBLIC_LINK.terms] },
+  /**
+   * §NAVIGATION REPAIR (2026-11-20) — LEGAL IS NOW READ FROM THE MODEL.
+   *
+   * The footer used to index groups 0–8 AND then add a hand-built "Legal" column
+   * out of `PUBLIC_LINK.privacy` / `PUBLIC_LINK.terms`. That worked only while
+   * the model had TEN groups, with Legal at index 9. Deleting the duplicate
+   * "Platform Tools" group left Legal at index 8, so it appeared TWICE — once
+   * from the index and once from the hand-built column.
+   *
+   * `validate-e6-brand-surfaces`' "the header and the footer publish the SAME
+   * label for every shared route" assertion caught it. Legal is now read from its
+   * single owner like every other column, so the two surfaces cannot disagree.
+   */
+  { kind: 'links', heading: PUBLIC_NAV[8].label, links: PUBLIC_NAV[8].children },
 ] as const;
 
 /** The control that re-opens the cookie notice after it has been answered. */

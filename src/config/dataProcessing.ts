@@ -408,6 +408,8 @@ export const INVENTORY_EXCLUSIONS: Readonly<Record<string, string>> = {
     'Product price-history data only (public product/market data). No personal data of any data subject passes through it.',
   firecrawl:
     'Public web research for market analysis. It reads publicly published pages; Mercenta stores no personal data collected through it.',
+  gemini:
+    'Marketing image generation for the public site. Prompts describe products and scenes, never a data subject, and no personal data is sent to or stored by it.',
 };
 
 /* ── 6. The public-safe projection (what the privacy policy may publish) ────

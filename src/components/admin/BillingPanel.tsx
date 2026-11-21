@@ -124,7 +124,7 @@ export function BillingPanel() {
   return (
     <WorkspaceFrame className="space-y-4">
       <DemoBanner />
-      {!stripeLive && (<div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
+      {!stripeLive && (<div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2"><FlaskConical className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" /><span>Stripe runs in <strong>(Mock) mode</strong> &mdash; subscription ids are simulated (<code>mock:sub-&hellip;</code>) and nothing is billed. Stripe is never a payout rail.</span></div>)}
 
       {/* §Sprint — workspace header + interactive metric band over the SAME
           canonical billing functions; the metric tiles are real drill-downs

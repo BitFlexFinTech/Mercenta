@@ -63,6 +63,29 @@ export async function pingOpenRouter(
   }
 }
 
+/**
+ * §IMAGERY (2026-11-20) — Google Gemini.
+ *
+ * Lists one model, which proves the key is accepted by the Generative Language
+ * API while generating nothing. A key that can list models is a key the imagery
+ * generator can then use.
+ */
+export async function pingGemini(
+  key: string,
+  fetchImpl: PingFetch = fetch
+): Promise<PingResult> {
+  try {
+    const res = await fetchWithTimeout(
+      fetchImpl,
+      'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1',
+      { method: 'GET', headers: { 'x-goog-api-key': key } }
+    );
+    return classify(res, await res.json().catch(() => undefined));
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export async function pingHunter(
   key: string,
   fetchImpl: PingFetch = fetch
@@ -158,6 +181,7 @@ export async function pingSendGrid(
  */
 export const LIVE_TEST_ENDPOINTS: ReadonlyArray<{ integrationId: string; provider: string }> = [
   { integrationId: 'openrouter', provider: '' },
+  { integrationId: 'gemini', provider: '' },
   { integrationId: 'hunter', provider: '' },
   { integrationId: 'instantly', provider: '' },
   { integrationId: 'email', provider: 'postmark' },

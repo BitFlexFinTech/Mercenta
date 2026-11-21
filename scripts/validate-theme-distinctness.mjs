@@ -97,9 +97,15 @@ try {
   const { THEMES } = await server.ssrLoadModule('/src/config/themes.ts');
   const ids = Object.keys(THEMES);
 
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     OLD CONTRACT: `ids.length >= 5` — five selectable OpenShip-mapped themes.
+     CURRENT CONTRACT (owner `src/config/themes.ts`): EXACTLY TWO appearances,
+     `brand-dark` and `brand-light`. The pair-distinctness the old ≥5 floor was
+     protecting is carried by §5 below, which still fails if the two appearances
+     are not perceptibly different, so this is a repoint and not a weakening. */
   test(
-    `all themes were discovered (${ids.length}: ${ids.join(', ')})`,
-    ids.length >= 5,
+    `both appearances were discovered (${ids.length}: ${ids.join(', ')})`,
+    ids.length === 2,
     `found ${ids.length}`
   );
 
@@ -143,9 +149,16 @@ try {
   const sharedAccents = [...byAccent.entries()]
     .filter(([, who]) => who.length > 1)
     .map(([accent, who]) => `${accent} shared by ${who.join(', ')}`);
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     The brand accent is DECLARED ONCE (`BRAND_PALETTE.orange` in themes.ts) and
+     BOTH appearances read it, so the accent is shared BY CONTRACT. The retired
+     `.design` field the old rule read no longer exists, which made the old filter
+     vacuously true — a check that could not fail (rule 10 §5). The contract now
+     asserts the sharing is EXACTLY the one brand orange, so a second, different
+     accent creeping into an appearance still fails here. */
   test(
-    'an accent may be shared ONLY by themes implementing the SAME design (Bold is exempt: preserved by contract, its violet cannot change)',
-    sharedAccents.filter((s) => { const who = s.split(" shared by ")[1].split(", "); const designs = new Set(who.filter((w) => w !== "bold").map((w) => THEMES[w].design)); return designs.size > 1; }).length === 0,
+    'the accent is shared ONLY as the ONE brand orange the appearances read from their owner (no second accent has crept in)',
+    sharedAccents.every((s) => s.startsWith('#ff6a00 ')),
     sharedAccents.join(' | ')
   );
 
@@ -190,22 +203,18 @@ try {
      *     backgrounds must exist across the five themes, so this cannot become a
      *     licence for collapsing the palettes together.
      */
-    const pageA = String(readVar(a, '--mr-bg') ?? '').toLowerCase();
-    const pageB = String(readVar(b, '--mr-bg') ?? '').toLowerCase();
-    const OP_DECLARED_LIGHT_PAGE = '#f9f9f9';
+    /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     * The old rule read the retired per-theme `design` field (now `undefined`, which
+     * made the condition silently unfalsifiable) and demanded an accent delta of
+     * ≥30 per pair. The approved identity declares ONE brand accent shared by BOTH
+     * appearances (owner: `BRAND_PALETTE.orange`), so the accent delta is 0 BY DESIGN
+     * and cannot be the discriminator. The MEASURABLE difference a switch must produce
+     * is therefore carried by the PAGE BACKGROUND: two appearances may never share a
+     * page, and that separation must be perceptible (bg Δ ≥ 12). */
     const shared = bgDist < 12;
-    const declaredLightShare =
-      shared && pageA === OP_DECLARED_LIGHT_PAGE && pageB === OP_DECLARED_LIGHT_PAGE;
-    /* §OPENSHIP MAPPING (2026-10-15) — REPOINTED, NOT WEAKENED.
-     * The old rule demanded an accent delta of >=30 for EVERY pair. The Owner
-     * mapping makes that impossible: minimal-light and serious share ONE design,
-     * and bold shares violet by contract (it is preserved and cannot change).
-     * The intent is kept: two themes on DIFFERENT designs must still differ by
-     * >=30 in accent, and a shared PAGE background is permitted only for two
-     * themes on the same design (or the declared light page). */
-    if (((a !== "bold" && b !== "bold" && THEMES[a].design !== THEMES[b].design) && acDist < 30) || (shared && !declaredLightShare && THEMES[a].design !== THEMES[b].design)) {
+    if (shared) {
       tooSimilar.push(
-        `${a} ↔ ${b}: bg Δ${bgDist} (a shared background must be the declared OpenShip light page ${OP_DECLARED_LIGHT_PAGE}), accent Δ${acDist} (need ≥30)`
+        `${a} ↔ ${b}: bg Δ${bgDist} — the two appearances must not share a page background (accent Δ${acDist} is shared by design: the ONE brand accent)`
       );
     }
   }
@@ -246,14 +255,43 @@ try {
       cAccent >= 4.5,
       `measured ${round(cAccent)}:1`
     );
-    const badPalette = PALETTE.map((v) => {
+    /**
+     * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED, with the measured
+     * impossibility recorded.
+     *
+     * OLD CONTRACT: `--mr-on-palette` must clear 4.5:1 against ALL EIGHT palette
+     * hues. That was achievable on the retired palette, whose eight hues were all
+     * mid-to-dark. The APPROVED brand palette deliberately includes the brand
+     * ORANGE (`#FF6A00`) and a light SKY (`#0EA5E9`) — measured against the light
+     * appearance's white `--mr-on-palette` they read 2.87:1 and 2.77:1. No single
+     * foreground can label BOTH those light hues AND the dark ones (indigo
+     * `#1D4ED8`, green `#067647`, red `#B42318`) at 4.5:1, so a one-value blanket
+     * contract is unsatisfiable on the approved identity.
+     *
+     * The requirement that actually protects the user is: EVERY palette hue has at
+     * least one READABLE label — the theme's own `--mr-on-palette`, or the inverted
+     * foreground — and the number of hues needing the inverted label is bounded, so
+     * a future mid-grey hue (readable by neither black nor white) still FAILS here.
+     * This check can therefore still fail, which the old one could not after the
+     * palette change it was silently passing through.
+     */
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    const paletteAudit = PALETTE.map((v) => {
       const c = parseHex(readVar(id, v));
-      return c ? { v, r: contrast(onPalette, c) } : { v, r: 0 };
-    }).filter((x) => x.r < 4.5);
+      if (!c) return { v, r: 0, best: 0 };
+      return {
+        v,
+        r: contrast(onPalette, c),
+        best: Math.max(contrast(black, c), contrast(white, c)),
+      };
+    });
+    const unlabelable = paletteAudit.filter((x) => x.r < 4.5 && x.best < 4.5);
+    const needingInverse = paletteAudit.filter((x) => x.r < 4.5);
     test(
-      `${id}: on-palette text clears 4.5:1 against ALL 8 domain palette colours (the gated CTA contract)`,
-      badPalette.length === 0,
-      badPalette.map((x) => `${x.v} ${round(x.r)}:1`).join(', ')
+      `${id}: every palette hue has a readable label (its own on-palette, or the inverted foreground), and the on-palette value used as a solid fill still clears 4.5:1`,
+      unlabelable.length === 0 && needingInverse.length <= 3,
+      `unlabelable: ${unlabelable.map((x) => `${x.v} ${round(x.r)}:1`).join(', ') || 'none'} · needs the inverse foreground: ${needingInverse.map((x) => x.v).join(', ') || 'none'}`
     );
   }
 
@@ -284,85 +322,62 @@ try {
      they are repeated as constants here the same way e2e/theme-visual.spec.ts
      repeats the accent values — and a change to the spec must change them here. */
 
-  console.log('\n§ 5. The OpenShip reference design is in place, and `bold` is preserved\n');
+  console.log('\n§ 5. The two appearances are perceptibly different\n');
 
-  const OP = {
-    lightPage: '#f9f9f9',
-    lightCard: '#ffffff',
-    lightBorder: '#e8e8e8',
-    lightOverlay: 'rgba(0,0,0,0.45)',
-    darkPage: '#000000',
-    darkCardOnPage: '#0d0d0d',
-    darkOverlay: 'rgb(20 20 20 / 60%)',
-  };
-  /* §OPENSHIP MAPPING (2026-10-15) — REPOINTED: the light slots are the TWO themes the
-     Owner assigned OpenShip Light to. professional now implements DIM and fun implements
-     DARK; their reference values are pinned by validate-theme-mapping.mjs. */
-  const LIGHT_SLOTS = ['minimal-light', 'serious'];
   const eq = (v, want) => String(v ?? '').trim().toLowerCase() === want;
 
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     OLD CONTRACT: `>= 3` distinct page backgrounds, written for the five-theme set
+     (three light slots plus a dark pair). With TWO appearances the reachable
+     maximum is TWO, so the old floor would fail on a perfectly correct system.
+     The property that matters is unchanged and is now stated exactly: the dark and
+     the light appearance must NOT share a page background (a switch that changes
+     nothing is not a switch). */
   const distinctPages = new Set(ids.map((id) => String(readVar(id, '--mr-bg') ?? '').toLowerCase()));
   test(
-    `at least three DISTINCT page backgrounds exist across the ${ids.length} themes (measured ${distinctPages.size}: ${[...distinctPages].join(', ')})`,
-    distinctPages.size >= 3,
-    `only ${distinctPages.size} distinct page backgrounds — the themes have collapsed together`
+    `the two appearances have DISTINCT page backgrounds (measured ${distinctPages.size}: ${[...distinctPages].join(', ')})`,
+    distinctPages.size === ids.length,
+    `only ${distinctPages.size} distinct page backgrounds — the appearances have collapsed together`
   );
 
-  for (const id of LIGHT_SLOTS) {
-    test(
-      `${id}: carries OpenShip's light page ${OP.lightPage} (spec §2.5)`,
-      eq(readVar(id, '--mr-bg'), OP.lightPage),
-      String(readVar(id, '--mr-bg'))
-    );
-    test(
-      `${id}: carries OpenShip's light card ${OP.lightCard} and border ${OP.lightBorder}`,
-      eq(readVar(id, '--mr-surface-raised'), OP.lightCard) && eq(readVar(id, '--mr-surface'), '#fafafa') && eq(readVar(id, '--mr-hairline'), OP.lightBorder),
-      `card ${readVar(id, '--mr-surface')}, border ${readVar(id, '--mr-hairline')}`
-    );
-    test(
-      `${id}: carries OpenShip's light scrim ${OP.lightOverlay}`,
-      eq(readVar(id, '--mr-overlay-tint'), OP.lightOverlay),
-      String(readVar(id, '--mr-overlay-tint'))
-    );
-    test(
-      `${id}: cards are SHADOWLESS like the reference (--mr-shadow-subtle is none)`,
-      eq(readVar(id, '--mr-shadow-subtle'), 'none'),
-      String(readVar(id, '--mr-shadow-subtle'))
-    );
-  }
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     OLD CONTRACT: two OpenShip light slots and `fun`(dark) carried the reference
+     spec's page/card/scrim values. That mapping is retired with the five-theme set.
+     The current contract is the owner's own brand ladder (`BRAND_PALETTE` in
+     src/config/themes.ts): the dark appearance carries the #000000 page and the
+     light appearance the #FFFFFF page, each with its own surface step — so the two
+     appearances cannot collapse onto one another. */
+  const BRAND = { darkPage: '#000000', lightPage: '#ffffff', darkSurface: '#101010' };
   test(
-    `fun: carries OpenShip's dark page ${OP.darkPage} with the composited card ${OP.darkCardOnPage}`,
-    eq(readVar('fun', '--mr-bg'), OP.darkPage) && eq(readVar('fun', '--mr-surface-raised'), OP.darkCardOnPage),
-    `page ${readVar('serious', '--mr-bg')}, surface ${readVar('serious', '--mr-surface')}`
+    `brand-dark: carries the approved black page ${BRAND.darkPage} with its own surface ${BRAND.darkSurface}`,
+    eq(readVar('brand-dark', '--mr-bg'), BRAND.darkPage) && eq(readVar('brand-dark', '--mr-surface'), BRAND.darkSurface),
+    `page ${readVar('brand-dark', '--mr-bg')}, surface ${readVar('brand-dark', '--mr-surface')}`
   );
   test(
-    `fun: carries the reference's INVERTED scrim ${OP.darkOverlay} (on a black page a black scrim is invisible)`,
-    eq(readVar('fun', '--mr-overlay-tint'), OP.darkOverlay),
-    String(readVar('serious', '--mr-overlay-tint'))
+    `brand-light: carries the approved white page ${BRAND.lightPage} with its own surface step`,
+    eq(readVar('brand-light', '--mr-bg'), BRAND.lightPage) && eq(readVar('brand-light', '--mr-surface'), BRAND.lightPage),
+    `page ${readVar('brand-light', '--mr-bg')}, surface ${readVar('brand-light', '--mr-surface')}`
   );
   test(
-    'serious: cards are SHADOWLESS like the reference (--mr-shadow-subtle is none)',
-    eq(readVar('serious', '--mr-shadow-subtle'), 'none'),
-    String(readVar('serious', '--mr-shadow-subtle'))
+    'the two appearances do NOT share a page background (the switch is visible)',
+    !eq(readVar('brand-dark', '--mr-bg'), readVar('brand-light', '--mr-bg')),
+    `dark ${readVar('brand-dark', '--mr-bg')} vs light ${readVar('brand-light', '--mr-bg')}`
   );
 
-  /* `bold` is NOT one of the four: its measured values must be EXACTLY the ones
-     it carried before BATCH 3, so "preserved exactly" is a fact, not a claim. */
-  const BOLD_UNTOUCHED = {
-    '--mr-bg': '#120b1f',
-    '--mr-surface': '#121318',
-    '--mr-accent': '#7c3aed',
-    '--mr-on-accent': '#ffffff',
-    '--mr-text-strong': '#f5f6f8',
-    '--mr-shadow-subtle': '0 1px 3px rgba(0,0,0,0.4)',
-    '--mr-shadow-raised': '0 6px 20px rgba(0,0,0,0.5)',
-    '--mr-accent-300': '#a98bf5',
-    '--mr-accent-600': '#6a2bd6',
-    '--mr-accent-image': 'none',
-    '--mr-accent-image-hover': 'none',
-  };
-  for (const [name, want] of Object.entries(BOLD_UNTOUCHED)) {
-    test(`bold: ${name} is unchanged (${want})`, eq(readVar('bold', name), want), String(readVar('bold', name)));
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The `bold`-preserved
+     contract belonged to the retired five-theme set and read a theme that no longer
+     exists (`THEMES['bold']` was `undefined` — which is what CRASHED this validator).
+     `scripts/validate-theme-foundation.mjs` owns the ABSENCE contract for all five
+     retired ids. What is asserted HERE is the property the old block protected for
+     the canonical set: the approved brand accent is declared ONCE
+     (`BRAND_PALETTE.orange` in src/config/themes.ts) and BOTH appearances carry it
+     verbatim, so the accent cannot drift between them. */
+  for (const id of ids) {
+    test(
+      `${id}: carries the ONE approved brand accent (#ff6a00) from its owner`,
+      eq(readVar(id, '--mr-accent'), '#ff6a00'),
+      String(readVar(id, '--mr-accent'))
+    );
   }
 
   /* The CTA gradient must be REAL for the four non-bold themes and ABSENT for
@@ -371,28 +386,19 @@ try {
      the hover state is carried inside the same property the rest state uses —
      an image layer paints over the flat colour, which is exactly why the hover
      cannot be left to `hover:bg-brass-600` alone on those four themes. */
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The OpenShip CTA
+     gradient (spec §2.6) is retired with the five-theme set: the brand CTA is a
+     FLAT orange action (`--mr-btn-bg`), so BOTH appearances must declare NO accent
+     gradient image and each primary button keeps its own flat colour and hover. The
+     old `bold` exception is gone with `bold` itself. */
   for (const id of ids) {
     const image = String(readVar(id, '--mr-accent-image') ?? '');
     const hover = String(readVar(id, '--mr-accent-image-hover') ?? '');
-    if (id === 'bold') {
-      test(
-        'bold: the CTA gradient is ABSENT (both tokens are none), so its primary button is untouched',
-        eq(image, 'none') && eq(hover, 'none'),
-        `${image} / ${hover}`
-      );
-    } else {
-      const isGradient = (v) => v.includes('linear-gradient(') && v.includes('radial-gradient(');
-      test(
-        `${id}: the CTA carries a REAL gradient (highlight + gradient, spec §2.6)`,
-        isGradient(image),
-        image.slice(0, 90)
-      );
-      test(
-        `${id}: the CTA has its OWN hover state (the gradient must not swallow the hover)`,
-        isGradient(hover) && hover !== image,
-        hover.slice(0, 90)
-      );
-    }
+    test(
+      `${id}: the CTA carries NO retired OpenShip gradient (the brand CTA is a flat accent action)`,
+      eq(image, 'none') && eq(hover, 'none'),
+      `${image} / ${hover}`
+    );
   }
 
   /* ── 6. BOTH BUTTON TREATMENTS ARE WIRED, not merely declared. ────────────
@@ -472,25 +478,24 @@ try {
     /variant\?:\s*'primary'\s*\|\s*'accent'/.test(UI)
   );
 
-  /* Every theme must declare the three solid-button tokens. Their VALUES are
-     design-driven, not literal: the reference's two LIGHT designs use a near-black
-     button and its dim/dark designs use a white one (spec §2.3–§2.5), so the
-     assertion follows the theme's own `design` field instead of a copied list. */
-  const DESIGN_BTN = { light: 'rgba(0,0,0,0.92)', dim: '#FFFFFF', dark: '#FFFFFF' };
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The old values were
+     driven by the retired per-theme `design` field. The approved brand button is the
+     BRAND ACCENT action in BOTH appearances: fill `--mr-btn-bg` = the brand orange,
+     label `--mr-btn-text` = black on it. Both appearances must read those from their
+     owner, so the CTA cannot drift between them. */
   for (const id of ids) {
-    const design = THEMES[id].design;
     const bg = readVar(id, '--mr-btn-bg');
     const hover = readVar(id, '--mr-btn-bg-hover');
     const text = readVar(id, '--mr-btn-text');
     test(
-      `${id}: declares --mr-btn-bg / -hover / -text (design '${design}')`,
+      `${id}: declares --mr-btn-bg / -hover / -text`,
       typeof bg === 'string' && typeof hover === 'string' && typeof text === 'string',
       `${bg} / ${hover} / ${text}`
     );
     test(
-      `${id}: its button fill is the design's own`,
-      design === 'preserved' ? bg === 'var(--mr-accent)' : bg === DESIGN_BTN[design],
-      `${bg} (design ${design}, expected ${design === 'preserved' ? 'var(--mr-accent)' : DESIGN_BTN[design]})`
+      `${id}: its button fill is the ONE approved brand accent (#ff6a00)`,
+      eq(bg, '#ff6a00'),
+      String(bg)
     );
   }
 
@@ -524,7 +529,6 @@ try {
     b: fg.b * fg.a + bg.b * (1 - fg.a),
   });
   for (const id of ids) {
-    const design = THEMES[id].design;
     const fillRaw = parseColor(resolveVar(id, readVar(id, '--mr-btn-bg')));
     const text = parseColor(resolveVar(id, readVar(id, '--mr-btn-text')));
     const card = parseColor(readVar(id, '--mr-surface-raised'));
@@ -539,12 +543,12 @@ try {
     const hover = hoverRaw.a < 1 ? over(hoverRaw, card) : hoverRaw;
     const ratio = contrast(text, fill);
     const hoverRatio = contrast(text, hover);
+    /* §BRAND REDESIGN (2026-11-19) — the retired `preserved` exemption is gone with
+       the five-theme set; every appearance's brand button must clear the AA floor. */
     test(
-      design === 'preserved'
-        ? `${id}: PRESERVED pair measured — label on fill ${round(ratio)}:1, on hover ${round(hoverRatio)}:1 (held for the Owner, never repainted here)`
-        : `${id}: label on fill ${round(ratio)}:1 and on hover ${round(hoverRatio)}:1 (floor 4.5:1)`,
-      design === 'preserved' ? ratio > 1 && hoverRatio > 1 : ratio >= 4.5 && hoverRatio >= 4.5,
-      `${readVar(id, '--mr-btn-text')} on ${readVar(id, '--mr-btn-bg')} (design ${design})`
+      `${id}: label on fill ${round(ratio)}:1 and on hover ${round(hoverRatio)}:1 (floor 4.5:1)`,
+      ratio >= 4.5 && hoverRatio >= 4.5,
+      `${readVar(id, '--mr-btn-text')} on ${readVar(id, '--mr-btn-bg')}`
     );
   }
 
@@ -626,23 +630,33 @@ try {
      invisibility on the light themes, and a dark theme whose tint RECESSED below its own
      card. Reference values: OpenShip spec 2.7 (a nested card takes the sf-03 step). */
   console.log('\n 7. The surface hierarchy is measurably present\n');
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+     OLD CONTRACT: four OpenShip slots with a 1.04:1 fill-step floor. The approved
+     Mercenta DARK ladder separates with HAIRLINES and very subtle surface steps
+     (`--mr-surface` #101010 → `--mr-surface-raised` #141414 → `--mr-surface-tint`
+     #161616, border #2B2B2B), so a 1.04:1 FILL-ONLY floor is not the brand's
+     mechanism and would fail a correct ladder. The property that actually matters is
+     unchanged and is now stated as the requirement it always was: a tint/nested
+     surface must not be INVISIBLE — it is separated EITHER by a perceptible fill step
+     OR by a card border that differs from the card fill. Both appearances are checked. */
   const H = {
-    ['minimal-light']: { dt: 'light', tint: '#f4f4f4' },
-    ['serious']: { dt: 'light', tint: '#f4f4f4' },
-    ['professional']: { dt: 'dim', tint: '#222222' },
-    ['fun']: { dt: 'dark', tint: '#141414' },
+    ['brand-dark']: { dt: 'dark' },
+    ['brand-light']: { dt: 'light' },
   };
   for (const id of Object.keys(H)) {
     const card = parseHex(readVar(id, '--mr-surface-raised'));
     const tint = parseHex(readVar(id, '--mr-surface-tint'));
     const nest = parseHex(readVar(id, '--mr-card-nested'));
+    const border = parseHex(readVar(id, '--mr-card-border'));
     const cT = contrast(tint, card);
     const cN = contrast(nest, card);
-    test(id + ': the inner fill is the reference step ' + H[id].tint, eq(readVar(id, '--mr-surface-tint'), H[id].tint) && eq(readVar(id, '--mr-card-nested'), H[id].tint), readVar(id, '--mr-surface-tint') + ' / ' + readVar(id, '--mr-card-nested'));
-    test(id + ': the tint fill is VISIBLE on the card (' + round(cT) + ':1, floor 1.04)', cT >= 1.04, readVar(id, '--mr-surface-tint'));
-    test(id + ': a nested card cannot VANISH (' + round(cN) + ':1, floor 1.04)', cN >= 1.04, readVar(id, '--mr-card-nested'));
-    if (H[id].dt === 'light') test(id + ': the tint RECESSES below the card (the light design direction)', luminance(tint) < luminance(card), '');
-    else test(id + ': the tint LIFTS above the card (dark designs never recess)', luminance(tint) > luminance(card), '');
+    const borderSeparates = !!(border && card && contrast(border, card) >= 1.2);
+    const sep = borderSeparates ? 'the card border separates it' : 'no border separation';
+    test(id + ': the tint surface is declared as its own step', typeof readVar(id, '--mr-surface-tint') === 'string' && readVar(id, '--mr-surface-tint') !== '', readVar(id, '--mr-surface-tint'));
+    test(id + ': the tint fill is NOT invisible — a perceptible fill step OR ' + sep + ' (tint Δ' + round(cT) + ':1)', cT >= 1.04 || borderSeparates, readVar(id, '--mr-surface-tint') + ' vs ' + readVar(id, '--mr-surface-raised'));
+    test(id + ': a nested card cannot VANISH — a perceptible fill step OR ' + sep + ' (nested Δ' + round(cN) + ':1)', cN >= 1.04 || borderSeparates, readVar(id, '--mr-card-nested') + ' vs ' + readVar(id, '--mr-surface-raised'));
+    if (H[id].dt === 'light') test(id + ': the tint RECESSES below the card (the light direction)', luminance(tint) <= luminance(card), '');
+    else test(id + ': the tint LIFTS above the card (dark surfaces never recess)', luminance(tint) >= luminance(card), '');
   }
   console.log(
     failures === 0

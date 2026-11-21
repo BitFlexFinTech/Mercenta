@@ -101,7 +101,7 @@ export function RoutingRequestIndicator({
     return (
       <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md px-3 py-2">
         <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-        <span className="text-ds-label text-emerald-200 font-medium" data-testid="routing-raised-by-mercenta">
+        <span className="text-ds-label text-state-success font-medium" data-testid="routing-raised-by-mercenta">
           Routing step raised by Mercenta · {routingCarrierLabel(routing)} · {routing.reference}
         </span>
       </div>
@@ -115,7 +115,7 @@ export function RoutingRequestIndicator({
     )}>
       <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-amber-400')} />
       <div className="flex-1 min-w-0">
-        <p className={cn('text-ds-label font-medium', countdown.overdue ? 'text-red-200' : 'text-amber-200')}>
+        <p className={cn('text-ds-label font-medium', countdown.overdue ? 'text-state-danger' : 'text-state-warning')}>
           Routing step — Mercenta raises it (Freight Collect)
         </p>
         <p className="text-ds-micro text-zinc-500" data-testid="routing-readiness-notice">

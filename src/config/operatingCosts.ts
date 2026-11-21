@@ -178,7 +178,7 @@ export const OPERATING_COST_LINES: OperatingCostLine[] = [
     fixedMonthlyGbp: 0,
     usageBudgetGbp: 0,
     source: 'NOT CONNECTED',
-    note: 'READY / NOT CONNECTED until VAT registration and MTD credentials exist.',
+    note: 'READY / NOT CONNECTED until the HMRC API connection and MTD credentials exist. Mercenta Partners Ltd is VAT-registered (see src/config/company.ts §VAT REGISTRATION).',
   },
 ];
 

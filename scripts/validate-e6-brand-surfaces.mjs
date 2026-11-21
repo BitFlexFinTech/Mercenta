@@ -112,7 +112,12 @@ const M2_SCOPE = new Set([
   // source is touched, so anything outside scripts/ is still refused.
   'scripts/',
 ]);
-const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
+const ALLOWED_NON_APPROVED = new Set([
+  'Review Zip/mercenta-review.zip',
+  'public/apple-touch-icon.png',
+  'public/favicon-32.png',
+  'public/favicon.svg',
+]);
 
 /**
  * §Phase M11 — the build-forward phase scope (2026-09-14).
@@ -4767,6 +4772,46 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
    */
+/**
+ * §BRAND REDESIGN (2026-11-19) — the four supplied homepage directions, the approved
+ * brand masters and the public-content route registry. DECLARED here (not widened):
+ * F5/F5b/F6's contract is UNCHANGED — a changed SOURCE file in NO declared set still
+ * fails. This phase legitimately ADDS the light lockup master, retunes the three
+ * existing masters to the approved brand geometry, and adds the two new owners
+ * (`homepageDesign.ts` — the design registry; `publicPages.ts` — the public content
+ * owner the additive route registry derives from).
+ */
+const BRAND_REDESIGN_SCOPE = new Set([
+  'src/assets/mercenta-logo-lockup.svg',
+  'src/assets/mercenta-logo-lockup-light.svg',
+  'src/assets/mercenta-mark-dark-bg.svg',
+  'src/assets/mercenta-mark-light-bg.svg',
+  'src/assets/favicon.svg',
+  'src/assets/favicon-32.png',
+  'src/assets/apple-touch-icon.png',
+  'src/config/homepageDesign.ts',
+  'src/config/publicPages.ts',
+  /*
+   * §HOMEPAGE IMAGERY (2026-11-20) — the four designs stopped looking alike, and
+   * two NEW source locations came out of that work:
+   *
+   *   `src/config/homepageImagery.ts` — the single owner that names every picture
+   *   a design may use, so no design hardcodes an image path.
+   *
+   *   `public/imagery/` — the placeholder photographs themselves, CC0 or Public
+   *   Domain Mark, fetched once by `scripts/fetch-placeholder-imagery.mjs` and
+   *   committed so the live site makes NO third-party request. They cost nothing:
+   *   paid generation was ruled out and Google's free tier allows zero image
+   *   requests. `public/imagery/CREDITS.md` records each source and licence.
+   *
+   * Both are declared rather than exempted: a future undeclared image directory
+   * still fails this gate.
+   */
+  'src/config/homepageImagery.ts',
+  'public/imagery/',
+]);
+
+
   const f6ChangedSource = changed
     .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
     .filter((p) => !isProjectStateDoc(p))
@@ -5076,7 +5121,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE_C4_TYPOGRAPHY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE C4 (2026-10-13) — the radius + elevation scale (see the declaration above). */
           PHASE_C4_DESIGN_SCALE_SCOPE.has(p) ||
-          [...PHASE_C4_DESIGN_SCALE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE_C4_DESIGN_SCALE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BRAND REDESIGN (2026-11-19) — the four homepage directions + brand masters (see above). */
+          BRAND_REDESIGN_SCOPE.has(p) ||
+          [...BRAND_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
@@ -5189,9 +5237,26 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   const homeSrc = readSrc('src/components/marketing/Home.tsx');
   const indexHtml = readSrc('index.html');
 
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED. The approved information architecture is
+     SEVEN groups (Services · Platform · Solutions · Categories · Company · Resources ·
+     Commercial), declared ONCE in positioning.ts and read by BOTH the header and the
+     footer. The retired two-group model (and its separate PUBLIC_FOOTER_COLUMNS list)
+     is gone: one owner, read by both surfaces. */
+  /**
+   * §NAVIGATION REPAIR (2026-11-20) — NINE groups, down from ten.
+   *
+   * The tenth group was "Platform Tools", an exact DUPLICATE of "Platform": the
+   * same four destinations (Order Automation, Client Portal, Listing Health,
+   * Reporting & Analytics) under four page ids that had no page behind them.
+   * Every one of those links rendered a blank screen, and the extra group also
+   * overflowed the header at 1440px.
+   *
+   * The Founder approved the deletion. The model is still declared ONCE and read
+   * by BOTH surfaces; only the duplicate group is gone.
+   */
   test('B4 the navigation model is declared ONCE, in positioning.ts §12',
-    Array.isArray(positioning.PUBLIC_NAV) && positioning.PUBLIC_NAV.length === 2 &&
-    !!positioning.PUBLIC_LINK && Array.isArray(positioning.PUBLIC_FOOTER_COLUMNS));
+    Array.isArray(positioning.PUBLIC_NAV) && positioning.PUBLIC_NAV.length === 9 &&
+    !!positioning.PUBLIC_LINK);
 
   /**
    * §B4 — no owner label may appear as a QUOTED LITERAL in the header or the
@@ -5222,7 +5287,7 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
 
   test('B4 the footer READS the owner and retypes NO owner label', (() => {
     const c = code(footerSrc);
-    return c.includes('PUBLIC_FOOTER_COLUMNS') && c.includes('{link.label}') && c.includes('{col.heading}') &&
+    return c.includes('PUBLIC_FOOTER_COLUMNS') && c.includes('column.heading') && c.includes('child.label') &&
       quotedOwnerLabels(footerSrc).length === 0;
   })());
 
@@ -5231,8 +5296,8 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
     !code(footerSrc).includes('Health & Personal Care') &&
     typesModule.APPROVED_CATEGORIES.length === 10);
 
-  test('B4 the footer declares the five-column shape',
-    /lg:grid-cols-5/.test(code(footerSrc)));
+  test('B4 the footer declares its approved column shape',
+    /xl:grid-cols-4/.test(code(footerSrc)));
 
   test('B4 the footer no longer publishes the retired description', (() => {
     /**

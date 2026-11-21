@@ -385,7 +385,7 @@ function DetailView({
           );
         })()}
         {borderline && (
-          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
+          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
             <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             Score falls in the 55–74 borderline band — auto-assignment is held for
             manual review and batched into the daily digest rather than applied silently.

@@ -546,12 +546,12 @@ function ConnectWizard({ id, onClose }: WizardProps) {
               placeholder="Public application/client ID — not a secret"
             />
             {state?.status === 'code_received' && receivedCode ? (
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-xs text-amber-200 leading-relaxed">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-xs text-state-warning leading-relaxed">
                 <strong>Authorization code received.</strong> Exchange it for
                 tokens via the server-side Edge Function to complete the connection.
               </div>
             ) : (
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-blue-200 leading-relaxed">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-state-info leading-relaxed">
                 Clicking connect opens the provider's real consent screen in a
                 popup. The authorization code is exchanged server-side by the
                 <strong> spapi-token-exchange</strong> function and stored encrypted
@@ -745,7 +745,7 @@ export function IntegrationsPanel() {
         }
       />
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-blue-200 flex items-start gap-2">
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-xs text-state-info flex items-start gap-2">
         <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live OAuth exchanges and test calls run as server-side Edge Functions with
@@ -791,7 +791,7 @@ export function IntegrationsPanel() {
       {attentionIds.length > 0 && (
         <div
           role="alert"
-          className="bg-red-500/10 border border-red-500/25 rounded-ds-md p-3 text-xs text-red-200 flex items-start gap-2"
+          className="bg-red-500/10 border border-red-500/25 rounded-ds-md p-3 text-xs text-state-danger flex items-start gap-2"
         >
           <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>
@@ -915,7 +915,7 @@ export function IntegrationsPanel() {
 
               {/* §Priority-1 — provider control plane: simulation mode + safe mock config */}
               {mode === 'simulation' && (
-                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-micro text-amber-200 leading-relaxed">
+                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-micro text-state-warning leading-relaxed">
                   <strong>Simulation mode.</strong> No live call is made and no real credential is
                   used or stored. Safe mock configuration: {SIM_MOCK_LABELS[`${id}:${state.provider ?? ''}`] ?? 'deterministic mock adapter (see workflow surfaces)'}. Enter real credentials below to switch to LIVE later — no code change.
                 </div>
@@ -967,7 +967,7 @@ export function IntegrationsPanel() {
                     <Button
                       variant="ghost"
                       onClick={() => disconnect(id)}
-                      className="text-xs text-red-300 hover:text-red-200"
+                      className="text-xs text-red-300 hover:text-state-danger"
                     >
                       <Unlink className="w-3.5 h-3.5 mr-1" /> Disconnect
                     </Button>

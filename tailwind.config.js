@@ -1,3 +1,32 @@
+/**
+ * §BRAND IDENTITY (2026-11-20) — LEGACY HUE SCALES REPOINTED TO THE APPROVED IDENTITY.
+ *
+ * THE DEFECT THIS CLOSES. Before this block, `emerald`, `blue`, `red`, `purple`,
+ * `pink`, `cyan`, `sky`, `rose`, `indigo`, `green`, `teal`, `lime`, `fuchsia`,
+ * `violet` and `yellow` were NOT declared here, so every one of them fell through
+ * to Tailwind's DEFAULT palette — real green, blue, red, purple and pink pixels
+ * that bypassed the theme entirely. Measured: 1,361 class sites across 115 files.
+ *
+ * THE FIX. Each scale now resolves to a canonical theme token, so those consumers
+ * inherit the approved identity and stay theme-reactive. NO literal colour is
+ * declared here — the values live in `src/config/themes.ts` (single source of
+ * truth). Tints (50–200) are mixed from the same token so pale surfaces stay in
+ * the brand; 300–950 are the solid token so text and icons stay legible.
+ */
+const brandHue = (token) => ({
+  50: `color-mix(in srgb, ${token} 8%, transparent)`,
+  100: `color-mix(in srgb, ${token} 14%, transparent)`,
+  200: `color-mix(in srgb, ${token} 26%, transparent)`,
+  300: token,
+  400: token,
+  500: token,
+  600: token,
+  700: token,
+  800: token,
+  900: token,
+  950: token,
+});
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -114,13 +143,34 @@ export default {
           400: 'var(--mr-text-muted)',
           500: 'var(--mr-text-muted)',
           600: 'var(--mr-text-faint)',
+          /* §BRAND IDENTITY — steps 700/800/900 were NOT declared, so 47 sites
+             fell through to Tailwind's default zinc (a real grey that bypassed
+             the theme). Declared now so every zinc step is theme-reactive. */
+          700: 'var(--mr-hairline)',
+          800: 'var(--mr-surface-overlay)',
+          900: 'var(--mr-surface-raised)',
         },
-        stamp: '#B5493A',
+        /* §BRAND IDENTITY — was a non-brand red-brown (#B5493A). Now the critical
+           token, so "unsafe wording" warnings stay inside the approved palette. */
+        stamp: 'var(--mr-state-critical)',
         parchment: 'var(--mr-text-soft)',
         steel: 'var(--mr-text-muted)',
-        amber: {
-          accent: 'var(--mr-state-warning)',
-        },
+        /* §BRAND IDENTITY — shadcn-style semantic keys used by the Header,
+           Sidebar and a few panels. They were never declared, so those classes
+           either dropped or fell through to Tailwind's defaults. Declared here
+           so they inherit the approved identity and stay theme-reactive. */
+        brand: brandHue('var(--mr-accent)'),
+        popover: 'var(--mr-surface-overlay)',
+        card: 'var(--mr-surface-raised)',
+        border: 'var(--mr-hairline)',
+        background: 'var(--mr-bg)',
+        foreground: 'var(--mr-text-strong)',
+        muted: 'var(--mr-text-muted)',
+        canvas: 'var(--mr-bg)',
+        /* NOTE: `amber` is declared ONCE, in the brand-hue block below — its
+           `accent` sub-key is merged there. A second `amber:` key here would be
+           silently overwritten by that block (later key wins in an object
+           literal), which is how `amber-accent` would stop resolving. */
         crimson: {
           accent: 'var(--mr-state-critical)',
         },
@@ -176,18 +226,46 @@ export default {
           violet: 'var(--mr-palette-violet)',
           red: 'var(--mr-palette-red)',
         },
+        /* §BRAND IDENTITY — the legacy hue NAMES are kept so 1,361 existing call
+           sites keep compiling, but every step now resolves to a canonical theme
+           token. Success-family hues → the success token; info-family → the info
+           token; danger-family → the critical token; accent-family → the brand
+           accent; decorative-family → the muted token. See `brandHue` above. */
+        emerald: brandHue('var(--mr-state-success)'),
+        green: brandHue('var(--mr-state-success)'),
+        teal: brandHue('var(--mr-state-success)'),
+        lime: brandHue('var(--mr-state-success)'),
+        blue: brandHue('var(--mr-state-info)'),
+        sky: brandHue('var(--mr-state-info)'),
+        cyan: brandHue('var(--mr-state-info)'),
+        indigo: brandHue('var(--mr-state-info)'),
+        red: brandHue('var(--mr-state-critical)'),
+        rose: brandHue('var(--mr-state-critical)'),
+        orange: brandHue('var(--mr-accent)'),
+        /* `accent` is merged in so the historical `amber-accent` utility keeps
+           resolving alongside the full brand-hue scale. */
+        amber: { ...brandHue('var(--mr-accent)'), accent: 'var(--mr-state-warning)' },
+        yellow: brandHue('var(--mr-accent)'),
+        purple: brandHue('var(--mr-state-muted)'),
+        violet: brandHue('var(--mr-state-muted)'),
+        fuchsia: brandHue('var(--mr-state-muted)'),
+        pink: brandHue('var(--mr-state-muted)'),
         /** §UI/UX Wave 2 — canonical text/icon colour ON a solid palette fill. */
         on: {
           palette: 'var(--mr-on-palette)',
           /** §OPENSHIP BATCH 10 — text colour ON saturated fills (bg-state-danger, bg-crimson-accent, etc.). */
           fill: 'var(--mr-on-fill)',
+          /* §BRAND IDENTITY — text/icon colour ON the brand accent fill. `on-fill`
+             was being borrowed for this, but `--mr-on-accent` is the token that
+             actually pairs with `bg-brass-500`/`bg-accent` (black in BOTH
+             appearances: white on #FF6A00 measures only 2.34:1). */
+          accent: 'var(--mr-on-accent)',
         },
         /** §UI/UX Wave 2 — per-domain identity colours (icons, nav, tints). */
         feature: {
           intel: 'var(--mr-feature-intel)',
           orders: 'var(--mr-feature-orders)',
           finance: 'var(--mr-feature-finance)',
-          social: 'var(--mr-feature-social)',
           compliance: 'var(--mr-feature-compliance)',
           ops: 'var(--mr-feature-ops)',
         },

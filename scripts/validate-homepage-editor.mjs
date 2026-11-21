@@ -56,12 +56,18 @@ try {
   test('default render is brand-name driven', htmlDefault.includes('Mercenta'));
 
   // Edited content renders through the same component.
+  // §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The homepage is now
+  // composed from ONE content model, so the editor's OWN fields are asserted: the
+  // hero heading (the field the owner edits) and the closing heading. The retired
+  // `about` section is no longer part of any of the four designs, so asserting it
+  // would be asserting a screen that does not exist; the closing band carries the
+  // same contract (an edited model field must reach the rendered page).
   const edited = structuredClone(cfg.DEFAULT_HOMEPAGE_CONTENT);
   edited.hero.headingStart = 'From our workshops to';
-  edited.about.heading = 'Partner with Mercenta';
+  edited.finalCta.heading = 'Partner with Mercenta';
   const htmlEdited = render(edited);
   test('edited heading renders instead of hardcoded text', htmlEdited.includes('From our workshops to'));
-  test('edited about heading renders', htmlEdited.includes('Partner with Mercenta'));
+  test('edited closing heading renders', htmlEdited.includes('Partner with Mercenta'));
   test('unedited sections still render from defaults (services heading)',
     htmlEdited.includes(cfg.DEFAULT_HOMEPAGE_CONTENT.services.heading));
 

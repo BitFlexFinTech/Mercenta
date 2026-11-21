@@ -1,144 +1,243 @@
-import { BRAND_NAME } from "@/config/brand";
 import {
   PUBLIC_COOKIE_SETTINGS_LABEL,
-  PUBLIC_FOOTER_COLUMNS,
   PUBLIC_PROMISE,
+  PUBLIC_NAV,
+  PUBLIC_FOOTER_COLUMNS,
+  PUBLIC_COMPANY_NUMBER,
+  PUBLIC_REGISTERED_OFFICE,
+  PUBLIC_JURISDICTION_LINE,
+  PUBLIC_CONTACT_EMAIL,
+  PUBLIC_LINK,
   publicCompanyLine,
   type PublicLinkPage,
-} from "@/config/positioning";
-import { COOKIE_SETTINGS_EVENT } from "@/components/marketing/CookieNotice";
-import { APPROVED_CATEGORIES } from "@/types";
-import logoLockup from "@/assets/mercenta-logo-lockup.svg";
+} from '@/config/positioning';
+import { COMPANY_TAX_REGISTRATION } from '@/config/company';
+import { COOKIE_SETTINGS_EVENT } from '@/components/marketing/CookieNotice';
+import { BrandLockup } from '@/components/shared/BrandLockup';
+import { APPROVED_CATEGORIES } from '@/types';
+
+/**
+ * §BRAND REDESIGN (2026-11-19) — THE FOOTER, REBUILT TO THE APPROVED SPEC.
+ *
+ * THREE DEFECTS THIS CLOSES:
+ *  1. THE LOGO DID NOT SWITCH — it rendered the WHITE wordmark on every
+ *     background, so it was invisible on the light appearance. `BrandLockup` now
+ *     picks the approved master for the actual background.
+ *  2. THE COMPANY DISCLOSURE WAS INCOMPLETE — the legal name, jurisdiction and
+ *     registered office were published, but NOT the company number, the VAT
+ *     number or a contact address. All three already existed in the config; they
+ *     are now published from their owners.
+ *  3. THERE WAS NO TRUST ROW — six positions plus a reserved seventh now exist.
+ *
+ * §EORI IS DELIBERATELY ABSENT. `COMPANY_TAX_REGISTRATION.eoriNumber` is marked
+ * `eoriPublicationAllowed: false` and is NOT referenced in this file at all, so
+ * it cannot leak by accident. Explicit owner instruction.
+ *
+ * §NOTHING IS INVENTED. Every fact is read from its owner.
+ */
+
+interface TrustPosition {
+  id: string;
+  label: string;
+  detail?: string;
+  reserved?: boolean;
+}
+
+/**
+ * The six trust positions plus the seventh reserved for a future AWRS
+ * registration. Positions 1–3 carry the three APPROVED memberships; their
+ * official artwork is installed separately, and until it is present the position
+ * states the membership in WORDS rather than showing a fabricated badge — a
+ * made-up logo would be worse than no logo.
+ */
+/* §LINT FIX (2026-11-19) — NOT EXPORTED. This list is used only by the footer
+   below. Exporting a constant from a module that also exports a component trips
+   `react-refresh/only-export-components`, because Fast Refresh cannot tell
+   whether an edit changed the component or the constant. Keeping it module-local
+   is the honest fix: nothing else imports it. */
+const TRUST_POSITIONS: readonly TrustPosition[] = [
+  { id: 'enterprise-nation', label: 'Enterprise Nation', detail: 'Member' },
+  { id: 'btn-community', label: 'Beverage Trade Network (BTN)', detail: 'Member' },
+  { id: 'sme-climate-hub', label: 'SME Climate Hub', detail: 'UN Race to Zero' },
+  { id: 'companies-house', label: 'Companies House', detail: `Reg. No. ${PUBLIC_COMPANY_NUMBER}` },
+  {
+    id: 'uk-vat',
+    label: 'UK VAT',
+    detail: COMPANY_TAX_REGISTRATION.vatRegistered ? COMPANY_TAX_REGISTRATION.vatNumber : '',
+  },
+  { id: 'england-wales', label: 'Registered in', detail: 'England & Wales' },
+  /* §RESERVED — HMRC AWRS is NOT held. The position keeps the row's shape and
+     makes no claim. */
+  { id: 'awrs', label: 'AWRS', detail: 'Reserved', reserved: true },
+] as const;
 
 interface PublicFooterProps {
   onNavigate: (page: PublicLinkPage) => void;
   onOpenPortal: () => void;
 }
 
-/**
- * §PUBLIC MESSAGING B4 (2026-09-29) — THE FOOTER, REBUILT TO ITS FIVE-COLUMN SHAPE.
- *
- * WHAT WAS WRONG.
- *
- *  1. IT PUBLISHED A DESCRIPTION THE REST OF THE SITE HAD ALREADY RETIRED. The
- *     brand column read "Self-service wholesale distribution platform connecting
- *     independent brands with UK retail channels" — the exact wording B3 removed
- *     from `HowItWorks`, and it contradicts `PUBLIC_CATEGORY` ("Retail channel
- *     partner"). It is now `PUBLIC_PROMISE`, the canonical owner, so the footer
- *     cannot describe the business differently from the pages above it.
- *
- *  2. IT RETAINED A SECOND COPY OF THE TEN CATEGORIES. `CATEGORIES` here was a
- *     hand-maintained literal duplicating `APPROVED_CATEGORIES` in `src/types.ts`
- *     — two sources of truth for the ten approved categories, which the SSOT rule
- *     forbids and which the audit's dataset-completeness check exists to catch.
- *     The list is now READ from its owner, so the footer renders exactly ten
- *     whenever the canonical list holds ten.
- *
- *  3. IT WAS FOUR COLUMNS, AND ITS LINKS DID NOT COME FROM THE NAVIGATION
- *     OWNER — so a label could differ from the header's. Both now read
- *     `src/config/positioning.ts` §12, and the four owner columns plus the brand
- *     column make the declared five.
- *
- *  4. THE `onNavigate` PROP COULD NOT EXPRESS THE EXPLORE ROUTE the header
- *     offers. It is now the owner's route union, so the footer can link anywhere
- *     the model allows.
- *
- * THE CONTRAST FIX REMAINS: these links were `text-zinc-600` on the `ink-900`
- * footer surface, which measures 2.56:1 — below the WCAG AA floor of 4.5:1 for
- * normal text and even below the 3:1 large-text floor. They use `steel`, the
- * design system's muted-text token (6.37:1 on the same surface).
- *
- * The legal line stays DERIVED from `publicCompanyLine()` and is never retyped.
- */
 export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
-  /**
-   * §PUBLIC MESSAGING (2026-09-28) — MEASURED CONTRAST FIX.
-   *
-   * These links were `text-zinc-600` on the `ink-900` footer surface, which
-   * measures 2.56:1 — below the WCAG AA floor of 4.5:1 for normal text and even
-   * below the 3:1 large-text floor. They now use `steel`, the design system's own
-   * muted-text token, which measures 6.37:1 on the same surface and passes AA.
-   */
-  const linkClass = "text-ds-label text-steel hover:text-brass-400 transition-colors cursor-pointer block py-0.5 text-left";
+  const linkClass =
+    'text-ds-label text-[var(--mr-text-muted)] hover:text-[var(--mr-accent)] transition-colors cursor-pointer block py-0.5 text-left';
 
   return (
-    <footer className="bg-ink-900 border-t border-hairline">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* The declared FIVE-column shape: the brand column, then four owner columns. */}
-        <div className="grid grid-cols-2 gap-8 mb-10 md:grid-cols-3 lg:grid-cols-5">
-          {/* Col 1 — Brand */}
-          <div className="col-span-2 md:col-span-3 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <img src={logoLockup} alt={BRAND_NAME} className="h-8 rounded-ds-sm" />
-            </div>
-            <p className="text-ds-label text-steel leading-relaxed mb-4">
+    <footer className="border-t border-hairline bg-[var(--mr-surface)]">
+      <div className="mx-auto max-w-7xl px-6 py-14">
+        {/* ── Brand column + the navigation groups ─────────────────────────── */}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,320px)_1fr]">
+          <div>
+            <BrandLockup className="h-14 w-auto" variant="dark" />
+            <p className="mt-5 text-ds-label leading-relaxed text-[var(--mr-text-muted)]">
               {PUBLIC_PROMISE}
             </p>
-            <button onClick={onOpenPortal} className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-ds-md transition-colors">
+            <button
+              onClick={onOpenPortal}
+              className="mt-5 bg-[var(--mr-accent)] px-5 py-2.5 text-ds-label font-semibold text-[var(--mr-on-accent)] transition-opacity hover:opacity-90"
+            >
               Request Partner Access
             </button>
           </div>
 
-          {PUBLIC_FOOTER_COLUMNS.map((col) => (
-            <div key={col.heading}>
-              <h4 className="text-xs font-semibold text-parchment mb-3">{col.heading}</h4>
-              {col.kind === "categories" ? (
-                <div className="space-y-1">
-                  {APPROVED_CATEGORIES.map((cat) => (
-                    <span key={cat} className="text-ds-label text-steel block py-0.5">{cat}</span>
-                  ))}
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-8 md:grid-cols-3 xl:grid-cols-4">
+            {PUBLIC_FOOTER_COLUMNS.map((column) => {
+              if (column.kind === 'categories') {
+                return (
+                  <div key={column.heading}>
+                    <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                      {column.heading}
+                    </h4>
+                    <div>
+                      {APPROVED_CATEGORIES.map((cat) => (
+                        <span
+                          key={cat}
+                          className="block py-0.5 text-ds-label text-[var(--mr-text-muted)]"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              const legalPages = new Set<string>([PUBLIC_LINK.privacy.page, PUBLIC_LINK.terms.page]);
+              const children = column.links.filter((child) => !legalPages.has(child.page));
+              if (children.length === 0) return null;
+              return (
+                <div key={column.heading}>
+                  <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                    {column.heading}
+                  </h4>
+                  <div>
+                    {children.map((child) => (
+                      <button
+                        key={child.page}
+                        onClick={() => onNavigate(child.page)}
+                        className={linkClass}
+                      >
+                        {child.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-1">
-                  {col.links.map((link) => (
-                    <button key={link.page} onClick={() => onNavigate(link.page)} className={linkClass}>
-                      {link.label}
-                    </button>
-                  ))}
-                  {/*
-                    §B4 — the cookie notice is RE-OPENABLE. The notice records only
-                    that it was read; this control clears that record and raises the
-                    notice again, so a visitor can always read it a second time.
-                  */}
-                  {col.withCookieSettings && (
-                    <button
-                      onClick={() => window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT))}
-                      className={linkClass}
-                    >
-                      {PUBLIC_COOKIE_SETTINGS_LABEL}
-                    </button>
-                  )}
-                </div>
+              );
+            })}
+
+            <div>
+              <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                Product Categories
+              </h4>
+              <div>
+                {APPROVED_CATEGORIES.map((cat) => (
+                  <span
+                    key={cat}
+                    className="block py-0.5 text-ds-label text-[var(--mr-text-muted)]"
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                Legal
+              </h4>
+              <div>
+                {[PUBLIC_LINK.privacy, PUBLIC_LINK.terms].map((link) => (
+                  <button key={link.page} onClick={() => onNavigate(link.page)} className={linkClass}>
+                    {link.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => window.dispatchEvent(new Event(COOKIE_SETTINGS_EVENT))}
+                  className={linkClass}
+                >
+                  {PUBLIC_COOKIE_SETTINGS_LABEL}
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        {/* ── Trust and membership positions (6 + 1 reserved for AWRS) ─────── */}
+        <div
+          className="mt-14 grid grid-cols-2 gap-px border border-hairline bg-[var(--mr-hairline)] sm:grid-cols-3 lg:grid-cols-7"
+          data-testid="footer-trust-row"
+        >
+          {TRUST_POSITIONS.map((pos) => (
+            <div
+              key={pos.id}
+              data-testid={`footer-trust-${pos.id}`}
+              className={
+                pos.reserved
+                  ? 'bg-[var(--mr-surface)] px-4 py-5 opacity-60'
+                  : 'bg-[var(--mr-surface)] px-4 py-5'
+              }
+            >
+              <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-text-muted)]">
+                {pos.label}
+              </p>
+              {pos.detail && (
+                <p className="mt-1.5 text-ds-label font-semibold leading-snug text-[var(--mr-text-strong)]">
+                  {pos.detail}
+                </p>
               )}
             </div>
           ))}
         </div>
 
-        {/*
-          §FOOTER COPYRIGHT (2026-10-07, OWNER DIRECTIVE) — the copyright line is
-          CENTRED in the footer. It previously sat on the right of a
-          `justify-between` row; the bottom bar is now a centred, stacked column
-          so the notice "© <year> <brand>. All rights reserved." reads in the
-          middle of the footer. The year stays DERIVED (`new Date().getFullYear()`)
-          and the brand stays READ from `src/config/brand.ts`, so the line can
-          never go stale or disagree with the rest of the site.
-        */}
-        <div className="border-t border-hairline pt-6 flex flex-col items-center gap-2 text-center">
-          {/*
-            §PUBLIC MESSAGING (2026-09-28) — THE LEGAL LINE CARRIES THE COMPANY'S
-            PUBLIC IDENTITY AND NOTHING ELSE. It previously read "… · UK Importer
-            of Record — EORI Registered", which published the operating model on
-            every one of the eight public pages. The block is now DERIVED from
-            `src/config/positioning.ts` (which derives it from the statutory
-            record), so the footer, the privacy policy and the terms cannot
-            disagree, and nothing internal can be retyped here.
-          */}
-          <div className="font-mono text-ds-micro text-steel tracking-wide">
+        {/* ── Company disclosure ───────────────────────────────────────────── */}
+        <div className="mt-10 border-t border-hairline pt-8">
+          <p className="font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
             {publicCompanyLine()}
+          </p>
+          <div className="mt-3 flex flex-col gap-1.5 text-ds-label text-[var(--mr-text-muted)]">
+            <span>
+              {PUBLIC_JURISDICTION_LINE} · Company number {PUBLIC_COMPANY_NUMBER}
+            </span>
+            <span>Registered office: {PUBLIC_REGISTERED_OFFICE}</span>
+            {COMPANY_TAX_REGISTRATION.vatRegistered && (
+              <span>VAT registration number: {COMPANY_TAX_REGISTRATION.vatNumber}</span>
+            )}
+            <span>
+              Contact:{' '}
+              <a
+                href={`mailto:${PUBLIC_CONTACT_EMAIL}`}
+                className="text-[var(--mr-accent)] hover:underline"
+              >
+                {PUBLIC_CONTACT_EMAIL}
+              </a>
+            </span>
           </div>
-          <div className="font-mono text-ds-micro text-steel">
-            &copy; {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
-          </div>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center gap-2 border-t border-hairline pt-6 text-center">
+          <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-text-muted)]">
+            Global Brands. UK Distribution. Smarter Growth.
+          </p>
+          <p className="font-mono text-ds-micro text-[var(--mr-text-muted)]">
+            &copy; {new Date().getFullYear()} Mercenta Partners Ltd. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

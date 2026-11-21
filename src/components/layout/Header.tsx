@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, type RefObject, type ReactNode } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { ChevronDown, Menu, Settings, CreditCard, Key, Search, LogOut } from 'lucide-react';
-import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { BrandMark } from '@/components/shared/BrandMark';
 import { Breadcrumb } from '@/components/ui';
 import { NotificationCenter } from '@/components/shared/NotificationCenter';
 import { ThemeSelector } from '@/components/shared/ThemeSelector';
@@ -170,11 +170,7 @@ export function Header({
         >
           <Menu className="h-5 w-5" />
         </button>
-        <img
-          src={brandMark}
-          alt="Mercenta Partners hexagon mark"
-          className="h-6 w-6 flex-shrink-0"
-        />
+        <BrandMark alt="Mercenta Partners mark" className="h-6 w-6 flex-shrink-0" />
         <Breadcrumb items={breadcrumbs} />
         {/*
           §UI/UX Wave 3 — REINSTATED, CORRECTLY LABELLED.

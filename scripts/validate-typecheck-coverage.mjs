@@ -26,10 +26,19 @@
 //   4. each project's `include` really covers its folder;
 //   5. the ambient Edge-runtime types exist and declare the Deno surface used;
 //   6. the folders genuinely hold the TypeScript they are meant to cover.
+//   7. §BATCH 0 (2026-11-21) — GITIGNORED material is excluded from the walk.
+//      The walk used to read the raw filesystem, so a design reference dropped
+//      into the repository (the gitignored `0. Company Documents/` homepage
+//      blueprint) was type-checked as application source and failed the whole
+//      corpus on material Git does not track. The ignored set is now DISCOVERED
+//      from Git's own resolution, so a newly ignored folder is skipped
+//      automatically and this class cannot recur.
 //
 // Every assertion below is proved able to fail by mutation (see the session
 // report): the mutated file was restored byte-identical.
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 let failures = 0;
 let checks = 0;
@@ -45,6 +54,27 @@ const test = (name, ok, detail) => {
 const ROOT = new URL('../', import.meta.url);
 const read = (p) => readFileSync(new URL(p, ROOT), 'utf8');
 const exists = (p) => existsSync(new URL(p, ROOT));
+
+/** Paths Git ignores are NOT source. Discovered from Git's own resolution (never
+ *  a retyped list) so an ignored folder added later is excluded automatically.
+ *  `--directory` collapses whole ignored trees to one entry, which keeps this
+ *  cheap even with `node_modules/` present. */
+const GITIGNORED = (() => {
+  try {
+    const out = execSync('git ls-files --others --ignored --exclude-standard --directory', {
+      cwd: fileURLToPath(ROOT), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return new Set(
+      out.split('\n').map((s) => s.trim().replace(/\/$/, '')).filter(Boolean),
+    );
+  } catch {
+    return new Set();
+  }
+})();
+const isGitignored = (p) => {
+  for (const ig of GITIGNORED) if (p === ig || p.startsWith(`${ig}/`)) return true;
+  return false;
+};
 
 /** Every `.ts` file under a folder (recursive) — used to prove the folders hold
  *  the TypeScript the projects are declared to cover. */
@@ -132,7 +162,8 @@ const SKIP_DIRS = new Set([
 function listAllTs(dir, out = []) {
   for (const e of readdirSync(new URL(`${dir}/`, ROOT), { withFileTypes: true })) {
     if (e.isDirectory()) {
-      if (!SKIP_DIRS.has(e.name)) listAllTs(`${dir}/${e.name}`, out);
+      const rel = `${dir}/${e.name}`.replace(/^\.\//, '');
+      if (!SKIP_DIRS.has(e.name) && !isGitignored(rel)) listAllTs(`${dir}/${e.name}`, out);
     } else if (/\.tsx?$/.test(e.name)) {
       out.push(`${dir}/${e.name}`.replace(/^\.\//, ''));
     }
@@ -154,6 +185,11 @@ test('rule 09 §1/§3 COVERAGE GATE — every TypeScript file belongs to a decla
   uncovered.length === 0, uncovered.join(', '));
 test(`the coverage gate really walked the source tree (${allTs.length} .ts/.tsx files discovered)`,
   allTs.length > 400);
+// A discovery that finds nothing is a FAILURE, not a pass (rule 06): if Git's
+// ignore resolution ever returns nothing here, the exclusion is silently
+// vacuous and this gate would certify the wrong state.
+test(`the walk skips gitignored reference material (${GITIGNORED.size} ignored path(s) discovered)`,
+  GITIGNORED.size > 0);
 
 /* ── 7. the editor root — the committed pin (half 2 of rule 09) ──────────── */
 // WHY: coverage (above) fixes what the command line checks; it does NOT stop the

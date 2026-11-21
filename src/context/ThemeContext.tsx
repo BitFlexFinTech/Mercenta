@@ -84,6 +84,24 @@ export function useTheme(): ThemeContextValue {
   return ctx;
 }
 
+/**
+ * §BRAND REDESIGN (2026-11-19) — THE SAFE READER.
+ *
+ * `useTheme()` deliberately throws outside the provider, which is the right
+ * contract for a SCREEN (a screen without a theme is a real defect). But a
+ * presentational primitive such as `BrandMark` may legitimately be rendered in a
+ * harness, a test render, an email/export path or a story that has no provider —
+ * and there it must not crash the tree. Measured: `scripts/validate-review-s2.mjs`
+ * threw `useTheme must be used within ThemeProvider` once `BrandMark` began
+ * reading the theme.
+ *
+ * This returns `null` instead of throwing, so a caller can fall back to the
+ * documented default (`brand-dark`). It does NOT weaken `useTheme()`.
+ */
+export function useOptionalTheme(): ThemeContextValue | null {
+  return useContext(ThemeContext);
+}
+
 /** Re-exported so consumers never import themes.ts for the active theme. */
 export { THEMES, DEFAULT_THEME } from '@/config/themes';
 export type { ThemeId } from '@/config/themes';

@@ -29,7 +29,7 @@
  *      `shadow-[…]` that is not `inset`) reappears in `src/`
  *   5. a declared token is never consumed — for the radii, the elevations, or the
  *      focus-shadow tokens (an ABSENCE GUARD: a declared token with no consumer)
- *   6. the elevation roles are not theme-driven for all five themes
+ *   6. the elevation roles are not theme-driven for both brand appearances
  *   7. the canonical `:focus-visible` outline is gone from `src/index.css`
  *   8. a `border-radius` CSS literal states a value the ramp does not declare
  *   9. a live describer (the design-system doc, the phase plan, the registry row,
@@ -346,7 +346,7 @@ for (const v of ['--mr-shadow-subtle', '--mr-shadow-raised', '--mr-shadow-overla
    * substrings measures spelling, not the thing it claims to measure.
    */
   const c = n(THEMES, new RegExp(`'${v}':`, 'g'));
-  check(`${v} is declared for all five themes`, c === 5, `declared ${c} times`);
+  check(`${v} is declared for BOTH brand appearances`, c === 2, `declared ${c} times`);
 }
 
 /* ── 5. The CSS layer states no radius outside the ramp ──────────────────── */

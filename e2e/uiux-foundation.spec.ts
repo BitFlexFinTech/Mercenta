@@ -1,11 +1,15 @@
 /**
  * §UI/UX Wave 1 — Theme foundation & presentation seams browser verification.
  *
- * Verifies the five-theme architecture and the Wave 1 presentation seams in a
- * real Chromium against the actual dev server:
- *   - Minimal Light is the DEFAULT first-load theme
- *   - all five themes exist and apply (light themes → light surfaces; dark
- *     themes → genuinely near-black, never navy)
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. This spec described a
+ * FIVE-theme architecture (minimal-light · professional · bold · fun · serious).
+ * The approved identity now exposes EXACTLY TWO appearances and the retired ids
+ * are gone from the selector, so the old expectations would have clicked theme
+ * options that no longer exist. The contract is repointed to the real two:
+ *
+ *   - brand-dark is the DEFAULT first-load appearance
+ *   - both appearances exist and apply (dark → genuinely near-black, never navy;
+ *     light → genuinely light surfaces)
  *   - theme switching changes PRESENTATION ONLY (data + permissions unchanged)
  *   - homepage renders with the preserved shipment-tracker animation
  *   - "Unlock growth with data" element renders
@@ -13,9 +17,14 @@
  *   - avatar initials fallback and brand-logo identity seam
  *   - charts render with delicate thin strokes
  *   - responsive: no horizontal overflow on homepage (mobile)
+ *
+ * The theme list is READ FROM `src/config/themes.ts` rather than hardcoded, so a
+ * future change to the approved appearances cannot leave this spec clicking a
+ * retired option — the drift that made this file stale in the first place.
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+import { THEME_ORDER, THEMES } from '../src/config/themes';
 
 const SHOTS = 'test-screenshots/uiux-foundation';
 
@@ -28,19 +37,21 @@ async function openNav(page: import('@playwright/test').Page) {
 }
 
 test.describe('UI/UX Wave 1 — theme foundation', () => {
-  test('Minimal Light is the default first-load theme', async ({ page }) => {
+  test('brand-dark is the default first-load appearance', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1500);
     const rootTheme = await page.evaluate(() => document.documentElement.dataset.mercentaTheme);
-    expect(rootTheme).toBe('minimal-light');
+    expect(rootTheme).toBe('brand-dark');
+    /* The approved default is the DARK appearance, so the page fill is black —
+       the previous assertion required a light fill, which is the opposite. */
     const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     const [r, g, b] = (bodyBg.match(/\d+/g) ?? []).map(Number);
-    expect(r).toBeGreaterThan(230);
-    expect(g).toBeGreaterThan(230);
-    expect(b).toBeGreaterThan(230);
+    expect((r + g + b) / 3).toBeLessThan(40);
+    /* Never navy: the approved dark is neutral black, not a blue-tinted dark. */
+    expect(b > r + 18 && b > g + 18).toBe(false);
   });
 
-  test('all five themes render with consistent semantic presence', async ({ page }) => {
+  test('both approved appearances render with consistent semantic presence', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page.locator('[data-testid="theme-selector"]').click();
     await page.waitForTimeout(400);
@@ -49,9 +60,9 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
         (e) => (e as HTMLElement).dataset.themeOption
       )
     );
-    expect(options).toEqual([
-      'minimal-light', 'professional', 'bold', 'fun', 'serious',
-    ]);
+    /* The selector must offer EXACTLY the approved appearances, in the declared
+       order — read from the config, so a retired id can never be silently kept. */
+    expect(options).toEqual([...THEME_ORDER]);
     for (const t of options) {
       await page.locator(`[data-theme-option="${t}"]`).click();
       await page.waitForTimeout(500);
@@ -69,7 +80,8 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       expect(vars.warning).toMatch(/^#/);
       expect(vars.info).toMatch(/^#/);
       expect(vars.success).toMatch(/^#/);
-      const isDark = t === 'bold' || t === 'serious';
+      /* The appearance's own mode, read from the owner — never a hardcoded pair. */
+      const isDark = THEMES[t as keyof typeof THEMES].mode === 'dark';
       if (isDark) {
         const hex = vars.bg.replace('#', '');
         const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -81,7 +93,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
         expect(g).toBeGreaterThan(220);
       }
     }
-    await page.locator('[data-theme-option="minimal-light"]').click();
+    await page.locator('[data-theme-option="brand-dark"]').click();
     await page.waitForTimeout(400);
     await page.keyboard.press('Escape');
   });
@@ -97,7 +109,9 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       }
       return out;
     }, kpiIds);
-    for (const t of ['professional', 'bold', 'fun', 'serious']) {
+    /* §BRAND REDESIGN (2026-11-19) — every appearance EXCEPT the one already
+       applied, read from the config so a retired id cannot be clicked. */
+    for (const t of THEME_ORDER.filter((id) => id !== 'brand-dark')) {
       await page.locator('[data-testid="theme-selector"]').click();
       await page.waitForTimeout(300);
       await page.locator(`[data-theme-option="${t}"]`).click();
@@ -208,7 +222,10 @@ test.describe('UI/UX Wave 1 — presentation seams', () => {
 
   test('theme switching does NOT change permissions (Super Admin nav stays hidden for brands)', async ({ page }) => {
     await loginAs(page, 'Tapatío', 1400);
-    for (const t of ['bold', 'minimal-light', 'serious']) {
+    /* §BRAND REDESIGN (2026-11-19) — the two approved appearances, read from the
+       config. The intent is unchanged: switching appearance must never reveal a
+       privileged navigation section to a brand user. */
+    for (const t of THEME_ORDER) {
       await page.locator('[data-testid="theme-selector"]').click();
       await page.waitForTimeout(300);
       await page.locator(`[data-theme-option="${t}"]`).click();

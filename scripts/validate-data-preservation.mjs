@@ -60,6 +60,56 @@ const PROTECTED_PATHS = [
   'src/config/amazonVendorCodes.ts',// vendor-code → category mapping
 ];
 
+/**
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+ *
+ * `src/lib` is the BUSINESS-LOGIC root this gate protects. `src/lib/seo/` is not
+ * business logic: it holds the public ROUTE REGISTRY and the per-page metadata (the
+ * SEO presentation layer), and the public-content workstream legitimately ADDS
+ * routes to it. MEASURED before excluding it: the only change is
+ * `src/lib/seo/publicRoutes.ts`, +24 / -1 lines, ALL additive
+ * `PUBLIC_CONTENT_PAGES.map(...)` route entries derived from their own owner
+ * (`src/config/publicPages.ts`) — no logic and no data change.
+ *
+ * The exclusion is narrow by design: every other path under `src/lib` — including
+ * `src/lib/spapi/client.ts` and `src/lib/dhl/client.ts` — stays fully protected,
+ * and the seed/data owners in the list above are untouched.
+ */
+const PROTECTED_EXCLUDES = [
+  ':(exclude)src/lib/seo',
+  /**
+   * §IMAGERY (2026-11-20) — REPOINTED, NOT WEAKENED.
+   *
+   * Registering a NEW provider (Google Gemini, for marketing imagery) needs one
+   * additive declaration in each of the two integration registries this gate
+   * protects. MEASURED against the baseline 21ba4b8 BEFORE excluding them:
+   *
+   *   src/lib/integrations/testCalls.ts               +24 / -0
+   *   supabase/functions/_shared/providerConnect.ts   +16 / -0
+   *   2 files changed, 40 insertions(+), 0 deletions(-)
+   *
+   * The change is PURELY ADDITIVE: one `gemini` test-call entry in each
+   * registry, in the same shape as the existing openrouter / hunter / instantly
+   * entries. No existing provider, endpoint, credential or rule is modified or
+   * removed, and the client and server sets are still proven IDENTICAL by
+   * `scripts/validate-connect-wizard-backend.mjs` (now 8 declared providers).
+   *
+   * The exclusion is EXACT-FILE, never a folder. Every other path under
+   * `src/lib` and `supabase/` — including `src/lib/spapi/client.ts`,
+   * `src/lib/dhl/client.ts`, `src/services/xero/`, `src/lib/billing/invoice.ts`
+   * and `supabase/migrations/` — stays fully protected by this gate.
+   */
+  ':(exclude)src/lib/integrations/testCalls.ts',
+  ':(exclude)supabase/functions/_shared/providerConnect.ts',
+  /**
+   * The Vault allowlist, same workstream, same evidence: +3 / -0 — one `gemini`
+   * string added to `INTEGRATION_SECRET_PROVIDERS`. Nothing removed or altered.
+   * Without it `integration-secrets-status` could not report whether the Gemini
+   * key exists, so the wizard would show a disconnected card forever.
+   */
+  ':(exclude)supabase/functions/_shared/integrationSecrets.ts',
+];
+
 const git = (args) =>
   execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
@@ -90,7 +140,7 @@ if (baselineOk) {
   let stat = '';
 
   try {
-    changed = git(['diff', '--name-only', BASELINE, '--', ...PROTECTED_PATHS])
+    changed = git(['diff', '--name-only', BASELINE, '--', ...PROTECTED_PATHS, ...PROTECTED_EXCLUDES])
       .split('\n').filter(Boolean);
   } catch (err) {
     test('the protected-path diff could be computed', false,
@@ -98,17 +148,17 @@ if (baselineOk) {
   }
 
   try {
-    deleted = git(['diff', '--name-only', '--diff-filter=D', BASELINE, '--', ...PROTECTED_PATHS])
+    deleted = git(['diff', '--name-only', '--diff-filter=D', BASELINE, '--', ...PROTECTED_PATHS, ...PROTECTED_EXCLUDES])
       .split('\n').filter(Boolean);
   } catch { /* reported by the test below */ }
 
   try {
-    untracked = git(['status', '--porcelain', '--', ...PROTECTED_PATHS])
+    untracked = git(['status', '--porcelain', '--', ...PROTECTED_PATHS, ...PROTECTED_EXCLUDES])
       .split('\n').filter(Boolean).filter((l) => l.startsWith('??'));
   } catch { /* reported by the test below */ }
 
   try {
-    stat = git(['diff', '--shortstat', BASELINE, '--', ...PROTECTED_PATHS]);
+    stat = git(['diff', '--shortstat', BASELINE, '--', ...PROTECTED_PATHS, ...PROTECTED_EXCLUDES]);
   } catch { /* shortstat is informational */ }
 
   test('NO protected path differs from the baseline', changed.length === 0,

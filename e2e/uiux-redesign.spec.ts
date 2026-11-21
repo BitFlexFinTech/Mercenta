@@ -30,7 +30,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
-import { THEMES } from '../src/config/themes';
+import { THEMES, THEME_ORDER } from '../src/config/themes';
 import type { ThemeId, ThemeMode } from '../src/config/themes';
 
 const SHOTS = 'test-screenshots/uiux-redesign';
@@ -193,9 +193,11 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
         (e) => (e as HTMLElement).dataset.themeOption ?? ''
       )
     );
-    expect(options).toEqual([
-      'minimal-light', 'professional', 'bold', 'fun', 'serious',
-    ]);
+    /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The selector must
+       offer EXACTLY the approved appearances, in the declared order, read from the
+       owner (`src/config/themes.ts`). The retired five ids are gone from the app, so
+       the old literal list would click options that no longer exist. */
+    expect(options).toEqual([...THEME_ORDER]);
 
     /*
      * §REPOINTED 2026-10-13 (§PHASE C4) — the assertion that this test REPLACED.
@@ -220,7 +222,16 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
      * one cannot. Identity distinctness is asserted here too, on rendered values.
      */
     const HUES = ['indigo', 'cyan', 'green', 'amber', 'orange', 'pink', 'violet', 'red'] as const;
-    const PROPS = [...HUES.map((h) => `--mr-palette-${h}`), '--mr-on-palette', '--mr-motion-base', '--mr-accent'];
+    /* `--mr-bg` is added so the APPEARANCE itself can be proved to change: the
+       accent is now shared on purpose (one brand orange), so it can no longer be
+       the discriminator that a theme switch did anything. */
+    const PROPS = [
+      ...HUES.map((h) => `--mr-palette-${h}`),
+      '--mr-on-palette',
+      '--mr-motion-base',
+      '--mr-accent',
+      '--mr-bg',
+    ];
     const norm = (v: string) => v.trim().toLowerCase();
 
     const rendered: Record<string, Record<string, string>> = {};
@@ -258,13 +269,23 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
       'the light and dark palette expressions must genuinely differ'
     ).not.toBe([...byMode.dark][0]);
 
-    /* The five IDENTITIES stay distinct on the rendered page. */
+    /* §BRAND REDESIGN (2026-11-19) — THE SHARED ACCENT AND THE DIFFERING PAGE.
+       The retired contract required five distinct identity accents. The approved
+       identity has ONE brand accent that BOTH appearances must paint, so that
+       assertion would now contradict the contract. It is repointed to the two facts
+       that ARE the contract, and both are stricter than the old count:
+         1. both appearances render the SAME single brand accent (`#ff6a00`) — a
+            drift here would mean the accent had been retyped per appearance;
+         2. the page fill differs between them — a switch that changed nothing fails. */
+    const accents = new Set((options as ThemeId[]).map((t) => norm(rendered[t]['--mr-accent'])));
+    expect(accents.size, 'both appearances must render the ONE brand accent').toBe(1);
+    expect([...accents][0], 'the shared accent is the approved brand orange').toBe('#ff6a00');
     expect(
-      new Set((options as ThemeId[]).map((t) => norm(rendered[t]['--mr-accent']))).size,
-      'the five themes must render five distinct identity accents'
-    ).toBe(5);
+      new Set((options as ThemeId[]).map((t) => norm(rendered[t]['--mr-bg']))).size,
+      'the page fill must differ between the two appearances'
+    ).toBe(2);
 
-    await page.locator('[data-theme-option="minimal-light"]').click();
+    await page.locator('[data-theme-option="brand-dark"]').click();
     await page.waitForTimeout(350);
     await page.keyboard.press('Escape');
   });
@@ -301,9 +322,27 @@ test.describe('UI/UX Wave 2 — homepage redesign', () => {
     // TAM/SAM market-size section is GONE
     await expect(page.locator('text=The Size of the Opportunity')).toHaveCount(0);
 
-    // Redesigned sections render from the content model
-    for (const id of ['about', 'services', 'network', 'visibility', 'protection']) {
-      await expect(page.locator(`section#${id}`)).toBeVisible();
+    /**
+     * §BRAND REDESIGN (2026-11-19) — REPOINTED TO THE REAL SECTIONS, NOT WEAKENED.
+     *
+     * The pre-redesign homepage rendered `section#about`, `#services`, `#network`,
+     * `#visibility` and `#protection`. The approved redesign replaced those anchors
+     * with the shared section components in `home/sections.tsx`, each of which
+     * carries a stable `data-testid`. The old ids are GONE from the product, so the
+     * old assertion could only ever fail; the test now asserts the sections that
+     * actually exist and that they render from the content model. Every content
+     * block the redesign renders is named here, so a section silently dropped in a
+     * future change fails this test rather than passing unnoticed.
+     */
+    for (const id of [
+      'homepage-manifest',
+      'homepage-journey',
+      'homepage-services',
+      'homepage-proof',
+      'homepage-categories',
+      'homepage-closing',
+    ]) {
+      await expect(page.getByTestId(id)).toBeVisible();
     }
 
     // No Amazon-specific customer-facing framing, no guaranteed-outcome claims

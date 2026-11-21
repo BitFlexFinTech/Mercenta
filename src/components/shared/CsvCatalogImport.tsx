@@ -159,7 +159,7 @@ return (
       {phase === 'done' && summary?.commit?.ok && (
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span className="text-xs text-emerald-200">Successfully imported {summary.commit.imported} product(s) into the catalog.</span>
+          <span className="text-xs text-state-success">Successfully imported {summary.commit.imported} product(s) into the catalog.</span>
         </div>
       )}
 

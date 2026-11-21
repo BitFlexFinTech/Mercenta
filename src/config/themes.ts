@@ -1,22 +1,40 @@
 /**
- * §UI/UX Wave 1 — CANONICAL THEME & DESIGN-TOKEN ARCHITECTURE.
+ * §BRAND REDESIGN (2026-11-19) — CANONICAL BRAND TOKENS AND THE TWO APPEARANCES.
  *
- * Single source of truth for the FIVE Mercenta visual themes and every
- * design token they express. Nothing else may define a theme or a theme
- * colour: components consume `useTheme()` / the CSS variables emitted by
- * ThemeContext, and validators read THIS file. Hard-coded per-page colours
+ * THE ONE OWNER of every colour in the product. Nothing else may define a theme
+ * or a theme colour: components consume `useTheme()` / the CSS variables emitted
+ * by ThemeContext, and validators read THIS file. Hard-coded per-page colours
  * are forbidden by the standing single-source-of-truth rule.
+ *
+ * §REPOINTED CONTRACT (supersedes the five-theme OpenShip-mapped contract).
+ * The selectable set is now EXACTLY TWO, both built from the approved Mercenta
+ * identity (black #000000 / white #FFFFFF / orange #FF6A00):
+ *
+ *   `brand-dark` (DEFAULT)  ·  `brand-light`
+ *
+ * The five retired themes — minimal-light, professional, bold, fun, serious —
+ * are REMOVED IN FULL. They are not selectable, not a fallback, not recreated,
+ * and must never re-enter `THEME_ORDER`. A persisted `mercenta.theme` value from
+ * an earlier session is rejected by `isThemeId()`, so a returning visitor lands
+ * on `DEFAULT_THEME`. `scripts/validate-theme-foundation.mjs` asserts all five
+ * retired ids are absent.
+ *
+ * THE BRAND PALETTE IS DECLARED ONCE (`BRAND_PALETTE`) and both appearances READ
+ * it, so the accent cannot drift between them. No brand hex is retyped in a
+ * theme block.
  *
  * Themes are PURE PRESENTATION. They never change business logic, data,
  * permissions, routes, information architecture, tenant isolation, API
  * behaviour, simulation semantics or AI policy.
  *
- * The semantic colour language is ONE canonical Mercenta language:
- *   critical=red · warning=yellow · info=blue/cyan · success=green
- * plus expressive feature/context colours (violet, cyan, orange, pink,
- * indigo, emerald, slate). The same semantic colour keeps the same meaning
- * in every theme; only its EXPRESSION changes (indicator → tint → surface
- * → expressive → edge).
+ * HOMEPAGE DESIGN SELECTION IS A SEPARATE AXIS. Which homepage composition
+ * renders (A/B/C/D) is owned by `src/config/homepageDesign.ts` and is NOT a
+ * theme. Appearance and homepage design are independent, by contract.
+ *
+ * The semantic colour language remains ONE canonical Mercenta language:
+ *   critical=red · warning=amber · info=blue · success=green
+ * plus expressive feature/context colours. The same semantic colour keeps the
+ * same meaning in every appearance; only its EXPRESSION changes.
  *
  * §UI/UX Wave 2 — SATURATED FEATURE PALETTE. Colour must communicate state,
  * workflow, category, urgency, action, navigation and data meaning, so the
@@ -28,56 +46,56 @@
  *   green   → finance / payouts             pink   → communications / CRM
  *   violet  → catalogue / products          red    → risk / exceptions
  *
- * `--mr-on-palette` is the canonical text/icon colour to place ON a solid
- * palette surface (white on light themes, near-black on dark themes) so a
- * saturated fill is never paired with an unreadable label.
+ * §BRAND REDESIGN (2026-11-19) — THE TOKEN NAMES ARE HISTORICAL, THE VALUES ARE
+ * BRAND-ALIGNED. The eight `--mr-palette-*` NAMES above are kept because hundreds
+ * of call sites and the `PaletteDomain` union reference them; the VALUES no longer
+ * include purple, teal, violet or lime, which the approved identity forbids.
+ * Measured defect this closed: the navigation rail's **Catalogue** section
+ * resolved to `--mr-palette-violet` (`#6941C6`), which rendered as a PURPLE
+ * sidebar. Re-tuned to brand-aligned hues that remain distinguishable from each
+ * other, so charts and status semantics still work:
  *
- * BRASS IS IDENTITY ACCENT ONLY (`--mr-accent*`). It must never become the
- * dominant interactive colour of the product.
+ *   indigo → blue      cyan → sky       violet → slate
+ *
+ * Do NOT re-introduce a purple, teal, violet or lime value here.
+ *
+ * `--mr-on-palette` is the canonical text/icon colour to place ON a solid
+ * palette surface so a saturated fill is never paired with an unreadable label.
+ *
+ * THE ACCENT IS THE BRAND ORANGE (`--mr-accent*`), not a decorative tint.
  *
  * §UI/UX Wave 2 — MOTION + DENSITY. `--mr-motion-*`, `--mr-ease-*` and
- * `--mr-density-*` are declared identically in all five themes (the foundation
+ * `--mr-density-*` are declared identically in both appearances (the foundation
  * validator enforces it) so one coherent motion language and one controlled
- * density scale are guaranteed across every theme expression.
- *
- * §Phase WAVE-0 — REPOINTED CONTRACT (supersedes the Wave 1 six-theme contract).
- * The selectable theme set is now EXACTLY FIVE: Minimal Light (default) ·
- * Professional · Bold · Fun · Serious. The retired legacy "Current Mercenta"
- * theme (id `current`, brass-on-ink identity) was REMOVED IN FULL: it is not
- * selectable, not a sixth theme, not a fallback, not recreated, and it must
- * never re-enter `THEME_ORDER`. `scripts/validate-theme-foundation.mjs`
- * asserts the `current` theme is absent, and a persisted
- * `mercenta.theme = "current"` from an earlier session is rejected by
- * `isThemeId()` so a returning visitor falls back to DEFAULT_THEME.
+ * density scale are guaranteed across every expression.
  */
 
-export type ThemeId =
-  | 'minimal-light'
-  | 'professional'
-  | 'bold'
-  | 'fun'
-  | 'serious';
+export type ThemeId = 'brand-dark' | 'brand-light';
 
-/** OPENSHIP MAPPING (2026-10-15) - which of the reference three designs a theme implements. */
-export type OpenShipDesign = 'light' | 'dim' | 'dark' | 'preserved';
+/**
+ * §BRAND REDESIGN — the approved Mercenta appearance a theme implements.
+ * REPOINTED from the retired `OpenShipDesign` (`'light' | 'dim' | 'dark' | 'preserved'`),
+ * which described the five-theme OpenShip mapping that no longer exists.
+ */
+export type BrandAppearance = 'dark' | 'light';
 
 export type ThemeMode = 'light' | 'dark';
 
 /** How prominently a semantic severity is expressed in a theme (§10). */
 export type SeverityExpression =
-  | 'indicator' // tiny dot / edge marker (minimal)
-  | 'tint' // subtle surface tint (professional)
-  | 'surface' // strong flat semantic surface (bold)
-  | 'expressive' // colourful, still professional (fun)
-  | 'edge'; // restrained edge + icon (serious)
+  | 'indicator' // tiny dot / edge marker
+  | 'tint' // subtle surface tint
+  | 'surface' // strong flat semantic surface
+  | 'expressive' // colourful, still professional
+  | 'edge'; // restrained edge + icon
 
 export interface ThemeMeta {
   id: ThemeId;
   label: string;
   description: string;
   mode: ThemeMode;
-  /** The OpenShip design this theme implements (reference spec 2.3-2.5). */
-  design: OpenShipDesign;
+  /** The approved brand appearance this theme implements. */
+  appearance: BrandAppearance;
   /** Per-severity expression mode for this theme. */
   severity: Record<'critical' | 'warning' | 'info' | 'success', SeverityExpression>;
   /** CSS custom properties applied to the document root. */
@@ -97,16 +115,36 @@ export interface ThemeMeta {
   };
 }
 
-export const THEME_ORDER: readonly ThemeId[] = [
-  'minimal-light',
-  'professional',
-  'bold',
-  'fun',
-  'serious',
-];
+/**
+ * §BRAND PALETTE — THE APPROVED MERCENTA IDENTITY, DECLARED ONCE.
+ *
+ * Source of truth: the approved brand guidelines (black #000000, white #FFFFFF,
+ * orange #FF6A00 only). Both appearances READ these values, so the brand colours
+ * are never retyped inside a theme block and cannot drift apart.
+ */
+export const BRAND_PALETTE = {
+  black: '#000000',
+  white: '#FFFFFF',
+  orange: '#FF6A00',
+  /** Derived steps of the orange action (not additional brand colours). */
+  orangeHover: '#E05A00',
+  orangeDeep: '#B34700',
+  orangeLight: '#FF8F40',
+  orangePale: '#FFC499',
+  /** Dark appearance ladder (guidelines: surface #101010). */
+  darkSurface: '#101010',
+  darkBorder: '#2B2B2B',
+  darkMuted: '#A5A5A5',
+  /** Light appearance ladder (guidelines: surface #F4F4F2). */
+  lightSurface: '#F4F4F2',
+  lightBorder: '#DCDCDC',
+  lightMuted: '#666666',
+} as const;
 
-/** §UI/UX Wave 1 — the default first-load experience is MINIMAL LIGHT. */
-export const DEFAULT_THEME: ThemeId = 'minimal-light';
+export const THEME_ORDER: readonly ThemeId[] = ['brand-dark', 'brand-light'];
+
+/** §BRAND REDESIGN — the approved default first-load experience is DARK. */
+export const DEFAULT_THEME: ThemeId = 'brand-dark';
 
 /** Convenience helpers consumed by ThemeContext and validators. */
 export function isThemeId(value: string): value is ThemeId {
@@ -122,13 +160,13 @@ export function isDarkTheme(id: ThemeId): boolean {
 }
 
 export const THEMES: Record<ThemeId, ThemeMeta> = {
-  'minimal-light': {
-    id: 'minimal-light',
-    label: 'Minimal Light',
+  'brand-dark': {
+    id: 'brand-dark',
+    label: 'Mercenta Dark',
     description:
-      'Default. The OpenShip LIGHT design - a #F9F9F9 page, white cards, a near-black primary action and the violet-to-blue accent gradient. Separation is carried by surface FILLS, not borders.',
-    mode: 'light',
-    design: 'light',
+      'Default. The approved Mercenta identity on black: a #000000 page, #101010 surfaces, white type and the #FF6A00 accent. Separation is carried by hairlines and surface steps.',
+    mode: 'dark',
+    appearance: 'dark',
     severity: {
       critical: 'indicator',
       warning: 'indicator',
@@ -136,366 +174,90 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       success: 'indicator',
     },
     vars: {
-      '--mr-bg': '#F9F9F9',
-      '--mr-bg-deep': '#F4F4F4',
-      '--mr-surface': '#FAFAFA',
-      '--mr-surface-raised': '#FFFFFF',
-      '--mr-surface-overlay': '#FFFFFF',
-      '--mr-surface-hover': '#F0F0F0',
-      '--mr-surface-tint': '#F4F4F4',
-      '--mr-hairline': '#E8E8E8',
-      '--mr-hairline-strong': '#D0D0D0',
-      '--mr-text-strong': '#000000',
-      '--mr-text': '#555555',
-      '--mr-text-active': '#141414',
-      '--mr-text-200': '#2C2C2C',
-      '--mr-on-accent': '#FFFFFF',
-      '--mr-text-muted': '#696969',
-      '--mr-text-faint': '#8A8A8A',
-      '--mr-text-soft': '#FDFDFE',
-      '--mr-accent': '#7C3AED',
-      '--mr-accent-300': '#C4B5FD',
-      '--mr-accent-400': '#A78BFA',
-      '--mr-accent-600': '#6D28D9',
-      '--mr-accent-700': '#5B21B6',
-      '--mr-state-critical': '#DC2626',
-      '--mr-state-warning': '#D97706',
-      '--mr-state-info': '#2563EB',
-      '--mr-state-success': '#059669',
-      '--mr-state-muted': '#52525B',
-      '--mr-feature-intel': '#3D7BFA',
-      '--mr-feature-orders': '#5B6BF5',
-      '--mr-feature-finance': '#10B981',
-      '--mr-feature-compliance': '#F59E0B',
-      '--mr-feature-ops': '#64748B',
-      '--mr-exp-cyan': '#22C7F0',
-      '--mr-exp-coral': '#F472A6',
-      '--mr-focus': 'rgba(124,58,237,0.5)',
+      '--mr-bg': BRAND_PALETTE.black,
+      '--mr-bg-deep': BRAND_PALETTE.black,
+      '--mr-surface': BRAND_PALETTE.darkSurface,
+      '--mr-surface-raised': '#141414',
+      '--mr-surface-overlay': '#1A1A1A',
+      '--mr-surface-hover': '#1F1F1F',
+      '--mr-surface-tint': '#161616',
+      '--mr-hairline': BRAND_PALETTE.darkBorder,
+      '--mr-hairline-strong': '#3D3D3D',
+      '--mr-text-strong': BRAND_PALETTE.white,
+      '--mr-text': '#E8E8E8',
+      '--mr-text-active': BRAND_PALETTE.white,
+      '--mr-text-200': '#D4D4D4',
+      '--mr-on-accent': BRAND_PALETTE.black,
+      '--mr-text-muted': BRAND_PALETTE.darkMuted,
+      /* §BRAND IDENTITY — was #7A7A7A, which measured 4.43:1 on #101010 and
+         4.29:1 on the #141414 raised surface: BELOW the WCAG AA floor of 4.5:1
+         for the 11px labels and timestamps that use it. #858585 measures 5.20:1
+         on #101010 and 4.72:1 on #141414. */
+      '--mr-text-faint': '#858585',
+      '--mr-text-soft': BRAND_PALETTE.white,
+      '--mr-accent': BRAND_PALETTE.orange,
+      '--mr-accent-300': BRAND_PALETTE.orangePale,
+      '--mr-accent-400': BRAND_PALETTE.orangeLight,
+      '--mr-accent-600': BRAND_PALETTE.orangeHover,
+      '--mr-accent-700': BRAND_PALETTE.orangeDeep,
+      /* §BRAND IDENTITY (2026-11-20) — STATUS INSIDE THE APPROVED PALETTE.
+         The approved identity is black, white and #FF6A00 plus neutrals. There
+         is no green, blue, red, purple or teal in it. Status therefore keeps its
+         MEANING through intensity, fill weight, text and icon — never through an
+         unrelated hue. Critical is the strongest orange; warning is a lighter
+         orange; info is neutral; success is the brightest neutral step. */
+      '--mr-state-critical': BRAND_PALETTE.orange,
+      '--mr-state-warning': BRAND_PALETTE.orangeLight,
+      '--mr-state-info': BRAND_PALETTE.darkMuted,
+      '--mr-state-success': '#E8E8E8',
+      '--mr-state-muted': '#7A7A7A',
+      '--mr-feature-intel': BRAND_PALETTE.darkMuted,
+      '--mr-feature-orders': BRAND_PALETTE.orange,
+      '--mr-feature-finance': '#D4D4D4',
+      '--mr-feature-compliance': BRAND_PALETTE.orangeLight,
+      '--mr-feature-ops': '#8A8A8A',
+      /* §BRAND IDENTITY — `text-on-fill` was referenced by tailwind.config.js but
+         never declared, so it resolved to an undefined variable. Declared here so
+         the contract is complete. (The retired Social feature's token is gone with
+         the feature — see §BATCH 5 in validate-retired-platforms.) */
+      '--mr-on-fill': BRAND_PALETTE.black,
+      '--mr-exp-cyan': BRAND_PALETTE.darkMuted,
+      '--mr-exp-coral': BRAND_PALETTE.orange,
+      '--mr-focus': 'rgba(255,106,0,0.60)',
       '--mr-shadow-subtle': 'none',
-      '--mr-shadow-raised': '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px -1px rgba(0,0,0,0.10)',
-      '--mr-shadow-overlay': '0 16px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06)',
-      '--mr-scrollbar': '#D0D0D0',
-      '--mr-overlay-tint': 'rgba(0,0,0,0.45)',
-      /* §OPENSHIP BATCH 4 (2026-10-15) — THE SHARED-SURFACE ROLE TOKENS.
-         THE FULL CONTRACT LIVES HERE, ONCE; the four other themes carry the short
-         pointer comment and their own values.
-
-         `--mr-card-border` — the border of a CONTAINER surface (`Card`). The
-         reference makes a card BORDERLESS in all three of its designs
-         (`--th-card-bd: transparent` — spec §2.3/§2.4/§2.5), which is the other
-         half of the treatment BATCH 3 began when it set `--mr-shadow-subtle: none`
-         on these four themes. Consumed by `.ds-card` in `src/index.css`.
-
-         `--mr-card-nested` — the fill of a card INSIDE a card. The reference
-         states the rule ("a card nested inside a card is recessed … because
-         otherwise the inner card is the same colour as the outer and vanishes
-         once the border is gone" — spec §2.7) and this is why it is part of THIS
-         batch: the moment the outer border is transparent, an un-recessed inner
-         card is invisible on these themes. The value is the theme's own tint step
-         (`--mr-surface-tint`), i.e. the token system's existing subtle-surface
-         value, not a new colour. The `--th-sf-03` step the reference names was NOT
-         extracted (§15.4), so this is DERIVED, not copied.
-
-         `--mr-hover-tint` — the hover fill for an item on a FLOATING surface
-         (a dropdown row). The reference uses a tint of the FOREGROUND colour
-         (`hover:bg-foreground/[0.06]`, spec §7.6), which is visible on any
-         surface — the legacy `hover:bg-white/[0.04]` remaps to the near-white
-         `--mr-surface-tint` on light shells, so a row hover is invisible there.
-         Consumed by `hover:bg-tint` (tailwind.config.js → `tint`).
-
-         `--mr-card-border-hover` — the edge a card shows while it is being
-         POINTED AT (§OPENSHIP BATCH 8). The reference states exactly this one
-         interaction state on a card (`--th-card-bd-hover`: `.12` in dark, `.14`
-         in dim, `#e0e0e0` in light — spec §2.3/§2.4/§2.5, applied by
-         `.th-card:has(a:hover)` in §2.7 and listed as §9.4's card-hover row).
-         The three light designs share the reference's single light value and
-         `serious` takes its dark-family value, because `serious` carries the
-         reference's DARK design throughout. `bold` declares its own border
-         value, so the hover is a no-op there and Bold is preserved by mechanism.
-         Consumed by `.ds-card:has(a:hover)` / `.ds-card-interactive:hover` in
-         `src/index.css`.
-
-         `bold` carries values that REPRODUCE what it renders today (border
-         `rgba(255,255,255,0.06)`, nested fill `--mr-surface-raised`, hover
-         `rgba(255,255,255,0.04)`), so the Owner's "Bold is preserved exactly"
-         holds BY MECHANISM rather than by value alone. */
-      '--mr-card-border': 'transparent',
-      '--mr-card-nested': '#F4F4F4',
-      '--mr-hover-tint': 'rgba(0,0,0,0.07)',
-      '--mr-card-border-hover': '#E0E0E0',
-      '--mr-tracker-route': '#8A8A8A',
-      '--mr-tracker-dot': '#7C3AED',
-      '--mr-tracker-live': '#059669',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette (solid, confident).
-         HUE → DOMAIN is canonical everywhere: indigo=orders · cyan=intelligence
-         · green=finance · amber=compliance · orange=logistics · pink=comms
-         · violet=catalogue · red=risk. Brass stays identity accent ONLY. */
-      '--mr-palette-indigo': '#4F46E5',
-      '--mr-palette-cyan': '#0E7490',
-      '--mr-palette-green': '#047857',
-      '--mr-palette-amber': '#B45309',
-      '--mr-palette-orange': '#C2410C',
-      '--mr-palette-pink': '#BE185D',
-      '--mr-palette-violet': '#6D28D9',
-      '--mr-palette-red': '#B91C1C',
-      '--mr-on-palette': '#FFFFFF',
-      /* §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) GRADIENT. Each token is a
-         COMPLETE `background-image` value (a radial highlight over a three-stop
-         gradient — the reference's own treatment, spec §2.6), consumed by the
-         `.ds-btn-accent` utility in src/index.css. TWO tokens, not four stops,
-         because an image layer paints over the flat background colour: the hover
-         state must therefore live in the image too, or the button loses its hover
-         feedback. `bold` carries the same two NAMES with the value `none`, so no
-         image is painted at all and its button keeps its flat accent AND its own
-         `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
-      '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 70%), linear-gradient(to right in oklab, #7C3AED, #111111, #2563EB)',
-      '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.28) 0%, transparent 70%), linear-gradient(to right in oklab, #6D28D9, #0D0D0D, #1D4ED8)',
-      /* §OPENSHIP MAPPING BATCH 3 (2026-10-15) — THE SOLID PRIMARY-ACTION TOKENS.
-         THE FULL CONTRACT LIVES HERE, ONCE; the four other themes carry the short
-         pointer comment and their own values.
-
-         The reference's page primary action is NOT the accent gradient. It is the
-         SOLID `.th-btn` (`background: var(--th-btn-bg)`, `color: var(--th-btn-text)`
-         — spec §2.7), while the gradient above is the separate `th-btn-accent` CTA
-         (§2.6) the reference reserves for create-style actions (its empty state's
-         "Create project" button, spec §5.4). Consumed by `.ds-btn` in src/index.css.
-
-         Measured values, taken from the reference's own LIGHT design (spec §2.5):
-         a near-black `rgba(0,0,0,.92)` button with white text, hover
-         `rgba(0,0,0,.80)`. The dim and dark designs are the INVERSE — white with
-         black text (§2.3/§2.4) — which is why these are per-design, not literal. */
-      '--mr-btn-bg': 'rgba(0,0,0,0.92)',
-      '--mr-btn-bg-hover': 'rgba(0,0,0,0.80)',
-      '--mr-btn-text': '#FFFFFF',
-      /* §UI/UX Wave 2 — motion + density language. Theme-invariant by contract
-         (the foundation validator enforces identical declaration in all five). */
-      '--mr-motion-fast': '140ms',
-      '--mr-motion-base': '240ms',
-      '--mr-motion-slow': '420ms',
-      '--mr-ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
-      '--mr-ease-emphasized': 'cubic-bezier(0.2, 0.9, 0.1, 1)',
-      '--mr-density-row': '40px',
-      '--mr-density-gap': '10px',
-      '--mr-density-pad': '14px',
-    },
-    chart: {
-      palette: ['#5B6BF5', '#C9A15A', '#10B981', '#8B5CF6', '#22C7F0', '#F472A6'],
-      grid: 'rgba(24,28,40,0.08)',
-      axis: '#8A93A2',
-      strokeWidth: 1.5,
-      ring: 11,
-    },
-  },
-
-  professional: {
-    id: 'professional',
-    label: 'Professional',
-    description:
-      'The OpenShip DIM design - a neutral dark between light and pure black. #141414 page, #1e1e1e cards, a white primary action and lime accents.',
-    mode: 'dark',
-    design: 'dim',
-    severity: {
-      critical: 'tint',
-      warning: 'tint',
-      info: 'tint',
-      success: 'tint',
-    },
-    vars: {
-      '--mr-bg': '#141414',
-      '--mr-bg-deep': '#101010',
-      '--mr-surface': '#1E1E1E',
-      '--mr-surface-raised': '#1B1B1B',
-      '--mr-surface-overlay': '#282828',
-      '--mr-surface-hover': '#262626',
-      '--mr-surface-tint': '#222222',
-      '--mr-hairline': 'rgba(255,255,255,0.08)',
-      '--mr-hairline-strong': 'rgba(255,255,255,0.14)',
-      '--mr-text-strong': '#FFFFFF',
-      '--mr-text': '#BFBFBF',
-      '--mr-text-active': '#F4F4F4',
-      '--mr-text-200': '#DFDFDF',
-      '--mr-on-accent': '#000000',
-      '--mr-text-muted': '#9F9F9F',
-      '--mr-text-faint': '#848484',
-      '--mr-text-soft': '#F5F5F5',
-      '--mr-accent': '#B7ED5A',
-      '--mr-accent-300': '#D6F8AB',
-      '--mr-accent-400': '#C4F485',
-      '--mr-accent-600': '#B8E033',
-      '--mr-accent-700': '#9DC31D',
-      '--mr-state-critical': '#F06F66',
-      '--mr-state-warning': '#EA8857',
-      '--mr-state-info': '#84B1EB',
-      '--mr-state-success': '#C4F386',
-      '--mr-state-muted': '#7B7B7B',
-      '--mr-feature-intel': '#1E7FF0',
-      '--mr-feature-orders': '#4456E8',
-      '--mr-feature-finance': '#0FA06A',
-      '--mr-feature-compliance': '#E88F1A',
-      '--mr-feature-ops': '#5A6A7C',
-      '--mr-exp-cyan': '#17B8E8',
-      '--mr-exp-coral': '#E85D8A',
-      '--mr-focus': 'rgba(183,237,90,0.5)',
-      '--mr-shadow-subtle': 'none',
-      '--mr-shadow-raised': '0 4px 12px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.35)',
-      '--mr-shadow-overlay': '0 20px 48px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
-      '--mr-scrollbar': '#3A3A3A',
-      '--mr-overlay-tint': 'rgba(0,0,0,0.55)',
-      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
-         declared once, in `minimal-light`. */
-      '--mr-card-border': 'transparent',
-      '--mr-card-nested': '#222222',
-      '--mr-hover-tint': 'rgba(255,255,255,0.07)',
-      '--mr-card-border-hover': 'rgba(255,255,255,0.14)',
-      '--mr-tracker-route': '#848484',
-      '--mr-tracker-dot': '#B7ED5A',
-      '--mr-tracker-live': '#C4F386',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette (see minimal-light
-         for the canonical hue → domain mapping). */
-      '--mr-palette-indigo': '#6C6FF2',
-      '--mr-palette-cyan': '#06B6D4',
-      '--mr-palette-green': '#22C55E',
-      '--mr-palette-amber': '#FBBF24',
-      '--mr-palette-orange': '#F97316',
-      '--mr-palette-pink': '#EC4899',
-      '--mr-palette-violet': '#8B5CF6',
-      '--mr-palette-red': '#EF4444',
-      '--mr-on-palette': '#0B0C0F',
-      /* §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) GRADIENT. Each token is a
-         COMPLETE `background-image` value (a radial highlight over a three-stop
-         gradient — the reference's own treatment, spec §2.6), consumed by the
-         `.ds-btn-accent` utility in src/index.css. TWO tokens, not four stops,
-         because an image layer paints over the flat background colour: the hover
-         state must therefore live in the image too, or the button loses its hover
-         feedback. `bold` carries the same two NAMES with the value `none`, so no
-         image is painted at all and its button keeps its flat accent AND its own
-         `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
-      '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.30) 0%, transparent 70%), linear-gradient(to right in oklab, hsl(86 84% 74%), hsl(82 80% 64%), hsl(74 74% 54%))',
-      '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.36) 0%, transparent 70%), linear-gradient(to right in oklab, hsl(86 84% 80%), hsl(82 80% 70%), hsl(74 74% 60%))',
-      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
-         contract is on `minimal-light`. This theme implements the reference's
-         DIM design, whose button is WHITE with black text (spec §2.4). */
-      '--mr-btn-bg': '#FFFFFF',
-      '--mr-btn-bg-hover': 'rgba(255,255,255,0.90)',
-      '--mr-btn-text': '#000000',
-      /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
-      '--mr-motion-fast': '140ms',
-      '--mr-motion-base': '240ms',
-      '--mr-motion-slow': '420ms',
-      '--mr-ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
-      '--mr-ease-emphasized': 'cubic-bezier(0.2, 0.9, 0.1, 1)',
-      '--mr-density-row': '40px',
-      '--mr-density-gap': '10px',
-      '--mr-density-pad': '14px',
-    },
-    chart: {
-      palette: ['#1E7FF0', '#C9A15A', '#0FA06A', '#7A5AD8', '#17B8E8', '#E85D8A'],
-      grid: 'rgba(31,42,68,0.08)',
-      axis: '#8490A2',
-      strokeWidth: 1.5,
-      ring: 11,
-    },
-  },
-bold: {
-    id: 'bold',
-    label: 'Bold',
-    description:
-      'Genuinely near-black charcoal foundation with strong, saturated semantic surfaces. High visual energy, unmistakably professional.',
-    mode: 'dark',
-    design: 'preserved',
-    severity: {
-      critical: 'surface',
-      warning: 'surface',
-      info: 'surface',
-      success: 'surface',
-    },
-    vars: {
-      '--mr-bg': '#120B1F',
-      '--mr-bg-deep': '#0B0714',
-      '--mr-surface': '#121318',
-      '--mr-surface-raised': '#17181D',
-      '--mr-surface-overlay': '#1C1E24',
-      '--mr-surface-hover': '#23252E',
-      '--mr-surface-tint': '#2A2C36',
-      '--mr-hairline': 'rgba(245,246,248,0.09)',
-      '--mr-hairline-strong': 'rgba(245,246,248,0.16)',
-      '--mr-text-strong': '#F5F6F8',
-      '--mr-text': '#E6E8EE',
-      '--mr-text-active': '#C9CDD8',
-      '--mr-text-200': '#D8DCE5',
-      '--mr-on-accent': '#FFFFFF',
-      '--mr-text-muted': '#9AA1AC',
-      '--mr-text-faint': '#6E7582',
-      '--mr-text-soft': '#F1ECE1',
-      '--mr-accent': '#7C3AED',
-      '--mr-accent-300': '#A98BF5',
-      '--mr-accent-400': '#9271F1',
-      '--mr-accent-600': '#6A2BD6',
-      '--mr-accent-700': '#5823B4',
-      '--mr-state-critical': '#E5484D',
-      '--mr-state-warning': '#F5A524',
-      '--mr-state-info': '#2E9BF0',
-      '--mr-state-success': '#2FBF71',
-      '--mr-state-muted': '#9AA1AC',
-      '--mr-feature-intel': '#3D7BFA',
-      '--mr-feature-orders': '#6366F1',
-      '--mr-feature-finance': '#10C981',
-      '--mr-feature-compliance': '#F5A524',
-      '--mr-feature-ops': '#8594A5',
-      '--mr-exp-cyan': '#22D3EE',
-      '--mr-exp-coral': '#F472B6',
-      '--mr-focus': 'rgba(212,179,106,0.55)',
-      '--mr-shadow-subtle': '0 1px 3px rgba(0,0,0,0.4)',
-      '--mr-shadow-raised': '0 6px 20px rgba(0,0,0,0.5)',
-      '--mr-shadow-overlay': '0 16px 48px rgba(0,0,0,0.62)',
-      '--mr-scrollbar': '#3A3D47',
-      '--mr-overlay-tint': 'rgba(0,0,0,0.6)',
-      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
-         declared once, in `minimal-light`. BOLD IS PRESERVED BY MECHANISM: these
-         three values reproduce exactly what `bold` renders today (the `Card`
-         border `rgba(255,255,255,0.06)`, the card fill `--mr-surface-raised`, and
-         the menu-row hover `rgba(255,255,255,0.04)`), so this batch changes nothing
-         in this theme unless a future value is set deliberately. */
-      '--mr-card-border': 'rgba(255,255,255,0.06)',
-      '--mr-card-nested': '#17181D',
-      '--mr-hover-tint': 'rgba(255,255,255,0.04)',
-      '--mr-card-border-hover': 'rgba(255,255,255,0.06)',
-      '--mr-tracker-route': '#6E7582',
-      '--mr-tracker-dot': '#D4B36A',
-      '--mr-tracker-live': '#2FBF71',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette. Bright, solid,
-         high-energy fills with dark on-palette text. */
-      '--mr-palette-indigo': '#6C6FF2',
-      '--mr-palette-cyan': '#06B6D4',
-      '--mr-palette-green': '#22C55E',
-      '--mr-palette-amber': '#FBBF24',
-      '--mr-palette-orange': '#F97316',
-      '--mr-palette-pink': '#EC4899',
-      '--mr-palette-violet': '#8B5CF6',
-      '--mr-palette-red': '#EF4444',
-      '--mr-on-palette': '#0B0C0F',
-      /* §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) GRADIENT. Each token is a
-         COMPLETE `background-image` value (a radial highlight over a three-stop
-         gradient — the reference's own treatment, spec §2.6), consumed by the
-         `.ds-btn-accent` utility in src/index.css. TWO tokens, not four stops,
-         because an image layer paints over the flat background colour: the hover
-         state must therefore live in the image too, or the button loses its hover
-         feedback. `bold` carries the same two NAMES with the value `none`, so no
-         image is painted at all and its button keeps its flat accent AND its own
-         `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
+      '--mr-shadow-raised': '0 6px 20px rgba(0,0,0,0.55)',
+      '--mr-shadow-overlay': '0 18px 48px rgba(0,0,0,0.70)',
+      '--mr-scrollbar': '#333333',
+      '--mr-overlay-tint': 'rgba(0,0,0,0.72)',
+      '--mr-card-border': BRAND_PALETTE.darkBorder,
+      '--mr-card-nested': '#161616',
+      '--mr-hover-tint': 'rgba(255,255,255,0.05)',
+      '--mr-card-border-hover': '#3D3D3D',
+      '--mr-tracker-route': BRAND_PALETTE.darkMuted,
+      '--mr-tracker-dot': BRAND_PALETTE.orange,
+      '--mr-tracker-live': BRAND_PALETTE.orange,
+      /* §BRAND IDENTITY (2026-11-20) — THE EIGHT DOMAIN TOKENS ARE NOW A
+         SINGLE-HUE BRAND RAMP. The NAMES are historical (hundreds of call sites
+         and the `PaletteDomain` type depend on them); the VALUES are all inside
+         the approved identity: orange steps plus neutral steps. Charts and
+         pipeline stages stay distinguishable by LIGHTNESS STEP, not by an
+         unrelated hue. Nothing here is blue, green, pink, purple or teal. */
+      '--mr-palette-indigo': BRAND_PALETTE.orange,
+      '--mr-palette-cyan': BRAND_PALETTE.orangeLight,
+      '--mr-palette-green': BRAND_PALETTE.orangePale,
+      '--mr-palette-amber': BRAND_PALETTE.orangeHover,
+      '--mr-palette-orange': BRAND_PALETTE.orange,
+      /* A saturated orange step, not a grey: the token name is historical, but a
+         desaturated value would make `pink` indistinguishable from `violet`. */
+      '--mr-palette-pink': '#FF9E5C',
+      '--mr-palette-violet': '#8A8A8A',
+      '--mr-palette-red': BRAND_PALETTE.orangeDeep,
+      '--mr-on-palette': BRAND_PALETTE.black,
       '--mr-accent-image': 'none',
       '--mr-accent-image-hover': 'none',
-      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens, and this is
-         the theme that PROVES they are a re-naming rather than a redesign: they
-         are set to the values `bold`'s primary button ALREADY computed —
-         `bg-brass-500` (this theme's own accent), `hover:bg-brass-600`, and
-         `text-ink` (its surface token) — so the variant swap moves NO pixel here.
-         Stated as var() references, not re-typed literals, so the values cannot
-         drift from the tokens they came from. */
-      '--mr-btn-bg': 'var(--mr-accent)',
-      '--mr-btn-bg-hover': 'var(--mr-accent-600)',
-      '--mr-btn-text': 'var(--mr-surface)',
-      /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
+      '--mr-btn-bg': BRAND_PALETTE.orange,
+      '--mr-btn-bg-hover': BRAND_PALETTE.orangeHover,
+      '--mr-btn-text': BRAND_PALETTE.black,
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
       '--mr-motion-slow': '420ms',
@@ -506,217 +268,125 @@ bold: {
       '--mr-density-pad': '14px',
     },
     chart: {
-      palette: ['#6366F1', '#D4B36A', '#2FBF71', '#A78BFA', '#22D3EE', '#F472B6'],
-      grid: 'rgba(245,246,248,0.07)',
-      axis: '#6E7582',
-      strokeWidth: 1.5,
-      ring: 12,
-    },
-  },
-
-  fun: {
-    id: 'fun',
-    label: 'Fun',
-    description:
-      'The OpenShip DARK design - a pure-black page, translucent cards, a white primary action and an amber-to-rose accent gradient.',
-    mode: 'dark',
-    design: 'dark',
-    severity: {
-      critical: 'expressive',
-      warning: 'expressive',
-      info: 'expressive',
-      success: 'expressive',
-    },
-    vars: {
-      '--mr-bg': '#000000',
-      '--mr-bg-deep': '#000000',
-      '--mr-surface': '#0A0A0A',
-      '--mr-surface-raised': '#0D0D0D',
-      '--mr-surface-overlay': '#161616',
-      '--mr-surface-hover': '#171717',
-      '--mr-surface-tint': '#141414',
-      '--mr-hairline': 'rgba(255,255,255,0.08)',
-      '--mr-hairline-strong': 'rgba(255,255,255,0.14)',
-      '--mr-text-strong': '#FFFFFF',
-      '--mr-text': '#ADADAD',
-      '--mr-text-active': '#F3F3F3',
-      '--mr-text-200': '#DBDBDB',
-      '--mr-on-accent': '#000000',
-      '--mr-text-muted': '#868686',
-      '--mr-text-faint': '#646464',
-      '--mr-text-soft': '#F5F5F5',
-      '--mr-accent': '#F97316',
-      '--mr-accent-300': '#FCD34D',
-      '--mr-accent-400': '#FBBF24',
-      '--mr-accent-600': '#EA580C',
-      '--mr-accent-700': '#C2410C',
-      '--mr-state-critical': '#F04848',
-      '--mr-state-warning': '#FBBF24',
-      '--mr-state-info': '#60A5FA',
-      '--mr-state-success': '#34D399',
-      '--mr-state-muted': '#868686',
-      '--mr-feature-intel': '#2E9BF0',
-      '--mr-feature-orders': '#5866EB',
-      '--mr-feature-finance': '#18B981',
-      '--mr-feature-compliance': '#F2A93B',
-      '--mr-feature-ops': '#7C8698',
-      '--mr-exp-cyan': '#22D3EE',
-      '--mr-exp-coral': '#F472B6',
-      '--mr-focus': 'rgba(249,115,22,0.5)',
-      '--mr-shadow-subtle': 'none',
-      '--mr-shadow-raised': '0 4px 12px rgba(0,0,0,0.32), 0 1px 3px rgba(0,0,0,0.40)',
-      '--mr-shadow-overlay': '0 20px 48px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.32)',
-      '--mr-scrollbar': '#333333',
-      '--mr-overlay-tint': 'rgb(20 20 20 / 60%)',
-      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
-         declared once, in `minimal-light`. */
-      '--mr-card-border': 'transparent',
-      '--mr-card-nested': '#141414',
-      '--mr-hover-tint': 'rgba(255,255,255,0.07)',
-      '--mr-card-border-hover': 'rgba(255,255,255,0.12)',
-      '--mr-tracker-route': '#646464',
-      '--mr-tracker-dot': '#F97316',
-      '--mr-tracker-live': '#34D399',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette. Bright playful
-         fills with a dark on-palette text for AA contrast. */
-      '--mr-palette-indigo': '#6C6FF2',
-      '--mr-palette-cyan': '#06B6D4',
-      '--mr-palette-green': '#22C55E',
-      '--mr-palette-amber': '#FBBF24',
-      '--mr-palette-orange': '#F97316',
-      '--mr-palette-pink': '#EC4899',
-      '--mr-palette-violet': '#8B5CF6',
-      '--mr-palette-red': '#EF4444',
-      '--mr-on-palette': '#0B0C0F',
-      /* §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) GRADIENT. Each token is a
-         COMPLETE `background-image` value (a radial highlight over a three-stop
-         gradient — the reference's own treatment, spec §2.6), consumed by the
-         `.ds-btn-accent` utility in src/index.css. TWO tokens, not four stops,
-         because an image layer paints over the flat background colour: the hover
-         state must therefore live in the image too, or the button loses its hover
-         feedback. `bold` carries the same two NAMES with the value `none`, so no
-         image is painted at all and its button keeps its flat accent AND its own
-         `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
-      '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.25) 0%, transparent 70%), linear-gradient(to right in oklab, #FBBF24, #F97316, #F43F5E)',
-      '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.32) 0%, transparent 70%), linear-gradient(to right in oklab, #FCD34D, #FB923C, #FB7185)',
-      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
-         contract is on `minimal-light`. This theme implements the reference's
-         DARK design, whose button is WHITE with black text (spec §2.3). */
-      '--mr-btn-bg': '#FFFFFF',
-      '--mr-btn-bg-hover': 'rgba(255,255,255,0.90)',
-      '--mr-btn-text': '#000000',
-      /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
-      '--mr-motion-fast': '140ms',
-      '--mr-motion-base': '240ms',
-      '--mr-motion-slow': '420ms',
-      '--mr-ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
-      '--mr-ease-emphasized': 'cubic-bezier(0.2, 0.9, 0.1, 1)',
-      '--mr-density-row': '40px',
-      '--mr-density-gap': '10px',
-      '--mr-density-pad': '14px',
-    },
-    chart: {
-      palette: ['#E85D8A', '#5866EB', '#22D3EE', '#C9A15A', '#21B573', '#F59E0B'],
-      grid: 'rgba(60,46,90,0.08)',
-      axis: '#948C96',
+      /* §BRAND IDENTITY — a single-hue brand ramp. Series stay separable by
+         lightness step while every value remains inside the approved identity. */
+      palette: [
+        BRAND_PALETTE.orange,
+        BRAND_PALETTE.orangeLight,
+        BRAND_PALETTE.orangePale,
+        BRAND_PALETTE.orangeHover,
+        BRAND_PALETTE.orangeDeep,
+        '#B8B8B8',
+      ],
+      grid: 'rgba(255,255,255,0.07)',
+      axis: '#7A7A7A',
       strokeWidth: 1.5,
       ring: 11,
     },
   },
 
-  serious: {
-    id: 'serious',
-    label: 'Serious',
+  'brand-light': {
+    id: 'brand-light',
+    label: 'Mercenta Light',
     description:
-      'The OpenShip LIGHT design - a #F9F9F9 page, white cards, a near-black primary action and the violet-to-blue accent gradient, on quiet edges.',
+      'The approved Mercenta identity on white: a #FFFFFF page, #F4F4F2 surfaces, black type and the #FF6A00 accent.',
     mode: 'light',
-    design: 'light',
+    appearance: 'light',
     severity: {
-      critical: 'edge',
-      warning: 'edge',
-      info: 'edge',
-      success: 'edge',
+      critical: 'indicator',
+      warning: 'indicator',
+      info: 'indicator',
+      success: 'indicator',
     },
     vars: {
-      '--mr-bg': '#F9F9F9',
-      '--mr-bg-deep': '#F4F4F4',
-      '--mr-surface': '#FAFAFA',
-      '--mr-surface-raised': '#FFFFFF',
-      '--mr-surface-overlay': '#FFFFFF',
-      '--mr-surface-hover': '#F0F0F0',
-      '--mr-surface-tint': '#F4F4F4',
-      '--mr-hairline': '#E8E8E8',
-      '--mr-hairline-strong': '#D0D0D0',
-      '--mr-text-strong': '#000000',
-      '--mr-text': '#555555',
-      '--mr-text-active': '#141414',
-      '--mr-text-200': '#2C2C2C',
-      '--mr-on-accent': '#FFFFFF',
-      '--mr-text-muted': '#696969',
-      '--mr-text-faint': '#8A8A8A',
-      '--mr-text-soft': '#FDFDFE',
-      '--mr-accent': '#7C3AED',
-      '--mr-accent-300': '#C4B5FD',
-      '--mr-accent-400': '#A78BFA',
-      '--mr-accent-600': '#6D28D9',
-      '--mr-accent-700': '#5B21B6',
-      '--mr-state-critical': '#DC2626',
-      '--mr-state-warning': '#D97706',
-      '--mr-state-info': '#2563EB',
-      '--mr-state-success': '#059669',
-      '--mr-state-muted': '#52525B',
-      '--mr-feature-intel': '#3D7BFA',
-      '--mr-feature-orders': '#5B6BF5',
-      '--mr-feature-finance': '#10B981',
-      '--mr-feature-compliance': '#F59E0B',
-      '--mr-feature-ops': '#64748B',
-      '--mr-exp-cyan': '#22C7F0',
-      '--mr-exp-coral': '#F472A6',
-      '--mr-focus': 'rgba(124,58,237,0.5)',
+      '--mr-bg': BRAND_PALETTE.white,
+      '--mr-bg-deep': BRAND_PALETTE.lightSurface,
+      '--mr-surface': BRAND_PALETTE.white,
+      '--mr-surface-raised': BRAND_PALETTE.white,
+      '--mr-surface-overlay': BRAND_PALETTE.white,
+      '--mr-surface-hover': BRAND_PALETTE.lightSurface,
+      '--mr-surface-tint': BRAND_PALETTE.lightSurface,
+      '--mr-hairline': BRAND_PALETTE.lightBorder,
+      '--mr-hairline-strong': '#BFBFBF',
+      '--mr-text-strong': BRAND_PALETTE.black,
+      '--mr-text': '#333333',
+      '--mr-text-active': BRAND_PALETTE.black,
+      '--mr-text-200': '#1A1A1A',
+      '--mr-on-accent': BRAND_PALETTE.black,
+      '--mr-text-muted': BRAND_PALETTE.lightMuted,
+      /* §BRAND IDENTITY — was #8A8A8A, which measured 3.45:1 on white: far
+         BELOW the WCAG AA floor of 4.5:1 for the 11px labels that use it.
+         #6B6B6B measures 5.33:1 on #FFFFFF and 4.85:1 on the #F4F4F2 surface. */
+      '--mr-text-faint': '#6B6B6B',
+      '--mr-text-soft': BRAND_PALETTE.white,
+      '--mr-accent': BRAND_PALETTE.orange,
+      /* §BRAND IDENTITY — the 300/400 steps are used as TEXT (`text-brass-300`
+         badge labels), not only as tints. On white the pale steps measured
+         1.54:1 (#FFC499) and 2.29:1 (#FF8F40) — unreadable. They now carry deep,
+         legible steps; the pale LOOK of a tint is preserved by the `/opacity`
+         form (the shim mixes the base toward transparent), so `bg-brass-300/15`
+         is still a pale wash while the text is readable. */
+      '--mr-accent-300': BRAND_PALETTE.orangeDeep,
+      '--mr-accent-400': '#C45100',
+      '--mr-accent-600': BRAND_PALETTE.orangeHover,
+      '--mr-accent-700': BRAND_PALETTE.orangeDeep,
+      /* §BRAND IDENTITY (2026-11-20) — STATUS INSIDE THE APPROVED PALETTE.
+         On white the ramp steps deeper so contrast holds: critical is a deep
+         orange, warning a strong orange, info a neutral grey, success a
+         near-black "solid / complete" tone. Meaning is carried by intensity,
+         fill weight, text and icon — never by an unrelated hue. */
+      '--mr-state-critical': BRAND_PALETTE.orangeDeep,
+      /* §BRAND IDENTITY — was `orangeHover` (#E05A00), which measured 3.73:1 as
+         text on white: below the 4.5:1 floor for the 12px badge labels that use
+         it. #C45100 measures 4.72:1. Critical stays the deeper #B34700 (5.46:1)
+         so the two states remain distinguishable. */
+      '--mr-state-warning': '#C45100',
+      '--mr-state-info': BRAND_PALETTE.lightMuted,
+      '--mr-state-success': '#333333',
+      '--mr-state-muted': '#8A8A8A',
+      '--mr-feature-intel': BRAND_PALETTE.lightMuted,
+      '--mr-feature-orders': BRAND_PALETTE.orange,
+      '--mr-feature-finance': '#333333',
+      '--mr-feature-compliance': BRAND_PALETTE.orangeDeep,
+      '--mr-feature-ops': '#8A8A8A',
+      /* §BRAND IDENTITY — declared so the tailwind contract is complete. */
+      '--mr-on-fill': BRAND_PALETTE.black,
+      '--mr-exp-cyan': '#8A8A8A',
+      '--mr-exp-coral': BRAND_PALETTE.orange,
+      '--mr-focus': 'rgba(255,106,0,0.50)',
       '--mr-shadow-subtle': 'none',
       '--mr-shadow-raised': '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px -1px rgba(0,0,0,0.10)',
       '--mr-shadow-overlay': '0 16px 40px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06)',
-      '--mr-scrollbar': '#D0D0D0',
-      '--mr-overlay-tint': 'rgba(0,0,0,0.45)',
-      /* §OPENSHIP BATCH 4 — the shared-surface role tokens; the full contract is
-         declared once, in `minimal-light`. `serious` carries the reference's own
-         DARK design values: a borderless card and the inverted scrim (spec §2.3). */
-      '--mr-card-border': 'transparent',
-      '--mr-card-nested': '#F4F4F4',
-      '--mr-hover-tint': 'rgba(0,0,0,0.07)',
-      '--mr-card-border-hover': '#E0E0E0',
-      '--mr-tracker-route': '#8A8A8A',
-      '--mr-tracker-dot': '#7C3AED',
-      '--mr-tracker-live': '#059669',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette, held to a cool,
-         restrained saturation appropriate to a decision-heavy deck. */
-      '--mr-palette-indigo': '#4F46E5',
-      '--mr-palette-cyan': '#0E7490',
-      '--mr-palette-green': '#047857',
-      '--mr-palette-amber': '#B45309',
-      '--mr-palette-orange': '#C2410C',
-      '--mr-palette-pink': '#BE185D',
-      '--mr-palette-violet': '#6D28D9',
-      '--mr-palette-red': '#B91C1C',
-      '--mr-on-palette': '#FFFFFF',
-      /* §OPENSHIP BATCH 3 — THE PRIMARY-ACTION (CTA) GRADIENT. Each token is a
-         COMPLETE `background-image` value (a radial highlight over a three-stop
-         gradient — the reference's own treatment, spec §2.6), consumed by the
-         `.ds-btn-accent` utility in src/index.css. TWO tokens, not four stops,
-         because an image layer paints over the flat background colour: the hover
-         state must therefore live in the image too, or the button loses its hover
-         feedback. `bold` carries the same two NAMES with the value `none`, so no
-         image is painted at all and its button keeps its flat accent AND its own
-         `hover:bg-brass-600` — untouched by MECHANISM, not merely by value. */
-      '--mr-accent-image': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 70%), linear-gradient(to right in oklab, #7C3AED, #111111, #2563EB)',
-      '--mr-accent-image-hover': 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.28) 0%, transparent 70%), linear-gradient(to right in oklab, #6D28D9, #0D0D0D, #1D4ED8)',
-      /* §OPENSHIP MAPPING BATCH 3 — the solid primary-action tokens; the FULL
-         contract is on `minimal-light`. This theme also implements the reference's
-         LIGHT design, so its button is near-black with white text (spec §2.5). */
-      '--mr-btn-bg': 'rgba(0,0,0,0.92)',
-      '--mr-btn-bg-hover': 'rgba(0,0,0,0.80)',
-      '--mr-btn-text': '#FFFFFF',
-      /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
+      '--mr-scrollbar': '#BFBFBF',
+      '--mr-overlay-tint': 'rgba(0,0,0,0.50)',
+      '--mr-card-border': BRAND_PALETTE.lightBorder,
+      '--mr-card-nested': BRAND_PALETTE.lightSurface,
+      '--mr-hover-tint': 'rgba(0,0,0,0.04)',
+      '--mr-card-border-hover': '#BFBFBF',
+      '--mr-tracker-route': BRAND_PALETTE.lightMuted,
+      '--mr-tracker-dot': BRAND_PALETTE.orange,
+      '--mr-tracker-live': BRAND_PALETTE.orange,
+      /* §BRAND IDENTITY (2026-11-20) — THE EIGHT DOMAIN TOKENS AS A SINGLE-HUE
+         BRAND RAMP. Names are historical; values are all inside the approved
+         identity. On white the steps run deeper so every series stays legible. */
+      '--mr-palette-indigo': BRAND_PALETTE.orange,
+      '--mr-palette-cyan': BRAND_PALETTE.orangeLight,
+      '--mr-palette-green': BRAND_PALETTE.orangeDeep,
+      '--mr-palette-amber': BRAND_PALETTE.orangeHover,
+      '--mr-palette-orange': BRAND_PALETTE.orange,
+      /* A saturated orange step, not a grey: the token name is historical, but a
+         desaturated value would make `pink` indistinguishable from `violet`. */
+      '--mr-palette-pink': '#FF9E5C',
+      '--mr-palette-violet': BRAND_PALETTE.lightMuted,
+      '--mr-palette-red': BRAND_PALETTE.orangeDeep,
+      /* §BRAND IDENTITY — black on orange. White on #FF6A00 fails contrast
+         (≈2.9:1); black on the same fill is ≈7.4:1. Meaning must stay legible. */
+      '--mr-on-palette': BRAND_PALETTE.black,
+      '--mr-accent-image': 'none',
+      '--mr-accent-image-hover': 'none',
+      '--mr-btn-bg': BRAND_PALETTE.orange,
+      '--mr-btn-bg-hover': BRAND_PALETTE.orangeHover,
+      '--mr-btn-text': BRAND_PALETTE.black,
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
       '--mr-motion-slow': '420ms',
@@ -727,15 +397,22 @@ bold: {
       '--mr-density-pad': '14px',
     },
     chart: {
-      palette: ['#4C8FD9', '#B89B5E', '#2BA164', '#7A6CB8', '#4CB9D9', '#C96A8C'],
-      grid: 'rgba(234,236,239,0.06)',
-      axis: '#6A7078',
+      /* §BRAND IDENTITY — single-hue brand ramp; separable by lightness step. */
+      palette: [
+        BRAND_PALETTE.orange,
+        BRAND_PALETTE.orangeHover,
+        BRAND_PALETTE.orangeDeep,
+        BRAND_PALETTE.orangeLight,
+        BRAND_PALETTE.orangePale,
+        '#8A8A8A',
+      ],
+      grid: 'rgba(0,0,0,0.08)',
+      axis: '#8A8A8A',
       strokeWidth: 1.5,
-      ring: 12,
+      ring: 11,
     },
   },
 };
-
 /** Validates the CSS variable contract — every theme must define every name. */
 export const THEME_VAR_NAMES: readonly string[] =
   THEME_ORDER.length > 0 ? Object.keys(THEMES[THEME_ORDER[0]].vars) : [];

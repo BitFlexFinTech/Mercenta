@@ -9,7 +9,7 @@ import {
   COMMERCIAL_MODEL_ORDER,
   checkCommercialModelSelection,
 } from '@/config/commercialModel';
-import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { BrandMark } from '@/components/shared/BrandMark';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
 import { fulfillmentTrackLabel, FULFILLMENT_TRACK_HINTS } from '@/config/fulfillmentTrack';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
@@ -197,11 +197,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <img
-              src={brandMark}
-              alt="Mercenta Partners hexagon mark"
-              className="w-9 h-9"
-            />
+            <BrandMark alt="Mercenta Partners mark" className="w-9 h-9" />
             <span className="text-lg font-semibold text-strong">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-strong mb-1">Brand Onboarding</h1>

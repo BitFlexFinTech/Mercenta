@@ -31,12 +31,31 @@
 import { test, expect } from '@playwright/test';
 import { PUBLIC_NAV, PUBLIC_CLAIM_RED_LINES } from '../src/config/positioning';
 
+/**
+ * §BRAND REDESIGN (2026-11-19) — RESOLVED BY PAGE, NOT BY POSITION.
+ *
+ * This used to reach into `PUBLIC_NAV[0]` and `PUBLIC_NAV[1]` by INDEX. When the
+ * approved information architecture took the header from two groups to seven,
+ * `PUBLIC_NAV[1]` stopped being the group that holds the FAQ and the two legal
+ * documents, so the lookup returned `undefined` and the whole spec failed at
+ * collection time — before a single assertion ran. A positional index is a
+ * second, silent copy of the navigation's shape; searching every group for the
+ * page means the spec follows the owner instead of a remembered layout.
+ */
+const routeOf = (page: string): string => {
+  for (const group of PUBLIC_NAV) {
+    const link = group.children.find((l) => l.page === page);
+    if (link) return link.page;
+  }
+  throw new Error(`public page "${page}" is not reachable from PUBLIC_NAV — the navigation owner and this spec disagree`);
+};
+
 /** Each page, its route (read from the navigation owner) and its H1. */
 const PAGES = [
-  { route: PUBLIC_NAV[0].children.find((l) => l.page === 'how-it-works')!.page, h1: /how mercenta works/i },
-  { route: PUBLIC_NAV[0].children.find((l) => l.page === 'uk-market-access')!.page, h1: /uk market access/i },
-  { route: PUBLIC_NAV[0].children.find((l) => l.page === 'for-brands')!.page, h1: /for brands/i },
-  { route: PUBLIC_NAV[1].children.find((l) => l.page === 'faq')!.page, h1: /questions brands ask us/i },
+  { route: routeOf('how-it-works'), h1: /how mercenta works/i },
+  { route: routeOf('uk-market-access'), h1: /uk market access/i },
+  { route: routeOf('for-brands'), h1: /for brands/i },
+  { route: routeOf('faq'), h1: /questions brands ask us/i },
   /**
    * §B5 (2026-09-29) — THE TWO LEGAL DOCUMENTS ARE PUBLIC PAGES TOO, and until
    * B5 they were the only public surfaces that hardcoded the dark palette,
@@ -45,8 +64,8 @@ const PAGES = [
    * holding the full picture. They are rendered, theme-checked and
    * red-line-checked here exactly like the four marketing pages.
    */
-  { route: PUBLIC_NAV[1].children.find((l) => l.page === 'privacy')!.page, h1: /privacy policy/i },
-  { route: PUBLIC_NAV[1].children.find((l) => l.page === 'terms')!.page, h1: /terms of service/i },
+  { route: routeOf('privacy'), h1: /privacy policy/i },
+  { route: routeOf('terms'), h1: /terms of service/i },
   /**
    * §B6 (2026-09-29) — THE ASSESSMENT IS A PUBLIC PAGE TOO, and it was the LAST
    * one still hardcoding the dark palette: measured, `main` had no enclosing
@@ -55,7 +74,7 @@ const PAGES = [
    * (which is composed by the engine and published six red-line claims of its
    * own) is driven and scanned in `e2e/uk-market-fit.spec.ts`.
    */
-  { route: PUBLIC_NAV[0].children.find((l) => l.page === 'explore-uk-market-fit')!.page, h1: /explore uk market fit/i },
+  { route: routeOf('explore-uk-market-fit'), h1: /explore uk market fit/i },
 ];
 
 const RED_LINES = PUBLIC_CLAIM_RED_LINES.flatMap((family) =>
@@ -78,9 +97,14 @@ const RED_LINES = PUBLIC_CLAIM_RED_LINES.flatMap((family) =>
  * deployed site — so the dev-side spec fails for the same reason the live check
  * does, before anything is deployed.
  */
+/* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The two retired ids
+   (`bold`, `minimal-light`) no longer exist in the app, so setting them in
+   localStorage would fall back to the default and the "expected shell" assertion
+   would be measuring the default rather than the theme it names. The approved
+   appearances are `brand-dark` / `brand-light`, and both are still exercised. */
 const THEMES = [
-  { id: 'bold', expected: 'dark' },
-  { id: 'minimal-light', expected: 'light' },
+  { id: 'brand-dark', expected: 'dark' },
+  { id: 'brand-light', expected: 'light' },
 ] as const;
 
 test.describe('The seven public pages — render, shell theme and no red-line claim (B3 · B5 · B6)', () => {

@@ -32,27 +32,40 @@ function check(name, ok, detail = '') {
 
 // 1. Theme set + order + default
 /**
- * §Phase WAVE-0 — REPOINTED CONTRACT (supersedes the Wave 1 "six themes"
- * contract this validator previously asserted). The canonical theme set is
- * EXACTLY FIVE: Minimal Light (default) · Professional · Bold · Fun · Serious.
- * The retired legacy "Current Mercenta" (`current`) theme was REMOVED, and the
- * guard below keeps it out — a validator that merely stopped checking for six
- * would not prove removal.
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED CONTRACT (supersedes the five-theme
+ * OpenShip-mapped contract this validator asserted). The canonical theme set is
+ * now EXACTLY TWO, both built from the approved Mercenta identity:
+ *
+ *   brand-dark (DEFAULT) · brand-light
+ *
+ * The five retired themes — minimal-light, professional, bold, fun, serious —
+ * were REMOVED IN FULL. The guard below proves each is ABSENT (no id, no order
+ * entry), so a validator that merely stopped checking could not pass: it would
+ * still fail if any retired id reappeared.
  */
-const required = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
+const required = ['brand-dark', 'brand-light'];
+const RETIRED = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
 check(
-  'RETIRED legacy theme "current" is absent (no id, no order entry, no block)',
-  !/id:\s*'current'/.test(THEMES_SRC) &&
-    !/'current'/.test((THEMES_SRC.match(/THEME_ORDER:\s*readonly\s*ThemeId\[\]\s*=\s*\[([\s\S]*?)\]/) ?? ['', ''])[1])
+  'RETIRED themes are absent (no id, no order entry, no block)',
+  RETIRED.every(
+    (id) =>
+      !new RegExp(`id:\\s*'${id}'`).test(THEMES_SRC) &&
+      !new RegExp(`'${id}'`).test((THEMES_SRC.match(/THEME_ORDER:\s*readonly\s*ThemeId\[\]\s*=\s*\[([\s\S]*?)\]/) ?? ['', ''])[1])
+  )
 );
-check('default theme is minimal-light', /DEFAULT_THEME:\s*ThemeId\s*=\s*'minimal-light'/.test(THEMES_SRC));
-check('five-theme order array', THEME_ORDER_EXPECTED(THEMES_SRC));
+check('default theme is brand-dark', /DEFAULT_THEME:\s*ThemeId\s*=\s*'brand-dark'/.test(THEMES_SRC));
+check('two-theme order array', THEME_ORDER_EXPECTED(THEMES_SRC));
+check(
+  'the approved brand palette is declared ONCE and both themes read it',
+  /export const BRAND_PALETTE/.test(THEMES_SRC) &&
+    (THEMES_SRC.match(/BRAND_PALETTE\.orange/g) ?? []).length >= 4
+);
 
 function THEME_ORDER_EXPECTED(src) {
   const m = src.match(/THEME_ORDER:\s*readonly\s*ThemeId\[\]\s*=\s*\[([\s\S]*?)\]/);
   if (!m) return false;
   const ids = [...m[1].matchAll(/'([a-z-]+)'/g)].map((x) => x[1]);
-  return ids.length === 5 && ids.every((x) => required.includes(x));
+  return ids.length === 2 && ids.every((x) => required.includes(x));
 }
 
 // 2. Every theme defines an identical CSS-variable NAME set.
@@ -65,7 +78,7 @@ for (const id of required) {
   const end = nextId === -1 ? THEMES_SRC.indexOf('};', start) : start + 12 + nextId;
   themeBlocks.push({ id, body: THEMES_SRC.slice(start, end) });
 }
-check('five theme objects parsed', themeBlocks.length === 5, `got ${themeBlocks.length}`);
+check('two theme objects parsed', themeBlocks.length === 2, `got ${themeBlocks.length}`);
 for (const { id, body } of themeBlocks) {
   const names = [...body.matchAll(/'--mr-[a-z0-9-]+'/g)].map((m) => m[0]).filter((v, i, a) => a.indexOf(v) === i);
   const missing = varNames.filter((n) => !names.includes(n));
@@ -82,11 +95,27 @@ check('severity expression map present', THEMES_SRC.includes("severity: {"));
 
 // 4. Dark foundations are genuinely near-black/charcoal — never navy/blue.
 // Only themes whose block declares mode: 'dark' are dark-surface themes.
+/**
+ * §BRAND REDESIGN — REPOINTED: a brand colour is now declared ONCE in
+ * `BRAND_PALETTE` and READ by the theme, so the value may be a hex literal OR a
+ * `BRAND_PALETTE.<key>` reference. Both forms are resolved to a real hex before
+ * the near-black / not-navy assertions run, so the check still measures the
+ * actual colour rather than being skipped.
+ */
+const PALETTE_HEX = Object.fromEntries(
+  [...THEMES_SRC.matchAll(/^\s{2}([a-zA-Z]+):\s*'(#[0-9A-Fa-f]{6})',/gm)].map((m) => [m[1], m[2]])
+);
+function resolveBg(body) {
+  const ref = body.match(/'--mr-bg':\s*BRAND_PALETTE\.([a-zA-Z]+)/);
+  if (ref) return PALETTE_HEX[ref[1]] ?? null;
+  const hex = body.match(/'--mr-bg':\s*'(#[0-9A-Fa-f]{6})'/);
+  return hex ? hex[1] : null;
+}
 for (const { id, body } of themeBlocks) {
   if (!/mode: 'dark'/.test(body)) continue;
-  const m = body.match(/'--mr-bg': '(#[0-9A-Fa-f]{6})'/);
-  check(`dark theme ${id} declares --mr-bg`, !!m);
-  const hex = m ? m[1] : '#000000';
+  const hex = resolveBg(body);
+  check(`dark theme ${id} declares --mr-bg`, !!hex);
+  if (!hex) continue;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
@@ -98,8 +127,8 @@ for (const { id, body } of themeBlocks) {
 // 5. Chart system: delicate strokes only (stroke ∈ {1, 1.5}, ring ∈ {10,11,12}).
 const strokes = [...THEMES_SRC.matchAll(/strokeWidth:\s*(1|1\.5),/g)].map((m) => Number(m[1]));
 const rings = [...THEMES_SRC.matchAll(/ring:\s*(\d+),/g)].map((m) => Number(m[1]));
-check('chart stroke values are delicate (≤1.5)', strokes.length === 5 && strokes.every((s) => s === 1 || s === 1.5), JSON.stringify(strokes));
-check('doughnut ring values are thin (≤12)', rings.length === 5 && rings.every((r) => r >= 8 && r <= 12), JSON.stringify(rings));
+check('chart stroke values are delicate (≤1.5)', strokes.length === 2 && strokes.every((s) => s === 1 || s === 1.5), JSON.stringify(strokes));
+check('doughnut ring values are thin (≤12)', rings.length === 2 && rings.every((r) => r >= 8 && r <= 12), JSON.stringify(rings));
 
 // 6. Presentation-only guarantee: theme config must not import business libs.
 check('themes.ts imports only pure types', !/@\/data|@\/lib|@\/services|@\/integrations/.test(THEMES_SRC));
@@ -120,13 +149,47 @@ for (const f of [
 }
 
 // 8. Homepage creative preservation — tracker animation classes retained.
+/**
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The tracker used to be
+ * inline in `Home.tsx`; it now lives in its own component (so all four homepage
+ * designs share ONE tracker and the animation cannot drift). The check follows
+ * the owner, and additionally asserts the class names are STILL applied — which
+ * is the thing that actually matters.
+ */
 const css = fs.readFileSync(path.join(ROOT, 'src/index.css'), 'utf8');
 check('route-dot keyframes preserved', css.includes('@keyframes route-dot'));
 check('tracker-ping keyframes preserved', css.includes('@keyframes tracker-ping'));
-const home = fs.readFileSync(path.join(ROOT, 'src/components/marketing/Home.tsx'), 'utf8');
-check('homepage uses animate-route-dot', home.includes('animate-route-dot'));
-check('homepage uses animate-tracker-ping', home.includes('animate-tracker-ping'));
-check('homepage renders UnlockGrowth', home.includes('<UnlockGrowth'));
+const trackerSrc = fs.readFileSync(path.join(ROOT, 'src/components/marketing/home/HeroTracker.tsx'), 'utf8');
+check('the shared tracker applies animate-route-dot', trackerSrc.includes('animate-route-dot'));
+check('the shared tracker applies animate-tracker-ping', trackerSrc.includes('animate-tracker-ping'));
+check(
+  'the tracker is HONESTLY labelled as an example (never live data)',
+  /example of the live view/i.test(trackerSrc)
+);
+/*
+ * §BRAND REDESIGN (2026-11-20) — REPOINTED, NOT WEAKENED.
+ *
+ * The four designs used to all live in `HomeDesigns.tsx`, so counting
+ * `<HeroTracker` there was enough. Each design now lives in its OWN module
+ * (`DesignA.tsx` … `DesignD.tsx`), and `HomeDesigns.tsx` is a re-export — so
+ * reading one file would now find zero trackers and the check would be
+ * meaningless.
+ *
+ * It now DISCOVERS the design modules and requires that EACH one renders the
+ * shared tracker, which is STRONGER than before: previously one design could
+ * have dropped the tracker and a count of three would still have passed.
+ */
+const designsDir = path.join(ROOT, 'src/components/marketing/home');
+const designFiles = fs
+  .readdirSync(designsDir)
+  .filter((f) => /^Design[A-D]\.tsx$/.test(f))
+  .sort();
+check('the four design modules were discovered (a discovery of none is a failure)', designFiles.length === 4,
+  designFiles.join(', '));
+for (const file of designFiles) {
+  const src = fs.readFileSync(path.join(designsDir, file), 'utf8');
+  check(`${file} renders the shared tracker`, src.includes('<HeroTracker'));
+}
 
 // 9. Notification severity presentation wired.
 const notif = fs.readFileSync(path.join(ROOT, 'src/components/shared/NotificationCenter.tsx'), 'utf8');

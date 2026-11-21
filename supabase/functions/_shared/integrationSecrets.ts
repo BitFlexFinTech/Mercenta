@@ -22,6 +22,9 @@ import { credentialSecretName, vaultSecretRef } from './vault.ts';
 export const INTEGRATION_SECRET_PROVIDERS: readonly string[] = [
   'email',
   'openrouter',
+  // §IMAGERY (2026-11-20) — Gemini's key is written to Vault by the connect
+  // wizard, so the status endpoint must be able to report its presence.
+  'gemini',
   'hunter',
   'instantly',
 ];

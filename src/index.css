@@ -13,8 +13,8 @@ body {
   /* §OPENSHIP BATCH 3 — the UI typeface is Plus Jakarta Sans (OFL 1.1). Gellix,
      the reference's own face, is "Personal Use Only" and is NOT shipped. */
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  background-color: var(--mr-bg, #F6F7F9);
-  color: var(--mr-text, #232731);
+  background-color: var(--mr-bg, #FFFFFF);
+  color: var(--mr-text, #000000);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -162,8 +162,8 @@ body {
 }
 
 ::selection {
-  background: var(--mr-accent-300, #E2C98F);
-  color: var(--mr-text-strong, #16181D);
+  background: var(--mr-accent-300, #FFC499);
+  color: var(--mr-text-strong, #000000);
 }
 
 * {
@@ -180,7 +180,7 @@ body {
    second one applied only while a control is focused.
    Guarded by `npm run validate:radius-elevation`. */
 :focus-visible {
-  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
+  outline: 2px solid var(--mr-focus, rgba(255, 106, 0, 0.5));
   outline-offset: 2px;
 }
 
@@ -197,7 +197,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
+  outline: 2px solid var(--mr-focus, rgba(255, 106, 0, 0.5));
   outline-offset: 2px;
 }
 
@@ -228,22 +228,24 @@ textarea:focus-visible {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--mr-scrollbar, #C9CFD9);
+  background: var(--mr-scrollbar, #DCDCDC);
   /* §PHASE C4 — this was `4px`, a radius the ramp does not declare. The thumb is
      8px wide, so a 4px radius IS half its width: the intent was a pill. Expressed
      as the pill step (9999px) it is pixel-identical and inside the scale. */
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--mr-hairline-strong, #C9CFD9);
+  background: var(--mr-hairline-strong, #BFBFBF);
 }
 
 @keyframes pulse-neon {
+  /* §BRAND IDENTITY — the glow was brass/gold (201,161,90), a non-brand hue.
+     Now the approved brand orange (#FF6A00 = 255,106,0). */
   0%, 100% {
-    box-shadow: 0 0 5px rgba(201, 161, 90, 0.5), 0 0 20px rgba(201, 161, 90, 0.3);
+    box-shadow: 0 0 5px rgba(255, 106, 0, 0.5), 0 0 20px rgba(255, 106, 0, 0.3);
   }
   50% {
-    box-shadow: 0 0 15px rgba(201, 161, 90, 0.8), 0 0 40px rgba(201, 161, 90, 0.5);
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.8), 0 0 40px rgba(255, 106, 0, 0.5);
   }
 }
 
@@ -458,6 +460,6 @@ textarea:focus-visible {
    card, an 8px tile). The outline follows the element's own radius from the ramp,
    so the ring still shows and the geometry stops contradicting the scale. */
 [data-record-focused='true'] {
-  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
+  outline: 2px solid var(--mr-focus, rgba(255, 106, 0, 0.5));
   outline-offset: 2px;
 }

@@ -52,7 +52,17 @@ export type IntegrationId =
   // founder's personal Google account. Registered so its mode is authoritative
   // (OAuth connect, no API-key form) and an unconfigured Google can never be
   // treated as simulation by accident.
-  | 'google';
+  | 'google'
+  /**
+   * §IMAGERY (2026-11-20) — Google Gemini (AI Studio API key), used to generate
+   * the public site's marketing imagery.
+   *
+   * This is an API-KEY provider, so it uses the standard Integrations API-key
+   * form. The key is written to Supabase Vault server-side; the browser only
+   * ever receives the `vault:<name>` reference and a yes/no existence answer —
+   * never the value. See `supabase/functions/_shared/vault.ts`.
+   */
+  | 'gemini';
 
 export type IntegrationStatus =
   | 'disconnected'
@@ -217,6 +227,10 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   email: { status: 'disconnected', sandbox: false },
   lead_sourcing: { status: 'disconnected', sandbox: false },
   openrouter: { status: 'disconnected', sandbox: false },
+  // §IMAGERY (2026-11-20) — Gemini starts disconnected. It is NOT a simulated
+  // provider: connecting it writes a real key to Vault. Until the Google Cloud
+  // project has billing enabled, image generation returns 429 (free tier limit 0).
+  gemini: { status: 'disconnected', sandbox: false },
   hunter: { status: 'disconnected', sandbox: false },
   instantly: { status: 'disconnected', sandbox: false },
   keepa: { status: 'disconnected', sandbox: false },

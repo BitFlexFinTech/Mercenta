@@ -44,13 +44,26 @@ function walk(dir) {
 walk('src'.replace('src', fileURLToPath(new URL('../src/', import.meta.url)).replace(/\/$/, '')));
 test('zero neon-* class refs in src', neonRefs === 0);
 
+/* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED.
+   OLD CONTRACT: each of the three shells rendered the raw hexagon asset
+   `mercenta-mark-dark-bg.svg` inline. The redesign replaced that hexagon with the
+   approved brand mark component, `src/components/shared/BrandMark.tsx`, which is the
+   ONE owner of which official master file is used per appearance. The contract that
+   matters is unchanged — every shell shows the APPROVED brand mark, from one owner —
+   so the check now asserts each shell renders `BrandMark`, and that BrandMark itself
+   is the component that references the official mark masters. */
 for (const f of [
   'src/components/layout/Header.tsx',
   'src/components/layout/Sidebar.tsx',
   'src/components/brand/OnboardingWizard.tsx',
 ]) {
-  test(`${f} uses the hexagon mark`, read(f).includes('mercenta-mark-dark-bg.svg'));
+  test(`${f} renders the approved brand mark from its owner`, read(f).includes('BrandMark'));
 }
+test(
+  'the official mark masters are referenced by ONE owner (BrandMark), not inline in a shell',
+  read('src/components/shared/BrandMark.tsx').includes('mercenta-mark-dark-bg.svg') &&
+    read('src/components/shared/BrandMark.tsx').includes('mercenta-mark-light-bg.svg')
+);
 
 console.log(failures === 0 ? 'DESIGN_TOKEN_VALIDATION_PASS' : `DESIGN_TOKEN_VALIDATION_FAIL (${failures})`);
 if (failures > 0) process.exit(1);

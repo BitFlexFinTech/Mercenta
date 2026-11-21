@@ -471,8 +471,21 @@ export function AccountingPanel() {
       >
       <div className="space-y-4">
       <Card title="Xero Connection Status" className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/*
+          §BRAND REDESIGN (2026-11-19) — THE BUTTON WAS UNCLICKABLE, MEASURED.
+          The row was `flex items-center justify-between` with no wrapping and no
+          `min-w-0` on the left group. The status badge reads "Xero Not Connected —
+          Add API credentials" and the "Last sync" text follows it, so the row's
+          intrinsic width exceeded the workspace column. `justify-between` then
+          pushed the action button PAST the column edge and underneath the Context
+          rail. Measured at 1280×720: the button spanned x 460→574 while the rail
+          began at x 512, so the button's centre (x≈517) sat inside the rail and a
+          real click landed on the rail instead — the control could not be used at
+          all. The fix lets the row WRAP and lets the left group SHRINK, so the
+          action stays inside its own column at every width.
+        */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
             {connected === null ? (
               <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
             ) : connected ? (

@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 409 · **Capabilities:** 8
+**Scenarios:** 410 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -31,7 +31,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | integrations | 10 |
 | onboarding_acquisition | 58 |
 | operations | 47 |
-| platform | 82 |
+| platform | 83 |
 
 ## Scenarios
 
@@ -389,6 +389,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-fulfillment-tracks | commerce_logistics | mixed | happy | `e2e/fulfillment-tracks.spec.ts` | — |
 | spec-funding-pipeline | founder | mixed | happy | `e2e/funding-pipeline.spec.ts` | — |
 | spec-google-setup | integrations | mixed | happy | `e2e/google-setup.spec.ts` | — |
+| spec-homepage-designs | platform | mixed | happy | `e2e/homepage-designs.spec.ts` | — |
 | spec-homepage-editor | platform | mixed | happy | `e2e/homepage-editor.spec.ts` | — |
 | spec-integration-hub | integrations | mixed | happy | `e2e/integration-hub.spec.ts` | — |
 | spec-inventory | commerce_logistics | mixed | happy | `e2e/inventory.spec.ts` | — |

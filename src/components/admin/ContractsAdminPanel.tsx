@@ -111,13 +111,13 @@ export function ContractsAdminPanel() {
       />
 
       {lastEnvelope && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-emerald-200">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-2.5 text-ds-label text-state-success">
           Last e-sign envelope sent: <code className="font-mono">{lastEnvelope}</code>
         </div>
       )}
 
       {!esignLive && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-amber-200 flex items-start gap-2">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-3 text-ds-label text-state-warning flex items-start gap-2">
           <Lock className="w-3.5 h-3.5 mt-0.5 text-amber-300 flex-shrink-0" />
           <span>
             E-signature runs in <strong>(Mock) mode</strong> — envelopes are
@@ -323,7 +323,7 @@ function GenerateModal({
         </pre>
 
         {!esignLive && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-amber-200 mb-3 flex items-start gap-1.5">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-state-warning mb-3 flex items-start gap-1.5">
             <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             No verified e-sign connection — the envelope will be SIMULATED
             (mock client, id like mock:env-…).

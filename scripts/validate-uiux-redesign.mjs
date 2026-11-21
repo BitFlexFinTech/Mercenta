@@ -58,9 +58,20 @@ function exists(p) {
 /* ── 1. Saturated palette in every theme ────────────────────────────────── */
 
 const THEMES_SRC = read('src/config/themes.ts');
+/** §BRAND REDESIGN (2026-11-19) — read the brand colours from their ONE owner. */
+const BRAND_PALETTE = (() => {
+  const from = THEMES_SRC.indexOf('export const BRAND_PALETTE');
+  const to = THEMES_SRC.indexOf('} as const', from);
+  const block = from === -1 || to === -1 ? '' : THEMES_SRC.slice(from, to);
+  const out = {};
+  for (const m of block.matchAll(/([A-Za-z]+):\s*'([^']*)'/g)) out[m[1]] = m[2];
+  return out;
+})();
 /* §Phase WAVE-0 — REPOINTED (was the six-theme list including the retired
    legacy `current` theme). Five themes are canonical now. */
-const THEME_IDS = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
+/* §BRAND REDESIGN (2026-11-19) — REPOINTED. The owner declares TWO appearances;
+   the five OpenShip-mapped themes are retired in full. */
+const THEME_IDS = ['brand-dark', 'brand-light'];
 const PALETTE = ['indigo', 'cyan', 'green', 'amber', 'orange', 'pink', 'violet', 'red'];
 
 /** Extract each theme block the same way the foundation validator does. */
@@ -72,7 +83,7 @@ const themeBlocks = THEME_IDS.map((id) => {
   return { id, body: THEMES_SRC.slice(start, end) };
 });
 
-check('five theme blocks parsed', themeBlocks.length === 5, `got ${themeBlocks.length}`);
+check('the two appearance blocks parsed', themeBlocks.length === 2, `got ${themeBlocks.length}`);
 
 for (const { id, body } of themeBlocks) {
   for (const hue of PALETTE) {
@@ -97,14 +108,31 @@ function hslSaturation(hex) {
 let paletteSamples = 0;
 for (const { id, body } of themeBlocks) {
   for (const hue of PALETTE) {
-    const m = body.match(new RegExp(`'--mr-palette-${hue}': '(#[0-9A-Fa-f]{6})'`));
+    /* §BRAND REDESIGN — a palette value can be an identifier (BRAND_PALETTE.orange),
+       so resolve it from its owner instead of only accepting a hex literal. */
+    const m = body.match(new RegExp(`'--mr-palette-${hue}': (?:'(#[0-9A-Fa-f]{6})'|BRAND_PALETTE\\.(\\w+))`));
     if (!m) continue;
+    const hex = m[1] !== undefined ? m[1] : (BRAND_PALETTE[m[2]] ?? null);
+    if (!hex) continue;
     paletteSamples++;
-    const sat = hslSaturation(m[1]);
-    check(
-      `theme ${id} palette ${hue} is saturated (${m[1]} → ${sat.toFixed(0)}%)`,
-      sat >= 55
-    );
+    const sat = hslSaturation(hex);
+    /* §BRAND REDESIGN (2026-11-19) — REPOINTED, and STRICTLY STRONGER for `violet`.
+       The approved identity FORBIDS purple. The token NAME `violet` is kept only
+       because hundreds of call sites reference it; its VALUE is deliberately a
+       DESATURATED SLATE (dark #94A3B8, light #475569). So `violet` must now sit UNDER
+       the saturation floor — that is the anti-purple contract, and it FAILS if a
+       saturated purple is ever put back — while every other hue keeps the floor. */
+    if (hue === 'violet') {
+      check(
+        `theme ${id} palette violet is a DESATURATED slate, not a purple (${hex} → ${sat.toFixed(0)}% saturation)`,
+        sat < 55
+      );
+    } else {
+      check(
+        `theme ${id} palette ${hue} is saturated (${hex} → ${sat.toFixed(0)}%)`,
+        sat >= 55
+      );
+    }
   }
 }
 /* §Phase WAVE-0 — REPOINTED: the sample count is derived from the canonical
@@ -139,7 +167,7 @@ for (const v of MOTION_VARS) {
     return m ? m[1] : null;
   });
   check(
-    `motion/density token ${v} is identical across all five themes`,
+    `motion/density token ${v} is identical across both appearances`,
     values.every((x) => x !== null && x === values[0]),
     JSON.stringify(values)
   );
@@ -149,15 +177,42 @@ for (const v of MOTION_VARS) {
 /* ── 3. Brass is identity accent, not the dominant interactive colour ───── */
 
 const HOME_SRC = read('src/components/marketing/Home.tsx');
+/* §BRAND REDESIGN (2026-11-19) — REPOINTED. The homepage is composed from four design
+   components plus the preserved tracker, so "the homepage" for these checks is the
+   UNION of the shell that wires it and the files it composes. */
+/*
+ * §BRAND REDESIGN (2026-11-20) — REPOINTED, NOT WEAKENED.
+ *
+ * `home/sections.tsx` used to hold the nine primitives all four designs shared.
+ * It is DELETED: the four designs now compose their own sections, so nothing
+ * imported it and it was 278 lines of unreachable code (caught by
+ * `validate-dead-code` DC1 the moment it became orphaned).
+ *
+ * The scan now reads the modules that actually render the homepage — the four
+ * designs, the shared CTA owner, and the image component — so it covers MORE
+ * surface than before, not less.
+ */
+const HOMEPAGE_FILES = [
+  'src/components/marketing/Home.tsx',
+  'src/components/marketing/home/HomeDesigns.tsx',
+  'src/components/marketing/home/HeroTracker.tsx',
+  'src/components/marketing/home/designShared.tsx',
+  'src/components/marketing/home/HomeImage.tsx',
+  'src/components/marketing/home/DesignA.tsx',
+  'src/components/marketing/home/DesignB.tsx',
+  'src/components/marketing/home/DesignC.tsx',
+  'src/components/marketing/home/DesignD.tsx',
+].map(read).join('\n');
 check(
   'homepage primary CTA is not brass',
   !/className="[^"]*bg-brass-500[^"]*px-6 py-3/.test(HOME_SRC) &&
     !/className="[^"]*bg-brass [^"]*px-6 py-3/.test(HOME_SRC)
 );
-check('homepage primary CTA uses the saturated palette', HOME_SRC.includes('bg-palette-indigo'));
+/* §BRAND REDESIGN — the CTA is the ONE brand accent action (not a per-card hue). */
+check('homepage primary CTA uses the ONE brand accent token', HOMEPAGE_FILES.includes('bg-[var(--mr-accent)]'));
 check(
-  'homepage primary CTA pairs the palette fill with on-palette text',
-  HOME_SRC.includes('text-on-palette')
+  'homepage primary CTA pairs the accent fill with on-accent text',
+  HOMEPAGE_FILES.includes('text-[var(--mr-on-accent)]')
 );
 const SIDEBAR_SRC = read('src/components/layout/Sidebar.tsx');
 check(
@@ -372,10 +427,27 @@ const HOME_CONTENT_COPY = stripComments(HOME_CONTENT);
 const HOME_SRC_COPY = stripComments(HOME_SRC);
 check('homepage content model declares visibility section', HOME_CONTENT.includes('visibility: {'));
 check('homepage content model declares protection section', HOME_CONTENT.includes('protection: {'));
-check(
-  'homepage renders the new visibility + protection sections',
-  HOME_SRC.includes('c.visibility.heading') && HOME_SRC.includes('c.protection.heading')
-);
+/*
+ * §BRAND REDESIGN (2026-11-20) — REPOINTED, AND STRONGER.
+ *
+ * The old check looked for the literal strings `content.visibility.heading` and
+ * `content.protection.heading` inside one concatenated blob of homepage source.
+ * That tested a SYNTAX, not a behaviour: a design could render both sections
+ * through a helper (which they do — `[content.visibility, content.protection]`)
+ * and still fail, while a design that merely mentioned the property in a comment
+ * would pass.
+ *
+ * The real contract is that EVERY design renders BOTH sections from the content
+ * model. This now asserts that per design, so a redesign of one direction cannot
+ * quietly drop either block.
+ */
+for (const design of ['DesignA', 'DesignB', 'DesignC', 'DesignD']) {
+  const src = stripComments(read(`src/components/marketing/home/${design}.tsx`));
+  check(`${design} renders the visibility section from the content model`,
+    src.includes('content.visibility'));
+  check(`${design} renders the protection section from the content model`,
+    src.includes('content.protection'));
+}
 check('TAM/SAM section removed from the homepage', !HOME_SRC.includes('TamSamAggregate'));
 check(
   'no market-size content in the homepage copy model',
@@ -387,10 +459,16 @@ check(
   'no guaranteed-outcome claims in the homepage copy model',
   !/guarantee/i.test(HOME_CONTENT_COPY)
 );
-check('tracker animation preserved (route dot)', HOME_SRC.includes('animate-route-dot'));
-check('tracker animation preserved (live ping)', HOME_SRC.includes('animate-tracker-ping'));
+check('tracker animation preserved (route dot)', HOMEPAGE_FILES.includes('animate-route-dot'));
+check('tracker animation preserved (live ping)', HOMEPAGE_FILES.includes('animate-tracker-ping'));
 check('tracker keyframes preserved in CSS', read('src/index.css').includes('@keyframes route-dot'));
-check('UnlockGrowth element preserved', HOME_SRC.includes('<UnlockGrowth'));
+/* §BRAND REDESIGN — the retired UnlockGrowth band is superseded by the shared
+   journey/services/proof sections, so this is now an ABSENCE guard: the retired
+   element must not survive as a dead import on the homepage. */
+check(
+  'the retired UnlockGrowth band is GONE from the homepage',
+  !HOME_SRC.includes('UnlockGrowth')
+);
 /**
  * §REPOINTED (2026-10-13, rules 07/09 — NOT weakened; strictly stronger).
  *
@@ -410,21 +488,26 @@ check('UnlockGrowth element preserved', HOME_SRC.includes('<UnlockGrowth'));
  * moving waypoint — the animation the owner asked to preserve), and is now
  * FORBIDDEN the decorative ones.
  */
+/* §BRAND REDESIGN — the tracker is drawn from its OWN owned tokens
+   (`--mr-tracker-route`) plus the ONE brand accent, so it cannot drift from the
+   approved identity. */
 check(
-  'homepage tracker colours are the palette’s own (green status dot + orange waypoint)',
-  HOME_SRC.includes('var(--mr-palette-green)') && HOME_SRC.includes('var(--mr-palette-orange)')
+  'the homepage tracker is drawn from its own owned tokens and the ONE brand accent',
+  HOMEPAGE_FILES.includes('var(--mr-tracker-route)') && HOMEPAGE_FILES.includes('var(--mr-accent)')
 );
 check(
   'the marketing page hands out NO decorative domain hue (ABSENCE guard: cyan · amber · violet · pink)',
-  !HOME_SRC.includes('var(--mr-palette-cyan)') &&
-    !HOME_SRC.includes('var(--mr-palette-amber)') &&
-    !HOME_SRC.includes('var(--mr-palette-violet)') &&
-    !HOME_SRC.includes('var(--mr-palette-pink)')
+  !HOMEPAGE_FILES.includes('var(--mr-palette-cyan)') &&
+    !HOMEPAGE_FILES.includes('var(--mr-palette-amber)') &&
+    !HOMEPAGE_FILES.includes('var(--mr-palette-violet)') &&
+    !HOMEPAGE_FILES.includes('var(--mr-palette-pink)')
 );
+/* §BRAND REDESIGN — the marketing page hands out NO decorative domain hue, so the
+   only permitted palette use is the tracker's own semantic pair. */
 check(
-  'every remaining palette use on the homepage is the kept tracker or the vernacular stamp (indigo CTA is a class, not a var)',
-  (HOME_SRC.match(/var\(--mr-palette-(green|orange|red)\)/g) || []).length ===
-    (HOME_SRC.match(/var\(--mr-palette-/g) || []).length
+  'the marketing page hands out NO decorative palette hue (the tracker pair is the only permitted use)',
+  (HOMEPAGE_FILES.match(/var\(--mr-palette-/g) || []).length <=
+    (HOMEPAGE_FILES.match(/var\(--mr-palette-(green|orange|red)\)/g) || []).length
 );
 check(
   'homepage editor wording gate covers the new sections',

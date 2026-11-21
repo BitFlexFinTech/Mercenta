@@ -137,6 +137,12 @@ const ALLOWLIST = new Set(['design/DesignSystemShowcase.tsx']);
  */
 const W3_ALLOWLIST = new Map([
   ['brand/BrandSettings.tsx::Invite Team Member', 'reveals the invite form; the write is handleInvite on submit'],
+  /* §BRAND REDESIGN (2026-11-19) — the design PREVIEW control is LOCAL BY CONTRACT:
+     previewing a homepage design must never write. The label itself says
+     "(not published)", and the write happens on the separate Publish control, so a
+     handler that only sets local preview state is the CORRECT behaviour here — not
+     the "does nothing but look like it does" defect W3 exists to catch. */
+  ['admin/HomepageEditor.tsx::Preview this design (not published)', 'toggles the draft PREVIEW only, by design; publishing is a separate control — preview must never write'],
 ]);
 
 /* ── W1 — no unwired control ──────────────────────────────────────────────── */

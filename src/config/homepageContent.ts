@@ -30,6 +30,11 @@ import {
   PUBLIC_REASONS_TO_STAY,
   PUBLIC_SOFTWARE_EXPERIENCE,
 } from './positioning';
+import {
+  DEFAULT_HOMEPAGE_DESIGN,
+  isHomepageDesignId,
+  type HomepageDesignId,
+} from './homepageDesign';
 
 export type HomeIconName =
   | 'truck' | 'shield' | 'package' | 'trending'
@@ -47,6 +52,13 @@ export interface HomeCardItem {
 }
 
 export interface HomepageContent {
+  /**
+   * §BRAND REDESIGN (2026-11-19) — WHICH HOMEPAGE DESIGN RENDERS.
+   * Owned by `src/config/homepageDesign.ts`; published from Super Admin through
+   * this same draft/publish payload. Appearance (dark/light) is a SEPARATE axis
+   * and never changes this value.
+   */
+  design: HomepageDesignId;
   hero: {
     eyebrow: string;
     headingStart: string;
@@ -111,8 +123,10 @@ const OUTCOME_ICONS: readonly HomeIconName[] = ['truck', 'shield', 'trending', '
 const REASON_ICONS: readonly HomeIconName[] = ['award', 'check', 'target', 'shield'];
 
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
+  /* §OWNER DECISION — Design A (Monolith) is the initial public homepage. */
+  design: DEFAULT_HOMEPAGE_DESIGN,
   hero: {
-    eyebrow: 'Retail channel partner — United Kingdom',
+    eyebrow: 'UK wholesale distribution & market entry',
     headingStart: 'Your products on UK shelves',
     headingHighlight: 'without building a UK business.',
     subheading: PUBLIC_HERO_SUBHEADING,
@@ -151,8 +165,8 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     })),
   },
   services: {
-    heading: 'What changes when a retailer becomes your partner',
-    subheading: 'Not a feature list. The four things that stop being your job.',
+    heading: 'Four ways to work with Mercenta',
+    subheading: 'Brands entering the UK, licensed properties, talent and distributors.',
     cards: PUBLIC_OUTCOMES.map((outcome, i) => ({
       title: outcome.title,
       description: outcome.body,
@@ -174,52 +188,45 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     points: [
       {
         title: 'Every order, in one queue',
-        description:
-          'What has come in, what it is worth and what is waiting on a decision from you — with the ones that need you soonest at the top.',
+        description: 'What has come in, what it is worth and what needs your decision. Soonest first.',
         icon: 'package',
       },
       {
         title: 'Every document, in its place',
-        description:
-          'What is approved, what is coming up for renewal and what is holding something back — so a piece of paper never stalls an order quietly.',
+        description: 'What is approved, what is renewing and what is holding an order back.',
         icon: 'shield',
       },
       {
         title: 'Every payment, explained',
-        description:
-          'What has settled, what is still to come and what each deduction was for — shown against the order that caused it.',
+        description: 'What has settled, what is to come and what each deduction was for.',
         icon: 'trending',
       },
     ],
   },
   protection: {
-    heading: 'When something goes wrong, you hear it from us',
-    subheading: 'Nothing in this business is risk-free. What matters is who tells you, and how quickly.',
+    heading: 'When something goes wrong',
+    subheading: 'You hear it from us first.',
     points: [
       {
         title: 'A problem is never hidden',
-        description:
-          'A late consignment, a failed delivery, a document that is rejected — you are told, and told what is being done about it.',
+        description: 'A late consignment or a rejected document: you are told what is being done.',
         icon: 'target',
       },
       {
         title: 'A payment is never quietly absorbed',
-        description:
-          'If a figure looks wrong, it is held and reviewed rather than paid out or written off without you seeing it.',
+        description: 'A figure that looks wrong is held and reviewed, not paid out.',
         icon: 'shield',
       },
       {
         title: 'Your approval comes first',
-        description:
-          'Nothing happens to your products or your money that you have not agreed to. That is the whole point of working with us.',
+        description: 'Nothing happens to your products or money without your approval.',
         icon: 'check',
       },
     ],
   },
   finalCta: {
-    heading: 'Ready to find out whether the UK wants your products?',
-    subheading:
-      'Start with an honest read on the market — free, and worth having whether or not you go any further with {{brand}}.',
+    heading: 'Find out whether the UK wants your product.',
+    subheading: 'Start with a free, honest read on the market. No obligation.',
     buttonLabel: 'Explore UK Market Fit',
     stampLine1: 'UK market',
     stampLine2: 'assessment',
@@ -282,6 +289,11 @@ export function normaliseHomepageContent(raw: unknown): HomepageContent {
   const finalCta = obj(raw ? obj(raw).finalCta : undefined);
 
   return {
+    /* §BRAND REDESIGN — FAIL-CLOSED: an unrecognised persisted design id falls
+       back to the canonical default rather than rendering nothing. */
+    design: isHomepageDesignId(raw && (raw as Record<string, unknown>).design)
+      ? ((raw as Record<string, unknown>).design as HomepageDesignId)
+      : d.design,
     hero: {
       eyebrow: str(hero.eyebrow, d.hero.eyebrow),
       headingStart: str(hero.headingStart, d.hero.headingStart),

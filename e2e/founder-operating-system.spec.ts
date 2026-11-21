@@ -23,6 +23,18 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+/**
+ * §BRAND REDESIGN (2026-11-19) — THE VAULT COUNT IS READ FROM THE OWNER.
+ *
+ * This spec asserted a hardcoded 23 credential-vault providers. The owner
+ * (`src/config/credentialVault.ts` → `CREDENTIAL_VAULT_CONTRACTS`, derived from
+ * the canonical integration registry) now declares 21, so the assertion failed
+ * for a reason that had nothing to do with the vault being wrong: a
+ * hand-maintained number in a test had drifted from the data it describes.
+ * Importing the owner's own list means the assertion cannot drift again, and it
+ * still fails if the UI stops rendering a contract the owner declares.
+ */
+import { CREDENTIAL_VAULT_CONTRACTS } from '../src/config/credentialVault';
 
 const SHOTS = 'test-screenshots/founder-os';
 
@@ -795,7 +807,7 @@ test.describe('Founder Operating System — Control Centre', () => {
     await page.getByRole('tab', { name: /^Brands/ }).click();
 
     const providers = page.getByTestId('control-credential-vault-list').locator('li');
-    await expect(providers).toHaveCount(23);
+    await expect(providers).toHaveCount(CREDENTIAL_VAULT_CONTRACTS.length);
     // The store held today is in-memory (not durable), so nothing is usable.
     await expect(page.getByTestId('control-credential-vault-counts')).toContainText('Usable: 0');
     await expect(page.getByTestId('control-credential-vault-counts')).toContainText('in-memory (not durable)');

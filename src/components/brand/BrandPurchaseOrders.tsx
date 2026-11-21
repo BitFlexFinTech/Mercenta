@@ -628,7 +628,7 @@ export function BrandPurchaseOrders() {
       />
 
       {notice && (
-        <div role="status" className="mt-3 bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-xs text-sky-200">
+        <div role="status" className="mt-3 bg-sky-500/10 border border-sky-500/20 rounded-ds-md p-3 text-xs text-state-info">
           {notice}
         </div>
       )}
@@ -890,7 +890,7 @@ export function BrandPurchaseOrders() {
                   when the channel's update window is open. */}
               {ackingPO === po.id && (canAct || canAmend) && (
                 <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 space-y-3">
-                  <p className="text-ds-label text-emerald-200">
+                  <p className="text-ds-label text-state-success">
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
                     Acknowledged quantity can never exceed the ordered quantity.
@@ -899,7 +899,7 @@ export function BrandPurchaseOrders() {
                       owner so the brand is told its real obligation. */}
                   {canAmend && (
                     <p
-                      className="text-ds-micro text-sky-200/80"
+                      className="text-ds-micro text-state-info/80"
                       data-testid={`po-amend-window-state-${po.poNumber}`}
                     >
                       {PO_AMENDMENT_WINDOW_RULE_TEXT}
@@ -908,7 +908,7 @@ export function BrandPurchaseOrders() {
                   {/* §P13 / S6 — the window this decision is being made inside, stated
                       by the rule's OWNER verbatim (never re-derived by the surface). */}
                   <p
-                    className="text-ds-micro text-emerald-200/80"
+                    className="text-ds-micro text-state-success/80"
                     data-testid={`po-ack-window-state-${po.poNumber}`}
                   >
                     {poAcknowledgementWindow(po).reason}
@@ -1045,7 +1045,7 @@ export function BrandPurchaseOrders() {
                   className="mt-3 bg-red-500/5 border border-red-500/20 rounded-ds-md p-3 space-y-2"
                   data-testid={`po-onbehalf-draft-${po.poNumber}`}
                 >
-                  <p className="text-ds-label text-red-200 font-medium">
+                  <p className="text-ds-label text-state-danger font-medium">
                     Mercenta's draft — the rejection the retail channel requires
                   </p>
                   <p className="text-ds-micro text-zinc-400">{onBehalfDraft.ruleText}</p>
@@ -1110,7 +1110,7 @@ export function BrandPurchaseOrders() {
                     className="mt-3 bg-sky-500/5 border border-sky-500/20 rounded-ds-md p-3 space-y-1"
                     data-testid={`po-mercenta-status-${po.poNumber}`}
                   >
-                    <p className="text-ds-label text-sky-200 font-medium">
+                    <p className="text-ds-label text-state-info font-medium">
                       Mercenta channel action — you are not required to file anything
                     </p>
                     <p className="text-ds-micro text-zinc-400">
@@ -1170,7 +1170,7 @@ export function BrandPurchaseOrders() {
               */}
               {correctionPO === po.id && (
                 <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 space-y-2">
-                  <p className="text-ds-label text-blue-200">
+                  <p className="text-ds-label text-state-info">
                     Tell Mercenta how this consignment was actually packed. Mercenta re-files the ASN
                     with these quantities — you do not file the document and you do not choose the carrier.
                   </p>
@@ -1339,7 +1339,7 @@ export function BrandPurchaseOrders() {
                   )}
 
                   {isFinanced && (po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-ds-label text-emerald-200 flex items-start gap-2">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-ds-md p-3 text-ds-label text-state-success flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         Accepted — Mercenta is handling fulfilment and financing for this
@@ -1349,7 +1349,7 @@ export function BrandPurchaseOrders() {
                     </div>
                   )}
                   {!isFinanced && po.status === 'accepted' && (
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-ds-label text-blue-200 flex items-start gap-2">
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-ds-md p-3 text-ds-label text-state-info flex items-start gap-2">
                       <Truck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         {fulfillmentTrackLabel('direct_fulfillment')} — Mercenta raises the shipment request and files the ASN
@@ -1460,7 +1460,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
       className="mt-3 rounded-ds-md border border-sky-500/20 bg-sky-500/10 p-3"
       data-testid={`po-revision-notice-${po.poNumber}`}
     >
-      <p className="text-ds-label text-sky-200">
+      <p className="text-ds-label text-state-info">
         The retail channel changed this purchase order — you are working from version{' '}
         {state.revisionNumber} of it.
       </p>
@@ -1477,7 +1477,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
           {latest.changes.map((change, index) => (
             <li
               key={`${change.kind}-${change.subject}-${index}`}
-              className="text-ds-micro text-sky-100/80"
+              className="text-ds-micro text-state-info/80"
             >
               {PO_CHANNEL_CHANGE_KIND_LABELS[change.kind]} — {change.detail}
             </li>
@@ -1485,7 +1485,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
         </ul>
       )}
       {latest && latest.changes.length === 0 && (
-        <p className="mt-1.5 text-ds-micro text-sky-100/80">
+        <p className="mt-1.5 text-ds-micro text-state-info/80">
           {latest.changeKinds.map((kind) => PO_CHANNEL_CHANGE_KIND_LABELS[kind]).join(' · ')}
         </p>
       )}
@@ -1507,7 +1507,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
         </p>
       )}
       <p
-        className="mt-1.5 text-ds-micro text-sky-200/70"
+        className="mt-1.5 text-ds-micro text-state-info/70"
         data-testid={`po-revision-rule-${po.poNumber}`}
       >
         {PO_REVISION_RULE_TEXT}
@@ -1534,16 +1534,16 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
       className="mt-3 rounded-ds-md border border-amber-500/20 bg-amber-500/10 p-3"
       data-testid={`ack-price-notice-${po.poNumber}`}
     >
-      <p className="text-ds-label text-amber-200">{ACK_PRICE_DISCREPANCY_TITLE}</p>
+      <p className="text-ds-label text-state-warning">{ACK_PRICE_DISCREPANCY_TITLE}</p>
       <ul className="mt-1.5 space-y-0.5">
         {divergences.map((d) => (
-          <li key={d.sku} className="text-ds-micro text-amber-100/80">
+          <li key={d.sku} className="text-ds-micro text-state-warning/80">
             {d.sku}: order unit price £{d.poUnitPrice.toFixed(2)} → acknowledged £
             {d.acknowledgedUnitPrice.toFixed(2)} — your invoice bills the acknowledged price
           </li>
         ))}
       </ul>
-      <p className="mt-1.5 text-ds-micro text-amber-200/70">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
+      <p className="mt-1.5 text-ds-micro text-state-warning/70">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
     </div>
   );
 }
@@ -1568,7 +1568,7 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
       )}
       data-testid={`po-channel-hold-${po.poNumber}`}
     >
-      <p className={cn('text-ds-label', duty.held ? 'text-amber-200' : 'text-zinc-300')}>
+      <p className={cn('text-ds-label', duty.held ? 'text-state-warning' : 'text-zinc-300')}>
         {duty.held ? 'Retail channel hold: this order is on hold' : 'Retail channel hold lifted'}
       </p>
       <p className="mt-1.5 text-ds-micro text-zinc-300/90">{duty.statement}</p>
@@ -1593,17 +1593,17 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
       className="mt-3 rounded-ds-md border border-amber-500/20 bg-amber-500/10 p-3"
       data-testid={`po-implicit-rejections-${po.poNumber}`}
     >
-      <p className="text-ds-label text-amber-200">
+      <p className="text-ds-label text-state-warning">
         The acknowledgement omitted {lines.length} of {po.lineItems.length} lines
       </p>
       <ul className="mt-1.5 space-y-0.5">
         {lines.map((sku) => (
-          <li key={sku} className="text-ds-micro text-amber-100/80">
+          <li key={sku} className="text-ds-micro text-state-warning/80">
             {sku} — rejected because the acknowledgement did not include it
           </li>
         ))}
       </ul>
-      <p className="mt-1.5 text-ds-micro text-amber-200/70">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
+      <p className="mt-1.5 text-ds-micro text-state-warning/70">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
     </div>
   );
 }
@@ -1704,7 +1704,7 @@ function HoldDutyLine({ po }: { po: PurchaseOrder }) {
   const duty = poChannelHoldDuty(po);
   return (
     <p
-      className="text-ds-micro text-amber-200/80"
+      className="text-ds-micro text-state-warning/80"
       data-testid={`po-hold-duty-${po.poNumber}`}
     >
       {duty.statement} {duty.ruleText}
@@ -1738,7 +1738,7 @@ function SubmitCompletenessNotice({
   );
   return (
     <p
-      className={`text-ds-micro ${verdict.statement ? 'text-amber-200/80' : 'text-zinc-400'}`}
+      className={`text-ds-micro ${verdict.statement ? 'text-state-warning/80' : 'text-zinc-400'}`}
       data-testid={`po-submit-completeness-${po.poNumber}`}
       data-completeness={verdict.complete ? 'complete' : 'incomplete'}
     >

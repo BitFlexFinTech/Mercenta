@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { Avatar } from '@/components/shared/Avatar';
 import { DOMAIN_COLOURS, sectionDomain } from '@/config/themes';
-import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { BrandMark } from '@/components/shared/BrandMark';
 import { ChevronDown, Pin, PanelLeftClose, PanelLeft, Search } from 'lucide-react';
 
 /**
@@ -195,11 +195,7 @@ export function Sidebar({
           side by side). */}
       <div className="border-b border-hairline">
         <div className={cn('flex items-center gap-3 px-5 pt-6', compact ? 'flex-col pb-3' : 'pb-6')}>
-          <img
-            src={brandMark}
-            alt="Mercenta Partners hexagon mark"
-            className="h-[26px] w-[26px] flex-shrink-0"
-          />
+          <BrandMark alt="Mercenta Partners mark" className="h-[26px] w-[26px] flex-shrink-0" />
           {!compact && (
             <div className="min-w-0 flex-1">
               <div className="truncate text-ds-title font-semibold tracking-tight text-strong">Mercenta</div>

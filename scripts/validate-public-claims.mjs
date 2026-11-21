@@ -228,9 +228,14 @@ try {
   const ukConfig = await vite.ssrLoadModule('/src/config/ukMarketFit.ts');
   const TESTIDS = ukConfig.PRE_AUDIT_TESTIDS;
   const publicPaths = routes.PUBLIC_ROUTES.map((r) => r.path);
+  /* §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The two retired ids
+     ('bold', 'minimal-light') are rejected by the current `isThemeId()`, so BOTH
+     shells silently fell back to the default appearance and the "two shells" clause
+     was checking the SAME appearance twice — a check that could not fail. They are
+     now the real pair the owner declares. */
   const themes = [
-    { id: 'bold', shell: 'dark' },
-    { id: 'minimal-light', shell: 'light' },
+    { id: 'brand-dark', shell: 'dark' },
+    { id: 'brand-light', shell: 'light' },
   ];
 
   const rendered = [];

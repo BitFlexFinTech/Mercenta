@@ -29,51 +29,59 @@ import { loginAs } from './helpers/auth';
 const SHOT_DIR = 'test-screenshots/themes';
 
 /**
- * The five themes and the accent each MUST render (src/config/themes.ts).
+ * The TWO approved appearances and the values each MUST render
+ * (`src/config/themes.ts`).
  *
- * §OPENSHIP MAPPING (2026-10-15) — REPOINTED AGAIN: minimal-light and serious implement
- * OpenShip Light (violet #7C3AED), professional implements DIM (lime #B7ED5A), fun implements
- * DARK (orange #F97316), and bold stays preserved exactly. Three distinct accents are rendered
- * ON PURPOSE, and each theme takes the scrim and tint of the design it implements.
+ * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED. The selectable set is
+ * now EXACTLY TWO, both built from the approved Mercenta identity (black
+ * #000000 · white #FFFFFF · orange #FF6A00):
  *
- * §OPENSHIP BATCH 3 (2026-10-14) — REPOINTED, NOT WEAKENED. Four accents moved
- * because the four non-Bold themes now carry OpenShip's designs (spec §13) and
- * OpenShip's own accent hues: the light design's violet→blue pair, its `dim`
- * design's lime, and the dark design's orange. `bold` is deliberately unchanged
- * (#7C3AED) — the Owner's instruction is that it is preserved exactly — so it is
- * still pinned here as the control. This spec must be updated in the SAME change
- * as any theme value: it is the only gate that proves a theme reaches the DOM.
+ *   `brand-dark` (DEFAULT)  ·  `brand-light`
+ *
+ * The five retired themes — minimal-light, professional, bold, fun, serious —
+ * are REMOVED IN FULL and `isThemeId()` rejects their ids, so a returning visitor
+ * carrying one lands on `DEFAULT_THEME`. The old five-entry table below is
+ * therefore not merely stale: it would select an id the app no longer accepts and
+ * the theme would never change, which is exactly the failure this spec exists to
+ * catch. The contract is repointed to the two real appearances and made STRICTLY
+ * STRONGER in three places:
+ *
+ *   · the accent is now SHARED on purpose (one brand orange), so "the accents
+ *     differ" can no longer be the proof that a theme switch did anything — the
+ *     PAGE BACKGROUND is asserted instead (`#000000` vs `#FFFFFF`);
+ *   · BOTH appearances now draw a hairline card edge (`#2B2B2B` / `#DCDCDC`), so
+ *     the "borderless card" branch is gone and both are asserted to have a real
+ *     edge;
+ *   · the gradient CTA is retired in both (`--mr-accent-image: none`), so the
+ *     primary action is asserted to be a FLAT brand-orange fill with black type.
+ *
+ * This spec must be updated in the SAME change as any theme value: it is the only
+ * gate that proves a theme reaches the DOM.
  */
 const THEMES = [
   {
-    id: 'minimal-light',
-    accent: '#7C3AED',
-    /* §OPENSHIP BATCH 4 — the theme's own SCRIM (spec §2.5) and its hover tint
-       (the reference's foreground tint, spec §7.6): asserted from the COMPUTED
+    id: 'brand-dark',
+    accent: '#FF6A00',
+    /* The theme's own SCRIM (`--mr-overlay-tint`: rgba(0,0,0,0.72)) and its hover
+       tint (`--mr-hover-tint`: rgba(255,255,255,0.05)): asserted from the COMPUTED
        style, so a token that never reaches the DOM fails here. */
     scrim: [0, 0, 0],
-    tint: [0, 0, 0],
-    cardBorder: 'none' as const,
-  },
-  { id: 'professional', accent: '#B7ED5A', scrim: [0, 0, 0], tint: [255, 255, 255], cardBorder: 'none' as const },
-  {
-    id: 'bold',
-    accent: '#7C3AED',
-    scrim: [0, 0, 0],
     tint: [255, 255, 255],
-    /* The Owner's instruction: `bold` is preserved exactly — so its card keeps the
-       border it draws today (its token reproduces the old rgba(255,255,255,0.06)). */
+    /* Both brand appearances draw a hairline edge: `--mr-card-border` is
+       #2B2B2B on dark. */
     cardBorder: 'hairline' as const,
+    /* The page fill — the discriminator now that the accent is shared. */
+    bg: '#000000',
   },
-  { id: 'fun', accent: '#F97316', scrim: [20, 20, 20], tint: [255, 255, 255], cardBorder: 'none' as const },
   {
-    id: 'serious',
-    accent: '#7C3AED',
-    /* The scrim now DARKENS (this theme implements the LIGHT design): on a pure-black page the reference LIGHTENS the veil
-       (`rgb(20 20 20 / 60%)`, spec §2.3) — the trap this assertion pins. */
+    id: 'brand-light',
+    accent: '#FF6A00',
+    /* `--mr-overlay-tint`: rgba(0,0,0,0.50); `--mr-hover-tint`: rgba(0,0,0,0.04). */
     scrim: [0, 0, 0],
     tint: [0, 0, 0],
-    cardBorder: 'none' as const,
+    /* `--mr-card-border` is #DCDCDC on light. */
+    cardBorder: 'hairline' as const,
+    bg: '#FFFFFF',
   },
 ] as const;
 
@@ -129,7 +137,12 @@ async function expectThemeApplied(
   });
   expect(applied.attr, `data-mercenta-theme for ${theme.id}`).toBe(theme.id);
   expect(norm(applied.accent), `computed --mr-accent for ${theme.id}`).toBe(norm(theme.accent));
-  expect(applied.bg.length, `computed --mr-bg for ${theme.id}`).toBeGreaterThan(0);
+  /* §BRAND REDESIGN (2026-11-19) — STRICTLY STRONGER. The accent is now SHARED by
+     both appearances (one brand orange), so it can no longer prove a switch
+     happened. The page fill is the discriminator: #000000 on `brand-dark`,
+     #FFFFFF on `brand-light`. Asserting the exact value (not merely "non-empty")
+     is what makes "the appearance really changed" a fact about the browser. */
+  expect(norm(applied.bg), `computed --mr-bg for ${theme.id}`).toBe(norm(theme.bg));
 }
 
 test.describe('§PHASE C — every theme renders, on real screens', () => {
@@ -191,56 +204,64 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
   }
 
   /**
-   * §OPENSHIP BATCH 3 — THE PRIMARY-ACTION GRADIENT, VERIFIED IN THE DOM.
+   * §BRAND REDESIGN (2026-11-19) — THE PRIMARY ACTION IS FLAT, VERIFIED IN THE DOM.
    *
-   * Declaring a token is not rendering it. This asserts the COMPUTED
-   * `background-image` of an element carrying the utility the `primary` Button
-   * variant now uses, under each theme: the four non-bold themes must compute a
-   * real gradient (the radial highlight layer plus the three-stop gradient), and
-   * `bold` must compute `none` — which is what makes "bold is preserved" a fact
-   * about the browser rather than a claim about the config.
+   * REPOINTED, NOT WEAKENED. The approved identity carries ONE flat brand orange
+   * (`#FF6A00`); the decorative gradient CTA that the retired OpenShip mapping
+   * carried is gone in BOTH appearances (`--mr-accent-image: none` and
+   * `--mr-accent-image-hover: none`). The old assertion demanded a gradient on four
+   * themes and `none` on one — under the current contract that would fail on every
+   * theme, so it is repointed to the behaviour that is actually approved.
+   *
+   * The check is not simply inverted to "expect none": the SAME probe also asserts
+   * the fill that replaced the gradient, so a theme that painted NO background at
+   * all could not pass. Declaring a token is not rendering it; this proves what the
+   * browser computes.
    */
-  test('the primary-action gradient reaches the DOM (and is ABSENT in bold)', async ({ page }) => {
+  test('the primary action paints the flat brand fill, with no decorative gradient', async ({
+    page,
+  }) => {
     for (const theme of THEMES) {
       await selectTheme(page, theme.id);
       const computed = await page.evaluate(() => {
         const el = document.createElement('button');
-        el.className = 'ds-btn-accent';
+        el.className = 'ds-btn-accent bg-brass-500';
         el.textContent = 'probe';
         document.body.appendChild(el);
-        const value = getComputedStyle(el).backgroundImage;
+        const cs = getComputedStyle(el);
+        const out = { image: cs.backgroundImage, bg: cs.backgroundColor };
         el.remove();
-        return value;
+        return out;
       });
-      if (theme.id === 'bold') {
-        expect(computed, 'bold must paint NO image, so its button keeps its flat accent').toBe('none');
-      } else {
-        expect(computed, `${theme.id} must paint a real gradient`).toContain('linear-gradient');
-        expect(computed, `${theme.id} must also paint the radial highlight layer`).toContain(
-          'radial-gradient'
-        );
-      }
+      expect(
+        computed.image,
+        `${theme.id} must paint NO decorative gradient (the brand fill is flat)`
+      ).toBe('none');
+      expect(
+        computed.bg,
+        `${theme.id} must still paint the brand orange fill beneath the flat action`
+      ).toBe('rgb(255, 106, 0)');
     }
   });
 
   /**
-   * §OPENSHIP MAPPING BATCH 3 (2026-10-15) — THE SOLID PRIMARY ACTION, MEASURED IN THE DOM.
+   * §BRAND REDESIGN (2026-11-19) — THE SOLID PRIMARY ACTION, MEASURED IN THE DOM.
    *
-   * `scripts/validate-theme-distinctness.mjs` proves the tokens are declared, wired and
-   * design-matched in the SOURCE. This proves what the BROWSER computes: the page primary
-   * action (the `primary` variant's `.ds-btn`) takes the design's own button fill — near-black
-   * with white text on the two LIGHT designs, WHITE with black text on dim and dark (spec
-   * §2.3–§2.5, §2.7) — while `bold`, which is preserved by contract, computes exactly the flat
-   * accent its button painted before this batch (rgb(124,58,237) = its #7C3AED accent, with its
-   * own surface token as the label colour).
+   * REPOINTED, NOT WEAKENED. `scripts/validate-theme-distinctness.mjs` proves the
+   * tokens are declared and wired in the SOURCE; this proves what the BROWSER
+   * computes. Under the approved identity the page primary action is ONE brand
+   * button in BOTH appearances: `--mr-btn-bg` #FF6A00 with `--mr-btn-text` #000000.
+   * The retired five-theme table (near-black/white fills per design) is gone with
+   * those themes, so the expectation is repointed to the single approved pair.
+   *
+   * The contrast this pins is real: brand orange on black type is a deliberate
+   * high-contrast action, and a theme that drifted its label colour would become
+   * unreadable — which is exactly what the assertion catches.
    */
-  test('the solid primary action computes the design\'s own button colour', async ({ page }) => {
+  test('the solid primary action computes the brand button colours', async ({ page }) => {
     const EXPECTED: Record<string, { bg: string; color: string }> = {
-      'minimal-light': { bg: 'rgba(0, 0, 0, 0.92)', color: 'rgb(255, 255, 255)' },
-      serious: { bg: 'rgba(0, 0, 0, 0.92)', color: 'rgb(255, 255, 255)' },
-      professional: { bg: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' },
-      fun: { bg: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' },
-      bold: { bg: 'rgb(124, 58, 237)', color: 'rgb(18, 19, 24)' },
+      'brand-dark': { bg: 'rgb(255, 106, 0)', color: 'rgb(0, 0, 0)' },
+      'brand-light': { bg: 'rgb(255, 106, 0)', color: 'rgb(0, 0, 0)' },
     };
     for (const theme of THEMES) {
       await selectTheme(page, theme.id);
@@ -270,13 +291,14 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
    * its own neutral `bg-zinc-700` / `hover:bg-zinc-600` / `text-white`, because a
    * full-strength primary action is wrong inside that modal.
    *
-   * This probe is the discriminator: the theme's own fill on `minimal-light` is
-   * `rgba(0, 0, 0, 0.92)`, so if the default were UNLAYERED the computed background
+   * This probe is the discriminator: the theme's own fill is the brand orange
+   * `rgb(255, 106, 0)`, so if the default were UNLAYERED the computed background
    * would be that — not the caller's opaque black. It therefore fails if the rule
-   * ever moves out of the layer.
+   * ever moves out of the layer. (`brand-light` is used so the light shell's own
+   * remaps are exercised at the same time.)
    */
   test("a call site's own colour utility still wins over the `.ds-btn` default", async ({ page }) => {
-    await selectTheme(page, 'minimal-light');
+    await selectTheme(page, 'brand-light');
     const computed = await page.evaluate(() => {
       const el = document.createElement('button');
       el.className = 'ds-btn bg-black text-white';
@@ -293,28 +315,62 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
     expect(computed.color, 'the same holds for the label colour').toBe('rgb(255, 255, 255)');
   });
 
-  test('the five themes render five DIFFERENT accents (a switch that changes nothing is not a theme)', async ({
-    page,
-  }) => {
-    const seen: Record<string, string> = {};
+  /**
+   * §BRAND REDESIGN (2026-11-19) — A SWITCH THAT CHANGES NOTHING IS STILL NOT A THEME.
+   *
+   * REPOINTED, NOT WEAKENED. The old test asserted that the five themes painted
+   * five different accents. Under the approved identity there is exactly ONE brand
+   * accent (`#FF6A00`) and BOTH appearances must paint it — so "different accents"
+   * is no longer the proof that a switch did anything, and asserting it would
+   * contradict the contract. The proof is repointed to the two facts that ARE the
+   * contract, and both are stricter than the old floor:
+   *
+   *   1. both appearances compute the SAME single brand accent (`#FF6A00`) — a
+   *      drift here would mean the accent had been retyped per theme;
+   *   2. the PAGE FILL differs between them (`#000000` vs `#FFFFFF`) — a switch
+   *      that changed nothing would fail here.
+   */
+  test('both appearances share the one brand accent and differ in page fill', async ({ page }) => {
+    const seen: Record<string, { accent: string; bg: string }> = {};
     for (const theme of THEMES) {
       await selectTheme(page, theme.id);
-      seen[theme.id] = await page.evaluate(() =>
-        getComputedStyle(document.documentElement).getPropertyValue('--mr-accent').trim().toLowerCase()
-      );
+      seen[theme.id] = await page.evaluate(() => {
+        const cs = getComputedStyle(document.documentElement);
+        return {
+          accent: cs.getPropertyValue('--mr-accent').trim().toLowerCase(),
+          bg: cs.getPropertyValue('--mr-bg').trim().toLowerCase(),
+        };
+      });
     }
-    const values = Object.values(seen);
-    expect(new Set(values).size, `accents rendered: ${JSON.stringify(seen)}`).toBeGreaterThanOrEqual(3); /* OPENSHIP MAPPING 2026-10-15: minimal-light and serious share the Light accent by the Owner instruction, so the floor is the three DESIGNS (light violet, dim lime, dark orange). The old five-distinct rule would forbid the mapping. */
+    const accents = Object.values(seen).map((s) => s.accent);
+    expect(
+      new Set(accents).size,
+      `both appearances must paint the ONE brand accent: ${JSON.stringify(seen)}`
+    ).toBe(1);
+    expect(accents[0], 'the shared accent is the approved brand orange').toBe('#ff6a00');
+
+    const fills = Object.values(seen).map((s) => s.bg);
+    expect(
+      new Set(fills).size,
+      `the page fill must differ between the two appearances: ${JSON.stringify(seen)}`
+    ).toBe(2);
   });
 
   /**
-   * §OPENSHIP BATCH 4 (2026-10-15) — THE SHARED SURFACES, VERIFIED IN THE DOM.
+   * §BRAND REDESIGN (2026-11-19) — THE SHARED SURFACES, VERIFIED IN THE DOM.
    *
    * `scripts/validate-shared-surfaces.mjs` proves the WIRING in the source. This
-   * proves what the browser COMPUTES, per theme, for the four surfaces the batch
-   * changes — including the two traits it exists for: a BORDERLESS card, and a
-   * nested card that cannot VANISH inside it (with `bold`, whose token reproduces
-   * today's rendering, deliberately unchanged).
+   * proves what the browser COMPUTES, per appearance, for the four surfaces the
+   * design system owns: the card edge, the nested card, the modal scrim and the
+   * floating dropdown.
+   *
+   * REPOINTED, NOT WEAKENED. The retired OpenShip contract made the card BORDERLESS
+   * on four themes and kept the border only on `bold`; the approved identity draws
+   * a hairline edge on BOTH appearances (`#2B2B2B` on dark, `#DCDCDC` on light), so
+   * the "borderless" branch is removed and BOTH appearances are asserted to carry a
+   * real edge — a stricter requirement than the old one. The `bold`-only nested-card
+   * exception is removed with that theme; the nested card must not VANISH in either
+   * appearance, which is the trait the rule exists for.
    *
    * The probes are the primitive's own class strings (the same technique the CTA
    * test above uses), so a token that is declared but never reaches the DOM fails.
@@ -368,17 +424,20 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
         return out;
       });
 
-      if (theme.cardBorder === 'none') {
-        expect(alphaOf(probe.cardBorder), `${theme.id}: the card must be BORDERLESS`).toBe(0);
-      } else {
-        expect(alphaOf(probe.cardBorder), `${theme.id}: bold keeps the card border it draws today`).toBeGreaterThan(0);
-      }
+      /* Both approved appearances draw a real hairline edge from `--mr-card-border`.
+         A theme whose card lost its edge would render as a floating rectangle with
+         no separation on a same-colour page — the defect this pins. */
+      expect(
+        alphaOf(probe.cardBorder),
+        `${theme.id}: the card edge must be a real hairline (${probe.cardBorder})`
+      ).toBeGreaterThan(0);
 
-      if (theme.id === 'bold') {
-        expect(probe.innerBg, 'bold: a nested card keeps its own fill — the rule is a NO-OP there').toBe(probe.outerBg);
-      } else {
-        expect(probe.innerBg, `${theme.id}: a nested card must NOT vanish (its fill differs)`).not.toBe(probe.outerBg);
-      }
+      /* A nested card must never VANISH inside its parent: its fill has to differ
+         from the outer card's, or the nesting reads as one flat block. */
+      expect(
+        probe.innerBg,
+        `${theme.id}: a nested card must NOT vanish (its fill differs)`
+      ).not.toBe(probe.outerBg);
 
       expect(alphaOf(probe.menuBg), `${theme.id}: the dropdown is TRANSLUCENT`).toBeLessThan(1);
       expect(probe.menuBlur, `${theme.id}: the dropdown carries a real backdrop blur`).toContain('blur(');
@@ -389,13 +448,13 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
       expect(rgbOf(probe.tintBg), `${theme.id}: the hover tint is the foreground tint`).toEqual([...theme.tint]);
     }
 
-    /* And on a REAL screen: a REAL card, rendered by the primitive, must actually be
-       borderless in a non-Bold theme — the batch's whole point, proven where a user
-       sees it rather than in a probe. `minimal-light` is chosen because it is the
-       default theme an operator first meets, and an explicitly-bordered dialog card
-       is excluded (26 call sites keep their own border by design, spec §13 Batch-4
-       divergence 2). */
-    await selectTheme(page, 'minimal-light');
+    /* And on a REAL screen: a REAL card, rendered by the primitive, must carry the
+       theme's hairline edge — proven where a user sees it rather than in a probe.
+       `brand-light` is chosen because it is the appearance whose edge is lightest
+       against its own page fill, so a lost edge is most visible there. An
+       explicitly-bordered dialog card is excluded (call sites may keep their own
+       border by design), so the selector skips `border-white` variants. */
+    await selectTheme(page, 'brand-light');
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page
       .locator('nav[aria-label="Primary"] button', { hasText: 'Purchase Orders' })
@@ -405,6 +464,9 @@ test.describe('§PHASE C — every theme renders, on real screens', () => {
     const realCard = page.locator('.ds-card:not([class*="border-white"])').first();
     await expect(realCard).toBeVisible({ timeout: 8000 });
     const realBorder = await realCard.evaluate((el) => getComputedStyle(el).borderTopColor);
-    expect(alphaOf(realBorder), `a real card on a real screen must be BORDERLESS (${realBorder})`).toBe(0);
+    expect(
+      alphaOf(realBorder),
+      `a real card on a real screen must carry the theme's hairline edge (${realBorder})`
+    ).toBeGreaterThan(0);
   });
 });

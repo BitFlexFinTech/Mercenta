@@ -20,6 +20,15 @@ import {
   type HomepageContent,
   type HomeCardItem,
 } from '@/config/homepageContent';
+/**
+ * §BRAND REDESIGN (2026-11-19) — THE HOMEPAGE DESIGN AXIS. Which composition
+ * renders is a separate axis from the appearance, owned by `homepageDesign.ts`.
+ */
+import {
+  HOMEPAGE_DESIGNS,
+  HOMEPAGE_DESIGN_ORDER,
+  type HomepageDesignId,
+} from '@/config/homepageDesign';
 import { lintOutwardWording } from '@/lib/discovery/wordingSafety';
 import { Home } from '@/components/marketing/Home';
 import { Badge, Button, Card, Input } from '@/components/ui';
@@ -138,6 +147,14 @@ function PointsEditor({
 
 export function HomepageEditor() {
   const [content, setContent] = useState<HomepageContent>(DEFAULT_HOMEPAGE_CONTENT);
+  /**
+   * §BRAND REDESIGN — the design that is CURRENTLY LIVE, kept separate from the
+   * draft selection so the editor can always show what is published versus what
+   * is merely selected. Selecting a design changes the DRAFT only.
+   */
+  const [publishedDesign, setPublishedDesign] = useState<HomepageDesignId>(
+    DEFAULT_HOMEPAGE_CONTENT.design
+  );
   const [status, setStatus] = useState('');
   const [previewDraft, setPreviewDraft] = useState(false);
 
@@ -150,6 +167,9 @@ export function HomepageEditor() {
   async function loadPersisted() {
     const r = await fetchHomepageContent();
     setContent(r.draft ?? r.live);
+    /* §BRAND REDESIGN — remember what is LIVE, so the picker can distinguish it
+       from the draft selection. */
+    setPublishedDesign(r.live.design);
   }
 
   useEffect(() => {
@@ -258,6 +278,83 @@ export function HomepageEditor() {
               </Badge>
             )
           )}
+        </div>
+
+        {/* ── §BRAND REDESIGN (2026-11-19) — HOMEPAGE DESIGN SELECTION ──────
+            The four approved compositions. Selecting one changes the DRAFT ONLY:
+            nothing reaches the public homepage until Publish is pressed. The
+            "Preview" control shows the draft in the embedded preview below, which
+            renders the REAL `Home` component — so what the owner sees is what
+            publishes. Previewing never publishes. */}
+        <div className="mt-6 border-t border-hairline pt-5" data-testid="homepage-design-picker">
+          <p className="mb-1 text-ds-label uppercase tracking-wider text-zinc-500">
+            Homepage design
+          </p>
+          <p className="mb-3 text-ds-micro text-zinc-500">
+            Published:{' '}
+            <span className="font-semibold text-strong">{HOMEPAGE_DESIGNS[publishedDesign].label}</span>
+            {content.design !== publishedDesign && (
+              <>
+                {' '}
+                · draft selection:{' '}
+                <span className="font-semibold text-strong">
+                  {HOMEPAGE_DESIGNS[content.design].label}
+                </span>{' '}
+                — not published
+              </>
+            )}
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {HOMEPAGE_DESIGN_ORDER.map((id) => {
+              const d = HOMEPAGE_DESIGNS[id];
+              const active = content.design === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  data-testid={`homepage-design-option-${id}`}
+                  data-state={active ? 'active' : 'idle'}
+                  onClick={() => setContent((prev) => ({ ...prev, design: id }))}
+                  className={
+                    'rounded-ds-lg border p-3 text-left transition-colors ' +
+                    (active
+                      ? 'border-brass-500 bg-brass-500/10'
+                      : 'border-hairline bg-ink-850 hover:border-brass-500/40')
+                  }
+                >
+                  <span className="block text-xs font-semibold text-strong">{d.label}</span>
+                  <span className="mt-1 block text-ds-micro leading-snug text-zinc-500">
+                    {d.description}
+                  </span>
+                  {publishedDesign === id && (
+                    <span className="mt-2 inline-block rounded-ds-sm border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-ds-micro text-emerald-300">
+                      Live
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              variant="ghost"
+              className="text-xs"
+              data-testid="homepage-design-preview"
+              onClick={() => setPreviewDraft(true)}
+            >
+              <Eye className="mr-1.5 h-3.5 w-3.5" /> Preview this design (not published)
+            </Button>
+            {content.design !== publishedDesign && (
+              <Button
+                variant="ghost"
+                className="text-xs"
+                data-testid="homepage-design-reset"
+                onClick={() => setContent((prev) => ({ ...prev, design: publishedDesign }))}
+              >
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset to published
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Hero */}

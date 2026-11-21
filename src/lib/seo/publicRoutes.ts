@@ -49,6 +49,12 @@ import { LIFT_OFF_PATH } from '@/config/liftOff';
  * different ways. It now reads the owner.
  */
 import { PUBLIC_PROMISE } from '@/config/positioning';
+/**
+ * §PUBLIC CONTENT PROGRAMME (2026-11-19) — the 16 approved content pages.
+ * Their route entries are DERIVED from their own owner, so a page cannot exist in
+ * the router without existing in the content model (and vice versa).
+ */
+import { PUBLIC_CONTENT_PAGES, type PublicContentPageId } from '@/config/publicPages';
 
 /** The public page ids — the SAME union `PublicNav` renders. */
 export type PublicRoutePage =
@@ -60,7 +66,22 @@ export type PublicRoutePage =
   | 'privacy'
   | 'terms'
   | 'explore-uk-market-fit'
-  | 'lift-off';
+  | 'lift-off'
+  /*
+   * §NAVIGATION REPAIR (2026-11-20) — THE REDUNDANT, LYING LIST IS GONE.
+   *
+   * This union used to RE-LIST every content-page id by hand AND carry
+   * seventeen ids that had no page at all (`order-automation-page`,
+   * `entering-uk`, `scaling-uk`, `commercial-terms`, …). TypeScript would not
+   * catch their absence from `PUBLIC_ROUTES`, because `PUBLIC_ROUTE_BY_PAGE` is
+   * built with an `as Record<PublicRoutePage, …>` cast that silences the check.
+   *
+   * So the type system said seventeen dead menu ids were valid pages, the router
+   * rendered NOTHING for them, and visitors got a blank screen. The ids now come
+   * from their single owner, `src/config/publicPages.ts`, and reachability is
+   * proved at runtime by `scripts/validate-public-links.mjs`.
+   */
+  | PublicContentPageId;
 
 export interface PublicRouteDefinition {
   /** The canonical path, exactly as it appears in the address bar. */
@@ -196,6 +217,21 @@ export const PUBLIC_ROUTES: readonly PublicRouteDefinition[] = [
     changefreq: 'monthly',
     priority: '0.8',
   },
+  /* ── §PUBLIC CONTENT PROGRAMME (2026-11-19) — THE 16 APPROVED PAGES ────────
+     DERIVED from `src/config/publicPages.ts`. A page cannot be routable unless
+     it exists in the content model, and it cannot exist in the content model
+     without a title, a description and real body content — so there can be no
+     dead route and no empty page. */
+  ...PUBLIC_CONTENT_PAGES.map((p) => ({
+    path: p.path,
+    page: p.id as PublicRoutePage,
+    title: `${p.title} — ${BRAND_NAME}`,
+    description: p.description,
+    robots: 'index, follow' as const,
+    changefreq: 'monthly' as const,
+    priority: '0.7',
+  })),
+
 ] as const;
 
 export const PUBLIC_ROUTE_BY_PATH: Record<string, PublicRouteDefinition> = Object.fromEntries(
@@ -205,6 +241,24 @@ export const PUBLIC_ROUTE_BY_PATH: Record<string, PublicRouteDefinition> = Objec
 export const PUBLIC_ROUTE_BY_PAGE: Record<PublicRoutePage, PublicRouteDefinition> = Object.fromEntries(
   PUBLIC_ROUTES.map((r) => [r.page, r])
 ) as Record<PublicRoutePage, PublicRouteDefinition>;
+
+/**
+ * §NAVIGATION REPAIR (2026-11-20) — THE DECLARED ADDRESS OF A PAGE, OR `null`.
+ *
+ * `PUBLIC_ROUTE_BY_PAGE` is typed as `Record<PublicRoutePage, …>` by an `as`
+ * cast, so the TYPE SYSTEM claims every page id has a route even when the route
+ * table has no row for it. That cast is why a menu could point at a page that
+ * did not exist and nothing complained: `resolveRoute` returned `unknown`, the
+ * router rendered nothing, and the visitor got a blank screen.
+ *
+ * This function tells the truth at runtime. `null` means "no route is declared
+ * for this page", and the caller must not render a link to it.
+ * `scripts/validate-public-links.mjs` fails the build if any navigation entry
+ * resolves to `null`, so the fallback in the components cannot ship.
+ */
+export function pathForPublicPage(page: PublicRoutePage): string | null {
+  return PUBLIC_ROUTE_BY_PAGE[page]?.path ?? null;
+}
 
 /**
  * Paths that must NEVER be indexed. These mirror `public/robots.txt`'s Disallow

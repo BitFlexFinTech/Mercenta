@@ -454,6 +454,15 @@
       "expects": "The homepage editor journey renders and behaves as its spec asserts."
     },
     {
+      "id": "spec-homepage-designs",
+      "capability": "platform",
+      "journey": "homepage designs",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/homepage-designs.spec.ts",
+      "expects": "The four homepage designs (A Monolith default, B Grid, C Signal, D Mark) all render in the real application in BOTH brand appearances; publishing a design from the real editor changes the public homepage; the published design persists across navigation within the session; and the light and dark appearances are measurably different (not the same image)."
+    },
+    {
       "id": "spec-integration-hub",
       "capability": "integrations",
       "journey": "integration hub",

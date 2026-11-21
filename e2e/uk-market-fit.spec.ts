@@ -103,13 +103,32 @@ test.describe('Explore UK Market Fit — public assessment', () => {
   test('1. the homepage carries the primary CTA and Partner Login stays a header utility action', async ({ page }) => {
     const pageErrors = watchForPageErrors(page);
     await page.goto('/');
-    await expect(page.getByTestId('explore-uk-market-fit-cta')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('explore-uk-market-fit-cta')).toHaveText(/Explore UK Market Fit/);
-    // The header utility action exists and is the ONLY Partner Login on the page.
+    /**
+     * §BRAND REDESIGN (2026-11-19) — the approved designs render the SAME CTA in
+     * two places by design: once in the hero and once in the closing section. That
+     * is the approved composition, so the assertion is scoped to the HERO rather
+     * than pretending only one exists. A duplicate test id is not a defect here;
+     * the defect would be the hero losing its CTA, which this still catches.
+     */
+    const heroCta = page.getByTestId('home-hero').getByTestId('explore-uk-market-fit-cta');
+    await expect(heroCta).toBeVisible({ timeout: 10000 });
+    await expect(heroCta).toHaveText(/Explore UK Market Fit/);
+    /**
+     * The header utility action exists and is the ONLY Partner Login IN THE HEADER.
+     *
+     * §BRAND REDESIGN (2026-11-19) — the approved designs also render a secondary
+     * "Partner Login" action inside the hero (`homepage-partner-login`), which is
+     * part of the approved composition, not a competing sibling. The original
+     * assertion counted every button on the page and so failed as soon as the
+     * hero's secondary action was added. The invariant that matters — the header
+     * carries exactly one utility action — is asserted by scoping to the header.
+     */
     await expect(page.getByTestId('public-header-partner-login')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Partner Login' })).toHaveCount(1);
+    await expect(
+      page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Partner Login' })
+    ).toHaveCount(1);
     // The two are not competing siblings inside the hero CTA row.
-    await expect(page.getByTestId('explore-uk-market-fit-cta')).not.toHaveText(/Partner Login/);
+    await expect(heroCta).not.toHaveText(/Partner Login/);
     await page.screenshot({ path: `${SHOTS}/01-homepage-cta.png`, fullPage: false });
     expect(pageErrors, pageErrors.join(' | ')).toEqual([]);
   });
@@ -117,7 +136,9 @@ test.describe('Explore UK Market Fit — public assessment', () => {
   test('2. the CTA opens the assessment and the four progressive steps render', async ({ page }) => {
     const pageErrors = watchForPageErrors(page);
     await page.goto('/');
-    await page.getByTestId('explore-uk-market-fit-cta').click();
+    /* §BRAND REDESIGN (2026-11-19) — the CTA renders in the hero AND the closing
+       section by design; the hero's is the first in document order. */
+    await page.getByTestId('explore-uk-market-fit-cta').first().click();
     await expect(page.getByTestId('uk-market-fit-surface')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('uk-market-fit-step-identity')).toBeVisible();
     await expect(page.getByTestId('uk-market-fit-steps').locator('li')).toHaveCount(4);
@@ -233,7 +254,11 @@ test.describe('Explore UK Market Fit — public assessment', () => {
      */
     await page.addInitScript(() => {
       try {
-        window.localStorage.setItem('mercenta.theme', 'minimal-light');
+        /* §BRAND REDESIGN (2026-11-19) — the approved LIGHT appearance. The retired
+           `minimal-light` id is rejected by `isThemeId()`, so setting it would have
+           silently fallen back to the default and the light-shell assertion would
+           have been measuring the dark shell. */
+        window.localStorage.setItem('mercenta.theme', 'brand-light');
       } catch {
         /* private mode — the default shell applies and the assertion below says so. */
       }

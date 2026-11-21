@@ -276,7 +276,7 @@ export function MessagesHub() {
               className={cn(
                 'rounded-ds-md px-2.5 py-1 text-ds-label font-medium transition-colors',
                 needsHumanOnly
-                  ? 'bg-red-500/20 text-red-200'
+                  ? 'bg-red-500/20 text-state-danger'
                   : 'bg-tint text-zinc-400 hover:bg-tint hover:text-strong'
               )}
             >

@@ -99,7 +99,7 @@ export function CompliancePanel() {
           </div>
         </div>
         {(!chSafe || !hmrcSafe) && (
-          <div className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-amber-200">
+          <div className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-ds-md p-2.5 text-ds-label text-state-warning">
             One or more compliance providers is not resolved as SIMULATION. Actions for that provider are
             refused at the boundary and by the engine. Open Integrations to set the provider to simulation
             (or connect real credentials there later — no code change).

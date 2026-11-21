@@ -18,7 +18,15 @@ import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
 type Period = 30 | 60 | 90;
 // §UI/UX Wave 2 — series colours now come from the canonical chart tokens
 // (`CHART.palette`) rather than local hex literals.
-const CHART_TT = { background: '#1A1A20', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px', color: '#E4E4E7' };
+/* §BRAND IDENTITY — was hardcoded #1A1A20 / #E4E4E7 (a zinc family outside the
+   approved palette). Now theme tokens, so the tooltip follows both themes. */
+const CHART_TT = {
+  background: 'var(--mr-surface-overlay)',
+  border: '1px solid var(--mr-hairline)',
+  borderRadius: '8px',
+  fontSize: '11px',
+  color: 'var(--mr-text)',
+};
 
 export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile, products } = useApp();

@@ -890,7 +890,21 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-20 grey=2832/123 ink=935/116 literal=0/0**
+>
+> **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
+> directions replaced the previous marketing composition, so the legacy-class count
+ * moved; ink dropped 937 → 934 sites when the dead hero constants were removed from
+ * `homepageDesign.ts`). The validator refuses a figure that drifts from the
+ * measurement, so this line is updated in the SAME change as the code that changed it.
+> **Re-measured 2026-11-20** during the footer restructuring (added Explore group to
+> footer, updated BrandLockup variant prop); ink rose 934 → 935 sites.
+>
+> **Re-measured again 2026-11-20**: grey moved 2833 → 2832 sites (files unchanged at
+> 123) because ONE site, the barcode drop-zone frame in `LogisticsHub.tsx`, was
+> repointed from `border-zinc-300` to the `border-hairline-strong` role token — a
+> text-brightness token that was being borrowed for a structural border (near-white in
+> the dark appearance). Ink is unchanged at 934/115. No other figure moved.
 >
 > **§MEASURED-BATCH10-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
 >

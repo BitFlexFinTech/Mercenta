@@ -100,6 +100,22 @@ export const PROVIDER_TESTS: Record<string, Record<string, ProviderTest>> = {
       harmless: 'Reads key metadata for the submitted key. Changes nothing.',
     },
   },
+  /**
+   * §IMAGERY (2026-11-20) — Google Gemini.
+   *
+   * The harmless test LISTS ONE MODEL: it proves the key is accepted by the
+   * Generative Language API without generating anything, so connecting the
+   * wizard costs nothing and cannot burn image quota. Generating an image to
+   * "test" would be the opposite of harmless.
+   */
+  gemini: {
+    '': {
+      url: 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1',
+      method: 'GET',
+      headers: (credential) => ({ 'x-goog-api-key': credential }),
+      harmless: 'Lists one model the key can reach. Generates nothing and changes nothing.',
+    },
+  },
   hunter: {
     '': {
       url: 'https://api.hunter.io/v2/account?api_key={credential}',

@@ -210,17 +210,21 @@ function useTourProgressReactive(brandId: string): TourProgress {
 /* ── Positioning helper ──────────────────────────────────────────── */
 
 /**
- * Returns the bounding rect of the tour's target element on the page,
- * falling back to viewport center if the element isn't found.
+ * Returns the bounding rect of the tour's target element on the page, or null
+ * when the target is not mounted.
+ *
+ * §BRAND REDESIGN (2026-11-19) — PURE ON PURPOSE. This used to call
+ * `el.scrollIntoView(...)` while React was rendering, which is a render-phase
+ * DOM mutation: React may render more than once per commit and may discard a
+ * render, so the page could scroll to a target the user never reached. The
+ * scroll now happens in an effect (`TourStepCard`), which is the only place a
+ * layout side effect belongs. Measurement stays here and stays pure.
  */
 function getTargetRect(targetSelector: string): { top: number; left: number; width: number; height: number } | null {
   const el = document.querySelector(targetSelector);
   if (!el) return null;
-  // Scroll the element into view so the tooltip can position near it
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   const rect = el.getBoundingClientRect();
   return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
-/* ── Tour step card ────────────────────────────────────────────── */
 }
 
 /* ── Tour step card ────────────────────────────────────────────── */
@@ -232,7 +236,38 @@ function TourStepCard(props: {
 }) {
   const { step, currentIndex, totalSteps, onNext, onFinish, onSkip, onLearnMore } = props;
   const dots = Array.from({ length: totalSteps }, function(_, i) { return i; });
-  const targetRect = useMemo(function() { return getTargetRect(step.targetSelector); }, [step.targetSelector]);
+
+  /**
+   * §BRAND REDESIGN (2026-11-19) — the scroll is a LAYOUT SIDE EFFECT, so it
+   * belongs in an effect, not in render. The rect is MEASURED INTO STATE by the
+   * same effect, so the card follows its target when the window is resized or the
+   * page scrolls — which the old render-only measurement could never do (the card
+   * stayed at the position captured on the first paint, so a resize left it
+   * pointing at empty space).
+   *
+   * §LINT FIX (2026-11-19) — this used to hold a `measureTick` counter and force
+   * recomputation through a `useMemo` dependency that the memo body never read, so
+   * `react-hooks/exhaustive-deps` correctly flagged it as an unnecessary
+   * dependency. Measuring into state is the idiomatic form: the value is real
+   * data, it changes only when the geometry changes, and there is no dummy
+   * dependency to explain away.
+   */
+  const [targetRect, setTargetRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  useEffect(function() {
+    const el = document.querySelector(step.targetSelector);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const measure = function() { setTargetRect(getTargetRect(step.targetSelector)); };
+    measure();
+    // Re-measure after the smooth scroll settles, then keep following the target.
+    const t = window.setTimeout(measure, 340);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return function() {
+      window.clearTimeout(t);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [step.targetSelector]);
 
   // Compute tooltip position based on step.position and target element
   const tooltipStyle = useMemo(function(): React.CSSProperties {
@@ -358,7 +393,18 @@ function SkipConfirmModal(props: {
 }) {
   const { tourName, onConfirm, onCancel } = props;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-hover">
+    /* §BRAND REDESIGN (2026-11-19) — the same opaque-veil defect as the tour
+       backdrop: `bg-surface-hover` is a SOLID colour, so confirming a skip
+       blanked the whole product behind the dialog. The canonical translucent
+       scrim (`--mr-overlay-tint` + blur) keeps the dialog legible while the page
+       stays visible behind it. */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+      style={{ backgroundColor: 'var(--mr-overlay-tint)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Skip tour confirmation"
+    >
       <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay p-6 max-w-sm w-full mx-4">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="w-5 h-5 text-amber-400" />
@@ -404,6 +450,61 @@ function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
         })}
       </div>
     </div>
+  );
+}
+
+/* ── Spotlight ring ────────────────────────────────────────────── */
+
+/**
+ * §BRAND REDESIGN (2026-11-19) — the ring around the element a step points at.
+ *
+ * MEASURED DEFECTS THIS CLOSED:
+ *  1. It measured and scrolled the target inside the render body (`querySelector`
+ *     + `scrollIntoView` in an IIFE), so every re-render re-scrolled the page and
+ *     React's render-phase purity was broken. Measurement now lives in an effect.
+ *  2. Its glow was hardcoded `rgba(212, 168, 83, …)` — the RETIRED brass palette.
+ *     The approved identity is black, white and orange, so the ring is the brand
+ *     accent token and follows the active theme automatically.
+ */
+function TourSpotlight(props: { targetSelector: string }) {
+  const { targetSelector } = props;
+  const [rect, setRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+
+  useEffect(function() {
+    function measure() {
+      const el = document.querySelector(targetSelector);
+      if (!el) { setRect(null); return; }
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    }
+    const el = document.querySelector(targetSelector);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    measure();
+    const t = window.setTimeout(measure, 340);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return function() {
+      window.clearTimeout(t);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [targetSelector]);
+
+  if (!rect) return null;
+  return (
+    <div
+      className="fixed z-40 pointer-events-none"
+      style={{
+        top: rect.top - 4,
+        left: rect.left - 4,
+        width: rect.width + 8,
+        height: rect.height + 8,
+        borderRadius: 8,
+        boxShadow: '0 0 0 4px var(--mr-accent), 0 0 20px var(--mr-accent)',
+        transition: 'top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease',
+      }}
+      data-testid="tour-spotlight"
+    />
   );
 }
 
@@ -529,22 +630,32 @@ export function TourEngine(props: TourEngineProps) {
     <>
       {showTour && currentStep && (
         <>
-          <div className="fixed inset-0 z-40 bg-surface-hover pointer-events-none" />
-          {(() => {
-            const el = document.querySelector(currentStep.targetSelector);
-            if (!el) return null;
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const r = el.getBoundingClientRect();
-            return (
-              <div className="fixed z-40 pointer-events-none" style={{
-                top: r.top - 4, left: r.left - 4,
-                width: r.width + 8, height: r.height + 8,
-                borderRadius: 8,
-                boxShadow: '0 0 0 4px rgba(212, 168, 83, 0.7), 0 0 20px rgba(212, 168, 83, 0.3)',
-                transition: 'all 0.3s ease',
-              }} />
-            );
-          })()}
+          {/*
+            * §BRAND REDESIGN (2026-11-19) — THE BLANK-PAGE DEFECT, FIXED AT SOURCE.
+            *
+            * MEASURED DEFECT: this veil was `bg-surface-hover`, which resolves to
+            * `var(--mr-surface-hover)` — a SOLID, OPAQUE colour (#1F1F1F in the dark
+            * appearance, measured in the browser as rgb(31, 31, 31) over a full
+            * 1440×900 viewport). The moment a tour started, a flat near-black
+            * rectangle covered the entire product: the brand portal's dashboard,
+            * tables and navigation all disappeared behind it and only the tour card
+            * remained — the "blank page" the owner reported. The skip-confirmation
+            * modal carried the same opaque veil, so dismissing the tour blanked the
+            * page a second time.
+            *
+            * THE FIX IS THE DESIGN SYSTEM'S OWN SCRIM, not a new mechanism: the
+            * canonical `--mr-overlay-tint` token plus a real backdrop blur — exactly
+            * the pattern `Modal` (ui.tsx), `CommandPalette` and the workspace drawer
+            * already use. The veil stays a veil (the page is dimmed and the
+            * spotlight still reads), and the product underneath stays visible, which
+            * is what a coach-mark must do.
+            */}
+          <div
+            className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-none"
+            style={{ backgroundColor: 'var(--mr-overlay-tint)' }}
+            data-testid="tour-scrim"
+          />
+          <TourSpotlight targetSelector={currentStep.targetSelector} />
           <TourStepCard step={currentStep} currentIndex={currentStepIndex} totalSteps={remainingSteps.length}
             onNext={handleNext} onFinish={handleFinish} onSkip={handleDismiss} onLearnMore={setOpenArticleId} />
         </>
@@ -553,7 +664,15 @@ export function TourEngine(props: TourEngineProps) {
         const article: KBArticle | undefined = openArticleId ? getKnowledgeArticle(openArticleId) : undefined;
         if (!article) return null;
         return (
-          <div className="fixed z-50 inset-0 bg-surface-tint flex items-center justify-center" data-testid="kb-article-panel">
+          /* §BRAND REDESIGN (2026-11-19) — `bg-surface-tint` resolves to a SOLID
+             colour (#161616 in the dark appearance), so opening a "Learn more"
+             article covered the whole product with a flat panel. Same canonical
+             scrim as the tour backdrop. */
+          <div
+            className="fixed z-50 inset-0 flex items-center justify-center backdrop-blur-sm"
+            style={{ backgroundColor: 'var(--mr-overlay-tint)' }}
+            data-testid="kb-article-panel"
+          >
             <div className="bg-ink-900 border border-hairline rounded-ds-lg shadow-ds-overlay w-[560px] max-h-[70vh] overflow-y-auto p-5">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="flex items-center gap-2">

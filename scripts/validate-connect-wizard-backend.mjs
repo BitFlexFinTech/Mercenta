@@ -102,7 +102,7 @@ test(
   JSON.stringify(clientEntries) === JSON.stringify(declared),
   `client ${clientEntries.join(', ')} | server ${declared.join(', ')}`
 );
-test('parity: the declared set is non-empty (the registry cannot silently empty)', declared.length === 7, `${declared.length}`);
+test('parity: the declared set is non-empty (the registry cannot silently empty)', declared.length === 8, `${declared.length}`);
 
 /* ═══ 2. NO FAKE SUCCESS — every declared provider, failing transport ════════ */
 for (const pair of declared) {
