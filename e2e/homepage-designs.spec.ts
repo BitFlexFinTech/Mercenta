@@ -1,5 +1,7 @@
 /**
- * §BRAND REDESIGN — THE FOUR HOMEPAGE DESIGNS, RENDERED IN A REAL BROWSER.
+ * §BRAND REDESIGN — THE HOMEPAGE DESIGNS, RENDERED IN A REAL BROWSER.
+ * §BATCH 3 (2026-11-21) — the coverage list now includes the approved Concept 3
+ * direction (E), so FIVE designs are proven here, not four.
  *
  * WHY THIS SPEC EXISTS
  * --------------------
@@ -32,11 +34,15 @@ import { loginAs } from './helpers/auth';
 
 const SHOT_DIR = 'test-screenshots/homepage-designs';
 
-/** The three designs this spec must PROVE render (A is the default, proven first). */
+/** The designs this spec must PROVE render (A is the default, proven first). */
 const DESIGNS = [
   { id: 'b-grid', label: 'Grid', marker: 'b-grid' },
   { id: 'c-signal', label: 'Signal', marker: 'c-signal' },
   { id: 'd-mark', label: 'Mark', marker: 'd-mark' },
+  /* §BATCH 3 (2026-11-21) — the approved Concept 3 direction. Added to the
+     coverage list so the fifth design is proven in a REAL browser in BOTH
+     appearances, exactly like the original four. */
+  { id: 'e-concept', label: 'Concept 3', marker: 'e-concept' },
 ] as const;
 
 const THEMES = ['brand-dark', 'brand-light'] as const;
@@ -72,7 +78,7 @@ test.describe('§BRAND REDESIGN — homepage designs render in the real applicat
   test.describe.configure({ mode: 'serial' });
 
   for (const theme of THEMES) {
-    test(`designs B, C and D render and publish on '${theme}'`, async ({ page }) => {
+    test(`designs B, C, D and E render and publish on '${theme}'`, async ({ page }) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(String(e)));
 

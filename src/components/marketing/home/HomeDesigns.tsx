@@ -44,4 +44,6 @@ export { DesignA as HomeDesignA } from './DesignA';
 export { DesignB as HomeDesignB } from './DesignB';
 export { DesignC as HomeDesignC } from './DesignC';
 export { DesignD as HomeDesignD } from './DesignD';
+/** §BATCH 3 (2026-11-21) — the approved Concept 3 direction, added additively. */
+export { DesignE as HomeDesignE } from './DesignE';
 export type { HomeDesignProps } from './designShared';

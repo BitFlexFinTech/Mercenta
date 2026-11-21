@@ -182,9 +182,17 @@ check(
 const designsDir = path.join(ROOT, 'src/components/marketing/home');
 const designFiles = fs
   .readdirSync(designsDir)
-  .filter((f) => /^Design[A-D]\.tsx$/.test(f))
+  .filter((f) => /^Design[A-E]\.tsx$/.test(f))
   .sort();
-check('the four design modules were discovered (a discovery of none is a failure)', designFiles.length === 4,
+/*
+ * §BATCH 3 (2026-11-21) — REPOINTED TO THE DISCOVERY, NOT WEAKENED. The approved
+ * Concept 3 direction added a FIFTH design module (`DesignE.tsx`). The check
+ * previously matched `Design[A-D]` and required exactly four, so the new module
+ * would have been silently OUTSIDE the gate — a design shipping with no tracker
+ * assertion. The pattern now discovers A–E and the count is five, so the new
+ * module is covered by the same guarantee as the original four.
+ */
+check('the design modules were discovered (a discovery of none is a failure)', designFiles.length === 5,
   designFiles.join(', '));
 for (const file of designFiles) {
   const src = fs.readFileSync(path.join(designsDir, file), 'utf8');

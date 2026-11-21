@@ -4811,6 +4811,48 @@ const BRAND_REDESIGN_SCOPE = new Set([
   'public/imagery/',
 ]);
 
+  /**
+   * §BATCH 3 (2026-11-21) — THE CONCEPT 3 HOMEPAGE DIRECTION.
+   *
+   * DECLARED HERE, NOT WIDENED. F5/F5b/F6's contract is unchanged: a changed
+   * SOURCE file in NO declared set still fails. This phase legitimately ADDS a
+   * fifth homepage design module and the wiring that makes it selectable.
+   *
+   * **It declares FILES, not powers** — every path is named IN FULL, so the set
+   * cannot be used to move a different file. No PROTECTED prefix is touched
+   * (no `src/lib/spapi/`, `src/lib/dhl/`, `src/services/xero/`,
+   * `src/lib/billing/`, `supabase/migrations/`, `scripts/deploy`, `deploy/`).
+   *
+   * WHAT IS DECLARED AND WHY:
+   *   · `DesignE.tsx` — the new design module (the approved Concept 3 direction).
+   *   · `HomeDesigns.tsx` / `designRegistry.ts` — the additive re-export and the
+   *     registry entry that make it selectable. No existing entry is changed.
+   *   · `homepageDesign.ts` — the design id union, the order, the metadata entry
+   *     and the journey section's own label/heading owner.
+   *   · `homepageImagery.ts` — the picture role the new design uses.
+   *   · the two validators whose DISCOVERY patterns had to widen to cover the
+   *     fifth module (a design outside the gate would be a silent gap).
+   *
+   * NOTHING ELSE MOVES. Design A remains the published default.
+   */
+  const CONCEPT3_HOMEPAGE_SCOPE = new Set([
+    'src/components/marketing/home/DesignE.tsx',
+    /* DesignB's `data-design` marker was a second name for the same design
+       (`b-grid-editorial`); it now equals its registry id, so the browser spec
+       can assert one truth. */
+    'src/components/marketing/home/DesignB.tsx',
+    'src/components/marketing/home/HomeDesigns.tsx',
+    'src/components/marketing/home/designRegistry.ts',
+    'src/config/homepageDesign.ts',
+    'src/config/homepageImagery.ts',
+    'scripts/validate-theme-foundation.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    /* The browser spec that proves each design renders now covers the fifth
+       design too — extending coverage, not weakening it. */
+    'e2e/homepage-designs.spec.ts',
+  ]);
+
 
   const f6ChangedSource = changed
     .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -5124,7 +5166,9 @@ const BRAND_REDESIGN_SCOPE = new Set([
           [...PHASE_C4_DESIGN_SCALE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BRAND REDESIGN (2026-11-19) — the four homepage directions + brand masters (see above). */
           BRAND_REDESIGN_SCOPE.has(p) ||
-          [...BRAND_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BRAND_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 3 (2026-11-21) — the Concept 3 homepage direction (see above). */
+          CONCEPT3_HOMEPAGE_SCOPE.has(p)
         )
     );
   test(

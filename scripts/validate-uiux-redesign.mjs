@@ -202,6 +202,9 @@ const HOMEPAGE_FILES = [
   'src/components/marketing/home/DesignB.tsx',
   'src/components/marketing/home/DesignC.tsx',
   'src/components/marketing/home/DesignD.tsx',
+  /* §BATCH 3 (2026-11-21) — the approved Concept 3 direction is a fifth design
+     module; the scan must cover it too, or a regression in E would be invisible. */
+  'src/components/marketing/home/DesignE.tsx',
 ].map(read).join('\n');
 check(
   'homepage primary CTA is not brass',

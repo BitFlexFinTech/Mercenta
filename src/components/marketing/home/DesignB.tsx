@@ -21,10 +21,18 @@ export function DesignB(props: HomeDesignProps) {
 
   return (
     <>
+      {/*
+       * §BATCH 3 (2026-11-21) — THE MARKER NOW EQUALS THE DESIGN ID.
+       * It read `b-grid-editorial`, a SECOND string for the same design, while
+       * the registry id, the editor option and the browser spec all say
+       * `b-grid`. Every other design's marker already equals its id, so this
+       * was the one place a design had two names — and the browser spec could
+       * only ever fail against it. One name, one design.
+       */}
       <section
         className="px-6 pb-16 pt-14 md:pt-20"
         data-testid="home-hero"
-        data-design="b-grid-editorial"
+        data-design="b-grid"
       >
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
           <div>

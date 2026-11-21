@@ -13,6 +13,7 @@ import {
   HomeDesignB,
   HomeDesignC,
   HomeDesignD,
+  HomeDesignE,
 } from '@/components/marketing/home/HomeDesigns';
 
 /** The design registry — one entry per supplied direction. */
@@ -21,4 +22,6 @@ export const HOMEPAGE_DESIGN_COMPONENTS = {
   'b-grid': HomeDesignB,
   'c-signal': HomeDesignC,
   'd-mark': HomeDesignD,
+  /** §BATCH 3 (2026-11-21) — the approved Concept 3 direction. */
+  'e-concept': HomeDesignE,
 } as const;

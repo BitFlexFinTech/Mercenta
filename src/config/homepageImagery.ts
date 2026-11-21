@@ -121,3 +121,11 @@ export const IMAGERY_D: readonly HomeImageRole[] = [
   'warehouse-racks',
   'shelves-grocery',
 ];
+
+/**
+ * §BATCH 3 — CONCEPT 3 (2026-11-21). The approved Concept 3 direction places ONE
+ * photograph in the sticky column beside the five-stage journey. It is a goods
+ * image, not a work image, because the journey is about the product moving from
+ * origin to a UK shelf — so the visual has to show the product, not a laptop.
+ */
+export const IMAGERY_E: readonly HomeImageRole[] = ['warehouse-aisle'];

@@ -31,8 +31,20 @@ import {
 } from './positioning';
 import { APPROVED_CATEGORIES } from '@/types';
 
-/** The four supplied homepage directions. */
-export type HomepageDesignId = 'a-monolith' | 'b-grid' | 'c-signal' | 'd-mark';
+/**
+ * The supplied homepage directions.
+ *
+ * §BATCH 3 (2026-11-21) — `e-concept` is the approved Concept 3 direction,
+ * added ADDITIVELY. It does not replace A–D: the owner's fixed decision that
+ * Design A (Monolith) is the published default is unchanged, and E is selected
+ * in the Super Admin Homepage Editor exactly like the others.
+ */
+export type HomepageDesignId =
+  | 'a-monolith'
+  | 'b-grid'
+  | 'c-signal'
+  | 'd-mark'
+  | 'e-concept';
 
 export interface HomepageDesignMeta {
   id: HomepageDesignId;
@@ -49,6 +61,7 @@ export const HOMEPAGE_DESIGN_ORDER: readonly HomepageDesignId[] = [
   'b-grid',
   'c-signal',
   'd-mark',
+  'e-concept',
 ];
 
 /** §OWNER DECISION — Design A (Monolith) is the initial public homepage. */
@@ -82,6 +95,13 @@ export const HOMEPAGE_DESIGNS: Record<HomepageDesignId, HomepageDesignMeta> = {
     description:
       'The mark leads: a large ghosted "m." behind the hero headline, with the tracker held clear of the type.',
     source: 'D-Mark-dark.html / D-Mark-light.html',
+  },
+  'e-concept': {
+    id: 'e-concept',
+    label: 'E — Concept 3',
+    description:
+      'The approved Concept 3 direction: a 12-column hero split with the shipment tracker in the right-hand column, a construction grid, four modular tiles and a five-stage journey on a sticky rail.',
+    source: 'Concept3.tsx (mercenta-market-entry-main)',
   },
 };
 
@@ -133,6 +153,17 @@ export const HOMEPAGE_MANIFEST: readonly HomepageManifestCell[] = [
 
 /** The five-step journey (the approved journey, one entry per step). */
 export const HOMEPAGE_JOURNEY: readonly { title: string; body: string }[] = PUBLIC_HOW_IT_WORKS;
+
+/**
+ * §BATCH 3 — CONCEPT 3 (2026-11-21). The journey section's own label and heading.
+ *
+ * Declared HERE rather than written into the design component, because the
+ * component must not be a second owner of approved copy (the same rule that
+ * moved the hero copy out of this file and into `homepageContent.ts`). The
+ * strings are the approved section title for the five-step journey.
+ */
+export const HOMEPAGE_JOURNEY_EYEBROW = 'How it works';
+export const HOMEPAGE_JOURNEY_HEADING = 'Five steps. One tracked route.';
 
 /** The ten approved categories, read from their owner. */
 export const HOMEPAGE_CATEGORIES: readonly string[] = APPROVED_CATEGORIES;
