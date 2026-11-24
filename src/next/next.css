@@ -1,0 +1,189 @@
+/* Mercenta Partners — Redesign Design System Tokens & Utilities
+ * Imported ONCE by src/next/shell/NextShell.tsx.
+ * Rules:
+ * - Strictly 11 / 12 / 14 / 16 / 20 / 24 px type scale (no sub-11px).
+ * - Calm neutral base, 1px hairline borders, tabular numerals on money/quantities.
+ * - Single primary accent (#C2410C, AA 5.18:1 on #FFFFFF) + ink black (#111827).
+ * - Zero gradients, glows, or thick left accent borders.
+ */
+
+:root {
+  --font-sans: "Plus Jakarta Sans", "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+
+  --color-next-canvas: #fafafa;
+  --color-next-surface: #ffffff;
+  --color-next-subtle: #f4f4f5;
+  --color-next-border: #e4e4e7;
+  --color-next-border-strong: #d4d4d8;
+  --color-next-ink: #09090b;
+  --color-next-secondary: #3f3f46;
+  --color-next-muted: #52525b;
+  --color-next-accent: #c2410c;
+  --color-next-accent-hover: #9a3412;
+  --color-next-accent-tint: #fff7ed;
+}
+
+.mercenta-next {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #09090b;
+  background-color: #fafafa;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mercenta-next .tabular-nums,
+.mercenta-next .font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Enforce readable 11-24px semantic steps across the console */
+.text-ds-micro {
+  font-size: 11px;
+  line-height: 1.45;
+}
+.text-ds-label {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.text-ds-body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.text-ds-title {
+  font-size: 16px;
+  line-height: 1.35;
+}
+.text-ds-page {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+/* Semantic compatibility tokens so canonical Mercenta child panels
+   (PoDocumentQueuePanel, PoDocumentPackPanel, BrandCommPanel,
+   CarrierProviderConfigurationPanel, CommerceSimulationPanel)
+   render cleanly on the light neutral console without modifying src/index.css. */
+.mercenta-next .text-strong {
+  color: #09090b;
+}
+.mercenta-next .text-muted {
+  color: #52525b;
+}
+.mercenta-next .text-faint {
+  color: #71717a;
+}
+.mercenta-next .text-accent,
+.mercenta-next .text-accent-300,
+.mercenta-next .text-accent-400 {
+  color: #c2410c;
+}
+.mercenta-next .bg-surface {
+  background-color: #fafafa;
+}
+.mercenta-next .bg-surface-raised {
+  background-color: #ffffff;
+}
+.mercenta-next .bg-tint {
+  background-color: #f4f4f5;
+}
+.mercenta-next .bg-surface-hover {
+  background-color: rgba(9, 9, 11, 0.35);
+}
+.mercenta-next .border-hairline {
+  border-color: #e4e4e7;
+}
+.mercenta-next .border-hairline-strong {
+  border-color: #d4d4d8;
+}
+.mercenta-next .divide-hairline-06 > :not(:first-child) {
+  border-color: #e4e4e7;
+}
+.mercenta-next .rounded-ds-sm {
+  border-radius: 6px;
+}
+.mercenta-next .rounded-ds-md {
+  border-radius: 8px;
+}
+.mercenta-next .rounded-ds-lg {
+  border-radius: 10px;
+}
+.mercenta-next .shadow-ds-overlay {
+  box-shadow: 0 12px 32px -8px rgba(9, 9, 11, 0.14), 0 0 0 1px #e4e4e7;
+}
+.mercenta-next .text-state-success {
+  color: #15803d;
+}
+.mercenta-next .bg-state-success\/10,
+.mercenta-next .bg-state-success\/15 {
+  background-color: #f0fdf4;
+}
+.mercenta-next .border-state-success\/20,
+.mercenta-next .border-state-success\/40 {
+  border-color: #bbf7d0;
+}
+.mercenta-next .text-state-warning {
+  color: #b45309;
+}
+.mercenta-next .bg-state-warning\/10,
+.mercenta-next .bg-state-warning\/15 {
+  background-color: #fffbeb;
+}
+.mercenta-next .border-state-warning\/20,
+.mercenta-next .border-state-warning\/40 {
+  border-color: #fde68a;
+}
+.mercenta-next .text-state-danger {
+  color: #b91c1c;
+}
+.mercenta-next .bg-state-danger\/10 {
+  background-color: #fef2f2;
+}
+.mercenta-next .border-state-danger\/20 {
+  border-color: #fecaca;
+}
+.mercenta-next .text-state-info,
+.mercenta-next .text-state-info\/80 {
+  color: #1d4ed8;
+}
+.mercenta-next .bg-state-info\/10 {
+  background-color: #eff6ff;
+}
+.mercenta-next .border-state-info\/20 {
+  border-color: #bfdbfe;
+}
+.mercenta-next .text-palette-indigo {
+  color: #3730a3;
+}
+.mercenta-next .bg-palette-indigo\/10 {
+  background-color: #eef2ff;
+}
+.mercenta-next .border-palette-indigo\/40 {
+  border-color: #c7d2fe;
+}
+.mercenta-next .text-palette-orange {
+  color: #c2410c;
+}
+.mercenta-next .bg-palette-orange\/10 {
+  background-color: #fff7ed;
+}
+.mercenta-next .border-palette-orange\/40 {
+  border-color: #fed7aa;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mercenta-next *,
+  .mercenta-next *::before,
+  .mercenta-next *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
