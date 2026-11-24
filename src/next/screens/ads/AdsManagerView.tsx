@@ -554,8 +554,8 @@ export function AdsManagerView({
         <div>
           <span>
             {isLiveIntegration
-              ? 'Data reflects the live Amazon Ads integration.'
-              : 'Data is simulated from the Mercenta ad-spend seed seam — connect Amazon Ads credentials in Integration Settings to go live.'}{' '}
+              ? 'Data reflects the live retail-channel ads integration.'
+              : 'Data is simulated from the Mercenta ad-spend seed seam — connect retail-channel ads credentials in Integration Settings to go live.'}{' '}
             {policy.commissionNote}
           </span>
           {policy.verticalRuleNote && (
@@ -710,7 +710,7 @@ export function AdsManagerView({
           <div className="space-y-6">
             {selectedBrandRow.status === 'not_configured' ? (
               <div className="border border-zinc-200 bg-zinc-50 rounded-md p-3 text-[14px] text-zinc-700">
-                No Amazon Ads budget row is configured for this brand yet. Setting a monthly budget creates its initial active budget configuration.
+                No channel ad budget row is configured for this brand yet. Setting a monthly budget creates its initial active budget configuration.
               </div>
             ) : (
               <dl className="grid grid-cols-2 gap-3 text-[14px]">

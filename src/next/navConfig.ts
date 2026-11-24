@@ -68,7 +68,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   },
   {
     id: 'amazon_ads',
-    label: 'Amazon Ad Spend',
+    label: 'Ad Spend',
     group: 'Brands & Growth',
     implemented: true,
     rbacViewId: 'marketing',
@@ -174,8 +174,8 @@ export const BWS_ITEMS: NavItemDef[] = [
   { id: 'brand-discovery', label: 'Brand Discovery', group: 'Intelligence', implemented: false },
   { id: 'brand-intelligence', label: 'Brand Intelligence', group: 'Intelligence', implemented: false },
   { id: 'uk-distribution', label: 'UK Distribution Research', group: 'Intelligence', implemented: false },
-  { id: 'amazon-uk', label: 'Amazon UK Research', group: 'Intelligence', implemented: false },
-  { id: 'pitch-targets', label: '1P Pitch Targets', group: 'Intelligence', implemented: false },
+  { id: 'uk-channel-research', label: 'UK Channel Research', group: 'Intelligence', implemented: false },
+  { id: 'pitch-targets', label: 'Pitch Targets', group: 'Intelligence', implemented: false },
   { id: 'opportunity-assessment', label: 'Opportunity Assessment', group: 'Intelligence', implemented: false },
 
   { id: 'acquisition-pipeline', label: 'Acquisition Pipeline', group: 'Commercial & Portfolio', implemented: false },
@@ -205,7 +205,7 @@ export const TALENT_COMMERCE_ITEMS: NavItemDef[] = [
   { id: 'brands', label: 'Brands & Products', group: 'Intelligence', implemented: false },
   { id: 'uk-opportunities', label: 'UK Opportunities', group: 'Intelligence', implemented: false },
   { id: 'acquisition', label: 'Brand Acquisition', group: 'Intelligence', implemented: false },
-  { id: 'campaigns', label: 'Amazon Campaigns', group: 'Intelligence', implemented: true },
+  { id: 'campaigns', label: 'Campaigns', group: 'Intelligence', implemented: true },
   { id: 'brand-stores', label: 'Brand Store Studio', group: 'Intelligence', implemented: false },
 
   { id: 'concepts', label: 'Product Concepts', group: 'Operations', implemented: false },
@@ -241,7 +241,7 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
   bws: {
     id: 'bws',
     label: 'BWS Workspace',
-    subtitle: 'Beers, Wines & Spirits (1P Wholesale)',
+    subtitle: 'Beers, Wines & Spirits (Wholesale)',
     environment: 'admin',
     defaultViewId: 'campaign-studio',
     items: BWS_ITEMS,

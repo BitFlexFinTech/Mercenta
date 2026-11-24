@@ -43,7 +43,7 @@ export function resolveAdsSurfacePolicy(
       isSuperAdmin,
       title: 'Campaign Studio',
       description:
-        'Alcohol 1P brand advertising budgets, Sponsored Ads performance, and monthly budget approvals across the portfolio.',
+        'Alcohol brand advertising budgets, Sponsored Ads performance, and monthly budget approvals across the portfolio.',
       commissionNote:
         'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
       placementContextLabel: 'Sponsored Products · Sponsored Brands · Sponsored Display',
@@ -62,7 +62,7 @@ export function resolveAdsSurfacePolicy(
       vertical,
       scope: 'admin',
       isSuperAdmin,
-      title: 'Amazon Campaigns',
+      title: 'Campaigns',
       description:
         'Talent IP retail campaign spend, utilisation, and brand budget decisions backed by Mercenta advertising data.',
       commissionNote:
@@ -107,7 +107,7 @@ export function resolveAdsSurfacePolicy(
       : 'Portfolio ad spend, budget utilisation, ACOS/TACOS, manual monthly budgets, and brand budget recommendations across all brands.',
     commissionNote:
       'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
-    placementContextLabel: 'Amazon Ads Placements',
+    placementContextLabel: 'Channel Ad Placements',
     creativeAssetGapNote:
       'Creative asset review is unavailable until CreativeAsset endpoints exist in src/data/api.ts.',
     campaignMutationGapNote:
