@@ -4,7 +4,39 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §WAVE 3m — THE CONSOLE'S OWN PALETTE MADE REAL (2026-11-25)
+## §BATCH 9 — THE LOVABLE CONCEPT 3 TRANSFER LANDED, SIX DEFECTS FIXED, AND THE BUILD DEPLOYED (2026-11-25)
+
+**State: DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE.** Verified locally and committed
+(`validate:all` **205 PASS / 0 FAIL** · typecheck **0** · build **EXIT 0** · browser **62 passed**), pushed to
+`origin/redesign/foundation`, and **DEPLOYED to `https://demo.mercenta.co.uk`** through the only deploy path,
+`scripts/deploy-demo.sh`. The live entry point serves `assets/index-C28dS7mf.js`, byte-identical to the local
+`dist/`, so the verified commit IS what is deployed — the live LEG, not the live BUILD, is what is unresolved.
+
+**The live leg is not green because the GATE is stale, and that is evidenced rather than asserted.**
+`npm run verify:live` reports **249 PASS / 27 FAIL**, and every failure is `scripts/verify-live-demo.mjs`
+asserting a world the brand redesign retired:
+- it drove the theme ids `minimal-light` and `bold`, which `src/config/themes.ts` itself calls *"the five retired
+  themes"* — the app declares TWO (`brand-dark`, `brand-light`) — so every inner page was asserted against a shell
+  that id could never produce. **REPOINTED in this change:** the ids and their expected shells are now DISCOVERED
+  from `themes.ts` (the owner), with a discovery that FAILS LOUDLY rather than passing over an empty list, and the
+  **ten** shell failures it caused are gone;
+- its homepage and footer assertions describe the pre-redesign composition. Probing the LIVE site directly in
+  Chromium: it renders `a-monolith`, `brand-light` yields a WHITE body (`rgb(255,255,255)`), the footer carries its
+  owner-led columns (`Platform · Retail Infrastructure · Solutions · Company · Commercial · Resources · Explore ·
+  Product Categories · Legal`) and "EXAMPLE" appears three times on the page. Those assertions are the recorded next
+  task, `§BATCH 9b`.
+
+**The four documented blocks** are in `PROJECT_STATUS.md` → `CURRENT RESUME STATE`: two OWNER decisions (the public
+front page; whether the console should follow the light/dark switch) and two RECORDED workstreams (repoint the live
+gate's homepage/footer assertions; the console's 48 lint errors, which are deliberately not yet wired into
+`validate:all`).
+
+**Nothing was lost and nothing is broken.** The Owner's uncommitted transfer is now IN the project, and the record of
+what the previous session left dirty is superseded by this block.
+
+---
+
+### HISTORY (kept as history — superseded by the block above) §WAVE 3m — THE CONSOLE'S OWN PALETTE MADE REAL (2026-11-25)
 
 **State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
 tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.

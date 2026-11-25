@@ -86,7 +86,44 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = process.env.SITE_URL || 'https://demo.mercenta.co.uk';
-const THEMES = ['minimal-light', 'bold'];
+/**
+ * §REPOINTED 2026-11-25 (rule 10 §2 "a written fact has one author"; rule 07) —
+ * THE THEMES ARE READ FROM THEIR OWNER, AND THE IDS ARE NO LONGER RETIRED ONES.
+ *
+ * This used to be the literal `['minimal-light', 'bold']`, and the checks below asserted
+ * `minimal-light → light shell, bold → dark`. BOTH ids were RETIRED by the brand
+ * redesign: `src/config/themes.ts` declares exactly TWO themes — `ThemeId =
+ * 'brand-dark' | 'brand-light'` — and its own header calls the old five "the five
+ * retired themes". Driving a retired id makes the app fall back to its DEFAULT
+ * appearance, so every inner page was asserted against a shell that id could never
+ * produce. The live gate therefore reported the SITE as broken when it was the GATE
+ * describing a world that no longer exists — measured live on 2026-11-25: the site
+ * answered `data-mercenta-theme="brand-light"` with a WHITE body (`rgb(255,255,255)`)
+ * and rendered the `a-monolith` homepage, i.e. both things the gate called failures
+ * were working.
+ *
+ * The (id, expected shell) pairs are now DISCOVERED from `themes.ts` — the owner — so
+ * this cannot drift again. A retyped list here is exactly what allowed the drift: an
+ * id could be retired in one file while this one kept asserting it.
+ */
+const THEME_OWNER = readFileSync(path.join(ROOT, 'src/config/themes.ts'), 'utf8');
+const THEME_ORDER_SRC = /export const THEME_ORDER[^=]*=\s*\[([^\]]*)\]/.exec(THEME_OWNER);
+const THEMES_WITH_SHELL = (THEME_ORDER_SRC ? [...THEME_ORDER_SRC[1].matchAll(/'([a-z-]+)'/g)].map((m) => m[1]) : [])
+  .map((id) => {
+    const at = THEME_OWNER.indexOf(`id: '${id}'`);
+    const shell = at === -1 ? null : /appearance:\s*'(dark|light)'/.exec(THEME_OWNER.slice(at, at + 900));
+    return shell ? { id, shell: shell[1] } : null;
+  })
+  .filter(Boolean);
+/** A discovery that comes back EMPTY is a FAILURE, never a quiet pass (rule 10 §5). */
+if (THEMES_WITH_SHELL.length < 2) {
+  console.error(
+    `FATAL: could not read the theme ids from src/config/themes.ts (found ${THEMES_WITH_SHELL.length}). ` +
+      'This gate drives every theme the app declares; a short list would silently under-test it.'
+  );
+  process.exit(2);
+}
+const THEMES = THEMES_WITH_SHELL.map((t) => t.id);
 const WIDTHS = [1440, 390];
 
 let pass = 0;
@@ -404,8 +441,7 @@ function readRedLines() {
      * the dark palette and ignored the light shell completely, so each page is
      * rendered under both and the shell attribute it actually took is asserted.
      */
-    for (const theme of ['bold', 'minimal-light']) {
-      const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+    for (const { id: theme, shell: expectedShell } of THEMES_WITH_SHELL) {
       console.log(`\n--- ${meta.path} @ 390px, ${theme} ---`);
       const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
       await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
@@ -522,8 +558,7 @@ function readRedLines() {
   check(`L12 the footer declares four owner columns plus the brand column (found ${footerHeadings.length})`,
     footerHeadings.length === 4);
 
-  for (const theme of ['minimal-light', 'bold']) {
-    const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+  for (const { id: theme, shell: expectedShell } of THEMES_WITH_SHELL) {
     console.log(`\n--- L12 footer + cookie notice @ 390px, ${theme} ---`);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     /**
@@ -625,8 +660,7 @@ function readRedLines() {
    * branches that published two of the six.
    */
   if (EXPLORE_PATH) {
-  for (const theme of ['bold', 'minimal-light']) {
-    const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+  for (const { id: theme, shell: expectedShell } of THEMES_WITH_SHELL) {
     console.log(`\n--- L13 assessment result @ 390px, ${theme} ---`);
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
