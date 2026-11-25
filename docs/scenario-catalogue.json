@@ -4084,6 +4084,42 @@
       "type": "a11y",
       "spec": "e2e/typography-scale.spec.ts",
       "expects": "The operational type scale is asserted on the RENDERED document, not on the declaration: the workspace page title computes at the ds-page step (20px), the canonical DataTable computes at ds-body (14px) with ds-label (12px) headers, every canonical step that appears on a screen computes at its declared size, and NO text inside <main> falls below the 11px floor on the admin and brand screens."
+    },
+    {
+      "id": "spec-next-console-brand-shell",
+      "capability": "platform",
+      "journey": "redesigned console shell",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/next-console-smoke.spec.ts",
+      "expects": "A brand session reaches the redesigned console, the shell renders with RBAC-aware navigation for four surfaces, and the default console is NOT replaced."
+    },
+    {
+      "id": "spec-next-console-brand-views",
+      "capability": "platform",
+      "journey": "every mounted brand view",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/next-console-smoke.spec.ts",
+      "expects": "Each of the sixteen mounted brand views renders a real screen - none falls back to the not-available placeholder - with zero page errors."
+    },
+    {
+      "id": "spec-next-console-admin-views",
+      "capability": "operations",
+      "journey": "admin operational core",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/next-console-smoke.spec.ts",
+      "expects": "Each mounted admin view renders a real screen, and the portfolio overview shows real content rather than an empty shell."
+    },
+    {
+      "id": "spec-next-console-default-unchanged",
+      "capability": "platform",
+      "journey": "default console unchanged",
+      "actor": "public_visitor",
+      "type": "boundary",
+      "spec": "e2e/next-console-smoke.spec.ts",
+      "expects": "Loading the app with no console parameter renders the EXISTING application, with the new console reachable only through its explicit switch."
     }
   ]
 }

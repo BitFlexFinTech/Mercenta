@@ -51,7 +51,15 @@ test('admin session: the new console renders its admin surface', async ({ page }
 
   /* The admin views that are now real. The rest keep the honest "not available
      yet" state, which this list deliberately does not include. */
-  for (const label of ['Overview', 'Purchase Orders', 'Logistics Hub', 'Ads Manager']) {
+  for (const label of [
+    'Overview',
+    'Purchase Orders',
+    'Logistics Hub',
+    'Returns Tracking',
+    'Work Management',
+    'Compliance Approvals',
+    'Ads Manager',
+  ]) {
     await navButton(label).click();
     await expect(
       page.getByText(/is not available yet/i),
@@ -63,6 +71,11 @@ test('admin session: the new console renders its admin surface', async ({ page }
      cannot pass by rendering nothing. */
   await navButton('Overview').click();
   await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
+
+  /* Then the compliance screen, whose whole point is a decision, so the captured
+     artefact shows the action and not just a list. */
+  await navButton('Compliance Approvals').click();
+  await expect(page.getByText('Awaiting review')).toBeVisible({ timeout: 20000 });
 
   await page.screenshot({ path: 'test-results/next-console-admin.png', fullPage: true });
   expect(pageErrors).toEqual([]);

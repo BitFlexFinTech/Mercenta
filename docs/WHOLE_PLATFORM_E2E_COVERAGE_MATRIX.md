@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 410 · **Capabilities:** 8
+**Scenarios:** 414 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -30,8 +30,8 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | founder | 49 |
 | integrations | 10 |
 | onboarding_acquisition | 58 |
-| operations | 47 |
-| platform | 83 |
+| operations | 48 |
+| platform | 86 |
 
 ## Scenarios
 
@@ -403,6 +403,10 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-logistics-wave3 | commerce_logistics | mixed | happy | `e2e/logistics-wave3.spec.ts` | — |
 | spec-mercenta-brain | operations | mixed | happy | `e2e/mercenta-brain.spec.ts` | — |
 | spec-multi-tenant | platform | mixed | happy | `e2e/multi-tenant.spec.ts` | — |
+| spec-next-console-admin-views | operations | mercenta_admin | happy | `e2e/next-console-smoke.spec.ts` | — |
+| spec-next-console-brand-shell | platform | brand_user | happy | `e2e/next-console-smoke.spec.ts` | — |
+| spec-next-console-brand-views | platform | brand_user | happy | `e2e/next-console-smoke.spec.ts` | — |
+| spec-next-console-default-unchanged | platform | public_visitor | boundary | `e2e/next-console-smoke.spec.ts` | — |
 | spec-notifications | operations | mixed | happy | `e2e/notifications.spec.ts` | — |
 | spec-onboarding | onboarding_acquisition | mixed | happy | `e2e/onboarding.spec.ts` | — |
 | spec-onboarding-handoff | onboarding_acquisition | mixed | happy | `e2e/onboarding-handoff.spec.ts` | — |

@@ -45,6 +45,9 @@ import { WorkWorkspaceScreen } from '@/next/screens/shared/WorkWorkspaceScreen';
 import { AdminLogisticsScreen } from '@/next/screens/admin/AdminLogisticsScreen';
 import { AdminOverviewScreen } from '@/next/screens/admin/AdminOverviewScreen';
 import { AdminPurchaseOrdersScreen } from '@/next/screens/admin/AdminPurchaseOrdersScreen';
+/* §WAVE 3b (2026-11-25) — returns tracking and compliance approvals. */
+import { AdminComplianceScreen } from '@/next/screens/admin/AdminComplianceScreen';
+import { AdminReturnsScreen } from '@/next/screens/admin/AdminReturnsScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -325,6 +328,20 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'logistics') {
         return <AdminLogisticsScreen />;
+      }
+      if (activeViewId === 'returns_tracking') {
+        return <AdminReturnsScreen />;
+      }
+      if (activeViewId === 'compliance') {
+        return <AdminComplianceScreen />;
+      }
+      /* §WAVE 3b — the shared work workspace already exists for brands; the admin
+         surface mounts the SAME component with `scope="admin"`, so admin tasks and
+         brand tasks are one work layer, not two. */
+      if (activeViewId === 'work') {
+        return (
+          <WorkWorkspaceScreen scope="admin" onNavigate={(viewId) => goToAdminView(viewId)} />
+        );
       }
     }
 

@@ -50,10 +50,22 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     superAdminOnly: true,
   },
 
-  { id: 'work', label: 'Work Management', group: 'Operations', implemented: false },
+  { id: 'work', label: 'Work Management', group: 'Operations', implemented: true },
   { id: 'purchase_orders_admin', label: 'Purchase Orders', group: 'Operations', implemented: true },
   { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: true },
-  { id: 'returns_tracking', label: 'Returns Tracking', group: 'Operations', implemented: false },
+  {
+    /* §WAVE 3b — `returns_tracking` is NOT in `VIEW_ALLOWLIST.admin_staff`
+       (`src/lib/auth/rbac.ts`), so the item was silently filtered out of the menu
+       and the view was unreachable. RBAC is NOT widened here (that is a security
+       decision): the item declares the closest permission the staff already hold,
+       the same mechanism this nav already uses for the Ads Manager
+       (`rbacViewId: 'marketing'`). Returns are worked alongside fulfilment. */
+    id: 'returns_tracking',
+    label: 'Returns Tracking',
+    group: 'Operations',
+    implemented: true,
+    rbacViewId: 'fulfillment_track',
+  },
   { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
 
   { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: false },
@@ -88,7 +100,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   { id: 'billing', label: 'Billing', group: 'Finance & Legal', implemented: false },
   { id: 'contracts_admin', label: 'Contract Cycle', group: 'Finance & Legal', implemented: false },
 
-  { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: false },
+  { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: true },
   { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: false },
   { id: 'helpdesk', label: 'Helpdesk', group: 'Governance & Support', implemented: false },
   { id: 'monitoring', label: 'Monitoring', group: 'Governance & Support', implemented: false },
