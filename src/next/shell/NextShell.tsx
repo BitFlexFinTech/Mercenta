@@ -48,6 +48,10 @@ import { AdminPurchaseOrdersScreen } from '@/next/screens/admin/AdminPurchaseOrd
 /* §WAVE 3b (2026-11-25) — returns tracking and compliance approvals. */
 import { AdminComplianceScreen } from '@/next/screens/admin/AdminComplianceScreen';
 import { AdminReturnsScreen } from '@/next/screens/admin/AdminReturnsScreen';
+/* §WAVE 3c (2026-11-25) — billing, Brand CRM and the contract cycle. */
+import { AdminBillingScreen } from '@/next/screens/admin/AdminBillingScreen';
+import { AdminContractsScreen } from '@/next/screens/admin/AdminContractsScreen';
+import { AdminCrmScreen } from '@/next/screens/admin/AdminCrmScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -334,6 +338,16 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'compliance') {
         return <AdminComplianceScreen />;
+      }
+      /* §WAVE 3c — the finance, relationship and legal views. */
+      if (activeViewId === 'billing') {
+        return <AdminBillingScreen />;
+      }
+      if (activeViewId === 'crm') {
+        return <AdminCrmScreen />;
+      }
+      if (activeViewId === 'contracts_admin') {
+        return <AdminContractsScreen />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and

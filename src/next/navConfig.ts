@@ -68,7 +68,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   },
   { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
 
-  { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: false },
+  { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: true },
   { id: 'onboarding_pipeline', label: 'Onboarding', group: 'Brands & Growth', implemented: false },
   { id: 'marketing', label: 'Marketing', group: 'Brands & Growth', implemented: false },
   {
@@ -97,8 +97,8 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   { id: 'fulfillment_track', label: 'Fulfillment Track', group: 'Catalogue & Commerce', implemented: false },
   { id: 'retail_pipeline', label: 'Retail Pipeline', group: 'Catalogue & Commerce', implemented: false },
 
-  { id: 'billing', label: 'Billing', group: 'Finance & Legal', implemented: false },
-  { id: 'contracts_admin', label: 'Contract Cycle', group: 'Finance & Legal', implemented: false },
+  { id: 'billing', label: 'Billing', group: 'Finance & Legal', implemented: true },
+  { id: 'contracts_admin', label: 'Contract Cycle', group: 'Finance & Legal', implemented: true },
 
   { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: true },
   { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: false },

@@ -58,6 +58,9 @@ test('admin session: the new console renders its admin surface', async ({ page }
     'Returns Tracking',
     'Work Management',
     'Compliance Approvals',
+    'Billing',
+    'Brand CRM',
+    'Contract Cycle',
     'Ads Manager',
   ]) {
     await navButton(label).click();
@@ -72,10 +75,10 @@ test('admin session: the new console renders its admin surface', async ({ page }
   await navButton('Overview').click();
   await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
 
-  /* Then the compliance screen, whose whole point is a decision, so the captured
-     artefact shows the action and not just a list. */
-  await navButton('Compliance Approvals').click();
-  await expect(page.getByText('Awaiting review')).toBeVisible({ timeout: 20000 });
+  /* Then Billing, whose whole point is money, so the captured artefact shows real
+     amounts and not an empty shell. */
+  await navButton('Billing').click();
+  await expect(page.getByText('Commission accrued')).toBeVisible({ timeout: 20000 });
 
   await page.screenshot({ path: 'test-results/next-console-admin.png', fullPage: true });
   expect(pageErrors).toEqual([]);
