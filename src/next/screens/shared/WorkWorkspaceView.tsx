@@ -23,7 +23,7 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  PageHeader,
+  ConsoleHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -217,10 +217,10 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
       render: (w) => (
         <div className="min-w-0">
           <div className="font-medium text-zinc-950">{w.title}</div>
-          <div className="text-[12px] text-zinc-600 line-clamp-1">{w.detail}</div>
+          <div className="text-ds-label text-zinc-600 line-clamp-1">{w.detail}</div>
           {w.why && (
             <div
-              className="text-[11px] font-mono text-zinc-500 mt-0.5"
+              className="text-ds-micro font-mono text-zinc-500 mt-0.5"
               data-testid={`work-why-${w.id}`}
             >
               score {w.why.score} · {w.why.factors.map((f) => `${f.label} ${f.points}`).join(' + ')}
@@ -233,7 +233,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
       key: 'source',
       header: 'Category',
       render: (w) => (
-        <span className="text-[12px] text-zinc-700 font-medium">{sourceLabels[w.source]}</span>
+        <span className="text-ds-label text-zinc-700 font-medium">{sourceLabels[w.source]}</span>
       ),
     },
     {
@@ -263,8 +263,8 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
       align: 'right',
       render: (w) => (
         <div className="text-right">
-          <div className="font-mono text-[12px] text-zinc-900">{w.dueDate ?? '—'}</div>
-          <div className="text-[11px] text-zinc-500">{dueLabelFn(w.dueDate)}</div>
+          <div className="font-mono text-ds-label text-zinc-900">{w.dueDate ?? '—'}</div>
+          <div className="text-ds-micro text-zinc-500">{dueLabelFn(w.dueDate)}</div>
         </div>
       ),
     },
@@ -280,7 +280,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             e.stopPropagation();
             onOpenOwningRecord(w);
           }}
-          className="text-[12px] font-medium text-[#C2410C] hover:underline"
+          className="text-ds-label font-medium text-accent hover:underline"
         >
           {openLabel}
         </button>
@@ -307,7 +307,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
 
   return (
     <div className="space-y-6" data-testid="work-workspace">
-      <PageHeader
+      <ConsoleHeader
         title={title}
         description={description}
         meta={
@@ -325,7 +325,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             <button
               type="button"
               onClick={() => setShowNewTask((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
               New task
@@ -337,7 +337,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                 setSweepResult(r);
                 onChangeTab('reminders');
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
             >
               <BellRing className="w-3.5 h-3.5" aria-hidden="true" />
               Run reminder sweep
@@ -348,7 +348,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                 onResetWork();
                 setFeedback('Manual demo work items and reminder sweep state reset.');
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-zinc-200 bg-white text-[12px] text-zinc-600 hover:text-zinc-950"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-ds-md border border-zinc-200 bg-white text-ds-label text-zinc-600 hover:text-zinc-950"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               Reset demo work
@@ -365,22 +365,22 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
         <SectionCard title="New manual task" description="Adds a task directly to the shared work store.">
           <form onSubmit={submitTask} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
             <label className="block sm:col-span-2">
-              <span className="block text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Title</span>
+              <span className="block text-ds-micro uppercase tracking-[0.06em] text-zinc-500 mb-1">Title</span>
               <input
                 type="text"
                 required
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Follow up warehouse slot confirmation"
-                className="w-full px-3 py-1.5 rounded border border-zinc-300 text-[14px] text-zinc-950"
+                className="w-full px-3 py-1.5 rounded-ds-sm border border-zinc-300 text-ds-body text-zinc-950"
               />
             </label>
             <label className="block">
-              <span className="block text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Priority</span>
+              <span className="block text-ds-micro uppercase tracking-[0.06em] text-zinc-500 mb-1">Priority</span>
               <select
                 value={newPriority}
                 onChange={(e) => setNewPriority(e.target.value as WorkPriority)}
-                className="w-full px-3 py-1.5 rounded border border-zinc-300 bg-white text-[14px] text-zinc-950"
+                className="w-full px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-body text-zinc-950"
               >
                 <option value="normal">Normal</option>
                 <option value="high">High</option>
@@ -388,35 +388,35 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               </select>
             </label>
             <label className="block">
-              <span className="block text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Due date</span>
+              <span className="block text-ds-micro uppercase tracking-[0.06em] text-zinc-500 mb-1">Due date</span>
               <input
                 type="date"
                 value={newDue}
                 onChange={(e) => setNewDue(e.target.value)}
-                className="w-full px-3 py-1.5 rounded border border-zinc-300 text-[14px] text-zinc-950"
+                className="w-full px-3 py-1.5 rounded-ds-sm border border-zinc-300 text-ds-body text-zinc-950"
               />
             </label>
             <label className="block sm:col-span-3">
-              <span className="block text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Notes</span>
+              <span className="block text-ds-micro uppercase tracking-[0.06em] text-zinc-500 mb-1">Notes</span>
               <input
                 type="text"
                 value={newDetail}
                 onChange={(e) => setNewDetail(e.target.value)}
                 placeholder="Context or instruction"
-                className="w-full px-3 py-1.5 rounded border border-zinc-300 text-[14px] text-zinc-950"
+                className="w-full px-3 py-1.5 rounded-ds-sm border border-zinc-300 text-ds-body text-zinc-950"
               />
             </label>
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
+                className="px-3.5 py-1.5 rounded-ds-sm bg-zinc-950 text-white text-ds-label font-medium hover:bg-zinc-800"
               >
                 Add task
               </button>
               <button
                 type="button"
                 onClick={() => setShowNewTask(false)}
-                className="px-3 py-1.5 rounded border border-zinc-300 text-[12px] text-zinc-700"
+                className="px-3 py-1.5 rounded-ds-sm border border-zinc-300 text-ds-label text-zinc-700"
               >
                 Cancel
               </button>
@@ -440,20 +440,20 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
       />
 
       {activeTab !== 'calendar' && (
-        <div className="flex flex-wrap items-center gap-3 text-[12px]">
+        <div className="flex flex-wrap items-center gap-3 text-ds-label">
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search work items or record refs…"
             aria-label="Search work items"
-            className="w-full sm:w-64 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[14px] text-zinc-950"
+            className="w-full sm:w-64 px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-body text-zinc-950"
           />
           <select
             aria-label="Filter by priority"
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as 'all' | WorkPriority)}
-            className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-900"
+            className="px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-900"
           >
             <option value="all">All priorities</option>
             <option value="critical">Critical</option>
@@ -464,7 +464,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             aria-label="Filter by source"
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value as 'all' | WorkSource)}
-            className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-900"
+            className="px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-900"
           >
             <option value="all">All categories</option>
             {availableSources.map((s) => (
@@ -496,32 +496,32 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               {(['open', 'in_progress', 'blocked'] as WorkStatus[]).map((colStatus) => {
                 const colRows = openFiltered.filter((w) => w.status === colStatus);
                 return (
-                  <div key={colStatus} className="border border-zinc-200 bg-zinc-50/50 rounded-md p-3 space-y-2.5">
+                  <div key={colStatus} className="border border-zinc-200 bg-zinc-50/50 rounded-ds-md p-3 space-y-2.5">
                     <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
-                      <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-zinc-700">
+                      <span className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-700">
                         {statusLabels[colStatus]}
                       </span>
-                      <span className="font-mono text-[12px] text-zinc-500 tabular-nums">{colRows.length}</span>
+                      <span className="font-mono text-ds-label text-zinc-500 tabular-nums">{colRows.length}</span>
                     </div>
                     {colRows.length === 0 ? (
-                      <p className="text-[12px] text-zinc-500 py-4 text-center">No items</p>
+                      <p className="text-ds-label text-zinc-500 py-4 text-center">No items</p>
                     ) : (
                       colRows.map((w) => (
                         <button
                           key={w.id}
                           type="button"
                           onClick={() => onSelectItem(w.id)}
-                          className="w-full text-left border border-zinc-200 bg-white rounded-md p-3 hover:border-zinc-400 space-y-1.5"
+                          className="w-full text-left border border-zinc-200 bg-white rounded-ds-md p-3 hover:border-zinc-400 space-y-1.5"
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-mono text-zinc-500 truncate">
+                            <span className="text-ds-micro font-mono text-zinc-500 truncate">
                               {sourceLabels[w.source]}
                             </span>
                             <InlineStatus label={priorityLabels[w.priority]} tone={PRIORITY_TONE[w.priority]} />
                           </div>
-                          <div className="text-[14px] font-medium text-zinc-950">{w.title}</div>
-                          <div className="text-[12px] text-zinc-600 line-clamp-2">{w.detail}</div>
-                          <div className="text-[11px] font-mono text-zinc-500 pt-1">
+                          <div className="text-ds-body font-medium text-zinc-950">{w.title}</div>
+                          <div className="text-ds-label text-zinc-600 line-clamp-2">{w.detail}</div>
+                          <div className="text-ds-micro font-mono text-zinc-500 pt-1">
                             Due {w.dueDate ?? '—'} · {w.entity.label}
                           </div>
                         </button>
@@ -543,14 +543,14 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     type="button"
                     onClick={() => onShiftMonth(-1)}
                     aria-label="Previous month"
-                    className="p-1.5 rounded border border-zinc-300 bg-white hover:bg-zinc-50"
+                    className="p-1.5 rounded-ds-sm border border-zinc-300 bg-white hover:bg-zinc-50"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
                     onClick={onResetMonth}
-                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800 hover:bg-zinc-50"
+                    className="px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label text-zinc-800 hover:bg-zinc-50"
                   >
                     Today
                   </button>
@@ -558,18 +558,18 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     type="button"
                     onClick={() => onShiftMonth(1)}
                     aria-label="Next month"
-                    className="p-1.5 rounded border border-zinc-300 bg-white hover:bg-zinc-50"
+                    className="p-1.5 rounded-ds-sm border border-zinc-300 bg-white hover:bg-zinc-50"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               }
             >
-              <div className="grid grid-cols-7 gap-px bg-zinc-200 border border-zinc-200 rounded overflow-hidden">
+              <div className="grid grid-cols-7 gap-px bg-zinc-200 border border-zinc-200 rounded-ds-sm overflow-hidden">
                 {weekdayLabels.map((d) => (
                   <div
                     key={d}
-                    className="bg-zinc-50 px-2 py-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 text-center"
+                    className="bg-zinc-50 px-2 py-1.5 text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500 text-center"
                   >
                     {d}
                   </div>
@@ -587,14 +587,14 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span
-                          className={`text-[11px] font-mono tabular-nums px-1 rounded ${
-                            isToday ? 'bg-[#C2410C] text-white font-semibold' : 'text-zinc-600'
+                          className={`text-ds-micro font-mono tabular-nums px-1 rounded-ds-sm ${
+                            isToday ? 'bg-accent text-white font-semibold' : 'text-zinc-600'
                           }`}
                         >
                           {date.slice(8)}
                         </span>
                         {dayEntries.length > 0 && (
-                          <span className="text-[11px] font-mono text-zinc-400">{dayEntries.length}</span>
+                          <span className="text-ds-micro font-mono text-zinc-400">{dayEntries.length}</span>
                         )}
                       </div>
                       <div className="space-y-1">
@@ -603,7 +603,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                             key={entry.id}
                             type="button"
                             onClick={() => onSelectItem(entry.workItemId)}
-                            className={`w-full text-left px-1.5 py-0.5 rounded text-[11px] truncate border ${
+                            className={`w-full text-left px-1.5 py-0.5 rounded-ds-sm text-ds-micro truncate border ${
                               entry.resolved
                                 ? 'border-zinc-200 bg-zinc-50 text-zinc-400 line-through'
                                 : entry.priority === 'critical'
@@ -616,7 +616,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                           </button>
                         ))}
                         {dayEntries.length > 3 && (
-                          <div className="text-[11px] text-zinc-500 px-1">+{dayEntries.length - 3} more</div>
+                          <div className="text-ds-micro text-zinc-500 px-1">+{dayEntries.length - 3} more</div>
                         )}
                       </div>
                     </div>
@@ -648,7 +648,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     render: (r) => (
                       <div>
                         <div className="font-medium text-zinc-950">{r.title}</div>
-                        <div className="text-[12px] text-zinc-600">{r.detail}</div>
+                        <div className="text-ds-label text-zinc-600">{r.detail}</div>
                       </div>
                     ),
                   },
@@ -666,7 +666,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     key: 'dueDate',
                     header: 'Due Date',
                     align: 'right',
-                    render: (r) => <span className="font-mono text-[12px]">{r.dueDate}</span>,
+                    render: (r) => <span className="font-mono text-ds-label">{r.dueDate}</span>,
                   },
                   {
                     key: 'actions',
@@ -677,14 +677,14 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                         <button
                           type="button"
                           onClick={() => onSelectItem(r.workItemId)}
-                          className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                          className="text-ds-label font-medium text-accent hover:underline"
                         >
                           Inspect
                         </button>
                         <button
                           type="button"
                           onClick={() => onDismissReminder(r.id)}
-                          className="text-[12px] text-zinc-600 hover:text-zinc-950"
+                          className="text-ds-label text-zinc-600 hover:text-zinc-950"
                         >
                           Dismiss
                         </button>
@@ -703,9 +703,9 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             description={scope === 'admin' ? 'Platform-wide canonical projections' : 'Your brand projections'}
           >
             {sourceBreakdown.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">No open work items right now.</p>
+              <p className="text-ds-label text-zinc-500">No open work items right now.</p>
             ) : (
-              <ul className="space-y-2 text-[12px]">
+              <ul className="space-y-2 text-ds-label">
                 {sourceBreakdown.map((s) => (
                   <li key={s.source} className="flex items-center justify-between gap-2">
                     <span className="text-zinc-700">{s.label}</span>
@@ -717,11 +717,11 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
           </SectionCard>
 
           <SectionCard title="Views">
-            <div className="space-y-1.5 text-[12px]">
+            <div className="space-y-1.5 text-ds-label">
               <button
                 type="button"
                 onClick={() => onChangeTab('list')}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded border border-zinc-200 hover:bg-zinc-50 text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-ds-sm border border-zinc-200 hover:bg-zinc-50 text-left"
               >
                 <ListIcon className="w-3.5 h-3.5 text-zinc-500" />
                 Queue List ({openFiltered.length})
@@ -729,7 +729,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               <button
                 type="button"
                 onClick={() => onChangeTab('board')}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded border border-zinc-200 hover:bg-zinc-50 text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-ds-sm border border-zinc-200 hover:bg-zinc-50 text-left"
               >
                 <Columns3 className="w-3.5 h-3.5 text-zinc-500" />
                 Status Board
@@ -737,7 +737,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               <button
                 type="button"
                 onClick={() => onChangeTab('calendar')}
-                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded border border-zinc-200 hover:bg-zinc-50 text-left"
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-ds-sm border border-zinc-200 hover:bg-zinc-50 text-left"
               >
                 <CalendarIcon className="w-3.5 h-3.5 text-zinc-500" />
                 Deadlines Calendar
@@ -766,7 +766,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               <button
                 type="button"
                 onClick={() => onOpenOwningRecord(selectedItem)}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
               >
                 {openLabel}
               </button>
@@ -778,7 +778,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                       const res = onResolveManual(selectedItem.id, drawerNote);
                       setFeedback(res.ok ? 'Task resolved.' : res.error ?? 'Could not resolve');
                     }}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                    className="px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
                   >
                     Mark done
                   </button>
@@ -790,7 +790,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                       const res = onReopenManual(selectedItem.id, drawerNote);
                       setFeedback(res.ok ? 'Task reopened.' : res.error ?? 'Could not reopen');
                     }}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800"
+                    className="px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label text-zinc-800"
                   >
                     Reopen
                   </button>
@@ -801,8 +801,8 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
         }
       >
         {selectedItem && (
-          <div className="space-y-4 text-[14px]">
-            <div className="grid grid-cols-2 gap-3 text-[12px] border border-zinc-200 rounded-md p-3 bg-zinc-50/50">
+          <div className="space-y-4 text-ds-body">
+            <div className="grid grid-cols-2 gap-3 text-ds-label border border-zinc-200 rounded-ds-md p-3 bg-zinc-50/50">
               <div>
                 <span className="text-zinc-500 block">Status</span>
                 <InlineStatus label={statusLabels[selectedItem.status]} tone={STATUS_TONE[selectedItem.status]} />
@@ -834,7 +834,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             {canResolveCheck(selectedItem) && (
               <div className="space-y-2 border-t border-zinc-200 pt-3">
                 <label className="block">
-                  <span className="block text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">
+                  <span className="block text-ds-micro uppercase tracking-[0.06em] text-zinc-500 mb-1">
                     Progress note & status update
                   </span>
                   <input
@@ -842,7 +842,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                     value={drawerNote}
                     onChange={(e) => setDrawerNote(e.target.value)}
                     placeholder="Optional audit note"
-                    className="w-full px-3 py-1.5 rounded border border-zinc-300 text-[14px]"
+                    className="w-full px-3 py-1.5 rounded-ds-sm border border-zinc-300 text-ds-body"
                   />
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -851,7 +851,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                       key={st}
                       type="button"
                       onClick={() => onSetStatus(selectedItem.id, st, drawerNote)}
-                      className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] hover:bg-zinc-50"
+                      className="px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label hover:bg-zinc-50"
                     >
                       Set {statusLabels[st]}
                     </button>
@@ -861,15 +861,15 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             )}
 
             <div className="border-t border-zinc-200 pt-3">
-              <h3 className="text-[12px] font-semibold uppercase tracking-[0.06em] text-zinc-500 mb-2">
+              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-500 mb-2">
                 Activity trail
               </h3>
-              <ul className="space-y-2 text-[12px]">
+              <ul className="space-y-2 text-ds-label">
                 {selectedItem.activity.map((a) => (
                   <li key={a.id} className="border-l-2 border-zinc-200 pl-3">
                     <div className="font-medium text-zinc-950">{a.action.replace(/_/g, ' ')}</div>
                     <div className="text-zinc-600">{a.detail}</div>
-                    <div className="text-[11px] font-mono text-zinc-500">
+                    <div className="text-ds-micro font-mono text-zinc-500">
                       {a.actor} · {a.at}
                     </div>
                   </li>

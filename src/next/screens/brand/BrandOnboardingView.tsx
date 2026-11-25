@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, CheckCircle2, ShieldCheck } from 'lucide-react';
 import {
   InlineStatus,
-  PageHeader,
+  ConsoleHeader,
 } from '@/next/components/ConsolePrimitives';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
@@ -70,7 +70,7 @@ export function BrandOnboardingView({
     const gateCleared = allGateDocsApproved && logisticsSlaAccepted && chargebackIndemnityAccepted;
     return (
       <div className="space-y-6">
-        <PageHeader
+        <ConsoleHeader
           title="Onboarding & Legal Summary"
           description={`${profile.businessName || 'Your brand'} onboarding submission is locked on record.`}
           actions={
@@ -78,7 +78,7 @@ export function BrandOnboardingView({
               <button
                 type="button"
                 onClick={onNavigateSettings}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
               >
                 Request Profile / Bank Change in Settings
               </button>
@@ -98,7 +98,7 @@ export function BrandOnboardingView({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <SectionCard title="Brand Profile">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-zinc-200 text-ds-label">
               {[
                 ['Business Name', profile.businessName],
                 ['Category', profile.category],
@@ -117,7 +117,7 @@ export function BrandOnboardingView({
           </SectionCard>
 
           <SectionCard title="Legal & Commercial Model">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-zinc-200 text-ds-label">
               <div className="py-2 flex items-center justify-between gap-4">
                 <dt className="text-zinc-500">Authorized Signatory</dt>
                 <dd className="font-medium text-zinc-950">{profile.signatory || '—'}</dd>
@@ -154,7 +154,7 @@ export function BrandOnboardingView({
           </SectionCard>
 
           <SectionCard title="Banking & Payouts">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-zinc-200 text-ds-label">
               {[
                 ['SWIFT / BIC', profile.bic],
                 ['IBAN / Account', profile.iban],
@@ -170,7 +170,7 @@ export function BrandOnboardingView({
           </SectionCard>
 
           <SectionCard title="Fulfillment Track">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-zinc-200 text-ds-label">
               <div className="py-2 flex items-center justify-between gap-4">
                 <dt className="text-zinc-500">Assigned Track</dt>
                 <dd className="font-medium text-zinc-950 capitalize">
@@ -219,7 +219,7 @@ export function BrandOnboardingView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsoleHeader
         title="Brand Onboarding & Legal"
         description="Complete all six onboarding steps to establish your distribution agreement, commercial model, banking details, and fulfillment track."
       />
@@ -232,7 +232,7 @@ export function BrandOnboardingView({
             onClick={() => {
               if (s.id <= step) setStep(s.id);
             }}
-            className={`px-3 py-2 rounded border text-left text-[12px] ${
+            className={`px-3 py-2 rounded-ds-sm border text-left text-ds-label ${
               step === s.id
                 ? 'border-zinc-950 bg-zinc-950 text-white font-medium'
                 : step > s.id
@@ -240,7 +240,7 @@ export function BrandOnboardingView({
                   : 'border-zinc-200 bg-white text-zinc-500'
             }`}
           >
-            <div className="font-mono text-[11px] flex items-center justify-between">
+            <div className="font-mono text-ds-micro flex items-center justify-between">
               <span>Step {s.id}</span>
               {step > s.id && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
             </div>
@@ -250,7 +250,7 @@ export function BrandOnboardingView({
       </div>
 
       <SectionCard title={`Step ${step}: ${STEPS[step - 1].label}`}>
-        <div className="space-y-4 text-[12px] max-w-2xl">
+        <div className="space-y-4 text-ds-label max-w-2xl">
           {step === 1 && (
             <>
               <label className="block space-y-1">
@@ -258,7 +258,7 @@ export function BrandOnboardingView({
                 <input
                   value={profile.businessName}
                   onChange={(e) => onUpdateProfile({ businessName: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 />
               </label>
               <div className="space-y-1.5">
@@ -269,9 +269,9 @@ export function BrandOnboardingView({
                       key={cat}
                       type="button"
                       onClick={() => onUpdateProfile({ category: cat })}
-                      className={`px-2.5 py-1.5 rounded border text-left ${
+                      className={`px-2.5 py-1.5 rounded-ds-sm border text-left ${
                         profile.category === cat
-                          ? 'border-[#C2410C] bg-orange-50 text-zinc-950 font-medium'
+                          ? 'border-accent bg-orange-50 text-zinc-950 font-medium'
                           : 'border-zinc-200 bg-white text-zinc-700'
                       }`}
                     >
@@ -288,7 +288,7 @@ export function BrandOnboardingView({
                     onChange={(e) =>
                       onUpdateProfile({ region: e.target.value as BrandRegion, nation: '' })
                     }
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                   >
                     {REGIONS.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -302,7 +302,7 @@ export function BrandOnboardingView({
                   <select
                     value={profile.nation}
                     onChange={(e) => onUpdateProfile({ nation: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                   >
                     <option value="">Select nation…</option>
                     {(NATIONS_BY_REGION[profile.region] ?? []).map((n) => (
@@ -317,7 +317,7 @@ export function BrandOnboardingView({
                   <input
                     value={profile.taxId}
                     onChange={(e) => onUpdateProfile({ taxId: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                   />
                 </label>
                 <label className="space-y-1">
@@ -326,7 +326,7 @@ export function BrandOnboardingView({
                     type="email"
                     value={profile.email}
                     onChange={(e) => onUpdateProfile({ email: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                   />
                 </label>
               </div>
@@ -340,7 +340,7 @@ export function BrandOnboardingView({
                 <input
                   value={profile.signatory}
                   onChange={(e) => onUpdateProfile({ signatory: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 />
               </label>
               <div className="space-y-2">
@@ -371,9 +371,9 @@ export function BrandOnboardingView({
                       key={id}
                       type="button"
                       onClick={() => onUpdateProfile({ commercialModel: id })}
-                      className={`w-full text-left p-3 rounded border ${
+                      className={`w-full text-left p-3 rounded-ds-sm border ${
                         selected
-                          ? 'border-[#C2410C] bg-orange-50'
+                          ? 'border-accent bg-orange-50'
                           : 'border-zinc-200 bg-white hover:bg-zinc-50'
                       }`}
                     >
@@ -393,7 +393,7 @@ export function BrandOnboardingView({
                 <select
                   value={profile.bic}
                   onChange={(e) => onUpdateProfile({ bic: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-2.5 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="">Select bank…</option>
                   {banks.map((b) => (
@@ -408,7 +408,7 @@ export function BrandOnboardingView({
                 <input
                   value={profile.iban}
                   onChange={(e) => onUpdateProfile({ iban: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white font-mono text-zinc-950"
                 />
               </label>
               <div className="space-y-1">
@@ -421,9 +421,9 @@ export function BrandOnboardingView({
                       key={ans}
                       type="button"
                       onClick={() => onUpdateProfile({ workingCapitalAnswer: ans })}
-                      className={`px-3 py-1.5 rounded border capitalize ${
+                      className={`px-3 py-1.5 rounded-ds-sm border capitalize ${
                         profile.workingCapitalAnswer === ans
-                          ? 'border-[#C2410C] bg-orange-50 font-medium text-zinc-950'
+                          ? 'border-accent bg-orange-50 font-medium text-zinc-950'
                           : 'border-zinc-200 bg-white text-zinc-700'
                       }`}
                     >
@@ -446,9 +446,9 @@ export function BrandOnboardingView({
                   key={track}
                   type="button"
                   onClick={() => onUpdateProfile({ fulfillmentTrack: track })}
-                  className={`w-full text-left p-3 rounded border ${
+                  className={`w-full text-left p-3 rounded-ds-sm border ${
                     profile.fulfillmentTrack === track
-                      ? 'border-[#C2410C] bg-orange-50'
+                      ? 'border-accent bg-orange-50'
                       : 'border-zinc-200 bg-white'
                   }`}
                 >
@@ -484,7 +484,7 @@ export function BrandOnboardingView({
 
           {step === 6 && (
             <div className="space-y-3">
-              <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-zinc-700">
+              <div className="rounded-ds-sm border border-zinc-200 bg-zinc-50 p-3 text-zinc-700">
                 Purchase orders must be acknowledged within 24 hours on Mercenta. Unconfirmed POs
                 risk automated channel deductions.
               </div>
@@ -494,7 +494,7 @@ export function BrandOnboardingView({
                   checked={guidanceAck}
                   onChange={(e) => setGuidanceAck(e.target.checked)}
                 />
-                <ShieldCheck className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                <ShieldCheck className="w-4 h-4 text-accent" aria-hidden="true" />
                 I acknowledge MOQ, packaging, and PO acknowledgement rules
               </label>
             </div>
@@ -505,7 +505,7 @@ export function BrandOnboardingView({
               type="button"
               disabled={step === 1}
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700 disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-700 disabled:opacity-40"
             >
               Previous
             </button>
@@ -514,7 +514,7 @@ export function BrandOnboardingView({
                 type="button"
                 disabled={!canNext}
                 onClick={() => setStep((s) => Math.min(6, s + 1))}
-                className="px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-4 py-1.5 rounded-ds-sm bg-accent text-white font-medium hover:bg-accent-600 disabled:opacity-40"
               >
                 Continue
               </button>
@@ -529,7 +529,7 @@ export function BrandOnboardingView({
                     chargebackIndemnity: legal.chargebackIndemnity,
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-ds-sm bg-accent text-white font-medium hover:bg-accent-600 disabled:opacity-40"
               >
                 <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 Complete Onboarding

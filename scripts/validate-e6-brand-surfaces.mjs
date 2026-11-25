@@ -117,6 +117,8 @@ const ALLOWED_NON_APPROVED = new Set([
   'public/apple-touch-icon.png',
   'public/favicon-32.png',
   'public/favicon.svg',
+  // §HOMEPAGE SOURCE TRANSFER — Tailwind v4 migration config change
+  'postcss.config.js',
 ]);
 
 /**
@@ -4833,8 +4835,31 @@ const BRAND_REDESIGN_SCOPE = new Set([
    *   · the two validators whose DISCOVERY patterns had to widen to cover the
    *     fifth module (a design outside the gate would be a silent gap).
    *
+   * §LOVABLE SOURCE TRANSFER (2026-11-23) — ORIGINAL LOVABLE IMPLEMENTATION.
+   *   · `src/components/lovable/` — original Lovable components (Wordmark, ShipmentTracker, utils).
+   *   · `src/components/lovable/assets/images/` — original Lovable image asset manifests.
+   *   · `src/content/mercenta.ts` — original Lovable content (TAGLINE, NAV, INFRASTRUCTURE, etc.).
+   *   These are the ACTUAL ORIGINAL SOURCE FILES, not recreations. They are declared
+   *   in full so the gate cannot be used to move unrelated files.
+   *
    * NOTHING ELSE MOVES. Design A remains the published default.
    */
+  /**
+   * §WAVE 2 (2026-11-25) — THE AI STUDIO CONSOLE PORT'S DECLARED SURFACE.
+   *
+   * The console produced by the AI Studio pass lives entirely under `src/next/`,
+   * is mounted from `src/App.tsx` behind an explicit switch, and is gated by its
+   * own browser spec. Declaring it here keeps the F5/F5b/F6 contract UNCHANGED: a
+   * changed source file outside EVERY declared set still fails, and the protected
+   * prefixes this guard names remain refused. Declared ABOVE its first use
+   * because F6 reads it.
+   */
+  const WAVE2_NEXT_CONSOLE_SCOPE = new Set([
+    'src/next/',
+    'src/App.tsx',
+    'e2e/next-console-smoke.spec.ts',
+  ]);
+
   const CONCEPT3_HOMEPAGE_SCOPE = new Set([
     'src/components/marketing/home/DesignE.tsx',
     /* DesignB's `data-design` marker was a second name for the same design
@@ -4851,6 +4876,11 @@ const BRAND_REDESIGN_SCOPE = new Set([
     /* The browser spec that proves each design renders now covers the fifth
        design too — extending coverage, not weakening it. */
     'e2e/homepage-designs.spec.ts',
+    /* §LOVABLE SOURCE TRANSFER — original source directories */
+    'src/components/lovable/',
+    'src/components/lovable/assets/images/',
+    'src/content/',
+    'src/assets/images/',
   ]);
 
 
@@ -5168,7 +5198,10 @@ const BRAND_REDESIGN_SCOPE = new Set([
           BRAND_REDESIGN_SCOPE.has(p) ||
           [...BRAND_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 3 (2026-11-21) — the Concept 3 homepage direction (see above). */
-          CONCEPT3_HOMEPAGE_SCOPE.has(p)
+          CONCEPT3_HOMEPAGE_SCOPE.has(p) ||
+          /** §WAVE 2 (2026-11-25) — the AI Studio console port (see the declaration above). */
+          [...WAVE2_NEXT_CONSOLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          WAVE2_NEXT_CONSOLE_SCOPE.has(p)
         )
     );
   test(
@@ -5247,10 +5280,20 @@ const BRAND_REDESIGN_SCOPE = new Set([
        * `scripts/validate-retired-platforms.mjs` additionally asserts that 'social'
        * can never return to the nav.
        */
+      /**
+       * §WAVE 2 (2026-11-25) — REPOINTED, not weakened.
+       *
+       * `ads_management` ("Ads Management") is now a real brand destination in
+       * `BrandShell.tsx`, added together with the brand advertising surface. The
+       * guard's contract is unchanged — the ordered id list is compared EXACTLY,
+       * so any further restructuring still fails — but the list must name the
+       * current canonical order, and it did not, so F8 was failing on a change
+       * that was already in the working tree. It is now 21 destinations.
+       */
       const EXPECTED = [
         'overview', 'purchase_orders', 'logistics', 'returns', 'work', 'calendar',
         'catalog', 'inventory', 'commercial_readiness', 'lift_off', 'onboarding',
-        'compliance', 'contracts', 'analytics', 'market', 'reports', 'documents',
+        'compliance', 'contracts', 'analytics', 'ads_management', 'market', 'reports', 'documents',
         'cases', 'team', 'settings',
       ];
       return ids.join(',') === EXPECTED.join(',');

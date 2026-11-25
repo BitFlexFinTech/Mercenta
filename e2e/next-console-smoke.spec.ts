@@ -45,6 +45,50 @@ test('admin session: the new console renders its admin surface', async ({ page }
   expect(pageErrors).toEqual([]);
 });
 
+test('every mounted brand view renders and none falls back to the Phase 4-6 placeholder', async ({
+  page,
+}) => {
+  const pageErrors = watchPageErrors(page);
+  await loginAs(page, 'Le Creuset');
+  await page.goto('/?console=next');
+
+  const nav = page.getByRole('navigation', { name: 'Workspace navigation' });
+  await expect(nav).toBeVisible({ timeout: 20000 });
+
+  /* The sixteen brand views the shell now mounts. `calendar`, `market`, `cases`,
+     `team` and `settings` are deliberately absent: those screens were never built
+     in the AI Studio pass, so they keep the honest placeholder. */
+  const mountedViews = [
+    'Dashboard',
+    'Purchase Orders',
+    'Logistics Hub',
+    'Returns',
+    'Tasks & Deadlines',
+    'Product Catalog',
+    'Inventory',
+    'Commercial Readiness',
+    'Lift Off',
+    'Onboarding & Legal',
+    'UK Compliance',
+    'Contracts',
+    'Analytics',
+    'Advertising',
+    'Reports',
+    'Documents & Account',
+  ];
+
+  for (const label of mountedViews) {
+    await nav.getByText(label, { exact: true }).first().click();
+    await expect(
+      page.getByText(/is not available yet/i),
+      `${label} must render a real screen, not the placeholder`
+    ).toHaveCount(0);
+  }
+
+  await page.screenshot({ path: 'test-results/next-console-brand.png', fullPage: true });
+  expect(pageErrors).toEqual([]);
+});
+
 test('default: the existing application still renders, not the new console', async ({ page }) => {
   const pageErrors = watchPageErrors(page);
   await page.goto('/');

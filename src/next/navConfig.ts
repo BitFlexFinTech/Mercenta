@@ -136,30 +136,30 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
  * CORE — Brand Portal surface (20 canonical BrandShell IDs + first-class ads_management entry).
  */
 export const CORE_BRAND_ITEMS: NavItemDef[] = [
-  { id: 'overview', label: 'Dashboard', group: 'Overview', implemented: false },
+  { id: 'overview', label: 'Dashboard', group: 'Overview', implemented: true },
 
   { id: 'purchase_orders', label: 'Purchase Orders', group: 'Operations', implemented: true },
   { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: true },
-  { id: 'returns', label: 'Returns', group: 'Operations', implemented: false },
-  { id: 'work', label: 'Tasks & Deadlines', group: 'Operations', implemented: false },
+  { id: 'returns', label: 'Returns', group: 'Operations', implemented: true },
+  { id: 'work', label: 'Tasks & Deadlines', group: 'Operations', implemented: true },
   { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
 
-  { id: 'catalog', label: 'Product Catalog', group: 'Catalogue', implemented: false },
-  { id: 'inventory', label: 'Inventory', group: 'Catalogue', implemented: false },
-  { id: 'commercial_readiness', label: 'Commercial Readiness', group: 'Catalogue', implemented: false },
+  { id: 'catalog', label: 'Product Catalog', group: 'Catalogue', implemented: true },
+  { id: 'inventory', label: 'Inventory', group: 'Catalogue', implemented: true },
+  { id: 'commercial_readiness', label: 'Commercial Readiness', group: 'Catalogue', implemented: true },
 
-  { id: 'lift_off', label: 'Lift Off', group: 'Programme', implemented: false },
+  { id: 'lift_off', label: 'Lift Off', group: 'Programme', implemented: true },
 
-  { id: 'onboarding', label: 'Onboarding & Legal', group: 'Compliance', implemented: false },
-  { id: 'compliance', label: 'UK Compliance', group: 'Compliance', implemented: false },
-  { id: 'contracts', label: 'Contracts', group: 'Compliance', implemented: false },
+  { id: 'onboarding', label: 'Onboarding & Legal', group: 'Compliance', implemented: true },
+  { id: 'compliance', label: 'UK Compliance', group: 'Compliance', implemented: true },
+  { id: 'contracts', label: 'Contracts', group: 'Compliance', implemented: true },
 
-  { id: 'analytics', label: 'Analytics', group: 'Insights & Growth', implemented: false },
+  { id: 'analytics', label: 'Analytics', group: 'Insights & Growth', implemented: true },
   { id: 'ads_management', label: 'Advertising', group: 'Insights & Growth', implemented: true },
   { id: 'market', label: 'Market Intel', group: 'Insights & Growth', implemented: false },
-  { id: 'reports', label: 'Reports', group: 'Insights & Growth', implemented: false },
+  { id: 'reports', label: 'Reports', group: 'Insights & Growth', implemented: true },
 
-  { id: 'documents', label: 'Documents & Account', group: 'Account', implemented: false },
+  { id: 'documents', label: 'Documents & Account', group: 'Account', implemented: true },
   { id: 'cases', label: 'Support & Cases', group: 'Account', implemented: false },
   { id: 'team', label: 'Support & Team', group: 'Account', implemented: false },
   { id: 'settings', label: 'Settings', group: 'Account', implemented: false },

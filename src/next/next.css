@@ -3,7 +3,7 @@
  * Rules:
  * - Strictly 11 / 12 / 14 / 16 / 20 / 24 px type scale (no sub-11px).
  * - Calm neutral base, 1px hairline borders, tabular numerals on money/quantities.
- * - Single primary accent (#C2410C, AA 5.18:1 on #FFFFFF) + ink black (#111827).
+ * - Single primary accent, resolved from the theme token --mr-accent + ink black (#111827).
  * - Zero gradients, glows, or thick left accent borders.
  */
 
@@ -107,13 +107,13 @@
   border-color: #e4e4e7;
 }
 .mercenta-next .rounded-ds-sm {
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .mercenta-next .rounded-ds-md {
   border-radius: 8px;
 }
 .mercenta-next .rounded-ds-lg {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 .mercenta-next .shadow-ds-overlay {
   box-shadow: 0 12px 32px -8px rgba(9, 9, 11, 0.14), 0 0 0 1px #e4e4e7;

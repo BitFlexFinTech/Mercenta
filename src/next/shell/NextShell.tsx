@@ -23,6 +23,23 @@ import {
 import { AdsManagerScreen } from '@/next/screens/ads/AdsManagerScreen';
 import { BrandLogisticsScreen } from '@/next/screens/brand/BrandLogisticsScreen';
 import { BrandPurchaseOrdersScreen } from '@/next/screens/brand/BrandPurchaseOrdersScreen';
+/* §WAVE 2 (2026-11-25) — the twelve brand screens below were BUILT in the AI
+   Studio pass but never mounted: nothing imported them, so the navigation
+   advertised views the shell could not render and `validate-dead-code` reported
+   them as dead files. They are mounted here, behind the same view-id switch. */
+import { BrandAnalyticsScreen } from '@/next/screens/brand/BrandAnalyticsScreen';
+import { BrandCatalogScreen } from '@/next/screens/brand/BrandCatalogScreen';
+import { BrandCommercialReadinessScreen } from '@/next/screens/brand/BrandCommercialReadinessScreen';
+import { BrandComplianceScreen } from '@/next/screens/brand/BrandComplianceScreen';
+import { BrandContractsScreen } from '@/next/screens/brand/BrandContractsScreen';
+import { BrandDocumentsScreen } from '@/next/screens/brand/BrandDocumentsScreen';
+import { BrandInventoryScreen } from '@/next/screens/brand/BrandInventoryScreen';
+import { BrandLiftOffScreen } from '@/next/screens/brand/BrandLiftOffScreen';
+import { BrandOnboardingScreen } from '@/next/screens/brand/BrandOnboardingScreen';
+import { BrandOverviewScreen } from '@/next/screens/brand/BrandOverviewScreen';
+import { BrandReportsScreen } from '@/next/screens/brand/BrandReportsScreen';
+import { BrandReturnsScreen } from '@/next/screens/brand/BrandReturnsScreen';
+import { WorkWorkspaceScreen } from '@/next/screens/shared/WorkWorkspaceScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -77,6 +94,14 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   });
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  /* §WAVE 2 (2026-11-25) — ONE navigation helper for the brand surface, so a
+     screen that sends the user elsewhere keeps shell state and the canonical
+     URL in step (the pattern `purchase_orders -> logistics` already used). */
+  const goToBrandView = (viewId: string, query: Record<string, string> = {}) => {
+    setViewBySurface((prev) => ({ ...prev, core_brand: viewId }));
+    navigateProductView('brand', viewId, query);
+  };
 
   // Super-Admin portfolio filters (applied cleanly against fields present on DemoBrandRow)
   const [verticalFilter, setVerticalFilter] = useState<VerticalFilterValue>('all');
@@ -212,6 +237,57 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       if (activeViewId === 'ads_management') {
         return <AdsManagerScreen vertical="core" scope="brand" />;
       }
+      /* §WAVE 2 (2026-11-25) — the remaining brand views are MOUNTED. */
+      if (activeViewId === 'overview') {
+        return (
+          <BrandOverviewScreen
+            onNavigate={(viewId, poNumber) =>
+              goToBrandView(viewId, poNumber ? recordLinkQuery('po', poNumber) : {})
+            }
+          />
+        );
+      }
+      if (activeViewId === 'returns') {
+        return (
+          <BrandReturnsScreen
+            onOpenPo={(poNumber) => goToBrandView('purchase_orders', recordLinkQuery('po', poNumber))}
+            onOpenDeductions={() => goToBrandView('analytics')}
+          />
+        );
+      }
+      if (activeViewId === 'work') {
+        return <WorkWorkspaceScreen scope="brand" onNavigate={(viewId) => goToBrandView(viewId)} />;
+      }
+      if (activeViewId === 'catalog') {
+        return <BrandCatalogScreen />;
+      }
+      if (activeViewId === 'inventory') {
+        return <BrandInventoryScreen />;
+      }
+      if (activeViewId === 'commercial_readiness') {
+        return <BrandCommercialReadinessScreen />;
+      }
+      if (activeViewId === 'lift_off') {
+        return <BrandLiftOffScreen onOpenCases={() => goToBrandView('cases')} />;
+      }
+      if (activeViewId === 'onboarding') {
+        return <BrandOnboardingScreen onNavigateSettings={() => goToBrandView('settings')} />;
+      }
+      if (activeViewId === 'compliance') {
+        return <BrandComplianceScreen />;
+      }
+      if (activeViewId === 'contracts') {
+        return <BrandContractsScreen />;
+      }
+      if (activeViewId === 'analytics') {
+        return <BrandAnalyticsScreen />;
+      }
+      if (activeViewId === 'reports') {
+        return <BrandReportsScreen />;
+      }
+      if (activeViewId === 'documents') {
+        return <BrandDocumentsScreen />;
+      }
     }
 
     if (
@@ -250,23 +326,23 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
     return (
       <div className="space-y-6">
         <div className="border-b border-zinc-200 pb-4">
-          <div className="text-[11px] font-mono uppercase tracking-[0.06em] text-zinc-500">
+          <div className="text-ds-micro font-mono uppercase tracking-[0.06em] text-zinc-500">
             {surfaceCfg.label} · {activeViewId}
           </div>
-          <h1 className="mt-1 text-[20px] font-semibold text-zinc-950">
+          <h1 className="mt-1 text-ds-page font-semibold text-zinc-950">
             {activeNavItem?.label ?? activeViewId}
           </h1>
-          <p className="mt-1 text-[14px] text-zinc-600">
+          <p className="mt-1 text-ds-body text-zinc-600">
             Scheduled for Phases 4–6. Navigation structure and RBAC allowlists are active in Phase 1.
           </p>
         </div>
 
         <EmptyStateBlock
-          title={`${activeNavItem?.label ?? activeViewId} is scheduled for Phases 4–6`}
+          title={`${activeNavItem?.label ?? activeViewId} is not available yet`}
           description={
             surface === 'core_brand'
-              ? 'Phases 1–2 implement Purchase Orders, Logistics Hub, and Advertising on this surface.'
-              : 'Phases 1–2 implement the unified Ads Manager across Operations Console, BWS Campaign Studio, and Talent Commerce Campaigns.'
+              ? 'This view is not part of the current release. Everything else in the Partner Portal is available from the menu.'
+              : 'This view is not part of the current release. The Ads Manager is available from the menu.'
           }
           actionLabel={
             surface === 'core_brand'
@@ -283,16 +359,16 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
     <div className="flex flex-col h-full">
       <div className="px-4 py-4 border-b border-zinc-200 flex items-center justify-between">
         <div>
-          <div className="text-[14px] font-semibold tracking-tight text-zinc-950">
+          <div className="text-ds-body font-semibold tracking-tight text-zinc-950">
             Mercenta Partners
           </div>
-          <div className="text-[12px] text-zinc-500">{surfaceCfg.label}</div>
+          <div className="text-ds-label text-zinc-500">{surfaceCfg.label}</div>
         </div>
         <button
           type="button"
           onClick={() => setMobileNavOpen(false)}
           aria-label="Close navigation menu"
-          className="lg:hidden p-1.5 rounded text-zinc-500 hover:text-zinc-900"
+          className="lg:hidden p-1.5 rounded-ds-sm text-zinc-500 hover:text-zinc-900"
         >
           <X className="w-4 h-4" />
         </button>
@@ -301,7 +377,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5" aria-label="Workspace navigation">
         {groupedItems.map((group) => (
           <div key={group.group} className="space-y-1">
-            <div className="px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+            <div className="px-2 text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
               {group.group}
             </div>
             <ul className="space-y-0.5">
@@ -313,7 +389,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       type="button"
                       onClick={() => selectNavItem(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-[14px] text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
                         isActive
                           ? 'bg-zinc-950 text-white font-medium'
                           : item.implemented
@@ -322,15 +398,12 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       }`}
                     >
                       <span className="truncate">{item.label}</span>
-                      {item.implemented && (
-                        <span
-                          className={`text-[11px] font-mono shrink-0 ${
-                            isActive ? 'text-zinc-300' : 'text-[#C2410C]'
-                          }`}
-                        >
-                          Live
-                        </span>
-                      )}
+                      {/* §WAVE 2 FIX (2026-11-25) — this badge rendered "Live"
+                          from `item.implemented`, which only means "the screen
+                          exists". It falsely claimed live data on sixteen nav
+                          items, against the platform rule that simulated data is
+                          never presented as live. Availability is conveyed by the
+                          item's contrast and by an honest empty state instead. */}
                     </button>
                   </li>
                 );
@@ -340,9 +413,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-zinc-200 space-y-2 text-[12px]">
-        <div className="px-2 py-1.5 rounded bg-zinc-50 border border-zinc-200">
-          <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Session</div>
+      <div className="p-3 border-t border-zinc-200 space-y-2 text-ds-label">
+        <div className="px-2 py-1.5 rounded-ds-sm bg-zinc-50 border border-zinc-200">
+          <div className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">Session</div>
           <div className="font-medium text-zinc-950 truncate">
             {session ? `${session.role}${session.tenantId ? ` (${session.tenantId})` : ''}` : 'No active session'}
           </div>
@@ -351,7 +424,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           <button
             type="button"
             onClick={onOpenLegacy}
-            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
           >
             Legacy UI
             <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -360,7 +433,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             <button
               type="button"
               onClick={signOut}
-              className="px-2.5 py-1.5 rounded border border-zinc-200 bg-white text-[12px] text-zinc-600 hover:text-zinc-950"
+              className="px-2.5 py-1.5 rounded-ds-sm border border-zinc-200 bg-white text-ds-label text-zinc-600 hover:text-zinc-950"
             >
               Sign out
             </button>
@@ -402,7 +475,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 type="button"
                 onClick={() => setMobileNavOpen(true)}
                 aria-label="Open navigation menu"
-                className="lg:hidden p-2 -ml-2 rounded border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                className="lg:hidden p-2 -ml-2 rounded-ds-sm border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               >
                 <Menu className="w-4 h-4" />
               </button>
@@ -410,7 +483,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               <div
                 role="tablist"
                 aria-label="Operating model surface"
-                className="inline-flex flex-wrap items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-0.5"
+                className="inline-flex flex-wrap items-center gap-1 rounded-ds-md border border-zinc-200 bg-zinc-50 p-0.5"
               >
                 {(
                   ['core_brand', 'core_admin', 'bws', 'talent_commerce'] as OperatingSurfaceId[]
@@ -424,7 +497,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       role="tab"
                       aria-selected={active}
                       onClick={() => selectSurface(sId)}
-                      className={`px-2.5 py-1 rounded text-[12px] font-medium transition-colors whitespace-nowrap ${
+                      className={`px-2.5 py-1 rounded-ds-sm text-ds-label font-medium transition-colors whitespace-nowrap ${
                         active
                           ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
                           : 'text-zinc-600 hover:text-zinc-950'
@@ -438,7 +511,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             </div>
 
             {/* Zone 2: Demo Actor / Brand Switcher */}
-            <div className="flex flex-wrap items-center gap-2 text-[12px]">
+            <div className="flex flex-wrap items-center gap-2 text-ds-label">
               <label className="inline-flex items-center gap-1.5 text-zinc-600">
                 <UserCheck className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
                 <span className="hidden sm:inline">Demo actor</span>
@@ -467,7 +540,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       if (surface === 'core_brand') setSurface('core_admin');
                     }
                   }}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   {!session && <option value="none">Select session…</option>}
                   <optgroup label="Partner Brand Accounts">
@@ -491,7 +564,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                     aria-label="Acting staff member"
                     value={actingStaffId}
                     onChange={(e) => setActingStaffId(e.target.value)}
-                    className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                   >
                     {staff.map((st) => (
                       <option key={st.id} value={st.id}>
@@ -500,7 +573,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                     ))}
                   </select>
                   {!canCurrentUserMutate && (
-                    <span className="text-[11px] font-mono text-amber-800">Read-only</span>
+                    <span className="text-ds-micro font-mono text-amber-800">Read-only</span>
                   )}
                 </label>
               )}
@@ -511,7 +584,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               <button
                 type="button"
                 onClick={onOpenPreview}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
               >
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                 Preview Harness
@@ -523,7 +596,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         {/* Super-Admin Portfolio Filter Strip */}
         {showSuperAdminFilterBar && (
           <div className="border-b border-zinc-200 bg-zinc-50/70 px-4 sm:px-6 py-2.5 space-y-2">
-            <div className="flex flex-wrap items-center gap-3 text-[12px]">
+            <div className="flex flex-wrap items-center gap-3 text-ds-label">
               <span className="inline-flex items-center gap-1.5 font-medium text-zinc-700">
                 <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
                 Portfolio scope
@@ -535,7 +608,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                   aria-label="Filter portfolio by vertical"
                   value={verticalFilter}
                   onChange={(e) => setVerticalFilter(e.target.value as VerticalFilterValue)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All verticals</option>
                   <option value="core">Core</option>
@@ -550,7 +623,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                   aria-label="Filter portfolio by nation"
                   value={nationFilter}
                   onChange={(e) => setNationFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All nations</option>
                   {nations.map((n) => (
@@ -567,7 +640,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                   aria-label="Filter portfolio by fulfillment track"
                   value={trackFilter}
                   onChange={(e) => setTrackFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All tracks</option>
                   <option value="financed">Financed</option>
@@ -582,7 +655,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                   aria-label="Filter portfolio by contract status"
                   value={contractFilter}
                   onChange={(e) => setContractFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All statuses</option>
                   {contractStatuses.map((s) => (
@@ -602,7 +675,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded border border-amber-200 bg-amber-50/80 px-3 py-2 text-[12px] text-amber-950"
+                className="flex items-start gap-2 rounded-ds-sm border border-amber-200 bg-amber-50/80 px-3 py-2 text-ds-label text-amber-950"
               >
                 <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
                 <span>

@@ -5,7 +5,7 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
+  ConsoleHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
 import { NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
@@ -76,13 +76,13 @@ export function BrandDocumentsView({
     {
       key: 'val',
       header: 'Requested Value',
-      render: (r) => <span className="font-mono text-[12px] text-zinc-950">{r.requestedValue}</span>,
+      render: (r) => <span className="font-mono text-ds-label text-zinc-950">{r.requestedValue}</span>,
     },
     {
       key: 'reason',
       header: 'Reason',
       hideOnMobile: true,
-      render: (r) => <span className="text-[12px] text-zinc-600">{r.reason}</span>,
+      render: (r) => <span className="text-ds-label text-zinc-600">{r.reason}</span>,
     },
     {
       key: 'status',
@@ -107,7 +107,7 @@ export function BrandDocumentsView({
 
   return (
     <div className="space-y-6" data-testid="brand-documents-account">
-      <PageHeader
+      <ConsoleHeader
         title="Documents & Account"
         description="Download signed distribution agreements, monthly remittance statements, and submit verification-gated account or banking change requests."
       />
@@ -125,12 +125,12 @@ export function BrandDocumentsView({
           ) : (
             <div className="space-y-2">
               {signedContracts.length === 0 && !remittance && (
-                <p className="text-[12px] text-zinc-500">No signed documents available yet.</p>
+                <p className="text-ds-label text-zinc-500">No signed documents available yet.</p>
               )}
               {signedContracts.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between gap-3 py-2 border-b border-zinc-200 last:border-0 text-[12px]"
+                  className="flex items-center justify-between gap-3 py-2 border-b border-zinc-200 last:border-0 text-ds-label"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <FileText className="w-4 h-4 text-zinc-500 shrink-0" aria-hidden="true" />
@@ -141,7 +141,7 @@ export function BrandDocumentsView({
                   <button
                     type="button"
                     onClick={() => onDownloadAgreement(c)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 shrink-0"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 shrink-0"
                   >
                     <Download className="w-3.5 h-3.5" aria-hidden="true" />
                     Download
@@ -150,9 +150,9 @@ export function BrandDocumentsView({
               ))}
 
               {remittance && (
-                <div className="flex items-center justify-between gap-3 py-2 text-[12px]">
+                <div className="flex items-center justify-between gap-3 py-2 text-ds-label">
                   <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-[#C2410C] shrink-0" aria-hidden="true" />
+                    <FileText className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
                     <span className="font-medium text-zinc-950 truncate">
                       Remittance {remittance.statementNumber} · Net {formatGbp(remittance.netPaid, 2)}
                     </span>
@@ -160,7 +160,7 @@ export function BrandDocumentsView({
                   <button
                     type="button"
                     onClick={onDownloadRemittance}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 shrink-0"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 shrink-0"
                   >
                     <Download className="w-3.5 h-3.5" aria-hidden="true" />
                     Download
@@ -175,13 +175,13 @@ export function BrandDocumentsView({
           title="Request an Account or Banking Change"
           description="Banking and signatory changes always require Mercenta verification before applying."
         >
-          <div className="space-y-3 text-[12px]">
+          <div className="space-y-3 text-ds-label">
             <label className="block space-y-1">
               <span className="text-zinc-600">Field to update</span>
               <select
                 value={field}
                 onChange={(e) => setField(e.target.value as AccountChangeField)}
-                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
               >
                 {ACCOUNT_CHANGE_FIELDS.map((f) => (
                   <option key={f} value={f}>
@@ -195,7 +195,7 @@ export function BrandDocumentsView({
               <input
                 value={requestedValue}
                 onChange={(e) => setRequestedValue(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
               />
             </label>
             <label className="block space-y-1">
@@ -204,14 +204,14 @@ export function BrandDocumentsView({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Reason for Mercenta verification team…"
-                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
               />
             </label>
             <button
               type="button"
               disabled={!requestedValue.trim() || !reason.trim()}
               onClick={submitForm}
-              className="px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="px-4 py-1.5 rounded-ds-sm bg-accent text-white font-medium hover:bg-accent-600 disabled:opacity-40"
             >
               Submit Change Request
             </button>

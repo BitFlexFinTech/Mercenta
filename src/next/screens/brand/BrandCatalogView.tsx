@@ -5,7 +5,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
+  ConsoleHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -107,10 +107,10 @@ export function BrandCatalogView({
       mobilePrimary: true,
       render: ({ product: p }) => (
         <div className="flex items-center gap-2.5 min-w-0">
-          <ProductThumb product={p} size={40} className="rounded" />
+          <ProductThumb product={p} size={40} className="rounded-ds-sm" />
           <div className="min-w-0">
             <div className="font-medium text-zinc-950 truncate">{p.name}</div>
-            <div className="text-[11px] font-mono text-zinc-500">
+            <div className="text-ds-micro font-mono text-zinc-500">
               {p.commodityCode || 'No commodity code'} · {p.vatStatus}
               {p.hazmat ? ' · Hazmat' : ''}
             </div>
@@ -124,10 +124,10 @@ export function BrandCatalogView({
       render: ({ product: p, identifier, latestSubmission }) => {
         const state = deriveAsinState(identifier, Boolean(latestSubmission));
         return (
-          <div data-testid={`catalog-asin-${p.sku}`} className="text-[12px]">
+          <div data-testid={`catalog-asin-${p.sku}`} className="text-ds-label">
             <div className="font-mono text-zinc-950">{p.sku}</div>
-            <div className="font-mono text-[11px] text-zinc-500">{p.barcode || 'No barcode'}</div>
-            <div className="text-[11px] text-zinc-600 mt-0.5">
+            <div className="font-mono text-ds-micro text-zinc-500">{p.barcode || 'No barcode'}</div>
+            <div className="text-ds-micro text-zinc-600 mt-0.5">
               {identifier ? (
                 <span className="font-mono">
                   {identifier.asin} · {identifier.source === 'brand_declared' ? 'brand' : 'channel'}
@@ -159,7 +159,7 @@ export function BrandCatalogView({
       header: 'Case / Dims',
       hideOnMobile: true,
       render: ({ product: p }) => (
-        <span className="text-[12px] text-zinc-600 font-mono">
+        <span className="text-ds-label text-zinc-600 font-mono">
           {p.unitsPerCase ?? '—'} u/cs · {p.length}×{p.width}×{p.height}cm · {p.weight}kg
         </span>
       ),
@@ -175,7 +175,7 @@ export function BrandCatalogView({
             onToggleAvailability(p.sku, !isAvailable);
           }}
           aria-pressed={!isAvailable}
-          className={`px-2 py-0.5 rounded border text-[11px] font-medium ${
+          className={`px-2 py-0.5 rounded-ds-sm border text-ds-micro font-medium ${
             isAvailable
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : 'border-red-200 bg-red-50 text-red-800'
@@ -229,7 +229,7 @@ export function BrandCatalogView({
                 setEditingProduct(p);
                 setCostDraft(String(p.exWorksPrice));
               }}
-              className="text-[12px] font-medium text-zinc-700 hover:text-zinc-950 underline"
+              className="text-ds-label font-medium text-zinc-700 hover:text-zinc-950 underline"
             >
               Edit cost
             </button>
@@ -241,7 +241,7 @@ export function BrandCatalogView({
                   e.stopPropagation();
                   onPollSubmission(latestSubmission.id);
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
               >
                 <RefreshCw className="w-3 h-3" aria-hidden="true" />
                 {busySku === latestSubmission.id ? 'Checking…' : 'Check result'}
@@ -254,7 +254,7 @@ export function BrandCatalogView({
                   e.stopPropagation();
                   onSubmitProduct(p);
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-40"
               >
                 <Send className="w-3 h-3" aria-hidden="true" />
                 {busySku === p.sku ? 'Submitting…' : latestSubmission ? 'Resubmit' : 'Submit'}
@@ -313,7 +313,7 @@ export function BrandCatalogView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsoleHeader
         title="Master Product Catalog"
         description="Wholesale pricing schema, UK compliance metadata, availability toggles, and canonical retail-channel submissions."
         actions={
@@ -322,7 +322,7 @@ export function BrandCatalogView({
               type="button"
               disabled={!gateCleared}
               onClick={() => setShowCsv((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
             >
               <Upload className="w-3.5 h-3.5" aria-hidden="true" />
               CSV Import
@@ -334,7 +334,7 @@ export function BrandCatalogView({
                 setShowAdd(true);
                 setGuidanceAcked(false);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-40"
             >
               {gateCleared ? <Plus className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
               {gateCleared ? 'Add Product' : 'Catalog Locked'}
@@ -355,7 +355,7 @@ export function BrandCatalogView({
                 Retail-channel product submissions stay locked until all required compliance documents
                 and legal agreements are approved.
               </p>
-              <div className="text-[11px] font-mono">
+              <div className="text-ds-micro font-mono">
                 {gateMissing.map((m) => `Missing: ${m.replace(/_/g, ' ')}`).join(' · ')}
                 {gateBlocking.map((b) => `Pending: ${b.type.replace(/_/g, ' ')} (${b.status})`).join(' · ')}
               </div>
@@ -385,26 +385,26 @@ export function BrandCatalogView({
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
               placeholder="name,sku,barcode,exWorksPrice,ukRetailPrice,commodityCode,vatStatus,hazmat,length,width,height,weight"
-              className="w-full px-3 py-2 rounded border border-zinc-300 bg-white font-mono text-[12px] text-zinc-950"
+              className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white font-mono text-ds-label text-zinc-950"
             />
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={csvBusy || !csvText.trim()}
                 onClick={() => void handleCsvCommit()}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-40"
               >
                 {csvBusy ? 'Importing…' : 'Validate & Import CSV'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowCsv(false)}
-                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700"
+                className="px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label text-zinc-700"
               >
                 Close
               </button>
             </div>
-            {csvResult && <p className="text-[12px] text-zinc-700">{csvResult}</p>}
+            {csvResult && <p className="text-ds-label text-zinc-700">{csvResult}</p>}
           </div>
         </SectionCard>
       )}
@@ -431,10 +431,10 @@ export function BrandCatalogView({
         title={guidanceAcked ? 'Add New Product' : 'Before You Add a Product'}
       >
         {!guidanceAcked ? (
-          <div className="space-y-4 text-[12px] text-zinc-700">
-            <div className="rounded border border-zinc-200 bg-zinc-50 p-4 space-y-2">
+          <div className="space-y-4 text-ds-label text-zinc-700">
+            <div className="rounded-ds-sm border border-zinc-200 bg-zinc-50 p-4 space-y-2">
               <div className="font-semibold text-zinc-950 flex items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                <ShieldAlert className="w-4 h-4 text-accent" aria-hidden="true" />
                 Pricing, Packaging & PO Rule Confirmation
               </div>
               <p>
@@ -446,19 +446,19 @@ export function BrandCatalogView({
             <button
               type="button"
               onClick={() => setGuidanceAcked(true)}
-              className="w-full px-4 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="w-full px-4 py-2 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
             >
               I Understand — Continue to Add Product
             </button>
           </div>
         ) : (
-          <div className="space-y-3 text-[12px]">
+          <div className="space-y-3 text-ds-label">
             <label className="block space-y-1">
               <span className="text-zinc-600">Product Name</span>
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -467,7 +467,7 @@ export function BrandCatalogView({
                 <input
                   value={form.sku}
                   onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white font-mono text-zinc-950"
                 />
               </label>
               <label className="block space-y-1">
@@ -475,7 +475,7 @@ export function BrandCatalogView({
                 <input
                   value={form.barcode}
                   onChange={(e) => setForm({ ...form, barcode: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white font-mono text-zinc-950"
                 />
               </label>
               <label className="block space-y-1">
@@ -484,7 +484,7 @@ export function BrandCatalogView({
                   type="number"
                   value={form.exWorksPrice}
                   onChange={(e) => setForm({ ...form, exWorksPrice: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white tabular-nums text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white tabular-nums text-zinc-950"
                 />
               </label>
               <label className="block space-y-1">
@@ -493,7 +493,7 @@ export function BrandCatalogView({
                   type="number"
                   value={form.ukRetailPrice}
                   onChange={(e) => setForm({ ...form, ukRetailPrice: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white tabular-nums text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white tabular-nums text-zinc-950"
                 />
               </label>
             </div>
@@ -503,7 +503,7 @@ export function BrandCatalogView({
                 <input
                   value={form.commodityCode}
                   onChange={(e) => setForm({ ...form, commodityCode: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white font-mono text-zinc-950"
                 />
               </label>
               <label className="block space-y-1">
@@ -511,7 +511,7 @@ export function BrandCatalogView({
                 <select
                   value={form.vatStatus}
                   onChange={(e) => setForm({ ...form, vatStatus: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="Standard 20%">Standard 20%</option>
                   <option value="Zero-rated">Zero-rated</option>
@@ -534,7 +534,7 @@ export function BrandCatalogView({
                     type="number"
                     value={form[fieldKey]}
                     onChange={(e) => setForm({ ...form, [fieldKey]: e.target.value })}
-                    className="w-full px-2 py-1.5 rounded border border-zinc-300 bg-white tabular-nums text-zinc-950"
+                    className="w-full px-2 py-1.5 rounded-ds-sm border border-zinc-300 bg-white tabular-nums text-zinc-950"
                   />
                 </label>
               ))}
@@ -552,7 +552,7 @@ export function BrandCatalogView({
               type="button"
               disabled={!form.name.trim() || !form.sku.trim()}
               onClick={handleSaveNewProduct}
-              className="w-full px-4 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="w-full px-4 py-2 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-40"
             >
               Save Product to Catalogue
             </button>
@@ -567,7 +567,7 @@ export function BrandCatalogView({
         subtitle={editingProduct?.name}
       >
         {editingProduct && (
-          <div className="space-y-4 text-[12px]">
+          <div className="space-y-4 text-ds-label">
             <label className="block space-y-1">
               <span className="text-zinc-600">New Ex-Works Cost (£)</span>
               <input
@@ -575,7 +575,7 @@ export function BrandCatalogView({
                 step="0.01"
                 value={costDraft}
                 onChange={(e) => setCostDraft(e.target.value)}
-                className="w-full px-3 py-2 rounded border border-zinc-300 bg-white tabular-nums text-zinc-950"
+                className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white tabular-nums text-zinc-950"
               />
             </label>
             <div className="flex gap-2">
@@ -588,14 +588,14 @@ export function BrandCatalogView({
                     setEditingProduct(null);
                   }
                 }}
-                className="px-4 py-2 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                className="px-4 py-2 rounded-ds-sm bg-accent text-white font-medium hover:bg-accent-600"
               >
                 Update Cost
               </button>
               <button
                 type="button"
                 onClick={() => setEditingProduct(null)}
-                className="px-4 py-2 rounded border border-zinc-300 bg-white text-zinc-700"
+                className="px-4 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-700"
               >
                 Cancel
               </button>

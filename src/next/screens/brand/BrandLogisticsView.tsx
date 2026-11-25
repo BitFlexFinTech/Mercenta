@@ -43,7 +43,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
+  ConsoleHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -375,11 +375,11 @@ export function BrandLogisticsView({
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono font-semibold text-zinc-950">{leg.reference}</span>
             {leg.poNumber && (
-              <span className="font-mono text-[12px] text-zinc-500">{leg.poNumber}</span>
+              <span className="font-mono text-ds-label text-zinc-500">{leg.poNumber}</span>
             )}
           </div>
-          <div className="text-[12px] text-zinc-600 truncate max-w-[260px]">{leg.title}</div>
-          <div className="text-[11px] text-zinc-500">
+          <div className="text-ds-label text-zinc-600 truncate max-w-[260px]">{leg.title}</div>
+          <div className="text-ds-micro text-zinc-500">
             Evidence: {OPERATIONAL_TRUTH[leg.truth].short} · {carrierLabel(leg.carrier)}
           </div>
         </div>
@@ -389,14 +389,14 @@ export function BrandLogisticsView({
       key: 'route',
       header: 'Declared Route',
       render: (leg) => (
-        <div className="text-[12px] text-zinc-700 space-y-0.5">
+        <div className="text-ds-label text-zinc-700 space-y-0.5">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span>{leg.origin.raw || 'Origin not declared'}</span>
             <ArrowRight className="w-3 h-3 text-zinc-400 shrink-0" aria-hidden="true" />
             <span>{leg.destination.raw || 'Destination not declared'}</span>
           </div>
           {!leg.geometry && (
-            <div className="text-[11px] text-zinc-500">Location not resolvable (schematic)</div>
+            <div className="text-ds-micro text-zinc-500">Location not resolvable (schematic)</div>
           )}
         </div>
       ),
@@ -414,7 +414,7 @@ export function BrandLogisticsView({
               dataStatus={status.dataStatus}
             />
             {(leg.exception || leg.delayed) && (
-              <div className="flex items-center gap-1 text-[11px] text-amber-800">
+              <div className="flex items-center gap-1 text-ds-micro text-amber-800">
                 <AlertTriangle className="w-3 h-3" aria-hidden="true" />
                 Exception
               </div>
@@ -431,7 +431,7 @@ export function BrandLogisticsView({
       render: (leg) => (
         <div className="font-mono text-right">
           <div className="text-zinc-950 font-semibold">£{leg.value.toLocaleString('en-GB')}</div>
-          <div className="text-[11px] text-zinc-500">{leg.cbm} CBM</div>
+          <div className="text-ds-micro text-zinc-500">{leg.cbm} CBM</div>
         </div>
       ),
     },
@@ -444,7 +444,7 @@ export function BrandLogisticsView({
             type="button"
             data-testid={`logistics-waybill-${leg.id}`}
             onClick={() => setWaybillId(leg.id)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-200 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
           >
             <Printer className="w-3 h-3" aria-hidden="true" />
             Waybill
@@ -453,7 +453,7 @@ export function BrandLogisticsView({
             type="button"
             data-testid={`logistics-labels-${leg.id}`}
             onClick={() => setLabelsId(leg.id)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-200 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
           >
             <Barcode className="w-3 h-3" aria-hidden="true" />
             Labels
@@ -462,7 +462,7 @@ export function BrandLogisticsView({
             type="button"
             data-testid={`logistics-track-${leg.id}`}
             onClick={() => setTrackingId(leg.id)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-200 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
           >
             <Truck className="w-3 h-3" aria-hidden="true" />
             Track
@@ -518,7 +518,7 @@ export function BrandLogisticsView({
   if (isError) {
     return (
       <div>
-        <PageHeader
+        <ConsoleHeader
           title="Logistics Hub"
           description="Inbound consignments, route provenance, freight terms, and shipping document packs."
         />
@@ -537,7 +537,7 @@ export function BrandLogisticsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsoleHeader
         title="Logistics Hub"
         description="Consignments Mercenta moves on your behalf, declared routes, carrier evidence states, and PO shipping document packs."
         meta={
@@ -568,7 +568,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setAsnDrawerOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600 whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 Create ASN consignment
@@ -577,7 +577,7 @@ export function BrandLogisticsView({
             <button
               type="button"
               onClick={onRetry}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
               Refresh feed
@@ -589,13 +589,13 @@ export function BrandLogisticsView({
       {asnNotice && (
         <div
           role="status"
-          className="border border-emerald-200 bg-emerald-50/70 rounded-md px-4 py-3 text-[14px] text-zinc-900 flex items-center justify-between gap-3"
+          className="border border-emerald-200 bg-emerald-50/70 rounded-ds-md px-4 py-3 text-ds-body text-zinc-900 flex items-center justify-between gap-3"
         >
           <span>{asnNotice}</span>
           <button
             type="button"
             onClick={() => setAsnNotice(null)}
-            className="text-[12px] text-zinc-600 hover:text-zinc-950"
+            className="text-ds-label text-zinc-600 hover:text-zinc-950"
           >
             Dismiss
           </button>
@@ -609,18 +609,18 @@ export function BrandLogisticsView({
       {/* Insight drill-down panel when On-time delivery or ETA coverage is clicked */}
       {insight && (
         <div
-          className="border border-zinc-200 bg-white rounded-md p-4 space-y-3"
+          className="border border-zinc-200 bg-white rounded-ds-md p-4 space-y-3"
           data-testid={`logistics-insight-${insight}`}
         >
           <div className="flex items-center justify-between border-b border-zinc-200 pb-2.5">
-            <h2 className="text-[14px] font-semibold text-zinc-950">
+            <h2 className="text-ds-body font-semibold text-zinc-950">
               {insight === 'performance' ? 'Delivery performance breakdown' : 'ETA & appointment basis'}
             </h2>
             <button
               type="button"
               onClick={() => setInsight(null)}
               aria-label="Close insight detail"
-              className="p-1 rounded text-zinc-500 hover:text-zinc-900"
+              className="p-1 rounded-ds-sm text-zinc-500 hover:text-zinc-900"
             >
               <X className="w-4 h-4" />
             </button>
@@ -641,15 +641,15 @@ export function BrandLogisticsView({
                     value: `${performance.verifiedDelivered} of ${performance.delivered}`,
                   },
                 ].map((item) => (
-                  <div key={item.label} className="border border-zinc-200 rounded px-3 py-2 bg-zinc-50/40">
-                    <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">{item.label}</div>
-                    <div className="mt-0.5 font-mono text-[14px] font-semibold text-zinc-950">
+                  <div key={item.label} className="border border-zinc-200 rounded-ds-sm px-3 py-2 bg-zinc-50/40">
+                    <div className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">{item.label}</div>
+                    <div className="mt-0.5 font-mono text-ds-body font-semibold text-zinc-950">
                       {item.value}
                     </div>
                   </div>
                 ))}
               </div>
-              <ul className="space-y-1 text-[12px] text-zinc-600">
+              <ul className="space-y-1 text-ds-label text-zinc-600">
                 {performance.sources.map((src) => (
                   <li key={src}>{src}</li>
                 ))}
@@ -658,7 +658,7 @@ export function BrandLogisticsView({
           ) : (
             <div className="space-y-2" data-testid="eta-basis-detail">
               {rows.length === 0 ? (
-                <p className="text-[14px] text-zinc-600">No consignments in scope.</p>
+                <p className="text-ds-body text-zinc-600">No consignments in scope.</p>
               ) : (
                 <ul className="divide-y divide-zinc-200">
                   {rows.map((row) => {
@@ -673,7 +673,7 @@ export function BrandLogisticsView({
                     return (
                       <li
                         key={row.id}
-                        className="py-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px]"
+                        className="py-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-ds-label"
                         data-testid={`eta-basis-${row.reference}`}
                       >
                         <span className="font-mono font-semibold text-zinc-950">{row.reference}</span>
@@ -703,10 +703,10 @@ export function BrandLogisticsView({
       )}
 
       {/* Shipping Documents Download Queue */}
-      <section className="border border-zinc-200 bg-white rounded-md p-5 space-y-3">
+      <section className="border border-zinc-200 bg-white rounded-ds-md p-5 space-y-3">
         <div>
-          <h2 className="text-[16px] font-semibold text-zinc-950">Shipping documents</h2>
-          <p className="text-[12px] text-zinc-600">
+          <h2 className="text-ds-title font-semibold text-zinc-950">Shipping documents</h2>
+          <p className="text-ds-label text-zinc-600">
             Accepted purchase orders whose document pack is ready to download and print before dispatch.
           </p>
         </div>
@@ -728,14 +728,14 @@ export function BrandLogisticsView({
             placeholder="Search reference, PO, origin…"
             aria-label="Search consignments"
             data-testid="logistics-search"
-            className="pl-9 pr-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 w-64 focus:outline-2 focus:outline-[#C2410C]"
+            className="pl-9 pr-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64 focus:outline-2 focus:outline-accent"
           />
         </div>
         <select
           value={truthFilter}
           onChange={(e) => setTruthFilter(e.target.value)}
           aria-label="Filter by travel evidence"
-          className="px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950"
+          className="px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
         >
           <option value="all">Evidence: all</option>
           <option value="live_verified">
@@ -752,7 +752,7 @@ export function BrandLogisticsView({
           value={laneFilter}
           onChange={(e) => setLaneFilter(e.target.value)}
           aria-label="Filter by lane"
-          className="px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950"
+          className="px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
         >
           <option value="all">Lane: all</option>
           <option value="international">International origin</option>
@@ -763,7 +763,7 @@ export function BrandLogisticsView({
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           aria-label="Filter by status"
-          className="px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950"
+          className="px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
         >
           <option value="all">Status: all</option>
           {statusOptions.map((s) => (
@@ -781,7 +781,7 @@ export function BrandLogisticsView({
               setLaneFilter('all');
               setStatusFilter('all');
             }}
-            className="px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-[12px] font-medium text-zinc-700 hover:bg-zinc-50"
+            className="px-3 py-1.5 rounded-ds-md border border-zinc-200 bg-white text-ds-label font-medium text-zinc-700 hover:bg-zinc-50"
           >
             Clear filters
           </button>
@@ -815,42 +815,42 @@ export function BrandLogisticsView({
               }}
             />
           )}
-          <p className="text-[12px] text-zinc-500">
+          <p className="text-ds-label text-zinc-500">
             Booking a consignment happens through the canonical ASN flow on Purchase Orders — freight cannot be booked without an eligible PO.
           </p>
         </div>
 
         {/* Context Rail: Eligibility + Carrier Providers */}
         <aside className="space-y-4">
-          <div className="border border-zinc-200 bg-white rounded-md p-4 space-y-3">
-            <h2 className="text-[14px] font-semibold text-zinc-950">How carriage is arranged</h2>
+          <div className="border border-zinc-200 bg-white rounded-ds-md p-4 space-y-3">
+            <h2 className="text-ds-body font-semibold text-zinc-950">How carriage is arranged</h2>
             <div className="space-y-1">
-              <div className="text-[12px] font-medium text-indigo-900">
+              <div className="text-ds-label font-medium text-indigo-900">
                 Freight Collect — Channel-arranged
               </div>
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-ds-label text-zinc-600">
                 Retail-channel-arranged. Mercenta carrier accounts are refused on collect POs.
               </p>
             </div>
             <div className="space-y-1">
-              <div className="text-[12px] font-medium text-[#C2410C]">
+              <div className="text-ds-label font-medium text-accent">
                 Freight Prepaid — Mercenta-arranged
               </div>
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-ds-label text-zinc-600">
                 International uses DHL Express; UK domestic uses Palletline. Admin overrides are audited.
               </p>
             </div>
 
             <div className="border-t border-zinc-200 pt-3 space-y-1.5" data-testid="carrier-eligibility">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+              <div className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">
                 Eligibility for consignment in scope
               </div>
-              <div className="text-[12px] text-zinc-700" data-testid="carrier-eligibility-lane">
+              <div className="text-ds-label text-zinc-700" data-testid="carrier-eligibility-lane">
                 Lane: {eligibility.lane === 'uk_domestic' ? 'UK domestic' : 'International'} ·{' '}
                 {eligibility.channelArranged ? 'channel-arranged' : 'Mercenta-arranged'}
               </div>
               {eligibility.permitted.length > 0 && (
-                <div className="text-[12px] text-zinc-900" data-testid="carrier-eligibility-permitted">
+                <div className="text-ds-label text-zinc-900" data-testid="carrier-eligibility-permitted">
                   Permitted:{' '}
                   <span className="font-mono">
                     {eligibility.permitted
@@ -860,7 +860,7 @@ export function BrandLogisticsView({
                 </div>
               )}
               {eligibility.overrideCandidates.length > 0 && (
-                <div className="text-[12px] text-zinc-600" data-testid="carrier-eligibility-override">
+                <div className="text-ds-label text-zinc-600" data-testid="carrier-eligibility-override">
                   Override only:{' '}
                   <span className="font-mono">
                     {eligibility.overrideCandidates.map((c) => carrierLabel(c)).join(', ')}
@@ -868,7 +868,7 @@ export function BrandLogisticsView({
                 </div>
               )}
               {eligibility.blocked.length > 0 && (
-                <ul className="space-y-0.5 text-[12px] text-zinc-500" data-testid="carrier-eligibility-blocked">
+                <ul className="space-y-0.5 text-ds-label text-zinc-500" data-testid="carrier-eligibility-blocked">
                   {eligibility.blocked.map((entry) => (
                     <li key={entry.carrier}>
                       <span className="font-mono">{entry.carrier}</span> refused — {entry.reason}
@@ -880,15 +880,15 @@ export function BrandLogisticsView({
                 </ul>
               )}
               {eligibility.permitted.length === 0 && !eligibility.channelArranged && (
-                <p className="text-[12px] text-amber-800" data-testid="carrier-eligibility-none">
+                <p className="text-ds-label text-amber-800" data-testid="carrier-eligibility-none">
                   No Mercenta carrier account is operational on this lane right now.
                 </p>
               )}
             </div>
           </div>
 
-          <div className="border border-zinc-200 bg-white rounded-md p-4 space-y-2" data-testid="brand-carrier-providers">
-            <h2 className="text-[14px] font-semibold text-zinc-950">Carrier providers</h2>
+          <div className="border border-zinc-200 bg-white rounded-ds-md p-4 space-y-2" data-testid="brand-carrier-providers">
+            <h2 className="text-ds-body font-semibold text-zinc-950">Carrier providers</h2>
             {providerConfigsSlot}
           </div>
         </aside>
@@ -907,7 +907,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setWaybillId(selectedLeg.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
               >
                 <Printer className="w-3.5 h-3.5" aria-hidden="true" />
                 Waybill
@@ -915,7 +915,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setLabelsId(selectedLeg.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
               >
                 <Barcode className="w-3.5 h-3.5" aria-hidden="true" />
                 Labels
@@ -923,7 +923,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setTrackingId(selectedLeg.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
               >
                 <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                 Track timeline
@@ -954,7 +954,7 @@ export function BrandLogisticsView({
               )}
             </div>
 
-            <dl className="grid grid-cols-2 gap-3 text-[12px] border border-zinc-200 rounded-md p-3">
+            <dl className="grid grid-cols-2 gap-3 text-ds-label border border-zinc-200 rounded-ds-md p-3">
               <div>
                 <dt className="text-zinc-500">Stage</dt>
                 <dd className="font-medium text-zinc-950">
@@ -986,9 +986,9 @@ export function BrandLogisticsView({
             </dl>
 
             {/* ETA & Appointment */}
-            <div className="border border-zinc-200 rounded-md p-3 space-y-1.5 text-[12px]">
+            <div className="border border-zinc-200 rounded-ds-md p-3 space-y-1.5 text-ds-label">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-zinc-500 uppercase tracking-[0.06em] text-[11px]">ETA Projection</span>
+                <span className="text-zinc-500 uppercase tracking-[0.06em] text-ds-micro">ETA Projection</span>
                 <span
                   className="font-mono font-semibold text-zinc-950"
                   data-testid="logistics-eta-value"
@@ -1023,7 +1023,7 @@ export function BrandLogisticsView({
             </div>
 
             {/* Evidence Explanation */}
-            <div className="border border-zinc-200 bg-zinc-50/70 rounded-md p-3 space-y-1 text-[12px]">
+            <div className="border border-zinc-200 bg-zinc-50/70 rounded-ds-md p-3 space-y-1 text-ds-label">
               <div className="font-semibold text-zinc-900 flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5" aria-hidden="true" />
                 Why this leg is {OPERATIONAL_TRUTH[selectedLeg.truth].short}
@@ -1037,8 +1037,8 @@ export function BrandLogisticsView({
             </div>
 
             {/* Freight Term & Carriage Responsibility */}
-            <div className="border border-zinc-200 rounded-md p-3 space-y-1.5 text-[12px]">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+            <div className="border border-zinc-200 rounded-ds-md p-3 space-y-1.5 text-ds-label">
+              <div className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">
                 Carriage responsibility
               </div>
               {freightSemantics(selectedLeg.freightTerm) ? (
@@ -1047,7 +1047,7 @@ export function BrandLogisticsView({
                     className={`font-semibold ${
                       freightSemantics(selectedLeg.freightTerm)!.channelArranged
                         ? 'text-indigo-900'
-                        : 'text-[#C2410C]'
+                        : 'text-accent'
                     }`}
                   >
                     {selectedLeg.freightTerm === 'collect'
@@ -1078,8 +1078,8 @@ export function BrandLogisticsView({
             </div>
 
             {/* Documents for this PO */}
-            <div className="border border-zinc-200 rounded-md p-3 space-y-2">
-              <h3 className="text-[14px] font-semibold text-zinc-950">Documents for this PO</h3>
+            <div className="border border-zinc-200 rounded-ds-md p-3 space-y-2">
+              <h3 className="text-ds-body font-semibold text-zinc-950">Documents for this PO</h3>
               {renderDocumentPackSlot(selectedLeg, selectedRow, (kind, sId) => {
                 if (kind === 'carrier_label') setLabelsId(sId);
                 else setWaybillId(sId);
@@ -1127,13 +1127,13 @@ export function BrandLogisticsView({
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-[12px] font-medium text-zinc-700 mb-1">
+            <label className="block text-ds-label font-medium text-zinc-700 mb-1">
               Accepted Purchase Order
             </label>
             <select
               value={asnPoId}
               onChange={(e) => setAsnPoId(e.target.value)}
-              className="w-full px-3 py-2 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950"
+              className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
             >
               {acceptedUnshippedPos.map((po) => (
                 <option key={po.id} value={po.id}>
@@ -1151,29 +1151,29 @@ export function BrandLogisticsView({
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[12px] font-medium text-zinc-700 mb-1">
+                    <label className="block text-ds-label font-medium text-zinc-700 mb-1">
                       Ship date
                     </label>
                     <input
                       type="date"
                       value={asnShipDate}
                       onChange={(e) => setAsnShipDate(e.target.value)}
-                      className="w-full px-3 py-2 text-[14px] border border-zinc-300 rounded-md bg-white"
+                      className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-[12px] font-medium text-zinc-700 mb-1">
+                    <label className="block text-ds-label font-medium text-zinc-700 mb-1">
                       Assigned carrier (rule)
                     </label>
-                    <div className="px-3 py-2 text-[14px] border border-zinc-200 rounded-md bg-zinc-50 text-zinc-800">
+                    <div className="px-3 py-2 text-ds-body border border-zinc-200 rounded-ds-md bg-zinc-50 text-zinc-800">
                       {carrierLabel(po.defaultCarrier)}
                     </div>
                   </div>
                 </div>
                 {requiresLot && (
-                  <div className="grid grid-cols-2 gap-3 border border-amber-200 bg-amber-50/50 rounded-md p-3">
+                  <div className="grid grid-cols-2 gap-3 border border-amber-200 bg-amber-50/50 rounded-ds-md p-3">
                     <div>
-                      <label className="block text-[12px] font-medium text-zinc-800 mb-1">
+                      <label className="block text-ds-label font-medium text-zinc-800 mb-1">
                         Lot number (required)
                       </label>
                       <input
@@ -1181,34 +1181,34 @@ export function BrandLogisticsView({
                         value={asnLotNumber}
                         onChange={(e) => setAsnLotNumber(e.target.value)}
                         placeholder="e.g. LOT-2026-01"
-                        className="w-full px-3 py-1.5 text-[14px] border border-zinc-300 rounded bg-white"
+                        className="w-full px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-sm bg-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-medium text-zinc-800 mb-1">
+                      <label className="block text-ds-label font-medium text-zinc-800 mb-1">
                         Expiry date (required)
                       </label>
                       <input
                         type="date"
                         value={asnExpiryDate}
                         onChange={(e) => setAsnExpiryDate(e.target.value)}
-                        className="w-full px-3 py-1.5 text-[14px] border border-zinc-300 rounded bg-white"
+                        className="w-full px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-sm bg-white"
                       />
                     </div>
                   </div>
                 )}
-                <div className="border border-zinc-200 rounded-md divide-y divide-zinc-200">
+                <div className="border border-zinc-200 rounded-ds-md divide-y divide-zinc-200">
                   {po.lineItems
                     .filter((l) => l.ackStatus !== 'rejected')
                     .map((l) => (
                       <div key={l.sku} className="px-3 py-2.5 flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="font-mono text-[12px] font-semibold text-zinc-950">
+                          <div className="font-mono text-ds-label font-semibold text-zinc-950">
                             {l.sku}
                           </div>
-                          <div className="text-[12px] text-zinc-600 truncate">{l.productName}</div>
+                          <div className="text-ds-label text-zinc-600 truncate">{l.productName}</div>
                         </div>
-                        <label className="flex items-center gap-2 text-[12px] text-zinc-600">
+                        <label className="flex items-center gap-2 text-ds-label text-zinc-600">
                           Qty
                           <input
                             type="number"
@@ -1221,7 +1221,7 @@ export function BrandLogisticsView({
                                 [l.sku]: Number(e.target.value),
                               }))
                             }
-                            className="w-20 px-2 py-1 border border-zinc-300 rounded text-right font-mono"
+                            className="w-20 px-2 py-1 border border-zinc-300 rounded-ds-sm text-right font-mono"
                           />
                         </label>
                       </div>
@@ -1231,7 +1231,7 @@ export function BrandLogisticsView({
             );
           })()}
           {asnError && (
-            <div className="border border-red-200 bg-red-50 rounded-md p-3 text-[12px] text-red-800">
+            <div className="border border-red-200 bg-red-50 rounded-ds-md p-3 text-ds-label text-red-800">
               {asnError}
             </div>
           )}
@@ -1240,14 +1240,14 @@ export function BrandLogisticsView({
               type="button"
               disabled={asnBusy || !asnPoId}
               onClick={() => void handleSubmitAsn()}
-              className="px-4 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
+              className="px-4 py-2 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-50"
             >
               {asnBusy ? 'Submitting…' : 'Create consignment ASN'}
             </button>
             <button
               type="button"
               onClick={() => setAsnDrawerOpen(false)}
-              className="px-4 py-2 rounded-md border border-zinc-200 text-[12px] font-medium text-zinc-700"
+              className="px-4 py-2 rounded-ds-md border border-zinc-200 text-ds-label font-medium text-zinc-700"
             >
               Cancel
             </button>
@@ -1284,7 +1284,7 @@ function WaybillDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 rounded-md border border-zinc-200 bg-white text-[12px] font-medium text-zinc-700"
+            className="px-3.5 py-2 rounded-ds-md border border-zinc-200 bg-white text-ds-label font-medium text-zinc-700"
           >
             Close
           </button>
@@ -1299,7 +1299,7 @@ function WaybillDialog({
                 'Freight waybill'
               )
             }
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
           >
             <Download className="w-3.5 h-3.5" aria-hidden="true" />
             Download
@@ -1307,7 +1307,7 @@ function WaybillDialog({
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
           >
             <Printer className="w-3.5 h-3.5" aria-hidden="true" />
             Print
@@ -1315,18 +1315,18 @@ function WaybillDialog({
         </div>
       }
     >
-      <div ref={printableRef} className="rounded-md bg-zinc-50 border border-zinc-200 p-5 text-zinc-950">
+      <div ref={printableRef} className="rounded-ds-md bg-zinc-50 border border-zinc-200 p-5 text-zinc-950">
         <div className="mb-4 flex items-center justify-between border-b-2 border-zinc-300 pb-3">
           <div>
-            <div className="text-[16px] font-bold uppercase tracking-tight">{brandDisplayName}</div>
-            <div className="text-[12px] text-zinc-500">Freight Waybill</div>
+            <div className="text-ds-title font-bold uppercase tracking-tight">{brandDisplayName}</div>
+            <div className="text-ds-label text-zinc-500">Freight Waybill</div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] text-zinc-500 uppercase">Tracking no.</div>
-            <div className="font-mono text-[14px] font-bold">{shipment.trackingNumber}</div>
+            <div className="text-ds-micro text-zinc-500 uppercase">Tracking no.</div>
+            <div className="font-mono text-ds-body font-bold">{shipment.trackingNumber}</div>
           </div>
         </div>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[12px]">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-ds-label">
           <div>
             <dt className="text-zinc-500">Reference</dt>
             <dd className="font-semibold">{shipment.reference}</dd>
@@ -1359,8 +1359,8 @@ function WaybillDialog({
           </div>
         </dl>
         <div className="mt-4 border-2 border-dashed border-zinc-400 p-4 text-center">
-          <div className="mb-1 text-[11px] text-zinc-500 uppercase">Barcode</div>
-          <div className="font-mono text-[20px] tracking-widest">{shipment.trackingNumber}</div>
+          <div className="mb-1 text-ds-micro text-zinc-500 uppercase">Barcode</div>
+          <div className="font-mono text-ds-page tracking-widest">{shipment.trackingNumber}</div>
           <div className="mt-3 flex justify-center gap-0.5">
             {Array.from({ length: 40 }).map((_, i) => (
               <div
@@ -1404,7 +1404,7 @@ function LabelsDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 rounded-md border border-zinc-200 bg-white text-[12px] font-medium text-zinc-700"
+            className="px-3.5 py-2 rounded-ds-md border border-zinc-200 bg-white text-ds-label font-medium text-zinc-700"
           >
             Close
           </button>
@@ -1419,7 +1419,7 @@ function LabelsDialog({
                 'Shipping label'
               )
             }
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
           >
             <Download className="w-3.5 h-3.5" aria-hidden="true" />
             Download
@@ -1427,7 +1427,7 @@ function LabelsDialog({
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
           >
             <Printer className="w-3.5 h-3.5" aria-hidden="true" />
             Print labels
@@ -1437,13 +1437,13 @@ function LabelsDialog({
     >
       <div
         ref={printableRef}
-        className="rounded-md bg-zinc-50 border border-zinc-200 p-6 font-mono text-zinc-950"
+        className="rounded-ds-md bg-zinc-50 border border-zinc-200 p-6 font-mono text-zinc-950"
       >
         <div className="mb-4 border-b-2 border-zinc-300 pb-3 text-center">
-          <div className="text-[16px] font-bold uppercase">Shipping Label</div>
-          <div className="text-[12px] text-zinc-500">{brandDisplayName}</div>
+          <div className="text-ds-title font-bold uppercase">Shipping Label</div>
+          <div className="text-ds-label text-zinc-500">{brandDisplayName}</div>
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[12px]">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-ds-label">
           <dt className="font-bold">Brand:</dt>
           <dd>{shipment.customer || shipment.brandId || '—'}</dd>
           <dt className="font-bold">PO Number:</dt>
@@ -1485,7 +1485,7 @@ function TrackingDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
+            className="px-4 py-2 rounded-ds-md bg-zinc-950 text-white text-ds-label font-medium hover:bg-zinc-800"
           >
             Close
           </button>
@@ -1493,16 +1493,16 @@ function TrackingDialog({
       }
     >
       <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-2 border border-zinc-200 rounded-md px-3 py-2 bg-zinc-50">
+        <div className="flex flex-wrap items-center gap-2 border border-zinc-200 rounded-ds-md px-3 py-2 bg-zinc-50">
           <InlineStatus
             label={status.label}
             tone={mapTone(status.tone)}
             dataStatus={status.dataStatus}
           />
-          <span className="text-[12px] text-zinc-600">
+          <span className="text-ds-label text-zinc-600">
             Stage: {STAGE_LABELS[shipment.stage as keyof typeof STAGE_LABELS] ?? shipment.stage}
           </span>
-          <span className="text-[12px] text-zinc-500">· Ship date {shipment.date}</span>
+          <span className="text-ds-label text-zinc-500">· Ship date {shipment.date}</span>
         </div>
 
         <ol className="space-y-1">
@@ -1531,7 +1531,7 @@ function TrackingDialog({
                   )}
                 </div>
                 <div className="flex-1 pb-3">
-                  <div className="flex items-center gap-2 text-[14px]">
+                  <div className="flex items-center gap-2 text-ds-body">
                     <span
                       className={
                         isCompleted
@@ -1543,12 +1543,12 @@ function TrackingDialog({
                     >
                       {m.label}
                     </span>
-                    <span className="text-[11px] font-mono text-zinc-500">
+                    <span className="text-ds-micro font-mono text-zinc-500">
                       {isCurrent ? 'CURRENT' : isCompleted ? 'DONE' : ''}
                     </span>
                   </div>
                   {isCurrent && (
-                    <div className="text-[12px] text-zinc-600 mt-0.5">
+                    <div className="text-ds-label text-zinc-600 mt-0.5">
                       {carrierLabel(shipment.carrier).toUpperCase()} — last update: {shipment.date}
                     </div>
                   )}
@@ -1560,7 +1560,7 @@ function TrackingDialog({
 
         {productsSlot && (
           <div className="border-t border-zinc-200 pt-4 space-y-2">
-            <h3 className="text-[14px] font-semibold text-zinc-950">Products in this shipment</h3>
+            <h3 className="text-ds-body font-semibold text-zinc-950">Products in this shipment</h3>
             {productsSlot}
           </div>
         )}

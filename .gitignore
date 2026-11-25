@@ -71,3 +71,8 @@ Review Zip/*
 
 # Generated ClickUp automation reports (reproducible outputs, never tracked)
 reports/
+
+# §WAVE 2 (2026-11-25) — the Supabase CLI writes a temp marker on every run. It is
+# a GENERATED artefact (operating-model §6: generated artefacts are never tracked),
+# so it is ignored instead of committing a new timestamp every session.
+supabase/.temp/

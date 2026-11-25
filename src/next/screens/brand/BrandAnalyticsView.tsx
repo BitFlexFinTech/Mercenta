@@ -6,7 +6,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
+  ConsoleHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -112,7 +112,7 @@ export function BrandAnalyticsView({
       render: (s) => (
         <div>
           <div className="font-medium text-zinc-950">{s.name}</div>
-          <div className="text-[11px] font-mono text-zinc-500">{s.sku}</div>
+          <div className="text-ds-micro font-mono text-zinc-500">{s.sku}</div>
         </div>
       ),
     },
@@ -134,7 +134,7 @@ export function BrandAnalyticsView({
     {
       key: 'date',
       header: 'Date',
-      render: (d) => <span className="font-mono text-[12px] text-zinc-600">{d.date}</span>,
+      render: (d) => <span className="font-mono text-ds-label text-zinc-600">{d.date}</span>,
     },
     {
       key: 'po',
@@ -143,7 +143,7 @@ export function BrandAnalyticsView({
       render: (d) => (
         <div>
           <div className="font-mono font-medium text-zinc-950">{d.purchaseOrderId}</div>
-          <div className="text-[12px] text-zinc-600">{deductionTypeLabel(d.type)}</div>
+          <div className="text-ds-label text-zinc-600">{deductionTypeLabel(d.type)}</div>
         </div>
       ),
     },
@@ -180,12 +180,12 @@ export function BrandAnalyticsView({
               setDisputingId(d.id);
               setNotes('');
             }}
-            className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+            className="px-2.5 py-1 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
           >
             Dispute
           </button>
         ) : (
-          <span className="text-[12px] text-zinc-500">
+          <span className="text-ds-label text-zinc-500">
             {d.dispute?.outcome ? `Outcome: ${d.dispute.outcome}` : d.dispute ? 'Submitted' : '—'}
           </span>
         ),
@@ -194,7 +194,7 @@ export function BrandAnalyticsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsoleHeader
         title="Sales Analytics"
         description={`Wholesale order performance, top SKUs, and tenant deductions ledger for ${brandName || 'your brand'}.`}
       />
@@ -216,13 +216,13 @@ export function BrandAnalyticsView({
           <SectionCard
             title={chartTab === 'revenue' ? 'Monthly Revenue Trend' : 'Monthly Unit Volume'}
             actions={
-              <div className="inline-flex rounded border border-zinc-200 p-0.5 bg-zinc-50 text-[12px]">
+              <div className="inline-flex rounded-ds-sm border border-zinc-200 p-0.5 bg-zinc-50 text-ds-label">
                 {(['revenue', 'volume'] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setChartTab(t)}
-                    className={`px-2.5 py-1 rounded ${
+                    className={`px-2.5 py-1 rounded-ds-sm ${
                       chartTab === t ? 'bg-white text-zinc-950 font-medium shadow-xs' : 'text-zinc-600'
                     }`}
                   >
@@ -276,13 +276,13 @@ export function BrandAnalyticsView({
         title="Submit Deduction Dispute"
         subtitle="Provide ASN / POD / carton evidence notes to challenge this deduction."
       >
-        <div className="space-y-3 text-[12px]">
+        <div className="space-y-3 text-ds-label">
           <textarea
             rows={5}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Describe delivery proof, ASN timestamps, or photo verification…"
-            className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+            className="w-full px-3 py-2 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
           />
           <button
             type="button"
@@ -295,7 +295,7 @@ export function BrandAnalyticsView({
                 setNotes('');
               }
             }}
-            className="px-4 py-2 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+            className="px-4 py-2 rounded-ds-sm bg-accent text-white font-medium hover:bg-accent-600 disabled:opacity-40"
           >
             Submit Dispute Evidence
           </button>

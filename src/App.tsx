@@ -108,7 +108,7 @@ function AppContent() {
       <button
         type="button"
         onClick={() => setConsoleMode('next')}
-        className="fixed bottom-4 right-4 z-50 px-3 py-2 text-[12px] font-medium rounded-md border border-zinc-300 bg-white text-zinc-900 shadow-sm hover:bg-zinc-50"
+        className="fixed bottom-4 right-4 z-50 px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-900 shadow-ds-subtle hover:bg-zinc-50"
       >
         Open new console
       </button>

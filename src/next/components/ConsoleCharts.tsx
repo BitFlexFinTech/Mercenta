@@ -9,7 +9,7 @@ export interface ChartDatum {
 
 /**
  * Lightweight monochrome SVG vertical bar chart with tabular values and hairline baseline.
- * Uses only Mercenta editorial zinc + #C2410C accent tokens (zero chart libraries).
+ * Uses only Mercenta editorial zinc + the theme accent token (zero chart libraries).
  */
 export function ConsoleBarChart({
   data,
@@ -24,7 +24,7 @@ export function ConsoleBarChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="py-8 text-center text-[12px] text-zinc-500 border border-dashed border-zinc-200 rounded-md">
+      <div className="py-8 text-center text-ds-label text-zinc-500 border border-dashed border-zinc-200 rounded-ds-md">
         {emptyText}
       </div>
     );
@@ -45,14 +45,14 @@ export function ConsoleBarChart({
           const isLast = idx === data.length - 1;
           return (
             <div key={d.label} className="flex-1 min-w-0 flex flex-col items-center justify-end h-full gap-1">
-              <span className="text-[11px] font-mono tabular-nums text-zinc-600 truncate max-w-full">
+              <span className="text-ds-micro font-mono tabular-nums text-zinc-600 truncate max-w-full">
                 {formatValue(d.value)}
               </span>
               <div className="w-full max-w-[36px] flex items-end flex-1">
                 <div
                   title={d.hint ?? `${d.label}: ${formatValue(d.value)}`}
                   className={`w-full rounded-t-[3px] transition-all ${
-                    isLast ? 'bg-[#C2410C]' : 'bg-zinc-900'
+                    isLast ? 'bg-accent' : 'bg-zinc-900'
                   }`}
                   style={{ height: `${pct}%` }}
                 />
@@ -65,7 +65,7 @@ export function ConsoleBarChart({
         {data.map((d) => (
           <div
             key={d.label}
-            className="flex-1 min-w-0 text-center text-[11px] text-zinc-500 truncate font-mono"
+            className="flex-1 min-w-0 text-center text-ds-micro text-zinc-500 truncate font-mono"
           >
             {d.label}
           </div>
@@ -89,7 +89,7 @@ export function ConsoleTrendChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="py-8 text-center text-[12px] text-zinc-500 border border-dashed border-zinc-200 rounded-md">
+      <div className="py-8 text-center text-ds-label text-zinc-500 border border-dashed border-zinc-200 rounded-ds-md">
         {emptyText}
       </div>
     );
@@ -116,7 +116,7 @@ export function ConsoleTrendChart({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-zinc-500">
+      <div className="flex items-center justify-between text-ds-micro font-mono tabular-nums text-zinc-500">
         <span>Peak: {formatValue(maxVal)}</span>
         <span>Latest: {formatValue(data[data.length - 1].value)}</span>
       </div>
@@ -145,13 +145,13 @@ export function ConsoleTrendChart({
             cx={c.x}
             cy={c.y}
             r={idx === coords.length - 1 ? 4 : 3}
-            fill={idx === coords.length - 1 ? '#C2410C' : '#09090B'}
+            fill={idx === coords.length - 1 ? 'var(--mr-accent)' : 'var(--color-next-ink)'}
           >
             <title>{`${c.label}: ${formatValue(c.value)}`}</title>
           </circle>
         ))}
       </svg>
-      <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-zinc-500">
+      <div className="flex items-center justify-between gap-2 text-ds-micro font-mono text-zinc-500">
         {data.map((d) => (
           <span key={d.label} className="truncate">
             {d.label}
@@ -178,13 +178,13 @@ export function ConsoleProgressTrack({
   return (
     <div className="space-y-1">
       {label && (
-        <div className="flex items-center justify-between text-[12px] text-zinc-600 tabular-nums font-mono">
+        <div className="flex items-center justify-between text-ds-label text-zinc-600 tabular-nums font-mono">
           <span>{label}</span>
           <span>{pct}%</span>
         </div>
       )}
-      <div className="h-2 w-full rounded bg-zinc-100 overflow-hidden">
-        <div className="h-full bg-zinc-900 rounded" style={{ width: `${pct}%` }} />
+      <div className="h-2 w-full rounded-ds-sm bg-zinc-100 overflow-hidden">
+        <div className="h-full bg-zinc-900 rounded-ds-sm" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -209,13 +209,13 @@ export function SectionCard({
   return (
     <section
       data-testid={testId}
-      className="border border-zinc-200 bg-white rounded-md overflow-hidden"
+      className="border border-zinc-200 bg-white rounded-ds-md overflow-hidden"
     >
       <div className="px-4 py-3 border-b border-zinc-200 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-[14px] font-semibold text-zinc-950">{title}</h2>
+          <h2 className="text-ds-body font-semibold text-zinc-950">{title}</h2>
           {description && (
-            <p className="mt-0.5 text-[12px] text-zinc-600 max-w-3xl">{description}</p>
+            <p className="mt-0.5 text-ds-label text-zinc-600 max-w-3xl">{description}</p>
           )}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
@@ -254,7 +254,7 @@ export function ConsoleTabs<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(t.id)}
-            className={`px-3 py-1.5 rounded text-[12px] font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
+            className={`px-3 py-1.5 rounded-ds-sm text-ds-label font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-accent ${
               active
                 ? 'bg-zinc-950 text-white'
                 : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
@@ -263,7 +263,7 @@ export function ConsoleTabs<T extends string>({
             {t.label}
             {typeof t.count === 'number' && (
               <span
-                className={`ml-1.5 font-mono text-[11px] tabular-nums ${
+                className={`ml-1.5 font-mono text-ds-micro tabular-nums ${
                   active ? 'text-zinc-300' : 'text-zinc-500'
                 }`}
               >
@@ -306,7 +306,7 @@ export function NoticeBanner({
         : Info;
 
   return (
-    <div role="status" className={`rounded-md border px-3.5 py-2.5 flex items-start gap-2.5 text-[12px] ${styles}`}>
+    <div role="status" className={`rounded-ds-md border px-3.5 py-2.5 flex items-start gap-2.5 text-ds-label ${styles}`}>
       <Icon className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
       <div className="min-w-0">
         {title && <div className="font-semibold">{title}</div>}
