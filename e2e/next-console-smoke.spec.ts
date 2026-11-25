@@ -152,6 +152,26 @@ test('super-admin session: an approval is audited, and the audit trail shows it'
   await expect(nav).toBeVisible({ timeout: 20000 });
   const navButton = (label: string) => nav.getByRole('button', { name: label, exact: true });
 
+  /* §WAVE 3i — the Control Centre is built on the founder's canonical model, and every
+     metric carries the EXISTING destination it belongs to, so this asserts the real
+     drill-down rather than a decorative number. */
+  await navButton('Control Centre').click();
+  await expect(page.getByRole('heading', { name: 'Needs attention' })).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.getByRole('heading', { name: 'Where these figures come from' })).toBeVisible();
+  await expect(page.locator('[data-testid^="control-metric-"]').first()).toBeVisible({
+    timeout: 20000,
+  });
+  await page.getByRole('tab', { name: /Compliance/ }).click();
+  await expect(page.locator('[data-testid^="control-metric-"]').first()).toBeVisible();
+  await page.screenshot({ path: 'test-results/next-console-control-centre.png', fullPage: true });
+
+  /* The Compliance area's own drill-down lands on the REAL compliance screen — the
+     same one this test then uses. */
+  await page.getByRole('button', { name: 'Open compliance →' }).click();
+  await expect(page.getByText('Awaiting review')).toBeVisible({ timeout: 20000 });
+
   /* `audit_log` is a SUPER-ADMIN view. This is the whole end-to-end proof: take a
      real DOMAIN ACTION (approve a brand document), then show the audit trail
      recorded it — no fixture, no stub. */

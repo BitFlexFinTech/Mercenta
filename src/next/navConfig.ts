@@ -46,7 +46,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'control_centre',
     label: 'Control Centre',
     group: 'Overview',
-    implemented: false,
+    implemented: true,
     superAdminOnly: true,
   },
 

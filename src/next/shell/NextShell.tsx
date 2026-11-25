@@ -65,6 +65,8 @@ import { AdminAuditScreen } from '@/next/screens/admin/AdminAuditScreen';
 import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
 /* §WAVE 3f (2026-11-25) — messages and monitoring. */
 import { AdminMessagesScreen } from '@/next/screens/admin/AdminMessagesScreen';
+/* §WAVE 3i (2026-11-25) — the founder's Control Centre, on its canonical model. */
+import { AdminControlCentreScreen } from '@/next/screens/admin/AdminControlCentreScreen';
 import { AdminMonitoringScreen } from '@/next/screens/admin/AdminMonitoringScreen';
 /* §WAVE 3g (2026-11-25) — ONE vertical-scoped portfolio screen serves all three
    operating models. */
@@ -399,6 +401,11 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'monitoring') {
         return <AdminMonitoringScreen />;
+      }
+      /* §WAVE 3i — the Control Centre: the ten capability areas the founder's own
+         model already derives, each metric drilling into its existing destination. */
+      if (activeViewId === 'control_centre') {
+        return <AdminControlCentreScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and
