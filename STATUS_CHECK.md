@@ -4,7 +4,51 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §NEXT CONSOLE WAVES 3g–3i — LOCAL/COMMITTED, NOT DEPLOYED (2026-11-25)
+
+**State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** The console work is committed on
+`redesign/foundation` and pushed; the tree is NOT empty (34 paths of the Owner's own untracked work in
+`src/components/ads/`, `src/config/homepageDesign.ts`, `src/data/*`, `scripts/*`, `src/content/` and
+`recovered-lovable-images/`), so this is explicitly **not** a clean checkpoint and **not** complete.
+
+`npm run validate:all` **193 PASS / 7 FAIL (of 200 validators)** — re-run and confirmed in this session.
+All **seven** failures pre-date this work and belong to the Owner's untracked advertising work: they name
+`ads_management`'s addition to the navigation, the declared destination counts (28 vs 27, 21 vs 20), the
+legacy-styling migration, the radius/typography scales, and the brand-surface scope guard's offenders
+(`recovered-lovable-images/`, `src/components/ads/`). **None is caused by the console.**
+`npm run typecheck` **0 errors**; `npm run build` **EXIT 0**; `e2e/next-console-smoke.spec.ts` **6 passed /
+0 failed**; `validate:resume-state` **PASS (60 assertions)**; `validate-no-stale-blockers` **PASS**;
+`validate-registry-integrity` **7 PASS / 0 FAIL**.
+
+**What the waves built.** The AI Studio console lives in `src/next/`, mounted behind the explicit switch
+`?console=next`, so the existing application stays the default. Real screens now: **18 of 21 brand views**,
+**19 of 28 admin views**, **3 of 22 BWS** and **2 of 18 Talent Commerce** — with each unbuilt view keeping an
+honest placeholder that names why. Wave 3g added the missing operating-vertical discriminator and one
+vertical-scoped portfolio; Wave 3h added the brand **Calendar** and **Settings** (with the ONE action a brand
+owns there — a profile-change request with a mandatory recorded reason); Wave 3i added the super-admin
+**Control Centre**, rendered entirely from `buildControlCentre`, with every metric and attention item drilling
+into the existing destination it belongs to (proved end to end by the browser gate landing on the real
+compliance screen).
+
+**NOT deployed and NOT live-verified** — deliberately: `scripts/deploy-demo.sh` builds the working tree, and
+the tree still carries the Owner's unrelated in-progress work, so publishing now would ship it.
+
+**What remains.** Wave 3j: the Control Centre's ~30 specialised panels and its two queue tables (all already
+computed), then Brand Intelligence, Founder Investor Centre and Partnerships & Fundraising. The two pipelines
+cannot be built at all yet — they hold no domain data. Three brand views (`market`, `cases`, `team`) await an
+**Owner decision**, each named in `requirements-registry.json` → `next-console-remaining-views`.
+
+---
 ## §OPENSHIP BATCH 10 — COMPLETE, AND FOUR STALE RECORDS REPAIRED (2026-11-19)
+
+> **§HISTORICAL — SUPERSEDED 2026-11-25 (the console waves 3g–3i).** This section is kept as the record of
+> that session and is **NOT the current state**. Its figures (commit `8193b40`, `validate:all` 197 PASS /
+> 0 FAIL, "`git status --porcelain` is EMPTY") were true on 2026-11-19 and are **false today**: the current
+> state is the section above — `193 PASS / 7 FAIL`, a tree carrying the Owner's own untracked work, and the
+> console waves added since. Any describer that still presents this section's figures as current is stale and
+> must be corrected, not believed (rule 10 — describers must match reality).
+
+
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `8193b40` (+ this record).
 `npm run validate:all` **197 PASS / 0 FAIL (exit 0)** — re-run and confirmed in this session.
