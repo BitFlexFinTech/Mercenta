@@ -177,8 +177,8 @@ export function BrandCatalogView({
           aria-pressed={!isAvailable}
           className={`px-2 py-0.5 rounded-ds-sm border text-ds-micro font-medium ${
             isAvailable
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-red-200 bg-red-50 text-red-800'
+              ? 'border-state-success/20 bg-state-success/10 text-state-success'
+              : 'border-state-danger/20 bg-state-danger/10 text-state-danger'
           }`}
         >
           {isAvailable ? 'In Stock' : 'OOS'}
@@ -545,7 +545,7 @@ export function BrandCatalogView({
                 checked={form.hazmat}
                 onChange={(e) => setForm({ ...form, hazmat: e.target.checked })}
               />
-              <Flame className="w-3.5 h-3.5 text-amber-700" aria-hidden="true" />
+              <Flame className="w-3.5 h-3.5 text-state-warning" aria-hidden="true" />
               Contains hazardous materials
             </label>
             <button

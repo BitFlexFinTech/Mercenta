@@ -135,7 +135,7 @@ export function BrandReturnsView({
       hideOnMobile: true,
       render: (r) =>
         r.linkedDeductionId ? (
-          <span className="font-mono text-ds-label text-amber-800">{r.linkedDeductionId}</span>
+          <span className="font-mono text-ds-label text-state-warning">{r.linkedDeductionId}</span>
         ) : (
           <span className="text-ds-label text-zinc-400">—</span>
         ),

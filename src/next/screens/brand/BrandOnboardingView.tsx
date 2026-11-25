@@ -236,7 +236,7 @@ export function BrandOnboardingView({
               step === s.id
                 ? 'border-zinc-950 bg-zinc-950 text-white font-medium'
                 : step > s.id
-                  ? 'border-emerald-200 bg-emerald-50/50 text-emerald-900'
+                  ? 'border-state-success/20 bg-state-success/10 text-state-success'
                   : 'border-zinc-200 bg-white text-zinc-500'
             }`}
           >

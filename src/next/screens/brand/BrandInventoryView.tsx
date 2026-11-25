@@ -190,7 +190,7 @@ export function BrandInventoryView({
       render: (r) => (
         <span
           data-testid={`inventory-available-${r.sku}`}
-          className={r.available < 0 ? 'text-red-800 font-semibold' : 'font-semibold text-zinc-950'}
+          className={r.available < 0 ? 'text-state-danger font-semibold' : 'font-semibold text-zinc-950'}
         >
           {r.available}
         </span>

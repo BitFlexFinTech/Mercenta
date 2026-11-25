@@ -40,6 +40,11 @@ import { BrandOverviewScreen } from '@/next/screens/brand/BrandOverviewScreen';
 import { BrandReportsScreen } from '@/next/screens/brand/BrandReportsScreen';
 import { BrandReturnsScreen } from '@/next/screens/brand/BrandReturnsScreen';
 import { WorkWorkspaceScreen } from '@/next/screens/shared/WorkWorkspaceScreen';
+/* §WAVE 3 (2026-11-25) — the ADMIN operational core. Before this the Operations
+   Console rendered placeholders for every view except the Ads Manager. */
+import { AdminLogisticsScreen } from '@/next/screens/admin/AdminLogisticsScreen';
+import { AdminOverviewScreen } from '@/next/screens/admin/AdminOverviewScreen';
+import { AdminPurchaseOrdersScreen } from '@/next/screens/admin/AdminPurchaseOrdersScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -101,6 +106,14 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   const goToBrandView = (viewId: string, query: Record<string, string> = {}) => {
     setViewBySurface((prev) => ({ ...prev, core_brand: viewId }));
     navigateProductView('brand', viewId, query);
+  };
+
+  /* §WAVE 3 (2026-11-25) — the same helper for the admin surface, plus the brand
+     the admin drilled into, so "open this brand's orders" is a real jump. */
+  const [adminPoBrandId, setAdminPoBrandId] = useState<string | null>(null);
+  const goToAdminView = (viewId: string, query: Record<string, string> = {}) => {
+    setViewBySurface((prev) => ({ ...prev, core_admin: viewId }));
+    navigateProductView('admin', viewId, query);
   };
 
   // Super-Admin portfolio filters (applied cleanly against fields present on DemoBrandRow)
@@ -287,6 +300,31 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'documents') {
         return <BrandDocumentsScreen />;
+      }
+    }
+
+    if (surface === 'core_admin') {
+      if (activeViewId === 'overview') {
+        return (
+          <AdminOverviewScreen
+            onOpenPurchaseOrders={(brandId) => {
+              setAdminPoBrandId(brandId ?? null);
+              goToAdminView('purchase_orders_admin');
+            }}
+            onOpenLogistics={() => goToAdminView('logistics')}
+          />
+        );
+      }
+      if (activeViewId === 'purchase_orders_admin') {
+        return (
+          <AdminPurchaseOrdersScreen
+            key={adminPoBrandId ?? 'all-brands'}
+            initialBrandId={adminPoBrandId}
+          />
+        );
+      }
+      if (activeViewId === 'logistics') {
+        return <AdminLogisticsScreen />;
       }
     }
 
@@ -573,7 +611,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                     ))}
                   </select>
                   {!canCurrentUserMutate && (
-                    <span className="text-ds-micro font-mono text-amber-800">Read-only</span>
+                    <span className="text-ds-micro font-mono text-state-warning">Read-only</span>
                   )}
                 </label>
               )}
@@ -675,9 +713,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded-ds-sm border border-amber-200 bg-amber-50/80 px-3 py-2 text-ds-label text-amber-950"
+                className="flex items-start gap-2 rounded-ds-sm border border-state-warning/20 bg-state-warning/10 px-3 py-2 text-ds-label text-state-warning"
               >
-                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertCircle className="w-4 h-4 text-state-warning shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
                   <strong>Vertical filter unavailable (`Brand.vertical` missing):</strong>{' '}
                   <code>src/types.ts</code> / <code>DemoBrandRow</code> does not define a{' '}

@@ -40,8 +40,31 @@ test('admin session: the new console renders its admin surface', async ({ page }
   await loginAs(page, 'Mercenta Admin Hub');
   await page.goto('/?console=next');
 
-  await expect(page.getByRole('navigation', WORKSPACE_NAV)).toBeVisible({ timeout: 20000 });
+  const nav = page.getByRole('navigation', WORKSPACE_NAV);
+  await expect(nav).toBeVisible({ timeout: 20000 });
   await expect(page.getByLabel('Operating model surface')).toBeVisible();
+
+  /* §WAVE 3 — select by ROLE. The sidebar's group heading is also the text
+     "Overview" (uppercased by CSS), so a text selector clicks the heading and the
+     view never changes — which is exactly what this gate caught. */
+  const navButton = (label: string) => nav.getByRole('button', { name: label, exact: true });
+
+  /* The admin views that are now real. The rest keep the honest "not available
+     yet" state, which this list deliberately does not include. */
+  for (const label of ['Overview', 'Purchase Orders', 'Logistics Hub', 'Ads Manager']) {
+    await navButton(label).click();
+    await expect(
+      page.getByText(/is not available yet/i),
+      `${label} must render a real admin screen`
+    ).toHaveCount(0);
+  }
+
+  /* Land on the new portfolio overview and assert real content, so the gate
+     cannot pass by rendering nothing. */
+  await navButton('Overview').click();
+  await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
+
+  await page.screenshot({ path: 'test-results/next-console-admin.png', fullPage: true });
   expect(pageErrors).toEqual([]);
 });
 

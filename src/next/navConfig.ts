@@ -41,7 +41,7 @@ const SUPER_ADMIN_ONLY_ADMIN_IDS = new Set([
  * CORE — Admin surface (28 exact IDs: all 27 from AdminShell.tsx + ads_management).
  */
 export const CORE_ADMIN_ITEMS: NavItemDef[] = [
-  { id: 'overview', label: 'Overview', group: 'Overview', implemented: false },
+  { id: 'overview', label: 'Overview', group: 'Overview', implemented: true },
   {
     id: 'control_centre',
     label: 'Control Centre',
@@ -51,8 +51,8 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   },
 
   { id: 'work', label: 'Work Management', group: 'Operations', implemented: false },
-  { id: 'purchase_orders_admin', label: 'Purchase Orders', group: 'Operations', implemented: false },
-  { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: false },
+  { id: 'purchase_orders_admin', label: 'Purchase Orders', group: 'Operations', implemented: true },
+  { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: true },
   { id: 'returns_tracking', label: 'Returns Tracking', group: 'Operations', implemented: false },
   { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
 

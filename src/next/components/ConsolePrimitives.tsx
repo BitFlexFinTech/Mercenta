@@ -85,10 +85,10 @@ export function ErrorStateBlock({
   return (
     <div
       role="alert"
-      className="border border-red-200 bg-red-50/70 rounded-ds-md p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      className="border border-state-danger/20 bg-state-danger/10 rounded-ds-md p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
     >
       <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" aria-hidden="true" />
+        <AlertCircle className="w-5 h-5 text-state-danger shrink-0 mt-0.5" aria-hidden="true" />
         <div>
           <h2 className="text-ds-body font-semibold text-zinc-950">{title}</h2>
           <p className="mt-1 text-ds-body text-zinc-700">
@@ -248,11 +248,19 @@ export function toSemanticTone(tone: StatusTone): SemanticTone {
 }
 
 const TONE_TEXT: Record<SemanticTone, string> = {
+  /* §WAVE 3 FIX (2026-11-25) — these were `text-state-success` / `amber-800` /
+     `red-800` / `blue-800`. In this project those palette families are a ramp
+     built from the BRAND HUE (`tailwind.config.js → brandHue(var(--mr-state-*))`),
+     not literal greens and reds, so status text rendered very pale — measured on
+     the admin portfolio table, where "Complete" was almost invisible. The console
+     already declares its own AA-safe state colours in `next.css`
+     (the success, warning, danger and info state colours), so the
+     canonical classes are used instead. */
   neutral: 'text-zinc-700',
-  success: 'text-emerald-800',
-  warning: 'text-amber-800',
-  danger: 'text-red-800',
-  info: 'text-blue-800',
+  success: 'text-state-success',
+  warning: 'text-state-warning',
+  danger: 'text-state-danger',
+  info: 'text-state-info',
 };
 
 export function InlineStatus({

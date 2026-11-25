@@ -197,7 +197,7 @@ export function BrandCommercialReadinessView({
                         )}
 
                         {row.fields.length === 0 ? (
-                          <p className="text-ds-label text-emerald-800 font-medium">
+                          <p className="text-ds-label text-state-success font-medium">
                             Nothing is needed from you right now.
                           </p>
                         ) : (
@@ -256,7 +256,7 @@ export function BrandCommercialReadinessView({
                                       </button>
                                     </div>
                                     {f.confirmExisting && (
-                                      <p className="text-ds-micro text-amber-800">
+                                      <p className="text-ds-micro text-state-warning">
                                         Mercenta currently holds this as an assumption. Please confirm the actual figure.
                                       </p>
                                     )}

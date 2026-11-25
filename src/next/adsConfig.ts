@@ -109,7 +109,11 @@ export function resolveAdsSurfacePolicy(
       'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
     placementContextLabel: 'Channel Ad Placements',
     creativeAssetGapNote:
-      'Creative asset review is unavailable until CreativeAsset endpoints exist in src/data/api.ts.',
+      /* §WAVE 3 FIX (2026-11-25) — this line claimed the CreativeAsset endpoints did
+         not exist. They DO: `useCreativeAssets` is in `src/data/queries.ts` and
+         create/update/delete/submit are in `src/data/api.ts`. What is missing is a
+         review surface in this console, so the statement now says exactly that. */
+      'Creative assets are available from the canonical data layer (useCreativeAssets, with create, update, delete and submit in src/data/api.ts); a review surface in this console is not built yet.',
     campaignMutationGapNote:
       'Individual campaign pause/resume toggles are omitted because no campaign-mutation API exists in src/data/api.ts.',
     recStatusLabels: ADMIN_REC_LABELS,

@@ -565,12 +565,12 @@ export function AdsManagerView({
       </div>
 
       {feedbackNotice && (
-        <div role="status" className="border border-emerald-200 bg-emerald-50 rounded-ds-md px-4 py-3 text-ds-body text-emerald-900">
+        <div role="status" className="border border-state-success/20 bg-state-success/10 rounded-ds-md px-4 py-3 text-ds-body text-state-success">
           {feedbackNotice}
         </div>
       )}
       {feedbackError && (
-        <div role="alert" className="border border-red-200 bg-red-50 rounded-ds-md px-4 py-3 text-ds-body text-red-900">
+        <div role="alert" className="border border-state-danger/20 bg-state-danger/10 rounded-ds-md px-4 py-3 text-ds-body text-state-danger">
           {feedbackError}
         </div>
       )}

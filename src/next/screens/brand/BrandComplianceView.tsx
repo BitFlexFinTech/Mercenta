@@ -242,14 +242,14 @@ export function BrandComplianceView({
                         onClick={() => onOpenPreview(po.id, doc)}
                         className={`text-left rounded-ds-sm border p-3 transition-colors ${
                           confirmed
-                            ? 'border-emerald-300 bg-emerald-50/40'
+                            ? 'border-state-success/20 bg-state-success/10'
                             : 'border-zinc-200 bg-white hover:border-zinc-400'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <FileCheck2 className="w-4 h-4 text-accent" aria-hidden="true" />
                           {confirmed && (
-                            <span className="inline-flex items-center gap-1 text-ds-micro font-medium text-emerald-800">
+                            <span className="inline-flex items-center gap-1 text-ds-micro font-medium text-state-success">
                               <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                               Confirmed
                             </span>
@@ -292,7 +292,7 @@ export function BrandComplianceView({
                 Close
               </button>
               {isCustomsConfirmed(previewDoc.poId, previewDoc.doc.type) ? (
-                <span className="text-ds-label font-medium text-emerald-800">Already Confirmed</span>
+                <span className="text-ds-label font-medium text-state-success">Already Confirmed</span>
               ) : (
                 <button
                   type="button"

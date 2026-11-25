@@ -414,7 +414,7 @@ export function BrandLogisticsView({
               dataStatus={status.dataStatus}
             />
             {(leg.exception || leg.delayed) && (
-              <div className="flex items-center gap-1 text-ds-micro text-amber-800">
+              <div className="flex items-center gap-1 text-ds-micro text-state-warning">
                 <AlertTriangle className="w-3 h-3" aria-hidden="true" />
                 Exception
               </div>
@@ -589,7 +589,7 @@ export function BrandLogisticsView({
       {asnNotice && (
         <div
           role="status"
-          className="border border-emerald-200 bg-emerald-50/70 rounded-ds-md px-4 py-3 text-ds-body text-zinc-900 flex items-center justify-between gap-3"
+          className="border border-state-success/20 bg-state-success/10 rounded-ds-md px-4 py-3 text-ds-body text-zinc-900 flex items-center justify-between gap-3"
         >
           <span>{asnNotice}</span>
           <button
@@ -684,7 +684,7 @@ export function BrandLogisticsView({
                           row.delayed,
                           row.exception
                         ) && (
-                          <span className="text-amber-800 font-medium">At risk against window</span>
+                          <span className="text-state-warning font-medium">At risk against window</span>
                         )}
                         {appView && (
                           <span className="basis-full text-zinc-600">
@@ -880,7 +880,7 @@ export function BrandLogisticsView({
                 </ul>
               )}
               {eligibility.permitted.length === 0 && !eligibility.channelArranged && (
-                <p className="text-ds-label text-amber-800" data-testid="carrier-eligibility-none">
+                <p className="text-ds-label text-state-warning" data-testid="carrier-eligibility-none">
                   No Mercenta carrier account is operational on this lane right now.
                 </p>
               )}
@@ -1073,7 +1073,7 @@ export function BrandLogisticsView({
                 <p className="text-indigo-900">Channel-arranged: Mercenta does not select this carrier.</p>
               )}
               {selectedLeg.carrierValidationError && (
-                <p className="text-amber-800">{selectedLeg.carrierValidationError}</p>
+                <p className="text-state-warning">{selectedLeg.carrierValidationError}</p>
               )}
             </div>
 
@@ -1171,7 +1171,7 @@ export function BrandLogisticsView({
                   </div>
                 </div>
                 {requiresLot && (
-                  <div className="grid grid-cols-2 gap-3 border border-amber-200 bg-amber-50/50 rounded-ds-md p-3">
+                  <div className="grid grid-cols-2 gap-3 border border-state-warning/20 bg-state-warning/10 rounded-ds-md p-3">
                     <div>
                       <label className="block text-ds-label font-medium text-zinc-800 mb-1">
                         Lot number (required)
@@ -1231,7 +1231,7 @@ export function BrandLogisticsView({
             );
           })()}
           {asnError && (
-            <div className="border border-red-200 bg-red-50 rounded-ds-md p-3 text-ds-label text-red-800">
+            <div className="border border-state-danger/20 bg-state-danger/10 rounded-ds-md p-3 text-ds-label text-state-danger">
               {asnError}
             </div>
           )}
@@ -1516,9 +1516,9 @@ function TrackingDialog({
                   <span
                     className={`flex h-7 w-7 items-center justify-center rounded-full border ${
                       isCompleted
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                        ? 'bg-state-success/10 text-state-success border-state-success/20'
                         : isCurrent
-                          ? 'bg-amber-50 text-amber-800 border-amber-300'
+                          ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
                           : 'bg-zinc-50 text-zinc-400 border-zinc-200'
                     }`}
                   >
@@ -1526,7 +1526,7 @@ function TrackingDialog({
                   </span>
                   {i < MILESTONES.length - 1 && (
                     <span
-                      className={`h-6 w-px ${isCompleted ? 'bg-emerald-300' : 'bg-zinc-200'}`}
+                      className={`h-6 w-px ${isCompleted ? 'bg-state-success/10' : 'bg-zinc-200'}`}
                     />
                   )}
                 </div>
@@ -1535,9 +1535,9 @@ function TrackingDialog({
                     <span
                       className={
                         isCompleted
-                          ? 'font-medium text-emerald-800'
+                          ? 'font-medium text-state-success'
                           : isCurrent
-                            ? 'font-semibold text-amber-900'
+                            ? 'font-semibold text-state-warning'
                             : 'text-zinc-500'
                       }
                     >

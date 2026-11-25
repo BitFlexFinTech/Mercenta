@@ -87,7 +87,7 @@ export function BrandLiftOffView({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-ds-body font-medium text-zinc-950">{t.label}</span>
                     {t.basis === 'requires_verification' && (
-                      <span className="text-ds-micro font-medium text-amber-800">
+                      <span className="text-ds-micro font-medium text-state-warning">
                         Checked per launch
                       </span>
                     )}
@@ -132,7 +132,7 @@ export function BrandLiftOffView({
                   {eligibility.outcomes.map(({ rule, state }) => (
                     <li key={rule.id} className="flex items-start gap-2.5 text-ds-label">
                       {state === 'met' ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
+                        <CheckCircle2 className="w-4 h-4 text-state-success shrink-0 mt-0.5" aria-hidden="true" />
                       ) : (
                         <Circle className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" aria-hidden="true" />
                       )}

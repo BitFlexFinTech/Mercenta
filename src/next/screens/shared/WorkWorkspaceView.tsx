@@ -315,7 +315,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             <span className="font-mono tabular-nums">{items.length} open</span>
             <span className="font-mono tabular-nums">{reminders.length} reminders</span>
             <span className="font-mono">As at {today}</span>
-            <span className="text-amber-800 font-mono" data-testid="work-operational-state-label">
+            <span className="text-state-warning font-mono" data-testid="work-operational-state-label">
               {operationalStateLabel}
             </span>
           </>
@@ -607,7 +607,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                               entry.resolved
                                 ? 'border-zinc-200 bg-zinc-50 text-zinc-400 line-through'
                                 : entry.priority === 'critical'
-                                  ? 'border-red-200 bg-red-50 text-red-900'
+                                  ? 'border-state-danger/20 bg-state-danger/10 text-state-danger'
                                   : 'border-zinc-200 bg-zinc-50 text-zinc-900 hover:border-zinc-400'
                             }`}
                             title={entry.title}

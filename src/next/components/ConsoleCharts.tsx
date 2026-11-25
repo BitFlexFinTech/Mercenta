@@ -291,11 +291,11 @@ export function NoticeBanner({
 }) {
   const styles =
     tone === 'danger'
-      ? 'border-red-200 bg-red-50/70 text-red-950'
+      ? 'border-state-danger/20 bg-state-danger/10 text-state-danger'
       : tone === 'warning'
-        ? 'border-amber-200 bg-amber-50/70 text-amber-950'
+        ? 'border-state-warning/20 bg-state-warning/10 text-state-warning'
         : tone === 'success'
-          ? 'border-emerald-200 bg-emerald-50/70 text-emerald-950'
+          ? 'border-state-success/20 bg-state-success/10 text-state-success'
           : 'border-zinc-200 bg-zinc-50 text-zinc-800';
 
   const Icon =
