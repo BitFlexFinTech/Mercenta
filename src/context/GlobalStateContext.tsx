@@ -34,7 +34,7 @@ import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } f
 /* §P9 (programme decision 4) — the ONE canonical writer of a consignment's
    milestone. The context delegates to it below so its projection can never
    diverge from the canonical store every query-backed surface reads. */
-import { setShipmentMilestone } from '@/data/demoStore';
+import { setShipmentMilestone, recordComplianceAudit } from '@/data/demoStore';
 import { isCommercialModel } from '@/config/commercialModel';
 import {
   parseProductPath,
@@ -126,7 +126,11 @@ interface AppState {
   completeOnboarding: (opts?: { poRulesAcknowledged?: boolean }) => void;
   /** §3 — compliance-gate documents for the active brand; catalog sync blocked until all approved. */
   gateDocs: ComplianceDocument[];
-  reviewGateDocument: (id: string, status: ComplianceDocument['status']) => void;
+  reviewGateDocument: (
+    id: string,
+    status: ComplianceDocument['status'],
+    reason?: string
+  ) => void;
   generatedAgreement: string;
 
   staff: StaffMember[];
@@ -815,14 +819,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   /** §3 — admin/staff action: move a gate document to a new status. */
   const reviewGateDocument = useCallback(
-    (id: string, status: ComplianceDocument['status']) => {
-      let nextDocs: ComplianceDocument[] = [];
-      setGateDocs((prev) => {
-        nextDocs = prev.map((d) => (d.id === id ? { ...d, status } : d));
-        return nextDocs;
-      });
+    (id: string, status: ComplianceDocument['status'], reason?: string) => {
+      const reviewed = gateDocs.find((doc) => doc.id === id);
+      setGateDocs((prev) => prev.map((d) => (d.id === id ? { ...d, status } : d)));
+
+      /**
+       * §WAVE 3e FIX (2026-11-25) — A REAL DEFECT FIXED AT SOURCE.
+       *
+       * This command changed the document's status and recorded NOTHING. Found by
+       * driving the new admin compliance screen in a real browser and then opening
+       * the audit trail: an approval of a regulated brand document left no trace at
+       * all, while `src/lib/verification/documentVerification.ts` calls
+       * `recordComplianceAudit` for exactly this and
+       * `src/data/demoStore.ts` documents that "compliance/verification actions are
+       * audited on the platform log" (§M2).
+       *
+       * The fix is HERE, in the command every caller uses, so no caller (this
+       * console or any earlier surface) can decide a document without an audit
+       * record. The reason is the caller's when supplied, and an explicit, truthful
+       * default otherwise.
+       */
+      if (reviewed) {
+        recordComplianceAudit(
+          `compliance.document.${status}`,
+          id,
+          reviewed.brandId,
+          reason ?? `Reviewed in the compliance workspace: ${reviewed.status} → ${status}.`,
+          actingStaffId,
+          { previousStatus: reviewed.status, nextStatus: status }
+        );
+      }
     },
-    []
+    [gateDocs, actingStaffId]
   );
 
   const addStaff = useCallback((member: StaffMember) => {

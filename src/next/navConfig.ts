@@ -102,7 +102,16 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
 
   { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: true },
   { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: false },
-  { id: 'helpdesk', label: 'Helpdesk', group: 'Governance & Support', implemented: false },
+{
+    /* §WAVE 3e — helpdesk TRIAGE is the support queue, so it declares the closest
+       permission an admin_staff member already holds (`messages`). RBAC itself is
+       not widened. */
+    id: 'helpdesk',
+    label: 'Helpdesk',
+    group: 'Governance & Support',
+    implemented: true,
+    rbacViewId: 'messages',
+  },
   { id: 'monitoring', label: 'Monitoring', group: 'Governance & Support', implemented: false },
 
   {
@@ -116,7 +125,9 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'audit_log',
     label: 'Audit Log',
     group: 'Administration',
-    implemented: false,
+    /* §WAVE 3e — built, and reachable only by a super_admin session (see
+       `superAdminOnly` and `SUPER_ADMIN_ONLY_ADMIN_IDS`). */
+    implemented: true,
     superAdminOnly: true,
   },
   { id: 'usertour', label: 'Onboarding Tours', group: 'Administration', implemented: false },

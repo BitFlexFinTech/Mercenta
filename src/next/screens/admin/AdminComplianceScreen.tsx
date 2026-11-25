@@ -5,8 +5,10 @@
  * path and one audit record.
  */
 import { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useComplianceDocuments } from '@/data/queries';
+import { recordManualDocumentVerification } from '@/lib/verification/documentVerification';
 import type { ComplianceDocument } from '@/types';
 import { AdminComplianceView, type AdminComplianceRow } from './AdminComplianceView';
 
@@ -20,7 +22,8 @@ const NOT_APPROVED: ReadonlySet<ComplianceDocument['status']> = new Set([
 ]);
 
 export function AdminComplianceScreen() {
-  const { reviewGateDocument } = useApp();
+  const qc = useQueryClient();
+  const { actingStaffId, canCurrentUserMutate } = useApp();
   const brandsQ = useBrands();
   const docsQ = useComplianceDocuments();
 
@@ -63,15 +66,47 @@ export function AdminComplianceScreen() {
       }));
   }, [docs, brands, brandFilter, statusFilter, search]);
 
-  function handleDecision(doc: ComplianceDocument, decision: 'approved' | 'rejected'): void {
+  /**
+   * §WAVE 3e FIX (2026-11-25) — REPOINTED TO THE CANONICAL PATH.
+   *
+   * This used to call the app context's `reviewGateDocument`, which only re-mapped
+   * a BRAND-SCOPED in-memory array (`gateDocs`) that is EMPTY in an admin session.
+   * So an admin "approval" changed nothing in the domain and yet showed a success
+   * notice — a false claim, and no audit record either. Found by approving a
+   * document in a real browser and then opening the audit trail.
+   *
+   * It now calls `recordManualDocumentVerification` — the first-class staff decision
+   * path (documented as the Founder / Super Admin route), which mutates the
+   * CANONICAL document store, requires a recorded reason, refuses an account that
+   * cannot mutate, and audits the decision. The notice reports what actually
+   * happened, including a refusal.
+   */
+  async function handleDecision(
+    doc: ComplianceDocument,
+    decision: 'approve' | 'reject',
+    reason: string
+  ): Promise<void> {
     setBusyDocId(doc.id);
-    reviewGateDocument(doc.id, decision);
-    setBusyDocId(null);
-    setNotice(
-      decision === 'approved'
-        ? `Document approved and recorded against the brand.`
-        : `Document rejected and recorded against the brand.`
+    const result = await recordManualDocumentVerification(
+      doc.id,
+      { staffId: actingStaffId, canMutate: canCurrentUserMutate },
+      decision,
+      reason
     );
+    setBusyDocId(null);
+
+    if (!result.ok) {
+      setNotice(`Nothing was recorded: ${result.error}`);
+      return;
+    }
+
+    setNotice(
+      decision === 'approve'
+        ? 'Document approved — verification recorded against the brand, and the decision is in the audit trail.'
+        : 'Document rejected — the decision is recorded against the brand and in the audit trail.'
+    );
+    await qc.invalidateQueries({ queryKey: ['compliance-documents'] });
+    await qc.invalidateQueries({ queryKey: ['audit-log-paginated'] });
     setSelected(null);
   }
 

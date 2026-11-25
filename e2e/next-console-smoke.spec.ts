@@ -64,6 +64,7 @@ test('admin session: the new console renders its admin surface', async ({ page }
     'Global Catalog',
     'Fulfillment Track',
     'Marketing',
+    'Helpdesk',
     'Ads Manager',
   ]) {
     await navButton(label).click();
@@ -72,6 +73,12 @@ test('admin session: the new console renders its admin surface', async ({ page }
       `${label} must render a real admin screen`
     ).toHaveCount(0);
   }
+
+  /* A staff session must NOT be offered the super-admin audit trail. */
+  await expect(
+    navButton('Audit Log'),
+    'admin_staff must never be offered the super-admin audit trail'
+  ).toHaveCount(0);
 
   /* Land on the new portfolio overview and assert real content, so the gate
      cannot pass by rendering nothing. */
@@ -128,6 +135,46 @@ test('every mounted brand view renders and none falls back to the Phase 4-6 plac
   }
 
   await page.screenshot({ path: 'test-results/next-console-brand.png', fullPage: true });
+  expect(pageErrors).toEqual([]);
+});
+
+test('super-admin session: an approval is audited, and the audit trail shows it', async ({
+  page,
+}) => {
+  const pageErrors = watchPageErrors(page);
+  await loginAs(page, 'Super Admin — Tadii');
+  await page.goto('/?console=next');
+
+  const nav = page.getByRole('navigation', WORKSPACE_NAV);
+  await expect(nav).toBeVisible({ timeout: 20000 });
+  const navButton = (label: string) => nav.getByRole('button', { name: label, exact: true });
+
+  /* `audit_log` is a SUPER-ADMIN view. This is the whole end-to-end proof: take a
+     real DOMAIN ACTION (approve a brand document), then show the audit trail
+     recorded it — no fixture, no stub. */
+  await navButton('Compliance Approvals').click();
+  await page.getByText('Awaiting review').click();
+  await page.locator('tbody tr').first().click();
+
+  /* A manual verification REFUSES a decision with no recorded reason, so the gate
+     proves the reason is genuinely required by typing one and asserting the notice. */
+  await page
+    .getByLabel(/reason for the decision/i)
+    .fill('Verified against the issuing body public register.');
+  await page.getByRole('button', { name: 'Approve document' }).click();
+  await expect(
+    page.getByText('Document approved — verification recorded against the brand')
+  ).toBeVisible({ timeout: 20000 });
+
+  await navButton('Audit Log').click();
+  await expect(page.getByText('Distinct actors')).toBeVisible({ timeout: 20000 });
+  await expect(
+    page.getByText('No audit entries match these filters'),
+    'the approval must appear in the audit trail'
+  ).toHaveCount(0);
+  await expect(page.locator('tbody tr').first()).toBeVisible();
+
+  await page.screenshot({ path: 'test-results/next-console-superadmin.png', fullPage: true });
   expect(pageErrors).toEqual([]);
 });
 

@@ -5,6 +5,7 @@
  * compliance screen uses (`reviewGateDocument` from the app context), so a decision
  * is recorded once, in one place, attributed to the acting staff member.
  */
+import { useEffect, useState } from 'react';
 import {
   ConsoleHeader,
   ConsoleTable,
@@ -49,7 +50,12 @@ export interface AdminComplianceViewProps {
   onChangeStatus: (value: string) => void;
   onChangeSearch: (value: string) => void;
   onSelect: (doc: ComplianceDocument | null) => void;
-  onDecision: (doc: ComplianceDocument, decision: 'approved' | 'rejected') => void;
+  /**
+   * §WAVE 3e — the decision carries a REASON. A manual verification is required to
+   * record one (`recordManualDocumentVerification` refuses a decision without it),
+   * and the reason is what makes the audit entry meaningful.
+   */
+  onDecision: (doc: ComplianceDocument, decision: 'approve' | 'reject', reason: string) => void;
 }
 
 export function AdminComplianceView({
@@ -77,6 +83,13 @@ export function AdminComplianceView({
   onSelect,
   onDecision,
 }: AdminComplianceViewProps) {
+  /* The decision reason is view state, and it resets per document so a reason
+     written for one document can never be submitted against another. */
+  const [reason, setReason] = useState('');
+  useEffect(() => {
+    setReason('');
+  }, [selected?.id]);
+
   const hasExpiry = rows.some((row) => Boolean(row.doc.expiryDate));
   const hasReviewer = rows.some((row) => Boolean(row.doc.reviewedBy));
 
@@ -266,23 +279,38 @@ return (
             </dl>
 
             {(selected.status === 'uploaded' || selected.status === 'under_review') && (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={busyDocId === selected.id}
-                  onClick={() => onDecision(selected, 'approved')}
-                  className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-white hover:bg-accent-600 disabled:opacity-50"
-                >
-                  {busyDocId === selected.id ? 'Recording…' : 'Approve document'}
-                </button>
-                <button
-                  type="button"
-                  disabled={busyDocId === selected.id}
-                  onClick={() => onDecision(selected, 'rejected')}
-                  className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
-                >
-                  Reject document
-                </button>
+              <div className="space-y-3">
+                <label className="text-ds-body block">
+                  <span className="text-ds-label text-zinc-500 block mb-1">
+                    Reason for the decision (required, and recorded in the audit trail)
+                  </span>
+                  <textarea
+                    value={reason}
+                    onChange={(event) => setReason(event.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                    placeholder="e.g. Certificate verified against the issuing body's public register."
+                  />
+                </label>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={busyDocId === selected.id || reason.trim().length < 3}
+                    onClick={() => onDecision(selected, 'approve', reason)}
+                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-white hover:bg-accent-600 disabled:opacity-50"
+                  >
+                    {busyDocId === selected.id ? 'Recording…' : 'Approve document'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busyDocId === selected.id || reason.trim().length < 3}
+                    onClick={() => onDecision(selected, 'reject', reason)}
+                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
+                  >
+                    Reject document
+                  </button>
+                </div>
               </div>
             )}
 

@@ -56,6 +56,9 @@ import { AdminCrmScreen } from '@/next/screens/admin/AdminCrmScreen';
 import { AdminCatalogScreen } from '@/next/screens/admin/AdminCatalogScreen';
 import { AdminFulfillmentScreen } from '@/next/screens/admin/AdminFulfillmentScreen';
 import { AdminMarketingScreen } from '@/next/screens/admin/AdminMarketingScreen';
+/* §WAVE 3e (2026-11-25) — helpdesk and the audit log. */
+import { AdminAuditScreen } from '@/next/screens/admin/AdminAuditScreen';
+import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -362,6 +365,15 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'marketing') {
         return <AdminMarketingScreen />;
+      }
+      /* §WAVE 3e — helpdesk triage and the audit trail. `audit_log` is a
+         SUPER-ADMIN view by design; `visibleNavItemsForSurface` keeps it out of an
+         admin_staff menu, so this branch is reached only by a super_admin session. */
+      if (activeViewId === 'helpdesk') {
+        return <AdminHelpdeskScreen />;
+      }
+      if (activeViewId === 'audit_log') {
+        return <AdminAuditScreen />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and
