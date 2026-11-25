@@ -67,6 +67,11 @@ import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
 import { AdminMessagesScreen } from '@/next/screens/admin/AdminMessagesScreen';
 /* §WAVE 3i (2026-11-25) — the founder's Control Centre, on its canonical model. */
 import { AdminControlCentreScreen } from '@/next/screens/admin/AdminControlCentreScreen';
+/* §WAVE 3k — the founder surfaces: the financing-partner universe and outreach, the
+   funding pipeline, and the ranked opportunity discovery. Each reads its own owner. */
+import { AdminPartnershipsScreen } from '@/next/screens/admin/AdminPartnershipsScreen';
+import { AdminFounderCentreScreen } from '@/next/screens/admin/AdminFounderCentreScreen';
+import { AdminBrandIntelligenceScreen } from '@/next/screens/admin/AdminBrandIntelligenceScreen';
 import { AdminMonitoringScreen } from '@/next/screens/admin/AdminMonitoringScreen';
 /* §WAVE 3g (2026-11-25) — ONE vertical-scoped portfolio screen serves all three
    operating models. */
@@ -406,6 +411,21 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
          model already derives, each metric drilling into its existing destination. */
       if (activeViewId === 'control_centre') {
         return <AdminControlCentreScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
+      }
+      /* §WAVE 3k — Partnerships & Fundraising: the real financing-partner universe, the
+         outreach pipeline run over it, and the financier lifecycle. Super-Admin only. */
+      if (activeViewId === 'partnerships') {
+        return <AdminPartnershipsScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
+      }
+      /* §WAVE 3k — Founder Investor Centre: the funding pipeline, the Model B capital case
+         and the pitch workspace. Super-Admin only. */
+      if (activeViewId === 'founder_centre') {
+        return <AdminFounderCentreScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
+      }
+      /* §WAVE 3k — Brand Intelligence: the ranked opportunity board derived from the
+         canonical prospect store, with the ten-category rule shown firing. */
+      if (activeViewId === 'brand_intelligence') {
+        return <AdminBrandIntelligenceScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and

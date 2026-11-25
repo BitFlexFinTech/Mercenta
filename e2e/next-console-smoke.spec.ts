@@ -219,6 +219,35 @@ test('super-admin session: an approval is audited, and the audit trail shows it'
   ).toHaveCount(0);
   await expect(page.locator('tbody tr').first()).toBeVisible();
 
+  /* §WAVE 3k — PARTNERSHIPS & FUNDRAISING. A super-admin-only surface whose figures come
+     from three owners (the financier universe, the outreach pipeline, the lifecycle), so
+     this asserts the real panels rendered rather than a decorative heading. */
+  await navButton('Partnerships & Fundraising').click();
+  await expect(page.getByRole('heading', { name: 'Financing-partner universe' })).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.locator('[data-testid="control-panel-partnerships-universe"]')).toBeVisible();
+  await expect(page.locator('[data-testid="control-panel-partnerships-outreach"]')).toBeVisible();
+  await expect(page.locator('[data-testid="control-panel-partnerships-lifecycle"]')).toBeVisible();
+
+  /* §WAVE 3k — the Founder Investor Centre: the funding pipeline, the Model B capital
+     case and the pitch workspace, each read from its own owner. */
+  await navButton('Founder Investor Centre').click();
+  await expect(page.locator('[data-testid="control-panel-funding-pipeline"]')).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.locator('[data-testid="control-panel-capital-requirement"]')).toBeVisible();
+  await expect(page.locator('[data-testid="control-panel-pitch-workspace"]')).toBeVisible();
+
+  /* §WAVE 3k — Brand Intelligence: the ranked board and the ten-category exclusion list,
+     which must be present as a panel rather than hidden behind a filter. */
+  await navButton('Brand Intelligence').click();
+  await expect(page.locator('[data-testid="control-panel-brand-intelligence-ranking"]')).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.locator('[data-testid="control-panel-brand-intelligence-ineligible"]')).toBeVisible();
+  await expect(page.locator('[data-testid="control-panel-brand-intelligence-verticals"]')).toBeVisible();
+
   await page.screenshot({ path: 'test-results/next-console-superadmin.png', fullPage: true });
   expect(pageErrors).toEqual([]);
 });

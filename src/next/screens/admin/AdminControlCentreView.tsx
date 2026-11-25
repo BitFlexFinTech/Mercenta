@@ -10,6 +10,7 @@
  */
 import { ConsoleHeader, ConsoleTable, MetricStrip, type ConsoleColumn } from '@/next/components/ConsolePrimitives';
 import { ConsoleTabs, SectionCard } from '@/next/components/ConsoleCharts';
+import { PanelCard, TONE_TEXT } from '@/next/components/ConsolePanels';
 import type {
   CommercialReadinessQueueRow,
   ControlCentreModel,
@@ -29,15 +30,6 @@ export interface AdminControlCentreViewProps {
   onNavigate: (destination: string) => void;
 }
 
-const TONE_TEXT: Record<string, string> = {
-  success: 'text-emerald-700',
-  warning: 'text-amber-700',
-  danger: 'text-red-700',
-  info: 'text-sky-700',
-  brass: 'text-amber-800',
-  neutral: 'text-zinc-700',
-};
-
 const PRIORITY_TONE: Record<string, string> = {
   urgent: 'text-red-700',
   high: 'text-amber-700',
@@ -45,64 +37,11 @@ const PRIORITY_TONE: Record<string, string> = {
 };
 
 /**
- * §WAVE 3j — one specialised panel. Every row is a figure the model already carries;
- * nothing here computes or re-derives a value, and the panel names the canonical owner
- * it reports on so provenance is shown rather than implied.
- */
-function PanelCard({ panel }: { panel: ControlPanel }) {
-  return (
-    <SectionCard
-      title={panel.title}
-      description={panel.description}
-      testId={`control-panel-${panel.id}`}
-    >
-      {panel.groups.map((group) => (
-        <div key={group.label} className="mb-5 last:mb-0">
-          <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
-            {group.label}
-          </h3>
-          {group.rows.length === 0 ? (
-            <p className="mt-1.5 text-ds-label text-zinc-500">
-              Nothing is recorded for this yet. The panel shows the real state of these records rather than
-              a filled-in placeholder.
-            </p>
-          ) : (
-            <dl className="mt-1.5 divide-y divide-zinc-200">
-              {group.rows.map((item, index) => (
-                <div
-                  key={`${item.label}-${index}`}
-                  className="py-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5"
-                >
-                  <dt className="text-ds-body text-zinc-600">{item.label}</dt>
-                  <dd className="text-right">
-                    <span
-                      className={`text-ds-body font-medium tabular-nums ${
-                        TONE_TEXT[item.tone ?? 'neutral'] ?? 'text-zinc-700'
-                      }`}
-                    >
-                      {item.value}
-                    </span>
-                    {item.note && (
-                      <span className="block text-ds-label font-normal text-zinc-500 max-w-2xl">
-                        {item.note}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </div>
-      ))}
-      <p className="mt-1 text-ds-label text-zinc-500">Owned by {panel.owner}</p>
-    </SectionCard>
-  );
-}
-
-/**
  * §WAVE 3j — a canonical queue drawn in full. `rows` ARE the model's own rows (the
  * owner's array, untouched), so the table can never show a curated subset: the
  * coverage gate compares this row count with the model's own count.
+ * §WAVE 3k — the panel card itself moved to `@/next/components/ConsolePanels`, so the
+ * three new super-admin surfaces reuse ONE renderer instead of copying it.
  */
 function QueuePanel({ panel }: { panel: ControlPanel }) {
   const queue = panel.queue;

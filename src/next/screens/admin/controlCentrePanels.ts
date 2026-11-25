@@ -26,26 +26,18 @@
  * - Panels that prove a fail-closed rule show the LIVE example the owner computed, not
  *   a written claim: "computed, not written".
  */
-import type { StatusTone } from '@/components/ui';
 import type {
   CommercialReadinessQueueRow,
   ControlCentreModel,
   ControlCentreSectionId,
   PreAuditQueueRow,
 } from '@/lib/commandCentre/controlCentre';
+import type { PanelGroup, PanelRow, PanelSpec } from '@/next/components/ConsolePanels';
 
-export interface ControlPanelRow {
-  label: string;
-  value: string;
-  tone?: StatusTone;
-  /** The sentence that explains what the value means, in plain words. */
-  note?: string;
-}
-
-export interface ControlPanelGroup {
-  label: string;
-  rows: ControlPanelRow[];
-}
+/* §WAVE 3k — the row and group shapes are the SHARED renderer's (one owner), aliased
+   here so a panel definition written in WAVE 3j keeps working unchanged. */
+export type ControlPanelRow = PanelRow;
+export type ControlPanelGroup = PanelGroup;
 
 /**
  * A canonical queue rendered as a full table. `kind` selects the column set in the
@@ -58,24 +50,18 @@ export interface ControlPanelQueue {
   rows: PreAuditQueueRow[] | CommercialReadinessQueueRow[];
 }
 
-export interface ControlPanel {
-  id: string;
+export interface ControlPanel extends PanelSpec {
   /** The capability area this panel belongs to, so it draws under its own tab. */
   section: ControlCentreSectionId;
-  title: string;
-  description: string;
-  /** The canonical module that produces every figure in this panel. */
-  owner: string;
   /** Every model key this panel renders. The coverage gate unions these. */
   modelKeys: (keyof ControlCentreModel)[];
-  groups: ControlPanelGroup[];
   /** Present only on a panel that renders a whole canonical queue. */
   queue?: ControlPanelQueue;
 }
 
 /* ── Formatting helpers (presentation only — no business arithmetic) ─────────── */
 
-const row = (label: string, value: string, tone?: StatusTone, note?: string): ControlPanelRow => ({
+const row = (label: string, value: string, tone?: PanelRow['tone'], note?: string): ControlPanelRow => ({
   label,
   value,
   tone,

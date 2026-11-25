@@ -4,7 +4,64 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §WAVE 3j — THE CONTROL CENTRE'S SPECIALISED PANELS, ALL 35 DRAWN (2026-11-25)
+## §WAVE 3k — THE THREE REMAINING SUPER-ADMIN VIEWS, EACH ON AN OWNER THE PLATFORM ALREADY HAS (2026-11-25)
+
+**State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
+tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.
+**NOT deployed and NOT live-verified**, deliberately: `scripts/deploy-demo.sh` builds the working tree, so
+publishing now would ship the Owner's unrelated in-progress work.
+
+**What this wave built — 22 of the 28 admin views are now real, up from 19.**
+
+- **Partnerships & Fundraising** (`partnerships`): the real financing-partner universe
+  (`buildFinancierUniverseSummary` — **zero real providers today, stated rather than filled in**, with the live
+  fail-closed refusal proof), the outreach pipeline run over it (`buildFounderOutreachSummary` — channels,
+  touchpoint types, the deterministic day-offset cadence, and every labelled touchpoint's allow/REFUSE decision)
+  and the financier lifecycle (`buildFinancierLifecycleSummary` — the forward-only machine, its off-ramps, and
+  where each candidate may move next).
+- **Founder Investor Centre** (`founder_centre`): the founder's **three REAL funding opportunities** with each
+  figure's claim class AND its source (`FOUNDER_FUNDING_OPPORTUNITIES` — "verified by the founder" is reported as
+  the **zero** it really is), the application pipeline with its per-stage next actions and the honest
+  "**zero submissions recorded**" (`getFundingPipeline` + `fundingPipelineSummary`), and the Model B capital case,
+  the financing router and the pitch workspace — **read from the platform's ONE derived model**, so the
+  "which purchases are financed, at what cost" mapping is never re-derived into a second definition.
+- **Brand Intelligence** (`brand_intelligence`): the ranked opportunity board (`rankOpportunities`, ranked by
+  estimated retail-channel PO potential), the **ineligible brands RETAINED with the reason** the ten-category rule
+  excludes them, the eight-vertical rollup (`rollupByVertical`), and the seeded sports opportunity with its
+  evidence status and the standing "no partnership" line.
+- **ONE panel renderer, not four.** `src/next/components/ConsolePanels.tsx` now owns the panel card that WAVE 3j
+  had built inside the Control Centre's view; all four surfaces render through it, and the gate asserts no second
+  copy exists.
+
+**The new gate — `scripts/validate-console-founder-views.mjs`, 28 assertions, auto-discovered by `validate:all`.**
+It DISCOVERS each view's wiring from the files and fails if a view is unmounted, declared unimplemented in the
+navigation, no longer super-admin only, not reading its canonical owner, calling an owner's ENGINE itself,
+not rendering through the shared renderer, not routing its cards with `onNavigate`, or referenced from a
+brand-scoped file.
+
+**Evidence.** `npm run typecheck` **0 errors** (four projects) · `npm run build` **EXIT 0** ·
+`e2e/next-console-smoke.spec.ts` **6 passed / 0 failed** — the super-admin walk now opens all three views and
+asserts their real panels · the new gate **28 PASS / 0 FAIL** · `validate:all` **194 PASS / 8 FAIL (of 202
+validators)**, the new gate among the passes.
+
+**Both new gates were PROVED ABLE TO FAIL, each restored byte-identical:** navigation honesty (`9fd80909…` → **A1
+FAIL, "partnerships is declared implemented"** → restored `7fdf364c…`) and engine-in-view (`46d7cdc8…` → **D1
+FAIL, "LEAKED: buildFinancierUniverseSummary"** → restored `06b2ba6c…`).
+
+**The eight failures are NOT this wave's.** The failing set is unchanged from before it and names only the Owner's
+untracked work (`src/components/ads/AdsManagement.tsx`, `recovered-lovable-images/`, the changed protected
+`src/data/*` paths): `validate-data-preservation`, `validate-e6-brand-surfaces` (whose F6 offenders are still
+**only** those two Owner paths — the two new gate scripts were DECLARED in the console scope, not exempted),
+`validate-legacy-styling-migration`, `validate-nav-destinations`, `validate-radius-elevation-scale`,
+`validate-typography-scale`, `validate-ui-wiring` and `validate:wording`.
+
+**What remains.** **6 of the 28 admin views** (`calendar`, `integrations`, `super_admin`, `usertour`,
+`retail_pipeline`, `onboarding_pipeline`) need a decision or data this repository does not hold; **BWS 3 of 22**
+and **Talent Commerce 2 of 18**; **3 brand views** deliberately unbuilt. **Next:** BATCH 10's next sub-batch — the
+literal `white`/`black` family and the force-patch block's deletion with its absence guard.
+
+---
+## PREVIOUS STATUS — **§WAVE 3j — SUPERSEDED BY §WAVE 3k** (2026-11-25)
 
 **State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed;
 the tree is NOT empty (the Owner's own untracked work), so this is explicitly **not** a clean checkpoint and

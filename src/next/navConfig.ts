@@ -89,7 +89,9 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'brand_intelligence',
     label: 'Brand Intelligence',
     group: 'Brands & Growth',
-    implemented: false,
+    /* §WAVE 3k — real: the ranked opportunity board derived from the canonical prospect
+       store, with the ten-category rule shown firing. Super-Admin only. */
+    implemented: true,
     superAdminOnly: true,
   },
 
@@ -152,14 +154,18 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'founder_centre',
     label: 'Founder Investor Centre',
     group: 'Founder',
-    implemented: false,
+    /* §WAVE 3k — real: the funding pipeline, the Model B capital case, the financing
+       router and the pitch workspace, all read from their own owners. Super-Admin only. */
+    implemented: true,
     superAdminOnly: true,
   },
   {
     id: 'partnerships',
     label: 'Partnerships & Fundraising',
     group: 'Founder',
-    implemented: false,
+    /* §WAVE 3k — real: the financier universe, the outreach pipeline and the
+       financier lifecycle, each rendered from its own owner. Super-Admin only. */
+    implemented: true,
     superAdminOnly: true,
   },
 ];

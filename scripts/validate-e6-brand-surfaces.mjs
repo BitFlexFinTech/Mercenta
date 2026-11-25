@@ -4862,6 +4862,12 @@ const BRAND_REDESIGN_SCOPE = new Set([
        Commerce surfaces are scoped by. Declared, not widened: the guard still
        refuses any changed source file outside EVERY declared set. */
     'src/config/verticals.ts',
+    /* §WAVE 3j — the Control Centre's panel coverage gate. */
+    'scripts/validate-control-centre-panels.mjs',
+    /* §WAVE 3k — the gate that pins the three founder surfaces to their owners and to
+       the ONE shared panel renderer. Declared HERE, not exempted: a changed file
+       outside every declared set still fails F6, which is the whole point of F6. */
+    'scripts/validate-console-founder-views.mjs',
   ]);
 
   const CONCEPT3_HOMEPAGE_SCOPE = new Set([
