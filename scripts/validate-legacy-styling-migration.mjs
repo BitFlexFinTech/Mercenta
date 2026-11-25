@@ -207,6 +207,17 @@ if (recorded) {
  * `ink-N | surface-* | brass-N`, but `--mr-surface*` is the CANONICAL token name and
  * `ink` is the alias — so this family cannot reach zero by migration. Recorded as a
  * decision (PROJECT_STATUS.md §BATCH 5a), NOT silently redefined.
+ *
+ * §CORRECTED 2026-11-25 (WAVE 3l, rule 10) — "THE LEGACY GREY FAMILY IS NOW ZERO ACROSS
+ * THE WHOLE PRODUCT" WAS TRUE OF THE APPLICATION AND IS NOT TRUE OF THE WHOLE SUBJECT.
+ * The console (`src/next/**`) arrived AFTER this batch and authors 1,746 grey-family and
+ * 279 literal `white`/`black` sites, because it declares its own `--color-next-*` tokens
+ * and uses none of them. Measured this session with this project's own method, the
+ * APPLICATION holds grey 6/1 · ink 483/98 · literal 0/0, and the CONSOLE holds
+ * grey 1746/44 · ink 0/0 · literal 279/38. The sentence above is left in place as what it
+ * was (a true statement about the application on that date) and this correction is added
+ * beneath it, because a claim that survives the thing it describes becomes a false
+ * statement about the product.
  */
 const CEILING = { grey: 6, ink: 468, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (

@@ -4,7 +4,55 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §WAVE 3k — THE THREE REMAINING SUPER-ADMIN VIEWS, EACH ON AN OWNER THE PLATFORM ALREADY HAS (2026-11-25)
+## §WAVE 3l — THE MIGRATION'S APPLICATION SURFACE COMPLETE, AND THE CONSOLE'S STYLING DEBT FOUND AND NAMED (2026-11-25)
+
+**State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
+tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.
+**NOT deployed and NOT live-verified**, deliberately: `scripts/deploy-demo.sh` builds the working tree.
+
+**What this wave did.** The recorded task was the migration's next sub-batch, whose first required step is to re-read
+the figures the migration is machine-checked against. That produced the finding:
+
+- **The application is INSIDE both of its ceilings.** The last literal site in the application — `src/App.tsx`'s
+  "Open new console" button — was repointed onto the declared ladder (`bg-surface` · `text-strong` ·
+  `border-hairline` · `hover:bg-surface-hover`). Application now measures **grey 6 sites/1 file · literal 0/0**
+  against ceilings grey 6 · literal 0.
+- **THE FINDING: `src/next/**` IS THE OVERRUN.** The console declares its OWN design-token set in
+  `src/next/next.css` (`--color-next-canvas` · `-surface` · `-subtle` · `-border` · `-ink` · `-secondary` · `-muted` ·
+  `-accent` …) and **uses none of it** — its ink-family usage is **zero**. Measured with the project's own method in
+  ONE run (split computed from the same `subjectFiles()` the gate uses):
+
+  | Surface | grey | ink | literal |
+  |---|---|---|---|
+  | APPLICATION | **6 / 1 file** | 483 / 98 | **0 / 0** |
+  | CONSOLE | **1746 / 44 files** | 0 / 0 | **279 / 38 files** |
+  | Whole subject (what the gate measures) | 1752 / 45 | 483 / 98 | 279 / 38 |
+
+- **TWO FALSE STATEMENTS CORRECTED AT SOURCE (rule 10)**: the spec's `§MIGRATION COMPLETE … as no literal sites
+  remain` and the migration validator's own `grey 0 ACROSS THE WHOLE PRODUCT` — both true of the APPLICATION, false
+  once the console arrived. Each now carries a dated `§CORRECTED 2026-11-25 (WAVE 3l)` note with the measured numbers.
+- **The record was brought up to the measurement; NO CEILING WAS TOUCHED**: `§MEASURED-BATCH10` →
+  `date=2026-11-25 grey=1752/45 ink=483/98 literal=279/38`, `§DECISION-BATCH10-2` → `literal=279/38 … tint=1
+  uncovered=279`, with the per-surface split recorded beneath. Ceilings unchanged (grey 6 · ink 468 · literal 0 ·
+  uncovered 0), so the validator still fails exactly where the debt is.
+- **THE INK METRIC WAS DELIBERATELY NOT REDEFINED.** The validator's §FINDING (2026-11-21) records that the `ink`
+  family counts `surface-*` — the migration's DESTINATION, not an alias — and that redefining a metric is *"exactly
+  the change that must not be made quietly"*. It stays an **open Owner decision**; the number it needs: the
+  application's true legacy-alias debt is **14 sites in 2 files**.
+
+**Evidence.** `validate:all` **194 PASS / 8 FAIL of 202** (the same eight, all the Owner's untracked files) ·
+typecheck **0** · build **EXIT 0** · `e2e/next-console-smoke` + `e2e/theme-visual` **15 passed** ·
+`validate-theme-classes-resolve` **PASS** · the migration validator **3 of 14 failing, down from 5** (T3 · T6 · T9 —
+all the console's debt) · **two mutations proved the gates still bite, each restored byte-identical**: the record
+(`ede8b373…` → T2 FAIL → `fd769a5a…`) and a new literal site in the application (`bcc12a82…` → T2 + T3 FAIL →
+`d68c4f8f…`).
+
+**What remains.** **WAVE 3m**: migrate `src/next/**` onto its own declared `--color-next-*` tokens — shared primitives
+first, then the sweep — which is the ONLY way T3 · T6 · T9 can go green (the ceilings must not be raised). Plus the
+INK-metric decision, above.
+
+---
+## PREVIOUS STATUS — **§WAVE 3k — SUPERSEDED BY §WAVE 3l** (2026-11-25)
 
 **State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
 tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.

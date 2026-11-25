@@ -890,7 +890,14 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-21 grey=6/1 ink=468/97 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=1752/45 ink=483/98 literal=279/38**
+>
+> **Per-surface split, measured the same way in the same run (2026-11-25, WAVE 3l):** the APPLICATION
+> (`src/**` excluding `src/next/**`) holds **grey 6/1 · ink 483/98 · literal 0/0** — inside its recorded ceiling;
+> the CONSOLE (`src/next/**`) holds **grey 1746/44 · ink 0/0 · literal 279/38**, because it authors raw palette
+> classes while declaring its own `--color-next-*` tokens in `src/next/next.css` and using none of them. The
+> ceilings below are UNCHANGED and are not made to pass by this record: the measurement moved because the console
+> added those sites, and the record now states that rather than hiding it.
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -998,11 +1005,23 @@ Every row below was measured in this repository this session.
 >
 > **§MEASURED-BATCH10-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
 >
-> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-10-19 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
+> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-11-25 literal=279/38 border=0 text=53 bg=226 divide=0 ring=0 solid=0 tint=1 uncovered=279**
 >
 > **§DECISION-BATCH10-2-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
 >
 > **§MIGRATION COMPLETE (2026-10-19) — All 1,663 literal white/black class sites migrated to theme tokens. The force-patch block (§UI/UX WAVE 1 — LIGHT-SHELL TOKEN REMAP LAYER) has been DELETED from src/index.css as no literal sites remain. Ratchet ceilings updated to final measured figures (grey 2866/126, ink 974/117, literal 0/0).**
+>
+> **§CORRECTED 2026-11-25 (WAVE 3l) — THAT CLAIM WAS TRUE OF THE APPLICATION AND IS NOT TRUE OF THE WHOLE SUBJECT.** The
+> console (`src/next/**`, the AI Studio port, built in WAVES 2–3k during November 2026) declares its OWN design-token set
+> in `src/next/next.css` (`--color-next-canvas` · `--color-next-surface` · `--color-next-border` · `--color-next-ink` …)
+> and **uses none of it**: measured this session with the project's own method
+> (`node scripts/measure-legacy-classes.mjs`), the console authors **1,746 grey-family sites across 44 files** and
+> **279 literal `white`/`black` sites across 38 files** (`bg-white` 226 · `text-white` 53), while its ink-family usage is
+> **zero**. The application surface, measured the same way, holds **6 grey sites in 1 file** and **0 literal sites** — so
+> the application is inside its recorded ceiling and the console is what stands outside it. The force-patch block remains
+> deleted; **the console's own sites are the reason that is no longer safe to assume**, and the fix is named work:
+> migrate `src/next/**` onto its own declared `--color-next-*` tokens. **The migration is NOT complete for the whole
+> subject, and this document must not be read as saying it is.**
 >
 > **§SUB-BATCH 2 — THE COUNT WAS COUNTING PROSE, AND THAT IS FIXED AT SOURCE (2026-10-16).** The
 > first reader matched the **raw file text**, so a class NAMED IN A COMMENT counted as a call site.

@@ -104,11 +104,15 @@ function AppContent() {
         <Suspense fallback={FALLBACK}><AdminShell /></Suspense>
       )}
       {/* §NEW CONSOLE SWITCH (temporary) — the entry point to `src/next/` while it
-          is still incomplete. Removed when the new console becomes the default. */}
+          is still incomplete. Removed when the new console becomes the default.
+          §WAVE 3l — repointed off the raw palette onto the declared ladder
+          (`bg-surface` · `text-strong` · `border-hairline` · `hover:bg-surface-hover`),
+          so the button follows the chosen appearance instead of ignoring it. It was the
+          last literal-white site in the application surface. */}
       <button
         type="button"
         onClick={() => setConsoleMode('next')}
-        className="fixed bottom-4 right-4 z-50 px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-900 shadow-ds-subtle hover:bg-zinc-50"
+        className="fixed bottom-4 right-4 z-50 px-3 py-2 text-ds-label font-medium rounded-ds-md border border-hairline bg-surface text-strong shadow-ds-subtle hover:bg-surface-hover"
       >
         Open new console
       </button>
