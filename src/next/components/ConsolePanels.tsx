@@ -41,11 +41,20 @@ export interface PanelSpec {
 }
 
 export const TONE_TEXT: Record<string, string> = {
-  success: 'text-emerald-700',
-  warning: 'text-amber-700',
-  danger: 'text-red-700',
-  info: 'text-sky-700',
-  brass: 'text-amber-800',
+  /* §BATCH 8 DEFECT FIXED AT SOURCE (2026-11-25). These were `text-emerald-700`,
+     `text-amber-700`, `text-red-700`, `text-sky-700` and `text-amber-800`. After
+     the Tailwind 4 upgrade those palette families emit NO RULE in this project
+     (measured in the browser: a `text-emerald-700` element computed to #E8E8E8,
+     the inherited body colour), so every tone value silently lost its colour and
+     the ones on the console's light surfaces became INVISIBLE — the Partnerships
+     screen's "YES" answers measured 1.23:1. `ConsolePrimitives.tsx` was fixed the
+     same way in Wave 3; this file was missed. The console's own AA-safe state
+     colours are declared in `next.css` and are used here instead. */
+  success: 'text-state-success',
+  warning: 'text-state-warning',
+  danger: 'text-state-danger',
+  info: 'text-state-info',
+  brass: 'text-accent',
   neutral: 'text-secondary',
 };
 

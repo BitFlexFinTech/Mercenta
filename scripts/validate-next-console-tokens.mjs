@@ -114,6 +114,62 @@ test(
   leftovers.map((m) => m.was).join(', ')
 );
 
+/* §BATCH 8 (2026-11-25) — THE DEAD-PALETTE GUARD.
+ *
+ * WHY THIS EXISTS. The visual acceptance pass measured a real, visible defect that
+ * this gate's A/B/C assertions could not see: the Partnerships screen's "YES"
+ * answers rendered in #E8E8E8 on a #FAFAFA surface (1.23:1 — invisible). The class
+ * was `text-emerald-700`, and after the Tailwind 4 upgrade this project's palette
+ * families (`emerald`, `red`, `amber`, `sky`, …) emit NO RULE AT ALL, so the text
+ * silently inherited the body colour. A class that emits nothing cannot fail
+ * typecheck, the build or any browser test — the same defect class as the
+ * undeclared `text-strong` that C3 already guards.
+ *
+ * The console must therefore use its OWN declared tokens, never a literal Tailwind
+ * palette family. The state tones it needs are declared in `next.css`
+ * (`text-state-success` · `text-state-warning` · `text-state-danger` ·
+ * `text-state-info` · `text-accent`). */
+console.log('\n── E. the dead-palette guard ──\n');
+const PALETTE_FAMILIES =
+  'slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose';
+const PALETTE_SITE = new RegExp(
+  `(?<![\\w-])(?:text|bg|border|ring|from|to|via|fill|stroke)-(?:${PALETTE_FAMILIES})-\\d{2,3}(?![\\w-])`,
+  'g'
+);
+const paletteHits = [];
+/* Comments are stripped FIRST: a comment that names the class being removed must
+   never be counted as authoring it — the same rule `validate-nav-destinations`
+   applies to its own declaration scan. */
+const stripComments = (body) =>
+  body
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n')
+    .map((line) => line.replace(/\/\/.*$/, ''))
+    .join('\n');
+for (const file of codeFiles) {
+  const body = stripComments(readFileSync(file, 'utf8'));
+  for (const m of body.match(PALETTE_SITE) || []) {
+    paletteHits.push(`${file.replace(ROOT + '/', '')}: ${m}`);
+  }
+}
+test(
+  'E1 the console authors ZERO literal Tailwind palette-colour classes (they emit no rule here)',
+  paletteHits.length === 0,
+  paletteHits.slice(0, 8).join(' · ')
+);
+test(
+  'E2 the console declares the state tones the palette classes were replaced with',
+  ['text-state-success', 'text-state-warning', 'text-state-danger', 'text-state-info'].every((t) =>
+    new RegExp(`\\.mercenta-next \\.${t.replace('-', '\\-')}\\b`).test(CSS)
+  ),
+  'declared in next.css'
+);
+test(
+  'E3 the console code actually USES at least one declared state tone (the fix is real)',
+  /text-state-(success|warning|danger|info)/.test(allCode),
+  'state tone(s) found in code'
+);
+
 console.log('\n── D. zero network ──\n');
 test('D1 the whole run made zero live network calls', networkCalls === 0, `${networkCalls} call(s)`);
 

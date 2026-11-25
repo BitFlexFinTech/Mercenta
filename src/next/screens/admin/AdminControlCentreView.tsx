@@ -31,8 +31,12 @@ export interface AdminControlCentreViewProps {
 }
 
 const PRIORITY_TONE: Record<string, string> = {
-  urgent: 'text-red-700',
-  high: 'text-amber-700',
+  /* §BATCH 8 (2026-11-25) — `text-red-700` / `text-amber-700` emit NO RULE after
+     the Tailwind 4 upgrade (measured: the element computed to the inherited body
+     colour), so the priority of a queue item lost its colour. The console's own
+     AA-safe state colours are used instead. */
+  urgent: 'text-state-danger',
+  high: 'text-state-warning',
   normal: 'text-muted',
 };
 

@@ -825,7 +825,7 @@ export function BrandLogisticsView({
           <div className="border border-hairline bg-surface-raised rounded-ds-md p-4 space-y-3">
             <h2 className="text-ds-body font-semibold text-strong">How carriage is arranged</h2>
             <div className="space-y-1">
-              <div className="text-ds-label font-medium text-indigo-900">
+              <div className="text-ds-label font-medium text-state-info">
                 Freight Collect — Channel-arranged
               </div>
               <p className="text-ds-label text-muted">
@@ -1046,7 +1046,7 @@ export function BrandLogisticsView({
                   <div
                     className={`font-semibold ${
                       freightSemantics(selectedLeg.freightTerm)!.channelArranged
-                        ? 'text-indigo-900'
+                        ? 'text-state-info'
                         : 'text-accent'
                     }`}
                   >
@@ -1070,7 +1070,7 @@ export function BrandLogisticsView({
                 </p>
               )}
               {selectedLeg.channelArranged && (
-                <p className="text-indigo-900">Channel-arranged: Mercenta does not select this carrier.</p>
+                <p className="text-state-info">Channel-arranged: Mercenta does not select this carrier.</p>
               )}
               {selectedLeg.carrierValidationError && (
                 <p className="text-state-warning">{selectedLeg.carrierValidationError}</p>

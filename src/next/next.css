@@ -158,6 +158,15 @@
 .mercenta-next .text-state-info\/80 {
   color: #1d4ed8;
 }
+/* §BATCH 8 (2026-11-25) — the accent tint, declared rather than borrowed.
+   The console's selection cards used the legacy `bg-orange-50`, which resolved to
+   `color-mix(in srgb, var(--mr-accent) 8%, transparent)`. That name is one of the
+   families `tailwind.config.js` remaps to the brand hue, so it does not mean
+   "orange" here and is unreliable on the console's fixed light canvas. This token
+   holds the EXACT value the class already rendered, so the tint does not move. */
+.mercenta-next .bg-accent-tint {
+  background-color: color-mix(in srgb, var(--mr-accent) 8%, transparent);
+}
 .mercenta-next .bg-state-info\/10 {
   background-color: #eff6ff;
 }

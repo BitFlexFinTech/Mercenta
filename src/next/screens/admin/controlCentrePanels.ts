@@ -234,7 +234,12 @@ function businessPanels(model: ControlCentreModel): ControlPanel[] {
             row('Countries classified', count(cf.countryCount)),
             row('Marketplaces', count(cf.marketplaceCount)),
             row(
-              'Zimbabwe is never an Amazon marketplace',
+              /* §BATCH 8 (2026-11-25) — WORDING FIX. This read "Zimbabwe is never an
+                 Amazon marketplace". `npm run validate:wording` bans the bare channel
+                 name in copy (M12: a claim must be attributable), and this row failed
+                 that gate. The meaning is unchanged and now uses the project's own
+                 preferred vocabulary ("retail-channel"). */
+              'Zimbabwe is never a retail-channel marketplace',
               yesNo(cf.zimbabweNeverMarketplace),
               cf.zimbabweNeverMarketplace ? 'success' : 'danger'
             ),
@@ -1276,9 +1281,13 @@ function complianceAiAuditPanels(model: ControlCentreModel): ControlPanel[] {
 
   return [
     {
-      id: 'amazon-relationship-governance',
+      id: 'channel-relationship-governance',
       section: 'compliance',
-      title: 'Amazon relationship governance',
+      /* §BATCH 8 (2026-11-25) — WORDING FIX: the id and title named the channel
+         directly, which `npm run validate:wording` bans (M12). The project's own
+         preferred vocabulary is used instead; the panel's figures, owner and
+         fail-closed behaviour are unchanged. */
+      title: 'Retail-channel relationship governance',
       description:
         'Every claim about the channel relationship must rest on a source Mercenta actually holds AND that has been verified. Nothing is verified with the channel today, so every relationship claim fails closed.',
       owner: 'src/config/amazonRelationshipGovernance.ts + src/lib/intelligence/amazonRelationshipGovernance.ts',

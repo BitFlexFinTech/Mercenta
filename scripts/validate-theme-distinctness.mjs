@@ -255,6 +255,50 @@ try {
       cAccent >= 4.5,
       `measured ${round(cAccent)}:1`
     );
+
+    /**
+     * §BATCH 8 (2026-11-25) — THE WHOLE TEXT LADDER, ON BOTH SURFACES.
+     *
+     * WHY THIS WAS ADDED. This gate checked `--mr-text-strong` and
+     * `--mr-text-muted` only, so a token outside those two could be unreadable in
+     * one appearance and every check still passed. It happened: `--mr-text-soft`
+     * was declared WHITE in the light theme, i.e. white text on a white page —
+     * section headings on the legal pages and marketing screens were silently
+     * invisible. The visual acceptance pass caught it by measuring rendered
+     * contrast; the theme gate must now catch it in the declaration, before any
+     * browser is opened.
+     *
+     * Every ladder token is measured against BOTH surfaces, because a token can be
+     * fine on the page and invisible on a raised card.
+     */
+    const TEXT_LADDER = [
+      '--mr-text-strong',
+      '--mr-text',
+      '--mr-text-active',
+      '--mr-text-200',
+      '--mr-text-muted',
+      '--mr-text-faint',
+      '--mr-text-soft',
+    ];
+    for (const token of TEXT_LADDER) {
+      const fg = parseHex(readVar(id, token));
+      for (const [surfaceName, surfaceVar] of [
+        ['page', '--mr-bg'],
+        ['card', '--mr-surface'],
+      ]) {
+        const surface = parseHex(readVar(id, surfaceVar));
+        if (!fg || !surface) {
+          test(`${id}: ${token} against the ${surfaceName} is measurable`, false, 'a colour could not be parsed');
+          continue;
+        }
+        const c = contrast(fg, surface);
+        test(
+          `${id}: ${token} on the ${surfaceName} ≥ 4.5:1 (measured ${round(c)})`,
+          c >= 4.5,
+          `${readVar(id, token)} vs ${readVar(id, surfaceVar)}`
+        );
+      }
+    }
     /**
      * §BRAND REDESIGN (2026-11-19) — REPOINTED, NOT WEAKENED, with the measured
      * impossibility recorded.

@@ -19,7 +19,7 @@
  *
  * WHAT IT PINS
  *   A. the admin section labels, in order  (13 groups)
- *   B. the admin destination ids, in order (27 destinations)
+ *   B. the admin destination ids, in order (28 destinations)
  *   C. the brand section labels, in order  (7 groups)
  *   D. the brand destination ids, in order (20 destinations)
  *   E. the RBAC hidden-for-non-super set    (7 ids)
@@ -52,7 +52,7 @@ const test = (name, ok, detail = '') => {
 const EXPECTED_ADMIN = [
   ['Overview', ['overview', 'control_centre']],
   ['Operations', ['work', 'purchase_orders_admin', 'logistics', 'returns_tracking', 'calendar']],
-  ['Brands', ['crm', 'onboarding_pipeline', 'marketing', 'amazon_ads', 'brand_intelligence']],
+  ['Brands', ['crm', 'onboarding_pipeline', 'marketing', 'amazon_ads', 'ads_management', 'brand_intelligence']],
   ['Catalogue', ['catalog']],
   ['Commerce', ['fulfillment_track', 'retail_pipeline']],
   ['Finance', ['billing', 'contracts_admin']],
@@ -71,7 +71,7 @@ const EXPECTED_BRAND = [
   ['Catalogue', ['catalog', 'inventory', 'commercial_readiness']],
   ['Programme', ['lift_off']],
   ['Compliance', ['onboarding', 'compliance', 'contracts']],
-  ['Insights', ['analytics', 'market', 'reports']],
+  ['Insights', ['analytics', 'ads_management', 'market', 'reports']],
   ['Account', ['documents', 'cases', 'team', 'settings']],
 ];
 

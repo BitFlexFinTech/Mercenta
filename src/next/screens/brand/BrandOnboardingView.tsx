@@ -271,7 +271,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ category: cat })}
                       className={`px-2.5 py-1.5 rounded-ds-sm border text-left ${
                         profile.category === cat
-                          ? 'border-accent bg-orange-50 text-strong font-medium'
+                          ? 'border-accent bg-accent-tint text-strong font-medium'
                           : 'border-hairline bg-surface-raised text-secondary'
                       }`}
                     >
@@ -373,7 +373,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ commercialModel: id })}
                       className={`w-full text-left p-3 rounded-ds-sm border ${
                         selected
-                          ? 'border-accent bg-orange-50'
+                          ? 'border-accent bg-accent-tint'
                           : 'border-hairline bg-surface-raised hover:bg-surface'
                       }`}
                     >
@@ -423,7 +423,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ workingCapitalAnswer: ans })}
                       className={`px-3 py-1.5 rounded-ds-sm border capitalize ${
                         profile.workingCapitalAnswer === ans
-                          ? 'border-accent bg-orange-50 font-medium text-strong'
+                          ? 'border-accent bg-accent-tint font-medium text-strong'
                           : 'border-hairline bg-surface-raised text-secondary'
                       }`}
                     >
@@ -448,7 +448,7 @@ export function BrandOnboardingView({
                   onClick={() => onUpdateProfile({ fulfillmentTrack: track })}
                   className={`w-full text-left p-3 rounded-ds-sm border ${
                     profile.fulfillmentTrack === track
-                      ? 'border-accent bg-orange-50'
+                      ? 'border-accent bg-accent-tint'
                       : 'border-hairline bg-surface-raised'
                   }`}
                 >

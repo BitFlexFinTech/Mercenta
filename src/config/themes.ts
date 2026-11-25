@@ -318,7 +318,16 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
          BELOW the WCAG AA floor of 4.5:1 for the 11px labels that use it.
          #6B6B6B measures 5.33:1 on #FFFFFF and 4.85:1 on the #F4F4F2 surface. */
       '--mr-text-faint': '#6B6B6B',
-      '--mr-text-soft': BRAND_PALETTE.white,
+      /* §BATCH 8 DEFECT FIXED AT SOURCE (2026-11-25). This was `BRAND_PALETTE.white`
+         in the LIGHT block — white text on a white page, i.e. invisible. The
+         section headings on the legal pages and the marketing screens use
+         `text-soft`, so those headings rendered as blank gaps. The dark block
+         declares soft as WHITE (its strongest text), so the light block mirrors it
+         with BLACK, which is this appearance's strongest. Caught by
+         `scripts/visual-acceptance.mjs` (rendered contrast) and now pinned here by
+         `scripts/validate-theme-distinctness.mjs`, which measures every text token
+         against both the page and the card surface. */
+      '--mr-text-soft': BRAND_PALETTE.black,
       '--mr-accent': BRAND_PALETTE.orange,
       /* §BRAND IDENTITY — the 300/400 steps are used as TEXT (`text-brass-300`
          badge labels), not only as tints. On white the pale steps measured
