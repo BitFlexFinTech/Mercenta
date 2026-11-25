@@ -1,3 +1,4 @@
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 /**
  * §WAVE 3c (2026-11-25) — ADMIN Brand CRM (presentation).
  *
@@ -193,7 +194,7 @@ return (
               <div>
                 <dt className="text-ds-label text-zinc-500">Fulfilment track</dt>
                 <dd className="font-medium text-zinc-950">
-                  {selected.brand.track.replace(/_/g, ' ')}
+                  {fulfillmentTrackLabel(selected.brand.track)}
                 </dd>
               </div>
               <div>

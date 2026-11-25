@@ -1,3 +1,4 @@
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 /**
  * §WAVE 3c (2026-11-25) — ADMIN contract cycle (presentation).
  * Oversight of the paperwork: what each brand has signed, what is still moving and
@@ -142,7 +143,7 @@ export function AdminContractsView({
       hideOnMobile: true,
       render: (row) => (
         <span className="text-ds-label text-zinc-600">
-          {row.contract.fulfillmentTrack.replace(/_/g, ' ')}
+          {fulfillmentTrackLabel(row.contract.fulfillmentTrack)}
         </span>
       ),
     },
@@ -248,7 +249,7 @@ return (
               <div>
                 <dt className="text-ds-label text-zinc-500">Fulfilment track</dt>
                 <dd className="font-medium text-zinc-950">
-                  {selected.contract.fulfillmentTrack.replace(/_/g, ' ')}
+                  {fulfillmentTrackLabel(selected.contract.fulfillmentTrack)}
                 </dd>
               </div>
             </dl>

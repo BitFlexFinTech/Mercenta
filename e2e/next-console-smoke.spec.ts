@@ -61,6 +61,9 @@ test('admin session: the new console renders its admin surface', async ({ page }
     'Billing',
     'Brand CRM',
     'Contract Cycle',
+    'Global Catalog',
+    'Fulfillment Track',
+    'Marketing',
     'Ads Manager',
   ]) {
     await navButton(label).click();
@@ -75,10 +78,10 @@ test('admin session: the new console renders its admin surface', async ({ page }
   await navButton('Overview').click();
   await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
 
-  /* Then Billing, whose whole point is money, so the captured artefact shows real
-     amounts and not an empty shell. */
-  await navButton('Billing').click();
-  await expect(page.getByText('Commission accrued')).toBeVisible({ timeout: 20000 });
+  /* Then the fulfilment track, whose whole point is the score breakdown, so the
+     captured artefact shows the real arithmetic. */
+  await navButton('Fulfillment Track').click();
+  await expect(page.getByText('Brands scored')).toBeVisible({ timeout: 20000 });
 
   await page.screenshot({ path: 'test-results/next-console-admin.png', fullPage: true });
   expect(pageErrors).toEqual([]);

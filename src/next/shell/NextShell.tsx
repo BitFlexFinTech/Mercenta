@@ -52,6 +52,10 @@ import { AdminReturnsScreen } from '@/next/screens/admin/AdminReturnsScreen';
 import { AdminBillingScreen } from '@/next/screens/admin/AdminBillingScreen';
 import { AdminContractsScreen } from '@/next/screens/admin/AdminContractsScreen';
 import { AdminCrmScreen } from '@/next/screens/admin/AdminCrmScreen';
+/* §WAVE 3d (2026-11-25) — catalogue, fulfilment track and marketing. */
+import { AdminCatalogScreen } from '@/next/screens/admin/AdminCatalogScreen';
+import { AdminFulfillmentScreen } from '@/next/screens/admin/AdminFulfillmentScreen';
+import { AdminMarketingScreen } from '@/next/screens/admin/AdminMarketingScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -348,6 +352,16 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'contracts_admin') {
         return <AdminContractsScreen />;
+      }
+      /* §WAVE 3d — catalogue, fulfilment and marketing. */
+      if (activeViewId === 'catalog') {
+        return <AdminCatalogScreen />;
+      }
+      if (activeViewId === 'fulfillment_track') {
+        return <AdminFulfillmentScreen />;
+      }
+      if (activeViewId === 'marketing') {
+        return <AdminMarketingScreen />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and

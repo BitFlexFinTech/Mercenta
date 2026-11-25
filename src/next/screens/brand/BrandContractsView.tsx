@@ -1,3 +1,4 @@
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { Download, Eye } from 'lucide-react';
 import {
   ConsoleTable,
@@ -57,7 +58,7 @@ export function BrandContractsView({
       header: 'Track',
       hideOnMobile: true,
       render: (c) => (
-        <span className="capitalize text-zinc-700">{c.fulfillmentTrack.replace(/_/g, ' ')}</span>
+        <span className="capitalize text-zinc-700">{fulfillmentTrackLabel(c.fulfillmentTrack)}</span>
       ),
     },
     {
@@ -149,7 +150,7 @@ export function BrandContractsView({
         }
         subtitle={
           viewingContract
-            ? `Clause set: ${viewingContract.fulfillmentTrack.replace(/_/g, ' ')}`
+            ? `Clause set: ${fulfillmentTrackLabel(viewingContract.fulfillmentTrack)}`
             : undefined
         }
         footer={

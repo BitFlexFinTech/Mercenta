@@ -174,7 +174,7 @@ export function BrandOnboardingView({
               <div className="py-2 flex items-center justify-between gap-4">
                 <dt className="text-zinc-500">Assigned Track</dt>
                 <dd className="font-medium text-zinc-950 capitalize">
-                  {profile.fulfillmentTrack.replace(/_/g, ' ')}
+                  {fulfillmentTrackLabel(profile.fulfillmentTrack)}
                 </dd>
               </div>
               <div className="py-2 flex items-center justify-between gap-4">

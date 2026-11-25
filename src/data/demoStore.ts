@@ -1726,12 +1726,33 @@ export function applyListingReviewOverrides(
   return { ...analysis, recommendations };
 }
 
-/** §5 scores — deterministic spread incl. borderline band and low scores. */
-const SCORE_TOTALS = [88, 62, 45, 79, 71, 92, 38, 84, 58, 96, 73];
+/**
+ * §5 scores — deterministic spread incl. borderline band and low scores.
+ *
+ * §WAVE 3d FIX (2026-11-25) — A REAL DEFECT FIXED AT SOURCE.
+ *
+ * Before this, ONE list fed every brand (`[88, 62, 45, 79, …]`) while `track` was
+ * copied from the brand row, and the two were chosen independently — so they
+ * contradicted each other. Measured on the rendered screen: Astonish scored **88
+ * and showed "financed"**, Le Creuset scored **45 and showed "direct
+ * fulfilment"**. `FulfillmentScore` documents the rule (the track is auto-assigned
+ * at totalScore >= 65) and `recalculateAllScores` implements it, but the seed went
+ * through neither.
+ *
+ * The brand's declared track is the value other features and specs rely on, so the
+ * SCORE is made consistent with it: a direct-fulfilment brand draws from totals at
+ * or above the threshold, a financed brand from totals below it. The spread and the
+ * borderline band (66 / 64) are preserved, and
+ * `scripts/validate-fulfillment-track-consistency.mjs` fails if the two drift apart
+ * again.
+ */
+const DIRECT_SCORE_TOTALS = [88, 79, 71, 92, 84, 96, 73, 66];
+const FINANCED_SCORE_TOTALS = [45, 62, 58, 38, 51, 64];
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 export const demoFulfillmentScores = ALL_DEMO_BRANDS.map((b, i) => {
-  const T = SCORE_TOTALS[i % SCORE_TOTALS.length];
+  const pool = b.track === 'direct_fulfillment' ? DIRECT_SCORE_TOTALS : FINANCED_SCORE_TOTALS;
+  const T = pool[i % pool.length];
   let th = clamp(Math.round(T * 0.25), 0, 20);
   const ee = clamp(Math.round(T * 0.15), 0, 15);
   const sc = clamp(Math.round(T * 0.25), 0, 20);

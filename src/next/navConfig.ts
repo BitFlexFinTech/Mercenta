@@ -70,7 +70,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
 
   { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: true },
   { id: 'onboarding_pipeline', label: 'Onboarding', group: 'Brands & Growth', implemented: false },
-  { id: 'marketing', label: 'Marketing', group: 'Brands & Growth', implemented: false },
+  { id: 'marketing', label: 'Marketing', group: 'Brands & Growth', implemented: true },
   {
     id: 'ads_management',
     label: 'Ads Manager',
@@ -93,8 +93,8 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     superAdminOnly: true,
   },
 
-  { id: 'catalog', label: 'Global Catalog', group: 'Catalogue & Commerce', implemented: false },
-  { id: 'fulfillment_track', label: 'Fulfillment Track', group: 'Catalogue & Commerce', implemented: false },
+  { id: 'catalog', label: 'Global Catalog', group: 'Catalogue & Commerce', implemented: true },
+  { id: 'fulfillment_track', label: 'Fulfillment Track', group: 'Catalogue & Commerce', implemented: true },
   { id: 'retail_pipeline', label: 'Retail Pipeline', group: 'Catalogue & Commerce', implemented: false },
 
   { id: 'billing', label: 'Billing', group: 'Finance & Legal', implemented: true },
