@@ -11903,4 +11903,27 @@ xero.spec.ts: 5 tests — requires running dev server
 
 | | **Margaret bot created on Rakazo** | ✅ **DONE** | New bot "Margaret" (UK Accountant / Financial Controller) created. Routine "Daily Financial Report" 6:30am weekdays. Penny Pincher instructions updated with coordination note. DEMO_MODE.md updated (20 bots). Test run completed with sample output. |
 | | **§Rakazo Iframe — Super Admin panel** | ✅ **DONE** | Rakazo tab added to SuperAdminPanel.tsx. RakazoPanel.tsx with iframe (sslip.io), loading/error states, status dot, Open in new tab/Refresh/Retry. URL fixed from raw IP to sslip.io for SSL. E2E spec `e2e/rakazo.spec.ts` (3 tests). |
-| | **§Namecheap FTP Deploy** | ✅ **DONE** | `scripts/deploy-demo.sh` created (build + lftp mirror to Namecheap). `.env` FTP vars added. `protection-rules.md` deployment rules added. Deployed and verified live at https://demo.mercenta.co.uk (HTTP 200). |\n
+| | **§Namecheap FTP Deploy** | ✅ **DONE** | `scripts/deploy-demo.sh` created (build + lftp mirror to Namecheap). `.env` FTP vars added. `protection-rules.md` deployment rules added. Deployed and verified live at https://demo.mercenta.co.uk (HTTP 200). |
+
+## §SESSION PROCESS NOTE (2026-11-25) — one commit swept up work that was not mine
+
+**What happened.** Commit `192df44` (WAVE 3g) ran `git add src/types.ts` on a path that was ALSO
+carrying the owner's own uncommitted work. That commit's diff for the file is **78 insertions**: my
+17-line `OperatingVertical` block, and **61 lines of the owner's `CreativeAsset` /
+`CreativeAssetFormat` / `CreativeAssetStatus` / `CreativeValidationResult` /
+`CreativeValidationCheck` types**, which were still work in progress.
+
+**Impact: none, with the evidence rather than an assurance.** Nothing was lost — the owner's types are
+now safely committed rather than sitting in a working tree, and the components that use them
+(`src/components/ads/AdsManagement.tsx`) remain untracked exactly as before, so the next commit of that
+work will show only the components. The other shared path, `src/data/demoData.ts`, was checked the same
+way and is **clean**: each of its 16 inserted lines is mine (the vertical field, its comment, and four
+brand literals re-added carrying the field).
+
+**The rule this adds for every future session here.** Never `git add` a whole shared file. When a path
+is dirty with work that is not mine, stage **only my own hunks** (`git add -p`, or a patch filter), or
+commit it separately with the reason recorded. A wholesale add is how one person's unfinished work ends up
+inside another person's commit, leaving the owner unable to tell which commit to look at.
+
+**Recorded, not rewritten** — repairing it would mean rewriting committed history, which this project
+forbids. It is written here so the next session reads it instead of rediscovering it.
