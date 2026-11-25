@@ -174,7 +174,7 @@ export const CORE_BRAND_ITEMS: NavItemDef[] = [
   { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: true },
   { id: 'returns', label: 'Returns', group: 'Operations', implemented: true },
   { id: 'work', label: 'Tasks & Deadlines', group: 'Operations', implemented: true },
-  { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
+  { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: true },
 
   { id: 'catalog', label: 'Product Catalog', group: 'Catalogue', implemented: true },
   { id: 'inventory', label: 'Inventory', group: 'Catalogue', implemented: true },
@@ -194,7 +194,7 @@ export const CORE_BRAND_ITEMS: NavItemDef[] = [
   { id: 'documents', label: 'Documents & Account', group: 'Account', implemented: true },
   { id: 'cases', label: 'Support & Cases', group: 'Account', implemented: false },
   { id: 'team', label: 'Support & Team', group: 'Account', implemented: false },
-  { id: 'settings', label: 'Settings', group: 'Account', implemented: false },
+  { id: 'settings', label: 'Settings', group: 'Account', implemented: true },
 ];
 
 /**

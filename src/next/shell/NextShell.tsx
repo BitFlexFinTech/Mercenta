@@ -40,6 +40,10 @@ import { BrandOverviewScreen } from '@/next/screens/brand/BrandOverviewScreen';
 import { BrandReportsScreen } from '@/next/screens/brand/BrandReportsScreen';
 import { BrandReturnsScreen } from '@/next/screens/brand/BrandReturnsScreen';
 import { WorkWorkspaceScreen } from '@/next/screens/shared/WorkWorkspaceScreen';
+/* §WAVE 3h (2026-11-25) — the deadline calendar, built on the work layer's own
+   derivation. */
+import { BrandCalendarScreen } from '@/next/screens/brand/BrandCalendarScreen';
+import { BrandSettingsScreen } from '@/next/screens/brand/BrandSettingsScreen';
 /* §WAVE 3 (2026-11-25) — the ADMIN operational core. Before this the Operations
    Console rendered placeholders for every view except the Ads Manager. */
 import { AdminLogisticsScreen } from '@/next/screens/admin/AdminLogisticsScreen';
@@ -320,6 +324,14 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'documents') {
         return <BrandDocumentsScreen />;
+      }
+      /* §WAVE 3h — the deadline calendar the work layer derives. */
+      if (activeViewId === 'calendar') {
+        return <BrandCalendarScreen />;
+      }
+      /* §WAVE 3h — settings: the brand's own record, and the change requests it owns. */
+      if (activeViewId === 'settings') {
+        return <BrandSettingsScreen />;
       }
     }
 

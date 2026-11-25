@@ -125,6 +125,8 @@ test('every mounted brand view renders and none falls back to the Phase 4-6 plac
     'Advertising',
     'Reports',
     'Documents & Account',
+    'Calendar',
+    'Settings',
   ];
 
   for (const label of mountedViews) {
