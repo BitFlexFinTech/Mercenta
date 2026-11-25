@@ -34,6 +34,10 @@ import type {
   AdCampaignStatus,
   AdSpendRecommendation,
   AdSpendBudget,
+  CreativeAsset,
+  CreativeAssetFormat,
+  CreativeAssetStatus,
+  CreativeAssetUpdate,
   ListingRecommendation,
   ListingReviewStatus,
   InventoryMovement,
@@ -1541,6 +1545,111 @@ export function campaignsForBrand(brandId: string): AdCampaign[] {
 export function recommendationsForBrand(brandId: string): AdSpendRecommendation[] {
   return demoAdSpendRecommendations.filter((r) => r.brandId === brandId);
 }
+
+
+
+export const demoCreativeAssets: CreativeAsset[] = [];
+
+/** Get all creative assets (admin view). */
+export function getCreativeAssets(): CreativeAsset[] {
+  return [...demoCreativeAssets];
+}
+
+/** Get creative assets for a specific brand. */
+export function creativeAssetsForBrand(brandId: string): CreativeAsset[] {
+  return demoCreativeAssets.filter((a) => a.brandId === brandId);
+}
+
+/** Get creative assets for a specific campaign. */
+export function creativeAssetsForCampaign(campaignId: string): CreativeAsset[] {
+  return demoCreativeAssets.filter((a) => a.campaignId === campaignId);
+}
+
+/** Create a new creative asset. */
+export function createCreativeAsset(input: {
+  brandId: string;
+  campaignId?: string;
+  formatId: CreativeAssetFormat;
+  name: string;
+  headline?: string;
+  productSku?: string;
+  logoUrl?: string;
+  mediaUrl?: string;
+  mediaType: 'image' | 'video';
+  ctaText?: string;
+  createdBy: string;
+}): CreativeAsset {
+  const id = 'ca-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const now = new Date().toISOString();
+  const asset: CreativeAsset = {
+    id,
+    brandId: input.brandId,
+    campaignId: input.campaignId,
+    formatId: input.formatId,
+    name: input.name,
+    headline: input.headline,
+    productSku: input.productSku,
+    logoUrl: input.logoUrl,
+    mediaUrl: input.mediaUrl,
+    mediaType: input.mediaType,
+    ctaText: input.ctaText,
+    status: 'draft',
+    validationResult: undefined,
+    amazonCreativeId: undefined,
+    submittedAt: undefined,
+    approvedAt: undefined,
+    createdBy: input.createdBy,
+    createdAt: now,
+    updatedBy: undefined,
+    updatedAt: undefined,
+    sourceLabel: 'simulated_seed',
+  };
+  demoCreativeAssets.push(asset);
+  notifyCanonicalStoreChange();
+  return asset;
+}
+
+/** Update a creative asset. */
+export function updateCreativeAsset(id: string, updates: CreativeAssetUpdate, actorId: string): CreativeAsset | undefined {
+  const idx = demoCreativeAssets.findIndex((a) => a.id === id);
+  if (idx === -1) return undefined;
+  demoCreativeAssets[idx] = {
+    ...demoCreativeAssets[idx],
+    ...updates,
+    updatedBy: actorId,
+    updatedAt: new Date().toISOString(),
+  };
+  notifyCanonicalStoreChange();
+  return demoCreativeAssets[idx];
+}
+
+/** Delete a creative asset. */
+export function deleteCreativeAsset(id: string, actorId: string): boolean {
+  const idx = demoCreativeAssets.findIndex((a) => a.id === id);
+  if (idx === -1) return false;
+  demoCreativeAssets.splice(idx, 1);
+  notifyCanonicalStoreChange();
+  return true;
+}
+
+/** Submit a creative asset for Amazon moderation (mock). */
+export function submitCreativeAsset(id: string, actorId: string): CreativeAsset | undefined {
+  const asset = updateCreativeAsset(id, {
+    status: 'submitted_to_amazon',
+    submittedAt: new Date().toISOString(),
+  }, actorId);
+  if (!asset) return undefined;
+  setTimeout(() => {
+    const approved = Math.random() > 0.3;
+    updateCreativeAsset(id, {
+      status: approved ? 'amazon_approved' : 'amazon_rejected',
+      approvedAt: approved ? new Date().toISOString() : undefined,
+      amazonCreativeId: approved ? 'amz-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) : undefined,
+    }, 'system');
+  }, 2000);
+  return asset;
+}
+
 
 /**
  * Manual monthly-budget input. Attributed + audited. A brand with no seed

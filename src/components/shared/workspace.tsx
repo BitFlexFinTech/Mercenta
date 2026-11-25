@@ -28,6 +28,8 @@ import { DOMAIN_COLOURS, type PaletteDomain } from '@/config/themes';
 import { StatusBadge, Skeleton, type StatusTone } from '@/components/ui';
 import { ArrowRight, X } from 'lucide-react';
 
+export { StatusBadge } from '@/components/ui';
+
 /* ── FRAME ─────────────────────────────────────────────────────────────── */
 
 /**

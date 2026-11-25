@@ -222,8 +222,23 @@ if (recorded) {
  * §UPDATED 2026-11-25 (WAVE 3m) — THE CONSOLE IS NOW MIGRATED, SO THE PARAGRAPH ABOVE IS HISTORY. All 1,746 grey
  * and 279 literal sites in `src/next/**` were repointed onto the console's own declared classes (values identical,
  * so nothing moved), and `scripts/validate-next-console-tokens.mjs` now makes that permanent. The whole subject
- * measures grey 6/1 · ink 912/136 · literal 0/0: **grey and literal are AT their ceilings** and the only remaining
- * failure of T3 is the INK arm — which this family's own definition (below) makes unreachable by migration.
+ * measured grey 6/1 · ink 912/136 · literal 0/0, and the only failure of T3 was the INK arm — which the family's
+ * own definition made unreachable by migration.
+ *
+ * §REPOINTED 2026-11-25 (rule 10; the recorded decision applied) — T3 PASSES NOW, AND THE REASON IS REVIEWABLE.
+ * The `ink` family was `ink-N | surface-* | brass-N`, and `surface-*` is the migration's DESTINATION, so the arm
+ * could only GROW as the migration succeeded. The Owner's recorded decision — count only the genuinely old names,
+ * leave the LIMIT untouched — has been applied in `scripts/measure-legacy-classes.mjs`: the family is now
+ * `ink-N | brass-N`, which is what the metric always claimed to measure.
+ *
+ *   · measured after the repoint: grey 6/1 · ink 127/29 · literal 0/0
+ *     (application grey 6/1 · ink 14/2 · literal 0/0; console grey 0/0 · ink 113/27 · literal 0/0).
+ *
+ * THE CEILING IS DELIBERATELY LEFT AT 468, AND THIS IS NOT A LOOSENING — it was already 468, and the decision was
+ * explicitly to leave the LIMIT alone rather than move it. What changed is WHAT IS COUNTED. Stated plainly rather
+ * than hidden: the ink arm now has 341 sites of headroom (127 measured against 468), so it is a LOOSE ratchet for
+ * this one family; lowering it to the measured 127 is a one-line tightening a later batch may take, and it is not
+ * taken here because the Owner's decision was to leave the limit untouched.
  */
 const CEILING = { grey: 6, ink: 468, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (

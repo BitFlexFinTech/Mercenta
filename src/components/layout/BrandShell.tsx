@@ -41,6 +41,7 @@ const BrandTeamMessages = lazy(() => import('@/components/brand/BrandTeamMessage
 const BrandIntelligence = lazy(() => import('@/components/brand/BrandIntelligence').then((m) => ({ default: m.BrandIntelligence })));
 const CommercialReadiness = lazy(() => import('@/components/brand/CommercialReadiness').then((m) => ({ default: m.CommercialReadiness })));
 const BrandAdvertising = lazy(() => import('@/components/brand/BrandAdvertising').then((m) => ({ default: m.BrandAdvertising })));
+const AdsManagement = lazy(() => import('@/components/ads/AdsManagement').then((m) => ({ default: m.AdsManagement })));
 const ListingAnalyzer = lazy(() => import('@/components/brand/ListingAnalyzer').then((m) => ({ default: m.ListingAnalyzer })));
 const SalesEstimatorCard = lazy(() => import('@/components/brand/SalesEstimatorCard').then((m) => ({ default: m.SalesEstimatorCard })));
 const LiftOffProgramme = lazy(() => import('@/components/brand/LiftOffProgramme').then((m) => ({ default: m.LiftOffProgramme })));
@@ -53,7 +54,7 @@ import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Settings,
   MessageSquare, ScrollText, ListChecks, CalendarDays, ClipboardCheck,
-  Boxes, Zap,
+  Boxes, Zap, Palette,
 } from 'lucide-react';
 
 const BRAND_SECTIONS = [
@@ -119,6 +120,7 @@ const BRAND_SECTIONS = [
     label: 'Insights',
     items: [
       { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
+      { id: 'ads_management', label: 'Ads Management', icon: <Palette className="w-4 h-4" /> },
       { id: 'market', label: 'Market Intel', icon: <BarChart3 className="w-4 h-4" /> },
       { id: 'reports', label: 'Reports', icon: <BarChart3 className="w-4 h-4" /> },
     ],
@@ -220,6 +222,7 @@ export default function BrandShell() {
     : brandView === 'team' ? 'Support & Team'
     : brandView === 'cases' ? 'Support & Cases'
     : brandView === 'market' ? 'Market Intelligence'
+    : brandView === 'ads_management' ? 'Ads Management'
     : brandView === 'settings' ? 'Settings'
     : brandView === 'work' ? 'Tasks & Deadlines'
     : brandView === 'calendar' ? 'Your Calendar'
@@ -262,6 +265,7 @@ export default function BrandShell() {
             {/* §Brief §6 — the brand's own case surface (Mercenta-mediated). */}
             {brandView === 'cases' && <BrandSupport />}
             {brandView === 'lift_off' && <LiftOffProgramme />}
+            {brandView === 'ads_management' && <AdsManagement />}
             {brandView === 'market' && (
               <div className="space-y-4">
                 <BrandIntelligence />

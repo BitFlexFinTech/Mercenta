@@ -10,6 +10,7 @@
  * or demoStore fixtures directly.
  */
 import { supabase } from '@/lib/supabase';
+import type { CreativeAsset, CreativeAssetFormat, CreativeAssetUpdate } from '@/types';
 /**
  * §P1 — THE ONE SWITCH. The seed fallback is DEMO-ONLY: in `live` this returns
  * an empty array, so a live platform can never serve a fake row. The decision
@@ -154,6 +155,14 @@ import {
   ensureDistributionAgreement as storeEnsureDistributionAgreement,
   demoAdCampaigns,
   demoAdSpendRecommendations,
+  demoCreativeAssets,
+  createCreativeAsset,
+  updateCreativeAsset,
+  deleteCreativeAsset,
+  submitCreativeAsset,
+  getCreativeAssets,
+  creativeAssetsForBrand,
+  creativeAssetsForCampaign,
   setAdSpendBudgetForBrand as storeSetAdSpendBudgetForBrand,
   reviewAdSpendRecommendation as storeReviewAdSpendRecommendation,
   setListingRecommendationReview as storeSetListingRecommendationReview,
@@ -3464,3 +3473,139 @@ export async function pushProductInventoryToChannel(input: {
     ...(input.unitOfMeasure ? { unitOfMeasure: input.unitOfMeasure } : {}),
   });
 }
+
+/* â€“ §Advertising — Creative Assets (simulation) —————— */
+
+export function fetchCreativeAssets() {
+  return queryOrSeed<CreativeAsset>('creative_assets', demoCreativeAssets);
+}
+
+/**
+ * §CREATIVE ASSETS (2026-11-25) — camelCase (the app's shape) → the table's own
+ * snake_case columns. One map, used by the update path only, so a field can never
+ * be written under a name `creative_assets` does not have.
+ */
+const CREATIVE_ASSET_COLUMNS: Record<keyof CreativeAssetUpdate, string> = {
+  campaignId: 'campaign_id',
+  formatId: 'format_id',
+  name: 'name',
+  headline: 'headline',
+  productSku: 'product_sku',
+  logoUrl: 'logo_url',
+  mediaUrl: 'media_url',
+  mediaType: 'media_type',
+  ctaText: 'cta_text',
+  status: 'status',
+  validationResult: 'validation_result',
+  amazonCreativeId: 'amazon_creative_id',
+  submittedAt: 'submitted_at',
+  approvedAt: 'approved_at',
+};
+
+export async function createCreativeAssetAPI(
+  input: {
+    brandId: string;
+    campaignId?: string;
+    formatId: CreativeAssetFormat;
+    name: string;
+    headline?: string;
+    productSku?: string;
+    logoUrl?: string;
+    mediaUrl?: string;
+    mediaType: 'image' | 'video';
+    ctaText?: string;
+    createdBy: string;
+  }
+): Promise<{ ok: boolean; asset?: CreativeAsset; error?: string }> {
+  const asset = createCreativeAsset(input);
+  if (asset == null) return { ok: false, error: 'Failed to create creative asset' };
+  if (supabase) {
+    const { error } = await supabase
+      .from('creative_assets')
+      .insert({
+        id: asset.id,
+        brand_id: asset.brandId,
+        campaign_id: asset.campaignId,
+        format_id: asset.formatId,
+        name: asset.name,
+        headline: asset.headline,
+        product_sku: asset.productSku,
+        logo_url: asset.logoUrl,
+        media_url: asset.mediaUrl,
+        media_type: asset.mediaType,
+        cta_text: asset.ctaText,
+        status: asset.status,
+        source_label: asset.sourceLabel,
+        created_by: asset.createdBy,
+        created_at: asset.createdAt,
+      });
+    if (error) console.warn('[api] Supabase write failed for creative_assets, using demo fallback:', error.message);
+  }
+  return { ok: true, asset };
+}
+
+export async function updateCreativeAssetAPI(
+  id: string,
+  updates: CreativeAssetUpdate,
+  actorId: string
+): Promise<{ ok: boolean; asset?: CreativeAsset; error?: string }> {
+  const asset = updateCreativeAsset(id, updates, actorId);
+  if (asset == null) return { ok: false, error: 'Creative asset not found' };
+  if (supabase) {
+    /* §CREATIVE ASSETS (2026-11-25) — THE COLUMN MAP, SO A FIELD CANNOT BE LOST.
+       This write used to spread `updates` straight into the table. The store holds
+       camelCase (`campaignId`, `productSku`, …) and the table is snake_case, so
+       PostgREST silently ignored every such key — the write reported success and
+       changed nothing. The map below is the ONLY translation between the two
+       shapes, and a key with no column is DROPPED rather than sent under a name
+       the table does not have. */
+    const row: Record<string, unknown> = {
+      updated_by: actorId,
+      updated_at: new Date().toISOString(),
+    };
+    for (const [key, value] of Object.entries(updates)) {
+      const column = CREATIVE_ASSET_COLUMNS[key as keyof CreativeAssetUpdate];
+      if (column) row[column] = value;
+    }
+    const { error } = await supabase.from('creative_assets').update(row).eq('id', id);
+    if (error) console.warn('[api] Supabase write failed for creative_assets, using demo fallback:', error.message);
+  }
+  return { ok: true, asset };
+}
+
+export async function deleteCreativeAssetAPI(
+  id: string,
+  actorId: string
+): Promise<{ ok: boolean; error?: string }> {
+  const result = deleteCreativeAsset(id, actorId);
+  if (result == false) return { ok: false, error: 'Creative asset not found' };
+  if (supabase) {
+    const { error } = await supabase
+      .from('creative_assets')
+      .delete()
+      .eq('id', id);
+    if (error) console.warn('[api] Supabase write failed for creative_assets, using demo fallback:', error.message);
+  }
+  return { ok: true };
+}
+
+export async function submitCreativeAssetAPI(
+  id: string,
+  actorId: string
+): Promise<{ ok: boolean; asset?: CreativeAsset; error?: string }> {
+  const asset = submitCreativeAsset(id, actorId);
+  if (asset == null) return { ok: false, error: 'Creative asset not found' };
+  if (supabase) {
+    const { error } = await supabase
+      .from('creative_assets')
+      .update({
+        status: asset.status,
+        submitted_at: asset.submittedAt,
+      })
+      .eq('id', id);
+    if (error) console.warn('[api] Supabase write failed for creative_assets, using demo fallback:', error.message);
+  }
+  return { ok: true, asset };
+}
+
+

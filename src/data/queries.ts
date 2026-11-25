@@ -9,6 +9,7 @@ import {
   fetchAdSpendBudgets,
   fetchAdCampaigns,
   fetchAdSpendRecommendations,
+  fetchCreativeAssets,
   fetchBrands,
   fetchCommissions,
   fetchComplianceDocuments,
@@ -128,6 +129,17 @@ export function useAdSpendRecommendations() {
     staleTime: STALE_TIME,
   });
 }
+
+
+export function useCreativeAssets(brandId?: string, campaignId?: string) {
+  return useQuery({
+    queryKey: ['creative-assets', brandId, campaignId],
+    queryFn: () => fetchCreativeAssets(),
+    staleTime: STALE_TIME,
+  });
+}
+
+
 
 /* ── §Batch-4 — Paginated list hooks ─────────────────────────────── */
 

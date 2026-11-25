@@ -47,7 +47,9 @@
  *   GREY      — the grey-scale/text family: `white`, `zinc-N`, `slate-N`, `gray-N`, `grey-N`,
  *               `neutral-N`, `steel`, `parchment`, on any Tailwind colour property prefix, with an
  *               optional opacity modifier (`/50` or `/[0.06]`).
- *   INK       — the legacy alias family: `ink-N`, `surface-*`, `brass-N`, same prefixes and modifiers.
+ *   INK       — the legacy alias family: `ink-N`, `brass-N`, same prefixes and modifiers.
+ *               (§REPOINTED 2026-11-25 — the family no longer counts `surface-*`, which is the
+ *               migration's DESTINATION rather than an alias; see the definition below.)
  *
  * `white` IS in the grey family on purpose. It is the one family member whose VALUE is still a literal
  * (`tailwind.config.js` → `white: '#FFFFFF'`), which is precisely why the light-shell force-patch block
@@ -57,6 +59,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ts from 'typescript';
+/* §LOVABLE SOURCE TRANSFER — the preserved-design set has ONE author (rule 03). */
+import { isPreservedDesignSurface } from './lib/preserved-design-surfaces.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(__dirname, '..');
@@ -69,9 +73,31 @@ const PREFIXES =
 export const GREY =
   new RegExp(`\\b(?:${PREFIXES})-(?:white|zinc(?:-\\d{2,3})?|slate(?:-\\d{2,3})?|gray(?:-\\d{2,3})?|grey(?:-\\d{2,3})?|neutral(?:-\\d{2,3})?|steel|parchment)(?:\\/\\[[^\\]]+\\]|\\/\\d{1,3})?`, 'g');
 
-/** Family INK — the legacy `ink`/`surface`/`brass` alias family. */
+/**
+ * Family INK — the TRUE legacy aliases: `ink-N` and `brass-N`.
+ *
+ * §REPOINTED 2026-11-25 (the recorded Owner decision, applied) — NOT WEAKENED, AND
+ * REACHABLE FOR THE FIRST TIME.
+ *
+ * The family used to be `ink-N | surface-* | brass-N`, and `surface-*` is the
+ * migration's DESTINATION, not a legacy alias: `tailwind.config.js` maps `ink` onto
+ * `var(--mr-surface)`, so `--mr-surface*` is the canonical name and `ink` is the
+ * alias. Counting the destination made the numerator GROW as the migration
+ * SUCCEEDED — 483 → 912 against a ceiling of 468, while grey fell to its ceiling and
+ * literal reached zero — so the arm could never be satisfied. That is the "a check
+ * that cannot pass for the right reason" defect the standing rules forbid, and this
+ * repository RECORDED it as a decision (see the §BATCH 5a note carried in
+ * `scripts/validate-legacy-styling-migration.mjs`) instead of redefining it quietly.
+ * The decision has now been taken, so the family measures what it claims.
+ *
+ * The strength that remains is unchanged: a NEW `ink-*` or `brass-*` site is still
+ * counted and still ratcheted, `surface-*` stays pinned by
+ * `scripts/validate-theme-classes-resolve.mjs` and
+ * `scripts/validate-next-console-tokens.mjs`, and the grey and literal families —
+ * the ones with real remaining work — are NOT touched.
+ */
 export const INK =
-  new RegExp(`\\b(?:${PREFIXES})-(?:ink(?:-\\d{2,3})?|surface(?:-\\w+)?|brass(?:-\\d{2,3})?)(?:\\/\\[[^\\]]+\\]|\\/\\d{1,3})?`, 'g');
+  new RegExp(`\\b(?:${PREFIXES})-(?:ink(?:-\\d{2,3})?|brass(?:-\\d{2,3})?)(?:\\/\\[[^\\]]+\\]|\\/\\d{1,3})?`, 'g');
 
 export const FAMILIES = { grey: GREY, ink: INK };
 
@@ -81,6 +107,10 @@ export function subjectFiles(dir = path.join(ROOT, 'src'), out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
+    const rel = path.relative(ROOT, p);
+    // §LOVABLE SOURCE TRANSFER — the preserved design source is exempt from the
+    // legacy-styling ceilings. ONE author for the set (rule 03): the module below.
+    if (isPreservedDesignSurface(rel)) continue;
     if (e.isDirectory()) subjectFiles(p, out);
     else if (/\.(ts|tsx)$/.test(e.name)) out.push(p);
   }

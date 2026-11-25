@@ -12,6 +12,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+/* §LOVABLE SOURCE TRANSFER — the preserved-design set has ONE author (rule 03). */
+import { isPreservedDesignSurface } from './lib/preserved-design-surfaces.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -196,7 +198,16 @@ check('the design modules were discovered (a discovery of none is a failure)', d
   designFiles.join(', '));
 for (const file of designFiles) {
   const src = fs.readFileSync(path.join(designsDir, file), 'utf8');
-  check(`${file} renders the shared tracker`, src.includes('<HeroTracker'));
+  /* §LOVABLE SOURCE TRANSFER — the preserved homepage renders the ORIGINAL Lovable
+     `ShipmentTracker`, which implements the same animation classes
+     (`animate-route-dot`, `animate-tracker-ping`) as the shared `HeroTracker`. Both
+     are valid tracker implementations, and WHICH files may use the preserved one is
+     declared ONCE rather than hardcoded here (rule 03). */
+  const rel = path.relative(ROOT, path.join(designsDir, file));
+  const acceptsPreservedTracker =
+    isPreservedDesignSurface(rel) && src.includes('<ShipmentTracker');
+  const hasTracker = src.includes('<HeroTracker') || acceptsPreservedTracker;
+  check(`${file} renders a tracker with the canonical animations`, hasTracker);
 }
 
 // 9. Notification severity presentation wired.

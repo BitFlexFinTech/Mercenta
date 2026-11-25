@@ -4894,8 +4894,34 @@ const BRAND_REDESIGN_SCOPE = new Set([
     'src/components/lovable/',
     'src/components/lovable/assets/images/',
     'src/content/',
-    'src/assets/images/',
   ]);
+
+  /**
+   * §ADS MANAGEMENT (2026-11-25) — THE ADVERTISING SURFACE'S DECLARED SCOPE.
+   *
+   * DECLARED, NOT WIDENED. F5/F5b/F6's contract is unchanged: a changed source file
+   * in NO declared set still fails, and every PROTECTED prefix this guard names stays
+   * refused. Declared here rather than lower down because F6 reads it, and a set
+   * defined below its first use raises a TDZ ReferenceError — a defect this file has
+   * already paid for once.
+   *
+   * WHAT IS DECLARED AND WHY:
+   *   · `src/components/ads/` — the Ads Management screen plus the example data it
+   *     renders. It is wired into BOTH the admin shell and the brand shell (a real
+   *     product surface, not a detached module). Its own folder, so the set cannot
+   *     be used to move an unrelated file.
+   *
+   * `recovered-lovable-images/` was the OTHER F6 offender and it is NOT declared
+   * here: it was a failed recovery output — a single 9-byte stub, referenced by no
+   * source file, duplicating `public/imagery/`. It was REMOVED in this change
+   * instead of being given a place in the repository.
+   *
+   * `src/assets/images/` is no longer declared either: it was a second, identical
+   * copy of the Lovable asset manifests that sit beside the components that came
+   * with them (verified byte-identical, 9 of 9, before removal), so the duplicate
+   * copy was deleted rather than kept as a second source of the same fact.
+   */
+  const ADS_MANAGEMENT_SCOPE = new Set(['src/components/ads/']);
 
 
   const f6ChangedSource = changed
@@ -5213,6 +5239,9 @@ const BRAND_REDESIGN_SCOPE = new Set([
           [...BRAND_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 3 (2026-11-21) — the Concept 3 homepage direction (see above). */
           CONCEPT3_HOMEPAGE_SCOPE.has(p) ||
+          /** §ADS MANAGEMENT (2026-11-25) — the advertising surface (see the declaration above). */
+          ADS_MANAGEMENT_SCOPE.has(p) ||
+          [...ADS_MANAGEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §WAVE 2 (2026-11-25) — the AI Studio console port (see the declaration above). */
           [...WAVE2_NEXT_CONSOLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           WAVE2_NEXT_CONSOLE_SCOPE.has(p)

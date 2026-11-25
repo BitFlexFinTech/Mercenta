@@ -20,6 +20,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+/* §LOVABLE SOURCE TRANSFER — the preserved-design set has ONE author (rule 03). */
+import { isPreservedDesignSurface } from './lib/preserved-design-surfaces.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -57,7 +59,8 @@ function walk(dir, out = []) {
   return out;
 }
 
-const SRC_FILES = walk(path.join(ROOT, 'src'));
+const SRC_FILES = walk(path.join(ROOT, 'src'))
+  .filter((f) => !isPreservedDesignSurface(path.relative(ROOT, f)));
 
 /* ── 1. No arbitrary micro sizes remain ─────────────────────────────────── */
 

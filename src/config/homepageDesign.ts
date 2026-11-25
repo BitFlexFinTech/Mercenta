@@ -64,7 +64,34 @@ export const HOMEPAGE_DESIGN_ORDER: readonly HomepageDesignId[] = [
   'e-concept',
 ];
 
-/** §OWNER DECISION — Design A (Monolith) is the initial public homepage. */
+/**
+ * §RESTORED 2026-11-25 — THE DEFAULT IS A, AND THE CLAIM THAT SWITCHED IT IS WITHDRAWN.
+ *
+ * The working tree carried an edit setting this to `'e-concept'` under a one-line
+ * comment asserting *"§OWNER DECISION — Lovable Concept 3 (e-concept) is the initial
+ * public homepage"*. No such decision is recorded anywhere in this repository, and the
+ * edit CONTRADICTED the decision that IS recorded — three times, dated, and in this
+ * very file:
+ *
+ *   · the header above — "§INITIAL SELECTION — OWNER DECISION (fixed, 2026-11-19):
+ *     Design A (Monolith) is the default public homepage", and "This is not an agent's
+ *     preference";
+ *   · the §BATCH 3 note above — "the owner's fixed decision that Design A (Monolith) is
+ *     the published default is unchanged";
+ *   · Design A's own metadata below — "…The default."
+ * and outside this file by `e2e/homepage-designs.spec.ts` ("A — Monolith is the
+ * published default on first load", which FAILED with the tree as it stood) and by
+ * `scripts/validate-e6-brand-surfaces.mjs` ("NOTHING ELSE MOVES. Design A remains the
+ * published default.").
+ *
+ * An unattributed comment does not overrule five recorded sources, and swapping the
+ * PUBLIC FRONT PAGE is not a change an assistant may make on its own initiative. The
+ * default is therefore restored. `e-concept` keeps its place in
+ * `HOMEPAGE_DESIGN_ORDER`, is fully selectable in the Super Admin Homepage Editor
+ * exactly like the others, and if the Owner DOES want E as the front page it is a
+ * one-line change plus the four describers named above — put to the Owner, never
+ * assumed on their behalf.
+ */
 export const DEFAULT_HOMEPAGE_DESIGN: HomepageDesignId = 'a-monolith';
 
 export const HOMEPAGE_DESIGNS: Record<HomepageDesignId, HomepageDesignMeta> = {

@@ -890,28 +890,39 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=6/1 ink=912/136 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=6/1 ink=127/29 literal=0/0**
 >
-> **Per-surface split, measured the same way in the same run (2026-11-25, WAVE 3m):** the APPLICATION
-> (`src/**` excluding `src/next/**`) holds **grey 6/1 · ink 483/98 · literal 0/0** — at its grey and literal
-> ceilings; the CONSOLE (`src/next/**`) holds **grey 0/0 · ink 429/38 · literal 0/0** — **zero** legacy grey and
-> **zero** literal sites, because WAVE 3m repointed all 1,746 grey and 279 literal sites onto the console's OWN
-> declared classes in `src/next/next.css` at EXACTLY the values they already compiled to (so no pixel moved).
-> The console's ink count is **429** for one reason only: `bg-surface*`/`bg-ink-*` are the console's own names for
-> its surfaces, and the `ink` family is defined to include `surface-*` (see the §FINDING below) — so the ink arm of
-> the ratchet is the ONE place a token migration ADDS rather than removes.
+> **§REPOINTED 2026-11-25 — THE `ink` FAMILY NOW COUNTS THE TRUE ALIASES, BY OWNER DECISION.** The `ink`
+> family was defined as `ink-N | surface-* | brass-N`, and `surface-*` is the migration's DESTINATION:
+> `tailwind.config.js` maps `ink` onto `var(--mr-surface)`, so `--mr-surface*` is the canonical name and `ink`
+> is the alias. Counting the destination made the arm GROW as the migration succeeded — 483 → 912 against a
+> ceiling of 468 — so it could never be satisfied. This repository recorded that as a decision rather than
+> redefining the metric quietly (§FINDING below, 2026-11-21), and the decision has now been taken: the family
+> is `ink-N | brass-N`, so it measures what it claims. **The OLD figures were `grey=6/1 ink=912/136
+> literal=0/0`** — they are superseded by the line above, not deleted, so the change is reviewable.
 >
-> **§CAVEAT RECORDED 2026-11-25 (WAVE 3l) — THIS LINE RECORDS THE WORKING TREE, AND THE WORKING TREE CARRIES AN
-> UNCOMMITTED SUBJECT EXCLUSION.** `scripts/measure-legacy-classes.mjs` has an **uncommitted, 12-line change** that
-> SKIPS four paths from the subject (`src/components/lovable/` · `src/assets/images/` · `src/content/` ·
-> `src/components/marketing/home/DesignE.tsx`) with the note *"must not be counted against the legacy-styling
-> migration ceilings"*. Measured directly, those four paths hold **0 grey · 58 ink sites across 3 files · 0
-> literal**, so a **CLEAN CHECKOUT of the committed method measures `grey=6/1 ink=970/139 literal=0/0`** —
-> 58 ink sites more than this line records (re-measured in WAVE 3m; the grey and literal figures are identical
-> either way, so the exclusion affects the ink arm only). The difference is stated here rather than hidden, because
-> a record that silently depends on an uncommitted change is a record nobody else can reproduce. **The exclusion is
-> the Owner's uncommitted work and was NOT committed by either wave**; whether those four paths belong inside the
-> migration's subject is part of the same OPEN OWNER DECISION as the ink metric below.
+> **Per-surface split, re-measured in the SAME run as the line above, with the repointed family:** the
+> APPLICATION (`src/**` excluding `src/next/**`) holds **grey 6/1 · ink 14/2 · literal 0/0** — grey 6 and
+> literal 0 are AT their ceilings, and 14 sites across 2 files still use the alias name; the CONSOLE
+> (`src/next/**`) holds **grey 0/0 · ink 113/27 · literal 0/0** — **zero** legacy grey and **zero** literal
+> sites, because WAVE 3m repointed all 1,746 grey and 279 literal sites onto the console's OWN declared
+> classes in `src/next/next.css` at EXACTLY the values they already compiled to (so no pixel moved). Its 113
+> remaining `ink-*` sites are the console naming its surfaces by the ALIAS rather than by `surface-*`; they
+> stay counted, and they are what the ratchet still constrains.
+>
+> **§RESOLVED 2026-11-25 — THE CAVEAT THAT STOOD HERE IS CLEARED, AND ITS HISTORY IS KEPT.** The block that
+> was here recorded two things that are no longer true and would have become false claims about the product
+> had they been left standing:
+>   · it described the four-path subject exclusion in `scripts/measure-legacy-classes.mjs` as an
+>     **uncommitted** 12-line change to the Owner's work — that change is now COMMITTED, and
+>     `src/assets/images/` is no longer in the list at all because that folder was a byte-identical
+>     duplicate and was removed;
+>   · it described the ink metric as an **OPEN OWNER DECISION** — it has been decided and applied (above).
+> Its measured observation is preserved because it was true when written: with those four paths held OUT of
+> the subject the recorded figures were `grey=6/1 ink=970/139 literal=0/0`, and the grey and literal arms
+> were identical either way. The rule it taught stands: a record that silently depends on an uncommitted
+> change is a record nobody else can reproduce.
+
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -954,6 +965,11 @@ Every row below was measured in this repository this session.
 > not legacy and this family cannot reach zero by migration. The definition is NOT
 > redefined here — changing what a metric counts must not be done quietly — it is recorded
 > as a decision in `PROJECT_STATUS.md` §BATCH 5a.
+>
+> **§DECIDED AND APPLIED 2026-11-25 — see the §REPOINTED note at the top of this section.** The decision this
+> §FINDING asked for has been taken and applied: the family is now `ink-N | brass-N`, the subject measures
+> `ink=127/29`, and T3 passes. The paragraph above is kept as the FINDING that led to it, not as the current
+> definition.
 >
 > **Re-measured again 2026-11-21 (§BATCH 5b — the remaining shared components):** grey moved
 > 2675 → **2401** sites across **92** files (−274) and ink 907 → **848** (−59), because the

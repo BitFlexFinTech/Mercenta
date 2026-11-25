@@ -45,6 +45,8 @@ import { fileURLToPath } from 'url';
    Two implementations of "what is a class" would drift, and a drifting gate reports
    PASS over a site the migration missed. */
 import { classStrings } from './lib/design-scale-scan.mjs';
+/* §LOVABLE SOURCE TRANSFER — the preserved-design set has ONE author (rule 03). */
+import { isPreservedDesignSurface } from './lib/preserved-design-surfaces.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -73,7 +75,8 @@ function walk(dir, out = []) {
   return out;
 }
 
-const SRC_FILES = walk(path.join(ROOT, 'src'));
+const SRC_FILES = walk(path.join(ROOT, 'src'))
+  .filter((f) => !isPreservedDesignSurface(path.relative(ROOT, f)));
 check(
   'the source walk found files (a check that finds nothing is a FAILURE)',
   SRC_FILES.length > 300,
@@ -286,15 +289,12 @@ check(
  * steps the app uses must come out with their declared value. A check that finds
  * nothing is a FAILURE (rule 10 §5): an empty compile fails every assertion below.
  */
-const twPlugin = (await import('tailwindcss')).default;
 const postcss = (await import('postcss')).default;
+const tailwindcss = (await import('@tailwindcss/postcss')).default;
 const projectConfig = (await import(new URL('../tailwind.config.js', import.meta.url))).default;
-const probe = await postcss([
-  twPlugin({
-    ...projectConfig,
-    content: [{ raw: '<div class="rounded-ds-sm rounded-ds-md rounded-ds-lg"></div>' }],
-  }),
-]).process('@tailwind utilities;', { from: undefined });
+const probe = await postcss([tailwindcss({
+  content: [{ raw: '<div class="rounded-ds-sm rounded-ds-md rounded-ds-lg"></div>' }],
+})]).process(`@import "tailwindcss";\n@config "../tailwind.config.js";\n@tailwind utilities;\n`, { from: path.join(ROOT, 'src/index.css') });
 const EMITTED = probe.css;
 check(
   'the config COMPILED and produced real utilities (an empty compile is a FAILURE, not a pass)',

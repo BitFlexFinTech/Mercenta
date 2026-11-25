@@ -1545,6 +1545,36 @@ export interface CreativeAsset {
   sourceLabel: string; // 'simulated_seed' | 'live_amazon_ads'
 }
 
+/**
+ * §CREATIVE ASSETS (2026-11-25) — THE MUTABLE SURFACE, NAMED.
+ *
+ * The advertising data layer shipped this as `any`, so an unvalidated object could
+ * be spread into BOTH the demo store and the Supabase write. Nothing failed,
+ * because a wrong key is not an error at runtime — it is a silent no-op. This
+ * names the fields a caller may actually change, so a typo or a wrong shape is a
+ * compile error instead. Defined here (the types owner) rather than in the data
+ * layer, so there is ONE description of the shape.
+ */
+export type CreativeAssetUpdate = Partial<
+  Pick<
+    CreativeAsset,
+    | 'campaignId'
+    | 'formatId'
+    | 'name'
+    | 'headline'
+    | 'productSku'
+    | 'logoUrl'
+    | 'mediaUrl'
+    | 'mediaType'
+    | 'ctaText'
+    | 'status'
+    | 'validationResult'
+    | 'amazonCreativeId'
+    | 'submittedAt'
+    | 'approvedAt'
+  >
+>;
+
 export interface CreativeValidationResult {
   isValid: boolean;
   checks: CreativeValidationCheck[];

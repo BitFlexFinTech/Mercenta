@@ -1,6 +1,133 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* ── LOVABLE DESIGN TOKENS (Concept 3) ──────────────────────────────────────
+ * These tokens come from the original Lovable Concept 3 stylesheet and are used
+ * by the e-concept homepage design. They coexist with Mercenta's --mr-* tokens
+ * which are managed by ThemeContext for the rest of the application.
+ * The Lovable tokens use oklch color space and define the ink/paper/signal
+ * palette plus tracker-specific colors and animations.
+ */
+@theme inline {
+  /* Brand colors */
+  --color-ink: #000000;
+  --color-paper: #FFFFFF;
+  --color-signal: #FF6A00;
+  --color-live: oklch(0.696 0.17 162.48);
+
+  /* Shipment Tracker colors (exact demo.mercenta.co.uk values) */
+  --color-tracker-surface: #0C1219;
+  --color-tracker-well: rgba(0, 0, 0, 0.6);
+  --color-tracker-text: oklch(0.871 0.006 286.286);
+  --color-tracker-muted: oklch(0.705 0.015 286.067);
+  --color-tracker-faint: oklch(0.552 0.016 285.938);
+  --color-tracker-ring: oklch(0.442 0.017 285.786);
+  --color-tracker-line: rgba(55, 55, 55, 0.6);
+
+  /* Fonts */
+  --font-brand: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-archivo: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-schibsted: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-bricolage: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+
+  /* Animations */
+  --animate-tracker-ping: tracker-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-route-dot: route-dot 6s linear infinite;
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-dash: dash 1.4s linear infinite;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-geist);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-ink);
+  }
+}
+
+@utility font-expanded {
+  font-stretch: 125%;
+}
+@utility font-condensed {
+  font-stretch: 75%;
+}
+
+@utility text-outline-ink {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-ink);
+}
+@utility text-outline-paper {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-paper);
+}
+
+@keyframes tracker-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes route-dot {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-route-dot,
+  .animate-tracker-ping,
+  .animate-dash {
+    animation: none;
+  }
+}
 
 html, body, #root {
   height: 100%;
@@ -330,21 +457,6 @@ textarea:focus-visible {
 }
 .animate-marquee {
   animation: marquee 38s linear infinite;
-}
-
-/* ── §HOMEPAGE CONCEPT 3 — THE CONSTRUCTION GRID ───────────────────────────
-   A 64px hairline grid behind the hero and the infrastructure band. It is the
-   one visual signature the approved Concept 3 direction carries across both
-   appearances, and it is drawn FROM THE THEME rather than from a literal: the
-   line is the active appearance's own hairline at reduced strength, so it reads
-   on black and on white without a second colour being introduced. `--mr-hairline`
-   is declared identically in both appearances (src/config/themes.ts), so this
-   utility can never fall out of step with the design system. */
-.grid-lines {
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--mr-hairline) 55%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--mr-hairline) 55%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px;
 }
 
 /* Scroll reveal — elements start hidden/offset, .is-revealed brings them in.

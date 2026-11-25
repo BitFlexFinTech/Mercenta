@@ -54,6 +54,7 @@ const OpportunityDiscoveryPanel = lazy(() => import('@/components/admin/Opportun
 const ProductDiscoveryPanel = lazy(() => import('@/components/admin/ProductDiscoveryPanel').then((m) => ({ default: m.ProductDiscoveryPanel })));
 const RegionalPriorityPanel = lazy(() => import('@/components/admin/RegionalPriorityPanel').then((m) => ({ default: m.RegionalPriorityPanel })));
 const AmazonAdsDashboard = lazy(() => import('@/components/admin/AmazonAdsDashboard').then((m) => ({ default: m.AmazonAdsDashboard })));
+const AdsManagement = lazy(() => import('@/components/ads/AdsManagement').then((m) => ({ default: m.AdsManagement })));
 const FounderControlCentre = lazy(() => import('@/components/admin/FounderControlCentre').then((m) => ({ default: m.FounderControlCentre })));
 const FounderInvestorCentre = lazy(() => import('@/components/admin/FounderInvestorCentre').then((m) => ({ default: m.FounderInvestorCentre })));
 const PartnershipsCentre = lazy(() => import('@/components/admin/PartnershipsCentre').then((m) => ({ default: m.PartnershipsCentre })));
@@ -69,6 +70,7 @@ import {
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
   ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
+  Palette,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -113,6 +115,7 @@ const ADMIN_SECTIONS = [
       { id: 'onboarding_pipeline', label: 'Onboarding', icon: <ClipboardList className="w-4 h-4" /> },
       { id: 'marketing', label: 'Marketing', icon: <Target className="w-4 h-4" /> },
       { id: 'amazon_ads', label: 'Ad Spend', icon: <Megaphone className="w-4 h-4" /> },
+      { id: 'ads_management', label: 'Ads Management', icon: <Palette className="w-4 h-4" /> },
       { id: 'brand_intelligence', label: 'Brand Intelligence', icon: <Target className="w-4 h-4" /> },
     ],
   },
@@ -353,6 +356,7 @@ export default function AdminShell() {
             {adminView === 'compliance' && <ComplianceApprovals />}
             {adminView === 'marketing' && <MarketingHub />}
             {adminView === 'amazon_ads' && <AmazonAdsDashboard />}
+            {adminView === 'ads_management' && <AdsManagement />}
             {adminView === 'brand_intelligence' && (isSuper ? (
               <div className="space-y-4">
                 <BrandIntelligenceStrategyPanel />
