@@ -899,6 +899,17 @@ Every row below was measured in this repository this session.
 > ceilings below are UNCHANGED and are not made to pass by this record: the measurement moved because the console
 > added those sites, and the record now states that rather than hiding it.
 >
+> **§CAVEAT RECORDED 2026-11-25 (WAVE 3l) — THIS LINE RECORDS THE WORKING TREE, AND THE WORKING TREE CARRIES AN
+> UNCOMMITTED SUBJECT EXCLUSION.** `scripts/measure-legacy-classes.mjs` has an **uncommitted, 12-line change** that
+> SKIPS four paths from the subject (`src/components/lovable/` · `src/assets/images/` · `src/content/` ·
+> `src/components/marketing/home/DesignE.tsx`) with the note *"must not be counted against the legacy-styling
+> migration ceilings"*. Measured directly, those four paths hold **0 grey · 58 ink sites across 3 files · 0
+> literal**, so a **CLEAN CHECKOUT of the committed method measures `grey=1752/45 ink=541/101 literal=279/38`** —
+> 58 ink sites more than this line records. The difference is stated here rather than hidden, because a record that
+> silently depends on an uncommitted change is a record nobody else can reproduce. **The exclusion is the Owner's
+> uncommitted work and was NOT committed by this wave**; whether those four paths belong inside the migration's
+> subject is part of the same OPEN OWNER DECISION as the ink metric below.
+>
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
  * moved; ink dropped 937 → 934 sites when the dead hero constants were removed from
