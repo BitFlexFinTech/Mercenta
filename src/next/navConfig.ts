@@ -101,7 +101,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   { id: 'contracts_admin', label: 'Contract Cycle', group: 'Finance & Legal', implemented: true },
 
   { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: true },
-  { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: false },
+  { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: true },
 {
     /* §WAVE 3e — helpdesk TRIAGE is the support queue, so it declares the closest
        permission an admin_staff member already holds (`messages`). RBAC itself is
@@ -112,7 +112,16 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     implemented: true,
     rbacViewId: 'messages',
   },
-  { id: 'monitoring', label: 'Monitoring', group: 'Governance & Support', implemented: false },
+{
+    /* §WAVE 3f — `monitoring` is NOT in `VIEW_ALLOWLIST.admin_staff`, so without a
+       mapping the item would be silently filtered out. RBAC is not widened: the item
+       declares the closest permission the staff already hold (`messages`). */
+    id: 'monitoring',
+    label: 'Monitoring',
+    group: 'Governance & Support',
+    implemented: true,
+    rbacViewId: 'messages',
+  },
 
   {
     id: 'super_admin',

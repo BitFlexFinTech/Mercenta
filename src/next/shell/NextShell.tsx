@@ -59,6 +59,9 @@ import { AdminMarketingScreen } from '@/next/screens/admin/AdminMarketingScreen'
 /* §WAVE 3e (2026-11-25) — helpdesk and the audit log. */
 import { AdminAuditScreen } from '@/next/screens/admin/AdminAuditScreen';
 import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
+/* §WAVE 3f (2026-11-25) — messages and monitoring. */
+import { AdminMessagesScreen } from '@/next/screens/admin/AdminMessagesScreen';
+import { AdminMonitoringScreen } from '@/next/screens/admin/AdminMonitoringScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -374,6 +377,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       }
       if (activeViewId === 'audit_log') {
         return <AdminAuditScreen />;
+      }
+      /* §WAVE 3f — the message log and the honest readiness view. */
+      if (activeViewId === 'messages') {
+        return <AdminMessagesScreen />;
+      }
+      if (activeViewId === 'monitoring') {
+        return <AdminMonitoringScreen />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and

@@ -65,6 +65,8 @@ test('admin session: the new console renders its admin surface', async ({ page }
     'Fulfillment Track',
     'Marketing',
     'Helpdesk',
+    'Messages',
+    'Monitoring',
     'Ads Manager',
   ]) {
     await navButton(label).click();
@@ -85,10 +87,9 @@ test('admin session: the new console renders its admin surface', async ({ page }
   await navButton('Overview').click();
   await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
 
-  /* Then the fulfilment track, whose whole point is the score breakdown, so the
-     captured artefact shows the real arithmetic. */
-  await navButton('Fulfillment Track').click();
-  await expect(page.getByText('Brands scored')).toBeVisible({ timeout: 20000 });
+  /* Then Monitoring, whose whole point is that it does NOT fabricate health. */
+  await navButton('Monitoring').click();
+  await expect(page.getByText(/Client readiness/).first()).toBeVisible({ timeout: 20000 });
 
   await page.screenshot({ path: 'test-results/next-console-admin.png', fullPage: true });
   expect(pageErrors).toEqual([]);
