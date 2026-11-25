@@ -8,18 +8,23 @@
  * attention item carries the EXISTING destination it belongs to, so each one drills
  * into the record it came from.
  */
-import { ConsoleHeader, MetricStrip } from '@/next/components/ConsolePrimitives';
+import { ConsoleHeader, ConsoleTable, MetricStrip, type ConsoleColumn } from '@/next/components/ConsolePrimitives';
 import { ConsoleTabs, SectionCard } from '@/next/components/ConsoleCharts';
 import type {
+  CommercialReadinessQueueRow,
   ControlCentreModel,
   ControlCentreSection,
   ControlCentreSectionId,
+  PreAuditQueueRow,
 } from '@/lib/commandCentre/controlCentre';
+import type { ControlPanel } from './controlCentrePanels';
 
 export interface AdminControlCentreViewProps {
   model: ControlCentreModel;
   sections: readonly ControlCentreSection[];
   activeSection: ControlCentreSectionId;
+  /** The specialised panels that belong to the active capability area. */
+  sectionPanels: readonly ControlPanel[];
   onSelectSection: (id: ControlCentreSectionId) => void;
   onNavigate: (destination: string) => void;
 }
@@ -39,10 +44,151 @@ const PRIORITY_TONE: Record<string, string> = {
   normal: 'text-zinc-600',
 };
 
+/**
+ * §WAVE 3j — one specialised panel. Every row is a figure the model already carries;
+ * nothing here computes or re-derives a value, and the panel names the canonical owner
+ * it reports on so provenance is shown rather than implied.
+ */
+function PanelCard({ panel }: { panel: ControlPanel }) {
+  return (
+    <SectionCard
+      title={panel.title}
+      description={panel.description}
+      testId={`control-panel-${panel.id}`}
+    >
+      {panel.groups.map((group) => (
+        <div key={group.label} className="mb-5 last:mb-0">
+          <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
+            {group.label}
+          </h3>
+          {group.rows.length === 0 ? (
+            <p className="mt-1.5 text-ds-label text-zinc-500">
+              Nothing is recorded for this yet. The panel shows the real state of these records rather than
+              a filled-in placeholder.
+            </p>
+          ) : (
+            <dl className="mt-1.5 divide-y divide-zinc-200">
+              {group.rows.map((item, index) => (
+                <div
+                  key={`${item.label}-${index}`}
+                  className="py-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5"
+                >
+                  <dt className="text-ds-body text-zinc-600">{item.label}</dt>
+                  <dd className="text-right">
+                    <span
+                      className={`text-ds-body font-medium tabular-nums ${
+                        TONE_TEXT[item.tone ?? 'neutral'] ?? 'text-zinc-700'
+                      }`}
+                    >
+                      {item.value}
+                    </span>
+                    {item.note && (
+                      <span className="block text-ds-label font-normal text-zinc-500 max-w-2xl">
+                        {item.note}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      ))}
+      <p className="mt-1 text-ds-label text-zinc-500">Owned by {panel.owner}</p>
+    </SectionCard>
+  );
+}
+
+/**
+ * §WAVE 3j — a canonical queue drawn in full. `rows` ARE the model's own rows (the
+ * owner's array, untouched), so the table can never show a curated subset: the
+ * coverage gate compares this row count with the model's own count.
+ */
+function QueuePanel({ panel }: { panel: ControlPanel }) {
+  const queue = panel.queue;
+  if (!queue) return null;
+
+  const footer = <p className="mt-2 text-ds-label text-zinc-500">Owned by {panel.owner}</p>;
+
+  if (queue.kind === 'pre_audit') {
+    const columns: ConsoleColumn<PreAuditQueueRow>[] = [
+      { key: 'brand', header: 'Brand', mobilePrimary: true, render: (r) => (
+        <div>
+          <div className="text-zinc-950">{r.brand}</div>
+          <div className="text-ds-label text-zinc-500">{r.website}</div>
+        </div>
+      ) },
+      { key: 'category', header: 'Category', hideOnMobile: true, render: (r) => r.category },
+      { key: 'presence', header: 'UK presence', render: (r) => r.presence },
+      { key: 'qualification', header: 'Qualification', render: (r) => r.qualificationLabel },
+      { key: 'mode', header: 'Research mode', hideOnMobile: true, render: (r) => r.researchMode },
+      { key: 'questions', header: 'Open questions', align: 'right', render: (r) => r.openQuestions },
+      { key: 'fed', header: 'Fed to pipeline', render: (r) => (r.fed ? `yes — ${r.fedProspectId}` : 'not yet') },
+      { key: 'next', header: 'Recommended next step', hideOnMobile: true, render: (r) => r.recommendedNextStep },
+    ];
+    return (
+      <SectionCard title={panel.title} description={panel.description} testId={`control-panel-${panel.id}`}>
+        <ConsoleTable
+          testId="control-queue-pre-audit"
+          rows={queue.rows as PreAuditQueueRow[]}
+          rowKey={(r) => r.assessmentId}
+          emptyTitle="No pre-audit assessments yet"
+          emptyDescription="An empty queue is the real state of these records, not a placeholder."
+          columns={columns}
+        />
+        {footer}
+      </SectionCard>
+    );
+  }
+
+  const columns: ConsoleColumn<CommercialReadinessQueueRow>[] = [
+    { key: 'product', header: 'Product', mobilePrimary: true, render: (r) => (
+      <div>
+        <div className="text-zinc-950">{r.product}</div>
+        <div className="text-ds-label text-zinc-500">{r.productRef ?? r.recordId}</div>
+      </div>
+    ) },
+    { key: 'brand', header: 'Brand', render: (r) => r.brandLabel },
+    { key: 'route', header: 'Route', render: (r) => r.routeLabel },
+    { key: 'owner', header: 'Who must act', render: (r) => r.ownerLabel },
+    {
+      key: 'why',
+      header: 'Why it sits here',
+      hideOnMobile: true,
+      render: (r) =>
+        r.unmet.length > 0
+          ? r.unmet.map((u) => `${u.label} (observed ${u.observed})`).join('; ')
+          : r.unevaluable.length > 0
+            ? r.unevaluable.map((u) => `${u.label} — could not be evaluated: ${u.reason}`).join('; ')
+            : r.missingInputs.length > 0
+              ? `Missing input: ${r.missingInputs.join(', ')}`
+              : 'No condition explains this state',
+    },
+    { key: 'next', header: 'Next step', hideOnMobile: true, render: (r) => r.nextStep },
+    { key: 'due', header: 'SLA deadline', render: (r) => r.dueDate ?? 'not declared' },
+    { key: 'work', header: 'Work item', render: (r) => r.workItemId ?? 'none raised' },
+  ];
+
+  return (
+    <SectionCard title={panel.title} description={panel.description} testId={`control-panel-${panel.id}`}>
+      <ConsoleTable
+        testId="control-queue-commercial-readiness"
+        rows={queue.rows as CommercialReadinessQueueRow[]}
+        rowKey={(r) => r.recordId}
+        emptyTitle="No commercial readiness records yet"
+        emptyDescription="An empty queue is the real state of these records, not a placeholder."
+        columns={columns}
+      />
+      {footer}
+    </SectionCard>
+  );
+}
+
 export function AdminControlCentreView({
   model,
   sections,
   activeSection,
+  sectionPanels,
   onSelectSection,
   onNavigate,
 }: AdminControlCentreViewProps) {
@@ -125,6 +271,23 @@ export function AdminControlCentreView({
             ))}
           </div>
         </SectionCard>
+
+        {sectionPanels.length > 0 && (
+          <div className="space-y-4" data-testid="control-panels">
+            <div>
+              <h2 className="text-ds-body font-semibold text-zinc-950">
+                {active.label} — specialised panels
+              </h2>
+              <p className="mt-0.5 text-ds-label text-zinc-600 max-w-3xl">
+                The sub-models this capability area&apos;s owner already derives, drawn in full. Each panel
+                names the canonical module that produces its figures.
+              </p>
+            </div>
+            {sectionPanels.map((panel) =>
+              panel.queue ? <QueuePanel key={panel.id} panel={panel} /> : <PanelCard key={panel.id} panel={panel} />
+            )}
+          </div>
+        )}
 
         <SectionCard
           title="Needs attention"

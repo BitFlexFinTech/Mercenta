@@ -4,7 +4,67 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §NEXT CONSOLE WAVES 3g–3i — LOCAL/COMMITTED, NOT DEPLOYED (2026-11-25)
+## §WAVE 3j — THE CONTROL CENTRE'S SPECIALISED PANELS, ALL 35 DRAWN (2026-11-25)
+
+**State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed;
+the tree is NOT empty (the Owner's own untracked work), so this is explicitly **not** a clean checkpoint and
+**not** complete. **NOT deployed and NOT live-verified**, deliberately: `scripts/deploy-demo.sh` builds the
+working tree, so publishing now would ship the Owner's unrelated in-progress work.
+
+**What this wave built.** The Control Centre's owner (`buildControlCentre`) derives ~30 specialised sub-models
+and the screen was drawing only the ten areas' metric cards, the attention list and the provenance list —
+**every sub-model was computed and then thrown away, and nothing in the repository could tell.** That class of
+defect is now closed at the source:
+
+- **`src/next/screens/admin/controlCentrePanels.ts` (NEW, the ONE owner of the panel model).** It reads the
+  model and never computes a figure: the funding family (capital requirement, financing router, financier
+  lifecycle, pitch workspace, founder outreach, financier universe), the intelligence family (founder
+  intelligence, the integrated loop, acquisition conversion, acquisition intelligence, UK opportunity states,
+  whole-platform object resolution), the framework family (country framework, localisation,
+  localisation/SEO/hreflang), the education family (onboarding curriculum, learning loop, contextual education,
+  shared workflows, tutorial recordings), the compliance and automation families (Amazon relationship
+  governance, the automation catalogue, runs, approvals, provider dependencies, the trigger seam, the credential
+  vault), AI availability, the audit trail, the acquisition pipeline, and the **pre-audit and commercial-readiness
+  queues as FULL tables** (every row, never a subset). Each panel names the canonical module that owns its figures.
+- **`AdminControlCentreView.tsx` / `AdminControlCentreScreen.tsx`** render those panels inside their capability
+  area, with the two queue tables built on the canonical `ConsoleTable`. **No figure is computed in the view.**
+- **`scripts/validate-control-centre-panels.mjs` (NEW GATE, 12 assertions).** It DISCOVERS the model's own keys
+  (38) and DISCOVERS from the view's source which keys the screen itself renders, then FAILS if any key is
+  **undrawn** — so a future sub-model cannot be computed and discarded in silence. It also pins: no phantom key,
+  every panel in a real capability area, every panel's canonical owner **exists on disk**, every queue carries
+  **EVERY** model row (`rows.length` equals the model's own, and the model's own total agrees), and no row leaks
+  `undefined`/`NaN`/`null`/`[object Object]`. Measured: **38/38 keys drawn · 35 panels · 644 rows checked**.
+- **`e2e/next-console-smoke.spec.ts` extended** — the browser gate now walks the Acquisition, Commercial and
+  Finance areas and asserts the real panels render (the pre-audit panel, the commercial queue TABLE **with real
+  rows**, the capital and financing panels), because compiling is not rendering.
+
+**Evidence.** `npm run typecheck` **0 errors** (all four projects) · `npm run build` **EXIT 0** ·
+`e2e/next-console-smoke.spec.ts` **6 passed / 0 failed** · the NEW gate **12 PASS / 0 FAIL** ·
+`validate:all` **193 PASS / 8 FAIL (of 201 validators)**.
+
+**The new gate was PROVED ABLE TO FAIL — twice, each restored byte-identical** (canonical
+`46d77d03a15494457fb708b14e5c849d287bee45af808291163dafebda61b109`): removing one panel's `modelKeys` entry
+(`d580ceba…`) → **B1 FAIL, "UNDRAWN: ukOpportunityStates"** → restored → PASS; and making the commercial queue
+carry a subset (`69f3eb6e…`) → **F2 FAIL, "1 rows drawn vs 4 rows in the model"** → restored → PASS.
+
+**The eight `validate:all` failures are NOT this wave's, and that was re-proved rather than asserted.** All eight
+pre-date the wave and name only the Owner's untracked work (`src/components/ads/AdsManagement.tsx`,
+`recovered-lovable-images/`, the changed protected `src/data/*` paths): `validate-data-preservation`,
+`validate-e6-brand-surfaces`, `validate-legacy-styling-migration`, `validate-nav-destinations`,
+`validate-radius-elevation-scale`, `validate-typography-scale`, `validate-ui-wiring` (whose only unwired controls
+are in `ads/AdsManagement.tsx`) and `validate:wording`. **Proof of non-attribution:** with this wave's panel JSX
+reverted, `validate-legacy-styling-migration` reports the **same 5 of 14 failing assertions**; and this wave's
+measured contribution to the legacy-styling grey family is **+13 sites** (1752 vs 1739; ink unchanged at 481) in a
+ratchet that already stands **1,746** sites above its recorded figure.
+
+**What remains.** **WAVE 3k**: the three super-admin views — Brand Intelligence, Founder Investor Centre and
+Partnerships & Fundraising — built on the intelligence and founder modules this repository already holds. The
+console's other placeholders hold **no domain data at all** and stay honest placeholders. Three brand views
+(`market`, `cases`, `team`) await an **Owner decision**, each named in `requirements-registry.json` →
+`next-console-remaining-views`.
+
+---
+## PREVIOUS STATUS — **§NEXT CONSOLE WAVES 3g–3i — SUPERSEDED BY §WAVE 3j** (2026-11-25)
 
 **State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** The console work is committed on
 `redesign/foundation` and pushed; the tree is NOT empty (34 paths of the Owner's own untracked work in

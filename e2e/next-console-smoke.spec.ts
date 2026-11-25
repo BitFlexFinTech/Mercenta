@@ -165,6 +165,28 @@ test('super-admin session: an approval is audited, and the audit trail shows it'
   });
   await page.getByRole('tab', { name: /Compliance/ }).click();
   await expect(page.locator('[data-testid^="control-metric-"]').first()).toBeVisible();
+
+  /* §WAVE 3j — the SPECIALISED PANELS. The model's own sub-models are now drawn, so
+     this asserts the real components in a real browser: the acquisition area's
+     pre-audit panel, the commercial area's queue TABLE with real rows, and the
+     finance area's capital panels. Compiling is not rendering. */
+  await page.getByRole('tab', { name: /Acquisition/ }).click();
+  await expect(page.locator('[data-testid="control-panel-pre-audit-queue"]')).toBeVisible({
+    timeout: 20000,
+  });
+  await page.getByRole('tab', { name: /Commercial/ }).click();
+  await expect(page.locator('[data-testid="control-queue-commercial-readiness"]')).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.locator('[data-testid="control-queue-commercial-readiness"] tbody tr').first()).toBeVisible();
+  await page.getByRole('tab', { name: /Finance/ }).click();
+  await expect(page.locator('[data-testid="control-panel-capital-requirement"]')).toBeVisible({
+    timeout: 20000,
+  });
+  await expect(page.locator('[data-testid="control-panel-financing-routing"]')).toBeVisible();
+  await expect(page.locator('[data-testid="control-panel-financier-universe"]')).toBeVisible();
+  /* Back to Compliance, so the drill-down below starts from the area it describes. */
+  await page.getByRole('tab', { name: /Compliance/ }).click();
   await page.screenshot({ path: 'test-results/next-console-control-centre.png', fullPage: true });
 
   /* The Compliance area's own drill-down lands on the REAL compliance screen — the
