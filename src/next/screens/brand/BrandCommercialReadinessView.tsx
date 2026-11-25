@@ -147,19 +147,19 @@ export function BrandCommercialReadinessView({
                 <div
                   key={r.id}
                   data-testid="brand-commercial-product"
-                  className="border border-zinc-200 bg-white rounded-ds-md overflow-hidden"
+                  className="border border-hairline bg-surface-raised rounded-ds-md overflow-hidden"
                 >
                   <button
                     type="button"
                     onClick={() => onToggleExpand(r.id)}
                     aria-expanded={open}
-                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-zinc-50/70 focus-visible:outline-2 focus-visible:outline-accent"
+                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-canvas-70 focus-visible:outline-2 focus-visible:outline-accent"
                   >
                     <div className="min-w-0">
-                      <div className="text-ds-body font-semibold text-zinc-950 truncate">
+                      <div className="text-ds-body font-semibold text-strong truncate">
                         {r.productLabel ?? r.id}
                       </div>
-                      <div className="mt-0.5 text-ds-label text-zinc-600 tabular-nums font-mono">
+                      <div className="mt-0.5 text-ds-label text-muted tabular-nums font-mono">
                         {row.progressSatisfied} of {row.progressTotal} checks passed · {row.progressPercent}%
                       </div>
                     </div>
@@ -168,25 +168,25 @@ export function BrandCommercialReadinessView({
                     </div>
                   </button>
 
-                  <div className="border-t border-zinc-200 px-4 py-3 space-y-4">
-                    <p className="text-ds-label text-zinc-700">{row.explanation}</p>
+                  <div className="border-t border-hairline px-4 py-3 space-y-4">
+                    <p className="text-ds-label text-secondary">{row.explanation}</p>
 
                     {open && (
-                      <div className="space-y-4 pt-2 border-t border-zinc-100">
+                      <div className="space-y-4 pt-2 border-t border-hairline-soft">
                         {row.reasons.length > 0 && (
                           <div data-testid="brand-commercial-guidance" className="space-y-2">
-                            <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
+                            <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
                               What Mercenta needs, and why
                             </h3>
                             <ul className="space-y-2">
                               {row.reasons.map((reason) => (
                                 <li
                                   key={reason.label}
-                                  className="rounded-ds-sm border border-zinc-200 bg-zinc-50/70 p-3 text-ds-label space-y-1"
+                                  className="rounded-ds-sm border border-hairline bg-canvas-70 p-3 text-ds-label space-y-1"
                                 >
-                                  <div className="font-semibold text-zinc-950">{reason.label}</div>
-                                  <p className="text-zinc-700">{reason.what}</p>
-                                  <p className="text-zinc-600">{reason.why}</p>
+                                  <div className="font-semibold text-strong">{reason.label}</div>
+                                  <p className="text-secondary">{reason.what}</p>
+                                  <p className="text-muted">{reason.why}</p>
                                   <div className="text-ds-micro text-accent font-medium">
                                     Guide: {reason.articleTitle}
                                   </div>
@@ -202,7 +202,7 @@ export function BrandCommercialReadinessView({
                           </p>
                         ) : (
                           <div data-testid="brand-commercial-missing" className="space-y-3">
-                            <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
+                            <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
                               Your actions
                             </h3>
                             <ul className="space-y-3">
@@ -216,10 +216,10 @@ export function BrandCommercialReadinessView({
                                   <li
                                     key={f.field}
                                     data-testid={`brand-commercial-field-${f.field}`}
-                                    className="rounded-ds-sm border border-zinc-200 p-3 space-y-2"
+                                    className="rounded-ds-sm border border-hairline p-3 space-y-2"
                                   >
-                                    <div className="text-ds-label font-medium text-zinc-950">{f.what}</div>
-                                    <div className="text-ds-label text-zinc-600">{f.action}</div>
+                                    <div className="text-ds-label font-medium text-strong">{f.what}</div>
+                                    <div className="text-ds-label text-muted">{f.action}</div>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <input
                                         aria-label={f.label}
@@ -227,7 +227,7 @@ export function BrandCommercialReadinessView({
                                         onChange={(e) => onChangeDraft(key, { value: e.target.value })}
                                         placeholder="Enter value…"
                                         data-testid={`brand-commercial-input-${f.field}`}
-                                        className="w-36 px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label text-zinc-950 tabular-nums"
+                                        className="w-36 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-strong tabular-nums"
                                       />
                                       <select
                                         aria-label={`${f.label} basis`}
@@ -238,7 +238,7 @@ export function BrandCommercialReadinessView({
                                           })
                                         }
                                         data-testid={`brand-commercial-basis-${f.field}`}
-                                        className="px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label text-zinc-950"
+                                        className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-strong"
                                       >
                                         {BASIS_OPTIONS.map((o) => (
                                           <option key={o.id} value={o.id}>
@@ -250,7 +250,7 @@ export function BrandCommercialReadinessView({
                                         type="button"
                                         onClick={() => onSubmitField(r, f.field)}
                                         data-testid={`brand-commercial-submit-${f.field}`}
-                                        className="px-3 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
+                                        className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
                                       >
                                         Submit for reassessment
                                       </button>
@@ -267,41 +267,41 @@ export function BrandCommercialReadinessView({
                           </div>
                         )}
 
-                        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-zinc-100 text-ds-label">
+                        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-hairline-soft text-ds-label">
                           <div>
-                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">Status</dt>
-                            <dd className="mt-0.5 font-medium text-zinc-950">{row.headline}</dd>
+                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Status</dt>
+                            <dd className="mt-0.5 font-medium text-strong">{row.headline}</dd>
                           </div>
                           <div>
-                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">Next step</dt>
-                            <dd className="mt-0.5 text-zinc-700">{row.nextStep}</dd>
+                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Next step</dt>
+                            <dd className="mt-0.5 text-secondary">{row.nextStep}</dd>
                           </div>
                           <div>
-                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">Checks</dt>
-                            <dd className="mt-0.5 font-mono tabular-nums text-zinc-950">
+                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Checks</dt>
+                            <dd className="mt-0.5 font-mono tabular-nums text-strong">
                               {row.progressSatisfied}/{row.progressTotal}
                             </dd>
                           </div>
                           <div>
-                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-zinc-500">Updated</dt>
-                            <dd className="mt-0.5 font-mono tabular-nums text-zinc-700">{r.updatedAt}</dd>
+                            <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Updated</dt>
+                            <dd className="mt-0.5 font-mono tabular-nums text-secondary">{r.updatedAt}</dd>
                           </div>
                         </dl>
-                        <p className="text-ds-micro text-zinc-500">{r.moqDisclaimer}</p>
+                        <p className="text-ds-micro text-faint">{r.moqDisclaimer}</p>
                       </div>
                     )}
                   </div>
                 </div>
               );
             })}
-            <p className="text-ds-micro text-zinc-500 pt-1" data-testid="brand-commercial-disclaimer">
+            <p className="text-ds-micro text-faint pt-1" data-testid="brand-commercial-disclaimer">
               {disclaimer}
             </p>
           </div>
 
           <div>
             <SectionCard title="How this works">
-              <ol className="space-y-2 text-ds-label text-zinc-700">
+              <ol className="space-y-2 text-ds-label text-secondary">
                 <li>1. Learn — every field links to a verified guidance topic.</li>
                 <li>2. Understand — Mercenta explains which condition requires the term.</li>
                 <li>3. Do — supply or confirm the actual or estimated figure.</li>

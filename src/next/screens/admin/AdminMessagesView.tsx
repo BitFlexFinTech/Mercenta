@@ -97,10 +97,10 @@ export function AdminMessagesView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">
+          <div className="font-medium text-strong truncate">
             {row.message.subject ?? row.message.body.slice(0, 60)}
           </div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.brandName}</div>
+          <div className="text-ds-label text-faint truncate">{row.brandName}</div>
         </div>
       ),
     },
@@ -109,7 +109,7 @@ export function AdminMessagesView({
       header: 'Channel',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">
+        <span className="text-ds-label text-muted">
           {row.message.channel.replace(/_/g, ' ')}
         </span>
       ),
@@ -129,7 +129,7 @@ export function AdminMessagesView({
       key: 'sentBy',
       header: 'Sent by',
       hideOnMobile: true,
-      render: (row) => <span className="text-ds-label text-zinc-600">{row.message.sentBy}</span>,
+      render: (row) => <span className="text-ds-label text-muted">{row.message.sentBy}</span>,
     },
     {
       key: 'human',
@@ -139,7 +139,7 @@ export function AdminMessagesView({
         row.message.requiresHuman ? (
           <InlineStatus label="Yes" tone="warning" dataStatus="needs-human" />
         ) : (
-          <span className="text-ds-label text-zinc-400">—</span>
+          <span className="text-ds-label text-quiet">—</span>
         ),
     },
   ];
@@ -170,13 +170,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search subject or body"
               aria-label="Search messages"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -189,7 +189,7 @@ return (
               value={channelFilter}
               onChange={(event) => onChangeChannel(event.target.value)}
               aria-label="Filter by channel"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All channels</option>
               {channelOptions.map((channel) => (
@@ -202,7 +202,7 @@ return (
               value={directionFilter}
               onChange={(event) => onChangeDirection(event.target.value)}
               aria-label="Filter by direction"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">Both directions</option>
               {directionOptions.map((direction) => (
@@ -217,8 +217,8 @@ return (
               aria-pressed={needsHumanOnly}
               className={`px-3 py-2 text-ds-label font-medium rounded-ds-md border ${
                 needsHumanOnly
-                  ? 'border-zinc-900 bg-zinc-950 text-white'
-                  : 'border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
+                  ? 'border-ink bg-ink-950 text-on-dark'
+                  : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >
               Needs a human reply
@@ -247,25 +247,25 @@ return (
       >
         {selected && (
           <div className="space-y-4">
-            <p className="text-ds-body text-zinc-800 whitespace-pre-wrap">{selected.message.body}</p>
-            <dl className="border-t border-zinc-200 pt-3 grid grid-cols-2 gap-3 text-ds-body">
+            <p className="text-ds-body text-ink-800 whitespace-pre-wrap">{selected.message.body}</p>
+            <dl className="border-t border-hairline pt-3 grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Channel</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Channel</dt>
+                <dd className="font-medium text-strong">
                   {selected.message.channel.replace(/_/g, ' ')}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Direction</dt>
-                <dd className="font-medium text-zinc-950">{selected.message.direction}</dd>
+                <dt className="text-ds-label text-faint">Direction</dt>
+                <dd className="font-medium text-strong">{selected.message.direction}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Sent by</dt>
-                <dd className="font-medium text-zinc-950">{selected.message.sentBy}</dd>
+                <dt className="text-ds-label text-faint">Sent by</dt>
+                <dd className="font-medium text-strong">{selected.message.sentBy}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Logged</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Logged</dt>
+                <dd className="font-medium text-strong">
                   {selected.message.createdAt.slice(0, 10)}
                 </dd>
               </div>

@@ -71,38 +71,38 @@ export function BrandSettingsView({
         <SectionCard title="Brand record" description="Held by Mercenta; changes are requested below.">
           <dl className="grid grid-cols-2 gap-3 text-ds-body">
             <div>
-              <dt className="text-ds-label text-zinc-500">Business name</dt>
-              <dd className="font-medium text-zinc-950">{profile.businessName}</dd>
+              <dt className="text-ds-label text-faint">Business name</dt>
+              <dd className="font-medium text-strong">{profile.businessName}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Region / nation</dt>
-              <dd className="font-medium text-zinc-950">
+              <dt className="text-ds-label text-faint">Region / nation</dt>
+              <dd className="font-medium text-strong">
                 {profile.region.replace(/_/g, ' ')} · {profile.nation}
               </dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Tax ID</dt>
-              <dd className="font-mono text-ds-label text-zinc-950">{profile.taxId}</dd>
+              <dt className="text-ds-label text-faint">Tax ID</dt>
+              <dd className="font-mono text-ds-label text-strong">{profile.taxId}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Signatory</dt>
-              <dd className="font-medium text-zinc-950">{profile.signatory}</dd>
+              <dt className="text-ds-label text-faint">Signatory</dt>
+              <dd className="font-medium text-strong">{profile.signatory}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Email</dt>
-              <dd className="font-medium text-zinc-950">{profile.email}</dd>
+              <dt className="text-ds-label text-faint">Email</dt>
+              <dd className="font-medium text-strong">{profile.email}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Phone</dt>
-              <dd className="font-medium text-zinc-950">{profile.phone}</dd>
+              <dt className="text-ds-label text-faint">Phone</dt>
+              <dd className="font-medium text-strong">{profile.phone}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Payout currency</dt>
-              <dd className="font-medium text-zinc-950">{profile.payoutCurrency}</dd>
+              <dt className="text-ds-label text-faint">Payout currency</dt>
+              <dd className="font-medium text-strong">{profile.payoutCurrency}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Bank (BIC / IBAN)</dt>
-              <dd className="font-mono text-ds-label text-zinc-950">
+              <dt className="text-ds-label text-faint">Bank (BIC / IBAN)</dt>
+              <dd className="font-mono text-ds-label text-strong">
                 {profile.bic} · {profile.iban ? `${profile.iban.slice(0, 4)}…` : 'not recorded'}
               </dd>
             </div>
@@ -115,16 +115,16 @@ export function BrandSettingsView({
         >
           <dl className="grid grid-cols-2 gap-3 text-ds-body">
             <div>
-              <dt className="text-ds-label text-zinc-500">Relationship</dt>
-              <dd className="font-medium text-zinc-950">{commercialRelationshipLabel}</dd>
+              <dt className="text-ds-label text-faint">Relationship</dt>
+              <dd className="font-medium text-strong">{commercialRelationshipLabel}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Operating model</dt>
-              <dd className="font-medium text-zinc-950">{verticalLabel}</dd>
+              <dt className="text-ds-label text-faint">Operating model</dt>
+              <dd className="font-medium text-strong">{verticalLabel}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Fulfilment</dt>
-              <dd className="font-medium text-zinc-950">{fulfilmentTrackLabel}</dd>
+              <dt className="text-ds-label text-faint">Fulfilment</dt>
+              <dd className="font-medium text-strong">{fulfilmentTrackLabel}</dd>
             </div>
           </dl>
         </SectionCard>
@@ -135,11 +135,11 @@ export function BrandSettingsView({
         >
           <div className="grid grid-cols-1 gap-3 max-w-2xl">
             <label className="text-ds-body">
-              <span className="text-ds-label text-zinc-500 block mb-1">Field</span>
+              <span className="text-ds-label text-faint block mb-1">Field</span>
               <select
                 value={field}
                 onChange={(event) => setField(event.target.value as ProfileChangeField)}
-                className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
               >
                 {fieldOptions.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -150,25 +150,25 @@ export function BrandSettingsView({
             </label>
 
             <label className="text-ds-body">
-              <span className="text-ds-label text-zinc-500 block mb-1">
+              <span className="text-ds-label text-faint block mb-1">
                 New value (current: {current || 'not recorded'})
               </span>
               <input
                 value={requestedValue}
                 onChange={(event) => setRequestedValue(event.target.value)}
-                className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
               />
             </label>
 
             <label className="text-ds-body">
-              <span className="text-ds-label text-zinc-500 block mb-1">
+              <span className="text-ds-label text-faint block mb-1">
                 Reason (required, and recorded)
               </span>
               <textarea
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
                 placeholder="e.g. The registered office has moved; a new certificate is attached."
               />
             </label>
@@ -180,7 +180,7 @@ export function BrandSettingsView({
                 onClick={() =>
                   onSubmitRequest({ field, requestedValue: requestedValue.trim(), reason: reason.trim() })
                 }
-                className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-white hover:bg-accent-600 disabled:opacity-50"
+                className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-on-dark hover:bg-accent-600 disabled:opacity-50"
               >
                 {busy ? 'Submitting…' : 'Submit request'}
               </button>
@@ -190,17 +190,17 @@ export function BrandSettingsView({
 
         <SectionCard title="Your requests" description="What you have asked for, and where it stands.">
           {requests.length === 0 ? (
-            <p className="text-ds-body text-zinc-600">You have not requested any changes yet.</p>
+            <p className="text-ds-body text-muted">You have not requested any changes yet.</p>
           ) : (
-            <ul className="divide-y divide-zinc-200">
+            <ul className="divide-y divide-hairline-06">
               {requests.map((request) => (
                 <li key={request.id} className="py-2.5 flex items-start justify-between gap-3">
                   <div className="min-w-0 text-ds-body">
-                    <div className="text-zinc-950">
+                    <div className="text-strong">
                       {request.field}: {request.currentValue || 'not recorded'} →{' '}
                       {request.requestedValue}
                     </div>
-                    <div className="text-ds-label text-zinc-500">
+                    <div className="text-ds-label text-faint">
                       {request.requestedAt.slice(0, 10)} · {request.reason}
                       {request.reviewNote ? ` · ${request.reviewNote}` : ''}
                     </div>

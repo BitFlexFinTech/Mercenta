@@ -83,24 +83,24 @@ export function AdminAuditView({
       mobilePrimary: true,
       render: (entry) => (
         <div className="min-w-0">
-          <div className="tabular-nums text-ds-label text-zinc-950">
+          <div className="tabular-nums text-ds-label text-strong">
             {entry.createdAt.slice(0, 19).replace('T', ' ')}
           </div>
-          <div className="text-ds-label text-zinc-500 truncate">{entry.actorId}</div>
+          <div className="text-ds-label text-faint truncate">{entry.actorId}</div>
         </div>
       ),
     },
     {
       key: 'action',
       header: 'Action',
-      render: (entry) => <span className="text-ds-body text-zinc-900">{entry.action}</span>,
+      render: (entry) => <span className="text-ds-body text-ink-900">{entry.action}</span>,
     },
     {
       key: 'entity',
       header: 'Object',
       hideOnMobile: true,
       render: (entry) => (
-        <span className="text-ds-label text-zinc-600">
+        <span className="text-ds-label text-muted">
           {entry.entityType} · <span className="font-mono">{entry.entityId}</span>
         </span>
       ),
@@ -109,7 +109,7 @@ export function AdminAuditView({
       key: 'reason',
       header: 'Reason',
       render: (entry) => (
-        <span className="text-ds-label text-zinc-600 line-clamp-2">{entry.reason}</span>
+        <span className="text-ds-label text-muted line-clamp-2">{entry.reason}</span>
       ),
     },
   ];
@@ -140,13 +140,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search action, object or reason"
               aria-label="Search audit entries"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={actorFilter}
               onChange={(event) => onChangeActor(event.target.value)}
               aria-label="Filter by actor"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All actors</option>
               {actorOptions.map((actor) => (
@@ -159,7 +159,7 @@ return (
               value={actionFilter}
               onChange={(event) => onChangeAction(event.target.value)}
               aria-label="Filter by action"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All actions</option>
               {actionOptions.map((action) => (
@@ -172,7 +172,7 @@ return (
               value={entityFilter}
               onChange={(event) => onChangeEntity(event.target.value)}
               aria-label="Filter by object type"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All object types</option>
               {entityOptions.map((entity) => (
@@ -207,39 +207,39 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Actor</dt>
-                <dd className="font-medium text-zinc-950">{selected.actorId}</dd>
+                <dt className="text-ds-label text-faint">Actor</dt>
+                <dd className="font-medium text-strong">{selected.actorId}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Object</dt>
-                <dd className="font-mono text-ds-label text-zinc-950">
+                <dt className="text-ds-label text-faint">Object</dt>
+                <dd className="font-mono text-ds-label text-strong">
                   {selected.entityType} · {selected.entityId}
                 </dd>
               </div>
               {selected.brandId && (
                 <div className="col-span-2">
-                  <dt className="text-ds-label text-zinc-500">Brand</dt>
-                  <dd className="font-medium text-zinc-950">{selected.brandId}</dd>
+                  <dt className="text-ds-label text-faint">Brand</dt>
+                  <dd className="font-medium text-strong">{selected.brandId}</dd>
                 </div>
               )}
             </dl>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Reason recorded</div>
-              <p className="text-ds-body text-zinc-800">{selected.reason}</p>
+              <div className="text-ds-label text-faint mb-1">Reason recorded</div>
+              <p className="text-ds-body text-ink-800">{selected.reason}</p>
             </div>
 
             {selected.metadata && Object.keys(selected.metadata).length > 0 && (
               <div>
-                <div className="text-ds-label text-zinc-500 mb-1">Metadata</div>
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                <div className="text-ds-label text-faint mb-1">Metadata</div>
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                   {Object.entries(selected.metadata).map(([key, value]) => (
                     <li
                       key={key}
                       className="px-3 py-2 flex items-start justify-between gap-3 text-ds-body"
                     >
-                      <span className="text-zinc-600">{key}</span>
-                      <span className="font-mono text-ds-label text-zinc-950 text-right break-all">
+                      <span className="text-muted">{key}</span>
+                      <span className="font-mono text-ds-label text-strong text-right break-all">
                         {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </span>
                     </li>

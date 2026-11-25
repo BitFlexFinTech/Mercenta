@@ -77,8 +77,8 @@ export function AdminCrmView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brand.profile.businessName}</div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.brand.category}</div>
+          <div className="font-medium text-strong truncate">{row.brand.profile.businessName}</div>
+          <div className="text-ds-label text-faint truncate">{row.brand.category}</div>
         </div>
       ),
     },
@@ -87,7 +87,7 @@ export function AdminCrmView({
       header: 'Contract',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">
+        <span className="text-ds-label text-muted">
           {row.brand.contractStatus.replace(/_/g, ' ')}
         </span>
       ),
@@ -97,7 +97,7 @@ export function AdminCrmView({
       header: 'Contact channel',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">
+        <span className="text-ds-label text-muted">
           {row.brand.profile.phone ? 'Phone declared' : 'Not declared'}
         </span>
       ),
@@ -116,7 +116,7 @@ export function AdminCrmView({
         row.needsHuman > 0 ? (
           <InlineStatus label={String(row.needsHuman)} tone="warning" dataStatus="needs-human" />
         ) : (
-          <span className="text-ds-label text-zinc-400">—</span>
+          <span className="text-ds-label text-quiet">—</span>
         ),
     },
     {
@@ -125,7 +125,7 @@ export function AdminCrmView({
       align: 'right',
       hideOnMobile: true,
       render: (row) => (
-        <span className="tabular-nums text-ds-label text-zinc-600">
+        <span className="tabular-nums text-ds-label text-muted">
           {row.lastContact ? row.lastContact.slice(0, 10) : '—'}
         </span>
       ),
@@ -158,7 +158,7 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search brand or category"
               aria-label="Search brands"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
           </div>
 
@@ -186,24 +186,24 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Contract</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Contract</dt>
+                <dd className="font-medium text-strong">
                   {selected.brand.contractStatus.replace(/_/g, ' ')}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Fulfilment track</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Fulfilment track</dt>
+                <dd className="font-medium text-strong">
                   {fulfillmentTrackLabel(selected.brand.track)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Nation</dt>
-                <dd className="font-medium text-zinc-950">{selected.brand.nation}</dd>
+                <dt className="text-ds-label text-faint">Nation</dt>
+                <dd className="font-medium text-strong">{selected.brand.nation}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Contact channel</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Contact channel</dt>
+                <dd className="font-medium text-strong">
                   {selected.brand.profile.phone
                     ? 'Phone declared'
                     : 'Not declared — instant messages fail closed'}
@@ -212,22 +212,22 @@ return (
             </dl>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Recent messages</div>
+              <div className="text-ds-label text-faint mb-1">Recent messages</div>
               {selectedMessages.length === 0 ? (
-                <p className="text-ds-body text-zinc-600">No messages are logged for this brand.</p>
+                <p className="text-ds-body text-muted">No messages are logged for this brand.</p>
               ) : (
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                   {selectedMessages.map((message) => (
                     <li key={message.id} className="px-3 py-2 text-ds-body">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-zinc-950 truncate">
+                        <span className="font-medium text-strong truncate">
                           {message.subject ?? message.channel.replace(/_/g, ' ')}
                         </span>
-                        <span className="text-ds-label text-zinc-500 shrink-0">
+                        <span className="text-ds-label text-faint shrink-0">
                           {message.createdAt.slice(0, 10)}
                         </span>
                       </div>
-                      <div className="text-ds-label text-zinc-600 mt-0.5">
+                      <div className="text-ds-label text-muted mt-0.5">
                         {message.direction} · {message.sentBy}
                         {message.requiresHuman ? ' · needs a human reply' : ''}
                       </div>

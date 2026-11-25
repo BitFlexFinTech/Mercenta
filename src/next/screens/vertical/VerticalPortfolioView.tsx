@@ -82,8 +82,8 @@ export function VerticalPortfolioView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brand.profile.businessName}</div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.brand.category}</div>
+          <div className="font-medium text-strong truncate">{row.brand.profile.businessName}</div>
+          <div className="text-ds-label text-faint truncate">{row.brand.category}</div>
         </div>
       ),
     },
@@ -165,32 +165,32 @@ return (
         {selected && (
           <dl className="grid grid-cols-2 gap-3 text-ds-body">
             <div>
-              <dt className="text-ds-label text-zinc-500">Contract</dt>
-              <dd className="font-medium text-zinc-950">
+              <dt className="text-ds-label text-faint">Contract</dt>
+              <dd className="font-medium text-strong">
                 {selected.brand.contractStatus.replace(/_/g, ' ')}
               </dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Nation</dt>
-              <dd className="font-medium text-zinc-950">{selected.brand.nation}</dd>
+              <dt className="text-ds-label text-faint">Nation</dt>
+              <dd className="font-medium text-strong">{selected.brand.nation}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Products</dt>
-              <dd className="font-medium text-zinc-950 tabular-nums">{selected.products}</dd>
+              <dt className="text-ds-label text-faint">Products</dt>
+              <dd className="font-medium text-strong tabular-nums">{selected.products}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Open purchase orders</dt>
-              <dd className="font-medium text-zinc-950 tabular-nums">{selected.openPos}</dd>
+              <dt className="text-ds-label text-faint">Open purchase orders</dt>
+              <dd className="font-medium text-strong tabular-nums">{selected.openPos}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">PO value</dt>
-              <dd className="font-medium text-zinc-950 tabular-nums">
+              <dt className="text-ds-label text-faint">PO value</dt>
+              <dd className="font-medium text-strong tabular-nums">
                 {formatGbp(selected.poValue)}
               </dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Shipments</dt>
-              <dd className="font-medium text-zinc-950 tabular-nums">{selected.shipments}</dd>
+              <dt className="text-ds-label text-faint">Shipments</dt>
+              <dd className="font-medium text-strong tabular-nums">{selected.shipments}</dd>
             </div>
           </dl>
         )}

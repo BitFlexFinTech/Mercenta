@@ -33,7 +33,7 @@ export interface AdminControlCentreViewProps {
 const PRIORITY_TONE: Record<string, string> = {
   urgent: 'text-red-700',
   high: 'text-amber-700',
-  normal: 'text-zinc-600',
+  normal: 'text-muted',
 };
 
 /**
@@ -47,14 +47,14 @@ function QueuePanel({ panel }: { panel: ControlPanel }) {
   const queue = panel.queue;
   if (!queue) return null;
 
-  const footer = <p className="mt-2 text-ds-label text-zinc-500">Owned by {panel.owner}</p>;
+  const footer = <p className="mt-2 text-ds-label text-faint">Owned by {panel.owner}</p>;
 
   if (queue.kind === 'pre_audit') {
     const columns: ConsoleColumn<PreAuditQueueRow>[] = [
       { key: 'brand', header: 'Brand', mobilePrimary: true, render: (r) => (
         <div>
-          <div className="text-zinc-950">{r.brand}</div>
-          <div className="text-ds-label text-zinc-500">{r.website}</div>
+          <div className="text-strong">{r.brand}</div>
+          <div className="text-ds-label text-faint">{r.website}</div>
         </div>
       ) },
       { key: 'category', header: 'Category', hideOnMobile: true, render: (r) => r.category },
@@ -83,8 +83,8 @@ function QueuePanel({ panel }: { panel: ControlPanel }) {
   const columns: ConsoleColumn<CommercialReadinessQueueRow>[] = [
     { key: 'product', header: 'Product', mobilePrimary: true, render: (r) => (
       <div>
-        <div className="text-zinc-950">{r.product}</div>
-        <div className="text-ds-label text-zinc-500">{r.productRef ?? r.recordId}</div>
+        <div className="text-strong">{r.product}</div>
+        <div className="text-ds-label text-faint">{r.productRef ?? r.recordId}</div>
       </div>
     ) },
     { key: 'brand', header: 'Brand', render: (r) => r.brandLabel },
@@ -181,7 +181,7 @@ export function AdminControlCentreView({
             <button
               type="button"
               onClick={() => onNavigate(active.destination)}
-              className="px-3 py-1.5 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
+              className="px-3 py-1.5 text-ds-label font-medium rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface"
             >
               Open {active.destination.replace(/_/g, ' ')} →
             </button>
@@ -193,17 +193,17 @@ export function AdminControlCentreView({
                 type="button"
                 onClick={() => onNavigate(item.destination)}
                 data-testid={`control-metric-${item.id}`}
-                className="text-left border border-zinc-200 rounded-ds-md p-3 bg-white hover:bg-zinc-50"
+                className="text-left border border-hairline rounded-ds-md p-3 bg-surface-raised hover:bg-surface"
               >
-                <div className="text-ds-label text-zinc-500">{item.label}</div>
-                <div className="text-ds-heading font-semibold text-zinc-950 tabular-nums">
+                <div className="text-ds-label text-faint">{item.label}</div>
+                <div className="text-ds-heading font-semibold text-strong tabular-nums">
                   {item.value}
                 </div>
-                <div className={`text-ds-label font-medium ${TONE_TEXT[item.tone] ?? 'text-zinc-700'}`}>
+                <div className={`text-ds-label font-medium ${TONE_TEXT[item.tone] ?? 'text-secondary'}`}>
                   {item.statusText}
                 </div>
-                <div className="mt-1 text-ds-label text-zinc-500">{item.context}</div>
-                <div className="mt-2 text-ds-label text-zinc-400">
+                <div className="mt-1 text-ds-label text-faint">{item.context}</div>
+                <div className="mt-2 text-ds-label text-quiet">
                   {item.destination.replace(/_/g, ' ')} →
                 </div>
               </button>
@@ -214,10 +214,10 @@ export function AdminControlCentreView({
         {sectionPanels.length > 0 && (
           <div className="space-y-4" data-testid="control-panels">
             <div>
-              <h2 className="text-ds-body font-semibold text-zinc-950">
+              <h2 className="text-ds-body font-semibold text-strong">
                 {active.label} — specialised panels
               </h2>
-              <p className="mt-0.5 text-ds-label text-zinc-600 max-w-3xl">
+              <p className="mt-0.5 text-ds-label text-muted max-w-3xl">
                 The sub-models this capability area&apos;s owner already derives, drawn in full. Each panel
                 names the canonical module that produces its figures.
               </p>
@@ -233,28 +233,28 @@ export function AdminControlCentreView({
           description="Every item points at the real record that needs a decision."
         >
           {model.attention.length === 0 ? (
-            <p className="text-ds-body text-zinc-600">
+            <p className="text-ds-body text-muted">
               Nothing is waiting on a decision. This is the real state of the records, not an
               optimistic summary.
             </p>
           ) : (
-            <ul className="divide-y divide-zinc-200">
+            <ul className="divide-y divide-hairline-06">
               {model.attention.map((item) => (
                 <li key={item.id} className="py-2.5 flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-ds-body text-zinc-950">{item.title}</div>
-                    <div className="text-ds-label text-zinc-500">
+                    <div className="text-ds-body text-strong">{item.title}</div>
+                    <div className="text-ds-label text-faint">
                       {item.detail} · {item.source}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-ds-label font-medium ${PRIORITY_TONE[item.priority] ?? 'text-zinc-600'}`}>
+                    <span className={`text-ds-label font-medium ${PRIORITY_TONE[item.priority] ?? 'text-muted'}`}>
                       {item.priority}
                     </span>
                     <button
                       type="button"
                       onClick={() => onNavigate(item.destination)}
-                      className="px-2.5 py-1 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
+                      className="px-2.5 py-1 text-ds-label font-medium rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface"
                     >
                       Open →
                     </button>
@@ -272,8 +272,8 @@ export function AdminControlCentreView({
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-ds-body">
             {model.dataSources.map((source) => (
               <div key={source.label} className="flex items-baseline justify-between gap-3">
-                <dt className="text-zinc-600">{source.label}</dt>
-                <dd className="font-medium text-zinc-950 text-right">{source.value}</dd>
+                <dt className="text-muted">{source.label}</dt>
+                <dd className="font-medium text-strong text-right">{source.value}</dd>
               </div>
             ))}
           </dl>

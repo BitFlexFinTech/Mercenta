@@ -99,8 +99,8 @@ export function AdminContractsView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brandName}</div>
-          <div className="text-ds-label text-zinc-500 truncate">
+          <div className="font-medium text-strong truncate">{row.brandName}</div>
+          <div className="text-ds-label text-faint truncate">
             {row.contract.type.replace(/_/g, ' ')}
           </div>
         </div>
@@ -142,7 +142,7 @@ export function AdminContractsView({
       header: 'Track',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">
+        <span className="text-ds-label text-muted">
           {fulfillmentTrackLabel(row.contract.fulfillmentTrack)}
         </span>
       ),
@@ -175,13 +175,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search brand or contract type"
               aria-label="Search contracts"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -194,7 +194,7 @@ return (
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -229,41 +229,41 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Status</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Status</dt>
+                <dd className="font-medium text-strong">
                   {contractStatusPresentation(selected.contract.status).label}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Commission</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Commission</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {(selected.contract.commissionRate * 100).toFixed(2)}%
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Monthly fee</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Monthly fee</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.contract.monthlyFee, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Fulfilment track</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Fulfilment track</dt>
+                <dd className="font-medium text-strong">
                   {fulfillmentTrackLabel(selected.contract.fulfillmentTrack)}
                 </dd>
               </div>
             </dl>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">
+              <div className="text-ds-label text-faint mb-1">
                 Accepted agreements
               </div>
               {selectedAgreements.length === 0 ? (
-                <p className="text-ds-body text-zinc-600">
+                <p className="text-ds-body text-muted">
                   No separate agreements are recorded for this brand.
                 </p>
               ) : (
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                   {selectedAgreements.map((agreement) => (
                     <li
                       key={agreement.id}
@@ -272,7 +272,7 @@ return (
                       <span className="min-w-0 truncate">
                         {agreement.agreementType.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-ds-label text-zinc-600 shrink-0">
+                      <span className="text-ds-label text-muted shrink-0">
                         v{agreement.version} · {agreement.acceptedAt.slice(0, 10)}
                       </span>
                     </li>

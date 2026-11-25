@@ -283,15 +283,15 @@ export function BrandPurchaseOrdersView({
                 e.stopPropagation();
                 setExpandedPoId((curr) => (curr === po.id ? null : po.id));
               }}
-              className="font-mono font-semibold text-zinc-950 hover:text-accent text-left focus-visible:outline-2 focus-visible:outline-accent"
+              className="font-mono font-semibold text-strong hover:text-accent text-left focus-visible:outline-2 focus-visible:outline-accent"
             >
               {po.poNumber}
             </button>
             {po.simulated === true && (
-              <span className="text-ds-micro font-mono text-zinc-500">(sim)</span>
+              <span className="text-ds-micro font-mono text-faint">(sim)</span>
             )}
           </div>
-          <div className="text-ds-label text-zinc-500">
+          <div className="text-ds-label text-faint">
             {orderDateLabel(po.orderDate)} · {po.lineItems.length} line(s)
             {po.freightTerm
               ? ` · ${po.freightTerm === 'collect' ? 'Freight Collect' : 'Freight Prepaid'}`
@@ -338,19 +338,19 @@ export function BrandPurchaseOrdersView({
       render: (po) => {
         if (po.freightTerm === 'collect' && po.shipWindowEnd) {
           return (
-            <span className="text-ds-label text-zinc-700">
+            <span className="text-ds-label text-secondary">
               Ship by {new Date(po.shipWindowEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
             </span>
           );
         }
         if (po.freightTerm === 'prepaid' && po.deliveryWindowEnd) {
           return (
-            <span className="text-ds-label text-zinc-700">
+            <span className="text-ds-label text-secondary">
               Deliver by {new Date(po.deliveryWindowEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
             </span>
           );
         }
-        return <span className="text-ds-label text-zinc-400">—</span>;
+        return <span className="text-ds-label text-quiet">—</span>;
       },
     },
     {
@@ -358,7 +358,7 @@ export function BrandPurchaseOrdersView({
       header: 'Order Value',
       align: 'right',
       render: (po) => (
-        <span className="font-mono font-semibold text-zinc-950">
+        <span className="font-mono font-semibold text-strong">
           £{po.poValue.toLocaleString('en-GB')}
         </span>
       ),
@@ -382,7 +382,7 @@ export function BrandPurchaseOrdersView({
               type="button"
               data-state={`brand-po-preview-${po.id}`}
               onClick={() => setPreviewPoId(po.id)}
-              className="px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50 whitespace-nowrap"
+              className="px-2.5 py-1 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface whitespace-nowrap"
             >
               Preview
             </button>
@@ -391,7 +391,7 @@ export function BrandPurchaseOrdersView({
                 type="button"
                 data-testid={`po-open-documents-${po.poNumber}`}
                 onClick={() => onOpenLogistics(po.poNumber)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 whitespace-nowrap"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface whitespace-nowrap"
               >
                 <FileText className="w-3.5 h-3.5" aria-hidden="true" />
                 Docs
@@ -404,7 +404,7 @@ export function BrandPurchaseOrdersView({
                   ackingPoId === po.id ? void handleAckSubmit(po) : beginAck(po)
                 }
                 disabled={busyPoId === po.id}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600 whitespace-nowrap disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600 whitespace-nowrap disabled:opacity-50"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                 {ackingPoId === po.id ? 'Submit ack' : 'Acknowledge'}
@@ -418,7 +418,7 @@ export function BrandPurchaseOrdersView({
                   ackingPoId === po.id ? void handleAckSubmit(po) : beginAck(po)
                 }
                 disabled={busyPoId === po.id}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 whitespace-nowrap"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface whitespace-nowrap"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                 {ackingPoId === po.id ? 'Submit amendment' : 'Amend'}
@@ -431,7 +431,7 @@ export function BrandPurchaseOrdersView({
                 onClick={() =>
                   correctionPoId === po.id ? setCorrectionPoId(null) : beginCorrection(po)
                 }
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-700 hover:bg-zinc-50 whitespace-nowrap"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label font-medium text-secondary hover:bg-surface whitespace-nowrap"
               >
                 <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                 Packing differs
@@ -446,7 +446,7 @@ export function BrandPurchaseOrdersView({
                 );
               }}
               aria-label={`Message Mercenta about ${po.poNumber}`}
-              className="p-1.5 rounded-ds-sm border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950"
+              className="p-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-muted hover:text-strong"
             >
               <MessageSquare className="w-3.5 h-3.5" />
             </button>
@@ -459,7 +459,7 @@ export function BrandPurchaseOrdersView({
                 );
               }}
               aria-label={`Log call about ${po.poNumber}`}
-              className="p-1.5 rounded-ds-sm border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950"
+              className="p-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-muted hover:text-strong"
             >
               <Phone className="w-3.5 h-3.5" />
             </button>
@@ -496,13 +496,13 @@ export function BrandPurchaseOrdersView({
           ) : (
             <>
               <span>
-                Showing <strong className="font-mono text-zinc-950">{filteredPos.length}</strong> of{' '}
-                <strong className="font-mono text-zinc-950">{pos.length}</strong>
+                Showing <strong className="font-mono text-strong">{filteredPos.length}</strong> of{' '}
+                <strong className="font-mono text-strong">{pos.length}</strong>
               </span>
               <span aria-hidden="true">·</span>
               <span>
                 Queue value{' '}
-                <strong className="font-mono text-zinc-950">
+                <strong className="font-mono text-strong">
                   £{queueValue.toLocaleString('en-GB')}
                 </strong>
               </span>
@@ -525,7 +525,7 @@ export function BrandPurchaseOrdersView({
                 ])
               )
             }
-            className="px-3.5 py-2 rounded-ds-md border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 whitespace-nowrap"
+            className="px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface whitespace-nowrap"
           >
             Export CSV
           </button>
@@ -538,21 +538,21 @@ export function BrandPurchaseOrdersView({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
+            <Search className="w-4 h-4 text-quiet absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search PO number…"
               aria-label="Search purchase orders"
-              className="pl-9 pr-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-56 focus:outline-2 focus:outline-accent"
+              className="pl-9 pr-3 py-1.5 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-56 focus:outline-2 focus:outline-accent"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             aria-label="Filter by status"
-            className="px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 focus:outline-2 focus:outline-accent"
+            className="px-3 py-1.5 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong focus:outline-2 focus:outline-accent"
           >
             <option value="all">Status: all</option>
             {PO_STATUS_ORDER.map((s) => (
@@ -563,14 +563,14 @@ export function BrandPurchaseOrdersView({
           </select>
         </div>
 
-        <div className="inline-flex rounded-ds-md border border-zinc-200 bg-white p-0.5 self-start sm:self-auto">
+        <div className="inline-flex rounded-ds-md border border-hairline bg-surface-raised p-0.5 self-start sm:self-auto">
           {(['compact', 'comfortable'] as const).map((mode) => (
             <button
               key={mode}
               type="button"
               onClick={() => setDensity(mode)}
               className={`px-3 py-1 text-ds-label font-medium rounded-ds-sm capitalize ${
-                density === mode ? 'bg-zinc-950 text-white' : 'text-zinc-600 hover:text-zinc-950'
+                density === mode ? 'bg-ink-950 text-on-dark' : 'text-muted hover:text-strong'
               }`}
             >
               {mode}
@@ -582,7 +582,7 @@ export function BrandPurchaseOrdersView({
       {notice && (
         <div
           role="status"
-          className="border border-state-info/20 bg-state-info/10 rounded-ds-md px-4 py-3 text-ds-body text-zinc-900"
+          className="border border-state-info/20 bg-state-info/10 rounded-ds-md px-4 py-3 text-ds-body text-ink-900"
         >
           {notice}
         </div>
@@ -643,16 +643,16 @@ export function BrandPurchaseOrdersView({
                 />
 
                 {contacting?.id === po.id && renderCommPanel && (
-                  <div className="border border-zinc-200 bg-white rounded-ds-md p-4">
+                  <div className="border border-hairline bg-surface-raised rounded-ds-md p-4">
                     {renderCommPanel(po)}
                   </div>
                 )}
 
                 {/* Inline Ack / Amend Panel */}
                 {ackingPoId === po.id && (canAct || canAmend) && (
-                  <div className="border border-zinc-300 bg-white rounded-ds-md p-4 space-y-3">
+                  <div className="border border-hairline-strong bg-surface-raised rounded-ds-md p-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-ds-body font-semibold text-zinc-950">
+                      <h3 className="text-ds-body font-semibold text-strong">
                         {canAmend ? 'Amend line acknowledgements' : 'Line-item acknowledgement'}
                       </h3>
                       <div className="flex items-center gap-2">
@@ -660,14 +660,14 @@ export function BrandPurchaseOrdersView({
                           type="button"
                           onClick={() => void handleAckSubmit(po)}
                           disabled={busyPoId === po.id}
-                          className="px-3.5 py-1.5 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600 disabled:opacity-50"
+                          className="px-3.5 py-1.5 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600 disabled:opacity-50"
                         >
                           {canAmend ? 'Submit amendment' : 'Submit acknowledgment'}
                         </button>
                         <button
                           type="button"
                           onClick={() => setAckingPoId(null)}
-                          className="px-3 py-1.5 rounded-ds-md border border-zinc-200 text-ds-label font-medium text-zinc-700 hover:bg-zinc-50"
+                          className="px-3 py-1.5 rounded-ds-md border border-hairline text-ds-label font-medium text-secondary hover:bg-surface"
                         >
                           Cancel
                         </button>
@@ -678,21 +678,21 @@ export function BrandPurchaseOrdersView({
                         {PO_AMENDMENT_WINDOW_RULE_TEXT}
                       </p>
                     )}
-                    <p className="text-ds-label text-zinc-600" data-testid={`po-ack-window-state-${po.poNumber}`}>
+                    <p className="text-ds-label text-muted" data-testid={`po-ack-window-state-${po.poNumber}`}>
                       {poAcknowledgementWindow(po).reason}
                     </p>
                     <HoldDutyLine po={po} />
                     <SubmitCompletenessNotice po={po} lineAcks={lineAcks} />
 
-                    <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                    <div className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                       {po.lineItems.map((li) => {
                         const draftLine = lineAcks[li.sku];
                         if (!draftLine) return null;
                         const backOrderAllowed = canBackOrderLine(li);
                         return (
                           <div key={li.sku} className="p-3 flex flex-wrap items-center gap-3 text-ds-label">
-                            <span className="font-mono font-semibold text-zinc-950 w-24">{li.sku}</span>
-                            <span className="text-zinc-600 w-44 truncate">{li.productName}</span>
+                            <span className="font-mono font-semibold text-strong w-24">{li.sku}</span>
+                            <span className="text-muted w-44 truncate">{li.productName}</span>
                             <select
                               value={draftLine.ackStatus}
                               data-testid={`po-ack-status-${li.sku}`}
@@ -706,20 +706,20 @@ export function BrandPurchaseOrdersView({
                                   },
                                 }))
                               }
-                              className="px-2 py-1 border border-zinc-300 rounded-ds-sm bg-white text-zinc-950"
+                              className="px-2 py-1 border border-hairline-strong rounded-ds-sm bg-surface-raised text-strong"
                             >
                               <option value="accepted">Accepted</option>
                               {backOrderAllowed && <option value="backordered">Backordered</option>}
                               <option value="rejected">Rejected</option>
                             </select>
                             {!backOrderAllowed && (
-                              <span className="text-ds-micro text-zinc-500" data-testid={`po-backorder-blocked-${li.sku}`}>
+                              <span className="text-ds-micro text-faint" data-testid={`po-backorder-blocked-${li.sku}`}>
                                 {backOrderAvailabilityLabel(li)}
                               </span>
                             )}
                             {draftLine.ackStatus !== 'rejected' && (
                               <>
-                                <label className="flex items-center gap-1 text-zinc-600">
+                                <label className="flex items-center gap-1 text-muted">
                                   Qty
                                   <input
                                     type="number"
@@ -735,11 +735,11 @@ export function BrandPurchaseOrdersView({
                                         },
                                       }))
                                     }
-                                    className="w-16 px-2 py-1 border border-zinc-300 rounded-ds-sm bg-white text-zinc-950 font-mono"
+                                    className="w-16 px-2 py-1 border border-hairline-strong rounded-ds-sm bg-surface-raised text-strong font-mono"
                                   />
                                   <span className="font-mono">/ {li.quantity}</span>
                                 </label>
-                                <label className="flex items-center gap-1 text-zinc-600">
+                                <label className="flex items-center gap-1 text-muted">
                                   Unit £
                                   <input
                                     type="number"
@@ -755,13 +755,13 @@ export function BrandPurchaseOrdersView({
                                         },
                                       }))
                                     }
-                                    className="w-20 px-2 py-1 border border-zinc-300 rounded-ds-sm bg-white text-zinc-950 font-mono"
+                                    className="w-20 px-2 py-1 border border-hairline-strong rounded-ds-sm bg-surface-raised text-strong font-mono"
                                   />
                                 </label>
                               </>
                             )}
                             {draftLine.ackStatus === 'backordered' && (
-                              <label className="flex items-center gap-1 text-zinc-600">
+                              <label className="flex items-center gap-1 text-muted">
                                 Ship by
                                 <input
                                   type="date"
@@ -775,7 +775,7 @@ export function BrandPurchaseOrdersView({
                                       },
                                     }))
                                   }
-                                  className="px-2 py-1 border border-zinc-300 rounded-ds-sm bg-white text-zinc-950"
+                                  className="px-2 py-1 border border-hairline-strong rounded-ds-sm bg-surface-raised text-strong"
                                 />
                               </label>
                             )}
@@ -792,7 +792,7 @@ export function BrandPurchaseOrdersView({
                                     },
                                   }));
                                 }}
-                                className="px-2 py-1 border border-zinc-300 rounded-ds-sm bg-white text-zinc-950"
+                                className="px-2 py-1 border border-hairline-strong rounded-ds-sm bg-surface-raised text-strong"
                               >
                                 <option value="">Rejection code…</option>
                                 {PO_REJECTION_CODES.map((c) => (
@@ -818,8 +818,8 @@ export function BrandPurchaseOrdersView({
                     <div className="text-ds-body font-semibold text-state-danger">
                       Mercenta draft — required channel rejection
                     </div>
-                    <p className="text-ds-label text-zinc-700">{onBehalfDraft.ruleText}</p>
-                    <p className="text-ds-label text-zinc-700 font-mono">
+                    <p className="text-ds-label text-secondary">{onBehalfDraft.ruleText}</p>
+                    <p className="text-ds-label text-secondary font-mono">
                       Draft {onBehalfDraft.draftId} · reason {onBehalfDraft.rejectionCode}
                     </p>
                     <p className="text-ds-label text-state-warning">
@@ -834,7 +834,7 @@ export function BrandPurchaseOrdersView({
                         const res = await onApproveOnBehalf(po, onBehalfDraft.draftId);
                         setNotice(res.notice);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-md bg-state-danger/10 text-white text-ds-label font-medium hover:bg-state-danger/10"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-md bg-state-danger/10 text-on-dark text-ds-label font-medium hover:bg-state-danger/10"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Approve — reject all lines on my behalf
@@ -843,7 +843,7 @@ export function BrandPurchaseOrdersView({
                 )}
 
                 {po.onBehalfDraft?.approvedAt && (
-                  <p className="text-ds-label text-zinc-600" data-testid={`po-onbehalf-approved-${po.poNumber}`}>
+                  <p className="text-ds-label text-muted" data-testid={`po-onbehalf-approved-${po.poNumber}`}>
                     On-behalf rejection draft <span className="font-mono">{po.onBehalfDraft.id}</span> approved by{' '}
                     {po.onBehalfDraft.approvedBy} at {new Date(po.onBehalfDraft.approvedAt).toLocaleString('en-GB')}
                     {po.onBehalfDraft.approvedByAdmin ? ' (Mercenta admin override)' : ''} · reason{' '}
@@ -854,10 +854,10 @@ export function BrandPurchaseOrdersView({
                 {/* Mercenta channel instruction outcome */}
                 {primaryInst && (
                   <div
-                    className="border border-zinc-200 bg-white rounded-ds-md p-4 space-y-1.5 text-ds-label"
+                    className="border border-hairline bg-surface-raised rounded-ds-md p-4 space-y-1.5 text-ds-label"
                     data-testid={`po-mercenta-status-${po.poNumber}`}
                   >
-                    <div className="font-semibold text-zinc-950">
+                    <div className="font-semibold text-strong">
                       Mercenta channel action — you are not required to file anything
                     </div>
                     {primaryInst.state === 'pending_mercenta_action' && (
@@ -869,28 +869,28 @@ export function BrandPurchaseOrdersView({
                       </p>
                     )}
                     {primaryInst.outcome?.channelAcknowledgement?.ok && (
-                      <p className="text-zinc-800">
+                      <p className="text-ink-800">
                         Acknowledgement transmitted — {primaryInst.outcome.channelAcknowledgement.acknowledgementId} ·{' '}
                         {primaryInst.outcome.channelAcknowledgement.status}
                         {primaryInst.outcome.channelAcknowledgement.mode === 'mock' ? ' · simulated (no live call)' : ''}
                       </p>
                     )}
                     {primaryInst.outcome?.routingRequest && (
-                      <p className="text-zinc-800">
+                      <p className="text-ink-800">
                         {primaryInst.outcome.routingRequest.raised
                           ? `Routing request raised — ${primaryInst.outcome.routingRequest.reference} · ${routingCarrierLabel(primaryInst.outcome.routingRequest)}`
                           : `Routing request not applicable — ${primaryInst.outcome.routingRequest.reference}`}
                       </p>
                     )}
                     {primaryInst.outcome?.asn && (
-                      <p className="text-zinc-800">
+                      <p className="text-ink-800">
                         {primaryInst.outcome.asn.filed
                           ? `ASN filed — ${primaryInst.outcome.asn.reference}${primaryInst.outcome.asn.shipmentId ? ` · consignment ${primaryInst.outcome.asn.shipmentId}` : ''}`
                           : `ASN — ${primaryInst.outcome.asn.note ?? 'not filed'}`}
                       </p>
                     )}
                     {correctionInst && correctionInst !== primaryInst && (
-                      <p className="text-zinc-800">
+                      <p className="text-ink-800">
                         {correctionInst.outcome?.asn?.filed
                           ? `Packing correction recorded — ASN filed (${correctionInst.outcome.asn.reference}).`
                           : correctionInst.outcome?.refusedReason
@@ -903,25 +903,25 @@ export function BrandPurchaseOrdersView({
 
                 {/* Packing correction panel */}
                 {correctionPoId === po.id && (
-                  <div className="border border-zinc-300 bg-white rounded-ds-md p-4 space-y-3">
-                    <p className="text-ds-label text-zinc-700">
+                  <div className="border border-hairline-strong bg-surface-raised rounded-ds-md p-4 space-y-3">
+                    <p className="text-ds-label text-secondary">
                       State actual packed quantities so Mercenta re-files the ASN. You do not file the ASN or select a carrier.
                     </p>
                     <table className="w-full text-ds-label">
                       <thead>
-                        <tr className="border-b border-zinc-200 text-zinc-500">
+                        <tr className="border-b border-hairline text-faint">
                           <th className="text-left py-1.5">SKU</th>
                           <th className="text-right py-1.5">Acknowledged</th>
                           <th className="text-right py-1.5">Packed qty</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-200">
+                      <tbody className="divide-y divide-hairline-06">
                         {po.lineItems
                           .filter((l) => l.ackStatus !== 'rejected')
                           .map((l) => (
                             <tr key={l.sku}>
-                              <td className="py-2 font-mono text-zinc-800">{l.sku}</td>
-                              <td className="py-2 text-right font-mono text-zinc-600">
+                              <td className="py-2 font-mono text-ink-800">{l.sku}</td>
+                              <td className="py-2 text-right font-mono text-muted">
                                 {l.acknowledgedQty ?? l.quantity}
                               </td>
                               <td className="py-2 text-right">
@@ -936,7 +936,7 @@ export function BrandPurchaseOrdersView({
                                       [l.sku]: Number(e.target.value),
                                     }))
                                   }
-                                  className="w-20 px-2 py-1 border border-zinc-300 rounded-ds-sm text-right font-mono"
+                                  className="w-20 px-2 py-1 border border-hairline-strong rounded-ds-sm text-right font-mono"
                                 />
                               </td>
                             </tr>
@@ -949,7 +949,7 @@ export function BrandPurchaseOrdersView({
                       onChange={(e) => setCorrectionNote(e.target.value)}
                       placeholder="Note for Mercenta (optional)"
                       aria-label="Packing correction note"
-                      className="w-full px-3 py-1.5 text-ds-body border border-zinc-300 rounded-ds-md"
+                      className="w-full px-3 py-1.5 text-ds-body border border-hairline-strong rounded-ds-md"
                     />
                     <RoutingRequestStatus
                       poFreightTerm={po.freightTerm}
@@ -971,14 +971,14 @@ export function BrandPurchaseOrdersView({
                         type="button"
                         onClick={() => void handleCorrectionSubmit(po)}
                         disabled={busyPoId === po.id}
-                        className="px-3.5 py-1.5 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
+                        className="px-3.5 py-1.5 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
                       >
                         Send packing correction to Mercenta
                       </button>
                       <button
                         type="button"
                         onClick={() => setCorrectionPoId(null)}
-                        className="px-3 py-1.5 rounded-ds-md border border-zinc-200 text-ds-label font-medium text-zinc-700"
+                        className="px-3 py-1.5 rounded-ds-md border border-hairline text-ds-label font-medium text-secondary"
                       >
                         Close
                       </button>
@@ -987,9 +987,9 @@ export function BrandPurchaseOrdersView({
                 )}
 
                 {/* Line items & History table */}
-                <div className="border border-zinc-200 bg-white rounded-ds-md overflow-hidden">
+                <div className="border border-hairline bg-surface-raised rounded-ds-md overflow-hidden">
                   <table className="w-full text-ds-label">
-                    <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-500">
+                    <thead className="bg-surface border-b border-hairline text-faint">
                       <tr>
                         <th className="text-left px-3 py-2 font-medium uppercase tracking-[0.06em]">SKU</th>
                         <th className="text-left px-3 py-2 font-medium uppercase tracking-[0.06em]">Product</th>
@@ -998,11 +998,11 @@ export function BrandPurchaseOrdersView({
                         <th className="text-right px-3 py-2 font-medium uppercase tracking-[0.06em]">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-200">
+                    <tbody className="divide-y divide-hairline-06">
                       {po.lineItems.map((li) => (
                         <tr key={li.sku}>
-                          <td className="px-3 py-2 font-mono text-zinc-700">{li.sku}</td>
-                          <td className="px-3 py-2 text-zinc-950">{li.productName}</td>
+                          <td className="px-3 py-2 font-mono text-secondary">{li.sku}</td>
+                          <td className="px-3 py-2 text-strong">{li.productName}</td>
                           <td className="px-3 py-2 text-right font-mono">{li.quantity}</td>
                           <td className="px-3 py-2 text-right font-mono">£{li.unitPrice.toFixed(2)}</td>
                           <td className="px-3 py-2 text-right font-mono">£{(li.quantity * li.unitPrice).toFixed(2)}</td>
@@ -1031,17 +1031,17 @@ export function BrandPurchaseOrdersView({
                           </div>
                         );
                       })}
-                    <p className="text-zinc-600">{BACKORDER_RESTOCK_TARGET.attributionNote}</p>
+                    <p className="text-muted">{BACKORDER_RESTOCK_TARGET.attributionNote}</p>
                   </div>
                 )}
 
                 {po.lineItems.some((l) => l.ackHistory && l.ackHistory.length > 0) && (
-                  <div className="border border-zinc-200 bg-white rounded-ds-md p-3 space-y-2">
-                    <div className="text-ds-micro font-semibold uppercase tracking-[0.06em] text-zinc-500">
+                  <div className="border border-hairline bg-surface-raised rounded-ds-md p-3 space-y-2">
+                    <div className="text-ds-micro font-semibold uppercase tracking-[0.06em] text-faint">
                       Acknowledgment History
                     </div>
                     <table className="w-full text-ds-label">
-                      <thead className="border-b border-zinc-200 text-zinc-500">
+                      <thead className="border-b border-hairline text-faint">
                         <tr>
                           <th className="text-left py-1">SKU</th>
                           <th className="text-left py-1">Date</th>
@@ -1051,7 +1051,7 @@ export function BrandPurchaseOrdersView({
                           <th className="text-left py-1">Code</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-200">
+                      <tbody className="divide-y divide-hairline-06">
                         {po.lineItems
                           .filter((l) => l.ackHistory && l.ackHistory.length > 0)
                           .flatMap((l) =>
@@ -1060,13 +1060,13 @@ export function BrandPurchaseOrdersView({
                               return (
                                 <tr key={`${l.sku}-${h.acknowledgedAt}`}>
                                   <td className="py-1.5 font-mono">{l.sku}</td>
-                                  <td className="py-1.5 font-mono text-zinc-600">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
+                                  <td className="py-1.5 font-mono text-muted">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
                                   <td className="py-1.5">
                                     <InlineStatus label={ackPres.label} tone={mapStatusTone(ackPres.tone)} dataStatus={ackPres.dataStatus} />
                                   </td>
                                   <td className="py-1.5 text-right font-mono">{h.acknowledgedQty}</td>
                                   <td className="py-1.5 text-right font-mono">£{h.unitPrice.toFixed(2)}</td>
-                                  <td className="py-1.5 text-zinc-600">{h.rejectionCode ?? '—'}</td>
+                                  <td className="py-1.5 text-muted">{h.rejectionCode ?? '—'}</td>
                                 </tr>
                               );
                             })
@@ -1105,7 +1105,7 @@ export function BrandPurchaseOrdersView({
         footer={
           previewRecord ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-label text-zinc-500">
+              <span className="text-ds-label text-faint">
                 {previewRecord.simulated === true ? 'Operational simulation record' : 'Recorded purchase order'}
               </span>
               <div className="flex items-center gap-2">
@@ -1117,7 +1117,7 @@ export function BrandPurchaseOrdersView({
                       beginAck(previewRecord);
                       setPreviewPoId(null);
                     }}
-                    className="px-3.5 py-1.5 rounded-ds-md bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
+                    className="px-3.5 py-1.5 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
                   >
                     Acknowledge
                   </button>
@@ -1129,7 +1129,7 @@ export function BrandPurchaseOrdersView({
                     setExpandedPoId(previewRecord.id);
                     setPreviewPoId(null);
                   }}
-                  className="px-3.5 py-1.5 rounded-ds-md border border-zinc-300 bg-white text-zinc-900 text-ds-label font-medium hover:bg-zinc-50"
+                  className="px-3.5 py-1.5 rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-900 text-ds-label font-medium hover:bg-surface"
                 >
                   Open full record
                 </button>
@@ -1149,7 +1149,7 @@ function AckDeadlineText({ po }: { po: PurchaseOrder }) {
   if (win.channelState === 'acknowledged' || win.channelState === 'closed') return null;
   if (win.channelState === 'unknown' || win.hoursLeft === null) {
     return (
-      <div className="text-ds-micro text-zinc-500" title={win.reason}>
+      <div className="text-ds-micro text-faint" title={win.reason}>
         Ack window unreadable
       </div>
     );
@@ -1192,7 +1192,7 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
           Your acknowledgement answers an earlier version of this order and must be updated before shipping.
         </p>
       )}
-      <p className="text-zinc-600">{PO_REVISION_RULE_TEXT}</p>
+      <p className="text-muted">{PO_REVISION_RULE_TEXT}</p>
     </div>
   );
 }
@@ -1210,7 +1210,7 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
           </li>
         ))}
       </ul>
-      <p className="text-zinc-600">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
+      <p className="text-muted">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
     </div>
   );
 }
@@ -1220,11 +1220,11 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
   if (!po.channelHold) return null;
   return (
     <div className="border border-state-warning/20 bg-state-warning/10 rounded-ds-md p-3 text-ds-label space-y-1" data-testid={`po-channel-hold-${po.poNumber}`}>
-      <p className="font-medium text-zinc-900">
+      <p className="font-medium text-ink-900">
         {duty.held ? 'Retail channel hold: this order is on hold' : 'Retail channel hold lifted'}
       </p>
-      <p className="text-zinc-700">{duty.statement}</p>
-      <p className="text-zinc-600">{duty.ruleText}</p>
+      <p className="text-secondary">{duty.statement}</p>
+      <p className="text-muted">{duty.ruleText}</p>
     </div>
   );
 }
@@ -1242,7 +1242,7 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
           <li key={sku}>{sku} — rejected because omitted</li>
         ))}
       </ul>
-      <p className="text-zinc-600">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
+      <p className="text-muted">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
     </div>
   );
 }
@@ -1264,11 +1264,11 @@ function OnBehalfAuthorisationBlock({
   if (authority.closingWindow || authority.pastLimit) return null;
 
   return (
-    <div className="border border-zinc-200 bg-white rounded-ds-md p-3 text-ds-label space-y-2" data-testid={`po-on-behalf-authorisation-${po.poNumber}`}>
-      <p className="font-medium text-zinc-900">
+    <div className="border border-hairline bg-surface-raised rounded-ds-md p-3 text-ds-label space-y-2" data-testid={`po-on-behalf-authorisation-${po.poNumber}`}>
+      <p className="font-medium text-ink-900">
         Mercenta deciding this order for you: {authority.stateLabel}
       </p>
-      <p className="text-zinc-600">{authority.statement}</p>
+      <p className="text-muted">{authority.statement}</p>
       {authority.state !== 'granted' ? (
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -1277,7 +1277,7 @@ function OnBehalfAuthorisationBlock({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Say what Mercenta may do (your own words)"
             aria-label="On-behalf instruction"
-            className="min-w-[220px] flex-1 px-2.5 py-1.5 border border-zinc-300 rounded-ds-sm text-ds-label"
+            className="min-w-[220px] flex-1 px-2.5 py-1.5 border border-hairline-strong rounded-ds-sm text-ds-label"
           />
           <button
             type="button"
@@ -1287,7 +1287,7 @@ function OnBehalfAuthorisationBlock({
               setFeedback(await onAuthorise(note));
               setBusy(false);
             }}
-            className="px-3 py-1.5 rounded-ds-sm bg-zinc-950 text-white font-medium disabled:opacity-40"
+            className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark font-medium disabled:opacity-40"
           >
             Authorise Mercenta
           </button>
@@ -1301,12 +1301,12 @@ function OnBehalfAuthorisationBlock({
             setFeedback(await onWithdraw());
             setBusy(false);
           }}
-          className="px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-800 font-medium"
+          className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-800 font-medium"
         >
           Withdraw authorisation
         </button>
       )}
-      {feedback && <p className="text-zinc-800 font-medium">{feedback}</p>}
+      {feedback && <p className="text-ink-800 font-medium">{feedback}</p>}
     </div>
   );
 }
@@ -1333,7 +1333,7 @@ function SubmitCompletenessNotice({
   );
   return (
     <p
-      className={`text-ds-label ${verdict.statement ? 'text-state-warning' : 'text-zinc-500'}`}
+      className={`text-ds-label ${verdict.statement ? 'text-state-warning' : 'text-faint'}`}
       data-testid={`po-submit-completeness-${po.poNumber}`}
     >
       {verdict.statement ?? verdict.ruleText}
@@ -1353,24 +1353,24 @@ function BrandPoPreviewBody({ po }: { po: PurchaseOrder }) {
       <AckPriceNotice po={po} />
       <ChannelHoldNotice po={po} />
       <ImplicitRejectionNotice po={po} />
-      <dl className="grid grid-cols-2 gap-3 text-ds-label border border-zinc-200 rounded-ds-md p-3">
+      <dl className="grid grid-cols-2 gap-3 text-ds-label border border-hairline rounded-ds-md p-3">
         <div>
-          <dt className="text-zinc-500">Order date</dt>
-          <dd className="font-mono text-zinc-950 mt-0.5">{orderDateLabel(po.orderDate)}</dd>
+          <dt className="text-faint">Order date</dt>
+          <dd className="font-mono text-strong mt-0.5">{orderDateLabel(po.orderDate)}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Order value</dt>
-          <dd className="font-mono font-semibold text-zinc-950 mt-0.5">£{po.poValue.toLocaleString('en-GB')}</dd>
+          <dt className="text-faint">Order value</dt>
+          <dd className="font-mono font-semibold text-strong mt-0.5">£{po.poValue.toLocaleString('en-GB')}</dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Freight term</dt>
-          <dd className="text-zinc-950 mt-0.5">
+          <dt className="text-faint">Freight term</dt>
+          <dd className="text-strong mt-0.5">
             {po.freightTerm === 'collect' ? 'Freight Collect' : po.freightTerm === 'prepaid' ? 'Freight Prepaid' : '—'}
           </dd>
         </div>
         <div>
-          <dt className="text-zinc-500">Carrier route</dt>
-          <dd className="text-zinc-950 mt-0.5">{shipCarrierLabel(selectCarrierForShipment({}).carrier)}</dd>
+          <dt className="text-faint">Carrier route</dt>
+          <dd className="text-strong mt-0.5">{shipCarrierLabel(selectCarrierForShipment({}).carrier)}</dd>
         </div>
       </dl>
       {po.rejectionReason && (
@@ -1378,9 +1378,9 @@ function BrandPoPreviewBody({ po }: { po: PurchaseOrder }) {
           <strong>Rejection reason:</strong> {po.rejectionReason}
         </div>
       )}
-      <div className="border border-zinc-200 rounded-ds-md overflow-hidden">
+      <div className="border border-hairline rounded-ds-md overflow-hidden">
         <table className="w-full text-ds-label">
-          <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-500">
+          <thead className="bg-surface border-b border-hairline text-faint">
             <tr>
               <th className="text-left px-3 py-2">SKU</th>
               <th className="text-left px-3 py-2">Product</th>
@@ -1388,7 +1388,7 @@ function BrandPoPreviewBody({ po }: { po: PurchaseOrder }) {
               <th className="text-left px-3 py-2">Ack</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200">
+          <tbody className="divide-y divide-hairline-06">
             {po.lineItems.map((line) => {
               const ack = ackStatusPresentation(line.ackStatus);
               return (

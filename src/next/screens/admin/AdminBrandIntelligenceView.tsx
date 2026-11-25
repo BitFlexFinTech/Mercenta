@@ -240,7 +240,7 @@ export function AdminBrandIntelligenceView({ model, onNavigate }: AdminBrandInte
           title="What this surface never does"
           description="Stated so it cannot be mistaken for a capability."
         >
-          <ul className="list-disc pl-5 space-y-1 text-ds-body text-zinc-700">
+          <ul className="list-disc pl-5 space-y-1 text-ds-body text-secondary">
             <li>
               It never prospects, estimates or ranks a product outside the ten permitted categories, and it
               never hides an excluded brand — the reason is shown.

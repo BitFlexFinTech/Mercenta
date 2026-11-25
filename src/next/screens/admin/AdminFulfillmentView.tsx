@@ -105,14 +105,14 @@ export function AdminFulfillmentView({
       key: 'brand',
       header: 'Brand',
       mobilePrimary: true,
-      render: (row) => <span className="font-medium text-zinc-950">{row.brandName}</span>,
+      render: (row) => <span className="font-medium text-strong">{row.brandName}</span>,
     },
     {
       key: 'score',
       header: 'Score',
       align: 'right',
       render: (row) => (
-        <span className="tabular-nums font-medium text-zinc-950">
+        <span className="tabular-nums font-medium text-strong">
           {row.score.totalScore} / 100
         </span>
       ),
@@ -136,7 +136,7 @@ export function AdminFulfillmentView({
         row.score.manualOverride ? (
           <InlineStatus label="Set by staff" tone="warning" dataStatus="override" />
         ) : (
-          <span className="text-ds-label text-zinc-400">—</span>
+          <span className="text-ds-label text-quiet">—</span>
         ),
     },
   ];
@@ -167,13 +167,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search brand"
               aria-label="Search brands"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={trackFilter}
               onChange={(event) => onChangeTrack(event.target.value)}
               aria-label="Filter by track"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All tracks</option>
               {trackOptions.map((track) => (
@@ -220,10 +220,10 @@ return (
               })}
             </div>
 
-            <div className="border-t border-zinc-200 pt-3 space-y-1">
+            <div className="border-t border-hairline pt-3 space-y-1">
               <div className="flex items-center justify-between text-ds-body">
-                <span className="text-zinc-600">Derived track</span>
-                <span className="font-medium text-zinc-950">
+                <span className="text-muted">Derived track</span>
+                <span className="font-medium text-strong">
                   {fulfillmentTrackLabel(selected.score.track)}
                 </span>
               </div>
@@ -234,7 +234,7 @@ return (
                 </p>
               )}
               {!selected.score.manualOverride && (
-                <p className="text-ds-label text-zinc-500">
+                <p className="text-ds-label text-faint">
                   Assigned automatically from the score; no human override is recorded.
                 </p>
               )}

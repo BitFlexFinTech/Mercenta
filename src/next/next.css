@@ -70,15 +70,20 @@
 /* Semantic compatibility tokens so canonical Mercenta child panels
    (PoDocumentQueuePanel, PoDocumentPackPanel, BrandCommPanel,
    CarrierProviderConfigurationPanel, CommerceSimulationPanel)
-   render cleanly on the light neutral console without modifying src/index.css. */
+   render cleanly on the light neutral console without modifying src/index.css.
+
+   §WAVE 3m — each rule now carries the raw class it replaced (`was …`), so the mapping
+   is COMPLETE and machine-readable: `scripts/validate-next-console-tokens.mjs` reads
+   these comments and fails if any of the replaced classes is still authored in the
+   console's code. The value is unchanged from when each class was introduced. */
 .mercenta-next .text-strong {
-  color: #09090b;
+  color: #09090b; /* was text-zinc-950 */
 }
 .mercenta-next .text-muted {
-  color: #52525b;
+  color: #52525b; /* was text-zinc-600 */
 }
 .mercenta-next .text-faint {
-  color: #71717a;
+  color: #71717a; /* was text-zinc-500 */
 }
 .mercenta-next .text-accent,
 .mercenta-next .text-accent-300,
@@ -86,25 +91,25 @@
   color: #c2410c;
 }
 .mercenta-next .bg-surface {
-  background-color: #fafafa;
+  background-color: #fafafa; /* was bg-zinc-50 */
 }
 .mercenta-next .bg-surface-raised {
-  background-color: #ffffff;
+  background-color: #ffffff; /* was bg-white */
 }
 .mercenta-next .bg-tint {
-  background-color: #f4f4f5;
+  background-color: #f4f4f5; /* was bg-zinc-100 */
 }
 .mercenta-next .bg-surface-hover {
   background-color: rgba(9, 9, 11, 0.35);
 }
 .mercenta-next .border-hairline {
-  border-color: #e4e4e7;
+  border-color: #e4e4e7; /* was border-zinc-200 */
 }
 .mercenta-next .border-hairline-strong {
-  border-color: #d4d4d8;
+  border-color: #d4d4d8; /* was border-zinc-300 */
 }
 .mercenta-next .divide-hairline-06 > :not(:first-child) {
-  border-color: #e4e4e7;
+  border-color: #e4e4e7; /* was divide-zinc-200 */
 }
 .mercenta-next .rounded-ds-sm {
   border-radius: 8px;
@@ -176,6 +181,92 @@
 }
 .mercenta-next .border-palette-orange\/40 {
   border-color: #fed7aa;
+}
+
+/* ── §WAVE 3m (2026-11-25) — THE CONSOLE'S OWN PALETTE, MADE COMPLETE ──────────
+ *
+ * WHY THESE RULES EXIST. The console was built with raw Tailwind palette classes
+ * (`text-zinc-950` · `bg-white` · `border-zinc-200` …) while its own token set above
+ * sat unused, which is what put 1,746 grey-family and 279 literal `white`/`black`
+ * sites into the legacy-styling measurement. Migrating those classes needs a TARGET
+ * for every one of them, and the rule for every target is the same:
+ *
+ *   THE VALUE IS THE EXACT VALUE THE CLASS IT REPLACES COMPILES TO.
+ *
+ * So no site moves a pixel when it is repointed — the console keeps the design it was
+ * reviewed with, and the migration is provably colour-neutral. Every value below is
+ * Tailwind v3's own zinc scale (50 #fafafa · 100 #f4f4f5 · 200 #e4e4e7 · 300 #d4d4d8 ·
+ * 400 #a1a1aa · 500 #71717a · 600 #52525b · 700 #3f3f46 · 800 #27272a · 900 #18181b ·
+ * 950 #09090b) or `white`, which is what each replaced class already compiled to.
+ *
+ * THE SCRIM (`bg-scrim-30`) and the TRANSLUCENT canvas/tint steps keep their alpha,
+ * because a translated value would change what the panel composites over.
+ */
+.mercenta-next .text-secondary {
+  color: #3f3f46; /* was text-zinc-700 */
+}
+.mercenta-next .text-ink-900 {
+  color: #18181b; /* was text-zinc-900 */
+}
+.mercenta-next .text-ink-800 {
+  color: #27272a; /* was text-zinc-800 */
+}
+.mercenta-next .text-quiet {
+  color: #a1a1aa; /* was text-zinc-400 */
+}
+.mercenta-next .text-quieter {
+  color: #d4d4d8; /* was text-zinc-300 */
+}
+.mercenta-next .text-on-dark {
+  color: #ffffff; /* was text-white, used on a dark or accent fill */
+}
+.mercenta-next .bg-tint-strong {
+  background-color: #e4e4e7; /* was bg-zinc-200 */
+}
+.mercenta-next .bg-ink-800 {
+  background-color: #27272a; /* was bg-zinc-800 */
+}
+.mercenta-next .bg-ink-900 {
+  background-color: #18181b; /* was bg-zinc-900 */
+}
+.mercenta-next .bg-ink-950 {
+  background-color: #09090b; /* was bg-zinc-950 */
+}
+.mercenta-next .bg-scrim-30 {
+  background-color: rgba(9, 9, 11, 0.3); /* was bg-zinc-950/30 */
+}
+.mercenta-next .bg-canvas-40 {
+  background-color: rgba(250, 250, 250, 0.4); /* was bg-zinc-50/40 */
+}
+.mercenta-next .bg-canvas-50 {
+  background-color: rgba(250, 250, 250, 0.5); /* was bg-zinc-50/50 */
+}
+.mercenta-next .bg-canvas-60 {
+  background-color: rgba(250, 250, 250, 0.6); /* was bg-zinc-50/60 */
+}
+.mercenta-next .bg-canvas-70 {
+  background-color: rgba(250, 250, 250, 0.7); /* was bg-zinc-50/70 */
+}
+.mercenta-next .bg-canvas-80 {
+  background-color: rgba(250, 250, 250, 0.8); /* was bg-zinc-50/80 */
+}
+.mercenta-next .bg-tint-70 {
+  background-color: rgba(244, 244, 245, 0.7); /* was bg-zinc-100/70 */
+}
+.mercenta-next .bg-tint-80 {
+  background-color: rgba(244, 244, 245, 0.8); /* was bg-zinc-100/80 */
+}
+.mercenta-next .border-hairline-soft {
+  border-color: #f4f4f5; /* was border-zinc-100 */
+}
+.mercenta-next .border-hairline-bold {
+  border-color: #a1a1aa; /* was border-zinc-400 */
+}
+.mercenta-next .border-ink {
+  border-color: #18181b; /* was border-zinc-900 */
+}
+.mercenta-next .border-ink-strong {
+  border-color: #09090b; /* was border-zinc-950 */
 }
 
 @media (prefers-reduced-motion: reduce) {

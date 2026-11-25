@@ -131,8 +131,8 @@ export function BrandInventoryView({
           <div className="flex items-center gap-2.5 min-w-0">
             <ProductThumb product={p ?? { name: r.sku }} size={32} className="rounded-ds-sm" />
             <div className="min-w-0">
-              <div className="font-medium text-zinc-950 truncate">{p?.name ?? r.sku}</div>
-              <div className="text-ds-label font-mono text-zinc-500">{r.sku}</div>
+              <div className="font-medium text-strong truncate">{p?.name ?? r.sku}</div>
+              <div className="text-ds-label font-mono text-faint">{r.sku}</div>
             </div>
           </div>
         );
@@ -145,14 +145,14 @@ export function BrandInventoryView({
         <div data-testid={`inventory-asin-${r.sku}`}>
           {r.asin ? (
             <>
-              <div className="font-mono text-ds-label text-zinc-950">{r.asin}</div>
-              <div className="text-ds-micro text-zinc-500">
+              <div className="font-mono text-ds-label text-strong">{r.asin}</div>
+              <div className="text-ds-micro text-faint">
                 {r.asinSource ? ASIN_SOURCE_LABELS[r.asinSource] : ''}
                 {r.asinSimulated ? ' (simulated)' : ''}
               </div>
             </>
           ) : (
-            <span className="text-ds-label text-zinc-500">{ASIN_STATE_LABELS[r.identifierState]}</span>
+            <span className="text-ds-label text-faint">{ASIN_STATE_LABELS[r.identifierState]}</span>
           )}
         </div>
       ),
@@ -161,7 +161,7 @@ export function BrandInventoryView({
       key: 'uom',
       header: 'UoM',
       hideOnMobile: true,
-      render: (r) => <span className="text-ds-label text-zinc-600">{INVENTORY_UOM_LABELS[r.uom]}</span>,
+      render: (r) => <span className="text-ds-label text-muted">{INVENTORY_UOM_LABELS[r.uom]}</span>,
     },
     {
       key: 'onHand',
@@ -190,7 +190,7 @@ export function BrandInventoryView({
       render: (r) => (
         <span
           data-testid={`inventory-available-${r.sku}`}
-          className={r.available < 0 ? 'text-state-danger font-semibold' : 'font-semibold text-zinc-950'}
+          className={r.available < 0 ? 'text-state-danger font-semibold' : 'font-semibold text-strong'}
         >
           {r.available}
         </span>
@@ -218,7 +218,7 @@ export function BrandInventoryView({
             e.stopPropagation();
             openManager(r);
           }}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-200 bg-white text-ds-label font-medium text-zinc-800 hover:bg-zinc-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
         >
           <PackageSearch className="w-3.5 h-3.5" aria-hidden="true" />
           Manage
@@ -289,17 +289,17 @@ export function BrandInventoryView({
       >
         {selected && (
           <div className="space-y-6">
-            <section className="space-y-3 border-b border-zinc-200 pb-5" data-testid="inventory-movement-form">
-              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-700">
+            <section className="space-y-3 border-b border-hairline pb-5" data-testid="inventory-movement-form">
+              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-secondary">
                 1. Record Stock Movement
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-ds-label">
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Movement type</span>
+                  <span className="text-muted">Movement type</span>
                   <select
                     value={movementType}
                     onChange={(e) => setMovementType(e.target.value as InventoryMovementType)}
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
                   >
                     {INVENTORY_MOVEMENT_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -309,20 +309,20 @@ export function BrandInventoryView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Quantity</span>
+                  <span className="text-muted">Quantity</span>
                   <input
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950 tabular-nums"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong tabular-nums"
                   />
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Unit</span>
+                  <span className="text-muted">Unit</span>
                   <select
                     value={entryUom}
                     onChange={(e) => setEntryUom(e.target.value as InventoryUom)}
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
                   >
                     {INVENTORY_UOMS.map((u) => (
                       <option key={u} value={u}>
@@ -332,12 +332,12 @@ export function BrandInventoryView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Reason</span>
+                  <span className="text-muted">Reason</span>
                   <input
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="e.g. Warehouse intake"
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
                   />
                 </label>
               </div>
@@ -352,23 +352,23 @@ export function BrandInventoryView({
                     reason,
                   })
                 }
-                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
+                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
               >
                 Record movement
               </button>
             </section>
 
-            <section className="space-y-3 border-b border-zinc-200 pb-5">
-              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-700">
+            <section className="space-y-3 border-b border-hairline pb-5">
+              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-secondary">
                 2. Unit & Reorder Threshold
               </h3>
               <div className="grid grid-cols-2 gap-3 text-ds-label">
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Default UoM</span>
+                  <span className="text-muted">Default UoM</span>
                   <select
                     value={entryUom}
                     onChange={(e) => setEntryUom(e.target.value as InventoryUom)}
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
                   >
                     {INVENTORY_UOMS.map((u) => (
                       <option key={u} value={u}>
@@ -378,12 +378,12 @@ export function BrandInventoryView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Safety stock (eaches)</span>
+                  <span className="text-muted">Safety stock (eaches)</span>
                   <input
                     type="number"
                     value={safetyStock}
                     onChange={(e) => setSafetyStock(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-zinc-950 tabular-nums"
+                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong tabular-nums"
                   />
                 </label>
               </div>
@@ -396,18 +396,18 @@ export function BrandInventoryView({
                     safetyStock: Number(safetyStock),
                   })
                 }
-                className="px-3.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
+                className="px-3.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
               >
                 Save inventory settings
               </button>
             </section>
 
-            <section className="space-y-3 border-b border-zinc-200 pb-5">
-              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-700">
+            <section className="space-y-3 border-b border-hairline pb-5">
+              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-secondary">
                 3. Declare Existing Channel ASIN
               </h3>
               <div className="space-y-2 text-ds-label">
-                <label className="flex items-center gap-2 text-zinc-700">
+                <label className="flex items-center gap-2 text-secondary">
                   <input
                     type="checkbox"
                     checked={existsOnChannel}
@@ -419,7 +419,7 @@ export function BrandInventoryView({
                   value={asinInput}
                   onChange={(e) => setAsinInput(e.target.value)}
                   placeholder="10-character ASIN (e.g. B08N5WRWNW)"
-                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised font-mono text-strong"
                 />
                 <button
                   type="button"
@@ -430,7 +430,7 @@ export function BrandInventoryView({
                       productExistsOnChannel: existsOnChannel,
                     })
                   }
-                  className="px-3.5 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
+                  className="px-3.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
                 >
                   Record ASIN declaration
                 </button>
@@ -438,22 +438,22 @@ export function BrandInventoryView({
             </section>
 
             <section className="space-y-2">
-              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-zinc-700">
+              <h3 className="text-ds-label font-semibold uppercase tracking-[0.06em] text-secondary">
                 Movement History ({ledger.length})
               </h3>
               {ledger.length === 0 ? (
-                <p className="text-ds-label text-zinc-500">No ledger movements recorded yet.</p>
+                <p className="text-ds-label text-faint">No ledger movements recorded yet.</p>
               ) : (
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                   {ledger.slice(0, 15).map((m) => (
                     <li key={m.id} className="px-3 py-2 flex items-center justify-between gap-3 text-ds-label">
                       <div className="min-w-0">
-                        <div className="font-medium text-zinc-950">
+                        <div className="font-medium text-strong">
                           {INVENTORY_MOVEMENT_TYPE_LABELS[m.type]} ({m.quantityDelta > 0 ? `+${m.quantityDelta}` : m.quantityDelta} {m.enteredUom})
                         </div>
-                        <div className="text-zinc-500 truncate">{m.reason}</div>
+                        <div className="text-faint truncate">{m.reason}</div>
                       </div>
-                      <span className="font-mono text-ds-micro text-zinc-500 shrink-0">
+                      <span className="font-mono text-ds-micro text-faint shrink-0">
                         {m.recordedAt.slice(0, 10)}
                       </span>
                     </li>

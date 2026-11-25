@@ -218,6 +218,12 @@ if (recorded) {
  * was (a true statement about the application on that date) and this correction is added
  * beneath it, because a claim that survives the thing it describes becomes a false
  * statement about the product.
+ *
+ * §UPDATED 2026-11-25 (WAVE 3m) — THE CONSOLE IS NOW MIGRATED, SO THE PARAGRAPH ABOVE IS HISTORY. All 1,746 grey
+ * and 279 literal sites in `src/next/**` were repointed onto the console's own declared classes (values identical,
+ * so nothing moved), and `scripts/validate-next-console-tokens.mjs` now makes that permanent. The whole subject
+ * measures grey 6/1 · ink 912/136 · literal 0/0: **grey and literal are AT their ceilings** and the only remaining
+ * failure of T3 is the INK arm — which this family's own definition (below) makes unreachable by migration.
  */
 const CEILING = { grey: 6, ink: 468, literal: 0, uncovered: 0 };
 check('T3 the ratchet: no family has GROWN past the Batch-10 ceiling', (

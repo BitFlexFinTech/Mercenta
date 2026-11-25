@@ -127,8 +127,8 @@ export function AdminComplianceView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brandName}</div>
-          <div className="text-ds-label text-zinc-500 truncate">
+          <div className="font-medium text-strong truncate">{row.brandName}</div>
+          <div className="text-ds-label text-faint truncate">
             {row.doc.type.replace(/_/g, ' ')}
           </div>
         </div>
@@ -156,7 +156,7 @@ export function AdminComplianceView({
             align: 'right' as const,
             hideOnMobile: true,
             render: (row: AdminComplianceRow) => (
-              <span className="tabular-nums text-ds-label text-zinc-600">
+              <span className="tabular-nums text-ds-label text-muted">
                 {row.doc.expiryDate ? row.doc.expiryDate.slice(0, 10) : '—'}
               </span>
             ),
@@ -172,7 +172,7 @@ export function AdminComplianceView({
             header: 'Reviewed by',
             hideOnMobile: true,
             render: (row: AdminComplianceRow) => (
-              <span className="text-ds-label text-zinc-600">{row.doc.reviewedBy ?? '—'}</span>
+              <span className="text-ds-label text-muted">{row.doc.reviewedBy ?? '—'}</span>
             ),
           },
         ]
@@ -187,7 +187,7 @@ return (
       />
 
       {notice && (
-        <p role="status" className="mb-4 text-ds-label text-zinc-700">
+        <p role="status" className="mb-4 text-ds-label text-secondary">
           {notice}
         </p>
       )}
@@ -211,13 +211,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search brand or document"
               aria-label="Search compliance documents"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -230,7 +230,7 @@ return (
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -265,14 +265,14 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Status</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Status</dt>
+                <dd className="font-medium text-strong">
                   {complianceDocStatusPresentation(selected.status).label}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Expiry</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Expiry</dt>
+                <dd className="font-medium text-strong">
                   {selected.expiryDate ? selected.expiryDate.slice(0, 10) : 'No expiry recorded'}
                 </dd>
               </div>
@@ -281,14 +281,14 @@ return (
             {(selected.status === 'uploaded' || selected.status === 'under_review') && (
               <div className="space-y-3">
                 <label className="text-ds-body block">
-                  <span className="text-ds-label text-zinc-500 block mb-1">
+                  <span className="text-ds-label text-faint block mb-1">
                     Reason for the decision (required, and recorded in the audit trail)
                   </span>
                   <textarea
                     value={reason}
                     onChange={(event) => setReason(event.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                    className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
                     placeholder="e.g. Certificate verified against the issuing body's public register."
                   />
                 </label>
@@ -298,7 +298,7 @@ return (
                     type="button"
                     disabled={busyDocId === selected.id || reason.trim().length < 3}
                     onClick={() => onDecision(selected, 'approve', reason)}
-                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-white hover:bg-accent-600 disabled:opacity-50"
+                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-on-dark hover:bg-accent-600 disabled:opacity-50"
                   >
                     {busyDocId === selected.id ? 'Recording…' : 'Approve document'}
                   </button>
@@ -306,7 +306,7 @@ return (
                     type="button"
                     disabled={busyDocId === selected.id || reason.trim().length < 3}
                     onClick={() => onDecision(selected, 'reject', reason)}
-                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
+                    className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface disabled:opacity-50"
                   >
                     Reject document
                   </button>
@@ -315,7 +315,7 @@ return (
             )}
 
             {selected.status !== 'uploaded' && selected.status !== 'under_review' && (
-              <p className="text-ds-body text-zinc-600">
+              <p className="text-ds-body text-muted">
                 This document has already been decided
                 {selected.reviewedBy ? ` by ${selected.reviewedBy}` : ''}. A new upload is needed
                 before it can be reviewed again.

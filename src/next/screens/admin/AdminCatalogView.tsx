@@ -127,8 +127,8 @@ export function AdminCatalogView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.name}</div>
-          <div className="font-mono text-ds-label text-zinc-500">
+          <div className="font-medium text-strong truncate">{row.name}</div>
+          <div className="font-mono text-ds-label text-faint">
             {row.sku} · {row.brandName}
           </div>
         </div>
@@ -167,7 +167,7 @@ export function AdminCatalogView({
       align: 'right',
       render: (row) =>
         row.available ? (
-          <span className="text-ds-label text-zinc-500">Available</span>
+          <span className="text-ds-label text-faint">Available</span>
         ) : (
           <InlineStatus label="Unavailable" tone="danger" dataStatus="unavailable" />
         ),
@@ -200,13 +200,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search product or SKU"
               aria-label="Search products"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -219,7 +219,7 @@ return (
               value={submissionFilter}
               onChange={(event) => onChangeSubmission(event.target.value)}
               aria-label="Filter by submission state"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All submission states</option>
               {submissionStatuses.map((status) => (
@@ -254,24 +254,24 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Ex-works price</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Ex-works price</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.exWorksPrice, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">UK retail price</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">UK retail price</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.ukRetailPrice, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Commodity code</dt>
-                <dd className="font-mono text-ds-label text-zinc-950">{selected.commodityCode}</dd>
+                <dt className="text-ds-label text-faint">Commodity code</dt>
+                <dd className="font-mono text-ds-label text-strong">{selected.commodityCode}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">VAT treatment</dt>
-                <dd className="font-medium text-zinc-950">{selected.vatStatus}</dd>
+                <dt className="text-ds-label text-faint">VAT treatment</dt>
+                <dd className="font-medium text-strong">{selected.vatStatus}</dd>
               </div>
             </dl>
 
@@ -282,7 +282,7 @@ return (
             )}
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Channel submission</div>
+              <div className="text-ds-label text-faint mb-1">Channel submission</div>
               {selected.submissionStatus ? (
                 <div className="space-y-1">
                   <InlineStatus
@@ -295,7 +295,7 @@ return (
                   )}
                 </div>
               ) : (
-                <p className="text-ds-body text-zinc-600">
+                <p className="text-ds-body text-muted">
                   This product has not been submitted to the channel.
                 </p>
               )}

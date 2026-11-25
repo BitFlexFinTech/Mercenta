@@ -124,8 +124,8 @@ export function AdminBillingView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brandName}</div>
-          <div className="font-mono text-ds-label text-zinc-500">{row.commission.purchaseOrderId}</div>
+          <div className="font-medium text-strong truncate">{row.brandName}</div>
+          <div className="font-mono text-ds-label text-faint">{row.commission.purchaseOrderId}</div>
         </div>
       ),
     },
@@ -142,7 +142,7 @@ export function AdminBillingView({
       header: 'Commission',
       align: 'right',
       render: (row) => (
-        <span className="tabular-nums font-medium text-zinc-950">
+        <span className="tabular-nums font-medium text-strong">
           {formatGbp(row.commission.commissionAmount, 2)}
         </span>
       ),
@@ -167,7 +167,7 @@ export function AdminBillingView({
       align: 'right',
       hideOnMobile: true,
       render: (row) => (
-        <span className="tabular-nums text-ds-label text-zinc-600">
+        <span className="tabular-nums text-ds-label text-muted">
           {row.commission.createdAt.slice(0, 10)}
         </span>
       ),
@@ -200,13 +200,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search brand or PO"
               aria-label="Search commission records"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -219,7 +219,7 @@ return (
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -250,9 +250,9 @@ return (
               testId="admin-subscriptions"
             >
               {subscriptions.length === 0 ? (
-                <p className="text-ds-body text-zinc-600">No subscriptions are recorded yet.</p>
+                <p className="text-ds-body text-muted">No subscriptions are recorded yet.</p>
               ) : (
-                <ul className="divide-y divide-zinc-200">
+                <ul className="divide-y divide-hairline-06">
                   {subscriptions.map((row) => (
                     <li
                       key={row.subscription.id}
@@ -262,7 +262,7 @@ return (
                         {row.brandName} · {row.subscription.planTier}
                       </span>
                       <span className="flex items-center gap-3 shrink-0">
-                        <span className="tabular-nums text-zinc-700">
+                        <span className="tabular-nums text-secondary">
                           {formatGbp(row.subscription.monthlyFee, 2)}/mo
                         </span>
                         <InlineStatus
@@ -291,39 +291,39 @@ return (
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">PO value</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">PO value</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.commission.poValue, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Commission</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Commission</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.commission.commissionAmount, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Rate applied</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Rate applied</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {(selected.commission.commissionRate * 100).toFixed(2)}%
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Accrued</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Accrued</dt>
+                <dd className="font-medium text-strong">
                   {selected.commission.createdAt.slice(0, 10)}
                 </dd>
               </div>
             </dl>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Deductions on this order</div>
+              <div className="text-ds-label text-faint mb-1">Deductions on this order</div>
               {selectedDeductions.length === 0 ? (
-                <p className="text-ds-body text-zinc-600">
+                <p className="text-ds-body text-muted">
                   No deductions were raised on this order.
                 </p>
               ) : (
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
                   {selectedDeductions.map((deduction) => (
                     <li
                       key={deduction.id}

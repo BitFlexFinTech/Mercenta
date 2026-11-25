@@ -320,7 +320,7 @@ export function AdminPartnershipsView({ model, onNavigate }: AdminPartnershipsVi
           title="What this surface never does"
           description="Stated so it cannot be mistaken for a capability."
         >
-          <ul className="list-disc pl-5 space-y-1 text-ds-body text-zinc-700">
+          <ul className="list-disc pl-5 space-y-1 text-ds-body text-secondary">
             <li>
               It never marks a provider active because it was researched — the active stage is reachable only
               through a completed pilot.

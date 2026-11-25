@@ -96,8 +96,8 @@ export function AdminReturnsView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.brandName}</div>
-          <div className="font-mono text-ds-label text-zinc-500">{row.ret.poNumber}</div>
+          <div className="font-medium text-strong truncate">{row.brandName}</div>
+          <div className="font-mono text-ds-label text-faint">{row.ret.poNumber}</div>
         </div>
       ),
     },
@@ -106,8 +106,8 @@ export function AdminReturnsView({
       header: 'Product',
       render: (row) => (
         <div className="min-w-0">
-          <div className="text-ds-body text-zinc-900 truncate">{row.ret.productName}</div>
-          <div className="font-mono text-ds-label text-zinc-500">{row.ret.productSku}</div>
+          <div className="text-ds-body text-ink-900 truncate">{row.ret.productName}</div>
+          <div className="font-mono text-ds-label text-faint">{row.ret.productSku}</div>
         </div>
       ),
     },
@@ -122,7 +122,7 @@ export function AdminReturnsView({
       header: 'Reason',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">{row.ret.reason.replace(/_/g, ' ')}</span>
+        <span className="text-ds-label text-muted">{row.ret.reason.replace(/_/g, ' ')}</span>
       ),
     },
     {
@@ -130,7 +130,7 @@ export function AdminReturnsView({
       header: 'Deduction',
       align: 'right',
       render: (row) => {
-        if (!row.deduction) return <span className="text-ds-label text-zinc-400">—</span>;
+        if (!row.deduction) return <span className="text-ds-label text-quiet">—</span>;
         const pres = deductionStatusPresentation(row.deduction.status);
         return (
           <InlineStatus
@@ -147,7 +147,7 @@ export function AdminReturnsView({
       align: 'right',
       hideOnMobile: true,
       render: (row) => (
-        <span className="tabular-nums text-ds-label text-zinc-600">
+        <span className="tabular-nums text-ds-label text-muted">
           {row.ret.returnDate.slice(0, 10)}
         </span>
       ),
@@ -179,13 +179,13 @@ export function AdminReturnsView({
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search PO, SKU or product"
               aria-label="Search returns"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -198,7 +198,7 @@ export function AdminReturnsView({
               value={reasonFilter}
               onChange={(event) => onChangeReason(event.target.value)}
               aria-label="Filter by reason"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All reasons</option>
               {reasonOptions.map((reason) => (
@@ -232,35 +232,35 @@ export function AdminReturnsView({
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Units</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">{selected.ret.quantity}</dd>
+                <dt className="text-ds-label text-faint">Units</dt>
+                <dd className="font-medium text-strong tabular-nums">{selected.ret.quantity}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Reason</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">Reason</dt>
+                <dd className="font-medium text-strong">
                   {selected.ret.reason.replace(/_/g, ' ')}
                 </dd>
               </div>
               <div className="col-span-2">
-                <dt className="text-ds-label text-zinc-500">Recorded</dt>
-                <dd className="font-medium text-zinc-950">{selected.ret.returnDate.slice(0, 10)}</dd>
+                <dt className="text-ds-label text-faint">Recorded</dt>
+                <dd className="font-medium text-strong">{selected.ret.returnDate.slice(0, 10)}</dd>
               </div>
             </dl>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Description</div>
-              <p className="text-ds-body text-zinc-800">{selected.ret.description}</p>
+              <div className="text-ds-label text-faint mb-1">Description</div>
+              <p className="text-ds-body text-ink-800">{selected.ret.description}</p>
             </div>
 
             <div>
-              <div className="text-ds-label text-zinc-500 mb-1">Linked deduction</div>
+              <div className="text-ds-label text-faint mb-1">Linked deduction</div>
               {selected.deduction ? (
-                <p className="text-ds-body text-zinc-800">
+                <p className="text-ds-body text-ink-800">
                   {formatGbp(selected.deduction.amountGbp, 2)} ·{' '}
                   {deductionStatusPresentation(selected.deduction.status).label}
                 </p>
               ) : (
-                <p className="text-ds-body text-zinc-600">
+                <p className="text-ds-body text-muted">
                   No deduction was raised against this return.
                 </p>
               )}

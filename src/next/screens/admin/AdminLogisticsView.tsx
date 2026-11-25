@@ -101,10 +101,10 @@ export function AdminLogisticsView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-mono text-ds-label text-zinc-950">
+          <div className="font-mono text-ds-label text-strong">
             {row.shipment.poNumber ?? row.shipment.reference}
           </div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.brandName}</div>
+          <div className="text-ds-label text-faint truncate">{row.brandName}</div>
         </div>
       ),
     },
@@ -112,14 +112,14 @@ export function AdminLogisticsView({
       key: 'carrier',
       header: 'Carrier',
       hideOnMobile: true,
-      render: (row) => <span className="text-ds-label text-zinc-700">{row.shipment.carrier}</span>,
+      render: (row) => <span className="text-ds-label text-secondary">{row.shipment.carrier}</span>,
     },
     {
       key: 'route',
       header: 'Route',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600 truncate">
+        <span className="text-ds-label text-muted truncate">
           {row.shipment.origin} → {row.shipment.destination}
         </span>
       ),
@@ -146,7 +146,7 @@ export function AdminLogisticsView({
         row.shipment.exception ? (
           <InlineStatus label="Raised" tone="danger" dataStatus="exception" />
         ) : (
-          <span className="text-ds-label text-zinc-400">—</span>
+          <span className="text-ds-label text-quiet">—</span>
         ),
     },
   ];
@@ -176,13 +176,13 @@ export function AdminLogisticsView({
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search PO or reference"
               aria-label="Search shipments"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={carrierFilter}
               onChange={(event) => onChangeCarrier(event.target.value)}
               aria-label="Filter by carrier"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All carriers</option>
               {carrierOptions.map((carrier) => (
@@ -195,7 +195,7 @@ export function AdminLogisticsView({
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -210,8 +210,8 @@ export function AdminLogisticsView({
               aria-pressed={exceptionsOnly}
               className={`px-3 py-2 text-ds-label font-medium rounded-ds-md border ${
                 exceptionsOnly
-                  ? 'border-zinc-900 bg-zinc-950 text-white'
-                  : 'border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
+                  ? 'border-ink bg-ink-950 text-on-dark'
+                  : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >
               Exceptions only
@@ -240,22 +240,22 @@ export function AdminLogisticsView({
         {selected && (
           <dl className="grid grid-cols-2 gap-3 text-ds-body">
             <div>
-              <dt className="text-ds-label text-zinc-500">Carrier</dt>
-              <dd className="font-medium text-zinc-950">{selected.carrier}</dd>
+              <dt className="text-ds-label text-faint">Carrier</dt>
+              <dd className="font-medium text-strong">{selected.carrier}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Reference</dt>
-              <dd className="font-mono text-ds-label text-zinc-950">{selected.reference}</dd>
+              <dt className="text-ds-label text-faint">Reference</dt>
+              <dd className="font-mono text-ds-label text-strong">{selected.reference}</dd>
             </div>
             <div className="col-span-2">
-              <dt className="text-ds-label text-zinc-500">Route</dt>
-              <dd className="font-medium text-zinc-950">
+              <dt className="text-ds-label text-faint">Route</dt>
+              <dd className="font-medium text-strong">
                 {selected.origin} → {selected.destination}
               </dd>
             </div>
             {selected.exception && (
               <div className="col-span-2">
-                <dt className="text-ds-label text-zinc-500">Exception</dt>
+                <dt className="text-ds-label text-faint">Exception</dt>
                 <dd className="text-ds-body text-state-danger">
                   {typeof selected.exception === 'string'
                     ? selected.exception

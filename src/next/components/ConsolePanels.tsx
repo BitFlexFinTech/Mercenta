@@ -46,24 +46,24 @@ export const TONE_TEXT: Record<string, string> = {
   danger: 'text-red-700',
   info: 'text-sky-700',
   brass: 'text-amber-800',
-  neutral: 'text-zinc-700',
+  neutral: 'text-secondary',
 };
 
 /** One labelled row. Presentation only — the value is the caller's. */
 export function PanelRowLine({ item }: { item: PanelRow }) {
   return (
     <div className="py-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5">
-      <dt className="text-ds-body text-zinc-600">{item.label}</dt>
+      <dt className="text-ds-body text-muted">{item.label}</dt>
       <dd className="text-right">
         <span
           className={`text-ds-body font-medium tabular-nums ${
-            TONE_TEXT[item.tone ?? 'neutral'] ?? 'text-zinc-700'
+            TONE_TEXT[item.tone ?? 'neutral'] ?? 'text-secondary'
           }`}
         >
           {item.value}
         </span>
         {item.note && (
-          <span className="block text-ds-label font-normal text-zinc-500 max-w-2xl">{item.note}</span>
+          <span className="block text-ds-label font-normal text-faint max-w-2xl">{item.note}</span>
         )}
       </dd>
     </div>
@@ -81,16 +81,16 @@ export function PanelCard({ panel, actions }: { panel: PanelSpec; actions?: Reac
     >
       {panel.groups.map((group) => (
         <div key={group.label} className="mb-5 last:mb-0">
-          <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
+          <h3 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
             {group.label}
           </h3>
           {group.rows.length === 0 ? (
-            <p className="mt-1.5 text-ds-label text-zinc-500">
+            <p className="mt-1.5 text-ds-label text-faint">
               Nothing is recorded for this yet. The panel shows the real state of these records rather than
               a filled-in placeholder.
             </p>
           ) : (
-            <dl className="mt-1.5 divide-y divide-zinc-200">
+            <dl className="mt-1.5 divide-y divide-hairline-06">
               {group.rows.map((item, index) => (
                 <PanelRowLine key={`${item.label}-${index}`} item={item} />
               ))}
@@ -98,7 +98,7 @@ export function PanelCard({ panel, actions }: { panel: PanelSpec; actions?: Reac
           )}
         </div>
       ))}
-      <p className="mt-1 text-ds-label text-zinc-500">Owned by {panel.owner}</p>
+      <p className="mt-1 text-ds-label text-faint">Owned by {panel.owner}</p>
     </SectionCard>
   );
 }

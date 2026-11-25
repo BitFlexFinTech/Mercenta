@@ -105,8 +105,8 @@ export function AdminPurchaseOrdersView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-mono text-ds-label text-zinc-950">{row.po.poNumber}</div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.brandName}</div>
+          <div className="font-mono text-ds-label text-strong">{row.po.poNumber}</div>
+          <div className="text-ds-label text-faint truncate">{row.brandName}</div>
         </div>
       ),
     },
@@ -136,7 +136,7 @@ export function AdminPurchaseOrdersView({
       align: 'right',
       hideOnMobile: true,
       render: (row) => (
-        <span className="tabular-nums text-ds-label text-zinc-600">
+        <span className="tabular-nums text-ds-label text-muted">
           {row.po.orderDate.slice(0, 10)}
         </span>
       ),
@@ -160,7 +160,7 @@ export function AdminPurchaseOrdersView({
           <button
             type="button"
             onClick={onExportCsv}
-            className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
+            className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface"
           >
             Export CSV
           </button>
@@ -168,7 +168,7 @@ export function AdminPurchaseOrdersView({
       />
 
       {notice && (
-        <p role="status" className="mb-4 text-ds-label text-zinc-700">
+        <p role="status" className="mb-4 text-ds-label text-secondary">
           {notice}
         </p>
       )}
@@ -191,13 +191,13 @@ export function AdminPurchaseOrdersView({
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search PO number or brand"
               aria-label="Search purchase orders"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -210,7 +210,7 @@ export function AdminPurchaseOrdersView({
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -244,25 +244,25 @@ export function AdminPurchaseOrdersView({
           <div className="space-y-4">
             <dl className="grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Value</dt>
-                <dd className="font-medium text-zinc-950 tabular-nums">
+                <dt className="text-ds-label text-faint">Value</dt>
+                <dd className="font-medium text-strong tabular-nums">
                   {formatGbp(selected.poValue)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">Ordered</dt>
-                <dd className="font-medium text-zinc-950">{selected.orderDate.slice(0, 10)}</dd>
+                <dt className="text-ds-label text-faint">Ordered</dt>
+                <dd className="font-medium text-strong">{selected.orderDate.slice(0, 10)}</dd>
               </div>
             </dl>
 
-            <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-ds-md">
+            <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
               {selected.lineItems.map((line) => (
                 <li
                   key={line.sku}
                   className="px-3 py-2 flex items-center justify-between gap-3 text-ds-body"
                 >
                   <span className="min-w-0 truncate">{line.productName}</span>
-                  <span className="tabular-nums text-zinc-600 shrink-0">
+                  <span className="tabular-nums text-muted shrink-0">
                     {line.quantity} × {formatGbp(line.unitPrice, 2)}
                   </span>
                 </li>
@@ -274,7 +274,7 @@ export function AdminPurchaseOrdersView({
                 type="button"
                 disabled={busyPoId === selected.id}
                 onClick={() => onAcknowledge(selected)}
-                className="w-full px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-white hover:bg-accent-600 disabled:opacity-50"
+                className="w-full px-3 py-2 text-ds-label font-medium rounded-ds-md bg-accent text-on-dark hover:bg-accent-600 disabled:opacity-50"
               >
                 {busyPoId === selected.id ? 'Acknowledging…' : 'Acknowledge all lines as accepted'}
               </button>

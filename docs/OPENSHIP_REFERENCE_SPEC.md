@@ -890,25 +890,28 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=1752/45 ink=483/98 literal=279/38**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=6/1 ink=912/136 literal=0/0**
 >
-> **Per-surface split, measured the same way in the same run (2026-11-25, WAVE 3l):** the APPLICATION
-> (`src/**` excluding `src/next/**`) holds **grey 6/1 · ink 483/98 · literal 0/0** — inside its recorded ceiling;
-> the CONSOLE (`src/next/**`) holds **grey 1746/44 · ink 0/0 · literal 279/38**, because it authors raw palette
-> classes while declaring its own `--color-next-*` tokens in `src/next/next.css` and using none of them. The
-> ceilings below are UNCHANGED and are not made to pass by this record: the measurement moved because the console
-> added those sites, and the record now states that rather than hiding it.
+> **Per-surface split, measured the same way in the same run (2026-11-25, WAVE 3m):** the APPLICATION
+> (`src/**` excluding `src/next/**`) holds **grey 6/1 · ink 483/98 · literal 0/0** — at its grey and literal
+> ceilings; the CONSOLE (`src/next/**`) holds **grey 0/0 · ink 429/38 · literal 0/0** — **zero** legacy grey and
+> **zero** literal sites, because WAVE 3m repointed all 1,746 grey and 279 literal sites onto the console's OWN
+> declared classes in `src/next/next.css` at EXACTLY the values they already compiled to (so no pixel moved).
+> The console's ink count is **429** for one reason only: `bg-surface*`/`bg-ink-*` are the console's own names for
+> its surfaces, and the `ink` family is defined to include `surface-*` (see the §FINDING below) — so the ink arm of
+> the ratchet is the ONE place a token migration ADDS rather than removes.
 >
 > **§CAVEAT RECORDED 2026-11-25 (WAVE 3l) — THIS LINE RECORDS THE WORKING TREE, AND THE WORKING TREE CARRIES AN
 > UNCOMMITTED SUBJECT EXCLUSION.** `scripts/measure-legacy-classes.mjs` has an **uncommitted, 12-line change** that
 > SKIPS four paths from the subject (`src/components/lovable/` · `src/assets/images/` · `src/content/` ·
 > `src/components/marketing/home/DesignE.tsx`) with the note *"must not be counted against the legacy-styling
 > migration ceilings"*. Measured directly, those four paths hold **0 grey · 58 ink sites across 3 files · 0
-> literal**, so a **CLEAN CHECKOUT of the committed method measures `grey=1752/45 ink=541/101 literal=279/38`** —
-> 58 ink sites more than this line records. The difference is stated here rather than hidden, because a record that
-> silently depends on an uncommitted change is a record nobody else can reproduce. **The exclusion is the Owner's
-> uncommitted work and was NOT committed by this wave**; whether those four paths belong inside the migration's
-> subject is part of the same OPEN OWNER DECISION as the ink metric below.
+> literal**, so a **CLEAN CHECKOUT of the committed method measures `grey=6/1 ink=970/139 literal=0/0`** —
+> 58 ink sites more than this line records (re-measured in WAVE 3m; the grey and literal figures are identical
+> either way, so the exclusion affects the ink arm only). The difference is stated here rather than hidden, because
+> a record that silently depends on an uncommitted change is a record nobody else can reproduce. **The exclusion is
+> the Owner's uncommitted work and was NOT committed by either wave**; whether those four paths belong inside the
+> migration's subject is part of the same OPEN OWNER DECISION as the ink metric below.
 >
 > **Re-measured 2026-11-20** during the brand redesign (the four supplied homepage
 > directions replaced the previous marketing composition, so the legacy-class count
@@ -1016,7 +1019,7 @@ Every row below was measured in this repository this session.
 >
 > **§MEASURED-BATCH10-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 grey=2866/126 ink=974/117 literal=0/0**
 >
-> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-11-25 literal=279/38 border=0 text=53 bg=226 divide=0 ring=0 solid=0 tint=1 uncovered=279**
+> **§DECISION-BATCH10-2: method=scripts/measure-legacy-classes.mjs date=2026-11-25 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
 >
 > **§DECISION-BATCH10-2-FINAL: method=scripts/measure-legacy-classes.mjs date=2026-10-19 literal=0/0 border=0 text=0 bg=0 divide=0 ring=0 solid=0 tint=0 uncovered=0**
 >
@@ -1033,6 +1036,22 @@ Every row below was measured in this repository this session.
 > deleted; **the console's own sites are the reason that is no longer safe to assume**, and the fix is named work:
 > migrate `src/next/**` onto its own declared `--color-next-*` tokens. **The migration is NOT complete for the whole
 > subject, and this document must not be read as saying it is.**
+>
+> **§UPDATED 2026-11-25 (WAVE 3m) — THE CONSOLE IS NOW MIGRATED, AND THE SENTENCE ABOVE IS ANSWERED.** Wave 3m
+> repointed **all 1,746 grey and 279 literal sites** in `src/next/**` onto the console's own classes, completing the
+> token set in `src/next/next.css` first with the missing ladder steps at EXACTLY the values they already compiled to
+> (`text-secondary` #3f3f46 · `text-ink-900` #18181b · `text-ink-800` #27272a · `text-quiet` #a1a1aa · `text-quieter`
+> #d4d4d8 · `text-on-dark` #ffffff · `bg-tint-strong` #e4e4e7 · `bg-ink-800/900/950` · `bg-scrim-30` ·
+> `bg-canvas-40…80` · `bg-tint-70/80` · `border-hairline-soft/bold` · `border-ink` · `border-ink-strong`), so **no
+> pixel moved**: proved by the measurement (grey 1746 → **0**, literal 279 → **0**), by `e2e/next-console-smoke.spec.ts`
+> (**6 passed**, every console screen rendering), and by a NEW gate `scripts/validate-next-console-tokens.mjs` that
+> makes the state permanent in both directions — **A**: the console's code authors zero grey-family and zero literal
+> sites (the project's OWN family regexes, imported, so no second definition); **C**: every console token the code
+> uses is DECLARED (the dead-class defect this project has already paid for once, when `text-strong` emitted no rule
+> in 97 files). **The whole subject now measures `grey=6/1 ink=912/136 literal=0/0`: grey and literal are AT their
+> ceilings, and the ONLY assertion still red is the ink arm — which WAVE 3m's own numbers show can never be reached
+> by migration, because the ink family counts `surface-*`, the destination of the migration it is supposed to
+> measure.** That is the open Owner decision below, now with its full evidence.
 >
 > **§SUB-BATCH 2 — THE COUNT WAS COUNTING PROSE, AND THAT IS FIXED AT SOURCE (2026-10-16).** The
 > first reader matched the **raw file text**, so a class NAMED IN A COMMENT counted as a call site.

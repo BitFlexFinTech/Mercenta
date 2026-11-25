@@ -4868,6 +4868,10 @@ const BRAND_REDESIGN_SCOPE = new Set([
        the ONE shared panel renderer. Declared HERE, not exempted: a changed file
        outside every declared set still fails F6, which is the whole point of F6. */
     'scripts/validate-console-founder-views.mjs',
+    /* §WAVE 3m — the gate that makes the console's token migration permanent (the
+       absence guard for the raw palette classes + the dead-class guard for the
+       console's own tokens). */
+    'scripts/validate-next-console-tokens.mjs',
   ]);
 
   const CONCEPT3_HOMEPAGE_SCOPE = new Set([

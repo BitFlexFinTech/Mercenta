@@ -411,7 +411,7 @@ export function AdminFounderCentreView({ model, onNavigate }: AdminFounderCentre
           title="What this surface never does"
           description="Stated so it cannot be mistaken for a capability."
         >
-          <ul className="list-disc pl-5 space-y-1 text-ds-body text-zinc-700">
+          <ul className="list-disc pl-5 space-y-1 text-ds-body text-secondary">
             <li>
               It never presents a researched term as a verified one: every figure carries its claim class and
               the source it came from, and the founder-verification count is stated as it really is.

@@ -44,10 +44,10 @@ export function BrandContractsView({
       mobilePrimary: true,
       render: (c) => (
         <div>
-          <div className="font-medium text-zinc-950 capitalize">
+          <div className="font-medium text-strong capitalize">
             {c.type.replace(/_/g, ' ')} — v{c.version}
           </div>
-          <div className="text-ds-micro font-mono text-zinc-500">
+          <div className="text-ds-micro font-mono text-faint">
             Effective {c.effectiveDate || '—'} · Renews {c.renewalDate || '—'}
           </div>
         </div>
@@ -58,7 +58,7 @@ export function BrandContractsView({
       header: 'Track',
       hideOnMobile: true,
       render: (c) => (
-        <span className="capitalize text-zinc-700">{fulfillmentTrackLabel(c.fulfillmentTrack)}</span>
+        <span className="capitalize text-secondary">{fulfillmentTrackLabel(c.fulfillmentTrack)}</span>
       ),
     },
     {
@@ -79,7 +79,7 @@ export function BrandContractsView({
       hideOnMobile: true,
       render: (c) => {
         const u = renewalUrgency(c.renewalDate, nowIso);
-        if (u === 'ok') return <span className="text-ds-label text-zinc-500">Current</span>;
+        if (u === 'ok') return <span className="text-ds-label text-faint">Current</span>;
         return (
           <InlineStatus
             label={u === 'expired' ? 'Expired' : `Renews ≤ ${u.replace('d', '')}d`}
@@ -110,7 +110,7 @@ export function BrandContractsView({
             e.stopPropagation();
             onOpenContract(c.id);
           }}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
         >
           <Eye className="w-3.5 h-3.5" aria-hidden="true" />
           Open
@@ -159,7 +159,7 @@ export function BrandContractsView({
               <button
                 type="button"
                 onClick={() => onDownloadContract(viewingContract)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
               >
                 <Download className="w-3.5 h-3.5" aria-hidden="true" />
                 Download text copy
@@ -167,7 +167,7 @@ export function BrandContractsView({
               <button
                 type="button"
                 onClick={onCloseContract}
-                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-white text-ds-label font-medium hover:bg-accent-600"
+                className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
               >
                 Done
               </button>
@@ -175,7 +175,7 @@ export function BrandContractsView({
           )
         }
       >
-        <pre className="whitespace-pre-wrap font-mono text-ds-label leading-relaxed text-zinc-800 bg-zinc-50 border border-zinc-200 rounded-ds-sm p-4">
+        <pre className="whitespace-pre-wrap font-mono text-ds-label leading-relaxed text-ink-800 bg-surface border border-hairline rounded-ds-sm p-4">
           {viewingText}
         </pre>
       </SlideOverDrawer>

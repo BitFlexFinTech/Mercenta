@@ -107,8 +107,8 @@ export function BrandReportsView({
       mobilePrimary: true,
       render: (d) => (
         <div>
-          <div className="font-mono font-medium text-zinc-950">{d.purchaseOrderId}</div>
-          <div className="text-ds-label text-zinc-600">{deductionTypeLabel(d.type)}</div>
+          <div className="font-mono font-medium text-strong">{d.purchaseOrderId}</div>
+          <div className="text-ds-label text-muted">{deductionTypeLabel(d.type)}</div>
         </div>
       ),
     },
@@ -130,14 +130,14 @@ export function BrandReportsView({
         description={`Operational confirmation rates, ledger on-hand inventory, and dispatch volume for ${brandName || 'your brand'}.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-ds-sm border border-zinc-200 p-0.5 bg-white text-ds-label">
+            <div className="inline-flex rounded-ds-sm border border-hairline p-0.5 bg-surface-raised text-ds-label">
               {([30, 60, 90] as const).map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => onChangePeriod(p)}
                   className={`px-2.5 py-1 rounded-ds-sm ${
-                    period === p ? 'bg-zinc-950 text-white font-medium' : 'text-zinc-600'
+                    period === p ? 'bg-ink-950 text-on-dark font-medium' : 'text-muted'
                   }`}
                 >
                   Last {p}d
@@ -148,7 +148,7 @@ export function BrandReportsView({
               type="button"
               disabled={!hasPos}
               onClick={onExportCsv}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-zinc-300 bg-white text-ds-label font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface disabled:opacity-40"
             >
               <Download className="w-3.5 h-3.5" aria-hidden="true" />
               Export CSV
@@ -164,14 +164,14 @@ export function BrandReportsView({
         <>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {metrics.map((m) => (
-              <div key={m.id} className="border border-zinc-200 bg-white rounded-ds-md p-4">
-                <div className="text-ds-micro font-medium uppercase tracking-[0.06em] text-zinc-500">
+              <div key={m.id} className="border border-hairline bg-surface-raised rounded-ds-md p-4">
+                <div className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
                   {m.label}
                 </div>
-                <div className="mt-1.5 text-ds-page font-semibold text-zinc-950 tabular-nums font-mono">
+                <div className="mt-1.5 text-ds-page font-semibold text-strong tabular-nums font-mono">
                   {m.value}
                 </div>
-                <div className="mt-1 text-ds-label text-zinc-600 truncate">{m.context}</div>
+                <div className="mt-1 text-ds-label text-muted truncate">{m.context}</div>
               </div>
             ))}
           </div>

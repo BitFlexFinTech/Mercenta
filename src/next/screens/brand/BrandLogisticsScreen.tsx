@@ -255,7 +255,7 @@ export function BrandLogisticsScreen() {
         const selectedPo = selectedLeg?.poNumber ? poByNumber.get(selectedLeg.poNumber) : null;
         if (!selectedPo) {
           return (
-            <p className="text-ds-label text-zinc-600" data-testid="po-documents-unavailable">
+            <p className="text-ds-label text-muted" data-testid="po-documents-unavailable">
               This consignment is not linked to a purchase order in your scope, so no document pack applies.
             </p>
           );
@@ -293,12 +293,12 @@ export function BrandLogisticsScreen() {
             {matched.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center gap-3 rounded-ds-sm border border-zinc-200 bg-zinc-50 p-2"
+                className="flex items-center gap-3 rounded-ds-sm border border-hairline bg-surface p-2"
               >
                 <ProductThumb product={p} size={36} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-ds-body font-medium text-zinc-950">{p.name}</div>
-                  <div className="text-ds-micro font-mono text-zinc-500">
+                  <div className="truncate text-ds-body font-medium text-strong">{p.name}</div>
+                  <div className="text-ds-micro font-mono text-faint">
                     SKU {p.sku} · EAN {p.barcode || '—'}
                   </div>
                 </div>

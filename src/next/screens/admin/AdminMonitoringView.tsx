@@ -120,8 +120,8 @@ export function AdminMonitoringView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.label}</div>
-          <div className="text-ds-label text-zinc-500 truncate">{row.category}</div>
+          <div className="font-medium text-strong truncate">{row.label}</div>
+          <div className="text-ds-label text-faint truncate">{row.category}</div>
         </div>
       ),
     },
@@ -141,7 +141,7 @@ export function AdminMonitoringView({
       header: 'Server secret',
       hideOnMobile: true,
       render: (row) => (
-        <span className="font-mono text-ds-label text-zinc-600">{row.secretName ?? 'Not needed'}</span>
+        <span className="font-mono text-ds-label text-muted">{row.secretName ?? 'Not needed'}</span>
       ),
     },
   ];
@@ -172,7 +172,7 @@ return (
             {/* The health module's own limitation, stated on the page: a browser
                 cannot probe the database or the Edge Functions, so this screen never
                 claims it did. */}
-            <p className="text-ds-label text-zinc-500">
+            <p className="text-ds-label text-faint">
               A browser cannot probe the database or the Edge Functions, so this view never
               reports their response times. It reflects the mode each integration resolves to in
               the current environment.
@@ -186,7 +186,7 @@ return (
               value={categoryFilter}
               onChange={(event) => onChangeCategory(event.target.value)}
               aria-label="Filter by category"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All categories</option>
               {categoryOptions.map((category) => (
@@ -199,7 +199,7 @@ return (
               value={modeFilter}
               onChange={(event) => onChangeMode(event.target.value)}
               aria-label="Filter by mode"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All modes</option>
               {modeOptions.map((mode) => (
@@ -214,8 +214,8 @@ return (
               aria-pressed={attentionOnly}
               className={`px-3 py-2 text-ds-label font-medium rounded-ds-md border ${
                 attentionOnly
-                  ? 'border-zinc-900 bg-zinc-950 text-white'
-                  : 'border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
+                  ? 'border-ink bg-ink-950 text-on-dark'
+                  : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >
               Needs attention only
@@ -245,16 +245,16 @@ return (
         {selected && (
           <dl className="grid grid-cols-2 gap-3 text-ds-body">
             <div>
-              <dt className="text-ds-label text-zinc-500">Resolved mode</dt>
-              <dd className="font-medium text-zinc-950">{modeLabel(selected.mode)}</dd>
+              <dt className="text-ds-label text-faint">Resolved mode</dt>
+              <dd className="font-medium text-strong">{modeLabel(selected.mode)}</dd>
             </div>
             <div>
-              <dt className="text-ds-label text-zinc-500">Needs attention</dt>
-              <dd className="font-medium text-zinc-950">{selected.needsAttention ? 'Yes' : 'No'}</dd>
+              <dt className="text-ds-label text-faint">Needs attention</dt>
+              <dd className="font-medium text-strong">{selected.needsAttention ? 'Yes' : 'No'}</dd>
             </div>
             <div className="col-span-2">
-              <dt className="text-ds-label text-zinc-500">Server-side secret</dt>
-              <dd className="font-mono text-ds-label text-zinc-950">
+              <dt className="text-ds-label text-faint">Server-side secret</dt>
+              <dd className="font-mono text-ds-label text-strong">
                 {selected.secretName ?? 'This provider needs no secret'}
               </dd>
             </div>

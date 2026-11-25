@@ -4,7 +4,42 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §WAVE 3l — THE MIGRATION'S APPLICATION SURFACE COMPLETE, AND THE CONSOLE'S STYLING DEBT FOUND AND NAMED (2026-11-25)
+## §WAVE 3m — THE CONSOLE'S OWN PALETTE MADE REAL (2026-11-25)
+
+**State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
+tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.
+**NOT deployed and NOT live-verified**, deliberately: `scripts/deploy-demo.sh` builds the working tree.
+
+**What this wave did.** WAVE 3l found that the console (`src/next/**`) authored **1,746 grey-family and 279 literal
+`white`/`black`** class sites while declaring its own token set in `src/next/next.css` and using none of it.
+
+- **The token set was completed first**, every new class holding **EXACTLY** the value of the class it replaces
+  (`text-secondary` #3f3f46 · `text-ink-900/800` · `text-quiet` #a1a1aa · `text-quieter` #d4d4d8 · `text-on-dark`
+  #ffffff · `bg-tint-strong` #e4e4e7 · `bg-ink-800/900/950` · `bg-scrim-30` · `bg-canvas-40…80` · `bg-tint-70/80` ·
+  `border-hairline-soft/bold` · `border-ink` · `border-ink-strong`), and the nine pre-existing rules were given their
+  `was <class>` record so the mapping is machine-readable.
+- **All 2,025 sites were repointed across 44 files** — a colour-neutral rewrite proved by measurement
+  (**console grey 1746 → 0 · literal 279 → 0**) and by the browser (**6 passed**, every console screen rendering).
+- **NEW GATE `scripts/validate-next-console-tokens.mjs` (9 assertions, auto-discovered)** — the ABSENCE GUARD (the
+  console authors zero grey and zero literal sites, using the project's own family regexes, imported) and the
+  DEAD-CLASS GUARD (every console token the code uses is declared — the defect already paid for once when
+  `text-strong` emitted no rule in 97 files), plus the positive control discovered from `next.css`'s `was` record.
+  **Proved able to fail**: 3 raw grey classes reintroduced → A1 FAIL → restored byte-identical `7b62a4e9…`.
+
+**Evidence.** typecheck **0** · build **EXIT 0** · `e2e/next-console-smoke.spec.ts` **6 passed / 0 failed** · new gate
+**9 PASS / 0 FAIL** · the migration validator **1 of 14, down from 3** · measured whole subject
+**grey 6/1 · ink 912/136 · literal 0/0** — **grey and literal AT their ceilings** (application grey 6/1 · literal 0/0;
+console grey 0/0 · literal 0/0).
+
+**What remains — ONE decision, and it is the Owner's.** The only failing assertion of the migration is T3's **ink
+arm** (912 against a ceiling of 468), and this wave proved by construction that it **cannot be reached by
+migrating**: the `ink` family is defined to include `surface-*`, which is the canonical token the migration repoints
+ONTO, so the console's own surface names arrive as "ink" the moment the migration succeeds (483 → 912). Either
+redefine `ink` to the legacy aliases only (`ink*` · `brass*` — **14 sites in 2 files**, so the arm would pass at
+once) or keep the family and re-state the ceiling with the reason. **Nothing can be migrated to fix it.**
+
+---
+## PREVIOUS STATUS — **§WAVE 3l — SUPERSEDED BY §WAVE 3m** (2026-11-25)
 
 **State: WORK-IN-PROGRESS COMMIT — NOT A VERIFIED CHECKPOINT.** Committed on `redesign/foundation` and pushed; the
 tree is NOT empty (the Owner's own untracked work), so this is **not** a clean checkpoint and **not** complete.

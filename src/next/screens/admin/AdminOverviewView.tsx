@@ -64,8 +64,8 @@ const COLUMNS: ConsoleColumn<BrandRow>[] = [
     mobilePrimary: true,
     render: (row) => (
       <div className="min-w-0">
-        <div className="font-medium text-zinc-950 truncate">{row.name}</div>
-        <div className="text-ds-label text-zinc-500 truncate">{row.category}</div>
+        <div className="font-medium text-strong truncate">{row.name}</div>
+        <div className="text-ds-label text-faint truncate">{row.category}</div>
       </div>
     ),
   },
@@ -73,7 +73,7 @@ const COLUMNS: ConsoleColumn<BrandRow>[] = [
     key: 'contract',
     header: 'Contract',
     hideOnMobile: true,
-    render: (row) => <span className="text-ds-label text-zinc-600">{row.contractStatus}</span>,
+    render: (row) => <span className="text-ds-label text-muted">{row.contractStatus}</span>,
   },
   {
     key: 'openPos',
@@ -190,15 +190,15 @@ export function AdminOverviewView({
               testId="admin-attention"
             >
               {attention.length === 0 ? (
-                <p className="text-ds-body text-zinc-600">Nothing needs attention right now.</p>
+                <p className="text-ds-body text-muted">Nothing needs attention right now.</p>
               ) : (
-                <ul className="divide-y divide-zinc-200">
+                <ul className="divide-y divide-hairline-06">
                   {attention.map((item) => {
                     const body = (
                       <>
                         <div className="min-w-0">
-                          <div className="text-ds-body text-zinc-950 truncate">{item.label}</div>
-                          <div className="text-ds-label text-zinc-500 truncate">
+                          <div className="text-ds-body text-strong truncate">{item.label}</div>
+                          <div className="text-ds-label text-faint truncate">
                             {item.brand} · {item.context}
                           </div>
                         </div>
@@ -212,7 +212,7 @@ export function AdminOverviewView({
                                 label={item.tone === 'danger' ? 'Blocked' : 'Action'}
                                 tone={item.tone}
                               />
-                              <ArrowUpRight className="w-4 h-4 text-zinc-400" aria-hidden="true" />
+                              <ArrowUpRight className="w-4 h-4 text-quiet" aria-hidden="true" />
                             </>
                           )}
                         </span>
@@ -224,7 +224,7 @@ export function AdminOverviewView({
                           <button
                             type="button"
                             onClick={item.onClick}
-                            className="w-full flex items-center justify-between gap-3 py-2.5 text-left hover:bg-zinc-50 rounded-ds-sm px-1"
+                            className="w-full flex items-center justify-between gap-3 py-2.5 text-left hover:bg-surface rounded-ds-sm px-1"
                           >
                             {body}
                           </button>
@@ -259,7 +259,7 @@ export function AdminOverviewView({
               <button
                 type="button"
                 onClick={onOpenLogistics}
-                className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
+                className="px-3 py-2 text-ds-label font-medium rounded-ds-md border border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface"
               >
                 Open logistics hub
               </button>

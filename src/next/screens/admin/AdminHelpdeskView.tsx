@@ -130,8 +130,8 @@ export function AdminHelpdeskView({
       mobilePrimary: true,
       render: (row) => (
         <div className="min-w-0">
-          <div className="font-medium text-zinc-950 truncate">{row.ticket.subject}</div>
-          <div className="text-ds-label text-zinc-500 truncate">
+          <div className="font-medium text-strong truncate">{row.ticket.subject}</div>
+          <div className="text-ds-label text-faint truncate">
             {row.brandName} · {row.ticket.lastMessagePreview}
           </div>
         </div>
@@ -164,7 +164,7 @@ export function AdminHelpdeskView({
       header: 'Assigned to',
       hideOnMobile: true,
       render: (row) => (
-        <span className="text-ds-label text-zinc-600">{row.assignedTo ?? 'Unassigned'}</span>
+        <span className="text-ds-label text-muted">{row.assignedTo ?? 'Unassigned'}</span>
       ),
     },
     {
@@ -176,7 +176,7 @@ export function AdminHelpdeskView({
         row.overdue ? (
           <InlineStatus label="Overdue" tone="danger" dataStatus="overdue" />
         ) : (
-          <span className="tabular-nums text-ds-label text-zinc-600">
+          <span className="tabular-nums text-ds-label text-muted">
             {row.ticket.slaDeadline ? row.ticket.slaDeadline.slice(0, 10) : '—'}
           </span>
         ),
@@ -191,7 +191,7 @@ return (
       />
 
       {notice && (
-        <p role="status" className="mb-4 text-ds-label text-zinc-700">
+        <p role="status" className="mb-4 text-ds-label text-secondary">
           {notice}
         </p>
       )}
@@ -215,13 +215,13 @@ return (
               onChange={(event) => onChangeSearch(event.target.value)}
               placeholder="Search subject or brand"
               aria-label="Search tickets"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950 w-64"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
             />
             <select
               value={brandFilter}
               onChange={(event) => onChangeBrand(event.target.value)}
               aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All brands</option>
               {brandOptions.map((brand) => (
@@ -234,7 +234,7 @@ return (
               value={statusFilter}
               onChange={(event) => onChangeStatus(event.target.value)}
               aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All statuses</option>
               {statusOptions.map((status) => (
@@ -247,7 +247,7 @@ return (
               value={priorityFilter}
               onChange={(event) => onChangePriority(event.target.value)}
               aria-label="Filter by priority"
-              className="px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
             >
               <option value="all">All priorities</option>
               {priorityOptions.map((priority) => (
@@ -279,16 +279,16 @@ return (
       >
         {selected && (
           <div className="space-y-4">
-            <p className="text-ds-body text-zinc-700">{selected.lastMessagePreview}</p>
+            <p className="text-ds-body text-secondary">{selected.lastMessagePreview}</p>
 
             <div className="grid grid-cols-1 gap-3">
               <label className="text-ds-body">
-                <span className="text-ds-label text-zinc-500 block mb-1">Status</span>
+                <span className="text-ds-label text-faint block mb-1">Status</span>
                 <select
                   value={selected.status}
                   disabled={busyTicketId === selected.id}
                   onChange={(event) => onSetStatus(selected, event.target.value as TicketStatus)}
-                  className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
                 >
                   {statusOptions.map((status) => (
                     <option key={status} value={status}>
@@ -299,14 +299,14 @@ return (
               </label>
 
               <label className="text-ds-body">
-                <span className="text-ds-label text-zinc-500 block mb-1">Priority</span>
+                <span className="text-ds-label text-faint block mb-1">Priority</span>
                 <select
                   value={selected.priority}
                   disabled={busyTicketId === selected.id}
                   onChange={(event) =>
                     onSetPriority(selected, event.target.value as TicketPriority)
                   }
-                  className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
                 >
                   {priorityOptions.map((priority) => (
                     <option key={priority} value={priority}>
@@ -317,12 +317,12 @@ return (
               </label>
 
               <label className="text-ds-body">
-                <span className="text-ds-label text-zinc-500 block mb-1">Assigned to</span>
+                <span className="text-ds-label text-faint block mb-1">Assigned to</span>
                 <select
                   value={selected.assignedToStaffId ?? ''}
                   disabled={busyTicketId === selected.id}
                   onChange={(event) => onAssign(selected, event.target.value)}
-                  className="w-full px-3 py-2 text-ds-body border border-zinc-300 rounded-ds-md bg-white text-zinc-950"
+                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
                 >
                   {/* Selecting "Unassigned" would be a false affordance: the ticket
                       store has no unassign command, so it is shown as current state
@@ -341,14 +341,14 @@ return (
               </label>
             </div>
 
-            <dl className="border-t border-zinc-200 pt-3 grid grid-cols-2 gap-3 text-ds-body">
+            <dl className="border-t border-hairline pt-3 grid grid-cols-2 gap-3 text-ds-body">
               <div>
-                <dt className="text-ds-label text-zinc-500">Opened</dt>
-                <dd className="font-medium text-zinc-950">{selected.createdAt.slice(0, 10)}</dd>
+                <dt className="text-ds-label text-faint">Opened</dt>
+                <dd className="font-medium text-strong">{selected.createdAt.slice(0, 10)}</dd>
               </div>
               <div>
-                <dt className="text-ds-label text-zinc-500">SLA target</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ds-label text-faint">SLA target</dt>
+                <dd className="font-medium text-strong">
                   {selected.slaDeadline ? selected.slaDeadline.slice(0, 10) : 'Not set'}
                 </dd>
               </div>
