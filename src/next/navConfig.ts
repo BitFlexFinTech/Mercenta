@@ -201,7 +201,7 @@ export const CORE_BRAND_ITEMS: NavItemDef[] = [
  * BWS — Alcohol Operating Model (22 exact IDs matching BitFlexFinTech/Dash-1).
  */
 export const BWS_ITEMS: NavItemDef[] = [
-  { id: 'overview', label: 'Overview', group: 'Intelligence', implemented: false },
+  { id: 'overview', label: 'Overview', group: 'Intelligence', implemented: true },
   { id: 'country-discovery', label: 'Country Discovery', group: 'Intelligence', implemented: false },
   { id: 'brand-discovery', label: 'Brand Discovery', group: 'Intelligence', implemented: false },
   { id: 'brand-intelligence', label: 'Brand Intelligence', group: 'Intelligence', implemented: false },
@@ -211,7 +211,7 @@ export const BWS_ITEMS: NavItemDef[] = [
   { id: 'opportunity-assessment', label: 'Opportunity Assessment', group: 'Intelligence', implemented: false },
 
   { id: 'acquisition-pipeline', label: 'Acquisition Pipeline', group: 'Commercial & Portfolio', implemented: false },
-  { id: 'brand-portfolio', label: 'Brand Portfolio', group: 'Commercial & Portfolio', implemented: false },
+  { id: 'brand-portfolio', label: 'Brand Portfolio', group: 'Commercial & Portfolio', implemented: true },
   { id: 'product-catalogue', label: 'Product Catalogue', group: 'Commercial & Portfolio', implemented: false },
   { id: 'brand-onboarding', label: 'Brand Onboarding', group: 'Commercial & Portfolio', implemented: false },
   { id: 'partner-portal', label: 'Partner Portal', group: 'Commercial & Portfolio', implemented: false },
@@ -234,7 +234,7 @@ export const BWS_ITEMS: NavItemDef[] = [
 export const TALENT_COMMERCE_ITEMS: NavItemDef[] = [
   { id: 'dashboard', label: 'Dashboard', group: 'Intelligence', implemented: false },
   { id: 'profile', label: 'Rights Holders', group: 'Intelligence', implemented: false },
-  { id: 'brands', label: 'Brands & Products', group: 'Intelligence', implemented: false },
+  { id: 'brands', label: 'Brands & Products', group: 'Intelligence', implemented: true },
   { id: 'uk-opportunities', label: 'UK Opportunities', group: 'Intelligence', implemented: false },
   { id: 'acquisition', label: 'Brand Acquisition', group: 'Intelligence', implemented: false },
   { id: 'campaigns', label: 'Campaigns', group: 'Intelligence', implemented: true },

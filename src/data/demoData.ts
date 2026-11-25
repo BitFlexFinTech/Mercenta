@@ -29,6 +29,7 @@ import type {
   Contract,
   FreightTerm,
   FulfillmentTrack,
+  OperatingVertical,
   Message,
   Product,
   ProductImage,
@@ -53,6 +54,14 @@ export interface DemoBrand {
   email: string;
   signatory: string;
   track: 'direct_fulfillment' | 'financed';
+  /**
+   * §WAVE 3g (2026-11-25) — the brand's OPERATING VERTICAL. `core` is this
+   * platform's own retail-channel business; `bws` and `talent_commerce` are the
+   * other two operating models. Every brand the demo holds belongs to `core` — none
+   * is a BWS or Talent Commerce brand — and recording that is the honest state
+   * rather than inventing one.
+   */
+  vertical: OperatingVertical;
   contractStatus: Contract['status'];
   /**
    * §5/M12 — this brand's commercial relationship with Mercenta. INTERNAL to
@@ -114,16 +123,16 @@ export const DEMO_MODEL_B_BRAND_ID = 'brand-tapatio';
  */
 export const DEMO_BRANDS: DemoBrand[] = [
   // Brand A — Astonish (Model A, commission/agent); CLEARED, trading tenant.
-  { id: 'brand-astonish', name: 'Astonish', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@astonish.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-astonish'] },
+  { id: 'brand-astonish', vertical: 'core', name: 'Astonish', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@astonish.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-astonish'] },
   // Brand B — Tapatío (Model B, buy/resell); CLEARED, trading tenant.
-  { id: 'brand-tapatio', name: 'Tapatío', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@tapatio.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-tapatio'] },
+  { id: 'brand-tapatio', vertical: 'core', name: 'Tapatío', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@tapatio.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-tapatio'] },
   // Brand C — Le Creuset (Model B, buy/resell); BLOCKED compliance-scenario tenant.
-  { id: 'brand-lecreuset', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
+  { id: 'brand-lecreuset', vertical: 'core', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
   // Brand D — Kit & Kin: a brand STILL IN ONBOARDING (not yet in the portal). It
   // demonstrates the onboarding wizard AND an UNAPPROVED brand (contract 'sent',
   // so the shell keeps it in the onboarding wizard rather than the operational
   // workspace). No operational data.
-  { id: 'brand-kitkin', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
+  { id: 'brand-kitkin', vertical: 'core', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
 ];
 
 // §P2 — the retired single-PC re-export (`DEMO_BRAND_PC`) is gone with the
@@ -205,6 +214,9 @@ export const PORTAL_BRAND_IDS: string[] = [
  */
 export interface DemoBrandRow {
   id: string;
+  /** §WAVE 3g — the operating vertical; absent on a row mapped from a database that
+   *  predates it, so readers resolve it explicitly rather than assuming. */
+  vertical?: OperatingVertical;
   category: string;
   /** §Phase D6 — the CANONICAL track union (was `string`), so a payout can rely
    *  on the financed-fee clause without a cast or a silent default. */

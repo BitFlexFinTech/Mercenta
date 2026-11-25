@@ -179,6 +179,36 @@ test('super-admin session: an approval is audited, and the audit trail shows it'
   expect(pageErrors).toEqual([]);
 });
 
+test('the BWS and Talent Commerce surfaces render their own portfolio, honestly', async ({
+  page,
+}) => {
+  const pageErrors = watchPageErrors(page);
+  await loginAs(page, 'Super Admin — Tadii');
+  await page.goto('/?console=next');
+
+  const nav = page.getByRole('navigation', WORKSPACE_NAV);
+  await expect(nav).toBeVisible({ timeout: 20000 });
+  /* The surface switcher is a TABLIST of buttons, not a select. */
+  const surfaceTab = (name: string) => page.getByRole('tab', { name, exact: true });
+
+  /* BWS: the portfolio is scoped to the BWS vertical, and NOTHING is onboarded in it
+     — so the screen must say that rather than show core brands under a BWS heading. */
+  await surfaceTab('BWS Workspace').click();
+  /* The BWS surface's declared default view is the Campaign Studio, so the test walks
+     to the portfolio the way a user would. */
+  await nav.getByRole('button', { name: 'Overview', exact: true }).click();
+  await expect(page.getByText('Beers, Wines & Spirits portfolio')).toBeVisible({ timeout: 20000 });
+  await expect(page.getByText('Nothing is onboarded in Beers, Wines & Spirits yet')).toBeVisible();
+
+  /* Talent Commerce: the same contract, with its own wording. */
+  await surfaceTab('Talent Commerce').click();
+  await nav.getByRole('button', { name: 'Brands & Products', exact: true }).click();
+  await expect(page.getByText('Talent Commerce portfolio')).toBeVisible({ timeout: 20000 });
+
+  await page.screenshot({ path: 'test-results/next-console-vertical.png', fullPage: true });
+  expect(pageErrors).toEqual([]);
+});
+
 test('default: the existing application still renders, not the new console', async ({ page }) => {
   const pageErrors = watchPageErrors(page);
   await page.goto('/');

@@ -4858,6 +4858,10 @@ const BRAND_REDESIGN_SCOPE = new Set([
     'src/next/',
     'src/App.tsx',
     'e2e/next-console-smoke.spec.ts',
+    /* §WAVE 3g — the operating-vertical discriminator the console's BWS and Talent
+       Commerce surfaces are scoped by. Declared, not widened: the guard still
+       refuses any changed source file outside EVERY declared set. */
+    'src/config/verticals.ts',
   ]);
 
   const CONCEPT3_HOMEPAGE_SCOPE = new Set([

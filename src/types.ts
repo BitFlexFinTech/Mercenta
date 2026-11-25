@@ -1176,6 +1176,21 @@ export interface RegionalDossier {
 /** §5 Fulfillment Track */
 export type FulfillmentTrack = 'direct_fulfillment' | 'financed' | 'unassigned';
 
+/**
+ * §WAVE 3g (2026-11-25) — THE OPERATING VERTICAL.
+ *
+ * Mercenta runs three operating models, and until now the platform held NO
+ * discriminator for them: the new console's surfaces declared BWS and Talent
+ * Commerce views, but nothing in the domain said which vertical a brand belonged
+ * to, so those views could only have been built by inventing a domain.
+ *
+ * This is that discriminator — ONE declaration, read by the surfaces. It is NOT the
+ * same thing as a brand's Amazon category (`APPROVED_CATEGORIES`), and it is NOT a
+ * commercial model (`commission_agent` / `buy_resell`): a brand has all three
+ * independently.
+ */
+export type OperatingVertical = 'core' | 'bws' | 'talent_commerce';
+
 export interface FulfillmentScore {
   brandId: string;
   tradingHistoryScore: number; // 0-20: years exporting
@@ -1479,6 +1494,69 @@ export interface AdSpendRecommendation {
   /** Optional brand note attached at decision time. */
   note?: string;
 }
+
+/* ── §Advertising — Creative Assets ───────────────────────────────────── */
+
+export type CreativeAssetStatus =
+  | 'draft'
+  | 'internally_validated'
+  | 'submitted_to_amazon'
+  | 'amazon_approved'
+  | 'amazon_rejected'
+  | 'live_in_use'
+  | 'archived';
+
+export type CreativeAssetFormat =
+  | 'sb-image'
+  | 'sb-logo'
+  | 'sbv-169'
+  | 'sbv-11'
+  | 'sbv-916'
+  | 'sd-1200'
+  | 'sd-sq'
+  | 'sd-300x250'
+  | 'sd-300x600'
+  | 'sd-160x600'
+  | 'sd-728x90'
+  | 'sd-video'
+  | 'sp-main';
+
+export interface CreativeAsset {
+  id: string;
+  brandId: string;
+  campaignId?: string;
+  formatId: CreativeAssetFormat;
+  name: string;
+  headline?: string;
+  productSku?: string;
+  logoUrl?: string;
+  mediaUrl?: string;
+  mediaType: 'image' | 'video';
+  ctaText?: string;
+  status: CreativeAssetStatus;
+  validationResult?: CreativeValidationResult;
+  amazonCreativeId?: string;
+  submittedAt?: string;
+  approvedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy?: string;
+  updatedAt?: string;
+  sourceLabel: string; // 'simulated_seed' | 'live_amazon_ads'
+}
+
+export interface CreativeValidationResult {
+  isValid: boolean;
+  checks: CreativeValidationCheck[];
+}
+
+export interface CreativeValidationCheck {
+  id: string;
+  label: string;
+  passed: boolean;
+  severity: 'error' | 'warning' | 'info';
+}
+
 
 /* ── §19.1 Deductions / chargebacks ledger ─────────────────────────── */
 

@@ -62,6 +62,9 @@ import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
 /* §WAVE 3f (2026-11-25) — messages and monitoring. */
 import { AdminMessagesScreen } from '@/next/screens/admin/AdminMessagesScreen';
 import { AdminMonitoringScreen } from '@/next/screens/admin/AdminMonitoringScreen';
+/* §WAVE 3g (2026-11-25) — ONE vertical-scoped portfolio screen serves all three
+   operating models. */
+import { VerticalPortfolioScreen } from '@/next/screens/vertical/VerticalPortfolioScreen';
 import '../next.css';
 
 export interface NextShellProps {
@@ -418,6 +421,17 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       );
     }
 
+    /* §WAVE 3g — BWS declares 22 views and holds ONE real screen. The two that the
+       canonical domain can actually support today are scoped to the BWS vertical
+       (`src/config/verticals.ts`), so they show BWS's own brands — none are onboarded
+       yet, and the screen says exactly that rather than showing core brands under a
+       BWS heading. */
+    if (surface === 'bws') {
+      if (activeViewId === 'overview' || activeViewId === 'brand-portfolio') {
+        return <VerticalPortfolioScreen vertical="bws" />;
+      }
+    }
+
     if (surface === 'talent_commerce' && activeViewId === 'campaigns') {
       return (
         <AdsManagerScreen
@@ -426,6 +440,14 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           allowedBrandIds={filteredBrandIds}
         />
       );
+    }
+
+    /* §WAVE 3g — the same for Talent Commerce: the vertical-scoped portfolio, with
+       its own honest empty state. */
+    if (surface === 'talent_commerce') {
+      if (activeViewId === 'overview' || activeViewId === 'brands') {
+        return <VerticalPortfolioScreen vertical="talent_commerce" />;
+      }
     }
 
     return (
