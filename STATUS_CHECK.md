@@ -34,6 +34,31 @@ gate's homepage/footer assertions; the console's 48 lint errors, which are delib
 **Nothing was lost and nothing is broken.** The Owner's uncommitted transfer is now IN the project, and the record of
 what the previous session left dirty is superseded by this block.
 
+### §DEV-PORT-GUARD — `npm run dev` NO LONGER FAILS ON A PINNED PORT (2026-11-25, same session)
+
+**The Owner reported `npm run dev` failing with "Port 5182 is already in use".** The PIN was working as designed
+(`vite.config.ts`: `server: { port: 5182, strictPort: true }`), so the fault was on the other side of the rule, and it
+had **two** causes — both measured, neither guessed:
+
+1. **A dev server left behind by an interrupted command kept holding the pinned port.** One had been listening for
+   **4h 40m**, started by the Playwright harness in this session when a command was cut off at the 300-second limit.
+   The error named neither the holder nor a way out.
+2. **An explicit `--port` OVERRIDES the pin**, so the pin never sees it. This project's own server had been left
+   running on **3000, 3004 and 3001** — the oldest for **2 days 11 hours** — and one of them was squatting port
+   **3000, which `latency-scalper` owns** in `~/.cline/DEV_PORTS.md`. That is the rule's own fault, in reverse.
+
+**FIX (at source, with a gate).** `scripts/dev-guard.mjs` runs as the **`predev`** script, so every `npm run dev`
+self-heals before vite starts. It clears **only this project's own** servers — on the pinned port or on any other —
+**REFUSES** a holder that is not ours (exit 1, naming the pid and the command, killing nothing), and **excludes its
+own ancestor chain**. That last property exists because testing found the first version killing the very
+`npm run dev` that launched it, so the run died silently; it is fixed and the reason is recorded in the file.
+Cleared this session: the 4h40m stray, plus the 3000/3004/3001 servers and their `npm run dev` parents.
+`scripts/validate-dev-port-guard.mjs` (**NEW**, 12 assertions, auto-discovered by `validate:all`) pins the port, the
+`strictPort` setting, the `predev` wiring, the guard's two safety properties, the Playwright consumer's agreement
+and the registry's sole ownership — **proved able to fail** (`strictPort: false` ⇒ 1 failure) and restored
+**byte-identical** (sha256 `7e17af3eae9f839bd2c2…`). **NOT redeployed:** no `src/` or `supabase/` file changed, so the
+deployed build is unchanged.
+
 ---
 
 ### HISTORY (kept as history — superseded by the block above) §WAVE 3m — THE CONSOLE'S OWN PALETTE MADE REAL (2026-11-25)

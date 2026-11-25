@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "predev": "node scripts/dev-guard.mjs",
     "dev:stop": "bash scripts/dev-stop.sh",
     "build": "vite build",
     "lint": "eslint .",
