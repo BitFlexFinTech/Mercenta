@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowUpRight,
@@ -13,70 +13,308 @@ import {
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
 import { navigateProductView, parseProductPath, recordLinkQuery } from '@/lib/runtime/productRoutes';
-import { EmptyStateBlock } from '@/next/components/ConsolePrimitives';
+import { EmptyStateBlock, LoadingRows } from '@/next/components/ConsolePrimitives';
 import {
   SURFACE_CONFIGS,
   groupNavItems,
   visibleNavItemsForSurface,
   type OperatingSurfaceId,
 } from '@/next/navConfig';
-import { AdsManagerScreen } from '@/next/screens/ads/AdsManagerScreen';
-import { BrandLogisticsScreen } from '@/next/screens/brand/BrandLogisticsScreen';
-import { BrandPurchaseOrdersScreen } from '@/next/screens/brand/BrandPurchaseOrdersScreen';
-/* §WAVE 2 (2026-11-25) — the twelve brand screens below were BUILT in the AI
-   Studio pass but never mounted: nothing imported them, so the navigation
-   advertised views the shell could not render and `validate-dead-code` reported
-   them as dead files. They are mounted here, behind the same view-id switch. */
-import { BrandAnalyticsScreen } from '@/next/screens/brand/BrandAnalyticsScreen';
-import { BrandCatalogScreen } from '@/next/screens/brand/BrandCatalogScreen';
-import { BrandCommercialReadinessScreen } from '@/next/screens/brand/BrandCommercialReadinessScreen';
-import { BrandComplianceScreen } from '@/next/screens/brand/BrandComplianceScreen';
-import { BrandContractsScreen } from '@/next/screens/brand/BrandContractsScreen';
-import { BrandDocumentsScreen } from '@/next/screens/brand/BrandDocumentsScreen';
-import { BrandInventoryScreen } from '@/next/screens/brand/BrandInventoryScreen';
-import { BrandLiftOffScreen } from '@/next/screens/brand/BrandLiftOffScreen';
-import { BrandOnboardingScreen } from '@/next/screens/brand/BrandOnboardingScreen';
-import { BrandOverviewScreen } from '@/next/screens/brand/BrandOverviewScreen';
-import { BrandReportsScreen } from '@/next/screens/brand/BrandReportsScreen';
-import { BrandReturnsScreen } from '@/next/screens/brand/BrandReturnsScreen';
-import { WorkWorkspaceScreen } from '@/next/screens/shared/WorkWorkspaceScreen';
-/* §WAVE 3h (2026-11-25) — the deadline calendar, built on the work layer's own
-   derivation. */
+import type { BwsIntelligenceSection } from '@/next/screens/bws/BwsIntelligenceView';
+import type { BwsPortfolioOpsSection } from '@/next/screens/bws/BwsPortfolioOpsView';
+import type { TalentWorkspaceSection } from '@/next/screens/talent/TalentWorkspaceView';
+/* §FRONTEND-REDESIGN BATCH 2b — two screens v1's shell does not have, kept because
+   THIS project built them and the requirements registry records them as built:
+   the §WAVE 3h deadline calendar, and the §WAVE 3g vertical-scoped portfolio
+   (ONE screen serving every operating model). */
 import { BrandCalendarScreen } from '@/next/screens/brand/BrandCalendarScreen';
-import { BrandSettingsScreen } from '@/next/screens/brand/BrandSettingsScreen';
-/* §WAVE 3 (2026-11-25) — the ADMIN operational core. Before this the Operations
-   Console rendered placeholders for every view except the Ads Manager. */
-import { AdminLogisticsScreen } from '@/next/screens/admin/AdminLogisticsScreen';
-import { AdminOverviewScreen } from '@/next/screens/admin/AdminOverviewScreen';
-import { AdminPurchaseOrdersScreen } from '@/next/screens/admin/AdminPurchaseOrdersScreen';
-/* §WAVE 3b (2026-11-25) — returns tracking and compliance approvals. */
-import { AdminComplianceScreen } from '@/next/screens/admin/AdminComplianceScreen';
-import { AdminReturnsScreen } from '@/next/screens/admin/AdminReturnsScreen';
-/* §WAVE 3c (2026-11-25) — billing, Brand CRM and the contract cycle. */
-import { AdminBillingScreen } from '@/next/screens/admin/AdminBillingScreen';
-import { AdminContractsScreen } from '@/next/screens/admin/AdminContractsScreen';
-import { AdminCrmScreen } from '@/next/screens/admin/AdminCrmScreen';
-/* §WAVE 3d (2026-11-25) — catalogue, fulfilment track and marketing. */
-import { AdminCatalogScreen } from '@/next/screens/admin/AdminCatalogScreen';
-import { AdminFulfillmentScreen } from '@/next/screens/admin/AdminFulfillmentScreen';
-import { AdminMarketingScreen } from '@/next/screens/admin/AdminMarketingScreen';
-/* §WAVE 3e (2026-11-25) — helpdesk and the audit log. */
-import { AdminAuditScreen } from '@/next/screens/admin/AdminAuditScreen';
-import { AdminHelpdeskScreen } from '@/next/screens/admin/AdminHelpdeskScreen';
-/* §WAVE 3f (2026-11-25) — messages and monitoring. */
-import { AdminMessagesScreen } from '@/next/screens/admin/AdminMessagesScreen';
-/* §WAVE 3i (2026-11-25) — the founder's Control Centre, on its canonical model. */
-import { AdminControlCentreScreen } from '@/next/screens/admin/AdminControlCentreScreen';
-/* §WAVE 3k — the founder surfaces: the financing-partner universe and outreach, the
-   funding pipeline, and the ranked opportunity discovery. Each reads its own owner. */
-import { AdminPartnershipsScreen } from '@/next/screens/admin/AdminPartnershipsScreen';
-import { AdminFounderCentreScreen } from '@/next/screens/admin/AdminFounderCentreScreen';
-import { AdminBrandIntelligenceScreen } from '@/next/screens/admin/AdminBrandIntelligenceScreen';
-import { AdminMonitoringScreen } from '@/next/screens/admin/AdminMonitoringScreen';
-/* §WAVE 3g (2026-11-25) — ONE vertical-scoped portfolio screen serves all three
-   operating models. */
 import { VerticalPortfolioScreen } from '@/next/screens/vertical/VerticalPortfolioScreen';
 import '../next.css';
+
+/* ── LAZY SCREEN IMPORTS ──────────────────────────────────────────────────── */
+
+const AdsManagerScreen = lazy(() =>
+  import('@/next/screens/ads/AdsManagerScreen').then((m) => ({ default: m.AdsManagerScreen }))
+);
+const WorkWorkspaceScreen = lazy(() =>
+  import('@/next/screens/shared/WorkWorkspaceScreen').then((m) => ({
+    default: m.WorkWorkspaceScreen,
+  }))
+);
+
+// Core Brand screens (21)
+const BrandOverviewScreen = lazy(() =>
+  import('@/next/screens/brand/BrandOverviewScreen').then((m) => ({
+    default: m.BrandOverviewScreen,
+  }))
+);
+const BrandPurchaseOrdersScreen = lazy(() =>
+  import('@/next/screens/brand/BrandPurchaseOrdersScreen').then((m) => ({
+    default: m.BrandPurchaseOrdersScreen,
+  }))
+);
+const BrandLogisticsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandLogisticsScreen').then((m) => ({
+    default: m.BrandLogisticsScreen,
+  }))
+);
+const BrandReturnsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandReturnsScreen').then((m) => ({
+    default: m.BrandReturnsScreen,
+  }))
+);
+const BrandCatalogScreen = lazy(() =>
+  import('@/next/screens/brand/BrandCatalogScreen').then((m) => ({
+    default: m.BrandCatalogScreen,
+  }))
+);
+const BrandInventoryScreen = lazy(() =>
+  import('@/next/screens/brand/BrandInventoryScreen').then((m) => ({
+    default: m.BrandInventoryScreen,
+  }))
+);
+const BrandCommercialReadinessScreen = lazy(() =>
+  import('@/next/screens/brand/BrandCommercialReadinessScreen').then((m) => ({
+    default: m.BrandCommercialReadinessScreen,
+  }))
+);
+const BrandLiftOffScreen = lazy(() =>
+  import('@/next/screens/brand/BrandLiftOffScreen').then((m) => ({
+    default: m.BrandLiftOffScreen,
+  }))
+);
+const BrandOnboardingScreen = lazy(() =>
+  import('@/next/screens/brand/BrandOnboardingScreen').then((m) => ({
+    default: m.BrandOnboardingScreen,
+  }))
+);
+const BrandComplianceScreen = lazy(() =>
+  import('@/next/screens/brand/BrandComplianceScreen').then((m) => ({
+    default: m.BrandComplianceScreen,
+  }))
+);
+const BrandContractsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandContractsScreen').then((m) => ({
+    default: m.BrandContractsScreen,
+  }))
+);
+const BrandAnalyticsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandAnalyticsScreen').then((m) => ({
+    default: m.BrandAnalyticsScreen,
+  }))
+);
+const BrandMarketIntelScreen = lazy(() =>
+  import('@/next/screens/brand/BrandMarketIntelScreen').then((m) => ({
+    default: m.BrandMarketIntelScreen,
+  }))
+);
+const BrandReportsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandReportsScreen').then((m) => ({
+    default: m.BrandReportsScreen,
+  }))
+);
+const BrandDocumentsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandDocumentsScreen').then((m) => ({
+    default: m.BrandDocumentsScreen,
+  }))
+);
+const BrandSupportScreen = lazy(() =>
+  import('@/next/screens/brand/BrandSupportScreen').then((m) => ({
+    default: m.BrandSupportScreen,
+  }))
+);
+const BrandTeamMessagesScreen = lazy(() =>
+  import('@/next/screens/brand/BrandTeamMessagesScreen').then((m) => ({
+    default: m.BrandTeamMessagesScreen,
+  }))
+);
+const BrandSettingsScreen = lazy(() =>
+  import('@/next/screens/brand/BrandSettingsScreen').then((m) => ({
+    default: m.BrandSettingsScreen,
+  }))
+);
+
+// Core Admin screens (28)
+const AdminOverviewScreen = lazy(() =>
+  import('@/next/screens/admin/AdminOverviewScreen').then((m) => ({
+    default: m.AdminOverviewScreen,
+  }))
+);
+const ControlCentreScreen = lazy(() =>
+  import('@/next/screens/admin/AdminControlCentreScreen').then((m) => ({
+    default: m.AdminControlCentreScreen,
+  }))
+);
+const AdminPurchaseOrdersScreen = lazy(() =>
+  import('@/next/screens/admin/AdminPurchaseOrdersScreen').then((m) => ({
+    default: m.AdminPurchaseOrdersScreen,
+  }))
+);
+const AdminLogisticsScreen = lazy(() =>
+  import('@/next/screens/admin/AdminLogisticsScreen').then((m) => ({
+    default: m.AdminLogisticsScreen,
+  }))
+);
+const AdminReturnsScreen = lazy(() =>
+  import('@/next/screens/admin/AdminReturnsScreen').then((m) => ({
+    default: m.AdminReturnsScreen,
+  }))
+);
+const BrandCrmScreen = lazy(() =>
+  import('@/next/screens/admin/AdminCrmScreen').then((m) => ({
+    default: m.AdminCrmScreen,
+  }))
+);
+const OnboardingPipelineScreen = lazy(() =>
+  import('@/next/screens/admin/OnboardingPipelineScreen').then((m) => ({
+    default: m.OnboardingPipelineScreen,
+  }))
+);
+const MarketingHubScreen = lazy(() =>
+  import('@/next/screens/admin/AdminMarketingScreen').then((m) => ({
+    default: m.AdminMarketingScreen,
+  }))
+);
+const AdminBrandIntelligenceScreen = lazy(() =>
+  import('@/next/screens/admin/AdminBrandIntelligenceScreen').then((m) => ({
+    default: m.AdminBrandIntelligenceScreen,
+  }))
+);
+const AdminCatalogScreen = lazy(() =>
+  import('@/next/screens/admin/AdminCatalogScreen').then((m) => ({
+    default: m.AdminCatalogScreen,
+  }))
+);
+const FulfillmentTrackScreen = lazy(() =>
+  import('@/next/screens/admin/AdminFulfillmentScreen').then((m) => ({
+    default: m.AdminFulfillmentScreen,
+  }))
+);
+const RetailPipelineScreen = lazy(() =>
+  import('@/next/screens/admin/RetailPipelineScreen').then((m) => ({
+    default: m.RetailPipelineScreen,
+  }))
+);
+const AdminBillingScreen = lazy(() =>
+  import('@/next/screens/admin/AdminBillingScreen').then((m) => ({
+    default: m.AdminBillingScreen,
+  }))
+);
+const AdminContractsScreen = lazy(() =>
+  import('@/next/screens/admin/AdminContractsScreen').then((m) => ({
+    default: m.AdminContractsScreen,
+  }))
+);
+const AdminComplianceScreen = lazy(() =>
+  import('@/next/screens/admin/AdminComplianceScreen').then((m) => ({
+    default: m.AdminComplianceScreen,
+  }))
+);
+const AdminMessagesScreen = lazy(() =>
+  import('@/next/screens/admin/AdminMessagesScreen').then((m) => ({
+    default: m.AdminMessagesScreen,
+  }))
+);
+const AdminHelpdeskScreen = lazy(() =>
+  import('@/next/screens/admin/AdminHelpdeskScreen').then((m) => ({
+    default: m.AdminHelpdeskScreen,
+  }))
+);
+const AdminMonitoringScreen = lazy(() =>
+  import('@/next/screens/admin/AdminMonitoringScreen').then((m) => ({
+    default: m.AdminMonitoringScreen,
+  }))
+);
+const SuperAdminScreen = lazy(() =>
+  import('@/next/screens/admin/SuperAdminScreen').then((m) => ({
+    default: m.SuperAdminScreen,
+  }))
+);
+const AdminAuditLogScreen = lazy(() =>
+  import('@/next/screens/admin/AdminAuditScreen').then((m) => ({
+    default: m.AdminAuditScreen,
+  }))
+);
+const AdminUsertourScreen = lazy(() =>
+  import('@/next/screens/admin/AdminUsertourScreen').then((m) => ({
+    default: m.AdminUsertourScreen,
+  }))
+);
+const AdminIntegrationsScreen = lazy(() =>
+  import('@/next/screens/admin/AdminIntegrationsScreen').then((m) => ({
+    default: m.AdminIntegrationsScreen,
+  }))
+);
+const FounderInvestorScreen = lazy(() =>
+  import('@/next/screens/admin/AdminFounderCentreScreen').then((m) => ({
+    default: m.AdminFounderCentreScreen,
+  }))
+);
+const PartnershipsScreen = lazy(() =>
+  import('@/next/screens/admin/AdminPartnershipsScreen').then((m) => ({
+    default: m.AdminPartnershipsScreen,
+  }))
+);
+
+// BWS Workspace screens
+const BwsIntelligenceScreen = lazy(() =>
+  import('@/next/screens/bws/BwsIntelligenceScreen').then((m) => ({
+    default: m.BwsIntelligenceScreen,
+  }))
+);
+const BwsPortfolioOpsScreen = lazy(() =>
+  import('@/next/screens/bws/BwsPortfolioOpsScreen').then((m) => ({
+    default: m.BwsPortfolioOpsScreen,
+  }))
+);
+
+// Talent Commerce screens
+const TalentApprovalsScreen = lazy(() =>
+  import('@/next/screens/talent/TalentApprovalsScreen').then((m) => ({
+    default: m.TalentApprovalsScreen,
+  }))
+);
+const TalentWorkspaceScreen = lazy(() =>
+  import('@/next/screens/talent/TalentWorkspaceScreen').then((m) => ({
+    default: m.TalentWorkspaceScreen,
+  }))
+);
+
+const BWS_INTEL_SECTIONS = new Set<BwsIntelligenceSection>([
+  'overview',
+  'country-discovery',
+  'brand-discovery',
+  'brand-intelligence',
+  'uk-distribution',
+  'uk-channel-research',
+  'pitch-targets',
+  'opportunity-assessment',
+  'acquisition-pipeline',
+]);
+
+const BWS_PORTFOLIO_OPS_SECTIONS = new Set<BwsPortfolioOpsSection>([
+  'brand-portfolio',
+  'partner-portal',
+  'import-excise',
+  'brand-growth',
+  'reports-analytics',
+  'settings',
+]);
+
+const TALENT_WORKSPACE_SECTIONS = new Set<TalentWorkspaceSection>([
+  'dashboard',
+  'profile',
+  'brands',
+  'uk-opportunities',
+  'acquisition',
+  'brand-stores',
+  'concepts',
+  'development',
+  'collections',
+  'assets',
+  'royalties',
+  'settings',
+]);
 
 export interface NextShellProps {
   onOpenLegacy: () => void;
@@ -130,22 +368,6 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   });
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
-  /* §WAVE 2 (2026-11-25) — ONE navigation helper for the brand surface, so a
-     screen that sends the user elsewhere keeps shell state and the canonical
-     URL in step (the pattern `purchase_orders -> logistics` already used). */
-  const goToBrandView = (viewId: string, query: Record<string, string> = {}) => {
-    setViewBySurface((prev) => ({ ...prev, core_brand: viewId }));
-    navigateProductView('brand', viewId, query);
-  };
-
-  /* §WAVE 3 (2026-11-25) — the same helper for the admin surface, plus the brand
-     the admin drilled into, so "open this brand's orders" is a real jump. */
-  const [adminPoBrandId, setAdminPoBrandId] = useState<string | null>(null);
-  const goToAdminView = (viewId: string, query: Record<string, string> = {}) => {
-    setViewBySurface((prev) => ({ ...prev, core_admin: viewId }));
-    navigateProductView('admin', viewId, query);
-  };
 
   // Super-Admin portfolio filters (applied cleanly against fields present on DemoBrandRow)
   const [verticalFilter, setVerticalFilter] = useState<VerticalFilterValue>('all');
@@ -260,12 +482,27 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   }
 
   const surfaceCfg = SURFACE_CONFIGS[surface];
+  const adsScope = session?.tier === 'super_admin' ? 'super_admin' : 'admin';
   const showSuperAdminFilterBar =
-    surface !== 'core_brand' && (session?.tier === 'super_admin' || session?.tier === 'admin_staff' || !session);
+    surface !== 'core_brand' &&
+    (session?.tier === 'super_admin' || session?.tier === 'admin_staff' || !session);
 
-  function renderMainContent() {
-    if (surface === 'core_brand') {
-      if (activeViewId === 'purchase_orders') {
+  function renderCoreBrandScreen() {
+    switch (activeViewId) {
+      case 'overview':
+        return (
+          <BrandOverviewScreen
+            onNavigate={(viewId, poNumber) => {
+              setViewBySurface((prev) => ({ ...prev, core_brand: viewId }));
+              navigateProductView(
+                'brand',
+                viewId,
+                poNumber ? recordLinkQuery('po', poNumber) : undefined
+              );
+            }}
+          />
+        );
+      case 'purchase_orders':
         return (
           <BrandPurchaseOrdersScreen
             onOpenLogistics={(poNumber) => {
@@ -274,261 +511,295 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             }}
           />
         );
-      }
-      if (activeViewId === 'logistics') {
+      case 'logistics':
         return <BrandLogisticsScreen />;
-      }
-      if (activeViewId === 'ads_management') {
-        return <AdsManagerScreen vertical="core" scope="brand" />;
-      }
-      /* §WAVE 2 (2026-11-25) — the remaining brand views are MOUNTED. */
-      if (activeViewId === 'overview') {
-        return (
-          <BrandOverviewScreen
-            onNavigate={(viewId, poNumber) =>
-              goToBrandView(viewId, poNumber ? recordLinkQuery('po', poNumber) : {})
-            }
-          />
-        );
-      }
-      if (activeViewId === 'returns') {
+      case 'returns':
         return (
           <BrandReturnsScreen
-            onOpenPo={(poNumber) => goToBrandView('purchase_orders', recordLinkQuery('po', poNumber))}
-            onOpenDeductions={() => goToBrandView('analytics')}
-          />
-        );
-      }
-      if (activeViewId === 'work') {
-        return <WorkWorkspaceScreen scope="brand" onNavigate={(viewId) => goToBrandView(viewId)} />;
-      }
-      if (activeViewId === 'catalog') {
-        return <BrandCatalogScreen />;
-      }
-      if (activeViewId === 'inventory') {
-        return <BrandInventoryScreen />;
-      }
-      if (activeViewId === 'commercial_readiness') {
-        return <BrandCommercialReadinessScreen />;
-      }
-      if (activeViewId === 'lift_off') {
-        return <BrandLiftOffScreen onOpenCases={() => goToBrandView('cases')} />;
-      }
-      if (activeViewId === 'onboarding') {
-        return <BrandOnboardingScreen onNavigateSettings={() => goToBrandView('settings')} />;
-      }
-      if (activeViewId === 'compliance') {
-        return <BrandComplianceScreen />;
-      }
-      if (activeViewId === 'contracts') {
-        return <BrandContractsScreen />;
-      }
-      if (activeViewId === 'analytics') {
-        return <BrandAnalyticsScreen />;
-      }
-      if (activeViewId === 'reports') {
-        return <BrandReportsScreen />;
-      }
-      if (activeViewId === 'documents') {
-        return <BrandDocumentsScreen />;
-      }
-      /* §WAVE 3h — the deadline calendar the work layer derives. */
-      if (activeViewId === 'calendar') {
-        return <BrandCalendarScreen />;
-      }
-      /* §WAVE 3h — settings: the brand's own record, and the change requests it owns. */
-      if (activeViewId === 'settings') {
-        return <BrandSettingsScreen />;
-      }
-    }
-
-    if (surface === 'core_admin') {
-      if (activeViewId === 'overview') {
-        return (
-          <AdminOverviewScreen
-            onOpenPurchaseOrders={(brandId) => {
-              setAdminPoBrandId(brandId ?? null);
-              goToAdminView('purchase_orders_admin');
+            onOpenPo={(poNumber) => {
+              setViewBySurface((prev) => ({ ...prev, core_brand: 'purchase_orders' }));
+              navigateProductView('brand', 'purchase_orders', recordLinkQuery('po', poNumber));
             }}
-            onOpenLogistics={() => goToAdminView('logistics')}
+            onOpenDeductions={() => selectNavItem('analytics')}
           />
         );
-      }
-      if (activeViewId === 'purchase_orders_admin') {
+      case 'work':
+        return <WorkWorkspaceScreen scope="brand" initialView="list" onNavigate={selectNavItem} />;
+      case 'calendar':
+        /* §FRONTEND-REDESIGN BATCH 2b — v1 rendered the work layer's calendar view
+           here. This project has a dedicated §WAVE 3h deadline calendar, so that
+           screen is kept rather than replaced by a narrower one. */
+        return <BrandCalendarScreen />;
+      case 'catalog':
+        return <BrandCatalogScreen />;
+      case 'inventory':
+        return <BrandInventoryScreen />;
+      case 'commercial_readiness':
+        return <BrandCommercialReadinessScreen />;
+      case 'lift_off':
+        return <BrandLiftOffScreen onOpenCases={() => selectNavItem('cases')} />;
+      case 'onboarding':
+        return <BrandOnboardingScreen onNavigateSettings={() => selectNavItem('settings')} />;
+      case 'compliance':
+        return <BrandComplianceScreen />;
+      case 'contracts':
+        return <BrandContractsScreen />;
+      case 'analytics':
+        return <BrandAnalyticsScreen />;
+      case 'ads_management':
+        return <AdsManagerScreen vertical="core" scope="brand" />;
+      case 'market':
+        return <BrandMarketIntelScreen />;
+      case 'reports':
+        return <BrandReportsScreen />;
+      case 'documents':
+        return <BrandDocumentsScreen />;
+      case 'cases':
+        return <BrandSupportScreen />;
+      case 'team':
+        return <BrandTeamMessagesScreen />;
+      case 'settings':
+        /* §FRONTEND-REDESIGN BATCH 2b — this project's BrandSettingsScreen owns its
+           own contract navigation and accepts no props; v1's took `onOpenContracts`.
+           Passing it would be a dead prop. */
+        return <BrandSettingsScreen />;
+      default:
         return (
-          <AdminPurchaseOrdersScreen
-            key={adminPoBrandId ?? 'all-brands'}
-            initialBrandId={adminPoBrandId}
+          <EmptyStateBlock
+            title={`Unknown view: ${activeViewId}`}
+            description="Select an available workspace view from the navigation rail."
+            actionLabel="Open Dashboard"
+            onAction={() => selectNavItem('overview')}
           />
         );
-      }
-      if (activeViewId === 'logistics') {
-        return <AdminLogisticsScreen />;
-      }
-      if (activeViewId === 'returns_tracking') {
-        return <AdminReturnsScreen />;
-      }
-      if (activeViewId === 'compliance') {
-        return <AdminComplianceScreen />;
-      }
-      /* §WAVE 3c — the finance, relationship and legal views. */
-      if (activeViewId === 'billing') {
-        return <AdminBillingScreen />;
-      }
-      if (activeViewId === 'crm') {
-        return <AdminCrmScreen />;
-      }
-      if (activeViewId === 'contracts_admin') {
-        return <AdminContractsScreen />;
-      }
-      /* §WAVE 3d — catalogue, fulfilment and marketing. */
-      if (activeViewId === 'catalog') {
-        return <AdminCatalogScreen />;
-      }
-      if (activeViewId === 'fulfillment_track') {
-        return <AdminFulfillmentScreen />;
-      }
-      if (activeViewId === 'marketing') {
-        return <AdminMarketingScreen />;
-      }
-      /* §WAVE 3e — helpdesk triage and the audit trail. `audit_log` is a
-         SUPER-ADMIN view by design; `visibleNavItemsForSurface` keeps it out of an
-         admin_staff menu, so this branch is reached only by a super_admin session. */
-      if (activeViewId === 'helpdesk') {
-        return <AdminHelpdeskScreen />;
-      }
-      if (activeViewId === 'audit_log') {
-        return <AdminAuditScreen />;
-      }
-      /* §WAVE 3f — the message log and the honest readiness view. */
-      if (activeViewId === 'messages') {
-        return <AdminMessagesScreen />;
-      }
-      if (activeViewId === 'monitoring') {
-        return <AdminMonitoringScreen />;
-      }
-      /* §WAVE 3i — the Control Centre: the ten capability areas the founder's own
-         model already derives, each metric drilling into its existing destination. */
-      if (activeViewId === 'control_centre') {
-        return <AdminControlCentreScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
-      }
-      /* §WAVE 3k — Partnerships & Fundraising: the real financing-partner universe, the
-         outreach pipeline run over it, and the financier lifecycle. Super-Admin only. */
-      if (activeViewId === 'partnerships') {
-        return <AdminPartnershipsScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
-      }
-      /* §WAVE 3k — Founder Investor Centre: the funding pipeline, the Model B capital case
-         and the pitch workspace. Super-Admin only. */
-      if (activeViewId === 'founder_centre') {
-        return <AdminFounderCentreScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
-      }
-      /* §WAVE 3k — Brand Intelligence: the ranked opportunity board derived from the
-         canonical prospect store, with the ten-category rule shown firing. */
-      if (activeViewId === 'brand_intelligence') {
-        /* §FRONTEND-REDESIGN BATCH 3 — no props. v1's screen inspects a prospect
-           INLINE (its own `selectedProspect` inspector) instead of navigating away,
-           so the old `onNavigate` prop had nothing left to call. */
-        return <AdminBrandIntelligenceScreen />;
-      }
-      /* §WAVE 3b — the shared work workspace already exists for brands; the admin
-         surface mounts the SAME component with `scope="admin"`, so admin tasks and
-         brand tasks are one work layer, not two. */
-      if (activeViewId === 'work') {
-        return (
-          <WorkWorkspaceScreen scope="admin" onNavigate={(viewId) => goToAdminView(viewId)} />
-        );
-      }
     }
+  }
 
-    if (
-      surface === 'core_admin' &&
-      (activeViewId === 'ads_management' || activeViewId === 'amazon_ads')
-    ) {
+  function renderCoreAdminScreen() {
+    if (activeNavItem?.superAdminOnly && session?.tier !== 'super_admin') {
       return (
-        <AdsManagerScreen
-          vertical="core"
-          scope="admin"
-          allowedBrandIds={filteredBrandIds}
-        />
-      );
-    }
-
-    if (surface === 'bws' && activeViewId === 'campaign-studio') {
-      return (
-        <AdsManagerScreen
-          vertical="bws"
-          scope="admin"
-          allowedBrandIds={filteredBrandIds}
-        />
-      );
-    }
-
-    /* §WAVE 3g — BWS declares 22 views and holds ONE real screen. The two that the
-       canonical domain can actually support today are scoped to the BWS vertical
-       (`src/config/verticals.ts`), so they show BWS's own brands — none are onboarded
-       yet, and the screen says exactly that rather than showing core brands under a
-       BWS heading. */
-    if (surface === 'bws') {
-      if (activeViewId === 'overview' || activeViewId === 'brand-portfolio') {
-        return <VerticalPortfolioScreen vertical="bws" />;
-      }
-    }
-
-    if (surface === 'talent_commerce' && activeViewId === 'campaigns') {
-      return (
-        <AdsManagerScreen
-          vertical="talent_commerce"
-          scope="admin"
-          allowedBrandIds={filteredBrandIds}
-        />
-      );
-    }
-
-    /* §WAVE 3g — the same for Talent Commerce: the vertical-scoped portfolio, with
-       its own honest empty state. */
-    if (surface === 'talent_commerce') {
-      if (activeViewId === 'overview' || activeViewId === 'brands') {
-        return <VerticalPortfolioScreen vertical="talent_commerce" />;
-      }
-    }
-
-    return (
-      <div className="space-y-6">
-        <div className="border-b border-hairline pb-4">
-          <div className="text-ds-micro font-mono uppercase tracking-[0.06em] text-faint">
-            {surfaceCfg.label} · {activeViewId}
-          </div>
-          <h1 className="mt-1 text-ds-page font-semibold text-strong">
-            {activeNavItem?.label ?? activeViewId}
-          </h1>
-          <p className="mt-1 text-ds-body text-muted">
-            Scheduled for Phases 4–6. Navigation structure and RBAC allowlists are active in Phase 1.
-          </p>
-        </div>
-
         <EmptyStateBlock
-          title={`${activeNavItem?.label ?? activeViewId} is not available yet`}
-          description={
-            surface === 'core_brand'
-              ? 'This view is not part of the current release. Everything else in the Partner Portal is available from the menu.'
-              : 'This view is not part of the current release. The Ads Manager is available from the menu.'
-          }
-          actionLabel={
-            surface === 'core_brand'
-              ? 'Open Purchase Orders'
-              : `Open ${SURFACE_CONFIGS[surface].defaultViewId === 'ads_management' ? 'Ads Manager' : 'Campaigns'}`
-          }
-          onAction={() => selectNavItem(SURFACE_CONFIGS[surface].defaultViewId)}
+          title="Super Admin access required"
+          description={`${activeNavItem.label} is restricted exclusively to Super Admin sessions. Switch Demo actor to Super Admin in the top bar to continue.`}
+          actionLabel="Open Overview"
+          onAction={() => selectNavItem('overview')}
         />
-      </div>
-    );
+      );
+    }
+
+    switch (activeViewId) {
+      case 'overview':
+        return <AdminOverviewScreen onNavigate={selectNavItem} />;
+      case 'control_centre':
+        return <ControlCentreScreen onNavigate={selectNavItem} />;
+      case 'work':
+        return <WorkWorkspaceScreen scope="admin" initialView="list" onNavigate={selectNavItem} />;
+      case 'purchase_orders_admin':
+        return <AdminPurchaseOrdersScreen />;
+      case 'logistics':
+        return <AdminLogisticsScreen onOpenIntegrations={() => selectNavItem('integrations')} />;
+      case 'returns_tracking':
+        return <AdminReturnsScreen />;
+      case 'calendar':
+        return (
+          <WorkWorkspaceScreen scope="admin" initialView="calendar" onNavigate={selectNavItem} />
+        );
+      case 'crm':
+        return <BrandCrmScreen />;
+      case 'onboarding_pipeline':
+        return <OnboardingPipelineScreen />;
+      case 'marketing':
+        return <MarketingHubScreen />;
+      case 'ads_management':
+      case 'amazon_ads':
+        return (
+          <AdsManagerScreen
+            vertical="core"
+            scope={adsScope}
+            allowedBrandIds={filteredBrandIds}
+          />
+        );
+      case 'brand_intelligence':
+        return <AdminBrandIntelligenceScreen />;
+      case 'catalog':
+        return <AdminCatalogScreen />;
+      case 'fulfillment_track':
+        return <FulfillmentTrackScreen />;
+      case 'retail_pipeline':
+        return <RetailPipelineScreen />;
+      case 'billing':
+        return <AdminBillingScreen />;
+      case 'contracts_admin':
+        return <AdminContractsScreen />;
+      case 'compliance':
+        return <AdminComplianceScreen />;
+      case 'messages':
+        return <AdminMessagesScreen />;
+      case 'helpdesk':
+        return <AdminHelpdeskScreen />;
+      case 'monitoring':
+        return <AdminMonitoringScreen />;
+      case 'super_admin':
+        return <SuperAdminScreen onNavigateView={selectNavItem} />;
+      case 'audit_log':
+        return <AdminAuditLogScreen />;
+      case 'usertour':
+        return <AdminUsertourScreen />;
+      case 'integrations':
+        return <AdminIntegrationsScreen />;
+      case 'founder_centre':
+        return <FounderInvestorScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
+      case 'partnerships':
+        return <PartnershipsScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
+      default:
+        return (
+          <EmptyStateBlock
+            title={`Unknown view: ${activeViewId}`}
+            description="Select an available Operations Console view from the navigation rail."
+            actionLabel="Open Overview"
+            onAction={() => selectNavItem('overview')}
+          />
+        );
+    }
+  }
+
+  function renderBwsScreen() {
+    if (activeViewId === 'brand-portfolio') {
+      /* §FRONTEND-REDESIGN BATCH 2b — the §WAVE 3g vertical portfolio owns the
+         portfolio slot: it is scoped by `Brand.vertical`, so a BWS heading can
+         never show core brands. v1's BwsPortfolioOps keeps the OPERATIONAL
+         sections (partner portal, import & excise, growth, reports, settings). */
+      return <VerticalPortfolioScreen vertical="bws" />;
+    }
+    if (BWS_INTEL_SECTIONS.has(activeViewId as BwsIntelligenceSection)) {
+      return (
+        <BwsIntelligenceScreen
+          section={activeViewId as BwsIntelligenceSection}
+          allowedBrandIds={filteredBrandIds}
+          onNavigateView={selectNavItem}
+        />
+      );
+    }
+    if (BWS_PORTFOLIO_OPS_SECTIONS.has(activeViewId as BwsPortfolioOpsSection)) {
+      return (
+        <BwsPortfolioOpsScreen
+          section={activeViewId as BwsPortfolioOpsSection}
+          allowedBrandIds={filteredBrandIds}
+          onNavigateView={selectNavItem}
+        />
+      );
+    }
+    switch (activeViewId) {
+      case 'campaign-studio':
+        return (
+          <AdsManagerScreen
+            vertical="bws"
+            scope={adsScope}
+            allowedBrandIds={filteredBrandIds}
+          />
+        );
+      case 'product-catalogue':
+        return <AdminCatalogScreen />;
+      case 'brand-onboarding':
+        return <OnboardingPipelineScreen />;
+      case 'compliance-regulatory':
+        return <AdminComplianceScreen />;
+      case 'wholesale-distribution':
+        return <AdminPurchaseOrdersScreen />;
+      case 'inventory-fulfilment':
+        return (
+          <AdminLogisticsScreen
+            onOpenIntegrations={() => {
+              setSurface('core_admin');
+              setViewBySurface((prev) => ({ ...prev, core_admin: 'integrations' }));
+              navigateProductView('admin', 'integrations');
+            }}
+          />
+        );
+      case 'financials':
+        return <AdminBillingScreen />;
+      default:
+        return (
+          <EmptyStateBlock
+            title={`Unknown BWS view: ${activeViewId}`}
+            description="Select a valid BWS Workspace section."
+            actionLabel="Open Overview"
+            onAction={() => selectNavItem('overview')}
+          />
+        );
+    }
+  }
+
+  function renderTalentCommerceScreen() {
+    if (activeViewId === 'brands') {
+      /* §FRONTEND-REDESIGN BATCH 2b — same reconciliation as BWS above. */
+      return <VerticalPortfolioScreen vertical="talent_commerce" />;
+    }
+    if (TALENT_WORKSPACE_SECTIONS.has(activeViewId as TalentWorkspaceSection)) {
+      return (
+        <TalentWorkspaceScreen
+          section={activeViewId as TalentWorkspaceSection}
+          allowedBrandIds={filteredBrandIds}
+          onNavigateView={selectNavItem}
+        />
+      );
+    }
+    switch (activeViewId) {
+      case 'campaigns':
+        return (
+          <AdsManagerScreen
+            vertical="talent_commerce"
+            scope={adsScope}
+            allowedBrandIds={filteredBrandIds}
+          />
+        );
+      case 'approvals':
+        return (
+          <TalentApprovalsScreen
+            allowedBrandIds={filteredBrandIds}
+            onNavigateView={selectNavItem}
+          />
+        );
+      case 'purchase-orders':
+        return <AdminPurchaseOrdersScreen />;
+      case 'fulfilment':
+        return (
+          <AdminLogisticsScreen
+            onOpenIntegrations={() => {
+              setSurface('core_admin');
+              setViewBySurface((prev) => ({ ...prev, core_admin: 'integrations' }));
+              navigateProductView('admin', 'integrations');
+            }}
+          />
+        );
+      case 'inventory':
+        return <AdminCatalogScreen />;
+      case 'financials':
+        return <AdminBillingScreen />;
+      default:
+        return (
+          <EmptyStateBlock
+            title={`Unknown Talent Commerce view: ${activeViewId}`}
+            description="Select a valid Talent Commerce section."
+            actionLabel="Open Dashboard"
+            onAction={() => selectNavItem('dashboard')}
+          />
+        );
+    }
+  }
+
+  function renderMainContent() {
+    if (surface === 'core_brand') return renderCoreBrandScreen();
+    if (surface === 'core_admin') return renderCoreAdminScreen();
+    if (surface === 'bws') return renderBwsScreen();
+    return renderTalentCommerceScreen();
   }
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
       <div className="px-4 py-4 border-b border-hairline flex items-center justify-between">
         <div>
-          <div className="text-ds-body font-semibold tracking-tight text-strong">
+          <div className="text-ds-body font-semibold tracking-tight text-ink-950">
             Mercenta Partners
           </div>
           <div className="text-ds-label text-faint">{surfaceCfg.label}</div>
@@ -558,21 +829,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       type="button"
                       onClick={() => selectNavItem(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
                         isActive
                           ? 'bg-ink-950 text-on-dark font-medium'
-                          : item.implemented
-                            ? 'text-ink-900 hover:bg-tint font-medium'
-                            : 'text-faint hover:bg-tint-70'
+                          : 'text-ink-900 hover:bg-tint font-medium'
                       }`}
                     >
                       <span className="truncate">{item.label}</span>
-                      {/* §WAVE 2 FIX (2026-11-25) — this badge rendered "Live"
-                          from `item.implemented`, which only means "the screen
-                          exists". It falsely claimed live data on sixteen nav
-                          items, against the platform rule that simulated data is
-                          never presented as live. Availability is conveyed by the
-                          item's contrast and by an honest empty state instead. */}
                     </button>
                   </li>
                 );
@@ -585,8 +848,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       <div className="p-3 border-t border-hairline space-y-2 text-ds-label">
         <div className="px-2 py-1.5 rounded-ds-sm bg-surface border border-hairline">
           <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">Session</div>
-          <div className="font-medium text-strong truncate">
-            {session ? `${session.role}${session.tenantId ? ` (${session.tenantId})` : ''}` : 'No active session'}
+          <div className="font-medium text-ink-950 truncate">
+            {session
+              ? `${session.role}${session.tenantId ? ` (${session.tenantId})` : ''}`
+              : 'No active session'}
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -602,7 +867,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             <button
               type="button"
               onClick={signOut}
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label text-muted hover:text-strong"
+              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label text-faint hover:text-ink-950"
             >
               Sign out
             </button>
@@ -635,7 +900,6 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
       {/* Main Column */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Unified Top Bar (3 concise zones) */}
         <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-4 sm:px-6 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Zone 1: Mobile trigger + Surface Switcher */}
@@ -668,8 +932,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       onClick={() => selectSurface(sId)}
                       className={`px-2.5 py-1 rounded-ds-sm text-ds-label font-medium transition-colors whitespace-nowrap ${
                         active
-                          ? 'bg-surface-raised text-strong shadow-xs border border-hairline'
-                          : 'text-muted hover:text-strong'
+                          ? 'bg-surface-raised text-ink-950 shadow-xs border border-hairline'
+                          : 'text-faint hover:text-ink-950'
                       }`}
                     >
                       {cfg.label}
@@ -681,7 +945,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
             {/* Zone 2: Demo Actor / Brand Switcher */}
             <div className="flex flex-wrap items-center gap-2 text-ds-label">
-              <label className="inline-flex items-center gap-1.5 text-muted">
+              <label className="inline-flex items-center gap-1.5 text-faint">
                 <UserCheck className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
                 <span className="hidden sm:inline">Demo actor</span>
                 <select
@@ -709,7 +973,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       if (surface === 'core_brand') setSurface('core_admin');
                     }
                   }}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   {!session && <option value="none">Select session…</option>}
                   <optgroup label="Partner Brand Accounts">
@@ -727,13 +991,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               </label>
 
               {surface !== 'core_brand' && staff.length > 0 && (
-                <label className="inline-flex items-center gap-1.5 text-muted">
+                <label className="inline-flex items-center gap-1.5 text-faint">
                   <Shield className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
                   <select
                     aria-label="Acting staff member"
                     value={actingStaffId}
                     onChange={(e) => setActingStaffId(e.target.value)}
-                    className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                    className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     {staff.map((st) => (
                       <option key={st.id} value={st.id}>
@@ -748,7 +1012,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               )}
             </div>
 
-            {/* Zone 3: Preview + Legacy triggers */}
+            {/* Zone 3: Preview trigger */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -771,13 +1035,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 Portfolio scope
               </span>
 
-              <label className="inline-flex items-center gap-1.5 text-muted">
+              <label className="inline-flex items-center gap-1.5 text-faint">
                 Vertical
                 <select
                   aria-label="Filter portfolio by vertical"
                   value={verticalFilter}
                   onChange={(e) => setVerticalFilter(e.target.value as VerticalFilterValue)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All verticals</option>
                   <option value="core">Core</option>
@@ -786,13 +1050,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-muted">
+              <label className="inline-flex items-center gap-1.5 text-faint">
                 Region
                 <select
                   aria-label="Filter portfolio by nation"
                   value={nationFilter}
                   onChange={(e) => setNationFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All nations</option>
                   {nations.map((n) => (
@@ -803,13 +1067,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-muted">
+              <label className="inline-flex items-center gap-1.5 text-faint">
                 Track
                 <select
                   aria-label="Filter portfolio by fulfillment track"
                   value={trackFilter}
                   onChange={(e) => setTrackFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All tracks</option>
                   <option value="financed">Financed</option>
@@ -818,13 +1082,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-muted">
+              <label className="inline-flex items-center gap-1.5 text-faint">
                 Contract
                 <select
                   aria-label="Filter portfolio by contract status"
                   value={contractFilter}
                   onChange={(e) => setContractFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All statuses</option>
                   {contractStatuses.map((s) => (
@@ -835,7 +1099,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <span className="ml-auto inline-flex items-center gap-1 text-muted font-mono">
+              <span className="ml-auto inline-flex items-center gap-1 text-faint font-mono">
                 <Building2 className="w-3.5 h-3.5 text-quiet" aria-hidden="true" />
                 {filteredBrandIds ? filteredBrandIds.size : brands.length} / {brands.length} brands
               </span>
@@ -844,7 +1108,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded-ds-sm border border-state-warning/20 bg-state-warning/10 px-3 py-2 text-ds-label text-state-warning"
+                className="flex items-start gap-2 rounded-ds-sm border border-state-warning/20 bg-state-warning/10/80 px-3 py-2 text-ds-label text-state-warning"
               >
                 <AlertCircle className="w-4 h-4 text-state-warning shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
@@ -861,7 +1125,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
         {/* Main Workspace Container */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-[1440px] w-full mx-auto">
-          {renderMainContent()}
+          <Suspense fallback={<LoadingRows rows={6} />}>{renderMainContent()}</Suspense>
         </main>
       </div>
     </div>

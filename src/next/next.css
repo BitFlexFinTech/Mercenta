@@ -259,9 +259,13 @@
 .mercenta-next .bg-canvas-80 {
   background-color: rgba(250, 250, 250, 0.8); /* was bg-zinc-50/80 */
 }
-.mercenta-next .bg-tint-70 {
-  background-color: rgba(244, 244, 245, 0.7); /* was bg-zinc-100/70 */
-}
+/* §FRONTEND-REDESIGN BATCH 2b (2026-11-26) — REMOVED `.bg-tint-70`. It was a
+   §WAVE 3m migration target for `bg-zinc-100/70`, but after the screens were
+   replaced with the re-tokenised versions NOTHING in the console authors that
+   class any more, and `validate-next-console-tokens` B3 correctly fails a token
+   that is declared but never used (a speculative token). The value is unchanged
+   in `.bg-tint-80` below, which IS used; if a future screen needs the 70% step,
+   the rule is re-added at that real call site, not in advance. */
 .mercenta-next .bg-tint-80 {
   background-color: rgba(244, 244, 245, 0.8); /* was bg-zinc-100/80 */
 }
