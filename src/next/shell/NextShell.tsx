@@ -13,6 +13,7 @@ import {
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
 import { navigateProductView, parseProductPath, recordLinkQuery } from '@/lib/runtime/productRoutes';
+import { BrandLockup } from '@/components/shared/BrandLockup';
 import { EmptyStateBlock, LoadingRows } from '@/next/components/ConsolePrimitives';
 import {
   SURFACE_CONFIGS,
@@ -814,11 +815,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       <div className="px-4 py-4 border-b border-hairline flex items-center justify-between">
-        <div>
-          <div className="text-ds-body font-semibold tracking-tight text-ink-950">
-            Mercenta Partners
-          </div>
-          <div className="text-ds-label text-faint">{surfaceCfg.label}</div>
+        <div className="min-w-0">
+          <BrandLockup variant="light" className="h-6 w-auto" />
+          <div className="text-ds-label text-faint mt-0.5">{surfaceCfg.label}</div>
         </div>
         <button
           type="button"
@@ -894,9 +893,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   );
 
   return (
-    <div className="mercenta-next min-h-screen flex bg-surface text-ink-950">
+    <div className="mercenta-next h-screen overflow-hidden flex bg-surface text-ink-950">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-hairline bg-surface-raised">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 lg:h-full overflow-hidden border-r border-hairline bg-surface-raised">
         {sidebarContent}
       </aside>
 
@@ -915,8 +914,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       )}
 
       {/* Main Column */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-4 sm:px-6 py-2.5">
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
+        <header className="z-30 shrink-0 border-b border-hairline bg-surface-raised px-4 sm:px-6 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Zone 1: Mobile trigger + Surface Switcher */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -1140,7 +1139,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         )}
 
         {/* Main Workspace Container */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-[1440px] w-full mx-auto">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 max-w-[1440px] w-full mx-auto">
           <Suspense fallback={<LoadingRows rows={6} />}>{renderMainContent()}</Suspense>
         </main>
       </div>
