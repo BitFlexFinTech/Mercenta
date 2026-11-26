@@ -49,7 +49,7 @@ export function BrandLogisticsScreen() {
 
   const isBrandSession = session?.tier === 'brand';
   const tenantId = session?.tenantId ?? null;
-  const brands = brandsQuery.data?.data ?? [];
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
 
   const scopedPos = useMemo(
     () =>

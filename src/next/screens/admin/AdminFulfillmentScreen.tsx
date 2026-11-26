@@ -15,8 +15,9 @@ export function AdminFulfillmentScreen() {
   const [trackFilter, setTrackFilter] = useState('all');
   const [selected, setSelected] = useState<AdminFulfillmentRow | null>(null);
 
-  const scores = scoresQ.data?.data ?? [];
-  const brands = brandsQ.data?.data ?? [];
+  /* §FRONTEND-REDESIGN BATCH 3 — memoised at source (stable identity for deps). */
+  const scores = useMemo(() => scoresQ.data?.data ?? [], [scoresQ.data]);
+  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
 
   const allRows = useMemo<AdminFulfillmentRow[]>(
     () =>

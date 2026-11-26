@@ -16,8 +16,9 @@ export function AdminMarketingScreen() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AdminMarketingRow | null>(null);
 
-  const campaigns = campaignsQ.data?.data ?? [];
-  const brands = brandsQ.data?.data ?? [];
+  /* §FRONTEND-REDESIGN BATCH 3 — memoised at source (stable identity for deps). */
+  const campaigns = useMemo(() => campaignsQ.data?.data ?? [], [campaignsQ.data]);
+  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
 
   const allRows = useMemo<AdminMarketingRow[]>(
     () =>

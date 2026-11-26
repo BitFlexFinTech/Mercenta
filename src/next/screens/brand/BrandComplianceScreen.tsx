@@ -102,8 +102,8 @@ export function BrandComplianceScreen() {
     });
   }, [requiredTypes, latestDocs, standing]);
 
-  const brandsList = brandsQ.data?.data ?? [];
-  const productsList = productsQ.data?.data ?? [];
+  const brandsList = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
+  const productsList = useMemo(() => productsQ.data?.data ?? [], [productsQ.data]);
   const posList = useMemo(() => {
     const raw = posQ.data?.data ?? [];
     const scoped = tenantId ? raw.filter((p) => p.brandId === tenantId) : raw;

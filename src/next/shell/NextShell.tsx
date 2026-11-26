@@ -336,7 +336,11 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
     canCurrentUserMutate,
   } = useApp();
   const brandsQ = useBrands();
-  const brands = brandsQ.data?.data ?? [];
+  /* §FRONTEND-REDESIGN BATCH 2b — `?.data ?? []` allocates a NEW array on every
+     render, so every useMemo keyed on it below re-ran on every render and ESLint
+     correctly flagged it. Memoised at the source instead: one identity per data
+     change, which is also what the filter strips memoise against. */
+  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
 
   const [surface, setSurface] = useState<OperatingSurfaceId>(() => {
     if (typeof window !== 'undefined') {

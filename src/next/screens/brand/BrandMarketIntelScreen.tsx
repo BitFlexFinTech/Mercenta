@@ -38,8 +38,12 @@ export function BrandMarketIntelScreen() {
   }, [brandCategory]);
 
   const productPerformance = useMemo(
-    () =>
-      products.map((product) => {
+    () => {
+      /* §FRONTEND-REDESIGN BATCH 3 — `stamp` is the canonical-store subscription;
+         `applyListingReviewOverrides` reads that store directly, so the value is
+         referenced here for the dependency to be real rather than stale. */
+      void stamp;
+      return products.map((product) => {
         const raw = analyzeProductListing(product as unknown as Record<string, unknown>, {
           category: brandCategory,
           brandId: tenantId,
@@ -49,7 +53,8 @@ export function BrandMarketIntelScreen() {
           product,
           analysis: tenantId ? applyListingReviewOverrides(raw, tenantId) : raw,
         };
-      }),
+      });
+    },
     [products, brandCategory, tenantId, sameCategoryProspects.sameCat.length, stamp]
   );
 

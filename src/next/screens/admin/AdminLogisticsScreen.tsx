@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { setShipmentMilestone } from '@/data/demoStore';
@@ -78,8 +78,14 @@ export function AdminLogisticsScreen({ onOpenIntegrations }: { onOpenIntegration
     if (shipments.some((s) => s.id === deepLinkShipment)) setSelectedShipmentId(deepLinkShipment);
   }, [deepLinkShipment, shipments]);
 
-  const brandName = (id: string) =>
-    brands.find((b) => b.id === id)?.profile.businessName ?? id;
+  /* §FRONTEND-REDESIGN BATCH 3 — a stable identity, so the three memos that label a
+     brand can depend on the FUNCTION that reads `brands` rather than on `brands`
+     alone. This is what the hook lint requires and it is also correct: the lookup
+     is recreated only when the brand list changes. */
+  const brandName = useCallback(
+    (id: string) => brands.find((b) => b.id === id)?.profile.businessName ?? id,
+    [brands]
+  );
 
   const poByNumber = useMemo(() => {
     const m = new Map<string, (typeof pos)[number]>();
@@ -134,7 +140,7 @@ export function AdminLogisticsScreen({ onOpenIntegrations }: { onOpenIntegration
         simulatedPo: poByNumber.get(s.poNumber)?.simulated === true,
       };
     });
-  }, [focus, shipments, brands, poByNumber]);
+  }, [focus, shipments, poByNumber, brandName]);
 
   const mapModel = useMemo(
     () =>
@@ -230,7 +236,7 @@ export function AdminLogisticsScreen({ onOpenIntegrations }: { onOpenIntegration
       reasons: result.reasons,
       unknowns: route.unknowns,
     };
-  }, [shipments, brands, routeConsignmentId, modes.delta_fulfillment]);
+  }, [shipments, brands, routeConsignmentId, modes.delta_fulfillment, brandName]);
 
   const poDocSummaries = useMemo(() => {
     const queue = pos.filter(documentsAwaitingDownload);
@@ -267,7 +273,7 @@ export function AdminLogisticsScreen({ onOpenIntegrations }: { onOpenIntegration
         generatedAt: instruction?.outcome?.documentsGeneratedAt,
       };
     });
-  }, [pos, shipments, brands, products]);
+  }, [pos, shipments, brands, products, brandName]);
 
   const metrics: MetricItem[] = [
     {

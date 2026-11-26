@@ -15,8 +15,10 @@ export function AdminCrmScreen() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AdminCrmRow | null>(null);
 
-  const brands = brandsQ.data?.data ?? [];
-  const messages = messagesQ.data?.data ?? [];
+  /* §FRONTEND-REDESIGN BATCH 3 — memoised at source: `?.data ?? []` made a new
+     array each render, so every useMemo keyed on it re-ran every render. */
+  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
+  const messages = useMemo(() => messagesQ.data?.data ?? [], [messagesQ.data]);
 
   const rows = useMemo<AdminCrmRow[]>(() => {
     const query = search.trim().toLowerCase();

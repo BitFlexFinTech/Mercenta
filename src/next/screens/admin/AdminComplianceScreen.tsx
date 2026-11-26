@@ -85,19 +85,22 @@ export function AdminComplianceScreen() {
     [docs, brandNameMap]
   );
 
-  const matchesFilter = (d: ComplianceDocRow) => {
-    if (reviewFilter === 'all') return true;
-    if (reviewFilter === 'awaiting') return d.status === 'under_review' || d.status === 'uploaded';
-    if (reviewFilter === 'approved') return d.status === 'approved';
-    return (
-      d.status === 'expired' ||
-      d.status === 'expiring' ||
-      d.status === 'missing' ||
-      d.status === 'rejected'
-    );
-  };
-
   const groups: ComplianceBrandGroup[] = useMemo(() => {
+    /* §FRONTEND-REDESIGN BATCH 3 — the predicate lives INSIDE the memo. It is a
+       closure over `reviewFilter`, so declaring it outside made its identity change
+       every render and the hook lint could not verify the dependency: it reads the
+       same `reviewFilter` the dep array already lists. Same behaviour, one owner. */
+    const matchesFilter = (d: ComplianceDocRow) => {
+      if (reviewFilter === 'all') return true;
+      if (reviewFilter === 'awaiting') return d.status === 'under_review' || d.status === 'uploaded';
+      if (reviewFilter === 'approved') return d.status === 'approved';
+      return (
+        d.status === 'expired' ||
+        d.status === 'expiring' ||
+        d.status === 'missing' ||
+        d.status === 'rejected'
+      );
+    };
     const map = new Map<string, ComplianceDocRow[]>();
     for (const d of docRows) {
       if (!matchesFilter(d)) continue;

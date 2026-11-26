@@ -184,7 +184,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
   const isError = stateMode === 'error';
   const isEmpty = stateMode === 'empty';
 
-  const logisticsRows = isEmpty ? [] : SAMPLE_LOGISTICS_ROWS;
+  const logisticsRows = useMemo(() => (isEmpty ? [] : SAMPLE_LOGISTICS_ROWS), [isEmpty]);
   const logisticsModel = useMemo(
     () =>
       buildOperationalMap(

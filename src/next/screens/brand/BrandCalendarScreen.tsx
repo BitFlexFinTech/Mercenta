@@ -30,7 +30,14 @@ export function BrandCalendarScreen() {
   const monthEntries = useMemo(
     /* `calendarEntriesForMonth(scope, tenantId, month)` derives from the same owner,
        so the month view and the grid can never disagree. */
-    () => calendarEntriesForMonth('brand', tenantId, month),
+    () => {
+      /* §FRONTEND-REDESIGN BATCH 3 — `canonicalVersion` is the subscription that
+         makes this recompute when the canonical store changes;
+         `calendarEntriesForMonth` reads that store directly, so the value has to be
+         referenced here for the dependency to be real rather than stale. */
+      void canonicalVersion;
+      return calendarEntriesForMonth('brand', tenantId, month);
+    },
     [tenantId, month, canonicalVersion]
   );
 

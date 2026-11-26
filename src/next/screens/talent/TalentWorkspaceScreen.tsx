@@ -273,6 +273,22 @@ export function TalentWorkspaceScreen({
     [rightsHolders]
   );
 
+  /* §FRONTEND-REDESIGN BATCH 4 — HOOK-ORDER DEFECT FIXED AT SOURCE.
+     v1 returned early for a super-admin `settings` visit BEFORE these two
+     useMemo calls, so that one route ran fewer hooks than every other render of
+     this component. React throws "Rendered fewer hooks than expected" the moment
+     the section changes — the crash was one navigation away. The hooks now run
+     first, unconditionally; the early return follows them. */
+  const actor = useMemo(
+    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
+    [actingStaffId, canCurrentUserMutate]
+  );
+
+  const transport = useMemo(
+    () => resolveOutreachTransport(integrations.email, comms.emailClient).transport,
+    [integrations.email, comms.emailClient]
+  );
+
   if (section === 'settings' && session?.tier === 'super_admin') {
     return <SuperAdminScreen onNavigateView={onNavigateView} />;
   }
@@ -323,16 +339,6 @@ export function TalentWorkspaceScreen({
             value: formatGbp(pos.reduce((s, p) => s + p.poValue, 0)),
           },
         ];
-
-  const actor = useMemo(
-    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
-    [actingStaffId, canCurrentUserMutate]
-  );
-
-  const transport = useMemo(
-    () => resolveOutreachTransport(integrations.email, comms.emailClient).transport,
-    [integrations.email, comms.emailClient]
-  );
 
   const integrationStatuses = Object.entries(integrations).map(([id, cfg]) => ({
     id,

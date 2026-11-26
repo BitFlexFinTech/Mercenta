@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, useDeductions, usePurchaseOrders } from '@/data/queries';
@@ -103,8 +103,11 @@ export function AdminPurchaseOrdersScreen({
   const [asnExpiry, setAsnExpiry] = useState('');
   const [asnNotice, setAsnNotice] = useState<string | null>(null);
 
-  const brandName = (id: string) =>
-    brands.find((b) => b.id === id)?.profile.businessName ?? id;
+  /* §FRONTEND-REDESIGN BATCH 3 — stable identity for the memos that label a brand. */
+  const brandName = useCallback(
+    (id: string) => brands.find((b) => b.id === id)?.profile.businessName ?? id,
+    [brands]
+  );
 
   const selectedPo = useMemo(() => pos.find((p) => p.id === selectedPoId) ?? null, [pos, selectedPoId]);
 
@@ -116,7 +119,7 @@ export function AdminPurchaseOrdersScreen({
     setBehalfRejectNotice(null);
     setProxyNotice(null);
     setAsnNotice(null);
-  }, [selectedPo?.id]);
+  }, [selectedPo]);
 
   const queueMetrics = useMemo(() => {
     const awaiting = pos.filter((p) => poAcknowledgementWindow(p).inQueue);
@@ -190,7 +193,7 @@ export function AdminPurchaseOrdersScreen({
         statusTone: pres.tone as 'neutral' | 'success' | 'warning' | 'danger' | 'info',
       };
     });
-  }, [pos, brandFilter, statusFilter, simOnly, searchQuery, brands, deductions]);
+  }, [pos, brandFilter, statusFilter, simOnly, searchQuery, deductions, brandName]);
 
   const selectedDetail: AdminPoDetailModel | null = useMemo(() => {
     if (!selectedPo) return null;

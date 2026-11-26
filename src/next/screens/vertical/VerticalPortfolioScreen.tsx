@@ -25,10 +25,13 @@ export function VerticalPortfolioScreen({ vertical }: { vertical: OperatingVerti
   const shipQ = useShipmentsAll();
   const [selected, setSelected] = useState<VerticalBrandRow | null>(null);
 
-  const brands = brandsQ.data?.data ?? [];
-  const products = productsQ.data?.data ?? [];
-  const pos = posQ.data?.data ?? [];
-  const shipments = shipQ.data?.data ?? [];
+  /* §FRONTEND-REDESIGN BATCH 2b — four `?.data ?? []` initialisers made new arrays
+     every render, so every useMemo below re-ran on every render. Memoised at source
+     so the dependency identity is stable (this is what the lint was reporting). */
+  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
+  const products = useMemo(() => productsQ.data?.data ?? [], [productsQ.data]);
+  const pos = useMemo(() => posQ.data?.data ?? [], [posQ.data]);
+  const shipments = useMemo(() => shipQ.data?.data ?? [], [shipQ.data]);
 
   const verticalBrands = useMemo(() => brandsInVertical(brands, vertical), [brands, vertical]);
 
