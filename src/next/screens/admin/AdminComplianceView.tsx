@@ -289,7 +289,7 @@ export function AdminComplianceView({
                                 <button
                                   type="button"
                                   onClick={() => void onRunAutomated(d.id)}
-                                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-[#C2410C] hover:bg-surface"
+                                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-accent hover:bg-surface"
                                 >
                                   Verify (auto)
                                 </button>
@@ -335,7 +335,7 @@ export function AdminComplianceView({
                   <button
                     type="button"
                     onClick={() => void onManualVerdict(drawerDoc.id, 'approve')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412]"
+                    className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95"
                   >
                     Approve (manual)
                   </button>
@@ -434,7 +434,7 @@ export function AdminComplianceView({
                   <button
                     type="button"
                     onClick={() => void onRunAutomated(fullRecordDoc.id)}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-[#C2410C] hover:bg-surface"
+                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-accent hover:bg-surface"
                   >
                     Verify (automated)
                   </button>

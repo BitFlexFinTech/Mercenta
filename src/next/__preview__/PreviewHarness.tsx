@@ -224,7 +224,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
   );
 
   return (
-    <div className="mercenta-next min-h-screen bg-[#FAFAFA] text-[#09090B]">
+    <div className="mercenta-next min-h-screen bg-surface text-ink-950">
       <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-6 py-3 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <button

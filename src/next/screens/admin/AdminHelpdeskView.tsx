@@ -194,7 +194,7 @@ export function AdminHelpdeskView({
                 <div key={c.id} className="p-3 space-y-2" data-state="case-review-row">
                   <div className="flex flex-wrap items-center gap-2 justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-ds-label text-[#C2410C]">
+                      <span className="font-mono text-ds-label text-accent">
                         {c.caseRef ?? c.id}
                       </span>
                       <span className="text-ds-label font-semibold text-ink-950">{c.subject}</span>
@@ -255,13 +255,13 @@ export function AdminHelpdeskView({
                   className="flex flex-wrap items-center justify-between gap-2 text-ds-label"
                 >
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
                     <span className="text-ink-950 font-medium">{c.subject}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => void onEscalateCase(c.id)}
-                    className="px-2.5 py-1 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-micro font-medium hover:bg-[#9A3412]"
+                    className="px-2.5 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-micro font-medium hover:brightness-95"
                   >
                     Escalate to the retail channel
                   </button>
@@ -275,7 +275,7 @@ export function AdminHelpdeskView({
               <div className="text-ds-label font-semibold text-ink-950">Provider cases</div>
               {providerCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center gap-3 text-ds-label">
-                  <span className="font-mono text-[#C2410C]">{c.caseRef ?? c.id}</span>
+                  <span className="font-mono text-accent">{c.caseRef ?? c.id}</span>
                   <span className="font-mono text-faint">{c.amazonReferenceId}</span>
                   <span className="text-faint">
                     {c.amazonSimulated ? 'Simulation — no live retail-channel case' : 'Live retail-channel case'}
@@ -317,7 +317,7 @@ export function AdminHelpdeskView({
               {awaitingResponseCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -348,7 +348,7 @@ export function AdminHelpdeskView({
               {readyToResolveCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -526,7 +526,7 @@ export function AdminHelpdeskView({
                       <button
                         type="button"
                         onClick={() => setReplyDraft(suggestedReply)}
-                        className="text-[#C2410C] font-medium hover:underline"
+                        className="text-accent font-medium hover:underline"
                       >
                         Insert draft
                       </button>
@@ -552,7 +552,7 @@ export function AdminHelpdeskView({
                           setReplyDraft('')
                         );
                       }}
-                      className="px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                      className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
                     >
                       Send Reply
                     </button>

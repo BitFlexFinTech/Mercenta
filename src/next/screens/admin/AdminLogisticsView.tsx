@@ -180,7 +180,7 @@ export function AdminLogisticsView({
       render: (s) => (
         <span className="font-mono text-ds-label font-medium text-ink-950">
           {s.poNumber}
-          {s.simulatedPo && <span className="ml-1.5 text-ds-micro text-[#C2410C]">(sim)</span>}
+          {s.simulatedPo && <span className="ml-1.5 text-ds-micro text-accent">(sim)</span>}
         </span>
       ),
     },
@@ -346,7 +346,7 @@ export function AdminLogisticsView({
                 {apiLogs.map((log) => (
                   <div key={log.id} className="font-mono text-ds-micro text-secondary border border-hairline rounded-ds-sm px-2.5 py-1.5">
                     <span className="text-faint">{log.timestamp}</span>{' '}
-                    <span className="font-semibold text-[#C2410C]">{log.method}</span> {log.endpoint}{' '}
+                    <span className="font-semibold text-accent">{log.method}</span> {log.endpoint}{' '}
                     <span className="text-state-success">{log.status}</span>
                   </div>
                 ))}
@@ -362,7 +362,7 @@ export function AdminLogisticsView({
                 <button
                   type="button"
                   onClick={onOpenIntegrations}
-                  className="inline-flex items-center gap-1 text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="inline-flex items-center gap-1 text-ds-label font-medium text-accent hover:underline"
                 >
                   <PlugZap className="w-3.5 h-3.5" aria-hidden="true" />
                   Integration Settings

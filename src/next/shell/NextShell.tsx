@@ -613,7 +613,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   );
 
   return (
-    <div className="mercenta-next min-h-screen flex bg-[#FAFAFA] text-[#09090B]">
+    <div className="mercenta-next min-h-screen flex bg-surface text-ink-950">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-hairline bg-surface-raised">
         {sidebarContent}

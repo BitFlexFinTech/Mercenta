@@ -212,7 +212,7 @@ export function AdminPurchaseOrdersView({
       render: (r) => (
         <div className="font-mono text-ds-label font-medium text-ink-950">
           {r.po.poNumber}
-          {r.po.simulated === true && <span className="ml-1.5 text-ds-micro text-[#C2410C]">(sim)</span>}
+          {r.po.simulated === true && <span className="ml-1.5 text-ds-micro text-accent">(sim)</span>}
         </div>
       ),
     },
@@ -263,7 +263,7 @@ export function AdminPurchaseOrdersView({
             e.stopPropagation();
             onOpenDetail(r.po.id);
           }}
-          className="inline-flex items-center gap-1 text-ds-label font-medium text-[#C2410C] hover:underline"
+          className="inline-flex items-center gap-1 text-ds-label font-medium text-accent hover:underline"
           title="View detail"
         >
           <Eye className="w-3.5 h-3.5" aria-hidden="true" />
@@ -552,7 +552,7 @@ export function AdminPurchaseOrdersView({
                   <button
                     type="button"
                     onClick={onSubmitBehalfAck}
-                    className="px-3 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412]"
+                    className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95"
                   >
                     Submit on-behalf acknowledgement
                   </button>
@@ -657,7 +657,7 @@ export function AdminPurchaseOrdersView({
                 <button
                   type="button"
                   onClick={onSubmitBehalfAsn}
-                  className="px-3 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412]"
+                  className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95"
                 >
                   Submit On-Behalf ASN
                 </button>

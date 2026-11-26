@@ -249,7 +249,7 @@ export function AdminContractsView({
             type="button"
             disabled={brandOptions.length === 0 || !canMutate}
             onClick={openGenerate}
-            className="px-3.5 py-2 rounded-ds-md bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40 whitespace-nowrap"
+            className="px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40 whitespace-nowrap"
           >
             New contract
           </button>
@@ -552,7 +552,7 @@ export function AdminContractsView({
                   setBusy(false);
                 }
               }}
-              className="px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
             >
               {esignLive ? 'Create & send for e-signature' : 'Create & send (Mock E-Signature)'}
             </button>

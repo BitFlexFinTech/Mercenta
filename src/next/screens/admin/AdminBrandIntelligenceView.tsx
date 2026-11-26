@@ -670,7 +670,7 @@ export function AdminBrandIntelligenceView({
                       type="button"
                       disabled={!canMutate}
                       onClick={() => void onOutreachAction(selectedProspect.id, 'send')}
-                      className="px-3 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label"
+                      className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label"
                     >
                       {workflowSnapshot.transportLive ? 'Send' : 'Send (Simulated)'}
                     </button>
@@ -741,7 +741,7 @@ export function AdminBrandIntelligenceView({
                                 onClick={() =>
                                   onCompleteOnboardingStep(workflowSnapshot.onboarding!.id, st.id)
                                 }
-                                className="text-[#C2410C] hover:underline"
+                                className="text-accent hover:underline"
                               >
                                 Complete
                               </button>
@@ -755,7 +755,7 @@ export function AdminBrandIntelligenceView({
                             type="button"
                             disabled={!canMutate}
                             onClick={() => void onOutreachAction(selectedProspect.id, 'finish_onboarding')}
-                            className="px-3 py-1 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-micro"
+                            className="px-3 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-micro"
                           >
                             Complete onboarding
                           </button>

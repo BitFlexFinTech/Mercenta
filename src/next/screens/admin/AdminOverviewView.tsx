@@ -237,7 +237,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('purchase_orders_admin')}
-                  className="text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="text-ds-label font-medium text-accent hover:underline"
                 >
                   Open queue
                 </button>
@@ -273,7 +273,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('super_admin')}
-                  className="inline-flex items-center gap-1 text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="inline-flex items-center gap-1 text-ds-label font-medium text-accent hover:underline"
                 >
                   Open Accounting <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -342,7 +342,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('logistics')}
-                  className="text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="text-ds-label font-medium text-accent hover:underline"
                 >
                   Open Logistics
                 </button>
@@ -375,7 +375,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('compliance')}
-                  className="text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="text-ds-label font-medium text-accent hover:underline"
                 >
                   Open
                 </button>
@@ -407,7 +407,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('logistics')}
-                  className="text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="text-ds-label font-medium text-accent hover:underline"
                 >
                   Open
                 </button>
@@ -460,7 +460,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigate('messages')}
-                  className="text-ds-label font-medium text-[#C2410C] hover:underline"
+                  className="text-ds-label font-medium text-accent hover:underline"
                 >
                   Open Messages
                 </button>
@@ -478,7 +478,7 @@ export function AdminOverviewView({
                       <button
                         type="button"
                         onClick={() => onNavigate?.('messages')}
-                        className="text-ds-micro font-medium text-[#C2410C] hover:underline"
+                        className="text-ds-micro font-medium text-accent hover:underline"
                       >
                         Open
                       </button>

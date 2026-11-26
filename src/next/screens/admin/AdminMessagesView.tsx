@@ -321,7 +321,7 @@ export function AdminMessagesView({
                             setSending(false);
                           }
                         }}
-                        className="ml-auto px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                        className="ml-auto px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
                       >
                         {emailSandbox ? 'Send (Sandbox)' : 'Send'}
                       </button>
