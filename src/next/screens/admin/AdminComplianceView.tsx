@@ -70,6 +70,17 @@ export interface AdminComplianceViewProps {
   fullRecordBundle: ComplianceDeclarationBundle | null;
   onSelectFullRecordDoc: (id: string | null) => void;
   onManualVerdict: (id: string, decision: 'approve' | 'reject') => Promise<void>;
+  /**
+   * §FRONTEND-REDESIGN (2026-11-26) — RESTORED, and why it matters.
+   *
+   * The ported screen recorded a manual verification with a HARD-CODED reason and
+   * collected nothing from the operator, so the §WAVE 3e property this project
+   * established — a manual decision on a regulated document carries the operator's
+   * own reason — was silently dropped. The audit record still existed; the reason
+   * behind it did not. These two props are the input it needs.
+   */
+  verdictReason: string;
+  onVerdictReasonChange: (value: string) => void;
   onRunAutomated: (id: string) => Promise<void>;
   onUploadOnBehalf: (brandId: string, type: ComplianceDocument['type']) => void;
 }
@@ -91,6 +102,8 @@ export function AdminComplianceView({
   fullRecordBundle,
   onSelectFullRecordDoc,
   onManualVerdict,
+  verdictReason,
+  onVerdictReasonChange,
   onRunAutomated,
   onUploadOnBehalf,
 }: AdminComplianceViewProps) {
@@ -421,7 +434,24 @@ export function AdminComplianceView({
         testId="doc-full-record-drawer"
         footer={
           fullRecordDoc ? (
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="space-y-3">
+              {/* §FRONTEND-REDESIGN — the operator's OWN reason for the decision.
+                  It is what the audit record must carry; left blank, the canonical
+                  command falls back to its truthful default sentence. */}
+              <label className="block">
+                <span className="block text-ds-micro font-mono uppercase tracking-[0.06em] text-faint mb-1">
+                  Reason for the decision (recorded in the audit trail)
+                </span>
+                <input
+                  type="text"
+                  value={verdictReason}
+                  onChange={(e) => onVerdictReasonChange(e.target.value)}
+                  aria-label="Reason for the decision"
+                  placeholder="e.g. Verified against the issuing body public register."
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                />
+              </label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => onSelectFullRecordDoc(null)}
@@ -443,17 +473,18 @@ export function AdminComplianceView({
                     onClick={() => void onManualVerdict(fullRecordDoc.id, 'reject')}
                     className="px-3 py-1.5 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-label font-medium hover:bg-state-danger/10"
                   >
-                    Reject
+                    Reject document
                   </button>
                   <button
                     type="button"
                     onClick={() => void onManualVerdict(fullRecordDoc.id, 'approve')}
                     className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800"
                   >
-                    Approve (manual)
+                    Approve document
                   </button>
                 </>
               )}
+              </div>
             </div>
           ) : undefined
         }

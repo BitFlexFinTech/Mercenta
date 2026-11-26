@@ -624,7 +624,15 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           />
         );
       case 'brand_intelligence':
-        return <AdminBrandIntelligenceScreen />;
+        /* §FRONTEND-REDESIGN BATCH 2b — this project's screen, NOT v1's. v1's version
+           was taken in Batch 3a and the superset check compared hooks and affordances,
+           which MISSED that v1 surfaces NO ten-category rule at all: the ranked board's
+           "Retained but NOT ranked (ineligible)" panel, the 10-category exclusion list
+           and the vertical split were gone. That is the platform's ABSOLUTE category
+           limit, so the compliant screen was restored from 5ff8297 and
+           `e2e/next-console-smoke.spec.ts` caught it. v1's prospect board stays a merge
+           candidate ON TOP of this screen, never instead of it. */
+        return <AdminBrandIntelligenceScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
       case 'catalog':
         return <AdminCatalogScreen />;
       case 'fulfillment_track':
@@ -668,11 +676,15 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   }
 
   function renderBwsScreen() {
-    if (activeViewId === 'brand-portfolio') {
+    if (activeViewId === 'overview' || activeViewId === 'brand-portfolio') {
       /* §FRONTEND-REDESIGN BATCH 2b — the §WAVE 3g vertical portfolio owns the
-         portfolio slot: it is scoped by `Brand.vertical`, so a BWS heading can
-         never show core brands. v1's BwsPortfolioOps keeps the OPERATIONAL
-         sections (partner portal, import & excise, growth, reports, settings). */
+         portfolio slot AND the surface's landing view, exactly as this project's
+         previous shell had it (`overview || brand-portfolio`). The BWS Overview was
+         lost when v1's shell was adopted — a real regression, caught by
+         `e2e/next-console-smoke.spec.ts` ("Beers, Wines & Spirits portfolio"). It is
+         scoped by `Brand.vertical`, so a BWS heading can never show core brands.
+         v1's BwsIntelligence keeps the research sections; BwsPortfolioOps keeps the
+         OPERATIONAL ones (partner portal, import & excise, growth, reports). */
       return <VerticalPortfolioScreen vertical="bws" />;
     }
     if (BWS_INTEL_SECTIONS.has(activeViewId as BwsIntelligenceSection)) {

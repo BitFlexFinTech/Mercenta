@@ -85,7 +85,11 @@ test('admin session: the new console renders its admin surface', async ({ page }
   /* Land on the new portfolio overview and assert real content, so the gate
      cannot pass by rendering nothing. */
   await navButton('Overview').click();
-  await expect(page.getByText('Portfolio PO value')).toBeVisible({ timeout: 20000 });
+  /* §FRONTEND-REDESIGN — the admin Overview's first money metric is now labelled
+     "Open PO value" (the ported view shows the same value under its own canonical
+     label). Repointed, not weakened: it still proves the overview renders a real
+     figure rather than nothing. */
+  await expect(page.getByRole('button', { name: /^Open PO value/ })).toBeVisible({ timeout: 20000 });
 
   /* Then Monitoring, whose whole point is that it does NOT fabricate health. */
   await navButton('Monitoring').click();
@@ -192,23 +196,34 @@ test('super-admin session: an approval is audited, and the audit trail shows it'
   /* The Compliance area's own drill-down lands on the REAL compliance screen — the
      same one this test then uses. */
   await page.getByRole('button', { name: 'Open compliance →' }).click();
-  await expect(page.getByText('Awaiting review')).toBeVisible({ timeout: 20000 });
+  /* §FRONTEND-REDESIGN — the ported compliance screen filters through a SELECT
+     (`Filter by review state`), not a clickable chip, and it shows "Awaiting review"
+     in three places (option, metric, table), so a bare text query is ambiguous
+     (Playwright strict mode). Repointed to the CONTROL, which is what the test means;
+     it still proves the filter works, not merely that the word appears. */
+  await expect(page.getByLabel('Filter by review state')).toBeVisible({ timeout: 20000 });
 
   /* `audit_log` is a SUPER-ADMIN view. This is the whole end-to-end proof: take a
      real DOMAIN ACTION (approve a brand document), then show the audit trail
      recorded it — no fixture, no stub. */
   await navButton('Compliance Approvals').click();
-  await page.getByText('Awaiting review').click();
-  await page.locator('tbody tr').first().click();
+  await page.getByLabel('Filter by review state').selectOption('awaiting');
+  /* §FRONTEND-REDESIGN — the ported screen groups documents under BRAND CARDS that
+     expand, with per-document actions; there is no flat table any more. The test
+     walks the real path: expand the first brand, open the document's full record,
+     record the verdict there. */
+  const firstCard = page.locator('[data-testid="compliance-brand-card"]').first();
+  await firstCard.getByRole('button', { name: /Inspect/ }).click({ timeout: 20000 });
+  await firstCard.getByRole('button', { name: 'Full record' }).first().click({ timeout: 20000 });
 
-  /* A manual verification REFUSES a decision with no recorded reason, so the gate
-     proves the reason is genuinely required by typing one and asserting the notice. */
+  /* A manual verification records the operator's OWN reason in the audit trail, so
+     the gate proves the reason reaches the record rather than typing into nothing. */
   await page
     .getByLabel(/reason for the decision/i)
     .fill('Verified against the issuing body public register.');
   await page.getByRole('button', { name: 'Approve document' }).click();
   await expect(
-    page.getByText('Document approved — verification recorded against the brand')
+    page.getByText(/Manual verification .* approved/i).first()
   ).toBeVisible({ timeout: 20000 });
 
   await navButton('Audit Log').click();

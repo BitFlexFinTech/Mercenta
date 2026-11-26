@@ -40,6 +40,12 @@ export function AdminComplianceScreen() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [fullRecordId, setFullRecordId] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  /**
+   * §FRONTEND-REDESIGN — the operator's own reason for a manual verdict. It is
+   * cleared after a decision is recorded, so one decision's reason can never be
+   * silently reused for the next.
+   */
+  const [verdictReason, setVerdictReason] = useState('');
 
   const reviewer = actingStaff?.name ?? 'Tadii';
 
@@ -199,10 +205,16 @@ export function AdminComplianceScreen() {
       id,
       { staffId: reviewer, canMutate: canCurrentUserMutate },
       decision,
-      decision === 'approve'
-        ? 'Document reviewed and accepted by the Founder / Super Admin.'
-        : 'Document rejected by the Founder / Super Admin — a replacement is required.'
+      /* §FRONTEND-REDESIGN — the operator's reason when they gave one; otherwise the
+         same truthful default this screen always recorded. The audit record is
+         written either way; the difference is that a regulated decision can now
+         carry WHY, which is the property §WAVE 3e established. */
+      verdictReason.trim() ||
+        (decision === 'approve'
+          ? 'Document reviewed and accepted by the Founder / Super Admin.'
+          : 'Document rejected by the Founder / Super Admin — a replacement is required.')
     );
+    setVerdictReason('');
     setNote(
       result.ok
         ? `Manual verification -> ${result.value.status} recorded by ${result.value.verifierIdentity}${
@@ -240,6 +252,8 @@ export function AdminComplianceScreen() {
       fullRecordBundle={fullRecordBundle}
       onSelectFullRecordDoc={setFullRecordId}
       onManualVerdict={manualVerdict}
+      verdictReason={verdictReason}
+      onVerdictReasonChange={setVerdictReason}
       onRunAutomated={runAutomated}
       onUploadOnBehalf={(brandId, type: ComplianceDocument['type']) => {
         if (!canCurrentUserMutate) return;
