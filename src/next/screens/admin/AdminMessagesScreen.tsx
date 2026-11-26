@@ -1,92 +1,143 @@
-/**
- * §WAVE 3f (2026-11-25) — admin messages (data).
- * Reads the canonical message log through the non-paginated hook (the paginated read
- * is 0-based and unnecessary here) and joins each message to its brand.
- */
 import { useMemo, useState } from 'react';
+import { brandInboxAddress, useBrandComms } from '@/components/shared/BrandComm';
+import { getProspect } from '@/data/prospectStore';
 import { useBrands, useMessages } from '@/data/queries';
-import { AdminMessagesView, type AdminMessageRow } from './AdminMessagesView';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS } from '@/lib/work/workStore';
+import {
+  AdminMessagesView,
+  type MessageThreadRow,
+} from './AdminMessagesView';
 
 export function AdminMessagesScreen() {
-  const messagesQ = useMessages();
-  const brandsQ = useBrands();
+  const comms = useBrandComms();
+  const brandsQuery = useBrands();
+  const messagesQuery = useMessages();
 
-  const [brandFilter, setBrandFilter] = useState('all');
-  const [channelFilter, setChannelFilter] = useState('all');
-  const [directionFilter, setDirectionFilter] = useState('all');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [threadQuery, setThreadQuery] = useState('');
   const [needsHumanOnly, setNeedsHumanOnly] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<AdminMessageRow | null>(null);
+  const [sendNote, setSendNote] = useState<string | null>(null);
 
-  const messages = messagesQ.data?.data ?? [];
-  const brands = brandsQ.data?.data ?? [];
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const allMessages = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
 
-  const allRows = useMemo<AdminMessageRow[]>(
-    () =>
-      messages
-        .slice()
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-        .map((message) => ({
-          message,
+  const threads: MessageThreadRow[] = useMemo(() => {
+    const map = new Map<string, MessageThreadRow>();
+    for (const m of allMessages) {
+      if (!map.has(m.brandId)) {
+        const brand = brands.find((b) => b.id === m.brandId);
+        const prospect = brand ? undefined : getProspect(m.brandId);
+        map.set(m.brandId, {
+          key: m.brandId,
+          brandId: m.brandId,
           brandName:
-            brands.find((brand) => brand.id === message.brandId)?.profile.businessName ??
-            message.brandId,
-        })),
-    [messages, brands]
-  );
+            brand?.profile.businessName ??
+            (prospect ? `${prospect.brand} (prospect)` : m.brandId),
+          messages: [],
+          hasHotLead: false,
+        });
+      }
+      const entry = map.get(m.brandId)!;
+      entry.messages.push({
+        id: m.id,
+        brandId: m.brandId,
+        direction: m.direction,
+        subject: m.subject,
+        body: m.body,
+        channel: m.channel,
+        sentBy: m.sentBy,
+        requiresHuman: m.requiresHuman,
+        createdAt: m.createdAt,
+      });
+      if (m.requiresHuman) entry.hasHotLead = true;
+    }
+    return Array.from(map.values()).sort((a, b) => b.messages.length - a.messages.length);
+  }, [allMessages, brands]);
 
-  const rows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return allRows
-      .filter((row) => brandFilter === 'all' || row.message.brandId === brandFilter)
-      .filter((row) => channelFilter === 'all' || row.message.channel === channelFilter)
-      .filter((row) => directionFilter === 'all' || row.message.direction === directionFilter)
-      .filter((row) => !needsHumanOnly || row.message.requiresHuman)
-      .filter((row) =>
-        query
-          ? `${row.message.subject ?? ''} ${row.message.body}`.toLowerCase().includes(query)
-          : true
+  const visibleThreads = useMemo(() => {
+    const q = threadQuery.trim().toLowerCase();
+    return threads.filter((t) => {
+      if (needsHumanOnly && !t.hasHotLead) return false;
+      if (!q) return true;
+      return (
+        t.brandName.toLowerCase().includes(q) ||
+        t.messages.some(
+          (m) =>
+            (m.subject ?? '').toLowerCase().includes(q) ||
+            m.body.toLowerCase().includes(q)
+        )
       );
-  }, [allRows, brandFilter, channelFilter, directionFilter, needsHumanOnly, search]);
+    });
+  }, [threads, threadQuery, needsHumanOnly]);
 
-  const channelOptions = useMemo(
-    () => Array.from(new Set(allRows.map((row) => row.message.channel))).sort(),
-    [allRows]
-  );
-  const directionOptions = useMemo(
-    () => Array.from(new Set(allRows.map((row) => row.message.direction))).sort(),
-    [allRows]
-  );
+  const activeThread =
+    visibleThreads.find((t) => t.key === selectedKey) ??
+    threads.find((t) => t.key === selectedKey) ??
+    visibleThreads[0] ??
+    null;
+
+  const needsHumanCount = threads.filter((t) => t.hasHotLead).length;
+  const acquisitionCount = threads.filter((t) => !brands.some((b) => b.id === t.brandId)).length;
+
+  const outreachWork = useWorkItems('admin')
+    .filter((w) => w.source === 'outreach_followup')
+    .map((w) => ({
+      id: w.id,
+      title: w.title,
+      sourceLabel: WORK_SOURCE_LABELS[w.source],
+      dueDate: w.dueDate,
+    }));
+
+  async function handleSend(threadKey: string, subject: string, body: string) {
+    const brandName = threads.find((t) => t.key === threadKey)?.brandName;
+    const result = await comms.sendToBrand(
+      threadKey,
+      brandInboxAddress(brandName),
+      subject,
+      body
+    );
+    setSendNote(
+      result.sandbox
+        ? 'Logged as sandbox send — connect a live provider for real delivery.'
+        : result.ok
+          ? 'Message logged to the thread.'
+          : `Send failed (${result.error}) — logged anyway so nothing is lost.`
+    );
+  }
+
+  const errObj = brandsQuery.error || messagesQuery.error;
+  const error =
+    errObj instanceof Error ? errObj.message : errObj ? 'Failed to load messages.' : null;
 
   return (
     <AdminMessagesView
-      rows={rows}
-      totalMessages={allRows.length}
-      brandOptions={brands.map((brand) => ({ id: brand.id, name: brand.profile.businessName }))}
-      channelOptions={channelOptions}
-      directionOptions={directionOptions}
-      brandFilter={brandFilter}
-      channelFilter={channelFilter}
-      directionFilter={directionFilter}
-      needsHumanOnly={needsHumanOnly}
-      search={search}
-      needsHumanCount={allRows.filter((row) => row.message.requiresHuman).length}
-      inboundCount={allRows.filter((row) => row.message.direction === 'inbound').length}
-      outboundCount={allRows.filter((row) => row.message.direction === 'outbound').length}
-      selected={selected}
-      isLoading={messagesQ.isPending || brandsQ.isPending}
-      isError={messagesQ.isError || brandsQ.isError}
-      errorMessage={String(messagesQ.error ?? brandsQ.error ?? '') || undefined}
+      loading={brandsQuery.isPending || messagesQuery.isPending}
+      error={error}
       onRetry={() => {
-        void messagesQ.refetch();
-        void brandsQ.refetch();
+        void brandsQuery.refetch();
+        void messagesQuery.refetch();
       }}
-      onChangeBrand={setBrandFilter}
-      onChangeChannel={setChannelFilter}
-      onChangeDirection={setDirectionFilter}
-      onToggleNeedsHuman={() => setNeedsHumanOnly((previous) => !previous)}
-      onChangeSearch={setSearch}
-      onSelect={setSelected}
+      emailLive={comms.emailLive}
+      emailSandbox={comms.emailSandbox}
+      totalThreads={threads.length}
+      totalMessages={allMessages.length}
+      acquisitionCount={acquisitionCount}
+      needsHumanCount={needsHumanCount}
+      threads={visibleThreads}
+      activeThread={activeThread}
+      onSelectThread={setSelectedKey}
+      threadQuery={threadQuery}
+      onThreadQueryChange={setThreadQuery}
+      needsHumanOnly={needsHumanOnly}
+      onToggleNeedsHuman={() => setNeedsHumanOnly((v) => !v)}
+      onResetFilters={() => {
+        setThreadQuery('');
+        setNeedsHumanOnly(false);
+      }}
+      outreachWork={outreachWork}
+      sendNote={sendNote}
+      onSend={handleSend}
     />
   );
 }

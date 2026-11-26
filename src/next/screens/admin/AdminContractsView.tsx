@@ -1,286 +1,623 @@
-import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
-/**
- * §WAVE 3c (2026-11-25) — ADMIN contract cycle (presentation).
- * Oversight of the paperwork: what each brand has signed, what is still moving and
- * which commercial terms are attached. There is no contract-mutation API, so this
- * screen reports the cycle rather than pretending to advance it.
- */
+import { useMemo, useState } from 'react';
+import type { Contract, FulfillmentTrack } from '@/types';
 import {
-  ConsoleHeader,
   ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
+  ConsoleHeader,
   SlideOverDrawer,
-  toSemanticTone,
   type ConsoleColumn,
-  type MetricItem,
+  type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
-import { contractStatusPresentation } from '@/lib/statusPresentation';
-import type { BrandAgreement, Contract } from '@/types';
+import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export interface AdminContractRow {
-  contract: Contract;
+  id: string;
+  brandId: string;
   brandName: string;
+  brandCategory: string;
+  type: string;
+  commissionRate: number;
+  monthlyFee: number;
+  fulfillmentTrack: FulfillmentTrack;
+  trackLabel: string;
+  status: Contract['status'];
+  statusLabel: string;
+  statusTone: SemanticTone;
+  effectiveDate: string;
+  renewalDate: string;
+  urgency: 'ok' | '60d' | '30d' | '7d' | 'expired';
+  signatoriesCount: number;
+  version: number;
+  agreementPreview: string;
+  raw: Contract;
+}
+
+export interface ContractBrandOption {
+  id: string;
+  businessName: string;
+  category: string;
+  defaultRate: number;
+  defaultFee: number;
+  defaultTrack: FulfillmentTrack;
 }
 
 export interface AdminContractsViewProps {
-  rows: AdminContractRow[];
-  totalContracts: number;
-  brandOptions: { id: string; name: string }[];
-  statusOptions: string[];
-  brandFilter: string;
-  statusFilter: string;
-  search: string;
-  activeCount: number;
-  awaitingSignatureCount: number;
-  endedCount: number;
-  selected: AdminContractRow | null;
-  selectedAgreements: BrandAgreement[];
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
+  loading: boolean;
+  error: string | null;
   onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeStatus: (value: string) => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (row: AdminContractRow | null) => void;
+  canMutate: boolean;
+  esignLive: boolean;
+  lastEnvelope: string | null;
+  rows: AdminContractRow[];
+  brandOptions: ContractBrandOption[];
+  statusOptions: { id: string; label: string }[];
+  statusFilter: string;
+  onStatusFilterChange: (next: string) => void;
+  searchQuery: string;
+  onSearchQueryChange: (next: string) => void;
+  selectedContract: AdminContractRow | null;
+  onSelectContract: (row: AdminContractRow | null) => void;
+  brandVersions: AdminContractRow[];
+  trackLabels: Record<FulfillmentTrack, string>;
+  buildAgreementText: (params: {
+    businessName: string;
+    commissionRate: number;
+    monthlyFee: number;
+    category: string;
+    fulfillmentTrack: FulfillmentTrack;
+  }) => string;
+  onCreateContract: (params: {
+    brand: ContractBrandOption;
+    rate: number;
+    fee: number;
+    track: FulfillmentTrack;
+    previewText: string;
+  }) => Promise<void>;
+  onCreateRenewalDraft: (contract: Contract) => void;
+  onCreateAmendment: (contract: Contract) => void;
+  onRenew: (contractId: string) => void;
+  onTerminate: (contractId: string) => void;
+}
+
+function urgencyBadge(urgency: AdminContractRow['urgency']) {
+  if (urgency === 'ok') return null;
+  const tone: SemanticTone =
+    urgency === 'expired' || urgency === '7d'
+      ? 'danger'
+      : urgency === '30d'
+        ? 'warning'
+        : 'info';
+  const label = urgency === 'expired' ? 'Expired' : `≤ ${urgency.replace('d', '')} days`;
+  return <InlineStatus label={label} tone={tone} dataStatus={urgency} />;
 }
 
 export function AdminContractsView({
+  loading,
+  error,
+  onRetry,
+  canMutate,
+  esignLive,
+  lastEnvelope,
   rows,
-  totalContracts,
   brandOptions,
   statusOptions,
-  brandFilter,
   statusFilter,
-  search,
-  activeCount,
-  awaitingSignatureCount,
-  endedCount,
-  selected,
-  selectedAgreements,
-  isLoading,
-  isError,
-  errorMessage,
-  onRetry,
-  onChangeBrand,
-  onChangeStatus,
-  onChangeSearch,
-  onSelect,
+  onStatusFilterChange,
+  searchQuery,
+  onSearchQueryChange,
+  selectedContract,
+  onSelectContract,
+  brandVersions,
+  trackLabels,
+  buildAgreementText,
+  onCreateContract,
+  onCreateRenewalDraft,
+  onCreateAmendment,
+  onRenew,
+  onTerminate,
 }: AdminContractsViewProps) {
-  const metrics: MetricItem[] = [
-    {
-      id: 'active',
-      label: 'Active contracts',
-      value: String(activeCount),
-      context: 'Signed and running',
-    },
-    {
-      id: 'awaiting',
-      label: 'Awaiting signature',
-      value: String(awaitingSignatureCount),
-      context: 'Draft, sent or under review',
-    },
-    {
-      id: 'ended',
-      label: 'Expiring or ended',
-      value: String(endedCount),
-      context: 'Needs renewal or closed',
-    },
-  ];
+  const [drawerTab, setDrawerTab] = useState<'document' | 'history'>('document');
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState(brandOptions[0]?.id ?? '');
+  const [draftRate, setDraftRate] = useState('');
+  const [draftFee, setDraftFee] = useState('');
+  const [draftTrack, setDraftTrack] = useState<FulfillmentTrack>('financed');
+  const [busy, setBusy] = useState(false);
+
+  const generateBrand = useMemo(
+    () => brandOptions.find((b) => b.id === selectedBrandId) ?? brandOptions[0] ?? null,
+    [brandOptions, selectedBrandId]
+  );
+
+  function openGenerate() {
+    const target = brandOptions[0];
+    if (target) {
+      setSelectedBrandId(target.id);
+      setDraftRate(String(target.defaultRate));
+      setDraftFee(String(target.defaultFee));
+      setDraftTrack(target.defaultTrack);
+    }
+    setGenerateOpen(true);
+  }
+
+  function handleBrandSelect(brandId: string) {
+    setSelectedBrandId(brandId);
+    const target = brandOptions.find((b) => b.id === brandId);
+    if (target) {
+      setDraftRate(String(target.defaultRate));
+      setDraftFee(String(target.defaultFee));
+      setDraftTrack(target.defaultTrack);
+    }
+  }
+
+  const previewText = useMemo(() => {
+    if (!generateBrand) return '';
+    return buildAgreementText({
+      businessName: generateBrand.businessName,
+      commissionRate: Number(draftRate) || 0,
+      monthlyFee: Number(draftFee) || 0,
+      category: generateBrand.category,
+      fulfillmentTrack: draftTrack === 'unassigned' ? 'financed' : draftTrack,
+    });
+  }, [generateBrand, draftRate, draftFee, draftTrack, buildAgreementText]);
+
+  const activeCount = rows.filter((r) => r.status === 'active' || r.status === 'signed').length;
+  const draftCount = rows.filter((r) => r.status === 'draft').length;
+  const urgentCount = rows.filter((r) => r.urgency !== 'ok').length;
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        r.brandName.toLowerCase().includes(q) ||
+        r.type.toLowerCase().includes(q) ||
+        r.statusLabel.toLowerCase().includes(q) ||
+        r.renewalDate.toLowerCase().includes(q)
+      );
+    });
+  }, [rows, statusFilter, searchQuery]);
 
   const columns: ConsoleColumn<AdminContractRow>[] = [
     {
       key: 'brand',
       header: 'Brand',
       mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.brandName}</div>
-          <div className="text-ds-label text-faint truncate">
-            {row.contract.type.replace(/_/g, ' ')}
-          </div>
+      render: (r) => (
+        <div>
+          <div className="font-medium text-ink-950">{r.brandName}</div>
+          <div className="text-ds-micro font-mono text-faint">v{r.version}</div>
         </div>
       ),
     },
     {
+      key: 'type',
+      header: 'Type',
+      render: (r) => <span className="capitalize text-secondary">{r.type.replace(/_/g, ' ')}</span>,
+    },
+    {
+      key: 'commissionRate',
+      header: 'Comm.',
+      align: 'right',
+      render: (r) => <span className="font-mono">{r.commissionRate}%</span>,
+    },
+    {
+      key: 'monthlyFee',
+      header: 'Fee',
+      align: 'right',
+      render: (r) => <span className="font-mono">{formatGbp(r.monthlyFee)}</span>,
+    },
+    {
       key: 'status',
       header: 'Status',
-      render: (row) => {
-        const pres = contractStatusPresentation(row.contract.status);
-        return (
-          <InlineStatus
-            label={pres.label}
-            tone={toSemanticTone(pres.tone)}
-            dataStatus={pres.dataStatus}
-          />
-        );
-      },
-    },
-    {
-      key: 'rate',
-      header: 'Commission',
-      align: 'right',
-      render: (row) => (
-        <span className="tabular-nums">{(row.contract.commissionRate * 100).toFixed(2)}%</span>
+      render: (r) => (
+        <InlineStatus label={r.statusLabel} tone={r.statusTone} dataStatus={r.status} />
       ),
     },
     {
-      key: 'fee',
-      header: 'Monthly fee',
+      key: 'renewal',
+      header: 'Renewal',
       align: 'right',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="tabular-nums">{formatGbp(row.contract.monthlyFee, 2)}</span>
-      ),
-    },
-    {
-      key: 'track',
-      header: 'Track',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="text-ds-label text-muted">
-          {fulfillmentTrackLabel(row.contract.fulfillmentTrack)}
-        </span>
+      render: (r) => (
+        <div className="inline-flex items-center justify-end gap-2">
+          <span className="font-mono text-ds-label text-secondary">{r.renewalDate}</span>
+          {urgencyBadge(r.urgency)}
+        </div>
       ),
     },
   ];
-return (
-    <div>
+
+  return (
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Finance & Legal"
-        title="Contract cycle"
-        description="What each brand has signed, what is still moving, and the commercial terms attached."
+        title="Contract Cycle"
+        description="Full distribution agreement lifecycle — generate from canonical terms, dispatch e-signature envelopes, and process renewals or terminations."
+        meta={
+          <>
+            <span>{rows.length} contracts</span>
+            <span>{activeCount} active/signed</span>
+            <span>{esignLive ? 'E-signature live' : 'E-signature mock mode'}</span>
+          </>
+        }
+        actions={
+          <button
+            type="button"
+            disabled={brandOptions.length === 0 || !canMutate}
+            onClick={openGenerate}
+            className="px-3.5 py-2 rounded-ds-md bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40 whitespace-nowrap"
+          >
+            New contract
+          </button>
+        }
       />
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Contracts could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
+      {!esignLive && (
+        <NoticeBanner
+          tone="warning"
+          title="E-signature running in simulation (Mock) mode"
+          message="Generated envelopes use mock:env-… identifiers until DocuSign or PandaDoc is verified in Integration Settings."
         />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <MetricStrip items={metrics} columns={3} />
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search brand or contract type"
-              aria-label="Search contracts"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
-            />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(event) => onChangeStatus(event.target.value)}
-              aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All statuses</option>
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {contractStatusPresentation(status as Contract['status']).label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <SectionCard title="Contracts" description={`${rows.length} of ${totalContracts} shown`}>
-            <ConsoleTable
-              rows={rows}
-              columns={columns}
-              rowKey={(row) => row.contract.id}
-              onRowClick={(row) => onSelect(row)}
-              emptyTitle="No contracts match these filters"
-              emptyDescription="Clear the filters to see the whole portfolio."
-            />
-          </SectionCard>
-        </>
       )}
 
-      <SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.contract.type.replace(/_/g, ' ') : ''}
-        subtitle={selected ? selected.brandName : undefined}
-        testId="admin-contract-drawer"
-      >
-        {selected && (
-          <div className="space-y-4">
-            <dl className="grid grid-cols-2 gap-3 text-ds-body">
-              <div>
-                <dt className="text-ds-label text-faint">Status</dt>
-                <dd className="font-medium text-strong">
-                  {contractStatusPresentation(selected.contract.status).label}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Commission</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {(selected.contract.commissionRate * 100).toFixed(2)}%
-                </dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Monthly fee</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {formatGbp(selected.contract.monthlyFee, 2)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Fulfilment track</dt>
-                <dd className="font-medium text-strong">
-                  {fulfillmentTrackLabel(selected.contract.fulfillmentTrack)}
-                </dd>
-              </div>
-            </dl>
+      {lastEnvelope && (
+        <NoticeBanner
+          tone="success"
+          title="E-sign envelope sent"
+          message={
+            <span>
+              Last envelope id: <code className="font-mono">{lastEnvelope}</code>
+            </span>
+          }
+        />
+      )}
 
-            <div>
-              <div className="text-ds-label text-faint mb-1">
-                Accepted agreements
-              </div>
-              {selectedAgreements.length === 0 ? (
-                <p className="text-ds-body text-muted">
-                  No separate agreements are recorded for this brand.
-                </p>
-              ) : (
-                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
-                  {selectedAgreements.map((agreement) => (
-                    <li
-                      key={agreement.id}
-                      className="px-3 py-2 flex items-center justify-between gap-3 text-ds-body"
-                    >
-                      <span className="min-w-0 truncate">
-                        {agreement.agreementType.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-ds-label text-muted shrink-0">
-                        v{agreement.version} · {agreement.acceptedAt.slice(0, 10)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+      {error && <ErrorStateBlock message={error} onRetry={onRetry} />}
+
+      <MetricStrip
+        loading={loading}
+        columns={4}
+        items={[
+          {
+            id: 'contracts-total',
+            label: 'Total contracts',
+            value: String(rows.length),
+            context: 'Canonical store agreements',
+            active: statusFilter === 'all',
+            onClick: () => onStatusFilterChange('all'),
+          },
+          {
+            id: 'contracts-active',
+            label: 'Active / Signed',
+            value: String(activeCount),
+            context: 'In-force terms',
+            active: statusFilter === 'active',
+            onClick: () => onStatusFilterChange('active'),
+          },
+          {
+            id: 'contracts-drafts',
+            label: 'Drafts',
+            value: String(draftCount),
+            context: 'Awaiting completion',
+            active: statusFilter === 'draft',
+            onClick: () => onStatusFilterChange('draft'),
+          },
+          {
+            id: 'contracts-urgent',
+            label: 'Renewal attention',
+            value: String(urgentCount),
+            context: 'Within 60 days or expired',
+            onClick: () => onStatusFilterChange('all'),
+          },
+        ]}
+      />
+
+      <SectionCard
+        title="Agreements"
+        description="Select a row to inspect the distribution agreement text, version history, or advance renewal/termination."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              placeholder="Search brand, type, renewal…"
+              aria-label="Search contracts"
+              className="w-56 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              aria-label="Filter contracts by status"
+              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+            >
+              <option value="all">Status: all</option>
+              {statusOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </div>
+        }
+      >
+        {loading ? (
+          <LoadingRows rows={5} label="Loading contracts…" />
+        ) : filtered.length === 0 ? (
+          <EmptyStateBlock
+            title="No contracts match"
+            description="Clear the status filter or search query to inspect all contracts."
+            actionLabel="Reset filters"
+            onAction={() => {
+              onStatusFilterChange('all');
+              onSearchQueryChange('');
+            }}
+          />
+        ) : (
+          <ConsoleTable
+            rows={filtered}
+            columns={columns}
+            rowKey={(r) => r.id}
+            selectedKey={selectedContract?.id ?? null}
+            onRowClick={(r) => {
+              setDrawerTab('document');
+              onSelectContract(r);
+            }}
+            testId="contract-cycle-table"
+          />
+        )}
+      </SectionCard>
+
+      {/* Contract detail slide-over drawer */}
+      <SlideOverDrawer
+        open={selectedContract !== null}
+        onClose={() => onSelectContract(null)}
+        title={
+          selectedContract
+            ? `${selectedContract.type.replace(/_/g, ' ')} — ${selectedContract.brandName}`
+            : ''
+        }
+        subtitle={
+          selectedContract
+            ? `v${selectedContract.version} · ${selectedContract.statusLabel} · ${selectedContract.trackLabel}`
+            : undefined
+        }
+        testId="contract-detail-drawer"
+        footer={
+          selectedContract ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {canMutate && selectedContract.status !== 'draft' && (
+                  <button
+                    type="button"
+                    onClick={() => onCreateRenewalDraft(selectedContract.raw)}
+                    className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                  >
+                    Create renewal draft
+                  </button>
+                )}
+                {canMutate && selectedContract.status === 'active' && (
+                  <button
+                    type="button"
+                    onClick={() => onCreateAmendment(selectedContract.raw)}
+                    className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                  >
+                    Track amendment
+                  </button>
+                )}
+                {canMutate && selectedContract.status !== 'terminated' && (
+                  <button
+                    type="button"
+                    onClick={() => onRenew(selectedContract.id)}
+                    className="px-2.5 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800"
+                  >
+                    Renew (advance term)
+                  </button>
+                )}
+                {canMutate && selectedContract.status !== 'terminated' && (
+                  <button
+                    type="button"
+                    onClick={() => onTerminate(selectedContract.id)}
+                    className="px-2.5 py-1.5 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-label font-medium hover:bg-state-danger/10"
+                  >
+                    Terminate
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => onSelectContract(null)}
+                className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary hover:bg-surface"
+              >
+                Close
+              </button>
+            </div>
+          ) : undefined
+        }
+      >
+        {selectedContract && (
+          <div className="space-y-4">
+            <ConsoleTabs
+              ariaLabel="Contract detail views"
+              value={drawerTab}
+              onChange={setDrawerTab}
+              tabs={[
+                { id: 'document', label: 'Agreement Document' },
+                { id: 'history', label: 'Version History', count: brandVersions.length },
+              ]}
+            />
+
+            {drawerTab === 'document' ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-ds-label border border-hairline rounded-ds-md p-3 bg-canvas-60">
+                  <div>
+                    <div className="text-faint">Commission</div>
+                    <div className="font-mono font-medium text-ink-950">
+                      {selectedContract.commissionRate}%
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-faint">Monthly Fee</div>
+                    <div className="font-mono font-medium text-ink-950">
+                      {formatGbp(selectedContract.monthlyFee)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-faint">Effective</div>
+                    <div className="font-mono text-ink-950">{selectedContract.effectiveDate}</div>
+                  </div>
+                  <div>
+                    <div className="text-faint">Renewal</div>
+                    <div className="font-mono text-ink-950">{selectedContract.renewalDate}</div>
+                  </div>
+                </div>
+                <pre className="whitespace-pre-wrap rounded-ds-md border border-hairline bg-surface p-4 text-ds-label leading-relaxed text-ink-900 font-mono">
+                  {selectedContract.agreementPreview}
+                </pre>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <p className="text-ds-label text-faint">
+                  {brandVersions.length} version(s) of {selectedContract.brandName}&rsquo;s distribution agreement.
+                </p>
+                {brandVersions.map((v) => (
+                  <div
+                    key={v.id}
+                    className={`border rounded-ds-md p-3 text-ds-label ${
+                      v.version === selectedContract.version
+                        ? 'border-accent bg-surface'
+                        : 'border-hairline bg-surface-raised'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-ink-950">
+                        Version {v.version}
+                        {v.version === selectedContract.version ? ' (Current)' : ''}
+                      </span>
+                      <InlineStatus label={v.statusLabel} tone={v.statusTone} />
+                    </div>
+                    <div className="mt-1 text-faint font-mono">
+                      {v.commissionRate}% commission · {formatGbp(v.monthlyFee)}/mo · {v.trackLabel}
+                    </div>
+                    <div className="mt-1 text-faint">
+                      Effective {v.effectiveDate} · Renewal {v.renewalDate}
+                      {v.signatoriesCount > 0 ? ` · ${v.signatoriesCount} signatory(s)` : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </SlideOverDrawer>
+
+      {/* Generate new contract slide-over drawer */}
+      <SlideOverDrawer
+        open={generateOpen}
+        onClose={() => setGenerateOpen(false)}
+        title="New Distribution Contract"
+        subtitle={
+          generateBrand ? `Pre-filled from ${generateBrand.businessName} fulfillment terms` : undefined
+        }
+        testId="contract-generate-drawer"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setGenerateOpen(false)}
+              className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary hover:bg-surface"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!generateBrand || busy}
+              onClick={async () => {
+                if (!generateBrand) return;
+                setBusy(true);
+                try {
+                  await onCreateContract({
+                    brand: generateBrand,
+                    rate: Number(draftRate) || 0,
+                    fee: Number(draftFee) || 0,
+                    track: draftTrack,
+                    previewText,
+                  });
+                  setGenerateOpen(false);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              className="px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+            >
+              {esignLive ? 'Create & send for e-signature' : 'Create & send (Mock E-Signature)'}
+            </button>
+          </div>
+        }
+      >
+        {generateBrand ? (
+          <div className="space-y-4">
+            <label className="block text-ds-label">
+              <span className="text-faint font-medium block mb-1">Partner Brand</span>
+              <select
+                value={generateBrand.id}
+                onChange={(e) => handleBrandSelect(e.target.value)}
+                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              >
+                {brandOptions.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.businessName} ({b.category})
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label className="block text-ds-label">
+                <span className="text-faint font-medium block mb-1">Commission (%)</span>
+                <input
+                  type="number"
+                  value={draftRate}
+                  onChange={(e) => setDraftRate(e.target.value)}
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-mono text-ink-950"
+                />
+              </label>
+              <label className="block text-ds-label">
+                <span className="text-faint font-medium block mb-1">Monthly Fee (£)</span>
+                <input
+                  type="number"
+                  value={draftFee}
+                  onChange={(e) => setDraftFee(e.target.value)}
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-mono text-ink-950"
+                />
+              </label>
+              <label className="block text-ds-label">
+                <span className="text-faint font-medium block mb-1">Track</span>
+                <select
+                  value={draftTrack}
+                  onChange={(e) => setDraftTrack(e.target.value as FulfillmentTrack)}
+                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                >
+                  <option value="direct_fulfillment">{trackLabels.direct_fulfillment}</option>
+                  <option value="financed">{trackLabels.financed}</option>
+                  <option value="unassigned">{trackLabels.unassigned}</option>
+                </select>
+              </label>
+            </div>
+
+            <pre className="whitespace-pre-wrap rounded-ds-md border border-hairline bg-surface p-3 text-ds-label leading-relaxed text-ink-900 font-mono max-h-72 overflow-y-auto">
+              {previewText}
+            </pre>
+          </div>
+        ) : (
+          <EmptyStateBlock
+            title="No brands available"
+            description="At least one partner brand is required to generate an agreement."
+          />
         )}
       </SlideOverDrawer>
     </div>

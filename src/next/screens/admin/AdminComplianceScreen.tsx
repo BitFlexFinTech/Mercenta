@@ -1,151 +1,249 @@
-/**
- * §WAVE 3b (2026-11-25) — admin compliance approvals (data + decision).
- * The decision goes through `reviewGateDocument` on the app context — the same
- * canonical command the brand compliance screen calls — so there is one review
- * path and one audit record.
- */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
-import { useBrands, useComplianceDocuments } from '@/data/queries';
-import { recordManualDocumentVerification } from '@/lib/verification/documentVerification';
+import { uploadComplianceDoc } from '@/data/api';
+import { useBrands, useComplianceDocuments, useProducts } from '@/data/queries';
+import { defaultIntegrationMode } from '@/integrations/registry';
+import { generateUkcaDeclaration } from '@/lib/customsDocs';
+import { useRecordDeepLink } from '@/lib/runtime/recordDeepLink';
+import {
+  complianceDocStatusPresentation,
+  documentVerificationStatusPresentation,
+} from '@/lib/statusPresentation';
+import {
+  recordManualDocumentVerification,
+  verifyDocumentVersion,
+} from '@/lib/verification/documentVerification';
 import type { ComplianceDocument } from '@/types';
-import { AdminComplianceView, type AdminComplianceRow } from './AdminComplianceView';
+import type { SemanticTone } from '@/next/components/ConsolePrimitives';
+import {
+  AdminComplianceView,
+  type ComplianceBrandGroup,
+  type ComplianceDeclarationBundle,
+  type ComplianceDocRow,
+  type ComplianceReviewFilter,
+} from './AdminComplianceView';
 
-const DECIDABLE: ReadonlySet<ComplianceDocument['status']> = new Set(['uploaded', 'under_review']);
-const NOT_APPROVED: ReadonlySet<ComplianceDocument['status']> = new Set([
-  'missing',
-  'rejected',
-  'expired',
-  'expiring',
-  'superseded',
-]);
+function mapTone(t: string): SemanticTone {
+  if (t === 'success' || t === 'warning' || t === 'danger' || t === 'info') return t;
+  return 'neutral';
+}
 
 export function AdminComplianceScreen() {
+  const { actingStaff, canCurrentUserMutate } = useApp();
   const qc = useQueryClient();
-  const { actingStaffId, canCurrentUserMutate } = useApp();
-  const brandsQ = useBrands();
-  const docsQ = useComplianceDocuments();
+  const docsQuery = useComplianceDocuments();
+  const brandsQuery = useBrands();
+  const productsQuery = useProducts();
 
-  const [brandFilter, setBrandFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<ComplianceDocument | null>(null);
-  const [busyDocId, setBusyDocId] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [reviewFilter, setReviewFilter] = useState<ComplianceReviewFilter>('all');
+  const [drawerId, setDrawerId] = useState<string | null>(null);
+  const [fullRecordId, setFullRecordId] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
 
-  const brands = brandsQ.data?.data ?? [];
-  const docs = docsQ.data?.data ?? [];
+  const reviewer = actingStaff?.name ?? 'Tadii';
 
-  const statusOptions = useMemo(
-    () => Array.from(new Set(docs.map((doc) => doc.status))).sort(),
-    [docs]
+  const docs = useMemo(() => docsQuery.data?.data ?? [], [docsQuery.data]);
+  const brandsList = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const productsList = useMemo(() => productsQuery.data?.data ?? [], [productsQuery.data]);
+
+  const deepLinkDoc = useRecordDeepLink('compliance');
+  useEffect(() => {
+    if (!deepLinkDoc) return;
+    if (docs.some((d) => d.id === deepLinkDoc)) setDrawerId(deepLinkDoc);
+  }, [deepLinkDoc, docs]);
+
+  const brandNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of brandsList) map.set(b.id, b.profile.businessName);
+    return map;
+  }, [brandsList]);
+
+  const docRows: ComplianceDocRow[] = useMemo(
+    () =>
+      docs.map((d) => {
+        const st = complianceDocStatusPresentation(d.status);
+        const ver = d.verificationStatus
+          ? documentVerificationStatusPresentation(d.verificationStatus)
+          : null;
+        return {
+          id: d.id,
+          brandId: d.brandId,
+          brandName: brandNameMap.get(d.brandId) ?? d.brandId,
+          type: d.type,
+          version: d.version ?? 1,
+          status: d.status,
+          statusLabel: st.label,
+          statusTone: mapTone(st.tone),
+          verificationLabel: ver ? ver.label : null,
+          verificationTone: ver ? mapTone(ver.tone) : null,
+          supersedesDocumentId: d.supersedesDocumentId,
+          expiryDate: d.expiryDate,
+          issuer: d.issuer,
+        };
+      }),
+    [docs, brandNameMap]
   );
 
-  const rows = useMemo<AdminComplianceRow[]>(() => {
-    const query = search.trim().toLowerCase();
-    return docs
-      .filter((doc) => brandFilter === 'all' || doc.brandId === brandFilter)
-      .filter((doc) => {
-        /* §WAVE 3b — the metric cards drill down, so two of the values are
-           GROUPS of statuses rather than a single status. */
-        if (statusFilter === 'all') return true;
-        if (statusFilter === 'awaiting') return DECIDABLE.has(doc.status);
-        if (statusFilter === 'not_approved') return NOT_APPROVED.has(doc.status);
-        return doc.status === statusFilter;
-      })
-      .filter((doc) => {
-        if (!query) return true;
-        const name = brands.find((brand) => brand.id === doc.brandId)?.profile.businessName ?? '';
-        return `${doc.type} ${name}`.toLowerCase().includes(query);
-      })
-      .map((doc) => ({
-        doc,
-        brandName:
-          brands.find((brand) => brand.id === doc.brandId)?.profile.businessName ?? doc.brandId,
-      }));
-  }, [docs, brands, brandFilter, statusFilter, search]);
-
-  /**
-   * §WAVE 3e FIX (2026-11-25) — REPOINTED TO THE CANONICAL PATH.
-   *
-   * This used to call the app context's `reviewGateDocument`, which only re-mapped
-   * a BRAND-SCOPED in-memory array (`gateDocs`) that is EMPTY in an admin session.
-   * So an admin "approval" changed nothing in the domain and yet showed a success
-   * notice — a false claim, and no audit record either. Found by approving a
-   * document in a real browser and then opening the audit trail.
-   *
-   * It now calls `recordManualDocumentVerification` — the first-class staff decision
-   * path (documented as the Founder / Super Admin route), which mutates the
-   * CANONICAL document store, requires a recorded reason, refuses an account that
-   * cannot mutate, and audits the decision. The notice reports what actually
-   * happened, including a refusal.
-   */
-  async function handleDecision(
-    doc: ComplianceDocument,
-    decision: 'approve' | 'reject',
-    reason: string
-  ): Promise<void> {
-    setBusyDocId(doc.id);
-    const result = await recordManualDocumentVerification(
-      doc.id,
-      { staffId: actingStaffId, canMutate: canCurrentUserMutate },
-      decision,
-      reason
+  const matchesFilter = (d: ComplianceDocRow) => {
+    if (reviewFilter === 'all') return true;
+    if (reviewFilter === 'awaiting') return d.status === 'under_review' || d.status === 'uploaded';
+    if (reviewFilter === 'approved') return d.status === 'approved';
+    return (
+      d.status === 'expired' ||
+      d.status === 'expiring' ||
+      d.status === 'missing' ||
+      d.status === 'rejected'
     );
-    setBusyDocId(null);
+  };
 
-    if (!result.ok) {
-      setNotice(`Nothing was recorded: ${result.error}`);
-      return;
+  const groups: ComplianceBrandGroup[] = useMemo(() => {
+    const map = new Map<string, ComplianceDocRow[]>();
+    for (const d of docRows) {
+      if (!matchesFilter(d)) continue;
+      const list = map.get(d.brandId) ?? [];
+      list.push(d);
+      map.set(d.brandId, list);
     }
+    return Array.from(map.entries()).map(([brandId, brandDocs]) => ({
+      brandId,
+      brandName: brandNameMap.get(brandId) ?? brandId,
+      docs: brandDocs,
+      total: brandDocs.length,
+      pending: brandDocs.filter((x) => x.status === 'under_review' || x.status === 'uploaded').length,
+      approved: brandDocs.filter((x) => x.status === 'approved').length,
+    }));
+  }, [docRows, reviewFilter, brandNameMap]);
 
-    setNotice(
-      decision === 'approve'
-        ? 'Document approved — verification recorded against the brand, and the decision is in the audit trail.'
-        : 'Document rejected — the decision is recorded against the brand and in the audit trail.'
+  const metrics = useMemo(
+    () => ({
+      total: docRows.length,
+      awaiting: docRows.filter((d) => d.status === 'under_review' || d.status === 'uploaded').length,
+      approved: docRows.filter((d) => d.status === 'approved').length,
+      attention: docRows.filter(
+        (d) =>
+          d.status === 'expired' ||
+          d.status === 'expiring' ||
+          d.status === 'missing' ||
+          d.status === 'rejected'
+      ).length,
+      brands: new Set(docRows.map((d) => d.brandId)).size,
+    }),
+    [docRows]
+  );
+
+  const drawerDoc = docRows.find((d) => d.id === drawerId) ?? null;
+  const drawerProductsCount = drawerDoc
+    ? productsList.filter((p) => p.brandId === drawerDoc.brandId).length
+    : 0;
+
+  const fullRecordDoc = docRows.find((d) => d.id === fullRecordId) ?? null;
+  const fullRecordBundle: ComplianceDeclarationBundle | null = useMemo(() => {
+    if (!fullRecordDoc) return null;
+    const brand = brandsList.find((b) => b.id === fullRecordDoc.brandId);
+    const prods = productsList.filter((p) => p.brandId === fullRecordDoc.brandId);
+    if (!brand || prods.length === 0) return null;
+    const po = {
+      id: `preview-${fullRecordDoc.id}`,
+      brandId: brand.id,
+      poNumber: `PREVIEW-${brand.id.slice(0, 6).toUpperCase()}`,
+      status: 'accepted' as const,
+      poValue: 0,
+      commissionRate: 0,
+      commissionAmount: 0,
+      orderDate: '',
+      lineItems: prods.map((p) => ({
+        sku: p.sku,
+        productName: p.name,
+        quantity: 1,
+        unitPrice: p.exWorksPrice,
+        commodityCode: p.commodityCode,
+      })),
+    };
+    const generated = generateUkcaDeclaration({
+      po,
+      brandName: brand.profile.businessName,
+      products: prods,
+    });
+    return {
+      title: generated.title,
+      poNumber: generated.poNumber,
+      brandName: generated.brandName,
+      preFilled: generated.preFilled,
+      productNames: prods.map((p) => `${p.name} (${p.sku})`),
+    };
+  }, [fullRecordDoc, brandsList, productsList]);
+
+  async function runAutomated(id: string) {
+    const result = await verifyDocumentVersion(
+      id,
+      { staffId: reviewer, canMutate: canCurrentUserMutate },
+      { getMode: defaultIntegrationMode, providerKey: 'companies_house' }
+    );
+    setNote(
+      result.ok
+        ? `Automated verification -> ${result.value.status} via ${result.value.providerId} (${result.value.providerMode})${
+            result.value.failureReason ? `: ${result.value.failureReason}` : ''
+          }`
+        : result.error
     );
     await qc.invalidateQueries({ queryKey: ['compliance-documents'] });
-    await qc.invalidateQueries({ queryKey: ['audit-log-paginated'] });
-    setSelected(null);
+    setFullRecordId(null);
   }
+
+  async function manualVerdict(id: string, decision: 'approve' | 'reject') {
+    const result = await recordManualDocumentVerification(
+      id,
+      { staffId: reviewer, canMutate: canCurrentUserMutate },
+      decision,
+      decision === 'approve'
+        ? 'Document reviewed and accepted by the Founder / Super Admin.'
+        : 'Document rejected by the Founder / Super Admin — a replacement is required.'
+    );
+    setNote(
+      result.ok
+        ? `Manual verification -> ${result.value.status} recorded by ${result.value.verifierIdentity}${
+            result.value.failureReason ? `: ${result.value.failureReason}` : ''
+          }`
+        : result.error
+    );
+    await qc.invalidateQueries({ queryKey: ['compliance-documents'] });
+    setFullRecordId(null);
+  }
+
+  const errObj = docsQuery.error || brandsQuery.error || productsQuery.error;
+  const error =
+    errObj instanceof Error ? errObj.message : errObj ? 'Failed to load compliance documents.' : null;
 
   return (
     <AdminComplianceView
-      rows={rows}
-      totalCount={docs.length}
-      brandOptions={brands.map((brand) => ({
-        id: brand.id,
-        name: brand.profile.businessName,
-      }))}
-      statusOptions={statusOptions}
-      brandFilter={brandFilter}
-      statusFilter={statusFilter}
-      search={search}
-      awaitingReview={docs.filter((doc) => DECIDABLE.has(doc.status)).length}
-      approved={docs.filter((doc) => doc.status === 'approved').length}
-      blocked={docs.filter((doc) => NOT_APPROVED.has(doc.status)).length}
-      selected={selected}
-      selectedBrandName={
-        selected
-          ? brands.find((brand) => brand.id === selected.brandId)?.profile.businessName ??
-            selected.brandId
-          : ''
-      }
-      busyDocId={busyDocId}
-      notice={notice}
-      isLoading={docsQ.isPending || brandsQ.isPending}
-      isError={docsQ.isError || brandsQ.isError}
-      errorMessage={String(docsQ.error ?? brandsQ.error ?? '') || undefined}
+      loading={docsQuery.isPending || brandsQuery.isPending || productsQuery.isPending}
+      error={error}
       onRetry={() => {
-        void docsQ.refetch();
-        void brandsQ.refetch();
+        void docsQuery.refetch();
+        void brandsQuery.refetch();
+        void productsQuery.refetch();
       }}
-      onChangeBrand={setBrandFilter}
-      onChangeStatus={setStatusFilter}
-      onChangeSearch={setSearch}
-      onSelect={setSelected}
-      onDecision={handleDecision}
+      canMutate={canCurrentUserMutate}
+      note={note}
+      metrics={metrics}
+      reviewFilter={reviewFilter}
+      onReviewFilterChange={setReviewFilter}
+      groups={groups}
+      drawerDoc={drawerDoc}
+      drawerProductsCount={drawerProductsCount}
+      onSelectDrawerDoc={setDrawerId}
+      fullRecordDoc={fullRecordDoc}
+      fullRecordBundle={fullRecordBundle}
+      onSelectFullRecordDoc={setFullRecordId}
+      onManualVerdict={manualVerdict}
+      onRunAutomated={runAutomated}
+      onUploadOnBehalf={(brandId, type: ComplianceDocument['type']) => {
+        if (!canCurrentUserMutate) return;
+        uploadComplianceDoc(brandId, type, reviewer);
+        void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
+        setNote(`Uploaded replacement ${type.replace(/_/g, ' ')} on behalf of brand.`);
+      }}
     />
   );
 }

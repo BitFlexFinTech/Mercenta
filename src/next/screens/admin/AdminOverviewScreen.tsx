@@ -1,138 +1,523 @@
-/**
- * §WAVE 3 (2026-11-25) — the ADMIN portfolio overview (data).
- *
- * Reads the canonical queries and shapes them for the view. It performs NO
- * mutation and re-derives no business rule: every state label comes from
- * `lib/statusPresentation` and every shipment resolution from
- * `isResolvedShipmentStatus`.
- */
 import { useMemo } from 'react';
 import {
+  useBrandAgreements,
   useBrands,
+  useCatalogSubmissions,
   useCommissions,
   useComplianceDocuments,
+  useContracts,
   useDeductions,
+  useMessages,
+  useProducts,
   usePurchaseOrders,
   useShipmentsAll,
 } from '@/data/queries';
-import { poStatusPresentation } from '@/lib/statusPresentation';
-import { isOpenPo, activeShipments, brandNameOf, sumGbp, shipmentsWithExceptions } from './adminPortfolio';
-import { AdminOverviewView, type AttentionItem, type BrandRow } from './AdminOverviewView';
+import { demoCommerceInvoices, getAllCommercePayments } from '@/data/demoStore';
+import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
+import { summariseInvoiceLedger, UPCOMING_PAYMENTS_HORIZON_DAYS } from '@/lib/commerce/invoiceTerms';
+import { poAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
+import { evaluateComplianceGate } from '@/lib/compliance';
+import { renewalUrgency } from '@/lib/contracts';
+import { operatingCostSummary } from '@/lib/costs/costSummary';
+import { demoTickets } from '@/lib/helpdesk/ticketStore';
+import { shipmentStatusPresentation } from '@/lib/statusPresentation';
+import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
+import { isApprovedCategory, STATUS_LABELS, type ShipmentStatus } from '@/types';
+import { AdminOverviewView } from './AdminOverviewView';
+import { formatGbp } from '@/next/components/ConsoleCharts';
+import type { MetricItem, SemanticTone } from '@/next/components/ConsolePrimitives';
+
+const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
+  'accepted',
+  'ready_to_fulfil',
+  'shipped',
+  'delivered',
+]);
 
 export function AdminOverviewScreen({
+  onNavigate,
   onOpenPurchaseOrders,
   onOpenLogistics,
 }: {
-  onOpenPurchaseOrders: (brandId?: string) => void;
-  onOpenLogistics: () => void;
+  /**
+   * §FRONTEND-REDESIGN BATCH 3 — v1's overview drives every drill-down through
+   * one generic `onNavigate(view)`. This console's shell was written against two
+   * purpose-named callbacks (`onOpenPurchaseOrders`, `onOpenLogistics`). Both
+   * shapes are accepted so that NEITHER call site breaks: the specific callback
+   * wins where it exists, `onNavigate` covers the rest. Nothing about the
+   * overview's behaviour depends on which one the shell supplies.
+   */
+  onNavigate?: (view: string) => void;
+  onOpenPurchaseOrders?: (brandId?: string) => void;
+  onOpenLogistics?: () => void;
 }) {
-  const brandsQ = useBrands();
-  const posQ = usePurchaseOrders();
-  const shipQ = useShipmentsAll();
-  const docsQ = useComplianceDocuments();
-  const dedQ = useDeductions();
-  const commQ = useCommissions();
+  /** One place that turns a view id into the call the shell actually provided. */
+  const go = (view: string) => {
+    if (view === 'purchase_orders_admin') return onOpenPurchaseOrders?.();
+    if (view === 'logistics') return onOpenLogistics?.();
+    return onNavigate?.(view);
+  };
+  const brandsQuery = useBrands();
+  const posQuery = usePurchaseOrders();
+  const docsQuery = useComplianceDocuments();
+  const contractsQuery = useContracts();
+  const agreementsQuery = useBrandAgreements();
+  const messagesQuery = useMessages();
+  const shipmentsQuery = useShipmentsAll();
+  const deductionsQuery = useDeductions();
+  const submissionsQuery = useCatalogSubmissions();
+  const commissionsQuery = useCommissions();
+  const productsQuery = useProducts();
 
-  const brands = brandsQ.data?.data ?? [];
-  const pos = posQ.data?.data ?? [];
-  const shipments = shipQ.data?.data ?? [];
-  const docs = docsQ.data?.data ?? [];
-  const deductions = dedQ.data?.data ?? [];
-  const commissions = commQ.data?.data ?? [];
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const posAll = useMemo(() => posQuery.data?.data ?? [], [posQuery.data]);
+  const docsAll = useMemo(() => docsQuery.data?.data ?? [], [docsQuery.data]);
+  const contractsAll = useMemo(() => contractsQuery.data?.data ?? [], [contractsQuery.data]);
+  const agreementsAll = useMemo(() => agreementsQuery.data?.data ?? [], [agreementsQuery.data]);
+  const messagesAll = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
+  const shipmentsAll = useMemo(() => shipmentsQuery.data?.data ?? [], [shipmentsQuery.data]);
+  const commissionsAll = useMemo(() => commissionsQuery.data?.data ?? [], [commissionsQuery.data]);
+  const productsAll = useMemo(() => productsQuery.data?.data ?? [], [productsQuery.data]);
 
-  const brandRows = useMemo<BrandRow[]>(() => {
-    return brands.map((brand) => {
-      const brandPos = pos.filter((po) => po.brandId === brand.id);
-      const openPos = brandPos.filter(isOpenPo);
-      const brandDocs = docs.filter((doc) => doc.brandId === brand.id);
-      const approved = brandDocs.filter((doc) => doc.status === 'approved').length;
-      const brandShipments = activeShipments(shipments.filter((s) => s.brandId === brand.id));
-      const brandDeductions = deductions.filter(
-        (d) => d.brandId === brand.id && (d.status === 'open' || d.status === 'disputed')
-      );
+  const dataReady = posAll.length > 0 && brands.length > 0;
+  const anyError =
+    brandsQuery.isError ||
+    posQuery.isError ||
+    docsQuery.isError ||
+    contractsQuery.isError ||
+    agreementsQuery.isError ||
+    messagesQuery.isError ||
+    shipmentsQuery.isError ||
+    submissionsQuery.isError ||
+    commissionsQuery.isError ||
+    deductionsQuery.isError ||
+    productsQuery.isError;
+
+  const loading =
+    !dataReady &&
+    (brandsQuery.isPending ||
+      posQuery.isPending ||
+      docsQuery.isPending ||
+      contractsQuery.isPending ||
+      agreementsQuery.isPending ||
+      messagesQuery.isPending ||
+      shipmentsQuery.isPending ||
+      deductionsQuery.isPending ||
+      productsQuery.isPending);
+
+  const brandName = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const b of brands) m.set(b.id, b.profile?.businessName ?? b.id);
+    return m;
+  }, [brands]);
+
+  const posAwaitingAction = posAll.filter((p) => poAcknowledgementWindow(p).inQueue);
+  const awaitingValue = posAwaitingAction.reduce((s, p) => s + p.poValue, 0);
+  const posInFulfilment = posAll.filter((p) => PO_IN_FLIGHT.has(p.status));
+
+  const productsByBrand = new Set(productsAll.map((p) => p.brandId)).size;
+  const lifetimePoValue = posAll.reduce((s, p) => s + p.poValue, 0);
+  const orderLineCount = posAll.reduce((s, p) => s + p.lineItems.length, 0);
+  const orderedUnits = posAll.reduce(
+    (s, p) => s + p.lineItems.reduce((a, l) => a + l.quantity, 0),
+    0
+  );
+  const unitsInFulfilment = posInFulfilment.reduce(
+    (s, p) => s + p.lineItems.reduce((a, l) => a + l.quantity, 0),
+    0
+  );
+  const valueInMotion = shipmentsAll.reduce((s, x) => s + (x.value ?? 0), 0);
+  const delayedShipments = shipmentsAll.filter((s) => s.delayed).length;
+  const shipmentExceptions = shipmentsAll.filter((s) => s.exception).length;
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const invoiceLedger = summariseInvoiceLedger(
+    demoCommerceInvoices,
+    getAllCommercePayments(),
+    todayIso
+  );
+
+  const docsPending = docsAll.filter(
+    (d) => d.status === 'under_review' || d.status === 'uploaded'
+  );
+  const brandsWithPendingDocs = new Set(docsPending.map((d) => d.brandId)).size;
+
+  const complianceCleared = brands.filter((b) => {
+    const brandDocs = docsAll.filter((d) => d.brandId === b.id);
+    const hasContract = contractsAll.some(
+      (c) => c.brandId === b.id && (c.status === 'signed' || c.status === 'active')
+    );
+    const brandAgreements = agreementsAll.filter((a) => a.brandId === b.id);
+    return evaluateComplianceGate(
+      brandDocs,
+      isApprovedCategory(b.category) ? b.category : undefined,
+      hasContract,
+      brandAgreements.some((a) => a.agreementType === 'logistics_sla'),
+      brandAgreements.some((a) => a.agreementType === 'chargeback_indemnity')
+    ).cleared;
+  }).length;
+  const complianceBlocked = Math.max(brands.length - complianceCleared, 0);
+
+  const nowIso = new Date().toISOString();
+  const renewalsDue = contractsAll
+    .map((c) => ({ c, urgency: renewalUrgency(c.renewalDate, nowIso) }))
+    .filter(({ urgency }) => urgency !== 'ok');
+  const earliestRenewal =
+    renewalsDue.length > 0 ? renewalsDue.map((r) => r.c.renewalDate).sort()[0] : '';
+
+  const activeTickets = demoTickets.filter((t) => t.status === 'open' || t.status === 'pending');
+  const urgentTickets = activeTickets.filter(
+    (t) => t.priority === 'urgent' || t.priority === 'high'
+  );
+
+  const brandTrackById = useMemo(() => {
+    const m = new Map<string, 'direct_fulfillment' | 'financed'>();
+    for (const b of brands) m.set(b.id, normalisePayoutTrack(b.track));
+    return m;
+  }, [brands]);
+
+  const pendingPayouts = commissionsAll.filter((c) => c.status !== 'paid');
+  const pendingPayoutValue = pendingPayouts.reduce(
+    (s, c) =>
+      s +
+      computeBrandNetShare({
+        poValue: c.poValue,
+        commissionRatePct: resolveCommissionRatePct({
+          commissionRate: c.commissionRate,
+          commissionAmount: c.commissionAmount,
+          poValue: c.poValue,
+        }),
+        fulfillmentTrack: brandTrackById.get(c.brandId) ?? 'financed',
+      }),
+    0
+  );
+
+  const costs = useMemo(() => operatingCostSummary(), []);
+
+  const moneyMetrics: MetricItem[] = [
+    {
+      id: 'open-po-value',
+      label: 'Open PO value',
+      value: formatGbp(awaitingValue),
+      context:
+        posAwaitingAction.length > 0
+          ? `${posAwaitingAction.length} PO(s) awaiting action`
+          : 'Nothing awaiting action',
+      onClick: () => go('purchase_orders_admin'),
+    },
+    {
+      id: 'revenue',
+      label: 'Recorded revenue',
+      value: formatGbp(costs.revenue.totalGbp),
+      context: 'Canonical streams',
+      onClick: () => go('super_admin'),
+    },
+    {
+      id: 'contribution',
+      label: 'Gross contribution',
+      value: formatGbp(costs.contribution.grossGbp),
+      context: `${costs.contribution.provisional ? 'Provisional · ' : ''}Cost base ${formatGbp(costs.monthlyTotalGbp)}`,
+      onClick: () => go('super_admin'),
+    },
+    {
+      id: 'margin',
+      label: 'Contribution margin',
+      value: `${costs.contribution.marginPct}%`,
+      context: costs.contribution.provisional ? 'Provisional until founder-approved' : 'Derived',
+      onClick: () => go('super_admin'),
+    },
+    {
+      id: 'receivables',
+      label: 'Receivables',
+      value: formatGbp(invoiceLedger.receivablesGbp, 2),
+      context:
+        invoiceLedger.overdue.length > 0
+          ? `${invoiceLedger.overdue.length} past terms`
+          : `${invoiceLedger.outstanding.length} unpaid (derived terms)`,
+      onClick: () => go('super_admin'),
+    },
+  ];
+
+  const operationalMetrics: MetricItem[] = [
+    {
+      id: 'pending-pos',
+      label: 'POs awaiting action',
+      value: String(posAwaitingAction.length),
+      context: `${formatGbp(awaitingValue)} open value`,
+      onClick: () => go('purchase_orders_admin'),
+    },
+    {
+      id: 'in-fulfilment',
+      label: 'POs in fulfilment',
+      value: String(posInFulfilment.length),
+      context: shipmentsAll.length > 0 ? `${shipmentsAll.length} live shipments` : 'No shipments yet',
+      onClick: () => go('logistics'),
+    },
+    {
+      id: 'docs-pending',
+      label: 'Compliance docs pending',
+      value: String(docsPending.length),
+      context: `${brandsWithPendingDocs} brand(s) affected`,
+      onClick: () => go('compliance'),
+    },
+    {
+      id: 'gate',
+      label: 'Compliance-gate cleared',
+      value: `${complianceCleared} / ${brands.length}`,
+      context: complianceBlocked === 0 ? 'All cleared' : `${complianceBlocked} not cleared`,
+      onClick: () => go('compliance'),
+    },
+    {
+      id: 'renewals',
+      label: 'Contract renewals due',
+      value: String(renewalsDue.length),
+      context: renewalsDue.length > 0 ? `Soonest ${earliestRenewal}` : 'Beyond 60 days',
+      onClick: () => go('contracts_admin'),
+    },
+    {
+      id: 'tickets',
+      label: 'Open support tickets',
+      value: String(activeTickets.length),
+      context: `${urgentTickets.length} urgent / high`,
+      onClick: () => go('helpdesk'),
+    },
+    {
+      id: 'payouts-pending',
+      label: 'Brand payouts pending',
+      value: String(pendingPayouts.length),
+      context: `${formatGbp(pendingPayoutValue, 2)} net owed`,
+      onClick: () => go('super_admin'),
+    },
+  ];
+
+  const volumeMetrics: MetricItem[] = [
+    {
+      id: 'brands',
+      label: 'Brands on platform',
+      value: String(brands.length),
+      context: `${complianceCleared} compliance-cleared`,
+      onClick: () => go('crm'),
+    },
+    {
+      id: 'products',
+      label: 'Products listed',
+      value: String(productsAll.length),
+      context: `Across ${productsByBrand} brand(s)`,
+      onClick: () => go('catalog'),
+    },
+    {
+      id: 'pos-count',
+      label: 'Purchase orders',
+      value: String(posAll.length),
+      context: `${formatGbp(lifetimePoValue)} lifetime`,
+      onClick: () => go('purchase_orders_admin'),
+    },
+    {
+      id: 'order-lines',
+      label: 'Order lines',
+      value: String(orderLineCount),
+      context: `${orderedUnits.toLocaleString('en-GB')} units ordered`,
+      onClick: () => go('purchase_orders_admin'),
+    },
+    {
+      id: 'shipments',
+      label: 'Shipments',
+      value: String(shipmentsAll.length),
+      context: `${formatGbp(valueInMotion)} in motion`,
+      onClick: () => go('logistics'),
+    },
+    {
+      id: 'volume',
+      label: 'Operational volume',
+      value: unitsInFulfilment.toLocaleString('en-GB'),
+      context: `${posInFulfilment.length} PO(s) in flight`,
+      onClick: () => go('logistics'),
+    },
+    {
+      id: 'upcoming-payments',
+      label: 'Upcoming payments',
+      value: formatGbp(invoiceLedger.upcomingGbp, 2),
+      context: `${invoiceLedger.upcoming.length} due within ${UPCOMING_PAYMENTS_HORIZON_DAYS}d`,
+      onClick: () => go('super_admin'),
+    },
+    {
+      id: 'exceptions',
+      label: 'Fulfilment exceptions',
+      value: String(shipmentExceptions),
+      context: `${delayedShipments} delayed · ${shipmentsAll.length} tracked`,
+      onClick: () => go('logistics'),
+    },
+  ];
+
+  const pipelineStages = useMemo(() => {
+    const buckets: { id: string; label: string; statuses: readonly string[] }[] = [
+      { id: 'awaiting', label: 'Awaiting action', statuses: PO_ACK_STATUSES_WITH_OBLIGATION },
+      { id: 'committed', label: 'Committed', statuses: ['accepted', 'ready_to_fulfil'] },
+      { id: 'in-transit', label: 'In transit', statuses: ['shipped'] },
+      { id: 'delivered', label: 'Delivered', statuses: ['delivered'] },
+      { id: 'closed', label: 'Closed / other', statuses: [] },
+    ];
+    const classified = new Set(buckets.flatMap((b) => b.statuses));
+    const total = Math.max(1, posAll.length);
+    return buckets.map((b) => {
+      const count =
+        b.statuses.length === 0
+          ? posAll.filter((p) => !classified.has(p.status)).length
+          : posAll.filter((p) => b.statuses.includes(p.status)).length;
       return {
-        id: brand.id,
-        name: brand.profile.businessName,
-        category: brand.category,
-        contractStatus: brand.contractStatus,
-        openPos: openPos.length,
-        poValue: sumGbp(brandPos.map((po) => po.poValue)),
-        complianceLabel: `${approved} of ${brandDocs.length} documents approved`,
-        complianceClear: brandDocs.length > 0 && approved === brandDocs.length,
-        activeShipments: brandShipments.length,
-        openDeductionValue: sumGbp(brandDeductions.map((d) => d.amountGbp)),
+        id: b.id,
+        label: b.label,
+        count,
+        sharePct: Math.round((count / total) * 100),
       };
     });
-  }, [brands, pos, docs, shipments, deductions]);
+  }, [posAll]);
 
-  const attention = useMemo<AttentionItem[]>(() => {
-    const items: AttentionItem[] = [];
-
-    for (const po of pos.filter((p) => p.status === 'received')) {
-      items.push({
-        id: `po-${po.id}`,
-        brand: brandNameOf(brands, po.brandId),
-        label: `${po.poNumber} awaiting acknowledgement`,
-        context: poStatusPresentation(po.status).label,
-        tone: 'warning',
-        onClick: () => onOpenPurchaseOrders(po.brandId),
-      });
+  const { orderValueTrend, orderCountTrend } = useMemo(() => {
+    const byMonth = new Map<string, { val: number; cnt: number }>();
+    for (const p of posAll) {
+      const m = (p.orderDate ?? '').slice(0, 7);
+      if (!m) continue;
+      const cur = byMonth.get(m) ?? { val: 0, cnt: 0 };
+      cur.val += p.poValue;
+      cur.cnt += 1;
+      byMonth.set(m, cur);
     }
+    const months = [...byMonth.keys()].sort().slice(-6);
+    return {
+      orderValueTrend: months.map((m) => ({
+        label: `${m.slice(5)}/${m.slice(2, 4)}`,
+        value: Math.round(byMonth.get(m)?.val ?? 0),
+      })),
+      orderCountTrend: months.map((m) => ({
+        label: `${m.slice(5)}/${m.slice(2, 4)}`,
+        value: byMonth.get(m)?.cnt ?? 0,
+      })),
+    };
+  }, [posAll]);
 
-    for (const shipment of shipmentsWithExceptions(shipments)) {
-      items.push({
-        id: `ship-${shipment.id}`,
-        brand: brandNameOf(brands, shipment.brandId),
-        label: `${shipment.poNumber ?? shipment.reference} has a carrier exception`,
-        context: shipment.carrier,
-        tone: 'danger',
-        onClick: onOpenLogistics,
-      });
+  const valueByBrand = useMemo(() => {
+    const byBrand = new Map<string, number>();
+    for (const p of posAll) byBrand.set(p.brandId, (byBrand.get(p.brandId) ?? 0) + p.poValue);
+    return [...byBrand.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([id, value]) => ({
+        label: (brandName.get(id) ?? id).split(' ')[0] ?? id,
+        value: Math.round(value),
+        hint: brandName.get(id) ?? id,
+      }));
+  }, [posAll, brandName]);
+
+  const docStatusBreakdown = useMemo(() => {
+    const order = ['approved', 'under_review', 'uploaded', 'missing', 'expired', 'rejected'];
+    const counts = new Map<string, number>();
+    for (const d of docsAll) counts.set(d.status, (counts.get(d.status) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
+      .map(([status, value]) => ({ label: status.replace(/_/g, ' '), value }));
+  }, [docsAll]);
+
+  const shipmentStatusBreakdown = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of shipmentsAll) {
+      const label = shipmentStatusPresentation(s.status).label;
+      counts.set(label, (counts.get(label) ?? 0) + 1);
     }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
+  }, [shipmentsAll]);
 
-    for (const row of brandRows) {
-      if (!row.complianceClear) {
-        items.push({
-          id: `comp-${row.id}`,
-          brand: row.name,
-          label: 'Compliance documentation is incomplete',
-          context: row.complianceLabel,
-          tone: 'warning',
-          /* No onClick yet: the admin compliance screen arrives in WAVE 3b, and a
-             row that navigates to a placeholder is worse than plain information. */
-        });
-      }
+  const carrierBreakdown = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of shipmentsAll) {
+      const label = s.carrier ? s.carrier.toUpperCase() : 'UNASSIGNED';
+      counts.set(label, (counts.get(label) ?? 0) + 1);
     }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
+  }, [shipmentsAll]);
 
-    return items.slice(0, 12);
-  }, [pos, brands, shipments, brandRows, onOpenPurchaseOrders, onOpenLogistics]);
+  const fulfilmentRows = useMemo(() => {
+    if (shipmentsAll.length > 0) {
+      return shipmentsAll.map((s) => ({
+        id: s.id,
+        ref: s.reference,
+        title: s.title,
+        meta: `${s.carrier.toUpperCase()} · ${s.origin} → ${s.destination}`,
+        status: STATUS_LABELS[s.status as ShipmentStatus] ?? s.status,
+        tone: (s.status === 'live_amazon' || s.status === 'uk_customs_cleared' ? 'success' : 'info') as SemanticTone,
+        targetView: 'logistics',
+      }));
+    }
+    return posInFulfilment.map((p) => ({
+      id: p.id,
+      ref: p.poNumber,
+      title: brandName.get(p.brandId) ?? p.brandId,
+      meta: `Awaiting fulfilment · ${p.status.replace(/_/g, ' ')}`,
+      status: p.status.replace(/_/g, ' '),
+      tone: 'info' as SemanticTone,
+      targetView: 'purchase_orders_admin',
+    }));
+  }, [shipmentsAll, posInFulfilment, brandName]);
 
-  const openPos = pos.filter(isOpenPo);
-  const inTransit = activeShipments(shipments);
-  const complianceGaps = brandRows.filter((row) => !row.complianceClear).length;
-  const paidCommission = commissions.filter((c) => c.status === 'paid');
+  const recentMessages = useMemo(
+    () =>
+      [...messagesAll]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 6)
+        .map((m) => ({
+          id: m.id,
+          subject: m.subject ?? m.body,
+          meta: `${brandName.get(m.brandId) ?? m.brandId} · ${m.direction} · ${m.createdAt.slice(0, 16).replace('T', ' ')}`,
+          badgeLabel: m.requiresHuman ? 'HUMAN REPLY' : m.channel.toUpperCase(),
+          tone: (m.requiresHuman ? 'warning' : m.direction === 'inbound' ? 'info' : 'neutral') as SemanticTone,
+        })),
+    [messagesAll, brandName]
+  );
+
+  function retryAll() {
+    void brandsQuery.refetch();
+    void posQuery.refetch();
+    void docsQuery.refetch();
+    void contractsQuery.refetch();
+    void shipmentsQuery.refetch();
+  }
 
   return (
     <AdminOverviewView
-      brandCount={brands.length}
-      portfolioValue={sumGbp(pos.map((po) => po.poValue))}
-      openPoCount={openPos.length}
-      inTransitCount={inTransit.length}
-      exceptionCount={shipmentsWithExceptions(shipments).length}
-      complianceGapCount={complianceGaps}
-      settledCommissionValue={sumGbp(paidCommission.map((c) => c.commissionAmount ?? 0))}
-      brandRows={brandRows}
-      attention={attention}
-      isLoading={brandsQ.isPending || posQ.isPending || shipQ.isPending}
-      isError={brandsQ.isError || posQ.isError || shipQ.isError}
-      errorMessage={String(brandsQ.error ?? posQ.error ?? shipQ.error ?? '') || undefined}
-      onRetry={() => {
-        void brandsQ.refetch();
-        void posQ.refetch();
-        void shipQ.refetch();
-      }}
-      onOpenBrand={(brandId) => onOpenPurchaseOrders(brandId)}
-      onOpenLogistics={onOpenLogistics}
+      loading={loading}
+      error={!dataReady && (anyError || (posAll.length === 0 && docsAll.length === 0))}
+      partialError={dataReady && anyError}
+      onRetry={retryAll}
+      onNavigate={onNavigate}
+      headerSummary={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages`}
+      awaitingActionCount={posAwaitingAction.length}
+      awaitingValueGbp={awaitingValue}
+      shipmentsCount={shipmentsAll.length}
+      renewalsCount={renewalsDue.length}
+      moneyMetrics={moneyMetrics}
+      operationalMetrics={operationalMetrics}
+      volumeMetrics={volumeMetrics}
+      pipelineTotal={posAll.length}
+      pipelineStages={pipelineStages}
+      revenueStreams={costs.revenue.streams}
+      totalRevenueGbp={costs.revenue.totalGbp}
+      monthlyCostGbp={costs.monthlyTotalGbp}
+      providerCount={costs.providers.length}
+      grossProfitGbp={costs.contribution.grossGbp}
+      marginPct={costs.contribution.marginPct}
+      provisional={costs.contribution.provisional}
+      orderValueTrend={orderValueTrend}
+      orderCountTrend={orderCountTrend}
+      valueByBrand={valueByBrand}
+      docStatusBreakdown={docStatusBreakdown}
+      totalDocs={docsAll.length}
+      shipmentStatusBreakdown={shipmentStatusBreakdown}
+      carrierBreakdown={carrierBreakdown}
+      shipmentExceptions={shipmentExceptions}
+      delayedShipments={delayedShipments}
+      valueInMotionGbp={valueInMotion}
+      fulfilmentRows={fulfilmentRows}
+      recentMessages={recentMessages}
     />
   );
 }

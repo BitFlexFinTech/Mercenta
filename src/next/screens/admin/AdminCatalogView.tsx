@@ -1,305 +1,691 @@
-/**
- * §WAVE 3d (2026-11-25) — ADMIN global catalog (presentation).
- * Products across every brand with their real submission state, prices and the
- * eligibility flags the domain already derives. No product or submission mutation
- * exists in the data layer, so this screen reports rather than pretends.
- */
+import { useState } from 'react';
 import {
-  ConsoleHeader,
   ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
+  ConsoleHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
-import type { CatalogSubmissionStatus } from '@/types';
+import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
-export interface AdminCatalogRow {
+export type CatalogFocus = 'all' | 'not_submitted' | 'inactive';
+
+export interface AdminCatalogProductRow {
   id: string;
   brandId: string;
+  brandName: string;
+  category: string;
   name: string;
   sku: string;
-  brandName: string;
-  exWorksPrice: number;
-  ukRetailPrice: number;
+  barcode: string;
   commodityCode: string;
   vatStatus: string;
   hazmat: boolean;
-  available: boolean;
-  submissionStatus?: CatalogSubmissionStatus;
-  rejectionReason?: string;
+  exWorksPrice: number;
+  ukRetailPrice: number;
+  length: number;
+  width: number;
+  height: number;
+  weight: number;
+  unitsPerCase?: number;
+  caseOrderable?: boolean;
+  isAvailable: boolean;
+  leadTimeDays: number;
+  images: string[];
+  completenessComplete: boolean;
+  completenessMissing: string[];
+  submissionLabel: string;
+  submissionTone: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  submissionSimulated?: boolean;
+  submissionTrackingId?: string;
+  submissionRejectionReason?: string;
+  inventory?: {
+    onHand: number;
+    committed: number;
+    inbound: number;
+    available: number;
+    safetyStock: number;
+    uomLabel: string;
+    statusLabel: string;
+    statusTone: 'success' | 'warning' | 'danger';
+    asin?: string;
+    asinSourceLabel?: string;
+    asinSimulated?: boolean;
+    ledger: {
+      id: string;
+      recordedAt: string;
+      type: string;
+      quantityDelta: number;
+      enteredQuantity: number;
+      enteredUom: string;
+      bucket: string;
+      actorId: string;
+    }[];
+  };
 }
 
 export interface AdminCatalogViewProps {
-  rows: AdminCatalogRow[];
+  loading: boolean;
+  error: string | null;
+  onRetry?: () => void;
+  canMutate: boolean;
   totalProducts: number;
-  brandOptions: { id: string; name: string }[];
-  submissionStatuses: string[];
-  brandFilter: string;
-  submissionFilter: string;
-  search: string;
-  liveCount: number;
-  awaitingReviewCount: number;
-  rejectedCount: number;
-  unavailableCount: number;
-  selected: AdminCatalogRow | null;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeSubmission: (value: string) => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (row: AdminCatalogRow | null) => void;
+  totalBrands: number;
+  categoryCount: number;
+  notSubmittedCount: number;
+  inactiveCount: number;
+  categories: { id: string; label: string; count: number }[];
+  categoryFilter: string;
+  onCategoryFilterChange: (cat: string) => void;
+  focus: CatalogFocus;
+  onFocusChange: (focus: CatalogFocus) => void;
+  searchQuery: string;
+  onSearchQueryChange: (q: string) => void;
+  rows: AdminCatalogProductRow[];
+  selectedProduct: AdminCatalogProductRow | null;
+  onSelectProduct: (row: AdminCatalogProductRow | null) => void;
+  inventoryDerivationBasis: string;
+  asinRules: string[];
+  onSaveAvailability: (sku: string, available: boolean, leadTimeDays: number) => void;
+  onUpdatePrice: (sku: string, exWorksPrice: number) => void;
+  onOverrideAsin: (brandId: string, sku: string, asin: string, reason: string) => string;
+  onPushStock: (productId: string) => Promise<string>;
 }
 
-const SUBMISSION_LABELS: Record<CatalogSubmissionStatus, string> = {
-  submitted: 'Submitted',
-  under_amazon_review: 'Under channel review',
-  live: 'Live on channel',
-  rejected: 'Rejected',
-};
-
-const SUBMISSION_TONES: Record<CatalogSubmissionStatus, 'neutral' | 'success' | 'warning' | 'danger'> =
-  {
-    submitted: 'neutral',
-    under_amazon_review: 'warning',
-    live: 'success',
-    rejected: 'danger',
-  };
-
 export function AdminCatalogView({
-  rows,
-  totalProducts,
-  brandOptions,
-  submissionStatuses,
-  brandFilter,
-  submissionFilter,
-  search,
-  liveCount,
-  awaitingReviewCount,
-  rejectedCount,
-  unavailableCount,
-  selected,
-  isLoading,
-  isError,
-  errorMessage,
+  loading,
+  error,
   onRetry,
-  onChangeBrand,
-  onChangeSubmission,
-  onChangeSearch,
-  onSelect,
+  canMutate,
+  totalProducts,
+  totalBrands,
+  categoryCount,
+  notSubmittedCount,
+  inactiveCount,
+  categories,
+  categoryFilter,
+  onCategoryFilterChange,
+  focus,
+  onFocusChange,
+  searchQuery,
+  onSearchQueryChange,
+  rows,
+  selectedProduct,
+  onSelectProduct,
+  inventoryDerivationBasis,
+  asinRules,
+  onSaveAvailability,
+  onUpdatePrice,
+  onOverrideAsin,
+  onPushStock,
 }: AdminCatalogViewProps) {
+  const [drawerTab, setDrawerTab] = useState<'detail' | 'images' | 'pricing' | 'inventory'>('detail');
+  const [avDraft, setAvDraft] = useState(true);
+  const [leadDraft, setLeadDraft] = useState(14);
+  const [priceDraft, setPriceDraft] = useState(0);
+  const [overrideAsin, setOverrideAsin] = useState('');
+  const [overrideReason, setOverrideReason] = useState('');
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  function openProduct(row: AdminCatalogProductRow) {
+    setAvDraft(row.isAvailable);
+    setLeadDraft(row.leadTimeDays);
+    setPriceDraft(row.exWorksPrice);
+    setOverrideAsin('');
+    setOverrideReason('');
+    setActionNotice(null);
+    setDrawerTab('detail');
+    onSelectProduct(row);
+  }
+
   const metrics: MetricItem[] = [
-    { id: 'products', label: 'Products', value: String(totalProducts), context: 'Across the portfolio' },
     {
-      id: 'live',
-      label: 'Live on channel',
-      value: String(liveCount),
-      context: 'Accepted and selling',
-      onClick: () => onChangeSubmission('live'),
-      active: submissionFilter === 'live',
+      id: 'catalog-products',
+      label: 'Products',
+      value: String(totalProducts),
+      context: `${rows.length} in view`,
+      active: focus === 'all' && categoryFilter === 'all',
+      onClick: () => {
+        onFocusChange('all');
+        onCategoryFilterChange('all');
+      },
+      testId: 'catalog-metric-products',
+      valueTestId: 'catalog-metric-products-value',
     },
     {
-      id: 'review',
-      label: 'Awaiting review',
-      value: String(awaitingReviewCount),
-      context: 'Submitted or under review',
-      onClick: () => onChangeSubmission('awaiting'),
-      active: submissionFilter === 'awaiting',
+      id: 'catalog-brands',
+      label: 'Owning brands',
+      value: String(totalBrands),
+      context: `${categoryCount} categories`,
+      onClick: () => {
+        onFocusChange('all');
+        onCategoryFilterChange('all');
+      },
+      testId: 'catalog-metric-brands',
+      valueTestId: 'catalog-metric-brands-value',
     },
     {
-      id: 'unavailable',
-      label: 'Not available',
-      value: String(unavailableCount),
-      context: `${rejectedCount} rejected by the channel`,
+      id: 'catalog-not-submitted',
+      label: 'Not submitted',
+      value: String(notSubmittedCount),
+      context: notSubmittedCount > 0 ? 'Awaiting channel submission' : 'All submitted',
+      active: focus === 'not_submitted',
+      onClick: () => onFocusChange(focus === 'not_submitted' ? 'all' : 'not_submitted'),
+      testId: 'catalog-metric-not-submitted',
+      valueTestId: 'catalog-metric-not-submitted-value',
+    },
+    {
+      id: 'catalog-inactive',
+      label: 'Inactive',
+      value: String(inactiveCount),
+      context: inactiveCount > 0 ? 'Not sellable' : 'All active',
+      active: focus === 'inactive',
+      onClick: () => onFocusChange(focus === 'inactive' ? 'all' : 'inactive'),
+      testId: 'catalog-metric-inactive',
+      valueTestId: 'catalog-metric-inactive-value',
     },
   ];
 
-  const columns: ConsoleColumn<AdminCatalogRow>[] = [
+  const columns: ConsoleColumn<AdminCatalogProductRow>[] = [
     {
-      key: 'product',
+      key: 'name',
       header: 'Product',
       mobilePrimary: true,
-      render: (row) => (
+      render: (r) => (
         <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.name}</div>
-          <div className="font-mono text-ds-label text-faint">
-            {row.sku} · {row.brandName}
-          </div>
+          <div className="font-medium text-ink-950 truncate">{r.name}</div>
+          <div className="text-ds-label font-mono text-faint">{r.sku}</div>
         </div>
       ),
     },
     {
-      key: 'exWorks',
-      header: 'Ex-works',
-      align: 'right',
-      render: (row) => <span className="tabular-nums">{formatGbp(row.exWorksPrice, 2)}</span>,
+      key: 'brand',
+      header: 'Brand',
+      render: (r) => <span className="text-ink-800">{r.brandName}</span>,
     },
     {
-      key: 'retail',
-      header: 'UK retail',
-      align: 'right',
+      key: 'category',
+      header: 'Category',
       hideOnMobile: true,
-      render: (row) => <span className="tabular-nums">{formatGbp(row.ukRetailPrice, 2)}</span>,
+      render: (r) => <span className="text-faint text-ds-label">{r.category}</span>,
+    },
+    {
+      key: 'price',
+      header: 'Ex-Works',
+      align: 'right',
+      render: (r) => <span className="font-mono text-ink-900">{formatGbp(r.exWorksPrice, 2)}</span>,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => (
+        <InlineStatus
+          label={r.isAvailable ? 'Active' : 'Inactive'}
+          tone={r.isAvailable ? 'success' : 'danger'}
+        />
+      ),
     },
     {
       key: 'submission',
       header: 'Submission',
-      render: (row) =>
-        row.submissionStatus ? (
-          <InlineStatus
-            label={SUBMISSION_LABELS[row.submissionStatus]}
-            tone={SUBMISSION_TONES[row.submissionStatus]}
-            dataStatus={row.submissionStatus}
-          />
-        ) : (
-          <InlineStatus label="Not submitted" tone="neutral" dataStatus="not_submitted" />
-        ),
-    },
-    {
-      key: 'available',
-      header: 'Availability',
-      align: 'right',
-      render: (row) =>
-        row.available ? (
-          <span className="text-ds-label text-faint">Available</span>
-        ) : (
-          <InlineStatus label="Unavailable" tone="danger" dataStatus="unavailable" />
-        ),
+      render: (r) => (
+        <InlineStatus
+          label={`${r.submissionLabel}${r.submissionSimulated ? ' (sim)' : ''}`}
+          tone={r.submissionTone}
+        />
+      ),
     },
   ];
-return (
-    <div>
+
+  return (
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Catalogue"
-        title="Global catalog"
-        description="Every product across the portfolio, with its real submission state and eligibility flags."
+        title="Global Catalog Manager"
+        description="Every catalogue record, its owning brand tenant, and its channel-submission state. Product readiness is derived from canonical submission and compliance records."
+        meta={
+          <>
+            <span className="font-mono">{rows.length} of {totalProducts} products</span>
+            <span className="font-mono">{totalBrands} brands</span>
+            <span>Focus: {focus.replace(/_/g, ' ')}</span>
+          </>
+        }
       />
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Catalog could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
-        />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <MetricStrip items={metrics} columns={4} />
+      {error && <ErrorStateBlock message={error} onRetry={onRetry} />}
 
-          <div className="mb-4 flex flex-wrap items-center gap-2">
+      <MetricStrip items={metrics} loading={loading} columns={4} />
+
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_280px] gap-6">
+        <div className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => onCategoryFilterChange(cat.id)}
+                  data-testid={`catalog-cat-${cat.id}`}
+                  className={`px-2.5 py-1 rounded-ds-sm text-ds-label font-medium transition-colors border ${
+                    categoryFilter === cat.id
+                      ? 'bg-ink-950 text-on-dark border-accent'
+                      : 'bg-surface-raised text-faint border-hairline hover:border-hairline-strong hover:text-ink-950'
+                  }`}
+                >
+                  {cat.label} ({cat.count})
+                </button>
+              ))}
+            </div>
             <input
               type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search product or SKU"
-              aria-label="Search products"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              placeholder="Search SKU, product, brand…"
+              aria-label="Search catalog products"
+              className="w-64 rounded-ds-sm border border-hairline-strong bg-surface-raised px-3 py-1.5 text-ds-label text-ink-900 placeholder:text-quiet focus:border-accent focus:outline-none"
             />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={submissionFilter}
-              onChange={(event) => onChangeSubmission(event.target.value)}
-              aria-label="Filter by submission state"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All submission states</option>
-              {submissionStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {SUBMISSION_LABELS[status as CatalogSubmissionStatus]}
-                </option>
-              ))}
-            </select>
           </div>
 
-          <SectionCard title="Products" description={`${rows.length} of ${totalProducts} shown`}>
+          {loading ? (
+            <LoadingRows rows={6} label="Loading catalogue records…" />
+          ) : rows.length === 0 ? (
+            <EmptyStateBlock
+              title="No matching products"
+              description="No products match the current category or focus filter."
+              actionLabel="Reset filters"
+              onAction={() => {
+                onCategoryFilterChange('all');
+                onFocusChange('all');
+                onSearchQueryChange('');
+              }}
+            />
+          ) : (
             <ConsoleTable
               rows={rows}
               columns={columns}
-              rowKey={(row) => row.id}
-              onRowClick={(row) => onSelect(row)}
-              emptyTitle="No products match these filters"
-              emptyDescription="Clear the filters to see the whole catalogue."
+              rowKey={(r) => r.id}
+              selectedKey={selectedProduct?.id ?? null}
+              onRowClick={openProduct}
+              testId="global-catalogue"
             />
-          </SectionCard>
-        </>
-      )}
+          )}
+        </div>
 
-      <SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.name : ''}
-        subtitle={selected ? `${selected.brandName} · ${selected.sku}` : undefined}
-        testId="admin-catalog-drawer"
-      >
-        {selected && (
-          <div className="space-y-4">
-            <dl className="grid grid-cols-2 gap-3 text-ds-body">
-              <div>
-                <dt className="text-ds-label text-faint">Ex-works price</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {formatGbp(selected.exWorksPrice, 2)}
-                </dd>
+        <aside className="space-y-4">
+          <SectionCard title="Catalogue readiness">
+            <dl className="space-y-2 text-ds-label">
+              <div className="flex justify-between">
+                <dt className="text-faint">Products</dt>
+                <dd className="font-mono text-ink-950">{totalProducts}</dd>
               </div>
-              <div>
-                <dt className="text-ds-label text-faint">UK retail price</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {formatGbp(selected.ukRetailPrice, 2)}
-                </dd>
+              <div className="flex justify-between">
+                <dt className="text-faint">In view</dt>
+                <dd className="font-mono text-ink-950">{rows.length}</dd>
               </div>
-              <div>
-                <dt className="text-ds-label text-faint">Commodity code</dt>
-                <dd className="font-mono text-ds-label text-strong">{selected.commodityCode}</dd>
+              <div className="flex justify-between">
+                <dt className="text-faint">Not submitted</dt>
+                <dd className="font-mono text-ink-950">{notSubmittedCount}</dd>
               </div>
-              <div>
-                <dt className="text-ds-label text-faint">VAT treatment</dt>
-                <dd className="font-medium text-strong">{selected.vatStatus}</dd>
+              <div className="flex justify-between">
+                <dt className="text-faint">Inactive</dt>
+                <dd className="font-mono text-ink-950">{inactiveCount}</dd>
               </div>
             </dl>
+            <p className="mt-3 pt-3 border-t border-hairline text-ds-label text-faint leading-relaxed">
+              A catalogue item becomes PO-eligible only once its compliance documents are approved.
+              Submissions marked (sim) use deterministic local simulation.
+            </p>
+          </SectionCard>
+        </aside>
+      </div>
 
-            {selected.hazmat && (
-              <p className="text-ds-body text-state-warning">
-                Flagged as hazardous material — carrier and category rules apply.
-              </p>
+      <SlideOverDrawer
+        open={Boolean(selectedProduct)}
+        onClose={() => onSelectProduct(null)}
+        title={selectedProduct?.name ?? 'Product detail'}
+        subtitle={
+          selectedProduct
+            ? `${selectedProduct.sku} · ${selectedProduct.barcode} · ${selectedProduct.brandName}`
+            : undefined
+        }
+      >
+        {selectedProduct && (
+          <div className="space-y-5">
+            <ConsoleTabs
+              tabs={[
+                { id: 'detail', label: 'Details' },
+                { id: 'images', label: 'Images', count: selectedProduct.images.length },
+                { id: 'pricing', label: 'Pricing' },
+                { id: 'inventory', label: 'Inventory' },
+              ]}
+              value={drawerTab}
+              onChange={setDrawerTab}
+              ariaLabel="Product detail sections"
+            />
+
+            {actionNotice && <NoticeBanner tone="info" message={actionNotice} />}
+
+            {drawerTab === 'detail' && (
+              <div className="space-y-5">
+                <dl className="grid grid-cols-2 gap-3 text-ds-label">
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Brand</dt>
+                    <dd className="mt-0.5 font-medium text-ink-950">{selectedProduct.brandName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Category</dt>
+                    <dd className="mt-0.5 text-ink-900">{selectedProduct.category}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Commodity code</dt>
+                    <dd className="mt-0.5 font-mono text-ink-900">{selectedProduct.commodityCode}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">VAT / Hazmat</dt>
+                    <dd className="mt-0.5 text-ink-900">
+                      {selectedProduct.vatStatus} · {selectedProduct.hazmat ? 'Hazmat' : 'Non-hazmat'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Dimensions</dt>
+                    <dd className="mt-0.5 font-mono text-ink-900">
+                      {selectedProduct.length} × {selectedProduct.width} × {selectedProduct.height} cm
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-ds-micro uppercase tracking-[0.06em] text-faint">Weight</dt>
+                    <dd className="mt-0.5 font-mono text-ink-900">
+                      {selectedProduct.weight} kg
+                      {selectedProduct.unitsPerCase != null &&
+                        ` · ${selectedProduct.unitsPerCase}/case${selectedProduct.caseOrderable ? ' (orderable)' : ''}`}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="border-t border-hairline pt-4 space-y-3">
+                  <h3 className="text-ds-label font-semibold text-ink-950">Availability</h3>
+                  <div className="flex flex-wrap items-center gap-4 text-ds-label">
+                    <label className="flex items-center gap-2 text-ink-900">
+                      <input
+                        type="checkbox"
+                        checked={avDraft}
+                        disabled={!canMutate}
+                        onChange={(e) => setAvDraft(e.target.checked)}
+                        className="rounded-ds-sm border-hairline-strong"
+                      />
+                      Available for new POs
+                    </label>
+                    <label className="flex items-center gap-2 text-secondary">
+                      <span>Lead time</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={90}
+                        disabled={!canMutate}
+                        value={leadDraft}
+                        onChange={(e) => setLeadDraft(Number(e.target.value) || 1)}
+                        className="w-16 rounded-ds-sm border border-hairline-strong px-2 py-1 text-center font-mono text-ink-900"
+                      />
+                      <span>days</span>
+                    </label>
+                    <button
+                      type="button"
+                      disabled={!canMutate}
+                      onClick={() => {
+                        onSaveAvailability(selectedProduct.sku, avDraft, leadDraft);
+                        setActionNotice('Availability updated.');
+                      }}
+                      className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800 disabled:opacity-40"
+                    >
+                      Save availability
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border-t border-hairline pt-4 space-y-2 text-ds-label">
+                  <h3 className="text-ds-label font-semibold text-ink-950">Readiness & submission</h3>
+                  <div>
+                    <span className="text-faint">Product data: </span>
+                    <InlineStatus
+                      label={
+                        selectedProduct.completenessComplete
+                          ? 'Complete'
+                          : `Missing: ${selectedProduct.completenessMissing.join(', ')}`
+                      }
+                      tone={selectedProduct.completenessComplete ? 'success' : 'warning'}
+                    />
+                  </div>
+                  <div>
+                    <span className="text-faint">Channel submission: </span>
+                    <InlineStatus
+                      label={`${selectedProduct.submissionLabel}${selectedProduct.submissionSimulated ? ' (simulated)' : ''}`}
+                      tone={selectedProduct.submissionTone}
+                    />
+                    {selectedProduct.submissionTrackingId && (
+                      <span className="ml-2 font-mono text-ds-label text-faint">
+                        ref {selectedProduct.submissionTrackingId}
+                      </span>
+                    )}
+                    {selectedProduct.submissionRejectionReason && (
+                      <p className="mt-1 text-ds-label text-state-danger">
+                        {selectedProduct.submissionRejectionReason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
 
-            <div>
-              <div className="text-ds-label text-faint mb-1">Channel submission</div>
-              {selected.submissionStatus ? (
-                <div className="space-y-1">
-                  <InlineStatus
-                    label={SUBMISSION_LABELS[selected.submissionStatus]}
-                    tone={SUBMISSION_TONES[selected.submissionStatus]}
-                    dataStatus={selected.submissionStatus}
+            {drawerTab === 'images' && (
+              <div className="space-y-3">
+                {selectedProduct.images.length === 0 ? (
+                  <p className="text-ds-label text-faint">No product images uploaded yet.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedProduct.images.map((url, idx) => (
+                      <div key={`${url}-${idx}`} className="border border-hairline rounded-ds-sm p-2 bg-surface">
+                        <img
+                          src={url}
+                          alt={`${selectedProduct.name} image ${idx + 1}`}
+                          className="w-full h-36 object-contain rounded-ds-sm bg-surface-raised"
+                        />
+                        <div className="mt-1 text-ds-micro font-mono text-faint truncate">
+                          Slot {idx + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {drawerTab === 'pricing' && (
+              <div className="space-y-4 max-w-sm">
+                <label className="block space-y-1 text-ds-label">
+                  <span className="font-medium text-ink-800">Ex-Works Price (GBP)</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    disabled={!canMutate}
+                    value={priceDraft}
+                    onChange={(e) => setPriceDraft(Number(e.target.value))}
+                    className="w-full rounded-ds-sm border border-hairline-strong px-3 py-1.5 font-mono text-ink-950"
                   />
-                  {selected.rejectionReason && (
-                    <p className="text-ds-body text-state-danger">{selected.rejectionReason}</p>
+                </label>
+                <dl className="space-y-1 text-ds-label">
+                  <div className="flex justify-between">
+                    <dt className="text-faint">UK Retail Price</dt>
+                    <dd className="font-mono text-ink-950">
+                      {formatGbp(selectedProduct.ukRetailPrice, 2)}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-faint">Implied margin</dt>
+                    <dd className="font-mono text-ink-950">
+                      {selectedProduct.ukRetailPrice > 0
+                        ? `${(((selectedProduct.ukRetailPrice - priceDraft) / selectedProduct.ukRetailPrice) * 100).toFixed(1)}%`
+                        : '—'}
+                    </dd>
+                  </div>
+                </dl>
+                <button
+                  type="button"
+                  disabled={!canMutate}
+                  onClick={() => {
+                    onUpdatePrice(selectedProduct.sku, priceDraft);
+                    setActionNotice('Ex-Works unit price updated.');
+                  }}
+                  className="px-3.5 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800 disabled:opacity-40"
+                >
+                  Update price
+                </button>
+              </div>
+            )}
+
+            {drawerTab === 'inventory' && (
+              <div className="space-y-5 text-ds-label">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="border border-hairline rounded-ds-sm p-3 space-y-1">
+                    <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+                      Ledger position
+                    </div>
+                    {selectedProduct.inventory ? (
+                      <>
+                        <div className="font-mono text-ink-900">
+                          On hand {selectedProduct.inventory.onHand} · Committed{' '}
+                          {selectedProduct.inventory.committed} · Inbound{' '}
+                          {selectedProduct.inventory.inbound}
+                        </div>
+                        <div className="font-mono text-ink-900">
+                          Available {selectedProduct.inventory.available} · Safety{' '}
+                          {selectedProduct.inventory.safetyStock} ({selectedProduct.inventory.uomLabel})
+                        </div>
+                        <InlineStatus
+                          label={selectedProduct.inventory.statusLabel}
+                          tone={selectedProduct.inventory.statusTone}
+                        />
+                      </>
+                    ) : (
+                      <p className="text-faint">No inventory record for this product.</p>
+                    )}
+                  </div>
+                  <div className="border border-hairline rounded-ds-sm p-3 space-y-1">
+                    <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+                      Channel identifier
+                    </div>
+                    {selectedProduct.inventory?.asin ? (
+                      <>
+                        <div className="font-mono font-semibold text-ink-950">
+                          {selectedProduct.inventory.asin}
+                        </div>
+                        <div className="text-ds-label text-faint">
+                          {selectedProduct.inventory.asinSourceLabel ?? ''}
+                          {selectedProduct.inventory.asinSimulated ? ' (simulated placeholder)' : ''}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-faint">No identifier recorded yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-ds-label text-faint leading-relaxed">{inventoryDerivationBasis}</p>
+
+                <div className="border-t border-hairline pt-4 space-y-2">
+                  <h4 className="font-semibold text-ink-950">Override channel identifier</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      value={overrideAsin}
+                      disabled={!canMutate}
+                      onChange={(e) => setOverrideAsin(e.target.value)}
+                      placeholder="10-char ASIN"
+                      className="w-36 rounded-ds-sm border border-hairline-strong px-2.5 py-1.5 text-ds-label font-mono"
+                    />
+                    <input
+                      value={overrideReason}
+                      disabled={!canMutate}
+                      onChange={(e) => setOverrideReason(e.target.value)}
+                      placeholder="Reason (required)"
+                      className="flex-1 min-w-[10rem] rounded-ds-sm border border-hairline-strong px-2.5 py-1.5 text-ds-label"
+                    />
+                    <button
+                      type="button"
+                      disabled={!canMutate}
+                      onClick={() => {
+                        const msg = onOverrideAsin(
+                          selectedProduct.brandId,
+                          selectedProduct.sku,
+                          overrideAsin,
+                          overrideReason
+                        );
+                        setActionNotice(msg);
+                      }}
+                      className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800 disabled:opacity-40"
+                    >
+                      Record identifier
+                    </button>
+                  </div>
+                  <ul className="text-ds-micro text-faint space-y-0.5">
+                    {asinRules.map((rule) => (
+                      <li key={rule}>• {rule}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="border-t border-hairline pt-4 space-y-2">
+                  <h4 className="font-semibold text-ink-950">Push stock to channel</h4>
+                  <p className="text-ds-label text-faint">
+                    Reports the ledger-derived position to the channel (`submitInventoryUpdate`).
+                  </p>
+                  <button
+                    type="button"
+                    disabled={!canMutate || pushBusy}
+                    onClick={async () => {
+                      setPushBusy(true);
+                      try {
+                        const msg = await onPushStock(selectedProduct.id);
+                        setActionNotice(msg);
+                      } finally {
+                        setPushBusy(false);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface disabled:opacity-40"
+                  >
+                    {pushBusy ? 'Submitting…' : 'Report stock to channel'}
+                  </button>
+                </div>
+
+                <div className="border-t border-hairline pt-4 space-y-2">
+                  <h4 className="font-semibold text-ink-950">
+                    Movement ledger ({selectedProduct.inventory?.ledger.length ?? 0})
+                  </h4>
+                  {(selectedProduct.inventory?.ledger.length ?? 0) === 0 ? (
+                    <p className="text-ds-label text-faint">No ledger movements recorded.</p>
+                  ) : (
+                    <ul className="max-h-40 overflow-y-auto divide-y divide-hairline-06 text-ds-label">
+                      {selectedProduct.inventory?.ledger.map((m) => (
+                        <li key={m.id} className="py-1.5 flex flex-wrap gap-x-3 text-secondary">
+                          <span className="font-mono text-faint">{m.recordedAt.slice(0, 10)}</span>
+                          <span>{m.type}</span>
+                          <span className="font-mono font-medium">
+                            {m.quantityDelta > 0 ? '+' : ''}
+                            {m.quantityDelta}
+                          </span>
+                          <span className="text-faint">
+                            {m.enteredQuantity} {m.enteredUom} · {m.bucket} · {m.actorId}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-              ) : (
-                <p className="text-ds-body text-muted">
-                  This product has not been submitted to the channel.
-                </p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </SlideOverDrawer>

@@ -1,361 +1,568 @@
-/**
- * §WAVE 3e (2026-11-25) — ADMIN helpdesk (presentation).
- *
- * This screen DOES act: `setTicketPriority`, `updateTicketStatus` and
- * `assignTicket` are canonical store commands, so triage happens here through the
- * same code paths the rest of the platform uses, recorded against the acting staff
- * member — not a second implementation.
- */
+import { useState } from 'react';
+import type { Ticket, TicketPriority, TicketStatus } from '@/types';
 import {
-  ConsoleHeader,
-  ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  SlideOverDrawer,
-  type ConsoleColumn,
-  type MetricItem,
+  ConsoleHeader,
+  type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard } from '@/next/components/ConsoleCharts';
-import type { StaffMember } from '@/types';
-import type { Ticket, TicketPriority, TicketStatus } from '@/types';
+import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
-export interface AdminTicketRow {
-  ticket: Ticket;
+export interface HelpdeskCaseItem {
+  id: string;
+  caseRef?: string;
+  subject: string;
+  brandId: string;
   brandName: string;
-  assignedTo?: string;
-  overdue: boolean;
+  escalationState?: string;
+  escalationLabel: string;
+  sufficiencyLabel: string;
+  sufficiencyTone: SemanticTone;
+  articleTitles: string[];
+  reasons: string[];
+  context: { detail: string; resolved: boolean }[];
+  amazonReferenceId?: string;
+  amazonSimulated?: boolean;
+  hasProviderResponse: boolean;
+}
+
+export interface HelpdeskMessageItem {
+  id: string;
+  direction: 'inbound' | 'outbound';
+  body: string;
+  createdAt: string;
 }
 
 export interface AdminHelpdeskViewProps {
-  rows: AdminTicketRow[];
-  totalTickets: number;
-  brandOptions: { id: string; name: string }[];
-  statusOptions: string[];
-  priorityOptions: string[];
-  staffOptions: StaffMember[];
-  brandFilter: string;
-  statusFilter: string;
-  priorityFilter: string;
-  search: string;
-  openCount: number;
-  pendingCount: number;
-  overdueCount: number;
-  selected: Ticket | null;
-  selectedRow: AdminTicketRow | null;
-  busyTicketId: string | null;
-  notice: string | null;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
+  loading: boolean;
+  error: string | null;
   onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeStatus: (value: string) => void;
-  onChangePriority: (value: string) => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (ticket: Ticket | null) => void;
-  onSetStatus: (ticket: Ticket, status: TicketStatus) => void;
-  onSetPriority: (ticket: Ticket, priority: TicketPriority) => void;
-  onAssign: (ticket: Ticket, staffId: string) => void;
+  note: string | null;
+  metrics: {
+    openCount: number;
+    pendingCount: number;
+    resolvedToday: number;
+    overdueCount: number;
+    unassignedCount: number;
+  };
+  awaitingReviewCases: HelpdeskCaseItem[];
+  approvedToEscalateCases: HelpdeskCaseItem[];
+  providerCases: HelpdeskCaseItem[];
+  awaitingResponseCases: HelpdeskCaseItem[];
+  readyToResolveCases: HelpdeskCaseItem[];
+  onReviewCase: (id: string, decision: 'approve_escalation' | 'request_info' | 'reject') => void;
+  onEscalateCase: (id: string) => Promise<void>;
+  onRecordProviderResponse: (
+    id: string,
+    outcome: 'accepted' | 'rejected' | 'info_required' | 'closed',
+    response: string
+  ) => void;
+  onResolveCase: (id: string, resolution: string) => void;
+  tickets: Ticket[];
+  selectedTicket: Ticket | null;
+  onSelectTicket: (id: string) => void;
+  ticketMessages: HelpdeskMessageItem[];
+  staffOptions: { id: string; name: string }[];
+  brandName: (brandId: string) => string;
+  statusFilter: TicketStatus | 'all';
+  onStatusFilterChange: (next: TicketStatus | 'all') => void;
+  priorityFilter: TicketPriority | 'all';
+  onPriorityFilterChange: (next: TicketPriority | 'all') => void;
+  searchQuery: string;
+  onSearchQueryChange: (next: string) => void;
+  onUpdateTicketStatus: (ticketId: string, status: TicketStatus) => void;
+  onAssignTicket: (ticketId: string, staffId: string) => void;
+  onSetTicketPriority: (ticketId: string, priority: TicketPriority) => void;
+  suggestedReply: string | null;
+  onSendReply: (ticketId: string, body: string) => Promise<void>;
 }
 
-const PRIORITY_TONES: Record<TicketPriority, 'neutral' | 'warning' | 'danger'> = {
-  low: 'neutral',
-  medium: 'neutral',
-  high: 'warning',
-  urgent: 'danger',
-};
+function slaLabel(deadline?: string, status?: TicketStatus): string | null {
+  if (!deadline || status === 'resolved') return null;
+  const h = Math.round((new Date(deadline).getTime() - Date.now()) / 3600000);
+  if (h < 0) return `OVERDUE ${Math.abs(h)}h`;
+  return h < 4 ? `${h}h left` : `${h}h`;
+}
 
 export function AdminHelpdeskView({
-  rows,
-  totalTickets,
-  brandOptions,
-  statusOptions,
-  priorityOptions,
-  staffOptions,
-  brandFilter,
-  statusFilter,
-  priorityFilter,
-  search,
-  openCount,
-  pendingCount,
-  overdueCount,
-  selected,
-  selectedRow,
-  busyTicketId,
-  notice,
-  isLoading,
-  isError,
-  errorMessage,
+  loading,
+  error,
   onRetry,
-  onChangeBrand,
-  onChangeStatus,
-  onChangePriority,
-  onChangeSearch,
-  onSelect,
-  onSetStatus,
-  onSetPriority,
-  onAssign,
+  note,
+  metrics,
+  awaitingReviewCases,
+  approvedToEscalateCases,
+  providerCases,
+  awaitingResponseCases,
+  readyToResolveCases,
+  onReviewCase,
+  onEscalateCase,
+  onRecordProviderResponse,
+  onResolveCase,
+  tickets,
+  selectedTicket,
+  onSelectTicket,
+  ticketMessages,
+  staffOptions,
+  brandName,
+  statusFilter,
+  onStatusFilterChange,
+  priorityFilter,
+  onPriorityFilterChange,
+  searchQuery,
+  onSearchQueryChange,
+  onUpdateTicketStatus,
+  onAssignTicket,
+  onSetTicketPriority,
+  suggestedReply,
+  onSendReply,
 }: AdminHelpdeskViewProps) {
-  const metrics: MetricItem[] = [
-    {
-      id: 'open',
-      label: 'Open tickets',
-      value: String(openCount),
-      context: 'Awaiting staff action',
-      onClick: () => onChangeStatus('open'),
-      active: statusFilter === 'open',
-    },
-    {
-      id: 'pending',
-      label: 'Pending',
-      value: String(pendingCount),
-      context: 'Waiting on the brand',
-      onClick: () => onChangeStatus('pending'),
-      active: statusFilter === 'pending',
-    },
-    {
-      id: 'overdue',
-      label: 'Past the SLA target',
-      value: String(overdueCount),
-      context: overdueCount > 0 ? 'Needs attention today' : 'Nothing overdue',
-    },
-  ];
+  const [caseResponse, setCaseResponse] = useState('');
+  const [caseOutcome, setCaseOutcome] = useState<'accepted' | 'rejected' | 'info_required' | 'closed'>(
+    'accepted'
+  );
+  const [caseResolution, setCaseResolution] = useState('');
+  const [replyDraft, setReplyDraft] = useState('');
 
-  const columns: ConsoleColumn<AdminTicketRow>[] = [
-    {
-      key: 'ticket',
-      header: 'Ticket',
-      mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.ticket.subject}</div>
-          <div className="text-ds-label text-faint truncate">
-            {row.brandName} · {row.ticket.lastMessagePreview}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'priority',
-      header: 'Priority',
-      render: (row) => (
-        <InlineStatus
-          label={row.ticket.priority}
-          tone={PRIORITY_TONES[row.ticket.priority]}
-          dataStatus={row.ticket.priority}
-        />
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (row) => (
-        <InlineStatus
-          label={row.ticket.status}
-          tone={row.ticket.status === 'resolved' ? 'success' : 'warning'}
-          dataStatus={row.ticket.status}
-        />
-      ),
-    },
-    {
-      key: 'assignee',
-      header: 'Assigned to',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="text-ds-label text-muted">{row.assignedTo ?? 'Unassigned'}</span>
-      ),
-    },
-    {
-      key: 'sla',
-      header: 'SLA target',
-      align: 'right',
-      hideOnMobile: true,
-      render: (row) =>
-        row.overdue ? (
-          <InlineStatus label="Overdue" tone="danger" dataStatus="overdue" />
-        ) : (
-          <span className="tabular-nums text-ds-label text-muted">
-            {row.ticket.slaDeadline ? row.ticket.slaDeadline.slice(0, 10) : '—'}
-          </span>
-        ),
-    },
-  ];
-return (
-    <div>
+  return (
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Governance & Support"
         title="Helpdesk"
-        description="Every brand ticket, its priority, who owns it, and the SLA target it is measured against."
+        description="Brand support cases reviewed by Mercenta before any channel escalation. Mercenta operates the channel relationship directly."
+        meta={
+          <span>
+            {metrics.openCount} open · {metrics.pendingCount} pending · {metrics.unassignedCount}{' '}
+            unassigned
+          </span>
+        }
       />
 
-      {notice && (
-        <p role="status" className="mb-4 text-ds-label text-secondary">
-          {notice}
-        </p>
-      )}
+      {note && <NoticeBanner tone="info" title="Helpdesk update" message={note} />}
+      {error && <ErrorStateBlock message={error} onRetry={onRetry} />}
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Tickets could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
-        />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <MetricStrip items={metrics} columns={3} />
+      <MetricStrip
+        loading={loading}
+        columns={4}
+        items={[
+          {
+            id: 'hd-open',
+            label: 'Open tickets',
+            value: String(metrics.openCount),
+            context: 'Requires response',
+            active: statusFilter === 'open',
+            onClick: () => onStatusFilterChange(statusFilter === 'open' ? 'all' : 'open'),
+          },
+          {
+            id: 'hd-pending',
+            label: 'Pending',
+            value: String(metrics.pendingCount),
+            context: 'Awaiting partner or channel',
+            active: statusFilter === 'pending',
+            onClick: () => onStatusFilterChange(statusFilter === 'pending' ? 'all' : 'pending'),
+          },
+          {
+            id: 'hd-overdue',
+            label: 'SLA overdue',
+            value: String(metrics.overdueCount),
+            context: 'Past target deadline',
+            onClick: () => onStatusFilterChange('all'),
+          },
+          {
+            id: 'hd-awaiting',
+            label: 'Cases awaiting review',
+            value: String(awaitingReviewCases.length),
+            context: `${metrics.resolvedToday} resolved today`,
+            onClick: () => onStatusFilterChange('all'),
+          },
+        ]}
+      />
 
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search subject or brand"
-              aria-label="Search tickets"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
-            />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(event) => onChangeStatus(event.target.value)}
-              aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All statuses</option>
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-            <select
-              value={priorityFilter}
-              onChange={(event) => onChangePriority(event.target.value)}
-              aria-label="Filter by priority"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All priorities</option>
-              {priorityOptions.map((priority) => (
-                <option key={priority} value={priority}>
-                  {priority}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <SectionCard title="Tickets" description={`${rows.length} of ${totalTickets} shown`}>
-            <ConsoleTable
-              rows={rows}
-              columns={columns}
-              rowKey={(row) => row.ticket.id}
-              onRowClick={(row) => onSelect(row.ticket)}
-              emptyTitle="No tickets match these filters"
-              emptyDescription="Clear the filters to see the whole portfolio."
-            />
-          </SectionCard>
-        </>
-      )}
-<SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.subject : ''}
-        subtitle={selectedRow ? selectedRow.brandName : undefined}
-        testId="admin-ticket-drawer"
+      {/* Mercenta Case Review & Channel Escalation Queue */}
+      <SectionCard
+        title="Brand Cases — Mercenta Review Queue"
+        description="Brand cases are checked against Knowledge Base sufficiency and reviewed before optional escalation to the retail channel."
       >
-        {selected && (
-          <div className="space-y-4">
-            <p className="text-ds-body text-secondary">{selected.lastMessagePreview}</p>
-
-            <div className="grid grid-cols-1 gap-3">
-              <label className="text-ds-body">
-                <span className="text-ds-label text-faint block mb-1">Status</span>
-                <select
-                  value={selected.status}
-                  disabled={busyTicketId === selected.id}
-                  onChange={(event) => onSetStatus(selected, event.target.value as TicketStatus)}
-                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-                >
-                  {statusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="text-ds-body">
-                <span className="text-ds-label text-faint block mb-1">Priority</span>
-                <select
-                  value={selected.priority}
-                  disabled={busyTicketId === selected.id}
-                  onChange={(event) =>
-                    onSetPriority(selected, event.target.value as TicketPriority)
-                  }
-                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-                >
-                  {priorityOptions.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="text-ds-body">
-                <span className="text-ds-label text-faint block mb-1">Assigned to</span>
-                <select
-                  value={selected.assignedToStaffId ?? ''}
-                  disabled={busyTicketId === selected.id}
-                  onChange={(event) => onAssign(selected, event.target.value)}
-                  className="w-full px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-                >
-                  {/* Selecting "Unassigned" would be a false affordance: the ticket
-                      store has no unassign command, so it is shown as current state
-                      only and cannot be chosen. */}
-                  {!selected.assignedToStaffId && (
-                    <option value="" disabled>
-                      Unassigned
-                    </option>
+        <div className="space-y-4">
+          {awaitingReviewCases.length === 0 ? (
+            <p className="text-ds-label text-faint">No cases awaiting review.</p>
+          ) : (
+            <div className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
+              {awaitingReviewCases.map((c) => (
+                <div key={c.id} className="p-3 space-y-2" data-state="case-review-row">
+                  <div className="flex flex-wrap items-center gap-2 justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-ds-label text-[#C2410C]">
+                        {c.caseRef ?? c.id}
+                      </span>
+                      <span className="text-ds-label font-semibold text-ink-950">{c.subject}</span>
+                      <span className="text-ds-label text-faint">· {c.brandName}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => onReviewCase(c.id, 'approve_escalation')}
+                        className="px-2.5 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+                      >
+                        Approve escalation
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onReviewCase(c.id, 'request_info')}
+                        className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                      >
+                        Request info
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onReviewCase(c.id, 'reject')}
+                        className="px-2.5 py-1 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-micro font-medium hover:bg-state-danger/10"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <InlineStatus label={c.sufficiencyLabel} tone={c.sufficiencyTone} />
+                    {c.articleTitles.length > 0 && (
+                      <span className="text-ds-micro text-faint">
+                        KB: {c.articleTitles.join(' · ')}
+                      </span>
+                    )}
+                  </div>
+                  {c.reasons.length > 0 && (
+                    <ul className="text-ds-micro text-faint list-disc pl-4 space-y-0.5">
+                      {c.reasons.map((r, i) => (
+                        <li key={i}>{r}</li>
+                      ))}
+                    </ul>
                   )}
-                  {staffOptions.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                </div>
+              ))}
             </div>
+          )}
 
-            <dl className="border-t border-hairline pt-3 grid grid-cols-2 gap-3 text-ds-body">
-              <div>
-                <dt className="text-ds-label text-faint">Opened</dt>
-                <dd className="font-medium text-strong">{selected.createdAt.slice(0, 10)}</dd>
+          {approvedToEscalateCases.length > 0 && (
+            <div className="border-t border-hairline pt-3 space-y-2">
+              <div className="text-ds-label font-semibold text-ink-950">
+                Reviewed — Ready to escalate to the retail channel
               </div>
-              <div>
-                <dt className="text-ds-label text-faint">SLA target</dt>
-                <dd className="font-medium text-strong">
-                  {selected.slaDeadline ? selected.slaDeadline.slice(0, 10) : 'Not set'}
-                </dd>
+              {approvedToEscalateCases.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center justify-between gap-2 text-ds-label"
+                >
+                  <span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="text-ink-950 font-medium">{c.subject}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void onEscalateCase(c.id)}
+                    className="px-2.5 py-1 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-micro font-medium hover:bg-[#9A3412]"
+                  >
+                    Escalate to the retail channel
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {providerCases.length > 0 && (
+            <div className="border-t border-hairline pt-3 space-y-1.5">
+              <div className="text-ds-label font-semibold text-ink-950">Provider cases</div>
+              {providerCases.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center gap-3 text-ds-label">
+                  <span className="font-mono text-[#C2410C]">{c.caseRef ?? c.id}</span>
+                  <span className="font-mono text-faint">{c.amazonReferenceId}</span>
+                  <span className="text-faint">
+                    {c.amazonSimulated ? 'Simulation — no live retail-channel case' : 'Live retail-channel case'}
+                  </span>
+                  <InlineStatus label={c.escalationLabel} tone="info" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {awaitingResponseCases.length > 0 && (
+            <div className="border-t border-hairline pt-3 space-y-2">
+              <div className="text-ds-label font-semibold text-ink-950">
+                Record retail channel response (human-entered)
               </div>
-            </dl>
-          </div>
-        )}
-      </SlideOverDrawer>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  type="text"
+                  value={caseResponse}
+                  onChange={(e) => setCaseResponse(e.target.value)}
+                  placeholder="What the retail channel said…"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                />
+                <select
+                  value={caseOutcome}
+                  onChange={(e) =>
+                    setCaseOutcome(
+                      e.target.value as 'accepted' | 'rejected' | 'info_required' | 'closed'
+                    )
+                  }
+                  className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                >
+                  <option value="accepted">Accepted</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="info_required">Information required</option>
+                  <option value="closed">Closed by channel</option>
+                </select>
+              </div>
+              {awaitingResponseCases.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
+                  <span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    {c.subject}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onRecordProviderResponse(c.id, caseOutcome, caseResponse);
+                      if (caseResponse.trim()) setCaseResponse('');
+                    }}
+                    className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-900 hover:bg-surface"
+                  >
+                    Record response
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {readyToResolveCases.length > 0 && (
+            <div className="border-t border-hairline pt-3 space-y-2">
+              <div className="text-ds-label font-semibold text-ink-950">Resolve case</div>
+              <input
+                type="text"
+                value={caseResolution}
+                onChange={(e) => setCaseResolution(e.target.value)}
+                placeholder="Resolution note for the brand…"
+                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              />
+              {readyToResolveCases.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
+                  <span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    {c.subject}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onResolveCase(c.id, caseResolution);
+                      if (caseResolution.trim()) setCaseResolution('');
+                    }}
+                    className="px-2.5 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+                  >
+                    Resolve case
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* Tickets split workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-5">
+          <SectionCard
+            title="Support Tickets"
+            actions={
+              <div className="flex flex-wrap items-center gap-1.5">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => onSearchQueryChange(e.target.value)}
+                  placeholder="Search tickets…"
+                  aria-label="Search tickets"
+                  className="w-36 px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                />
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => onPriorityFilterChange(e.target.value as TicketPriority | 'all')}
+                  aria-label="Priority filter"
+                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                >
+                  <option value="all">Priority: all</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+            }
+          >
+            {tickets.length === 0 ? (
+              <EmptyStateBlock
+                title="No tickets match"
+                description="Reset search or status filters to inspect all support tickets."
+              />
+            ) : (
+              <ul className="divide-y divide-hairline-06 -m-4 max-h-[520px] overflow-y-auto">
+                {tickets.map((t) => {
+                  const active = selectedTicket?.id === t.id;
+                  const sla = slaLabel(t.slaDeadline, t.status);
+                  return (
+                    <li key={t.id}>
+                      <button
+                        type="button"
+                        onClick={() => onSelectTicket(t.id)}
+                        className={`w-full text-left px-4 py-3 ${
+                          active ? 'bg-tint' : 'hover:bg-surface'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-ds-label font-semibold text-ink-950 truncate">
+                            {brandName(t.brandId)}
+                          </span>
+                          <span className="text-ds-micro font-mono uppercase text-faint">
+                            {t.priority}
+                          </span>
+                        </div>
+                        <div className="text-ds-label text-secondary truncate mt-0.5">{t.subject}</div>
+                        <div className="mt-1 flex items-center gap-2 text-ds-micro font-mono text-faint">
+                          <span>{t.status}</span>
+                          {sla && <span className="text-state-danger">· {sla}</span>}
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </SectionCard>
+        </div>
+
+        <div className="lg:col-span-7">
+          <SectionCard title={selectedTicket ? selectedTicket.subject : 'Ticket Detail'}>
+            {!selectedTicket ? (
+              <EmptyStateBlock
+                title="Select a ticket"
+                description="Choose a support ticket on the left to manage assignment, SLA status, and replies."
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-hairline text-ds-label">
+                  <div className="text-faint">
+                    {brandName(selectedTicket.brandId)} ·{' '}
+                    {new Date(selectedTicket.createdAt).toLocaleDateString()}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select
+                      value={selectedTicket.status}
+                      onChange={(e) =>
+                        onUpdateTicketStatus(selectedTicket.id, e.target.value as TicketStatus)
+                      }
+                      aria-label="Ticket status"
+                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    >
+                      <option value="open">Open</option>
+                      <option value="pending">Pending</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                    <select
+                      value={selectedTicket.assignedToStaffId ?? ''}
+                      onChange={(e) => onAssignTicket(selectedTicket.id, e.target.value)}
+                      aria-label="Assign ticket to"
+                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    >
+                      <option value="">Unassigned</option>
+                      {staffOptions.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={selectedTicket.priority}
+                      onChange={(e) =>
+                        onSetTicketPriority(selectedTicket.id, e.target.value as TicketPriority)
+                      }
+                      aria-label="Ticket priority"
+                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    >
+                      <option value="urgent">Urgent</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                {loading ? (
+                  <LoadingRows rows={3} label="Loading ticket messages…" />
+                ) : ticketMessages.length === 0 ? (
+                  <p className="text-ds-label text-faint">No messages recorded on this ticket yet.</p>
+                ) : (
+                  <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                    {ticketMessages.map((m) => (
+                      <div
+                        key={m.id}
+                        className={`rounded-ds-md border px-3 py-2 text-ds-label ${
+                          m.direction === 'outbound'
+                            ? 'border-hairline-strong bg-surface ml-8'
+                            : 'border-hairline bg-surface-raised mr-8'
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap text-ink-900">{m.body}</div>
+                        <div className="mt-1 text-ds-micro font-mono text-faint">
+                          {new Date(m.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {suggestedReply && (
+                  <div className="border border-hairline rounded-ds-md p-3 bg-canvas-70 text-ds-label">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-ink-950">Suggested Reply Template</span>
+                      <button
+                        type="button"
+                        onClick={() => setReplyDraft(suggestedReply)}
+                        className="text-[#C2410C] font-medium hover:underline"
+                      >
+                        Insert draft
+                      </button>
+                    </div>
+                    <p className="text-faint">{suggestedReply}</p>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-hairline space-y-2">
+                  <textarea
+                    value={replyDraft}
+                    onChange={(e) => setReplyDraft(e.target.value)}
+                    rows={3}
+                    placeholder="Type a reply…"
+                    className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      disabled={!replyDraft.trim()}
+                      onClick={() => {
+                        void onSendReply(selectedTicket.id, replyDraft).then(() =>
+                          setReplyDraft('')
+                        );
+                      }}
+                      className="px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                    >
+                      Send Reply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      </div>
     </div>
   );
 }

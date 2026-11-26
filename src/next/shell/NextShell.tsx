@@ -425,7 +425,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       /* §WAVE 3k — Brand Intelligence: the ranked opportunity board derived from the
          canonical prospect store, with the ten-category rule shown firing. */
       if (activeViewId === 'brand_intelligence') {
-        return <AdminBrandIntelligenceScreen onNavigate={(viewId) => goToAdminView(viewId)} />;
+        /* §FRONTEND-REDESIGN BATCH 3 — no props. v1's screen inspects a prospect
+           INLINE (its own `selectedProspect` inspector) instead of navigating away,
+           so the old `onNavigate` prop had nothing left to call. */
+        return <AdminBrandIntelligenceScreen />;
       }
       /* §WAVE 3b — the shared work workspace already exists for brands; the admin
          surface mounts the SAME component with `scope="admin"`, so admin tasks and

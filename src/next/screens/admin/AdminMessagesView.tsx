@@ -1,283 +1,338 @@
-/**
- * §WAVE 3f (2026-11-25) — ADMIN messages (presentation).
- * The portfolio-wide message log: every channel, both directions, with the ones the
- * automation could not answer flagged. There is NO send API in the data layer, so
- * this screen reports and does not offer a reply it cannot deliver.
- */
+import { useState } from 'react';
 import {
-  ConsoleHeader,
-  ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  SlideOverDrawer,
-  type ConsoleColumn,
-  type MetricItem,
+  ConsoleHeader,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard } from '@/next/components/ConsoleCharts';
-import type { Message } from '@/types';
+import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
-export interface AdminMessageRow {
-  message: Message;
+export interface MessageEntryRow {
+  id: string;
+  brandId: string;
+  direction: 'inbound' | 'outbound';
+  subject?: string;
+  body: string;
+  channel: string;
+  sentBy: string;
+  requiresHuman: boolean;
+  createdAt: string;
+}
+
+export interface MessageThreadRow {
+  key: string;
+  brandId: string;
   brandName: string;
+  messages: MessageEntryRow[];
+  hasHotLead: boolean;
+}
+
+export interface OutreachFollowupItem {
+  id: string;
+  title: string;
+  sourceLabel: string;
+  dueDate: string | null;
 }
 
 export interface AdminMessagesViewProps {
-  rows: AdminMessageRow[];
-  totalMessages: number;
-  brandOptions: { id: string; name: string }[];
-  channelOptions: string[];
-  directionOptions: string[];
-  brandFilter: string;
-  channelFilter: string;
-  directionFilter: string;
-  needsHumanOnly: boolean;
-  search: string;
-  needsHumanCount: number;
-  inboundCount: number;
-  outboundCount: number;
-  selected: AdminMessageRow | null;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
+  loading: boolean;
+  error: string | null;
   onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeChannel: (value: string) => void;
-  onChangeDirection: (value: string) => void;
+  emailLive: boolean;
+  emailSandbox: boolean;
+  totalThreads: number;
+  totalMessages: number;
+  acquisitionCount: number;
+  needsHumanCount: number;
+  threads: MessageThreadRow[];
+  activeThread: MessageThreadRow | null;
+  onSelectThread: (key: string) => void;
+  threadQuery: string;
+  onThreadQueryChange: (next: string) => void;
+  needsHumanOnly: boolean;
   onToggleNeedsHuman: () => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (row: AdminMessageRow | null) => void;
+  onResetFilters: () => void;
+  outreachWork: OutreachFollowupItem[];
+  sendNote: string | null;
+  onSend: (threadKey: string, subject: string, body: string) => Promise<void>;
 }
 
 export function AdminMessagesView({
-  rows,
-  totalMessages,
-  brandOptions,
-  channelOptions,
-  directionOptions,
-  brandFilter,
-  channelFilter,
-  directionFilter,
-  needsHumanOnly,
-  search,
-  needsHumanCount,
-  inboundCount,
-  outboundCount,
-  selected,
-  isLoading,
-  isError,
-  errorMessage,
+  loading,
+  error,
   onRetry,
-  onChangeBrand,
-  onChangeChannel,
-  onChangeDirection,
+  emailLive,
+  emailSandbox,
+  totalThreads,
+  totalMessages,
+  acquisitionCount,
+  needsHumanCount,
+  threads,
+  activeThread,
+  onSelectThread,
+  threadQuery,
+  onThreadQueryChange,
+  needsHumanOnly,
   onToggleNeedsHuman,
-  onChangeSearch,
-  onSelect,
+  onResetFilters,
+  outreachWork,
+  sendNote,
+  onSend,
 }: AdminMessagesViewProps) {
-  const metrics: MetricItem[] = [
-    { id: 'total', label: 'Messages logged', value: String(totalMessages), context: 'All channels' },
-    {
-      id: 'needs-human',
-      label: 'Needing a human reply',
-      value: String(needsHumanCount),
-      context: 'Flagged by the automation',
-      onClick: onToggleNeedsHuman,
-      active: needsHumanOnly,
-    },
-    { id: 'inbound', label: 'Inbound', value: String(inboundCount), context: 'From brands' },
-    { id: 'outbound', label: 'Outbound', value: String(outboundCount), context: 'From Mercenta' },
-  ];
+  const [draftSubject, setDraftSubject] = useState('');
+  const [draftBody, setDraftBody] = useState('');
+  const [sending, setSending] = useState(false);
 
-  const columns: ConsoleColumn<AdminMessageRow>[] = [
-    {
-      key: 'message',
-      header: 'Message',
-      mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">
-            {row.message.subject ?? row.message.body.slice(0, 60)}
-          </div>
-          <div className="text-ds-label text-faint truncate">{row.brandName}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'channel',
-      header: 'Channel',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="text-ds-label text-muted">
-          {row.message.channel.replace(/_/g, ' ')}
-        </span>
-      ),
-    },
-    {
-      key: 'direction',
-      header: 'Direction',
-      render: (row) => (
-        <InlineStatus
-          label={row.message.direction}
-          tone={row.message.direction === 'inbound' ? 'info' : 'neutral'}
-          dataStatus={row.message.direction}
-        />
-      ),
-    },
-    {
-      key: 'sentBy',
-      header: 'Sent by',
-      hideOnMobile: true,
-      render: (row) => <span className="text-ds-label text-muted">{row.message.sentBy}</span>,
-    },
-    {
-      key: 'human',
-      header: 'Needs reply',
-      align: 'right',
-      render: (row) =>
-        row.message.requiresHuman ? (
-          <InlineStatus label="Yes" tone="warning" dataStatus="needs-human" />
-        ) : (
-          <span className="text-ds-label text-quiet">—</span>
-        ),
-    },
-  ];
-return (
-    <div>
+  return (
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Governance & Support"
         title="Messages"
-        description="Every message across the portfolio, both directions, with the ones the automation could not answer flagged."
-      />
-
-      {isError ? (
-        <ErrorStateBlock
-          title="Messages could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
-        />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <MetricStrip items={metrics} columns={4} />
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
+        description="Unified brand and acquisition inbox — one canonical thread per brand or prospect across automation and staff."
+        meta={
+          <>
+            <span>
+              {threads.length} of {totalThreads} threads
+            </span>
+            <span>{totalMessages} messages</span>
+            <span>{emailLive ? 'Email live' : emailSandbox ? 'Email sandbox' : 'Sending disabled'}</span>
+          </>
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
             <input
-              type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search subject or body"
-              aria-label="Search messages"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
+              type="text"
+              value={threadQuery}
+              onChange={(e) => onThreadQueryChange(e.target.value)}
+              placeholder="Search threads…"
+              aria-label="Search message threads"
+              className="w-52 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
             />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={channelFilter}
-              onChange={(event) => onChangeChannel(event.target.value)}
-              aria-label="Filter by channel"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All channels</option>
-              {channelOptions.map((channel) => (
-                <option key={channel} value={channel}>
-                  {channel.replace(/_/g, ' ')}
-                </option>
-              ))}
-            </select>
-            <select
-              value={directionFilter}
-              onChange={(event) => onChangeDirection(event.target.value)}
-              aria-label="Filter by direction"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">Both directions</option>
-              {directionOptions.map((direction) => (
-                <option key={direction} value={direction}>
-                  {direction}
-                </option>
-              ))}
-            </select>
             <button
               type="button"
               onClick={onToggleNeedsHuman}
-              aria-pressed={needsHumanOnly}
-              className={`px-3 py-2 text-ds-label font-medium rounded-ds-md border ${
+              className={`px-3 py-1.5 rounded-ds-sm border text-ds-label font-medium ${
                 needsHumanOnly
-                  ? 'border-ink bg-ink-950 text-on-dark'
+                  ? 'border-state-danger/20 bg-state-danger/10 text-state-danger'
                   : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >
-              Needs a human reply
+              Needs human only
             </button>
           </div>
+        }
+      />
 
-          <SectionCard title="Messages" description={`${rows.length} of ${totalMessages} shown`}>
-            <ConsoleTable
-              rows={rows}
-              columns={columns}
-              rowKey={(row) => row.message.id}
-              onRowClick={(row) => onSelect(row)}
-              emptyTitle="No messages match these filters"
-              emptyDescription="Clear the filters to see the whole log."
-            />
-          </SectionCard>
-        </>
+      {!emailLive && !emailSandbox && (
+        <NoticeBanner
+          tone="info"
+          title="Outbound email transport disabled"
+          message="Connect Postmark or SendGrid in Integration Settings for live delivery. Reading threads and logging notes still works."
+        />
       )}
 
-      <SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? (selected.message.subject ?? 'Message') : ''}
-        subtitle={selected ? selected.brandName : undefined}
-        testId="admin-message-drawer"
-      >
-        {selected && (
-          <div className="space-y-4">
-            <p className="text-ds-body text-ink-800 whitespace-pre-wrap">{selected.message.body}</p>
-            <dl className="border-t border-hairline pt-3 grid grid-cols-2 gap-3 text-ds-body">
-              <div>
-                <dt className="text-ds-label text-faint">Channel</dt>
-                <dd className="font-medium text-strong">
-                  {selected.message.channel.replace(/_/g, ' ')}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Direction</dt>
-                <dd className="font-medium text-strong">{selected.message.direction}</dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Sent by</dt>
-                <dd className="font-medium text-strong">{selected.message.sentBy}</dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Logged</dt>
-                <dd className="font-medium text-strong">
-                  {selected.message.createdAt.slice(0, 10)}
-                </dd>
-              </div>
-            </dl>
-            {selected.message.requiresHuman && (
-              <p className="text-ds-body text-state-warning">
-                The automation flagged this message as needing a human reply.
-              </p>
+      {error && <ErrorStateBlock message={error} onRetry={onRetry} />}
+
+      <MetricStrip
+        loading={loading}
+        columns={4}
+        items={[
+          {
+            id: 'messages-threads',
+            label: 'Threads',
+            value: String(totalThreads),
+            context: `${threads.length} in view`,
+            active: !needsHumanOnly && !threadQuery,
+            onClick: onResetFilters,
+          },
+          {
+            id: 'messages-count',
+            label: 'Messages',
+            value: String(totalMessages),
+            context: `${acquisitionCount} acquisition`,
+            onClick: () => {
+              if (needsHumanOnly) onToggleNeedsHuman();
+            },
+          },
+          {
+            id: 'messages-needs-human',
+            label: 'Needs human',
+            value: String(needsHumanCount),
+            context: needsHumanCount > 0 ? 'Hot leads' : 'Nothing waiting',
+            active: needsHumanOnly,
+            onClick: onToggleNeedsHuman,
+          },
+          {
+            id: 'messages-followups',
+            label: 'Open follow-ups',
+            value: String(outreachWork.length),
+            context: 'Outreach work items',
+            onClick: onResetFilters,
+          },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Thread list */}
+        <div className="lg:col-span-4 space-y-4">
+          <SectionCard title="Threads" description="Sorted by recent activity">
+            {loading ? (
+              <LoadingRows rows={5} label="Loading conversations…" />
+            ) : threads.length === 0 ? (
+              <EmptyStateBlock
+                title="No threads match"
+                description="Clear the search filter or hot-lead toggle to view all threads."
+                actionLabel="Reset filters"
+                onAction={onResetFilters}
+              />
+            ) : (
+              <ul className="divide-y divide-hairline-06 -m-4">
+                {threads.map((t) => {
+                  const active = activeThread?.key === t.key;
+                  const last = t.messages[t.messages.length - 1];
+                  return (
+                    <li key={t.key}>
+                      <button
+                        type="button"
+                        onClick={() => onSelectThread(t.key)}
+                        className={`w-full text-left px-4 py-3 transition-colors ${
+                          active ? 'bg-tint' : 'hover:bg-surface'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-ds-label font-semibold text-ink-950 truncate">
+                            {t.brandName}
+                          </span>
+                          {t.hasHotLead && (
+                            <InlineStatus label="Hot lead" tone="danger" dataStatus="needs_human" />
+                          )}
+                        </div>
+                        <p className="mt-1 text-ds-label text-faint truncate">
+                          {last ? last.body.slice(0, 72) : 'No messages yet'}
+                        </p>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
-          </div>
-        )}
-      </SlideOverDrawer>
+          </SectionCard>
+
+          <SectionCard title="Open outreach follow-ups" description="Shared with Work Management">
+            {outreachWork.length === 0 ? (
+              <p className="text-ds-label text-faint">No open outreach follow-up items.</p>
+            ) : (
+              <ul className="space-y-2 text-ds-label">
+                {outreachWork.slice(0, 5).map((w) => (
+                  <li key={w.id} className="border-b border-hairline pb-2 last:border-b-0 last:pb-0">
+                    <div className="font-medium text-ink-950">{w.title}</div>
+                    <div className="text-faint font-mono">
+                      {w.sourceLabel}
+                      {w.dueDate ? ` · due ${w.dueDate}` : ''}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* Conversation pane */}
+        <div className="lg:col-span-8">
+          <SectionCard
+            title={activeThread ? activeThread.brandName : 'Conversation'}
+            description="Every send is attributed to its actor, appended to the thread, and audited."
+          >
+            {loading ? (
+              <LoadingRows rows={4} label="Loading conversation…" />
+            ) : !activeThread ? (
+              <EmptyStateBlock
+                title="No conversation selected"
+                description="Select a brand or prospect thread on the left to inspect messages."
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                  {activeThread.messages.map((m) => {
+                    const outbound = m.direction === 'outbound';
+                    return (
+                      <div
+                        key={m.id}
+                        className={`flex ${outbound ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[80%] rounded-ds-md border px-3.5 py-2.5 text-ds-label leading-relaxed ${
+                            outbound
+                              ? 'border-hairline-strong bg-surface text-ink-950'
+                              : 'border-hairline bg-surface-raised text-ink-900'
+                          }`}
+                        >
+                          {m.subject && (
+                            <div className="font-semibold text-ink-950 mb-1">{m.subject}</div>
+                          )}
+                          <div className="whitespace-pre-wrap">{m.body}</div>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-ds-micro font-mono text-faint">
+                            <span>{new Date(m.createdAt).toLocaleString()}</span>
+                            <span>· {m.channel}</span>
+                            <span>· {m.sentBy}</span>
+                            {m.requiresHuman && (
+                              <InlineStatus label="Needs human" tone="danger" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {(emailLive || emailSandbox) && (
+                  <div className="pt-4 border-t border-hairline space-y-2.5">
+                    <label className="block text-ds-label">
+                      <span className="text-faint font-medium block mb-1">Subject</span>
+                      <input
+                        type="text"
+                        value={draftSubject}
+                        onChange={(e) => setDraftSubject(e.target.value)}
+                        placeholder="Re: your wholesale enquiry"
+                        className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                      />
+                    </label>
+                    <textarea
+                      value={draftBody}
+                      onChange={(e) => setDraftBody(e.target.value)}
+                      rows={3}
+                      placeholder="Write a reply…"
+                      className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      {sendNote && <span className="text-ds-label text-faint">{sendNote}</span>}
+                      <button
+                        type="button"
+                        disabled={!draftBody.trim() || sending}
+                        onClick={async () => {
+                          if (!draftBody.trim()) return;
+                          setSending(true);
+                          try {
+                            await onSend(activeThread.key, draftSubject, draftBody);
+                            setDraftSubject('');
+                            setDraftBody('');
+                          } finally {
+                            setSending(false);
+                          }
+                        }}
+                        className="ml-auto px-3.5 py-1.5 rounded-ds-sm bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                      >
+                        {emailSandbox ? 'Send (Sandbox)' : 'Send'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </SectionCard>
+        </div>
+      </div>
     </div>
   );
 }

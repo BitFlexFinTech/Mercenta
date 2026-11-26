@@ -1,270 +1,266 @@
-/**
- * §WAVE 3b (2026-11-25) — ADMIN returns tracking (presentation).
- *
- * What it is for: seeing every return across the portfolio, how much of it turned
- * into a deduction, and opening one to its real detail. Recording a return belongs
- * to the channel/brand flow, so this screen claims only what it does.
- */
+import { Boxes, Search } from 'lucide-react';
+import { ConsoleTabs, NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
-  ConsoleHeader,
   ConsoleTable,
-  ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
+  ConsoleHeader,
   SlideOverDrawer,
-  toSemanticTone,
   type ConsoleColumn,
   type MetricItem,
+  type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
-import { deductionStatusPresentation } from '@/lib/statusPresentation';
-import type { BrandReturn, Deduction } from '@/types';
+import type { ReturnTrackingEntry, ReturnTrackingStatus } from '@/types';
 
 export interface AdminReturnRow {
-  ret: BrandReturn;
+  entry: ReturnTrackingEntry;
   brandName: string;
-  deduction?: Deduction;
+  productName: string;
+  quantity?: number;
+  statusLabel: string;
+  statusTone: SemanticTone;
 }
 
 export interface AdminReturnsViewProps {
-  rows: AdminReturnRow[];
+  loading: boolean;
   totalCount: number;
-  brandOptions: { id: string; name: string }[];
-  reasonOptions: string[];
-  brandFilter: string;
-  reasonFilter: string;
-  search: string;
-  unitsReturned: number;
-  openDeductionValue: number;
-  selected: AdminReturnRow | null;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeReason: (value: string) => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (row: AdminReturnRow | null) => void;
+  confirmedCount: number;
+  searchQuery: string;
+  onSearchChange: (q: string) => void;
+  stageFilter: 'all' | ReturnTrackingStatus;
+  onStageFilterChange: (s: 'all' | ReturnTrackingStatus) => void;
+  stats: { received: number; checked: number; forwarded: number; confirmed: number };
+  metrics: MetricItem[];
+  rows: AdminReturnRow[];
+  selectedRow: AdminReturnRow | null;
+  onSelectRow: (id: string | null) => void;
+  onAdvanceStage: (id: string) => void;
+  notice: string | null;
+  warehousePartner: { name: string; address: string; postcode: string; notes: string };
+  stageSteps: { status: ReturnTrackingStatus; label: string; count: number; reachedIndex: number }[];
 }
 
 export function AdminReturnsView({
-  rows,
+  loading,
   totalCount,
-  brandOptions,
-  reasonOptions,
-  brandFilter,
-  reasonFilter,
-  search,
-  unitsReturned,
-  openDeductionValue,
-  selected,
-  isLoading,
-  isError,
-  errorMessage,
-  onRetry,
-  onChangeBrand,
-  onChangeReason,
-  onChangeSearch,
-  onSelect,
+  confirmedCount,
+  searchQuery,
+  onSearchChange,
+  stageFilter,
+  onStageFilterChange,
+  stats,
+  metrics,
+  rows,
+  selectedRow,
+  onSelectRow,
+  onAdvanceStage,
+  notice,
+  warehousePartner,
+  stageSteps,
 }: AdminReturnsViewProps) {
-  const metrics: MetricItem[] = [
-    {
-      id: 'returns',
-      label: 'Returns recorded',
-      value: String(totalCount),
-      context: 'Across the portfolio',
-    },
-    {
-      id: 'units',
-      label: 'Units returned',
-      value: String(unitsReturned),
-      context: 'Sum of recorded quantities',
-    },
-    {
-      id: 'deductions',
-      label: 'Open deduction value',
-      value: formatGbp(openDeductionValue),
-      context: 'Raised against returns',
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <ConsoleHeader title="Returns Warehouse Tracking" description="Loading return tracking queue…" />
+        <LoadingRows rows={5} />
+      </div>
+    );
+  }
 
   const columns: ConsoleColumn<AdminReturnRow>[] = [
     {
       key: 'brand',
       header: 'Brand',
-      mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.brandName}</div>
-          <div className="font-mono text-ds-label text-faint">{row.ret.poNumber}</div>
+      hideOnMobile: true,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
+    },
+    {
+      key: 'return',
+      header: 'Return',
+      render: (r) => (
+        <div>
+          <div className="font-medium text-ink-950">{r.productName}</div>
+          <div className="font-mono text-ds-micro text-faint">
+            {r.entry.returnId} · {r.quantity ?? '?'} units
+          </div>
         </div>
       ),
     },
     {
-      key: 'product',
-      header: 'Product',
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="text-ds-body text-ink-900 truncate">{row.ret.productName}</div>
-          <div className="font-mono text-ds-label text-faint">{row.ret.productSku}</div>
+      key: 'inbound',
+      header: 'Inbound tracking',
+      hideOnMobile: true,
+      render: (r) => (
+        <div>
+          <div className="font-mono text-ds-label text-ink-900">{r.entry.inboundTrackingNumber}</div>
+          <div className="text-ds-micro text-faint">{r.entry.inboundCarrier}</div>
         </div>
       ),
     },
     {
-      key: 'qty',
-      header: 'Units',
-      align: 'right',
-      render: (row) => <span className="tabular-nums">{row.ret.quantity}</span>,
+      key: 'status',
+      header: 'Status',
+      render: (r) => <InlineStatus label={r.statusLabel} tone={r.statusTone} />,
     },
     {
-      key: 'reason',
-      header: 'Reason',
+      key: 'forwarded',
+      header: 'Forwarded',
       hideOnMobile: true,
-      render: (row) => (
-        <span className="text-ds-label text-muted">{row.ret.reason.replace(/_/g, ' ')}</span>
-      ),
+      render: (r) =>
+        r.entry.forwardedTrackingNumber ? (
+          <div>
+            <div className="font-mono text-ds-label text-ink-900">{r.entry.forwardedTrackingNumber}</div>
+            <div className="text-ds-micro text-faint">{r.entry.forwardedCarrier}</div>
+          </div>
+        ) : (
+          <span className="text-quiet">—</span>
+        ),
     },
     {
-      key: 'deduction',
-      header: 'Deduction',
+      key: 'action',
+      header: '',
       align: 'right',
-      render: (row) => {
-        if (!row.deduction) return <span className="text-ds-label text-quiet">—</span>;
-        const pres = deductionStatusPresentation(row.deduction.status);
-        return (
-          <InlineStatus
-            label={formatGbp(row.deduction.amountGbp, 2)}
-            tone={toSemanticTone(pres.tone)}
-            dataStatus={pres.dataStatus}
-          />
-        );
-      },
-    },
-    {
-      key: 'date',
-      header: 'Recorded',
-      align: 'right',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="tabular-nums text-ds-label text-muted">
-          {row.ret.returnDate.slice(0, 10)}
-        </span>
-      ),
+      render: (r) =>
+        r.entry.status !== 'confirmed_by_brand' ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdvanceStage(r.entry.id);
+            }}
+            className="px-2.5 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+          >
+            Advance
+          </button>
+        ) : null,
     },
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Operations"
-        title="Returns tracking"
-        description="Every return across the portfolio, and the deduction it raised."
+        title="Returns Warehouse Tracking"
+        description="Internal forwarding flow — received at warehouse to quality check, forward to brand, and brand receipt confirmation."
+        meta={
+          <>
+            <span className="font-mono tabular-nums">{totalCount} records</span>
+            <span className="font-mono tabular-nums">{confirmedCount} confirmed</span>
+          </>
+        }
       />
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Returns could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
-        />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-<div className="mb-4 flex flex-wrap items-center gap-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search PO, SKU or product"
-              aria-label="Search returns"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
-            />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={reasonFilter}
-              onChange={(event) => onChangeReason(event.target.value)}
-              aria-label="Filter by reason"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All reasons</option>
-              {reasonOptions.map((reason) => (
-                <option key={reason} value={reason}>
-                  {reason.replace(/_/g, ' ')}
-                </option>
-              ))}
-            </select>
-          </div>
+      {notice && <NoticeBanner tone="success" message={notice} />}
 
-          <SectionCard title="Returns" description={`${rows.length} of ${totalCount} shown`}>
+      <MetricStrip items={metrics} columns={4} />
+
+      <ConsoleTabs
+        tabs={[
+          { id: 'all', label: 'All', count: totalCount },
+          { id: 'received_at_warehouse', label: 'Received', count: stats.received },
+          { id: 'quality_checked', label: 'Checked', count: stats.checked },
+          { id: 'forwarded_to_brand', label: 'Forwarded', count: stats.forwarded },
+          { id: 'confirmed_by_brand', label: 'Confirmed', count: stats.confirmed },
+        ]}
+        value={stageFilter}
+        onChange={onStageFilterChange}
+        ariaLabel="Filter returns by stage"
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <SectionCard
+            title="Return queue"
+            description="Open any return entry to inspect forwarding condition or advance its stage."
+            actions={
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-quiet absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder="Search return or tracking…"
+                  aria-label="Search return tracking"
+                  className="pl-8 pr-3 py-1.5 rounded-ds-sm border border-hairline-strong text-ds-label bg-surface-raised focus:outline-none focus:border-accent"
+                />
+              </div>
+            }
+          >
             <ConsoleTable
               rows={rows}
               columns={columns}
-              rowKey={(row) => row.ret.id}
-              onRowClick={(row) => onSelect(row)}
-              emptyTitle="No returns match these filters"
-              emptyDescription="Clear the filters to see the whole portfolio."
+              rowKey={(r) => r.entry.id}
+              selectedKey={selectedRow?.entry.id}
+              onRowClick={(r) => onSelectRow(r.entry.id)}
+              emptyTitle="No matching returns"
+              emptyDescription="Adjust stage filters or search keywords."
             />
           </SectionCard>
-        </>
-      )}
-<SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.ret.productName : ''}
-        subtitle={selected ? `${selected.brandName} · ${selected.ret.poNumber}` : undefined}
-        testId="admin-return-drawer"
+        </div>
+
+        <aside className="space-y-6">
+          <SectionCard title="Warehouse partner">
+            <div className="flex items-center gap-2 text-ds-label font-medium text-ink-950">
+              <Boxes className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+              <span>{warehousePartner.name}</span>
+            </div>
+            <p className="mt-1.5 text-ds-label text-faint">
+              {warehousePartner.address}, {warehousePartner.postcode}
+            </p>
+            <p className="mt-1.5 text-ds-label text-faint">{warehousePartner.notes}</p>
+          </SectionCard>
+
+          <SectionCard title="Forwarding stages">
+            <ul className="space-y-2 text-ds-label">
+              {stageSteps.map((s) => (
+                <li key={s.status} className="flex items-center justify-between">
+                  <span className="text-secondary">{s.label}</span>
+                  <span className="font-mono font-medium text-ink-950">{s.count}</span>
+                </li>
+              ))}
+            </ul>
+          </SectionCard>
+        </aside>
+      </div>
+
+      <SlideOverDrawer
+        open={selectedRow !== null}
+        onClose={() => onSelectRow(null)}
+        title={selectedRow ? selectedRow.entry.returnId : 'Return'}
+        subtitle={selectedRow ? selectedRow.brandName : undefined}
+        testId="return-record-drawer"
+        footer={
+          selectedRow &&
+          selectedRow.entry.status !== 'confirmed_by_brand' && (
+            <button
+              type="button"
+              onClick={() => onAdvanceStage(selectedRow.entry.id)}
+              className="px-3.5 py-2 rounded-ds-md bg-[#C2410C] text-on-dark text-ds-label font-medium hover:bg-[#9A3412]"
+            >
+              Advance stage
+            </button>
+          )
+        }
       >
-        {selected && (
-          <div className="space-y-4">
-            <dl className="grid grid-cols-2 gap-3 text-ds-body">
-              <div>
-                <dt className="text-ds-label text-faint">Units</dt>
-                <dd className="font-medium text-strong tabular-nums">{selected.ret.quantity}</dd>
-              </div>
-              <div>
-                <dt className="text-ds-label text-faint">Reason</dt>
-                <dd className="font-medium text-strong">
-                  {selected.ret.reason.replace(/_/g, ' ')}
-                </dd>
-              </div>
-              <div className="col-span-2">
-                <dt className="text-ds-label text-faint">Recorded</dt>
-                <dd className="font-medium text-strong">{selected.ret.returnDate.slice(0, 10)}</dd>
-              </div>
+        {selectedRow && (
+          <div className="space-y-4 text-ds-label">
+            <InlineStatus label={selectedRow.statusLabel} tone={selectedRow.statusTone} />
+            <dl className="space-y-2 border border-hairline rounded-ds-md p-3">
+              <div className="flex justify-between"><dt className="text-faint">Product</dt><dd>{selectedRow.productName}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Quantity</dt><dd className="font-mono">{selectedRow.quantity ?? '?'}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Received</dt><dd className="font-mono">{selectedRow.entry.receivedAtWarehouse}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Condition</dt><dd>{selectedRow.entry.conditionOnReceipt}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Inbound carrier</dt><dd className="font-mono">{selectedRow.entry.inboundCarrier} · {selectedRow.entry.inboundTrackingNumber}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Forward carrier</dt><dd className="font-mono">{selectedRow.entry.forwardedCarrier ?? '—'} {selectedRow.entry.forwardedTrackingNumber ?? ''}</dd></div>
             </dl>
-
-            <div>
-              <div className="text-ds-label text-faint mb-1">Description</div>
-              <p className="text-ds-body text-ink-800">{selected.ret.description}</p>
-            </div>
-
-            <div>
-              <div className="text-ds-label text-faint mb-1">Linked deduction</div>
-              {selected.deduction ? (
-                <p className="text-ds-body text-ink-800">
-                  {formatGbp(selected.deduction.amountGbp, 2)} ·{' '}
-                  {deductionStatusPresentation(selected.deduction.status).label}
-                </p>
-              ) : (
-                <p className="text-ds-body text-muted">
-                  No deduction was raised against this return.
-                </p>
-              )}
-            </div>
+            {selectedRow.entry.qualityCheckNotes && (
+              <div className="border border-hairline rounded-ds-md p-3">
+                <div className="text-ds-micro uppercase tracking-[0.06em] text-faint mb-1">
+                  Quality check notes
+                </div>
+                <p className="text-ds-label text-secondary">{selectedRow.entry.qualityCheckNotes}</p>
+              </div>
+            )}
           </div>
         )}
       </SlideOverDrawer>

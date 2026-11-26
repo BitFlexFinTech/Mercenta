@@ -1,344 +1,372 @@
-/**
- * §WAVE 3c (2026-11-25) — ADMIN billing (presentation).
- *
- * What it is: oversight of the money across the portfolio — commission accrued,
- * invoiced and paid per brand, the monthly subscription run-rate, and open
- * deductions. There is NO commission or invoice MUTATION in the data layer, so
- * this screen performs none and claims none; review and settlement stay with the
- * finance flows that own them.
- */
 import {
-  ConsoleHeader,
-  ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
+  ConsoleHeader,
   SlideOverDrawer,
-  toSemanticTone,
-  type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
-import { SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
-import { commissionStatusPresentation } from '@/lib/statusPresentation';
-import type { Commission, Deduction, Subscription } from '@/types';
+import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
-export interface AdminCommissionRow {
-  commission: Commission;
+export type BillingFocus = 'all' | 'subscriptions' | 'commissions' | 'deductions';
+
+export interface RemittanceStatementDetail {
   brandName: string;
+  statementNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  grossTotal: number;
+  commissionTotal: number;
+  deductionsTotal: number;
+  netPaid: number;
+  lines: {
+    poNumber: string;
+    grossValue: number;
+    commission: number;
+    deductions: { type: string; amountGbp: number }[];
+    net: number;
+  }[];
 }
 
-export interface AdminSubscriptionRow {
-  subscription: Subscription;
+export interface AdminBillingBrandCard {
+  brandId: string;
   brandName: string;
+  planTier?: string;
+  subStatus?: string;
+  invoiceNumber: string;
+  invoiceSubtotalGbp: number;
+  invoiceNotes: string[];
+  shippingMarginGbp: number;
+  deductionsTotalGbp: number;
+  hasCommissions: boolean;
+  remittance: RemittanceStatementDetail;
 }
 
 export interface AdminBillingViewProps {
-  rows: AdminCommissionRow[];
-  subscriptions: AdminSubscriptionRow[];
-  totalCommissions: number;
-  brandOptions: { id: string; name: string }[];
-  statusOptions: string[];
-  brandFilter: string;
-  statusFilter: string;
-  search: string;
-  accruedValue: number;
-  invoicedValue: number;
-  paidValue: number;
-  monthlyRunRate: number;
-  openDeductionValue: number;
-  selected: AdminCommissionRow | null;
-  selectedDeductions: Deduction[];
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  onRetry: () => void;
-  onChangeBrand: (value: string) => void;
-  onChangeStatus: (value: string) => void;
-  onChangeSearch: (value: string) => void;
-  onSelect: (row: AdminCommissionRow | null) => void;
+  loading: boolean;
+  error: string | null;
+  onRetry?: () => void;
+  stripeLive: boolean;
+  focus: BillingFocus;
+  onFocusChange: (focus: BillingFocus) => void;
+  totalBrands: number;
+  periodInvoicedGbp: number;
+  activeSubscriptionsCount: number;
+  shippingMarginGbp: number;
+  totalDeductionsGbp: number;
+  deductionsPostedCount: number;
+  brands: AdminBillingBrandCard[];
+  onExportCommissionCsv: (brandId: string) => void;
+  selectedStatement: RemittanceStatementDetail | null;
+  onSelectStatement: (stmt: RemittanceStatementDetail | null) => void;
 }
 
 export function AdminBillingView({
-  rows,
-  subscriptions,
-  totalCommissions,
-  brandOptions,
-  statusOptions,
-  brandFilter,
-  statusFilter,
-  search,
-  accruedValue,
-  invoicedValue,
-  paidValue,
-  monthlyRunRate,
-  openDeductionValue,
-  selected,
-  selectedDeductions,
-  isLoading,
-  isError,
-  errorMessage,
+  loading,
+  error,
   onRetry,
-  onChangeBrand,
-  onChangeStatus,
-  onChangeSearch,
-  onSelect,
+  stripeLive,
+  focus,
+  onFocusChange,
+  totalBrands,
+  periodInvoicedGbp,
+  activeSubscriptionsCount,
+  shippingMarginGbp,
+  totalDeductionsGbp,
+  deductionsPostedCount,
+  brands,
+  onExportCommissionCsv,
+  selectedStatement,
+  onSelectStatement,
 }: AdminBillingViewProps) {
   const metrics: MetricItem[] = [
     {
-      id: 'accrued',
-      label: 'Commission accrued',
-      value: formatGbp(accruedValue),
-      context: 'Earned, not yet invoiced',
-      onClick: () => onChangeStatus('accrued'),
-      active: statusFilter === 'accrued',
+      id: 'billing-invoiced',
+      label: 'Invoiced (period)',
+      value: formatGbp(periodInvoicedGbp, 2),
+      context: `${totalBrands} brands · Aug 2026`,
+      active: focus === 'all',
+      onClick: () => onFocusChange('all'),
+      testId: 'billing-metric-invoiced',
     },
     {
-      id: 'invoiced',
-      label: 'Awaiting payment',
-      value: formatGbp(invoicedValue),
-      context: 'Invoiced, not settled',
-      onClick: () => onChangeStatus('invoiced'),
-      active: statusFilter === 'invoiced',
+      id: 'billing-subs',
+      label: 'Active subscriptions',
+      value: String(activeSubscriptionsCount),
+      context: stripeLive ? 'Stripe live' : 'Stripe (Mock) — subscription only',
+      active: focus === 'subscriptions',
+      onClick: () => onFocusChange('subscriptions'),
+      testId: 'billing-metric-subs',
     },
     {
-      id: 'paid',
-      label: 'Settled',
-      value: formatGbp(paidValue),
-      context: 'Paid to Mercenta',
-      onClick: () => onChangeStatus('paid'),
-      active: statusFilter === 'paid',
+      id: 'billing-shipping',
+      label: 'Shipping margin',
+      value: formatGbp(shippingMarginGbp, 2),
+      context: 'Brand-billed price less carrier cost',
+      active: focus === 'commissions',
+      onClick: () => onFocusChange('commissions'),
+      testId: 'billing-metric-shipping',
     },
     {
-      id: 'subscriptions',
-      label: 'Subscription run-rate',
-      value: formatGbp(monthlyRunRate),
-      context: 'Per month, active plans',
+      id: 'billing-deductions',
+      label: 'Deductions',
+      value: formatGbp(totalDeductionsGbp, 2),
+      context: `${deductionsPostedCount} posted`,
+      active: focus === 'deductions',
+      onClick: () => onFocusChange('deductions'),
+      testId: 'billing-metric-deductions',
     },
   ];
 
-  const columns: ConsoleColumn<AdminCommissionRow>[] = [
-    {
-      key: 'brand',
-      header: 'Brand',
-      mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.brandName}</div>
-          <div className="font-mono text-ds-label text-faint">{row.commission.purchaseOrderId}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'poValue',
-      header: 'PO value',
-      align: 'right',
-      render: (row) => (
-        <span className="tabular-nums">{formatGbp(row.commission.poValue)}</span>
-      ),
-    },
-    {
-      key: 'commission',
-      header: 'Commission',
-      align: 'right',
-      render: (row) => (
-        <span className="tabular-nums font-medium text-strong">
-          {formatGbp(row.commission.commissionAmount, 2)}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (row) => {
-        const pres = commissionStatusPresentation(row.commission.status);
-        return (
-          <InlineStatus
-            label={pres.label}
-            tone={toSemanticTone(pres.tone)}
-            dataStatus={pres.dataStatus}
-          />
-        );
-      },
-    },
-    {
-      key: 'created',
-      header: 'Accrued',
-      align: 'right',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="tabular-nums text-ds-label text-muted">
-          {row.commission.createdAt.slice(0, 10)}
-        </span>
-      ),
-    },
-  ];
-return (
-    <div>
+  return (
+    <div className="space-y-6">
       <ConsoleHeader
-        eyebrow="Mercenta · Finance"
-        title="Billing"
-        description="Commission across the portfolio, the subscription run-rate, and what is still open."
+        title="Billing & Remittance"
+        description="Brand subscriptions, commission invoices, and remittance statements. Gross PO value − commission − deductions = net paid per payout period."
+        meta={
+          <>
+            <span className="font-mono">Period 2026-08-01 → 2026-08-31</span>
+            <span className="font-mono">Showing {brands.length} of {totalBrands} brands</span>
+          </>
+        }
       />
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Billing records could not be loaded"
-          message={errorMessage}
-          onRetry={onRetry}
+      {!stripeLive && (
+        <NoticeBanner
+          tone="warning"
+          title="Stripe Mock Mode"
+          message="Subscription IDs are simulated and nothing is billed. Payoneer / Wise are the payout rails; Stripe is never a payout rail."
         />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <MetricStrip items={metrics} columns={4} />
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => onChangeSearch(event.target.value)}
-              placeholder="Search brand or PO"
-              aria-label="Search commission records"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong w-64"
-            />
-            <select
-              value={brandFilter}
-              onChange={(event) => onChangeBrand(event.target.value)}
-              aria-label="Filter by brand"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All brands</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(event) => onChangeStatus(event.target.value)}
-              aria-label="Filter by status"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All statuses</option>
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {commissionStatusPresentation(status as Commission['status']).label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-6">
-            <SectionCard
-              title="Commission"
-              description={`${rows.length} of ${totalCommissions} shown`}
-            >
-              <ConsoleTable
-                rows={rows}
-                columns={columns}
-                rowKey={(row) => row.commission.id}
-                onRowClick={(row) => onSelect(row)}
-                emptyTitle="No commission records match these filters"
-                emptyDescription="Clear the filters to see the whole portfolio."
-              />
-            </SectionCard>
-<SectionCard
-              title="Subscriptions"
-              description="The flat monthly plan each brand is on."
-              testId="admin-subscriptions"
-            >
-              {subscriptions.length === 0 ? (
-                <p className="text-ds-body text-muted">No subscriptions are recorded yet.</p>
-              ) : (
-                <ul className="divide-y divide-hairline-06">
-                  {subscriptions.map((row) => (
-                    <li
-                      key={row.subscription.id}
-                      className="py-2.5 flex items-center justify-between gap-3 text-ds-body"
-                    >
-                      <span className="min-w-0 truncate">
-                        {row.brandName} · {row.subscription.planTier}
-                      </span>
-                      <span className="flex items-center gap-3 shrink-0">
-                        <span className="tabular-nums text-secondary">
-                          {formatGbp(row.subscription.monthlyFee, 2)}/mo
-                        </span>
-                        <InlineStatus
-                          label={row.subscription.status.replace(/_/g, ' ')}
-                          tone={row.subscription.status === 'active' ? 'success' : 'warning'}
-                          dataStatus={row.subscription.status}
-                        />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </SectionCard>
-          </div>
-        </>
       )}
 
+      {error && <ErrorStateBlock message={error} onRetry={onRetry} />}
+
+      <ConsoleTabs
+        tabs={[
+          { id: 'all', label: 'All brands', count: totalBrands },
+          { id: 'subscriptions', label: 'Subscriptions', count: activeSubscriptionsCount },
+          { id: 'commissions', label: 'Commission' },
+          { id: 'deductions', label: 'Deductions', count: deductionsPostedCount },
+        ]}
+        value={focus}
+        onChange={onFocusChange}
+        ariaLabel="Billing focus filters"
+      />
+
+      <MetricStrip items={metrics} loading={loading} columns={4} />
+
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_290px] gap-6">
+        <div className="min-w-0 space-y-6">
+          {loading ? (
+            <LoadingRows rows={6} label="Loading billing records…" />
+          ) : brands.length === 0 ? (
+            <EmptyStateBlock
+              title="No brands match"
+              description="No brands match the selected billing focus filter."
+              actionLabel="Show all brands"
+              onAction={() => onFocusChange('all')}
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {brands.map((b) => (
+                  <div
+                    key={b.brandId}
+                    className="border border-hairline bg-surface-raised rounded-ds-md flex flex-col justify-between"
+                  >
+                    <div className="px-4 py-3 border-b border-hairline flex items-center justify-between gap-2">
+                      <span className="text-ds-body font-semibold text-ink-950 truncate">
+                        {b.brandName}
+                      </span>
+                      {b.planTier && (
+                        <InlineStatus
+                          label={b.planTier}
+                          tone={b.subStatus === 'active' ? 'success' : 'neutral'}
+                        />
+                      )}
+                    </div>
+                    <div className="p-4 space-y-2 text-ds-label">
+                      <div className="flex justify-between">
+                        <span className="text-faint">Invoice ({b.invoiceNumber})</span>
+                        <span className="font-mono font-medium text-ink-950">
+                          {formatGbp(b.invoiceSubtotalGbp, 2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-faint">Shipping margin</span>
+                        <span
+                          className={`font-mono ${
+                            b.shippingMarginGbp >= 0 ? 'text-state-success' : 'text-state-danger'
+                          }`}
+                        >
+                          {formatGbp(b.shippingMarginGbp, 2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-faint">Deductions</span>
+                        <span className="font-mono text-state-danger">
+                          {formatGbp(b.deductionsTotalGbp, 2)}
+                        </span>
+                      </div>
+                      {b.invoiceNotes.length > 0 && (
+                        <p className="text-ds-micro text-faint pt-1">{b.invoiceNotes.join(' · ')}</p>
+                      )}
+                    </div>
+                    <div className="px-4 py-2.5 border-t border-hairline bg-canvas-40 flex justify-end">
+                      <button
+                        type="button"
+                        disabled={!b.hasCommissions}
+                        onClick={() => onExportCommissionCsv(b.brandId)}
+                        className="text-ds-label font-medium text-secondary hover:text-ink-950 disabled:opacity-40"
+                      >
+                        Export CSV
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <SectionCard
+                title="Remittance statements — current period"
+                description="Gross PO value − commission − deductions = net paid per payout period."
+              >
+                <div className="divide-y divide-hairline-06">
+                  {brands.map((b) => {
+                    const empty = b.remittance.lines.length === 0;
+                    return (
+                      <div
+                        key={b.brandId}
+                        className="py-3 flex flex-wrap items-center justify-between gap-3"
+                      >
+                        <div>
+                          <div className="text-ds-label font-medium text-ink-950">{b.brandName}</div>
+                          <div className="text-ds-label font-mono text-faint">
+                            {b.remittance.statementNumber} · net paid{' '}
+                            <span className={empty ? 'text-quiet' : 'text-state-success font-semibold'}>
+                              {formatGbp(b.remittance.netPaid, 2)}
+                            </span>
+                            {empty ? ' · no settled POs' : ` · ${b.remittance.lines.length} settled PO(s)`}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={empty}
+                          onClick={() => onSelectStatement(b.remittance)}
+                          className="text-ds-label font-medium text-[#C2410C] hover:underline disabled:opacity-40"
+                        >
+                          View statement
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </SectionCard>
+            </>
+          )}
+        </div>
+
+        <aside className="space-y-4">
+          <SectionCard title="Period summary">
+            <dl className="space-y-2 text-ds-label">
+              <div className="flex justify-between">
+                <dt className="text-faint">Brands</dt>
+                <dd className="font-mono text-ink-950">{totalBrands}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-faint">Invoiced</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(periodInvoicedGbp, 2)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-faint">Shipping margin</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(shippingMarginGbp, 2)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-faint">Deductions</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(totalDeductionsGbp, 2)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-faint">Active subscriptions</dt>
+                <dd className="font-mono text-ink-950">{activeSubscriptionsCount}</dd>
+              </div>
+            </dl>
+          </SectionCard>
+
+          <SectionCard title="Payout rails">
+            <p className="text-ds-label text-faint leading-relaxed">
+              Payoneer is the default payout rail and Wise is secondary. Stripe bills flat
+              subscriptions only. No payout leaves Mercenta without explicit human approval.
+            </p>
+          </SectionCard>
+        </aside>
+      </div>
+
       <SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.commission.purchaseOrderId : ''}
-        subtitle={selected ? selected.brandName : undefined}
-        testId="admin-billing-drawer"
+        open={Boolean(selectedStatement)}
+        onClose={() => onSelectStatement(null)}
+        title={selectedStatement ? `Statement ${selectedStatement.statementNumber}` : 'Remittance'}
+        subtitle={
+          selectedStatement
+            ? `${selectedStatement.brandName} · ${selectedStatement.periodStart} → ${selectedStatement.periodEnd}`
+            : undefined
+        }
       >
-        {selected && (
-          <div className="space-y-4">
-            <dl className="grid grid-cols-2 gap-3 text-ds-body">
+        {selectedStatement && (
+          <div className="space-y-5 text-ds-label">
+            <dl className="grid grid-cols-2 gap-3 border border-hairline rounded-ds-sm p-4 bg-surface">
               <div>
-                <dt className="text-ds-label text-faint">PO value</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {formatGbp(selected.commission.poValue, 2)}
+                <dt className="text-ds-micro uppercase text-faint">Gross PO value</dt>
+                <dd className="font-mono font-medium text-ink-950">
+                  {formatGbp(selectedStatement.grossTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-faint">Commission</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {formatGbp(selected.commission.commissionAmount, 2)}
+                <dt className="text-ds-micro uppercase text-faint">Commission</dt>
+                <dd className="font-mono text-ink-800">
+                  −{formatGbp(selectedStatement.commissionTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-faint">Rate applied</dt>
-                <dd className="font-medium text-strong tabular-nums">
-                  {(selected.commission.commissionRate * 100).toFixed(2)}%
+                <dt className="text-ds-micro uppercase text-faint">Deductions</dt>
+                <dd className="font-mono text-state-danger">
+                  −{formatGbp(selectedStatement.deductionsTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-ds-label text-faint">Accrued</dt>
-                <dd className="font-medium text-strong">
-                  {selected.commission.createdAt.slice(0, 10)}
+                <dt className="text-ds-micro uppercase text-faint">Net paid</dt>
+                <dd className="font-mono font-semibold text-state-success">
+                  {formatGbp(selectedStatement.netPaid, 2)}
                 </dd>
               </div>
             </dl>
 
-            <div>
-              <div className="text-ds-label text-faint mb-1">Deductions on this order</div>
-              {selectedDeductions.length === 0 ? (
-                <p className="text-ds-body text-muted">
-                  No deductions were raised on this order.
-                </p>
-              ) : (
-                <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
-                  {selectedDeductions.map((deduction) => (
-                    <li
-                      key={deduction.id}
-                      className="px-3 py-2 flex items-center justify-between gap-3 text-ds-body"
-                    >
-                      <span className="min-w-0 truncate">
-                        {deduction.reason} · {deduction.status}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-ink-950">Settled PO breakdown</h3>
+              <ul className="divide-y divide-hairline-06 border border-hairline rounded-ds-sm">
+                {selectedStatement.lines.map((line) => (
+                  <li key={line.poNumber} className="p-3 space-y-1">
+                    <div className="flex justify-between font-mono text-ds-label">
+                      <span className="font-semibold text-ink-950">{line.poNumber}</span>
+                      <span className="font-semibold text-state-success">
+                        Net {formatGbp(line.net, 2)}
                       </span>
-                      <span className="tabular-nums shrink-0">
-                        {formatGbp(deduction.amountGbp, 2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                    </div>
+                    <div className="flex justify-between text-ds-label text-faint font-mono">
+                      <span>Gross {formatGbp(line.grossValue, 2)}</span>
+                      <span>Commission −{formatGbp(line.commission, 2)}</span>
+                    </div>
+                    {line.deductions.length > 0 && (
+                      <div className="text-ds-micro text-state-danger font-mono">
+                        Deductions:{' '}
+                        {line.deductions
+                          .map((d) => `${d.type.replace(/_/g, ' ')} −${formatGbp(d.amountGbp, 2)}`)
+                          .join(', ')}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         )}
