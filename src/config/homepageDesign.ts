@@ -20,8 +20,11 @@
  * changes it from Super Admin with no code change, rebuild or redeploy, and it
  * survives sessions and restarts.
  *
- * §INITIAL SELECTION — OWNER DECISION (fixed, 2026-11-19): Design A (Monolith)
- * is the default public homepage. This is not an agent's preference.
+ * §INITIAL SELECTION — OWNER DECISION (2026-11-19, SUPERSEDED 2026-11-27):
+ * Design A (Monolith) was the default public homepage. On 2026-11-27 the Owner
+ * stated plainly, in their own words: *"the default homepage should be E —
+ * Concept 3"*. That is the current decision and it wins over the 2026-11-19 one.
+ * This is not an agent's preference, in either direction.
  */
 
 import {
@@ -35,9 +38,10 @@ import { APPROVED_CATEGORIES } from '@/types';
  * The supplied homepage directions.
  *
  * §BATCH 3 (2026-11-21) — `e-concept` is the approved Concept 3 direction,
- * added ADDITIVELY. It does not replace A–D: the owner's fixed decision that
- * Design A (Monolith) is the published default is unchanged, and E is selected
- * in the Super Admin Homepage Editor exactly like the others.
+ * added ADDITIVELY. It did not replace A–D, and at the time A remained the
+ * default. §OWNER DECISION 2026-11-27 turned that round: E is now the default
+ * (see `DEFAULT_HOMEPAGE_DESIGN` below); A–D stay selectable in the Super Admin
+ * Homepage Editor exactly like before.
  */
 export type HomepageDesignId =
   | 'a-monolith'
@@ -65,41 +69,36 @@ export const HOMEPAGE_DESIGN_ORDER: readonly HomepageDesignId[] = [
 ];
 
 /**
- * §RESTORED 2026-11-25 — THE DEFAULT IS A, AND THE CLAIM THAT SWITCHED IT IS WITHDRAWN.
+ * §OWNER DECISION 2026-11-27 — THE DEFAULT PUBLIC HOMEPAGE IS NOW E (CONCEPT 3).
  *
- * The working tree carried an edit setting this to `'e-concept'` under a one-line
- * comment asserting *"§OWNER DECISION — Lovable Concept 3 (e-concept) is the initial
- * public homepage"*. No such decision is recorded anywhere in this repository, and the
- * edit CONTRADICTED the decision that IS recorded — three times, dated, and in this
- * very file:
+ * The Owner said, verbatim: *"the default homepage should be E — Concept 3"*.
  *
- *   · the header above — "§INITIAL SELECTION — OWNER DECISION (fixed, 2026-11-19):
- *     Design A (Monolith) is the default public homepage", and "This is not an agent's
- *     preference";
- *   · the §BATCH 3 note above — "the owner's fixed decision that Design A (Monolith) is
- *     the published default is unchanged";
- *   · Design A's own metadata below — "…The default."
- * and outside this file by `e2e/homepage-designs.spec.ts` ("A — Monolith is the
- * published default on first load", which FAILED with the tree as it stood) and by
- * `scripts/validate-e6-brand-surfaces.mjs` ("NOTHING ELSE MOVES. Design A remains the
- * published default.").
+ * WHY THIS IS THE ASSISTANT'S TO CHANGE NOW, AND WAS NOT BEFORE. Until today the
+ * recorded decision was Design A (2026-11-19), and a working-tree edit that
+ * switched it to E was restored because no decision existed behind it — swapping
+ * the PUBLIC FRONT PAGE is never an assistant's initiative. This note is that
+ * decision, in the Owner's own words and dated: the authority now exists, so the
+ * one-line change and its describers are made together.
  *
- * An unattributed comment does not overrule five recorded sources, and swapping the
- * PUBLIC FRONT PAGE is not a change an assistant may make on its own initiative. The
- * default is therefore restored. `e-concept` keeps its place in
- * `HOMEPAGE_DESIGN_ORDER`, is fully selectable in the Super Admin Homepage Editor
- * exactly like the others, and if the Owner DOES want E as the front page it is a
- * one-line change plus the four describers named above — put to the Owner, never
- * assumed on their behalf.
+ * The four describers this file itself named have all been repointed in the same
+ * change, so no source still claims A is the default:
+ *   · this file's header and §BATCH 3 note — record A as SUPERSEDED;
+ *   · `src/config/homepageDesign.ts` Design A metadata — "The default." removed;
+ *   · `e2e/homepage-designs.spec.ts` — now asserts E on first load;
+ *   · `scripts/validate-e6-brand-surfaces.mjs` — the "Design A remains the
+ *     published default" note now states E, per the same decision.
+ *
+ * A–D remain fully selectable in the Super Admin Homepage Editor; this changes
+ * only which design a visitor sees first. Reverting is the same one line.
  */
-export const DEFAULT_HOMEPAGE_DESIGN: HomepageDesignId = 'a-monolith';
+export const DEFAULT_HOMEPAGE_DESIGN: HomepageDesignId = 'e-concept';
 
 export const HOMEPAGE_DESIGNS: Record<HomepageDesignId, HomepageDesignMeta> = {
   'a-monolith': {
     id: 'a-monolith',
     label: 'A — Monolith',
     description:
-      'Restrained and premium: a thin orange rule, generous space, the tracker set directly into the hero. The default.',
+      'Restrained and premium: a thin orange rule, generous space, the tracker set directly into the hero.',
     source: 'A-Monolith-dark.html / A-Monolith-light.html',
   },
   'b-grid': {
@@ -127,7 +126,7 @@ export const HOMEPAGE_DESIGNS: Record<HomepageDesignId, HomepageDesignMeta> = {
     id: 'e-concept',
     label: 'E — Concept 3',
     description:
-      'The approved Concept 3 direction: a 12-column hero split with the shipment tracker in the right-hand column, a construction grid, four modular tiles and a five-stage journey on a sticky rail.',
+      'The approved Concept 3 direction: a 12-column hero split with the shipment tracker in the right-hand column, a construction grid, four modular tiles and a five-stage journey on a sticky rail. The published default (owner decision, 2026-11-27).',
     source: 'Concept3.tsx (mercenta-market-entry-main)',
   },
 };

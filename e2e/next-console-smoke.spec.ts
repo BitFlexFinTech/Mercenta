@@ -297,7 +297,12 @@ test('the BWS and Talent Commerce surfaces render their own portfolio, honestly'
   expect(pageErrors).toEqual([]);
 });
 
-test('default: the existing application still renders, not the new console', async ({ page }) => {
+/* §OWNER DECISION 2026-11-27 — the console is the default for a SIGNED-IN session,
+   while a visitor without one still gets the marketing homepage. This asserts the
+   visitor case (and that the entry button exists), which is the half that must not
+   regress; the signed-in half is proved by the brand/admin tests above, which reach
+   the console WITHOUT `?console=next` now that it is the default. */
+test('a visitor without a session still gets the marketing homepage, and the console entry point', async ({ page }) => {
   const pageErrors = watchPageErrors(page);
   await page.goto('/');
 

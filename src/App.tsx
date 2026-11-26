@@ -36,13 +36,32 @@ const FALLBACK = (
 
 type ConsoleMode = 'legacy' | 'next' | 'preview';
 
-/** Reads the console mode from the URL, so a specific console can be linked. */
+/**
+ * Reads the console mode from the URL, so a specific console can be linked.
+ *
+ * §OWNER DECISION 2026-11-27 — THE NEW CONSOLE IS THE DEFAULT.
+ * "i should be able to run npm run dev and see the new UI from the homepage."
+ *
+ * `?console=legacy` keeps the old application reachable; `?preview=1` keeps the
+ * offline harness reachable. Everything else opens the new console.
+ *
+ * The PUBLIC pages are the one exception, handled in `AppContent` below: an
+ * anonymous visitor must still see the marketing homepage (now Design E), not a
+ * staff workspace — a visitor has no session, so the console would show them
+ * `core_brand` with nothing in it.
+ */
 function readConsoleMode(): ConsoleMode {
-  if (typeof window === 'undefined') return 'legacy';
+  if (typeof window === 'undefined') return 'next';
   const query = new URLSearchParams(window.location.search);
   if (query.get('preview') === '1') return 'preview';
-  if (query.get('console') === 'next') return 'next';
-  return 'legacy';
+  if (query.get('console') === 'legacy') return 'legacy';
+  return 'next';
+}
+
+/** True when the address asked for the console EXPLICITLY (`?console=next`). */
+function consoleWasRequested(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('console') === 'next';
 }
 
 function AppContent() {
@@ -56,6 +75,19 @@ function AppContent() {
    */
   useCanonicalQuerySync();
   const [consoleMode, setConsoleMode] = useState<ConsoleMode>(readConsoleMode);
+  /**
+   * §OWNER DECISION 2026-11-27 — a session sees the new console by DEFAULT, but a
+   * visitor without a session still gets the marketing homepage. `consoleRequested`
+   * is how the "Open new console" button (and an explicit `?console=next`) gets a
+   * PUBLIC page past that guard, so the button is never a dead control.
+   */
+  const [consoleRequested, setConsoleRequested] = useState(consoleWasRequested);
+  const openConsole = () => {
+    setConsoleRequested(true);
+    setConsoleMode('next');
+  };
+  const isPublicEntry = environment === 'home' || environment === 'login';
+  const showConsole = consoleMode === 'next' && (!isPublicEntry || consoleRequested);
 
   if (consoleMode === 'preview') {
     return (
@@ -68,7 +100,7 @@ function AppContent() {
     );
   }
 
-  if (consoleMode === 'next') {
+  if (showConsole) {
     return (
       <>
         <RouteMetadata />
@@ -103,15 +135,12 @@ function AppContent() {
            only remaining case. No unreachable fourth branch is kept. */
         <Suspense fallback={FALLBACK}><AdminShell /></Suspense>
       )}
-      {/* §NEW CONSOLE SWITCH (temporary) — the entry point to `src/next/` while it
-          is still incomplete. Removed when the new console becomes the default.
-          §WAVE 3l — repointed off the raw palette onto the declared ladder
-          (`bg-surface` · `text-strong` · `border-hairline` · `hover:bg-surface-hover`),
-          so the button follows the chosen appearance instead of ignoring it. It was the
-          last literal-white site in the application surface. */}
+      {/* §OWNER DECISION 2026-11-27 — this entry point is no longer "temporary":
+          the console is the default for a signed-in session, and this button is
+          what lets a PUBLIC visitor reach it from the marketing homepage. */}
       <button
         type="button"
-        onClick={() => setConsoleMode('next')}
+        onClick={openConsole}
         className="fixed bottom-4 right-4 z-50 px-3 py-2 text-ds-label font-medium rounded-ds-md border border-hairline bg-surface text-strong shadow-ds-subtle hover:bg-surface-hover"
       >
         Open new console

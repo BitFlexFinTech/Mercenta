@@ -130,10 +130,12 @@ test.describe('§BRAND REDESIGN — homepage designs render in the real applicat
     });
   }
 
-  test('A — Monolith is the published default on first load', async ({ page }) => {
+  test('E — Concept 3 is the published default on first load', async ({ page }) => {
     await page.goto('/');
     const hero = page.locator('[data-testid="home-hero"]').first();
     await expect(hero).toBeVisible({ timeout: 8000 });
-    await expect(hero).toHaveAttribute('data-design', 'a-monolith');
+    /* §OWNER DECISION 2026-11-27 — the front page is E now, not A. Repointed in the
+       same change as the default, so this gate proves the decision took effect. */
+    await expect(hero).toHaveAttribute('data-design', 'e-concept');
   });
 });

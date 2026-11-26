@@ -4842,7 +4842,9 @@ const BRAND_REDESIGN_SCOPE = new Set([
    *   These are the ACTUAL ORIGINAL SOURCE FILES, not recreations. They are declared
    *   in full so the gate cannot be used to move unrelated files.
    *
-   * NOTHING ELSE MOVES. Design A remains the published default.
+   * NOTHING ELSE MOVES. §OWNER DECISION 2026-11-27 — the published default is now
+   * Design E (Concept 3), not A; A–D remain selectable. Recorded here because this
+   * note asserted A and would otherwise be a stale claim about the product.
    */
   /**
    * §WAVE 2 (2026-11-25) — THE AI STUDIO CONSOLE PORT'S DECLARED SURFACE.
