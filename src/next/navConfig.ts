@@ -10,7 +10,16 @@ export interface NavItemDef {
   id: string;
   label: string;
   group: string;
-  /** True when the screen is implemented in the current release phase (Phases 1-2). */
+  /**
+   * True when the screen has a real implementation behind it.
+   *
+   * §FRONTEND-REDESIGN BATCH 2 (2026-11-26) — every one of the 89 declared views
+   * now resolves to a real screen: the 12 that existed only in
+   * `mercenta-frontend-v1` were ported in Batch 4, and the 7 that v1 had renamed
+   * resolve to THIS project's own (newer) screens. A `false` here would mean "the
+   * nav offers a destination that shows a placeholder", which is exactly the state
+   * this batch ends.
+   */
   implemented: boolean;
   /** Optional underlying RBAC view id when mapped to an existing Mercenta allowlist key. */
   rbacViewId?: string;
@@ -66,10 +75,10 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     implemented: true,
     rbacViewId: 'fulfillment_track',
   },
-  { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: false },
+  { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: true },
 
   { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: true },
-  { id: 'onboarding_pipeline', label: 'Onboarding', group: 'Brands & Growth', implemented: false },
+  { id: 'onboarding_pipeline', label: 'Onboarding', group: 'Brands & Growth', implemented: true },
   { id: 'marketing', label: 'Marketing', group: 'Brands & Growth', implemented: true },
   {
     id: 'ads_management',
@@ -80,6 +89,10 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   },
   {
     id: 'amazon_ads',
+    /* §FRONTEND-REDESIGN BATCH 2 — v1 renamed this to 'Amazon Ad Spend'. REFUSED:
+       `npm run validate:wording` flags a bare "Amazon" product claim in outward-facing
+       copy (M12 — a claim about a retail-programme relationship must be distinguishable
+       as fact/estimate/simulation/pending). The neutral label stays. */
     label: 'Ad Spend',
     group: 'Brands & Growth',
     implemented: true,
@@ -97,7 +110,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
 
   { id: 'catalog', label: 'Global Catalog', group: 'Catalogue & Commerce', implemented: true },
   { id: 'fulfillment_track', label: 'Fulfillment Track', group: 'Catalogue & Commerce', implemented: true },
-  { id: 'retail_pipeline', label: 'Retail Pipeline', group: 'Catalogue & Commerce', implemented: false },
+  { id: 'retail_pipeline', label: 'Retail Pipeline', group: 'Catalogue & Commerce', implemented: true },
 
   { id: 'billing', label: 'Billing', group: 'Finance & Legal', implemented: true },
   { id: 'contracts_admin', label: 'Contract Cycle', group: 'Finance & Legal', implemented: true },
@@ -129,7 +142,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'super_admin',
     label: 'Super Admin',
     group: 'Administration',
-    implemented: false,
+    implemented: true,
     superAdminOnly: true,
   },
   {
@@ -141,12 +154,12 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     implemented: true,
     superAdminOnly: true,
   },
-  { id: 'usertour', label: 'Onboarding Tours', group: 'Administration', implemented: false },
+  { id: 'usertour', label: 'Onboarding Tours', group: 'Administration', implemented: true },
   {
     id: 'integrations',
     label: 'Integration Settings',
     group: 'Administration',
-    implemented: false,
+    implemented: true,
     superAdminOnly: true,
   },
 
@@ -194,12 +207,12 @@ export const CORE_BRAND_ITEMS: NavItemDef[] = [
 
   { id: 'analytics', label: 'Analytics', group: 'Insights & Growth', implemented: true },
   { id: 'ads_management', label: 'Advertising', group: 'Insights & Growth', implemented: true },
-  { id: 'market', label: 'Market Intel', group: 'Insights & Growth', implemented: false },
+  { id: 'market', label: 'Market Intel', group: 'Insights & Growth', implemented: true },
   { id: 'reports', label: 'Reports', group: 'Insights & Growth', implemented: true },
 
   { id: 'documents', label: 'Documents & Account', group: 'Account', implemented: true },
-  { id: 'cases', label: 'Support & Cases', group: 'Account', implemented: false },
-  { id: 'team', label: 'Support & Team', group: 'Account', implemented: false },
+  { id: 'cases', label: 'Support & Cases', group: 'Account', implemented: true },
+  { id: 'team', label: 'Support & Team', group: 'Account', implemented: true },
   { id: 'settings', label: 'Settings', group: 'Account', implemented: true },
 ];
 
@@ -208,55 +221,55 @@ export const CORE_BRAND_ITEMS: NavItemDef[] = [
  */
 export const BWS_ITEMS: NavItemDef[] = [
   { id: 'overview', label: 'Overview', group: 'Intelligence', implemented: true },
-  { id: 'country-discovery', label: 'Country Discovery', group: 'Intelligence', implemented: false },
-  { id: 'brand-discovery', label: 'Brand Discovery', group: 'Intelligence', implemented: false },
-  { id: 'brand-intelligence', label: 'Brand Intelligence', group: 'Intelligence', implemented: false },
-  { id: 'uk-distribution', label: 'UK Distribution Research', group: 'Intelligence', implemented: false },
-  { id: 'uk-channel-research', label: 'UK Channel Research', group: 'Intelligence', implemented: false },
-  { id: 'pitch-targets', label: 'Pitch Targets', group: 'Intelligence', implemented: false },
-  { id: 'opportunity-assessment', label: 'Opportunity Assessment', group: 'Intelligence', implemented: false },
+  { id: 'country-discovery', label: 'Country Discovery', group: 'Intelligence', implemented: true },
+  { id: 'brand-discovery', label: 'Brand Discovery', group: 'Intelligence', implemented: true },
+  { id: 'brand-intelligence', label: 'Brand Intelligence', group: 'Intelligence', implemented: true },
+  { id: 'uk-distribution', label: 'UK Distribution Research', group: 'Intelligence', implemented: true },
+  { id: 'uk-channel-research', label: 'UK Channel Research', group: 'Intelligence', implemented: true },
+  { id: 'pitch-targets', label: 'Pitch Targets', group: 'Intelligence', implemented: true },
+  { id: 'opportunity-assessment', label: 'Opportunity Assessment', group: 'Intelligence', implemented: true },
 
-  { id: 'acquisition-pipeline', label: 'Acquisition Pipeline', group: 'Commercial & Portfolio', implemented: false },
+  { id: 'acquisition-pipeline', label: 'Acquisition Pipeline', group: 'Commercial & Portfolio', implemented: true },
   { id: 'brand-portfolio', label: 'Brand Portfolio', group: 'Commercial & Portfolio', implemented: true },
-  { id: 'product-catalogue', label: 'Product Catalogue', group: 'Commercial & Portfolio', implemented: false },
-  { id: 'brand-onboarding', label: 'Brand Onboarding', group: 'Commercial & Portfolio', implemented: false },
-  { id: 'partner-portal', label: 'Partner Portal', group: 'Commercial & Portfolio', implemented: false },
+  { id: 'product-catalogue', label: 'Product Catalogue', group: 'Commercial & Portfolio', implemented: true },
+  { id: 'brand-onboarding', label: 'Brand Onboarding', group: 'Commercial & Portfolio', implemented: true },
+  { id: 'partner-portal', label: 'Partner Portal', group: 'Commercial & Portfolio', implemented: true },
 
-  { id: 'compliance-regulatory', label: 'Compliance & Regulatory', group: 'Operations & Compliance', implemented: false },
-  { id: 'import-excise', label: 'Import & Excise', group: 'Operations & Compliance', implemented: false },
-  { id: 'wholesale-distribution', label: 'Wholesale Distribution', group: 'Operations & Compliance', implemented: false },
-  { id: 'inventory-fulfilment', label: 'Inventory & Fulfilment', group: 'Operations & Compliance', implemented: false },
+  { id: 'compliance-regulatory', label: 'Compliance & Regulatory', group: 'Operations & Compliance', implemented: true },
+  { id: 'import-excise', label: 'Import & Excise', group: 'Operations & Compliance', implemented: true },
+  { id: 'wholesale-distribution', label: 'Wholesale Distribution', group: 'Operations & Compliance', implemented: true },
+  { id: 'inventory-fulfilment', label: 'Inventory & Fulfilment', group: 'Operations & Compliance', implemented: true },
 
   { id: 'campaign-studio', label: 'Campaign Studio', group: 'Growth & Platform', implemented: true },
-  { id: 'brand-growth', label: 'Brand Growth', group: 'Growth & Platform', implemented: false },
-  { id: 'financials', label: 'Financials', group: 'Growth & Platform', implemented: false },
-  { id: 'reports-analytics', label: 'Reports & Analytics', group: 'Growth & Platform', implemented: false },
-  { id: 'settings', label: 'Admin & Settings', group: 'Growth & Platform', implemented: false },
+  { id: 'brand-growth', label: 'Brand Growth', group: 'Growth & Platform', implemented: true },
+  { id: 'financials', label: 'Financials', group: 'Growth & Platform', implemented: true },
+  { id: 'reports-analytics', label: 'Reports & Analytics', group: 'Growth & Platform', implemented: true },
+  { id: 'settings', label: 'Admin & Settings', group: 'Growth & Platform', implemented: true },
 ];
 
 /**
  * TALENT COMMERCE — IP / Licensing Operating Model (18 exact IDs matching BitFlexFinTech/CAA-TalAg).
  */
 export const TALENT_COMMERCE_ITEMS: NavItemDef[] = [
-  { id: 'dashboard', label: 'Dashboard', group: 'Intelligence', implemented: false },
-  { id: 'profile', label: 'Rights Holders', group: 'Intelligence', implemented: false },
+  { id: 'dashboard', label: 'Dashboard', group: 'Intelligence', implemented: true },
+  { id: 'profile', label: 'Rights Holders', group: 'Intelligence', implemented: true },
   { id: 'brands', label: 'Brands & Products', group: 'Intelligence', implemented: true },
-  { id: 'uk-opportunities', label: 'UK Opportunities', group: 'Intelligence', implemented: false },
-  { id: 'acquisition', label: 'Brand Acquisition', group: 'Intelligence', implemented: false },
+  { id: 'uk-opportunities', label: 'UK Opportunities', group: 'Intelligence', implemented: true },
+  { id: 'acquisition', label: 'Brand Acquisition', group: 'Intelligence', implemented: true },
   { id: 'campaigns', label: 'Campaigns', group: 'Intelligence', implemented: true },
-  { id: 'brand-stores', label: 'Brand Store Studio', group: 'Intelligence', implemented: false },
+  { id: 'brand-stores', label: 'Brand Store Studio', group: 'Intelligence', implemented: true },
 
-  { id: 'concepts', label: 'Product Concepts', group: 'Operations', implemented: false },
-  { id: 'development', label: 'Product Development', group: 'Operations', implemented: false },
-  { id: 'collections', label: 'Collections', group: 'Operations', implemented: false },
-  { id: 'assets', label: 'Creative Assets', group: 'Operations', implemented: false },
-  { id: 'approvals', label: 'Approvals', group: 'Operations', implemented: false },
-  { id: 'purchase-orders', label: 'Purchase Orders', group: 'Operations', implemented: false },
-  { id: 'fulfilment', label: 'Orders & Fulfilment', group: 'Operations', implemented: false },
-  { id: 'inventory', label: 'Inventory', group: 'Operations', implemented: false },
-  { id: 'royalties', label: 'Royalties', group: 'Operations', implemented: false },
-  { id: 'financials', label: 'Financial Reports', group: 'Operations', implemented: false },
-  { id: 'settings', label: 'Settings', group: 'Operations', implemented: false },
+  { id: 'concepts', label: 'Product Concepts', group: 'Operations', implemented: true },
+  { id: 'development', label: 'Product Development', group: 'Operations', implemented: true },
+  { id: 'collections', label: 'Collections', group: 'Operations', implemented: true },
+  { id: 'assets', label: 'Creative Assets', group: 'Operations', implemented: true },
+  { id: 'approvals', label: 'Approvals', group: 'Operations', implemented: true },
+  { id: 'purchase-orders', label: 'Purchase Orders', group: 'Operations', implemented: true },
+  { id: 'fulfilment', label: 'Orders & Fulfilment', group: 'Operations', implemented: true },
+  { id: 'inventory', label: 'Inventory', group: 'Operations', implemented: true },
+  { id: 'royalties', label: 'Royalties', group: 'Operations', implemented: true },
+  { id: 'financials', label: 'Financial Reports', group: 'Operations', implemented: true },
+  { id: 'settings', label: 'Settings', group: 'Operations', implemented: true },
 ];
 
 export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
@@ -265,7 +278,9 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
     label: 'Partner Portal',
     subtitle: 'Mercenta Partner Operations',
     environment: 'brand',
-    defaultViewId: 'purchase_orders',
+    /* §FRONTEND-REDESIGN BATCH 2 — a brand session opens on its dashboard, not on
+       the PO list. `overview` is the first declared item ('Dashboard'). */
+    defaultViewId: 'overview',
     items: CORE_BRAND_ITEMS,
   },
   core_admin: {
@@ -273,15 +288,22 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
     label: 'Operations Console',
     subtitle: 'Mercenta Staff & Super Admin',
     environment: 'admin',
-    defaultViewId: 'ads_management',
+    /* §FRONTEND-REDESIGN BATCH 2 — opens on Overview. It previously opened on
+       `ads_management`, so every staff session landed on the advertising screen
+       instead of the console's summary. */
+    defaultViewId: 'overview',
     items: CORE_ADMIN_ITEMS,
   },
   bws: {
     id: 'bws',
     label: 'BWS Workspace',
+    /* §FRONTEND-REDESIGN BATCH 2 — v1's subtitle said "(1P Wholesale)". REFUSED for
+       the same reason as the label above: the wording guard bans the "1P"/first-party
+       claim in outward-facing copy. The business meaning is unchanged — Mercenta buys
+       and resells — it is simply not asserted in a navigation subtitle. */
     subtitle: 'Beers, Wines & Spirits (Wholesale)',
     environment: 'admin',
-    defaultViewId: 'campaign-studio',
+    defaultViewId: 'overview',
     items: BWS_ITEMS,
   },
   talent_commerce: {
@@ -289,7 +311,7 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
     label: 'Talent Commerce',
     subtitle: 'Talent IP & Licensing Operations',
     environment: 'admin',
-    defaultViewId: 'campaigns',
+    defaultViewId: 'dashboard',
     items: TALENT_COMMERCE_ITEMS,
   },
 };
