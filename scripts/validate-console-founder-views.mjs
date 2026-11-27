@@ -75,7 +75,7 @@ for (const v of VIEWS) {
   test(`A2 ${v.id} is still super-admin only`, /superAdminOnly:\s*true/.test(body));
   test(
     `B1 the shell mounts a screen for ${v.id}`,
-    new RegExp(`activeViewId === '${v.id}'`).test(shell) &&
+    new RegExp(`(?:activeViewId === |case )'${v.id}'`).test(shell) &&
       shell.includes(v.screen.split('/').pop().replace('.tsx', '')),
     v.screen.split('/').pop()
   );

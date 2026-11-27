@@ -371,7 +371,7 @@ export function TalentWorkspaceScreen({
       ukStates={ukStates}
       brandValueChart={brandValueChart}
       integrationStatuses={integrationStatuses}
-      actingStaffName={actingStaff?.name ?? 'Mercenta Operator'}
+      actingStaffName={actingStaff?.name ?? 'Founder / Super Admin'}
       statusMessage={statusMessage}
       onOutreachAction={async (prospectId, action) => {
         const rel = getRelationshipContext(prospectId);

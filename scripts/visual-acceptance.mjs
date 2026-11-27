@@ -273,7 +273,7 @@ const norm = (v) => (v || '').trim().toLowerCase();
 
 /** Open the login portal exactly the way `e2e/helpers/auth.ts` does. */
 async function openLogin(page) {
-  await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded' });
+  await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded', timeout: 20000 });
   const hero = page.getByRole('button', { name: 'Partner Login' }).first();
   if (!(await hero.isVisible({ timeout: 8000 }).catch(() => false))) {
     await page.evaluate(() => {
@@ -283,7 +283,7 @@ async function openLogin(page) {
         /* storage unavailable — nothing to clear */
       }
     });
-    await page.goto(BASE_URL + '/');
+    await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded', timeout: 20000 });
     await hero.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
   }
   await hero.click({ timeout: 8000 });
@@ -521,7 +521,7 @@ async function openSession(browser, appearance, session, errors) {
   page.on('console', (m) => {
     if (m.type() === 'error') errors.console.push(m.text().slice(0, 300));
   });
-  await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded' });
+  await page.goto(BASE_URL + '/', { waitUntil: 'domcontentloaded', timeout: 20000 });
   await page.evaluate((id) => window.localStorage.setItem('mercenta.theme', id), appearance.id);
   if (session === 'admin') await loginAs(page, 'Super Admin — Tadii');
   if (session === 'brand') await loginAs(page, 'Astonish');
@@ -538,9 +538,15 @@ async function runAppearance(appearance, inventory) {
     for (const screen of area.screens) {
       try {
         if (area.kind === 'public') {
-          await page.goto(BASE_URL + screen.path, { waitUntil: 'load' });
+          await page.goto(BASE_URL + screen.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
           await page.waitForTimeout(700);
         } else if (area.kind === 'shell') {
+          /* §OWNER DECISION 2026-11-27 - the console is now the DEFAULT for a
+             signed-in session, so the LEGACY shell is only reachable through the
+             switch. This recorder walks those legacy areas, so it must ask for them
+             explicitly; without this every nav click waited out its timeout and the
+             walk stalled at 30 captures. */
+          await page.goto(BASE_URL + '/?console=legacy', { waitUntil: 'domcontentloaded', timeout: 20000 });
           await clickNav(page, LEGACY_NAV, screen.label);
         } else {
           await clickNav(page, CONSOLE_NAV, screen.label);

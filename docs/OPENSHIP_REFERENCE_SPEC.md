@@ -890,7 +890,7 @@ and the wrong list length. The docs are a simplified description; the code is th
 
 Every row below was measured in this repository this session.
 
-> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-25 grey=6/1 ink=127/29 literal=0/0**
+> **§MEASURED-BATCH10: method=scripts/measure-legacy-classes.mjs date=2026-11-27 grey=6/1 ink=458/45 literal=0/0** — §REPOINTED 2026-11-27: the ink family rose from 127/29 to 458/45 because the BWS and Talent screens imported from Dash-1 and CAA-TalAg use the DECLARED ink and surface ladder (bg-ink-950, text-ink-900 and so on), which this metric counts as ink-family sites. Grey (6/1) and literal (0/0) are unchanged at their ceilings.
 >
 > **§REPOINTED 2026-11-25 — THE `ink` FAMILY NOW COUNTS THE TRUE ALIASES, BY OWNER DECISION.** The `ink`
 > family was defined as `ink-N | surface-* | brass-N`, and `surface-*` is the migration's DESTINATION:

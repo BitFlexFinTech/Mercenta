@@ -844,7 +844,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       type="button"
                       onClick={() => selectNavItem(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
                         isActive
                           ? 'bg-ink-950 text-on-dark font-medium'
                           : 'text-ink-900 hover:bg-tint font-medium'

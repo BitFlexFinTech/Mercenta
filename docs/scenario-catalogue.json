@@ -4104,6 +4104,15 @@
       "expects": "Each of the sixteen mounted brand views renders a real screen - none falls back to the not-available placeholder - with zero page errors."
     },
     {
+      "id": "spec-next-console-shell-frame",
+      "capability": "platform",
+      "journey": "console shell frame",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/next-console-shell.spec.ts",
+      "expects": "The console FRAME itself: the workspace rail does NOT scroll with the page (the content area and the window are scrolled and the rail is proved not to move, and the window never scrolls), the approved Mercenta lockup renders in the rail, and EACH of the four workspaces shows its OWN menu - BWS shows Country Discovery and not Control Centre, Talent shows Royalties and not Country Discovery, the Operations Console shows Control Centre and not Royalties."
+    },
+    {
       "id": "spec-next-console-admin-views",
       "capability": "operations",
       "journey": "admin operational core",

@@ -1100,7 +1100,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       }
                       className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised"
                     >
-                      <option value="direct_fulfillment">Direct Fulfillment Track</option>
+                      <option value="direct_fulfillment">Direct Track</option>
                       <option value="financed">Financed Track</option>
                     </select>
                   </div>
