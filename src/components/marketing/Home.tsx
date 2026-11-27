@@ -277,13 +277,55 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
 
   const rv = !reducedMotion ? 'reveal' : '';
 
+  /**
+   * §OWNER DECISION 2026-11-27 — THE MENU MATCHES THE PAGE IT SITS ON (option A).
+   *
+   * MEASURED DEFECT THIS CLOSES. The chrome follows the light/dark appearance, but a
+   * homepage DESIGN does not: Design E renders on its own dark canvas in BOTH
+   * appearances (probe: the design's first section measures rgb(0,0,0) in brand-dark and
+   * brand-light alike). So in the light appearance the menu was a WHITE bar pinned over a
+   * BLACK page — the owner's report, "the colours in the top menu are wrong". The menu's
+   * own text measured a clean 0 runs below the 4.5:1 floor in both appearances, so the
+   * fault was never its palette; it was that palette being the wrong one for the page.
+   *
+   * HOW. Two things, both scoped to this page only:
+   *   · the menu is told which surface it sits on (`surface="dark"`), which is how its
+   *     quiet "Request Partner Access" link gets a legible colour — the ONE element that
+   *     a token override could not reach (diagnosed: it resolved `--mr-text-faint` to the
+   *     light theme's #6B6B6B on the black bar, 3.94:1);
+   *   · the surface and text tokens are re-pointed for the menu's OWN subtree to the four
+   *     band values the footer uses — `--mr-band-*`, declared once in
+   *     `src/config/themes.ts` and pinned by `scripts/validate-theme-distinctness.mjs`
+   *     (white on the band 21:1, the muted step 8.53:1). The menu reads `var(--mr-*)`
+   *     like everything else, so scoping the variables covers its bar, its panel and its
+   *     labels without a second class set.
+   *
+   * SCOPE. Only `Home.tsx` wraps the nav this way. Every other public page keeps the
+   * appearance's chrome, because those pages DO follow it.
+   */
+  const homepageChromeTokens = {
+    '--mr-bg': 'var(--mr-band-bg)',
+    '--mr-text-strong': 'var(--mr-band-text)',
+    '--mr-text-muted': 'var(--mr-band-text-muted)',
+    '--mr-text-faint': 'var(--mr-band-text-muted)',
+    '--mr-hairline': 'var(--mr-band-hairline)',
+    '--mr-surface-overlay': 'var(--mr-band-bg)',
+  } as unknown as import('react').CSSProperties;
+
   return (
     <div
       data-shell-theme={shellMode}
       className="min-h-screen font-plex"
       style={{ backgroundColor: 'var(--mr-bg)' }}
     >
-      <PublicNav currentPage="home" onNavigate={navigate} onOpenPortal={openPortal} />
+      <div style={homepageChromeTokens}>
+        <PublicNav
+          currentPage="home"
+          onNavigate={navigate}
+          onOpenPortal={openPortal}
+          surface="dark"
+        />
+      </div>
 
       {/*
         §BRAND REDESIGN (2026-11-19) — THE HOMEPAGE IS NOW ONE OF FOUR DESIGNS.

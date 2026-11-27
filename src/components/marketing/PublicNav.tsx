@@ -34,11 +34,26 @@ interface PublicNavProps {
   currentPage: PublicPage;
   onNavigate: (page: PublicPage) => void;
   onOpenPortal: () => void;
+  /**
+   * §OWNER DECISION 2026-11-27 — WHICH SURFACE THE MENU SITS ON.
+   *
+   * `appearance` (the default) is the menu as it has always been: it follows the
+   * light/dark switch, because the marketing pages do. `dark` is for a page whose own
+   * canvas does NOT follow the switch — today only the homepage, whose design renders on
+   * a dark canvas in BOTH appearances (measured: rgb(0,0,0) in brand-dark and
+   * brand-light alike). Without this the light appearance showed a WHITE bar pinned over
+   * a BLACK page, which is what the owner reported as "the colours in the top menu are
+   * wrong". The band tokens are declared once in `src/config/themes.ts` and measured by
+   * `scripts/validate-theme-distinctness.mjs` (muted step 8.53:1 on the band).
+   */
+  surface?: 'appearance' | 'dark';
 }
 
 const NAV_LINKS = PUBLIC_NAV;
 
-export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavProps) {
+export function PublicNav({ currentPage, onNavigate, onOpenPortal, surface = 'appearance' }: PublicNavProps) {
+  /** True when this menu is drawn on a page that is dark in both appearances. */
+  const onDarkSurface = surface === 'dark';
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileGroup, setMobileGroup] = useState<string | null>(null);
@@ -219,7 +234,11 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           <button
             onClick={onOpenPortal}
             data-testid="public-nav-request-access"
-            className="ml-1 whitespace-nowrap px-2 py-2 font-mono text-ds-micro uppercase tracking-[0.08em] text-[var(--mr-text-faint)] transition-colors hover:text-[var(--mr-accent)]"
+            className={`ml-1 whitespace-nowrap px-2 py-2 font-mono text-ds-micro uppercase tracking-[0.08em] transition-colors hover:text-[var(--mr-accent)] ${
+              onDarkSurface
+                ? 'text-[var(--mr-band-text-muted)]'
+                : 'text-[var(--mr-text-faint)]'
+            }`}
           >
             Request Partner Access
           </button>

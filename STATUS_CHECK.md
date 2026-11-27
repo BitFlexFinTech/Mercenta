@@ -4,6 +4,41 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 2 (part) — THE MENU NOW MATCHES THE PAGE IT SITS ON, AND AN INSTRUMENT BLIND SPOT (2026-11-27)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The deployment leg is still deliberately deferred to the
+end of the plan (Batch 3's login touches the same surfaces).
+
+**The owner's report was "the colours in the top menu are wrong". Measured first, as promised — and the menu's own
+palette was NOT the fault:** the menu's text measured **0 runs below the 4.5:1 floor in both appearances**, closed and
+with a group opened. The fault was that the palette was the wrong one for the PAGE: the chrome follows the light/dark
+switch, but a homepage design does not — Design E's canvas measures **rgb(0,0,0) in brand-dark AND brand-light**, so
+the light appearance showed a **white bar pinned over a black page**.
+
+**Option A implemented.** `PublicNav` gained `surface?: 'appearance' | 'dark'` (default `'appearance'`), and `Home.tsx`
+alone declares `surface="dark"` and re-points the surface/text tokens for the menu's own subtree to the four `--mr-band-*`
+values the footer uses (declared once in `src/config/themes.ts`, pinned by `validate-theme-distinctness`: white 21:1,
+muted 8.53:1). Measured after the change: the bar is **`oklab(0 0 0 / 0.9)` — the band black — in BOTH appearances**,
+its hairline is the band's `#2B2B2B`, its quiet link resolves to **#A5A5A5**, and **every other public page keeps the
+appearance** (`/how-it-works` in light mode still measures a light bar). Evidence: typecheck 0, eslint 0,
+`validate-public-chrome` 6/6, `validate-theme-distinctness` 86 checks, `e2e/public-chrome.spec.ts` **6 passed**.
+
+**A BLIND SPOT IN BOTH CONTRAST INSTRUMENTS, FOUND BY BEING WRONG MYSELF.** My first measurement of the fix reported
+two menu texts below the floor in light mode — "Mercenta Partners" at 1:1 and the quiet link at 2.46:1 — and I nearly
+"fixed" a non-defect. The truth: those texts measured EXACTLY the intended band colours (white `#FFF`, muted `#A5A5A5`)
+while the reported background was white, because **the bar's background compiles to `oklab(0 0 0 / 0.9)` and the parser
+matches only `rgb()`/`rgba()`**, so it ignored the bar and measured the text against the page behind it.
+**`scripts/visual-acceptance.mjs` has the identical limit at line 318** — so ANY semi-transparent token background
+(anything authored as `bg-[var(--token)]/NN`, which Tailwind v4 emits as oklab) is invisible to the project's contrast
+measurement, in the walk as well as in my probes. That is the next instrument fix, and it also explains why the walk
+reported the homepage as a WARN rather than a FAIL.
+
+**NOT DONE in Batch 2:** the menu's ITEMS — Legal out, Categories out, Retail Infrastructure's grouping — with the
+by-index footer repoint that must accompany them (`PUBLIC_FOOTER_COLUMNS` reads `PUBLIC_NAV[8]` for Legal, so removing
+the Legal group makes it `undefined` and crashes the footer unless it becomes a name-based lookup in the same change).
+**Batch 3 (the login) and Batch 4 (the proof and the single deployment) are not started.**
+
+
 ## §PUBLIC SURFACES BATCH 1 — ONE FOOTER, ONE TOP BAR, AND A BLACK FOOTER BAND (2026-11-27)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Deployment is deliberately deferred to the end of the
