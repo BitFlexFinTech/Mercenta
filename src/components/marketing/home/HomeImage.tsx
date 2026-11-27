@@ -23,15 +23,10 @@
  * surface colour rather than a broken-image icon. The layout is unchanged, so a
  * missing placeholder is a cosmetic gap, never a broken page.
  */
-import { cn } from '@/utils/cn';
-import {
-  HOME_IMAGES,
-  homeImageLarge,
-  homeImageSmall,
-  type HomeImageRole,
-} from '@/config/homepageImagery';
+import { PublicImage, type PublicImageRatio } from '../PublicImage';
+import type { HomeImageRole } from '@/config/homepageImagery';
 
-export type HomeImageRatio = '21/9' | '16/9' | '3/2' | '4/3' | '1/1' | '3/4';
+export type HomeImageRatio = PublicImageRatio;
 
 export interface HomeImageProps {
   role: HomeImageRole;
@@ -59,31 +54,10 @@ export function HomeImage({
   ratio = '4/3',
   priority = false,
 }: HomeImageProps) {
-  const { alt } = HOME_IMAGES[role];
-
-  return (
-    <div
-      className={cn(
-        'relative overflow-hidden bg-[var(--mr-surface)]',
-        className
-      )}
-      style={{ aspectRatio: ratio.replace('/', ' / ') }}
-    >
-      <picture>
-        <source media="(min-width: 900px)" srcSet={homeImageLarge(role)} />
-        <img
-          src={homeImageSmall(role)}
-          alt={alt}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding={priority ? 'sync' : 'async'}
-          /*
-           * `object-cover` fills the reserved box without distorting the picture.
-           * The images are NOT upscaled in the build, so at large display sizes
-           * this crops rather than stretches — which is honest and looks right.
-           */
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      </picture>
-    </div>
-  );
+  /* §PUBLIC SURFACES BATCH 5 (2026-11-27) — DELEGATES TO THE ONE IMPLEMENTATION.
+     The markup that used to live here is now `PublicImage`, widened so the public content pages and
+     the category guides can show a picture through the same reserved-box, two-file, real-alt-text
+     path. Keeping this wrapper means the four homepage designs (and their props) are untouched, and
+     there is still exactly ONE `<picture>` implementation in the project to fix or improve. */
+  return <PublicImage role={role} className={className} ratio={ratio} priority={priority} />;
 }

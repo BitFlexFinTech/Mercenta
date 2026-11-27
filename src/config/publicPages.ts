@@ -26,6 +26,8 @@
  * answers a real question a brand asks before it talks to us.
  */
 
+import type { PublicImageRole } from '@/config/homepageImagery';
+
 export type PublicContentPageId =
   | 'order-automation'
   | 'client-portal'
@@ -63,6 +65,15 @@ export interface PublicContentBlock {
   heading: string;
   body?: string[];
   bullets?: string[];
+  /**
+   * §PUBLIC SURFACES BATCH 5 (2026-11-27) — an optional picture for this block.
+   *
+   * A ROLE, never a path: the picture's file names and its alt text are owned by
+   * `src/config/homepageImagery.ts`, so no page can hardcode `/imagery/...` and no page can ship a
+   * picture without alt text. Optional because most blocks do not need one — a page with a picture in
+   * every block reads as a gallery, not a page.
+   */
+  media?: PublicImageRole;
 }
 
 /** An honest statement of what is live and what is not. */
@@ -85,6 +96,8 @@ export interface PublicContentPage {
   heading: string;
   lede: string;
   blocks: PublicContentBlock[];
+  /** §PUBLIC SURFACES BATCH 5 — an optional opening picture, shown beside the page's lede. */
+  hero?: PublicImageRole;
   /** Present when part of the page describes something not yet live. */
   availability?: PublicContentAvailability;
   /** Optional closing call to action; defaults to the Explore assessment. */
@@ -412,6 +425,9 @@ export const PUBLIC_CATEGORY_PAGE: PublicContentPage = {
   heading: 'Where your brand fits.',
   lede:
     'Mercenta distributes across ten approved categories. If your product sits outside them, we will tell you honestly rather than take it on.',
+  /* §PUBLIC SURFACES BATCH 5 (2026-11-27) — the page opens with a picture of stocked grocery shelving
+     (the homepage set's own role, so no new file was fetched for it) rather than opening as text only. */
+  hero: 'shelves-grocery',
   blocks: [
     {
       heading: 'The ten approved categories',

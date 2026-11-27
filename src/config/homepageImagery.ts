@@ -69,16 +69,66 @@ export const HOME_IMAGES: Record<HomeImageRole, HomeImageDefinition> = {
   'desk-phone': { alt: 'A desk with a phone and an open notebook', group: 'work' },
 };
 
+/**
+ * §PUBLIC SURFACES BATCH 5 (2026-11-27) — THE TEN CATEGORY PICTURES.
+ *
+ * The categories page needs one photograph per approved category, and the owner asked for a page that
+ * is not boring. They come from the SAME licensed pool and the same fetch script as the homepage set
+ * (CC0 / Public Domain Mark, committed locally, recorded in `public/imagery/CREDITS.md`), because a
+ * second source would mean a second licence story to keep true.
+ *
+ * EACH ROLE IS A PICTURE OF THAT KIND OF PRODUCT, NOT A CLAIM. Nothing here may be presented as a
+ * brand Mercenta works with, a client, or a live listing: the alt text describes what the photograph
+ * shows, and the page's captions do the same.
+ */
+export type CategoryImageRole =
+  | 'cat-home'
+  | 'cat-baby'
+  | 'cat-office'
+  | 'cat-health'
+  | 'cat-kitchen'
+  | 'cat-electronics'
+  | 'cat-automotive'
+  | 'cat-grocery'
+  | 'cat-computer'
+  | 'cat-apparel';
+
+export const CATEGORY_IMAGES: Record<CategoryImageRole, HomeImageDefinition> = {
+  'cat-home': { alt: 'A modern living room with a sofa, plants and soft furnishings', group: 'retail' },
+  'cat-baby': { alt: 'A baby bottle resting on a nursing pillow', group: 'retail' },
+  'cat-office': { alt: 'A notebook, pencil and loose paper on a desk', group: 'work' },
+  'cat-health': { alt: 'Lotion and shampoo bottles standing on a tray', group: 'retail' },
+  'cat-kitchen': { alt: 'Kitchen utensils standing together in a holder', group: 'retail' },
+  'cat-electronics': { alt: 'A pair of wireless over-ear headphones', group: 'retail' },
+  'cat-automotive': { alt: 'A classic car photographed from the side', group: 'goods' },
+  'cat-grocery': { alt: 'Tinned goods stacked on a supermarket shelf', group: 'retail' },
+  'cat-computer': { alt: 'A laptop, a notebook and a camera on a desk', group: 'work' },
+  'cat-apparel': { alt: 'Shirts hanging along a clothes rack', group: 'retail' },
+};
+
+/** Every picture a public surface may use: the homepage set plus the ten category pictures. */
+export type PublicImageRole = HomeImageRole | CategoryImageRole;
+
+/**
+ * ONE LOOKUP FOR EVERY PUBLIC PICTURE. The homepage designs keep reading `HOME_IMAGES`; the public
+ * content pages and the category guides read this, so no surface needs to know which set a picture
+ * came from — and there is still exactly ONE place that names a picture and its alt text.
+ */
+export const PUBLIC_IMAGES: Record<PublicImageRole, HomeImageDefinition> = {
+  ...HOME_IMAGES,
+  ...CATEGORY_IMAGES,
+};
+
 /** The public path prefix. Files live in `public/imagery/`. */
 export const HOME_IMAGE_BASE = '/imagery';
 
-/** The wide variant (up to ~1024px). */
-export function homeImageLarge(role: HomeImageRole): string {
+/** The wide variant (up to ~1024px; never upscaled). */
+export function homeImageLarge(role: PublicImageRole): string {
   return `${HOME_IMAGE_BASE}/${role}-lg.webp`;
 }
 
 /** The narrow variant (up to 700px). */
-export function homeImageSmall(role: HomeImageRole): string {
+export function homeImageSmall(role: PublicImageRole): string {
   return `${HOME_IMAGE_BASE}/${role}-sm.webp`;
 }
 
