@@ -762,45 +762,49 @@ export type PublicFooterColumn =
   | { kind: 'links'; heading: string; links: readonly PublicNavLink[]; withCookieSettings?: boolean }
   | { kind: 'categories'; heading: string };
 
+/**
+ * §PUBLIC SURFACES BATCH 2 (2026-11-27) — A COLUMN IS REFERENCED BY NAME, NEVER BY POSITION.
+ *
+ * WHY THIS CHANGED. Every column below used to be read as `PUBLIC_NAV[0] … PUBLIC_NAV[8]`,
+ * and the comments immediately above record the defect that positional reads have ALREADY
+ * caused once: deleting a group shifted every index, Legal then appeared TWICE, and only
+ * `e2e/public-chrome.spec.ts` caught it. Batch 2 removes TWO groups from the menu (Legal
+ * and Categories), so with positional reads `PUBLIC_NAV[8]` would become `undefined` and
+ * the footer would crash on EVERY public page. This repoint is behaviour-identical —
+ * the same columns, in the same order — and it is the prerequisite for those removals.
+ *
+ * `navGroup()` fails LOUDLY rather than yielding `undefined`, so a future rename is a named
+ * error at first render, not a silently missing column.
+ */
+function navGroup(label: string): PublicNavGroup {
+  const found = PUBLIC_NAV.find((group) => group.label === label);
+  if (!found) {
+    throw new Error(
+      `PUBLIC_NAV has no group named "${label}" — a rename must update PUBLIC_FOOTER_COLUMNS in the same change.`
+    );
+  }
+  return found;
+}
+
+/** One footer link column, read from its menu group BY NAME. */
+function navColumn(label: string): PublicFooterColumn {
+  const group = navGroup(label);
+  return { kind: 'links', heading: group.label, links: group.children };
+}
+
 export const PUBLIC_FOOTER_COLUMNS: readonly PublicFooterColumn[] = [
-  { kind: 'links', heading: PUBLIC_NAV[0].label, links: PUBLIC_NAV[0].children },
-  { kind: 'links', heading: PUBLIC_NAV[1].label, links: PUBLIC_NAV[1].children },
-  { kind: 'links', heading: PUBLIC_NAV[2].label, links: PUBLIC_NAV[2].children },
-  { kind: 'links', heading: PUBLIC_NAV[3].label, links: PUBLIC_NAV[3].children },
-  /**
-   * §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — PUBLIC_NAV[4]
-   * ("Categories") IS NOT A FOOTER COLUMN.
-   *
-   * MEASURED DEFECT: that group's ONLY child is "Category Specialization", which
-   * is already listed under PUBLIC_NAV[2] ("Solutions"). Rendering both groups in
-   * the footer therefore printed the same link twice — one destination, two tab
-   * stops, duplicate content — and `e2e/public-chrome.spec.ts` failed on the
-   * strict-mode violation. The static validator could not see it because it
-   * collects the referenced ids into a Set.
-   *
-   * The approved footer shape is EIGHT link columns plus the ten product
-   * categories; this group's destination is already published by Solutions, so
-   * the footer now renders exactly eight. The HEADER keeps all nine groups — a
-   * menu may surface a destination in two places, a sitemap may not.
-   */
-  { kind: 'links', heading: PUBLIC_NAV[5].label, links: PUBLIC_NAV[5].children },
-  { kind: 'links', heading: PUBLIC_NAV[6].label, links: PUBLIC_NAV[6].children },
-  { kind: 'links', heading: PUBLIC_NAV[7].label, links: PUBLIC_NAV[7].children },
+  navColumn('Platform'),
+  navColumn('Retail Infrastructure'),
+  navColumn('Solutions'),
+  navColumn('Company'),
+  /* The "Categories" group is deliberately NOT a column here — see the §BATCH 2 GATE
+     DEFECT note above: its only child is already published by "Solutions". */
+  navColumn('Commercial'),
+  navColumn('Resources'),
+  navColumn('Explore'),
   { kind: 'categories', heading: 'Product Categories' },
-  /**
-   * §NAVIGATION REPAIR (2026-11-20) — LEGAL IS NOW READ FROM THE MODEL.
-   *
-   * The footer used to index groups 0–8 AND then add a hand-built "Legal" column
-   * out of `PUBLIC_LINK.privacy` / `PUBLIC_LINK.terms`. That worked only while
-   * the model had TEN groups, with Legal at index 9. Deleting the duplicate
-   * "Platform Tools" group left Legal at index 8, so it appeared TWICE — once
-   * from the index and once from the hand-built column.
-   *
-   * `validate-e6-brand-surfaces`' "the header and the footer publish the SAME
-   * label for every shared route" assertion caught it. Legal is now read from its
-   * single owner like every other column, so the two surfaces cannot disagree.
-   */
-  { kind: 'links', heading: PUBLIC_NAV[8].label, links: PUBLIC_NAV[8].children },
+  /* Legal — read from its owner like every other column (see §NAVIGATION REPAIR above). */
+  navColumn('Legal'),
 ] as const;
 
 /** The control that re-opens the cookie notice after it has been answered. */
