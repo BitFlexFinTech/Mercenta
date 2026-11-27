@@ -541,12 +541,32 @@ async function runAppearance(appearance, inventory) {
           await page.goto(BASE_URL + screen.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
           await page.waitForTimeout(700);
         } else if (area.kind === 'shell') {
-          /* §OWNER DECISION 2026-11-27 - the console is now the DEFAULT for a
-             signed-in session, so the LEGACY shell is only reachable through the
-             switch. This recorder walks those legacy areas, so it must ask for them
-             explicitly; without this every nav click waited out its timeout and the
-             walk stalled at 30 captures. */
-          await page.goto(BASE_URL + '/?console=legacy', { waitUntil: 'domcontentloaded', timeout: 20000 });
+          /* §FIX 2026-11-27 — THE LEGACY SHELL IS REACHED THROUGH THE CONSOLE'S OWN
+             SWITCH, NOT BY A BARE `?console=legacy`.
+
+             MEASURED DEFECT THIS CLOSES. The previous line was
+             `page.goto(BASE_URL + '/?console=legacy')`. That URL renders THE PUBLIC
+             HOMEPAGE, not the legacy shell: the app derives its environment from the
+             PATH (`/admin/...` = admin, `/` = public), so the legacy nav
+             (`nav[aria-label="Primary"]`) was never on the page, every
+             `clickNav` waited out its 15 s timeout, and the walk died as soon as it
+             reached the legacy areas — the stall recorded as "30 captures".
+
+             PROVEN FIX (headless Chromium, this repository, 2026-11-27): clicking the
+             console's own "Legacy UI" button keeps the session's path (`/admin/overview`)
+             and renders the legacy AdminShell, whose `nav[aria-label="Primary"]` carries
+             all 28 declared admin items. Using the product's own control means the
+             recorder drives the app exactly as a user does, and needs no knowledge of
+             route prefixes.
+
+             The guard makes this idempotent: the switch is visible only while the
+             console is showing, so the second and later screens of the same area skip
+             it and go straight to their nav click. */
+          const legacySwitch = page.getByRole('button', { name: 'Legacy UI' }).first();
+          if (await legacySwitch.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await legacySwitch.click({ timeout: 5000 });
+            await page.waitForTimeout(600);
+          }
           await clickNav(page, LEGACY_NAV, screen.label);
         } else {
           await clickNav(page, CONSOLE_NAV, screen.label);
@@ -663,7 +683,7 @@ function writeRecord(inventory, rows) {
   }
 
   const doc = [
-    '# §BATCH 8 — THE FULL VISUAL ACCEPTANCE PASS (2026-11-25)',
+    `# §BATCH 8 — THE FULL VISUAL ACCEPTANCE PASS (${new Date().toISOString().slice(0, 10)})`,
     '',
     '> **THIS IS A GENERATED RECORD, AND IT IS PINNED.** The table below is written by',
     '> `node scripts/visual-acceptance.mjs`, which walks every screen the product declares in BOTH',
@@ -671,6 +691,12 @@ function writeRecord(inventory, rows) {
     '> same inventory from the same declarations and FAILS if this record stops covering a screen — so',
     '> it cannot go stale, and it cannot quietly claim a screen it never walked. Only the',
     '> `WHAT THE PASS FOUND` section below is written by hand.',
+    '>',
+    '> **THE TITLE DATE IS THE DATE OF THE PASS THAT PRODUCED THIS TABLE, NOT A HISTORICAL LABEL**',
+    '> (regenerated 2026-11-27 after the console port changed 44 console screens from placeholders to',
+    '> real screens). The FILE NAME keeps its original `2026-11-25` because the path is pinned by',
+    '> `scripts/validate-visual-acceptance.mjs`; the content is always the LATEST pass, never an',
+    '> archive — so no reader has to infer a date from the file name.',
     '',
     '## HOW THE PASS WAS RUN',
     '',

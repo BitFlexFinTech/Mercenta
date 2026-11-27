@@ -114,6 +114,72 @@ test(
   leftovers.map((m) => m.was).join(', ')
 );
 
+/* Comments are stripped FIRST, for every scan below: a comment that NAMES the class
+   being removed or guarded must never be counted as authoring it — the same rule
+   `validate-nav-destinations` applies to its own declaration scan. Defined here,
+   before its first use. */
+const stripComments = (body) =>
+  body
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n')
+    .map((line) => line.replace(/\/\/.*$/, ''))
+    .join('\n');
+
+/* ── C3. THE MISSING-TOKEN GUARD (§FIX 2026-11-27) ────────────────────────────
+ *
+ * WHY THIS EXISTS — AND WHY IT IS CALLED C3. The two comment blocks below have always
+ * cited "C3, which guards the undeclared `text-strong`", but NO SUCH ASSERTION EXISTED:
+ * this gate jumped from C2 straight to the dead-palette guard. The citation was a false
+ * statement about the product's own checks, and the defect class it named was therefore
+ * unguarded — which is exactly how `text-ink-950` shipped authored at 220 sites (including
+ * the console ROOT, `NextShell.tsx`) with NO rule in `next.css`.
+ *
+ * WHAT THE DEFECT WAS, MEASURED. `text-ink-950` fell through to the application palette,
+ * where the ink scale is a SURFACE scale — `tailwind.config.js → ink.950 =
+ * var(--mr-bg-deep)`. So the console painted its text in the PAGE-DEEP BACKGROUND colour:
+ * black on a near-black card in brand-dark, light-surface on white in brand-light. The
+ * visual-acceptance pass measured **1.14:1 in BOTH appearances** — invisible text — on
+ * **12 console screens (24 captures)**, up to 23 unreadable runs per screen.
+ *
+ * WHAT IT ASSERTS. For the `ink` family — whose scale is a surface scale, and which the
+ * console must therefore override deliberately — every class the console AUTHORS must have
+ * a rule in `next.css`. Both sides are DISCOVERED (rule 09 §4), never retyped: the authored
+ * set from the console's own code with comments stripped, the declared set from `next.css`.
+ *
+ * THE OPACITY VARIANT IS CLOSED TOO, FAIL-CLOSED. A rule for a base class does not cover
+ * `bg-ink-950/30`, so such a variant would silently re-introduce the same defect. There are
+ * zero such sites today and C3c keeps it that way; its failure message names the class.
+ */
+console.log('\n── C3. the missing-token guard (the ink family) ──\n');
+const INK_AUTHORED = /\b(?:text|bg|border|ring)-ink(?:-\d+)?\b/g;
+const INK_OPACITY = /\b(?:text|bg|border|ring)-ink(?:-\d+)?\/\d+/g;
+const INK_DECLARED = /\.mercenta-next\s+\.((?:text|bg|border|ring)-ink(?:-\d+)?)\b/g;
+
+const declaredInk = new Set([...CSS.matchAll(INK_DECLARED)].map((m) => m[1]));
+const authoredInk = new Set();
+const inkOpacitySites = [];
+for (const file of codeFiles) {
+  const body = stripComments(readFileSync(file, 'utf8'));
+  for (const m of body.match(INK_AUTHORED) || []) authoredInk.add(m);
+  for (const m of body.match(INK_OPACITY) || []) inkOpacitySites.push(`${file.replace(ROOT + '/', '')}: ${m}`);
+}
+test(
+  'C3a the guard found ink-family classes to check (a check that finds nothing is a failure)',
+  authoredInk.size > 0 && declaredInk.size > 0,
+  `${authoredInk.size} authored · ${declaredInk.size} declared in next.css`
+);
+const inkUndeclared = [...authoredInk].filter((c) => declaredInk.has(c) === false).sort();
+test(
+  'C3b every `ink` class the console authors has a rule in next.css (no fall-through to the surface scale)',
+  inkUndeclared.length === 0,
+  inkUndeclared.length ? `UNDECLARED: ${inkUndeclared.join(', ')}` : `${authoredInk.size} covered`
+);
+test(
+  'C3c no ink class carries an opacity modifier (a base rule never covers the variant)',
+  inkOpacitySites.length === 0,
+  inkOpacitySites.slice(0, 5).join(' · ') || 'none authored'
+);
+
 /* §BATCH 8 (2026-11-25) — THE DEAD-PALETTE GUARD.
  *
  * WHY THIS EXISTS. The visual acceptance pass measured a real, visible defect that
@@ -137,15 +203,6 @@ const PALETTE_SITE = new RegExp(
   'g'
 );
 const paletteHits = [];
-/* Comments are stripped FIRST: a comment that names the class being removed must
-   never be counted as authoring it — the same rule `validate-nav-destinations`
-   applies to its own declaration scan. */
-const stripComments = (body) =>
-  body
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .split('\n')
-    .map((line) => line.replace(/\/\/.*$/, ''))
-    .join('\n');
 for (const file of codeFiles) {
   const body = stripComments(readFileSync(file, 'utf8'));
   for (const m of body.match(PALETTE_SITE) || []) {

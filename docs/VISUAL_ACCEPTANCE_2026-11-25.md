@@ -1,4 +1,4 @@
-# §BATCH 8 — THE FULL VISUAL ACCEPTANCE PASS (2026-11-25)
+# §BATCH 8 — THE FULL VISUAL ACCEPTANCE PASS (2026-11-27)
 
 > **THIS IS A GENERATED RECORD, AND IT IS PINNED.** The table below is written by
 > `node scripts/visual-acceptance.mjs`, which walks every screen the product declares in BOTH
@@ -6,6 +6,12 @@
 > same inventory from the same declarations and FAILS if this record stops covering a screen — so
 > it cannot go stale, and it cannot quietly claim a screen it never walked. Only the
 > `WHAT THE PASS FOUND` section below is written by hand.
+>
+> **THE TITLE DATE IS THE DATE OF THE PASS THAT PRODUCED THIS TABLE, NOT A HISTORICAL LABEL**
+> (regenerated 2026-11-27 after the console port changed 44 console screens from placeholders to
+> real screens). The FILE NAME keeps its original `2026-11-25` because the path is pinned by
+> `scripts/validate-visual-acceptance.mjs`; the content is always the LATEST pass, never an
+> archive — so no reader has to infer a date from the file name.
 
 ## HOW THE PASS WAS RUN
 
@@ -20,7 +26,7 @@
 ## THE MEASURED RESULT
 
 - **147 screens**, each walked in **both** appearances → **294 captures attempted**, **294 recorded**.
-- Verdicts: **PASS 202** · **PLACEHOLDER 88** · **WARN 4** · **FAIL 0**.
+- Verdicts: **PASS 291** · **PLACEHOLDER 0** · **WARN 3** · **FAIL 0**.
 - No screen failed: every walked screen rendered real content in both appearances, with no uncaught page error.
 
 <!-- BEGIN GENERATED ACCEPTANCE TABLE -->
@@ -72,7 +78,7 @@
 | 44 | brand | Product Catalog | signed in as Astonish, nav item clicked | PASS | PASS |
 | 45 | brand | Inventory | signed in as Astonish, nav item clicked | PASS | PASS |
 | 46 | brand | Commercial Readiness | signed in as Astonish, nav item clicked | PASS | PASS |
-| 47 | brand | Lift Off | signed in as Astonish, nav item clicked | WARN | PASS |
+| 47 | brand | Lift Off | signed in as Astonish, nav item clicked | PASS | PASS |
 | 48 | brand | Onboarding & Legal | signed in as Astonish, nav item clicked | PASS | PASS |
 | 49 | brand | UK Compliance | signed in as Astonish, nav item clicked | PASS | PASS |
 | 50 | brand | Contracts | signed in as Astonish, nav item clicked | PASS | PASS |
@@ -90,26 +96,26 @@
 | 62 | console-core_admin | Purchase Orders | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 63 | console-core_admin | Logistics Hub | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 64 | console-core_admin | Returns Tracking | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
-| 65 | console-core_admin | Calendar _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 65 | console-core_admin | Calendar | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 66 | console-core_admin | Brand CRM | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
-| 67 | console-core_admin | Onboarding _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 67 | console-core_admin | Onboarding | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 68 | console-core_admin | Marketing | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 69 | console-core_admin | Ads Manager | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 70 | console-core_admin | Ad Spend | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 71 | console-core_admin | Brand Intelligence | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 72 | console-core_admin | Global Catalog | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 73 | console-core_admin | Fulfillment Track | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
-| 74 | console-core_admin | Retail Pipeline _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 74 | console-core_admin | Retail Pipeline | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 75 | console-core_admin | Billing | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 76 | console-core_admin | Contract Cycle | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 77 | console-core_admin | Compliance Approvals | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 78 | console-core_admin | Messages | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 79 | console-core_admin | Helpdesk | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 80 | console-core_admin | Monitoring | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
-| 81 | console-core_admin | Super Admin _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 81 | console-core_admin | Super Admin | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 82 | console-core_admin | Audit Log | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
-| 83 | console-core_admin | Onboarding Tours _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 84 | console-core_admin | Integration Settings _(placeholder)_ | new console (?console=next), surface "Operations Console", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 83 | console-core_admin | Onboarding Tours | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
+| 84 | console-core_admin | Integration Settings | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 85 | console-core_admin | Founder Investor Centre | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 86 | console-core_admin | Partnerships & Fundraising | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 87 | console-core_brand | Dashboard | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
@@ -127,52 +133,52 @@
 | 99 | console-core_brand | Contracts | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 100 | console-core_brand | Analytics | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 101 | console-core_brand | Advertising | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
-| 102 | console-core_brand | Market Intel _(placeholder)_ | new console (?console=next), surface "Partner Portal", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 102 | console-core_brand | Market Intel | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 103 | console-core_brand | Reports | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 104 | console-core_brand | Documents & Account | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
-| 105 | console-core_brand | Support & Cases _(placeholder)_ | new console (?console=next), surface "Partner Portal", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 106 | console-core_brand | Support & Team _(placeholder)_ | new console (?console=next), surface "Partner Portal", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 105 | console-core_brand | Support & Cases | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
+| 106 | console-core_brand | Support & Team | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 107 | console-core_brand | Settings | new console (?console=next), surface "Partner Portal", nav item clicked | PASS | PASS |
 | 108 | console-bws | Overview | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
-| 109 | console-bws | Country Discovery _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 110 | console-bws | Brand Discovery _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 111 | console-bws | Brand Intelligence _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 112 | console-bws | UK Distribution Research _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 113 | console-bws | UK Channel Research _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 114 | console-bws | Pitch Targets _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 115 | console-bws | Opportunity Assessment _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 116 | console-bws | Acquisition Pipeline _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 109 | console-bws | Country Discovery | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 110 | console-bws | Brand Discovery | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 111 | console-bws | Brand Intelligence | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 112 | console-bws | UK Distribution Research | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 113 | console-bws | UK Channel Research | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 114 | console-bws | Pitch Targets | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 115 | console-bws | Opportunity Assessment | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 116 | console-bws | Acquisition Pipeline | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
 | 117 | console-bws | Brand Portfolio | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
-| 118 | console-bws | Product Catalogue _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 119 | console-bws | Brand Onboarding _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 120 | console-bws | Partner Portal _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 121 | console-bws | Compliance & Regulatory _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 122 | console-bws | Import & Excise _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 123 | console-bws | Wholesale Distribution _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 124 | console-bws | Inventory & Fulfilment _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 118 | console-bws | Product Catalogue | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 119 | console-bws | Brand Onboarding | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 120 | console-bws | Partner Portal | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 121 | console-bws | Compliance & Regulatory | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 122 | console-bws | Import & Excise | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 123 | console-bws | Wholesale Distribution | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 124 | console-bws | Inventory & Fulfilment | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
 | 125 | console-bws | Campaign Studio | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
-| 126 | console-bws | Brand Growth _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 127 | console-bws | Financials _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 128 | console-bws | Reports & Analytics _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 129 | console-bws | Admin & Settings _(placeholder)_ | new console (?console=next), surface "BWS Workspace", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 130 | console-talent_commerce | Dashboard _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 131 | console-talent_commerce | Rights Holders _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 126 | console-bws | Brand Growth | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 127 | console-bws | Financials | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 128 | console-bws | Reports & Analytics | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 129 | console-bws | Admin & Settings | new console (?console=next), surface "BWS Workspace", nav item clicked | PASS | PASS |
+| 130 | console-talent_commerce | Dashboard | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 131 | console-talent_commerce | Rights Holders | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
 | 132 | console-talent_commerce | Brands & Products | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
-| 133 | console-talent_commerce | UK Opportunities _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 134 | console-talent_commerce | Brand Acquisition _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 133 | console-talent_commerce | UK Opportunities | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 134 | console-talent_commerce | Brand Acquisition | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
 | 135 | console-talent_commerce | Campaigns | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
-| 136 | console-talent_commerce | Brand Store Studio _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 137 | console-talent_commerce | Product Concepts _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 138 | console-talent_commerce | Product Development _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 139 | console-talent_commerce | Collections _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 140 | console-talent_commerce | Creative Assets _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 141 | console-talent_commerce | Approvals _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 142 | console-talent_commerce | Purchase Orders _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 143 | console-talent_commerce | Orders & Fulfilment _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 144 | console-talent_commerce | Inventory _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 145 | console-talent_commerce | Royalties _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 146 | console-talent_commerce | Financial Reports _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
-| 147 | console-talent_commerce | Settings _(placeholder)_ | new console (?console=next), surface "Talent Commerce", nav item clicked | PLACEHOLDER | PLACEHOLDER |
+| 136 | console-talent_commerce | Brand Store Studio | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 137 | console-talent_commerce | Product Concepts | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 138 | console-talent_commerce | Product Development | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 139 | console-talent_commerce | Collections | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 140 | console-talent_commerce | Creative Assets | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 141 | console-talent_commerce | Approvals | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 142 | console-talent_commerce | Purchase Orders | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 143 | console-talent_commerce | Orders & Fulfilment | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 144 | console-talent_commerce | Inventory | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 145 | console-talent_commerce | Royalties | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 146 | console-talent_commerce | Financial Reports | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
+| 147 | console-talent_commerce | Settings | new console (?console=next), surface "Talent Commerce", nav item clicked | PASS | PASS |
 <!-- END GENERATED ACCEPTANCE TABLE -->
 
 ## WHAT THE PASS FOUND

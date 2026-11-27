@@ -220,6 +220,34 @@
 .mercenta-next .text-ink-800 {
   color: var(--mr-text, #27272a); /* was text-zinc-800 */
 }
+/* ── §FIX 2026-11-27 — THE MISSING LADDER STEP THAT MADE THE CONSOLE UNREADABLE ──
+ *
+ * MEASURED DEFECT THIS CLOSES. `text-ink-950` had NO rule in this block, so it fell
+ * through to the application palette, where the ink scale is a SURFACE scale:
+ * `tailwind.config.js → ink.950 = var(--mr-bg-deep)`. So the class painted text in the
+ * PAGE-DEEP BACKGROUND colour — black text on a near-black card in brand-dark, and
+ * light-surface text on a white card in brand-light. Measured contrast: 1.14:1 in BOTH
+ * appearances, i.e. unreadable in both.
+ *
+ * WHY IT WAS EVERYWHERE, NOT ONE SCREEN. `NextShell.tsx` sets `text-ink-950` on the
+ * console ROOT, so every text run that does not set its own colour INHERITED it. The
+ * visual-acceptance pass measured 12 console screens (24 captures) failing with up to
+ * 23 unreadable runs each; the worst was the console's own "Operations Console" label.
+ *
+ * THE VALUE, AND WHY IT IS NOT THE LITERAL. The sibling rules above use the
+ * appearance-aware `--mr-*` token with the console's own literal as the fallback,
+ * because PHASE B made the console FOLLOW the appearance — `--mr-bg-deep` and the
+ * surface tokens flip, so no fixed literal can be legible in both. `--mr-text-strong`
+ * is white in brand-dark and black in brand-light (src/config/themes.ts), and #09090b
+ * is the console's own declared ink (`--color-next-ink`), so this is the same contract
+ * as `.text-ink-900` directly above it.
+ *
+ * `scripts/validate-next-console-tokens.mjs` now FAILS if any `text-ink-*` class the
+ * console authors has no rule here, so this step cannot go missing again.
+ */
+.mercenta-next .text-ink-950 {
+  color: var(--mr-text-strong, #09090b); /* was text-zinc-950 */
+}
 .mercenta-next .text-quiet {
   color: var(--mr-text-faint, #a1a1aa); /* was text-zinc-400 */
 }
