@@ -4,6 +4,45 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 1 — ONE FOOTER, ONE TOP BAR, AND A BLACK FOOTER BAND (2026-11-27)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Deployment is deliberately deferred to the end of the
+plan so the menu and the login restyle ship in ONE publish (each FTP mirror is 30–40 minutes plus a propagation window).
+
+**What the owner reported, and what it actually was.** "Why are there 2 footers?" and "the top menu is too cluttered"
+were ONE defect: Design E was ported from the supplied Concept 3 HTML complete with its own `<footer>` **and** its own
+sticky `<header>`, while `Home.tsx` renders the shared `<PublicNav>` and `<PublicFooter>` for every public page. The
+front page therefore drew two footers and two top bars pinned to the top of the same screen (z-50 and z-40).
+
+**It was already failing the product's own spec.** With two `<footer>` elements, `page.locator('footer')` matches two
+nodes, so `e2e/public-chrome.spec.ts` reported **4 passed / 2 failed** in strict mode. It is **6 passed** now. The
+validator corpus never runs the e2e specs, which is why nothing had reported it.
+
+**The footer is now one black band, in both appearances.** Four tokens declared once in `src/config/themes.ts`
+(`--mr-band-bg` · `--mr-band-text` · `--mr-band-text-muted` · `--mr-band-hairline`), all derived from `BRAND_PALETTE`
+and asserted **identical in both blocks**. Measured: white on the band **21:1**, the muted step **8.53:1**. The logo
+was already hardcoded to the WHITE variant against an appearance-following background — a white logo on the white
+light-appearance footer, i.e. invisible — and the black band is what makes that variant correct.
+
+**Two new checks, both proved able to fail.** `scripts/validate-public-chrome.mjs` (6 assertions, discovered): no
+design may render its own `<header>`/`<footer>`, and every public page renders exactly one nav and one footer. It
+caught the header half immediately (`DesignE.tsx: 1 header(s), 0 footer(s)`) and caught a defect in ITSELF — a comment
+naming `<PublicFooter>` made Design E look like a page, so comments are stripped before any discovery.
+`validate-theme-distinctness.mjs` gained the band contract: mutation-proved by making the LIGHT appearance's band
+light, which fails three assertions (the identity one plus two contrast ones), restored byte-identical
+(`632b9d5f…`).
+
+**Evidence.** typecheck **0** · eslint **0** · `validate-public-chrome` **6/6** · `validate-theme-distinctness`
+**86 checks** · `e2e/public-chrome.spec.ts` **6 passed** (was 4/2) · state gates: resume-state 61 assertions,
+rules-application 33/0, plain-english 20/0.
+
+**NOT DONE, and said plainly: BATCH 2 (the menu's items — Legal out, Categories out, the Retail Infrastructure
+grouping — and the menu's colours, which must be MEASURED first), BATCH 3 (the demo login's design) and BATCH 4 (the
+measurement, the corpus, ONE deployment and the live check).** The trap for Batch 2 is recorded in `PROJECT_STATUS.md`
+→ `OUTSTANDING BLOCKER`: `PUBLIC_FOOTER_COLUMNS` reads `PUBLIC_NAV` **by index**, so removing the Legal group makes
+`PUBLIC_NAV[8]` undefined and crashes the footer unless it is repointed to a name-based lookup in the same change.
+
+
 ## §PHASE C BATCH C1 — THE HOMEPAGE EDITOR REACHES THE CONSOLE (2026-11-27)
 
 **State: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Committed `330ec0d`, deployed and verified live.
