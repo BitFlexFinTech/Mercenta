@@ -246,9 +246,16 @@ test(
   `PROJECT_STATUS: ${statusHashes.join(',') || 'none'} · HANDOFF: ${handoffHashes.join(',') || 'none'}`
 );
 const taskTokenOf = (text) => {
-  /** §REPOINTED 2026-11-19 — `INT` added to the family, matching `firstTaskToken` above. */
+  /** §REPOINTED 2026-11-19 — `INT` added to the family, matching `firstTaskToken` above.
+   *  §EXTENDED 2026-11-27 — the digit no longer has to follow the keyword DIRECTLY. The
+   *  project's own batch plan is written `§PHASE C BATCH C1`, which this parser could not
+   *  see at all: every live resume block describing that work produced an EMPTY token, so
+   *  the assertion below failed while the block was correct. A single optional letter is now
+   *  accepted before the digits (`BATCH C1`), which is the naming the record actually uses.
+   *  This narrows nothing: `BATCH 3`, `INT-1`, `WAVE 3m` and a token-less phrase all behave
+   *  exactly as before (the self-check below asserts each). */
   const m = fieldValue(text, 'LAST COMPLETED TASK').match(
-    /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?(\d+[a-z]?)\b/i
+    /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?([A-Z]?\d+[a-z]?)\b/i
   );
   return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
 };
@@ -264,7 +271,7 @@ test(
   (() => {
     const probe = (v) => {
       const m = v.match(
-        /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?(\d+[a-z]?)\b/i
+        /\b((?:OPENSHIP\s+)?(?:MAPPING\s+)?BATCH(?:ES)?|WAVE|E2E|S|INT|PHASE)\s?-?([A-Z]?\d+[a-z]?)\b/i
       );
       return m ? `${m[1].toUpperCase().replace(/\s+/g, ' ')} ${m[2].toUpperCase()}` : '';
     };
@@ -275,6 +282,9 @@ test(
          negative case proving a token-less phrase still yields nothing. */
       probe('INT-1 — Google Drive write capability (2026-11-19)') === 'INT 1' &&
       probe('**INT 3 — six system pairs**') === 'INT 3' &&
+      /* §ADDED 2026-11-27 — THE PROJECT'S REAL BATCH NAMING. `§PHASE C BATCH C1` yielded
+         NOTHING before the extension above, so a correct resume block failed this gate. */
+      probe('**§PHASE C BATCH C1 — the Homepage Editor reaches the console**') === 'BATCH C1' &&
       probe('nothing to see here') === ''
     );
   })()

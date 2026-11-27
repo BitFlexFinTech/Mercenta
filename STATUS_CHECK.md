@@ -4,6 +4,53 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PHASE C BATCH C1 — THE HOMEPAGE EDITOR REACHES THE CONSOLE (2026-11-27)
+
+**State: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Committed `330ec0d`, deployed and verified live.
+
+**What was missing, and why it mattered.** The console is the DEFAULT for a signed-in session (Owner decision
+2026-11-27), so the owner's own Homepage Editor — which has existed in the legacy shell since §12 — was reachable only
+by finding the hidden legacy switch. It is now a ninth Super Admin tab (`homepage`), because "the screen exists
+somewhere in the application" is not the same as "the operator can reach it".
+
+**NO NEW OWNER, NO SECOND SOURCE OF TRUTH.** The content model stays `src/config/homepageContent.ts`, the design axis
+`src/config/homepageDesign.ts` (labels are READ from the owner, never retyped) and draft/publish stays
+`src/data/api.ts` — the SAME pipeline the legacy editor drives, so the two screens cannot disagree about what is
+published. The console's Screen/View split is followed exactly: the Screen owns the draft and calls the owners, the
+View renders and calls back, and the SCREEN passes the panel to the Super Admin body as a `ReactNode` so it mounts
+only while its tab is open.
+
+**THE DRAFT PREVIEW IS PORTALLED OUT OF THE CONSOLE'S SCOPE — MEASURED, NOT STYLE.** `NextShell.tsx` puts the
+`.mercenta-next` scope on the console root, and `src/next/next.css` overrides `.mercenta-next .text-strong` /
+`.text-muted` / `.text-faint` with the CONSOLE's tokens, which follow the console's appearance. The marketing
+components use exactly those classes — 48, 104 and 15 sites. A preview rendered inside that scope would therefore
+paint the public page in the console's colours (light text over the homepage's light sections in brand-dark), and a
+preview that shows something other than what publishes is worse than no preview, because it is believed. The portal to
+`document.body` keeps React context flowing while escaping the scoped subtree.
+
+**A NEW GATE, AND IT CAUGHT A REAL LOSS IN THIS VERY CHANGE.** `scripts/validate-console-homepage-editor.mjs` (22
+assertions) compares the outward field set the console editor lints against the LEGACY editor's, extracted from both
+files. Before the commit it reported **`content.finalCta.heading` missing from the console** — the closing band's
+heading would have been publishable with banned positioning on the console screen but not on the legacy one, which is
+exactly the drift the comparison exists to catch. Fixed; all **20 fields now match on both**. The gate also pins the
+tab wiring, the owner-sourced design labels, every legacy capability, the fail-closed save/publish, and the portal.
+Mutation-proved: removing the tab wiring gives **FAIL 21/22 naming H1c**; restored byte-identical (sha256
+`ed73114b…`).
+
+**EVIDENCE.** typecheck **0** (all four projects) · eslint **0** on the four touched files ·
+`validate-console-homepage-editor` **22/22** · `validate-next-console-tokens` **15/0** ·
+`validate-legacy-styling-migration` **14 checks PASS** — the record was brought up to the measurement (ink 458/45 →
+**459/46** for ONE declared console token, `border-ink`, the same class `MetricStrip` and `ConsoleTabs` already use
+for their active state) with the CEILING untouched at 468, so the metric was not relaxed ·
+`validate-e6-brand-surfaces` **EXIT 0** · `e2e/next-console-smoke.spec.ts` **7 passed**, including a new browser test
+that types banned wording into the hero heading and asserts Publish becomes **disabled**, then re-enabled when
+reverted · **full corpus 207 PASS / 0 FAIL of 207**.
+
+**NOT STARTED, and said plainly: C2 (the Google setup wizard), C3 (Appearance settings) and C4 (verify the Control
+Centre panels).** They are the recorded `NEXT TASK`, with the exact starting point and the pattern this batch
+established in `PROJECT_STATUS.md`.
+
+
 ## §PHASE C BATCH C0 — THE RECORDED BLOCKER, THE REAL DEFECT BEHIND IT, AND THE FIX (2026-11-27)
 
 **State: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Deployed and verified live on `https://demo.mercenta.co.uk`.
