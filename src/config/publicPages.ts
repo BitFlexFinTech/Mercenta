@@ -82,6 +82,36 @@ export interface PublicContentAvailability {
   detail: string;
 }
 
+/**
+ * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — A LABELLED WORKED ILLUSTRATION.
+ *
+ * WHY THIS EXISTS. The page standard the owner set for these pages is: an opening, what you get,
+ * how it works, **a labelled worked illustration**, what it does NOT do, and one next step. The
+ * model could express everything except the illustration: `blocks` are prose and bullets, and a
+ * bullet list cannot be *labelled*, so the example a reader actually needs — the service running,
+ * stage by stage — had nowhere to live and the pages read as a wall of paragraphs.
+ *
+ * WHAT IT IS. A labelled sequence: one short label per stage (the step's name) and one sentence
+ * saying what happens at it. It is rendered as a numbered, labelled run rather than prose, which is
+ * what makes a long page readable and what stops these pages looking identical to each other.
+ *
+ * WHAT IT MAY NOT CONTAIN — the same rules that bind every word on these pages:
+ *   · it is an illustration of the SEQUENCE, never of an amount. No figure, no price, no percentage:
+ *     stage copy carries no number that would read as a claim about money or results;
+ *   · it never names the retail channel and never describes Mercenta's commercial terms;
+ *   · it must be true of the service as it actually works today, or the page's own `availability`
+ *     block must say which part is not yet live.
+ * `scripts/validate-public-page-standard.mjs` fails the build if a figure appears here.
+ */
+export interface PublicWorkedIllustration {
+  /** The illustration's own title — what the example is of, in one line. */
+  label: string;
+  /** One or two sentences framing the example before the stages. */
+  intro: string;
+  /** The labelled stages, IN ORDER. `label` names the stage; `detail` says what happens. */
+  stages: { label: string; detail: string }[];
+}
+
 export interface PublicContentPage {
   id: PublicContentPageId;
   /** The canonical path — exactly as it appears in the address bar. */
@@ -98,6 +128,24 @@ export interface PublicContentPage {
   blocks: PublicContentBlock[];
   /** §PUBLIC SURFACES BATCH 5 — an optional opening picture, shown beside the page's lede. */
   hero?: PublicImageRole;
+  /**
+   * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the labelled worked illustration.
+   *
+   * The example that shows the service running, stage by stage. It is what turns a page of
+   * paragraphs into something a reader can follow, and it is the piece of the page standard the
+   * blocks could not express. Optional on the TYPE so a page cannot fail to compile, but
+   * `scripts/validate-public-page-standard.mjs` requires it on every page in the batch's scope, so
+   * an enrichment batch cannot ship half-finished.
+   */
+  illustration?: PublicWorkedIllustration;
+  /**
+   * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — what this page's service does NOT do.
+   *
+   * The honest section, and the one that earns the rest of the page. Short statements only: a limit
+   * is a limit, not a paragraph of excuses. Same gate as `illustration` — required by the standard
+   * for the pages in the batch's scope.
+   */
+  limits?: string[];
   /** Present when part of the page describes something not yet live. */
   availability?: PublicContentAvailability;
   /** Optional closing call to action; defaults to the Explore assessment. */
@@ -658,15 +706,17 @@ const PAGE_VENDOR_OF_RECORD: PublicContentPage = {
   heading: 'A UK vendor of record, without a UK company.',
   lede:
     'UK retail buyers deal with a UK supplier. Being your vendor of record means Mercenta is that supplier — holding the trading relationship, the stock obligation and the paperwork — while the brand stays entirely yours.',
+  hero: 'warehouse-racks',
   blocks: [
     {
-      heading: 'What it gives you',
+      heading: 'What you get',
       bullets: [
         'A UK trading counterparty on the purchase order.',
         'Stock held and replenished against real orders, not forecasts.',
         'One commercial relationship instead of several.',
         'No UK subsidiary, no UK payroll and no UK filing run by you.',
       ],
+      media: 'boxes-stacked',
     },
     {
       heading: 'What stays yours',
@@ -680,6 +730,37 @@ const PAGE_VENDOR_OF_RECORD: PublicContentPage = {
         'A sales office, a warehouse, a finance function working in a second currency, and the regulatory work that comes with all three. Those are what stand between a good product and a UK shelf.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the example that shows the service running. */
+  illustration: {
+    label: 'How a first order runs',
+    intro:
+      'This is the sequence for a single order, from the buyer’s request to the money reaching you. The stages do not change with the size of the order.',
+    stages: [
+      {
+        label: 'The order arrives',
+        detail:
+          'A UK buyer raises an order against Mercenta, in the buyer’s own system. Nothing is sent to you to administer.',
+      },
+      {
+        label: 'You decide',
+        detail: 'The order appears in your workspace with what it is worth. You approve it, amend it or decline it.',
+      },
+      {
+        label: 'We carry it',
+        detail:
+          'Once you have decided, the movement, the paperwork and the buyer relationship are Mercenta’s to run.',
+      },
+      {
+        label: 'You are settled',
+        detail: 'The settlement is reconciled against the order behind it and shown to you in the same workspace.',
+      },
+    ],
+  },
+  limits: [
+    'We do not own your brand, rename it, or sell it anywhere you have not agreed.',
+    'We do not take over your product decisions or your pricing strategy.',
+    'We do not act on an order without your decision, and we do not treat a delay as consent.',
   ],
   cta: { label: 'Talk to us about your brand', to: 'contact' },
 };
@@ -696,6 +777,7 @@ const PAGE_IMPORT_COMPLIANCE: PublicContentPage = {
   heading: 'It arrives in the UK legally, and it is ready to sell.',
   lede:
     'Importing is a sequence, not a step. Mercenta runs the whole sequence — the customs entry, the product compliance your category requires, and the movement into stock — and holds the record of each.',
+  hero: 'port-containers',
   blocks: [
     {
       heading: 'What we handle',
@@ -705,6 +787,7 @@ const PAGE_IMPORT_COMPLIANCE: PublicContentPage = {
         'Movement into UK stock, not to a holding address.',
         'The evidence that all three were done.',
       ],
+      media: 'port-cranes',
     },
     {
       heading: 'What we need from you',
@@ -718,6 +801,35 @@ const PAGE_IMPORT_COMPLIANCE: PublicContentPage = {
         'A shipment refused at the border costs more than a shipment that waited. Nothing enters stock until its category requirements are satisfied, and no exception is made for a launch date.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the sequence, stage by stage. */
+  illustration: {
+    label: 'The import sequence, in order',
+    intro:
+      'Every consignment runs the same stages. The order is the point: a document that arrives after the goods is a problem, not a formality.',
+    stages: [
+      {
+        label: 'Documents read',
+        detail: 'The specification and the safety documentation are read before anything is booked to travel.',
+      },
+      {
+        label: 'Entry prepared',
+        detail: 'The entry is prepared and the amount owed is established while the goods are still where they are.',
+      },
+      {
+        label: 'Cleared',
+        detail: 'The consignment is cleared, and anything the border asks for is answered while it is still in transit.',
+      },
+      {
+        label: 'Into stock',
+        detail: 'The goods move into UK stock with the evidence that the earlier stages happened.',
+      },
+    ],
+  },
+  limits: [
+    'We do not move goods ahead of a missing document, and we do not promise a launch date regardless of it.',
+    'We do not decide which compliance documents your product needs — that is set by the product and its category.',
+    'We do not clear a consignment we cannot evidence.',
   ],
   cta: { label: 'Check your product fits', to: 'explore-uk-market-fit' },
 };
@@ -734,6 +846,7 @@ const PAGE_BRAND_REGISTRY: PublicContentPage = {
   heading: 'Your brand, presented the way you would present it.',
   lede:
     'The listing is the shop. Mercenta builds and maintains it — titles, images, copy and structure — against your brand rules rather than against a template.',
+  hero: 'page-product-display',
   blocks: [
     {
       heading: 'What we build and hold',
@@ -742,6 +855,7 @@ const PAGE_BRAND_REGISTRY: PublicContentPage = {
         'Image and copy libraries kept consistent across the range.',
         'A record of every change to a public listing, and who approved it.',
       ],
+      media: 'shelves-grocery',
     },
     {
       heading: 'Who decides the words',
@@ -755,6 +869,38 @@ const PAGE_BRAND_REGISTRY: PublicContentPage = {
         'Every listing, its current state and what changed since you last looked. Nothing about your brand goes live without an approved version behind it.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — a listing's own path, stage by stage. */
+  illustration: {
+    label: 'A listing, from draft to live',
+    intro:
+      'Every listing follows the same path. Nothing publishes without an approved version behind it.',
+    stages: [
+      {
+        label: 'Your brand rules',
+        detail:
+          'The first step is capturing how your brand is written and shown, so the listing starts from your standard rather than a template.',
+      },
+      {
+        label: 'Drafted',
+        detail: 'The title, the images and the copy are drafted against your rules and what the category expects.',
+      },
+      {
+        label: 'You approve',
+        detail:
+          'You read it and approve it. The approved version is the one that publishes, and the draft stays on the record.',
+      },
+      {
+        label: 'Watched',
+        detail:
+          'Once live it is checked against the product you actually supply, and every change is recorded with who approved it.',
+      },
+    ],
+  },
+  limits: [
+    'We do not rewrite your brand’s language to suit a template.',
+    'We do not publish a listing, an image or a claim you have not approved.',
+    'We do not invent a product detail that is not on the specification.',
   ],
   cta: { label: 'Talk to us about your brand', to: 'contact' },
 };
@@ -771,6 +917,7 @@ const PAGE_PRICING_GOVERNANCE: PublicContentPage = {
   heading: 'One price position, held in place.',
   lede:
     'Price drift is what erodes a brand in a new market: three sellers, three prices, and a customer who learns to wait. Mercenta holds one price position and defends it.',
+  hero: 'shelves-grocery',
   blocks: [
     {
       heading: 'What we watch',
@@ -791,7 +938,35 @@ const PAGE_PRICING_GOVERNANCE: PublicContentPage = {
       body: [
         'The agreed position, the current position, and every movement between the two — in the same place, with the date it happened.',
       ],
+      media: 'desk-tablet',
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the loop that keeps a position where it was set. */
+  illustration: {
+    label: 'A price position, held',
+    intro:
+      'A position is not set once. This is the loop that keeps it where you agreed it should be.',
+    stages: [
+      { label: 'Agreed', detail: 'You set the position, and what may move and what may not.' },
+      {
+        label: 'Monitored',
+        detail: 'The price a customer actually pays is watched, not the label on the page.',
+      },
+      {
+        label: 'Corrected',
+        detail:
+          'A movement that undercuts the position is corrected, and the correction is recorded with its reason.',
+      },
+      {
+        label: 'Escalated',
+        detail: 'A correction that needs a commercial decision comes to you before anything changes.',
+      },
+    ],
+  },
+  limits: [
+    'We do not set your prices, and we do not move the position without your agreement.',
+    'We do not police sellers with legal threats, and we do not claim to control a market.',
+    'We do not hide a correction that was made against your position.',
   ],
   cta: { label: 'Talk to us about your brand', to: 'contact' },
 };
@@ -808,6 +983,7 @@ const PAGE_ADVERTISING_SEARCH: PublicContentPage = {
   heading: 'Found by the people already looking.',
   lede:
     'Demand already exists for most products. The work is being visible at the moment somebody searches — without paying to reach people who were never going to buy.',
+  hero: 'desk-laptop',
   blocks: [
     {
       heading: 'What we run',
@@ -816,6 +992,7 @@ const PAGE_ADVERTISING_SEARCH: PublicContentPage = {
         'Organic visibility work on the listing itself.',
         'Spend limits you set, rather than limits discovered afterwards.',
       ],
+      media: 'desk-phone',
     },
     {
       heading: 'What we report',
@@ -824,11 +1001,42 @@ const PAGE_ADVERTISING_SEARCH: PublicContentPage = {
       ],
     },
     {
-      heading: 'What we will not promise',
+      heading: 'Where the ceiling sits',
       body: [
-        'A position, a volume or a return. Nobody can promise those, and a supplier who does is guessing with your money.',
+        'You set the ceiling before anything runs, and a campaign that reaches it stops there. Reaching the ceiling is a decision you made, not a bill that arrives afterwards.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — how a term is added, and how it is dropped. */
+  illustration: {
+    label: 'A search term, from found to kept',
+    intro:
+      'Most of the work is deciding what not to pay for. This is how a term is added, and how it is dropped.',
+    stages: [
+      {
+        label: 'Found',
+        detail: 'A term is chosen because people already search it and the product answers it.',
+      },
+      {
+        label: 'Tested',
+        detail: 'A small, capped amount of spend establishes whether the term converts.',
+      },
+      {
+        label: 'Kept or stopped',
+        detail:
+          'A term that converts is kept and given more room; one that does not is stopped, and the date is recorded.',
+      },
+      {
+        label: 'Reported',
+        detail:
+          'Spend, what it produced and what it cost per sale appear together, so the decision can be checked.',
+      },
+    ],
+  },
+  limits: [
+    'We do not promise a position, a volume or a return. Nobody can promise those, and a supplier who does is guessing with your money.',
+    'We do not spend beyond the ceiling you set.',
+    'We do not keep a term running because it looks busy rather than because it pays.',
   ],
   cta: { label: 'Explore UK market fit', to: 'explore-uk-market-fit' },
 };
@@ -845,6 +1053,7 @@ const PAGE_CREATIVE_ASSETS: PublicContentPage = {
   heading: 'The images and the words that actually sell it.',
   lede:
     'A product photographed badly reads as a cheap product. Mercenta produces the assets a category needs — on-brand, correctly sized for each placement, and reusable.',
+  hero: 'page-photo-studio',
   blocks: [
     {
       heading: 'What we produce',
@@ -853,6 +1062,7 @@ const PAGE_CREATIVE_ASSETS: PublicContentPage = {
         'Copy that describes the product accurately.',
         'Assets sized for every placement, from a search result to a detail page.',
       ],
+      media: 'page-product-display',
     },
     {
       heading: 'What you approve',
@@ -866,6 +1076,38 @@ const PAGE_CREATIVE_ASSETS: PublicContentPage = {
         'A photographer, a copywriter and a designer, commissioned once per range instead of once per market.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — one shoot, and everything it has to produce. */
+  illustration: {
+    label: 'One shoot, every placement',
+    intro:
+      'A single product shoot produces everything the placements need. The sequence is the same for every product, in every category.',
+    stages: [
+      {
+        label: 'Brief',
+        detail:
+          'Your brand rules and what the category expects of an image are read first, so the shoot starts from a specification.',
+      },
+      {
+        label: 'Shot',
+        detail:
+          'Photography is produced against that specification, including the angles and the detail shots the placements ask for.',
+      },
+      {
+        label: 'Written',
+        detail: 'Copy is written to describe the product, and nothing is added that is not on the specification.',
+      },
+      {
+        label: 'Sized',
+        detail:
+          'Each asset is cut for the placement it will appear in, from a small search result to a full detail page.',
+      },
+    ],
+  },
+  limits: [
+    'We do not invent a claim, a comparison or an ingredient that is not on the specification.',
+    'We do not publish an asset you have not approved, and we do not restyle your brand to follow a trend.',
+    'We do not book a fresh shoot for every placement — removing that cost is the point of the work.',
   ],
   cta: { label: 'Talk to us about your brand', to: 'contact' },
 };
@@ -882,6 +1124,7 @@ const PAGE_PRODUCT_LAUNCH: PublicContentPage = {
   heading: 'A launch, not a listing going live.',
   lede:
     'Most launches fail quietly: the listing appears, nobody finds it, and the stock sits. Mercenta launches in an order that puts a found, correct, in-stock product in front of buyers.',
+  hero: 'warehouse-aisle',
   blocks: [
     {
       heading: 'Before it goes live',
@@ -891,6 +1134,7 @@ const PAGE_PRODUCT_LAUNCH: PublicContentPage = {
         'Stock in place and replenishable.',
         'Price position agreed and set.',
       ],
+      media: 'boxes-stacked',
     },
     {
       heading: 'On launch',
@@ -904,6 +1148,29 @@ const PAGE_PRODUCT_LAUNCH: PublicContentPage = {
         'Replenishment, listing health and price position are watched continuously, because a launch is a start rather than an event.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the order a launch has to run in. */
+  illustration: {
+    label: 'A launch, in order',
+    intro:
+      'The order is deliberate: a product should be found only when it can be bought. This is the sequence that makes that true.',
+    stages: [
+      {
+        label: 'Ready',
+        detail: 'Compliance is satisfied and evidenced, and the listing is built and approved.',
+      },
+      {
+        label: 'Stocked',
+        detail: 'Stock is in place and replenishable, so a first order does not become a delay.',
+      },
+      { label: 'Priced', detail: 'The price position is agreed and set before anything is promoted.' },
+      { label: 'Found', detail: 'Visibility work starts on the day the product can be bought, not before.' },
+    ],
+  },
+  limits: [
+    'We do not promote a product before it can be bought.',
+    'We do not launch with a listing we cannot keep in stock.',
+    'We do not promise that a launch produces sales. A launch removes the reasons a good product fails; it does not decide the outcome.',
   ],
   cta: { label: 'Explore UK market fit', to: 'explore-uk-market-fit' },
 };

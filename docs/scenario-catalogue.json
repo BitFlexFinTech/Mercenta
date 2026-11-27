@@ -1221,6 +1221,26 @@
       "expects": "The header publishes the owner's nav labels and every footer link uses the SAME label for the same route."
     },
     {
+      "id": "pf-public-categories-explained",
+      "capability": "platform",
+      "journey": "platform foundations — the categories page explains every category and shows a picture of each",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/categories-page.spec.ts",
+      "test": "one card per approved category, each carrying its own explanation",
+      "expects": "The categories page renders one card per APPROVED category (read from the owner, never retyped), each carrying its own explanation and caption, and every category picture decodes from a local file."
+    },
+    {
+      "id": "pf-public-page-standard",
+      "capability": "platform",
+      "journey": "platform foundations — the Retail Infrastructure pages meet the full page standard",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/public-infrastructure-pages.spec.ts",
+      "test": "opening, labelled illustration, limits and one next step",
+      "expects": "Each of the seven Retail Infrastructure pages renders its own heading, a labelled worked illustration with one labelled stage per stage the owner declares, its own limits and exactly one next step, with no horizontal overflow at 390, and every picture on the page decoding from a local file."
+    },
+    {
       "id": "pf-design-system-canonical-kit",
       "capability": "platform",
       "journey": "platform foundations — the design system kit renders",

@@ -4925,6 +4925,42 @@ const BRAND_REDESIGN_SCOPE = new Set([
    */
   const ADS_MANAGEMENT_SCOPE = new Set(['src/components/ads/']);
 
+  /**
+   * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — THE PUBLIC CONTENT PAGES' OWN DECLARED SURFACE.
+   *
+   * DECLARED, NOT WIDENED. F5/F5b/F6's contract is unchanged: a changed SOURCE file in NO declared
+   * set still fails, and every PROTECTED prefix stays refused. Declared HERE, above its first use,
+   * because F6 reads it and a set defined below its first read raises a TDZ ReferenceError — a defect
+   * this file records having already paid for once.
+   *
+   * WHAT IS DECLARED AND WHY:
+   *   · `src/config/publicPages.ts` — the content model gained a labelled-illustration field and a
+   *     limits field, and the seven Retail Infrastructure pages were rewritten to the page standard.
+   *     ALREADY COVERED by BRAND_REDESIGN_SCOPE above; listed here so this batch's surface reads in
+   *     one place.
+   *   · `src/components/marketing/PublicContentPage.tsx` (the ONE renderer) and `PublicImage.tsx`
+   *     (the ONE picture implementation, which also carries the correction of a false claim about
+   *     which gate asserts its pictures exist). BOTH WERE CHANGED BY BATCH 5 PART 1 AND WERE NEVER
+   *     DECLARED — that gap is closed here rather than repeated.
+   *   · `src/config/categoryGuides.ts` + `scripts/validate-category-guides.mjs` +
+   *     `e2e/categories-page.spec.ts` — BATCH 5 PART 1's owner, gate and spec, likewise never
+   *     declared. Same workstream, same gap, closed in the same place.
+   *   · `scripts/validate-public-page-standard.mjs` — this batch's NEW gate.
+   *   · `e2e/public-infrastructure-pages.spec.ts` — this batch's NEW browser spec.
+   *   · this file — the declaration itself.
+   */
+  const PUBLIC_PAGE_STANDARD_SCOPE = new Set([
+    'src/config/publicPages.ts',
+    'src/config/categoryGuides.ts',
+    'src/components/marketing/PublicContentPage.tsx',
+    'src/components/marketing/PublicImage.tsx',
+    'scripts/validate-category-guides.mjs',
+    'scripts/validate-public-page-standard.mjs',
+    'scripts/fetch-public-page-imagery.mjs',
+    'e2e/categories-page.spec.ts',
+    'e2e/public-infrastructure-pages.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+  ]);
 
   const f6ChangedSource = changed
     .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -5246,7 +5282,9 @@ const BRAND_REDESIGN_SCOPE = new Set([
           [...ADS_MANAGEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §WAVE 2 (2026-11-25) — the AI Studio console port (see the declaration above). */
           [...WAVE2_NEXT_CONSOLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-          WAVE2_NEXT_CONSOLE_SCOPE.has(p)
+          WAVE2_NEXT_CONSOLE_SCOPE.has(p) ||
+          /** §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — the public content pages (see above). */
+          PUBLIC_PAGE_STANDARD_SCOPE.has(p)
         )
     );
   test(

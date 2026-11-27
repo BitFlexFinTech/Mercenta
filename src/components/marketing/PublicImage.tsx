@@ -13,8 +13,16 @@
  * caption here therefore sits BELOW the picture, on the page's own surface, using the theme's tokens.
  *
  * A MISSING FILE DEGRADES, IT DOES NOT BREAK: the box is painted in the page's own surface colour and
- * the layout is unchanged. `scripts/validate-public-chrome.mjs` additionally asserts that every role
- * a page names has both files on disk, so a missing picture is caught before it ships.
+ * the layout is unchanged. Because that failure is SILENT, a gate has to catch it, and
+ * `scripts/validate-public-page-standard.mjs` (assertion S8) does: it asserts that every role any
+ * page names — its `hero` and every block `media` — is declared in the imagery owner
+ * (`src/config/homepageImagery.ts`) AND has both files on disk.
+ *
+ * §CORRECTED 2026-11-27 (BATCH 5 PART 2) — THIS COMMENT NAMED THE WRONG GATE. It said
+ * `validate-public-chrome.mjs` asserted it. That check has never read an image role: it counts
+ * `<header>`, `<footer>` and `<PublicNav>` occurrences, so a page naming a picture whose file was
+ * never fetched rendered an empty box while every gate passed. The claim was false from the day it
+ * was written; the assertion now genuinely exists, in the file named above.
  */
 import { cn } from '@/utils/cn';
 import {

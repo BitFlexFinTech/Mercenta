@@ -190,6 +190,77 @@ export function PublicContentPage({ page, onNavigate, onOpenPortal }: PublicCont
           </div>
         </section>
 
+        {/* ── The labelled worked illustration ────────────────────────────────
+            §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — THE PIECE THE BLOCKS COULD NOT EXPRESS.
+
+            A labelled, numbered run of stages: how the service actually runs, in order, in a shape a
+            reader can follow. Deliberately drawn in TYPE rather than as a picture — a process diagram
+            rendered as text cannot go stale, cannot disagree with the page beside it, and needs no
+            new asset for every page. `scripts/validate-public-page-standard.mjs` requires the stages
+            and forbids a figure in them (an illustration of a SEQUENCE, never of an amount). */}
+        {page.illustration && (
+          <section className="border-t border-hairline px-6 py-14">
+            <div className="mx-auto max-w-6xl">
+              <p className="font-mono text-ds-label uppercase tracking-[0.18em] text-[var(--mr-accent)]">
+                {page.illustration.label}
+              </p>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--mr-text-muted)]">
+                {page.illustration.intro}
+              </p>
+              <ol
+                data-testid="public-page-illustration"
+                className="mt-8 grid gap-px border border-hairline bg-[var(--mr-hairline)] sm:grid-cols-2 lg:grid-cols-4"
+              >
+                {page.illustration.stages.map((stage, index) => (
+                  <li key={stage.label} className="flex flex-col gap-2 bg-[var(--mr-surface)] p-5">
+                    <span
+                      aria-hidden="true"
+                      className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-accent)]"
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span className="font-display text-base font-bold tracking-tight text-[var(--mr-text-strong)]">
+                      {stage.label}
+                    </span>
+                    <span className="text-ds-label leading-relaxed text-[var(--mr-text-muted)]">
+                      {stage.detail}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+        )}
+
+        {/* ── What this does not do ───────────────────────────────────────────
+            §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — THE HONEST SECTION.
+
+            Every one of these pages claims something, and a page that only claims is not worth
+            reading. This states the limits in short statements, in the same panel language the
+            `availability` block already uses, so a reader can tell what they are NOT getting before
+            they talk to us. `scripts/validate-public-page-standard.mjs` requires it on every page in
+            the batch's scope. */}
+        {page.limits && (
+          <section className="px-6 pb-14">
+            <div className="mx-auto max-w-4xl border-l-2 border-[var(--mr-accent)] bg-[var(--mr-surface-tint)] px-6 py-5">
+              <h2 className="font-display text-lg font-bold tracking-tight text-[var(--mr-text-strong)]">
+                What this does not do
+              </h2>
+              <ul data-testid="public-page-limits" className="mt-4 space-y-3">
+                {page.limits.map((line) => (
+                  <li key={line} className="flex gap-3 text-ds-body leading-relaxed">
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--mr-accent)]"
+                    />
+                    <span className="text-[var(--mr-text-muted)]">{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
         {/* ── Availability — what is live and what is not ──────────────────── */}
         {page.availability && (
           <section className="px-6 pb-14">

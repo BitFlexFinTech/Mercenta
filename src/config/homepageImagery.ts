@@ -59,9 +59,9 @@ export const HOME_IMAGES: Record<HomeImageRole, HomeImageDefinition> = {
   'warehouse-racks': { alt: 'High-bay racking in a distribution centre', group: 'goods' },
   'port-containers': { alt: 'Stacked shipping containers at a container terminal', group: 'port' },
   'port-cranes': { alt: 'Container cranes loading a ship at port', group: 'port' },
-  'shelves-aisle': { alt: 'A stocked grocery aisle in a UK supermarket', group: 'retail' },
+  'shelves-aisle': { alt: 'A supermarket aisle being replenished, with goods in trolleys', group: 'retail' },
   'shelves-grocery': { alt: 'Retail shelving holding packaged goods', group: 'retail' },
-  'shelves-stock': { alt: 'Store floor during shelf replenishment', group: 'retail' },
+  'shelves-stock': { alt: 'A supermarket aisle during a refit, beside an open empty freezer cabinet', group: 'retail' },
   'boxes-stacked': { alt: 'Stacked cardboard cartons ready for dispatch', group: 'goods' },
   'desk-notebook': { alt: 'A work desk with a notebook and pen', group: 'work' },
   'desk-laptop': { alt: 'A laptop showing performance charts on a desk', group: 'work' },
@@ -106,8 +106,35 @@ export const CATEGORY_IMAGES: Record<CategoryImageRole, HomeImageDefinition> = {
   'cat-apparel': { alt: 'Shirts hanging along a clothes rack', group: 'retail' },
 };
 
-/** Every picture a public surface may use: the homepage set plus the ten category pictures. */
-export type PublicImageRole = HomeImageRole | CategoryImageRole;
+/**
+ * §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — THE TWO PICTURES THE CONTENT PAGES NEEDED.
+ *
+ * WHY THESE EXIST. Batch 5 Part 2 opened every Retail Infrastructure page with a picture from the
+ * homepage set. LOOKING at the rendered pages showed two of those choices were wrong: the price page
+ * opened on a supermarket mid-refit (which reads as a closed shop) and the creative-assets page opened
+ * on a near-empty desk. Both were licensed and correctly sized; both were the wrong picture. These two
+ * were chosen from a labelled contact sheet by eye, then pinned in
+ * `scripts/fetch-public-page-imagery.mjs`, and their licences are recorded in
+ * `public/imagery/CREDITS-PAGES.md`.
+ *
+ * SAME RULE AS EVERY OTHER PICTURE HERE: the alt text says what the photograph shows, and nothing here
+ * is presented as a brand Mercenta works with, a client, or a live listing.
+ */
+export type PageImageRole = 'page-product-display' | 'page-photo-studio';
+
+export const PAGE_IMAGES: Record<PageImageRole, HomeImageDefinition> = {
+  'page-product-display': {
+    alt: 'Confectionery in packaging set out across the shelves of a retail display unit',
+    group: 'retail',
+  },
+  'page-photo-studio': {
+    alt: 'A photographic studio, with a white backdrop, a softbox on a stand and a ceiling light',
+    group: 'work',
+  },
+};
+
+/** Every picture a public surface may use: the homepage set, the ten category pictures, the page set. */
+export type PublicImageRole = HomeImageRole | CategoryImageRole | PageImageRole;
 
 /**
  * ONE LOOKUP FOR EVERY PUBLIC PICTURE. The homepage designs keep reading `HOME_IMAGES`; the public
@@ -117,6 +144,7 @@ export type PublicImageRole = HomeImageRole | CategoryImageRole;
 export const PUBLIC_IMAGES: Record<PublicImageRole, HomeImageDefinition> = {
   ...HOME_IMAGES,
   ...CATEGORY_IMAGES,
+  ...PAGE_IMAGES,
 };
 
 /** The public path prefix. Files live in `public/imagery/`. */

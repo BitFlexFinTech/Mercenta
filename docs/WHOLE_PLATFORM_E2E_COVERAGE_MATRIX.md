@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 415 · **Capabilities:** 8
+**Scenarios:** 417 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -31,7 +31,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | integrations | 10 |
 | onboarding_acquisition | 58 |
 | operations | 48 |
-| platform | 87 |
+| platform | 89 |
 
 ## Scenarios
 
@@ -230,9 +230,11 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | pf-design-system-canonical-kit | platform | super_admin | happy | `e2e/design-system.spec.ts` | `canonical kit renders` |
 | pf-design-system-focus-visible | platform | super_admin | a11y | `e2e/design-system.spec.ts` | `focus-visible outline is visible on keyboard focus of a Button` |
 | pf-design-system-no-overflow | platform | super_admin | responsive | `e2e/design-system.spec.ts` | `(no horizontal overflow)` |
+| pf-public-categories-explained | platform | public_visitor | happy | `e2e/categories-page.spec.ts` | `one card per approved category, each carrying its own explanation` |
 | pf-public-chrome-footer-categories | platform | public_visitor | happy | `e2e/public-chrome.spec.ts` | `the footer carries the five-column shape` |
 | pf-public-cookie-notice-sticky | platform | public_visitor | persistence | `e2e/public-chrome.spec.ts` | `answering the notice STICKS across a reload` |
 | pf-public-header-labels-agree | platform | public_visitor | happy | `e2e/public-chrome.spec.ts` | `the footer agrees with them` |
+| pf-public-page-standard | platform | public_visitor | happy | `e2e/public-infrastructure-pages.spec.ts` | `opening, labelled illustration, limits and one next step` |
 | pf-public-pages-render-shell-noredline | platform | public_visitor | happy | `e2e/public-pages.spec.ts` | `shell and publishes no internal detail` |
 | pf-public-stays-public-with-session | platform | public_visitor | happy | `e2e/runtime-entry.spec.ts` | `is still the public marketing homepage` |
 | pf-rbac-brand-nav-hidden | platform | brand_user | refusal | `e2e/app-shell.spec.ts` | `Brand — admin-only views hidden; render-side auth intact` |
