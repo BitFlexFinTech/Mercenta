@@ -316,3 +316,47 @@ test('a visitor without a session still gets the marketing homepage, and the con
   await expect(page.getByRole('navigation', WORKSPACE_NAV)).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
+
+/* §PHASE C BATCH C1 — THE CONSOLE HOMEPAGE EDITOR, RENDERED AND USED.
+   The console is now the DEFAULT for a signed-in session, so this panel is the only way an
+   operator reaches their own front page without finding the hidden legacy switch. This is
+   the half no static check can prove: the panel MOUNTS with real content taken from the
+   owners, and the wording gate is genuinely wired — an outward field carrying banned
+   positioning disables Publish in the real UI. Compiling is not rendering. */
+test('super-admin: the console Homepage Editor renders, and unsafe wording blocks publishing', async ({ page }) => {
+  const pageErrors = watchPageErrors(page);
+  await loginAs(page, 'Super Admin — Tadii');
+  await page.goto('/?console=next');
+
+  const nav = page.getByRole('navigation', WORKSPACE_NAV);
+  await expect(nav).toBeVisible({ timeout: 20000 });
+  /* Prefix match, not exact: a count badge is part of the button's accessible name. */
+  await nav.getByRole('button', { name: /^Super Admin/ }).first().click();
+
+  await page.getByRole('tab', { name: 'Homepage Editor' }).click();
+
+  /* Mounted, with REAL content: every design the owner declares, and both point sections. */
+  await expect(page.getByTestId('homepage-design-picker')).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('[data-testid^="homepage-design-option-"]')).toHaveCount(5);
+  await expect(page.getByTestId('homepage-editor-controls')).toBeVisible();
+  await expect(page.getByTestId('homepage-section-visibility')).toBeVisible();
+  await expect(page.getByTestId('homepage-section-protection')).toBeVisible();
+
+  /* Publish starts ENABLED for the canonical content… */
+  const publish = page.getByTestId('homepage-publish');
+  await expect(publish).toBeEnabled();
+
+  /* …and is DISABLED the moment an outward field carries banned positioning. This is the
+     capability the legacy editor had; without it the console could publish copy this project
+     forbids, and neither typecheck nor the build would notice. */
+  const heading = page.getByLabel('Hero heading (first part)');
+  await expect(heading).toBeVisible();
+  await heading.fill('Sell on Amazon today');
+  await expect(publish).toBeDisabled({ timeout: 10000 });
+
+  /* Reverting the field re-enables it — the gate follows the CONTENT, not a stuck flag. */
+  await heading.fill('Global brands, UK shelves');
+  await expect(publish).toBeEnabled({ timeout: 10000 });
+
+  expect(pageErrors).toEqual([]);
+});

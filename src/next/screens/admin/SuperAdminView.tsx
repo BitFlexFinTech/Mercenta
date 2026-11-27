@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   ConsoleBarChart,
   ConsoleProgressTrack,
@@ -31,6 +31,10 @@ export type SuperAdminTabId =
   | 'staff'
   | 'applications'
   | 'accounting'
+  /* §PHASE C BATCH C1 — the Homepage Editor joins the Super Admin tabs, which is where
+     it has always lived (the legacy panel's `homepage` tab). Tabbing it rather than
+     giving it its own nav item keeps the declared view count unchanged. */
+  | 'homepage'
   | 'commercial'
   | 'company'
   | 'costs'
@@ -138,6 +142,12 @@ export interface SuperAdminViewProps {
   isSuperAdmin: boolean;
   activeTab: SuperAdminTabId;
   onTabChange: (tab: SuperAdminTabId) => void;
+  /**
+   * §PHASE C BATCH C1 — the Homepage Editor, supplied by the SCREEN as a node so this
+   * view stays pure (it renders what it is given and never fetches). The screen passes
+   * null unless that tab is open, so the editor mounts only when it is actually shown.
+   */
+  homepagePanel: ReactNode;
   canMutate: boolean;
   staff: StaffMember[];
   actingStaffId: string;
@@ -414,6 +424,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
     isSuperAdmin,
     activeTab,
     onTabChange,
+    homepagePanel,
     canMutate,
     staff,
     actingStaffId,
@@ -696,6 +707,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           { id: 'staff', label: 'Staff & RBAC', count: staff.length },
           { id: 'applications', label: 'Applications', count: applications.length },
           { id: 'accounting', label: 'Accounting & Payouts', count: payoutRows.length },
+          { id: 'homepage', label: 'Homepage Editor' },
           { id: 'commercial', label: 'Commercial Models', count: commercialRows.length },
           { id: 'company', label: 'Company & HMRC' },
           { id: 'costs', label: 'Operating Costs' },
@@ -2462,6 +2474,12 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           </div>
         </SectionCard>
       )}
+
+      {/* ── §PHASE C BATCH C1 — HOMEPAGE EDITOR ───────────────────────────
+          Rendered by the SCREEN and passed in, so this view keeps its single job
+          (render what it is given). It is null unless the tab is open, so the editor's
+          data load happens only when an operator actually opens it. */}
+      {activeTab === 'homepage' && homepagePanel}
     </div>
   );
 }

@@ -133,6 +133,7 @@ import {
   SuperAdminView,
   type SuperAdminTabId,
 } from './SuperAdminView';
+import { AdminHomepageEditorScreen } from './AdminHomepageEditorScreen';
 
 const PARTNER_ID = 'a0000000-0000-0000-0000-000000000001';
 const HOOK_EDGE_BASE = '/functions/v1/companies-house';
@@ -440,6 +441,9 @@ export function SuperAdminScreen({ onNavigateView }: { onNavigateView?: (viewId:
       isSuperAdmin={isSuperAdmin}
       activeTab={activeTab}
       onTabChange={setActiveTab}
+      /* §PHASE C BATCH C1 — the editor is mounted ONLY while its tab is open, so its
+         data load never runs for an operator who never opens it. */
+      homepagePanel={activeTab === 'homepage' ? <AdminHomepageEditorScreen /> : null}
       canMutate={canCurrentUserMutate}
       staff={staff}
       actingStaffId={actingStaffId}
