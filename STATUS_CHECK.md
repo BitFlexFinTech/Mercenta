@@ -6691,3 +6691,28 @@ the registry's `not_started` build rows (**15** remain, e.g. `phase5-tutorial-re
 **EVIDENCE.** `typecheck` **0** · `lint` **0** · `build` **ok** (`dist/assets/index-C0nZCA_z.js`) · `validate:all` **187 PASS / 0 FAIL (of 187)** · `validate:built-rows` **2361/0** · `e2e/public-pages.spec.ts` + `e2e/public-chrome.spec.ts` **21 passed** · `brandkit` installed globally.
 
 **RESULT — see `PROJECT_STATUS.md` → `CURRENT RESUME STATE` for the live three-way status of this checkpoint.**
+
+## §PUBLIC SURFACES BATCH 5 (PART 1) — THE CATEGORIES PAGE EXPLAINS EACH CATEGORY, WITH A PICTURE (2026-11-27)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Commit `4d9fb5d`. One publish at the end of the content work.
+
+**Owner ask:** pages must not be boring; the categories page must explain each category and show products that fit it.
+This increment delivers the categories page. The other pages are the next batch.
+
+**Was:** ten identical pills, and the content model had NO way to render an image at all.
+**Now:** ten cards from `src/config/categoryGuides.ts` — what belongs / what works / what to watch — each with a
+photograph and a caption. The type is `ApprovedCategory`, so an unapproved category cannot be written; the gate fails if
+an approved one is missing.
+
+**The pictures took four passes, and the first three were wrong.** Automated search-plus-keyword filtering returned CC0
+images that were licensed, correctly sized and useless: a telephone keypad for "canned goods", a street mural for
+"car parts", a waste-paper bin for "stainless steel saucepan", paint containers for "cosmetics flat lay", a 1740 museum
+saucepan, and an identifiable branded product. Keywords cannot judge a photograph. `probe-category-imagery.mjs` now
+renders a labelled contact sheet; the ten are chosen by eye and PINNED in `CURATED`, so the run is deterministic.
+
+**Evidence:** typecheck 0 · eslint 0 · build 6.46s · claims scan PASS (70 pages) · `validate-category-guides` 8/8 ·
+browser spec proves all 10 pictures decode and are local · screenshots at 1440 and 390: 10 cards, 10 pictures, 0 broken,
+0 overflow · 20 image files, ~1.1 MB, widest 1024px, none upscaled.
+
+**Known and stated:** the automotive photograph is black-and-white — the best of its shortlist, and the one picture to
+revisit when better material exists. The other fifteen public pages are unchanged: ~2 content blocks each, no pictures.
