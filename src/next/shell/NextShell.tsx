@@ -14,6 +14,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
 import { navigateProductView, parseProductPath, recordLinkQuery } from '@/lib/runtime/productRoutes';
 import { BrandLockup } from '@/components/shared/BrandLockup';
+import { ThemeSelector } from '@/components/shared/ThemeSelector';
 import { EmptyStateBlock, LoadingRows } from '@/next/components/ConsolePrimitives';
 import {
   SURFACE_CONFIGS,
@@ -1027,8 +1028,12 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               )}
             </div>
 
-            {/* Zone 3: Preview trigger */}
+            {/* Zone 3: appearance + preview trigger */}
             <div className="flex items-center gap-2">
+              {/* §PHASE B — THE APPEARANCE SWITCHER LIVES IN THE CONSOLE. It used to exist
+                  only in the legacy header, so a session inside the console had no way to
+                  change appearance at all. */}
+              <ThemeSelector compact />
               <button
                 type="button"
                 onClick={onOpenPreview}

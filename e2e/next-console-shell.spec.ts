@@ -44,3 +44,37 @@ test('the rail is fixed, branded, and each workspace shows its OWN menu', async 
   await expect(navButton('Control Centre')).toBeVisible({ timeout: 20000 });
   await expect(navButton('Royalties')).toHaveCount(0);
 });
+
+test('the console follows BOTH appearances, and offers the switcher', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await loginAs(page, 'Super Admin — Tadii');
+
+  const consoleBg = async () => {
+    await expect(page.getByRole('navigation', { name: 'Workspace navigation' })).toBeVisible({ timeout: 20000 });
+    return page.locator('.mercenta-next').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  };
+  const luminance = (rgb: string) => {
+    const parts = (rgb.match(/[0-9]+/g) ?? ['0', '0', '0']).slice(0, 3).map(Number);
+    return 0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2];
+  };
+
+  await page.goto('/?console=next');
+  await page.evaluate(() => window.localStorage.setItem('mercenta.theme', 'brand-dark'));
+  await page.reload();
+  const dark = await consoleBg();
+
+  await page.evaluate(() => window.localStorage.setItem('mercenta.theme', 'brand-light'));
+  await page.reload();
+  const light = await consoleBg();
+
+  /* §PHASE B — the console must FOLLOW the appearance, not ignore it. Before this
+     phase its palette was hardcoded light, so both readings were identical. */
+  expect(dark === light, 'the console painted the SAME background in both appearances: ' + dark).toBe(false);
+  expect(luminance(dark), 'brand-dark must paint a DARK console canvas, got ' + dark).toBeLessThan(128);
+  expect(luminance(light), 'brand-light must paint a LIGHT console canvas, got ' + light).toBeGreaterThan(128);
+
+  /* And the switcher must be reachable INSIDE the console (it was legacy-only). */
+  await expect(page.locator('header button[aria-haspopup="menu"]').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});

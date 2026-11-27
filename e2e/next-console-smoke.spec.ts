@@ -148,6 +148,10 @@ test('every mounted brand view renders and none falls back to the Phase 4-6 plac
 test('super-admin session: an approval is audited, and the audit trail shows it', async ({
   page,
 }) => {
+  /* §PHASE B — this one test walks the Control Centre's three areas AND takes a
+     full-page screenshot; under parallel load it exceeded the 30s default and
+     reported a FALSE failure. Tripled, not weakened: no assertion changed. */
+  test.slow();
   const pageErrors = watchPageErrors(page);
   await loginAs(page, 'Super Admin — Tadii');
   await page.goto('/?console=next');

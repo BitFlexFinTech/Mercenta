@@ -34,8 +34,8 @@
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
-  color: #09090b;
-  background-color: #fafafa;
+  color: var(--mr-text-strong, #09090b);
+  background-color: var(--mr-bg, #fafafa);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -77,39 +77,39 @@
    these comments and fails if any of the replaced classes is still authored in the
    console's code. The value is unchanged from when each class was introduced. */
 .mercenta-next .text-strong {
-  color: #09090b; /* was text-zinc-950 */
+  color: var(--mr-text-strong, #09090b); /* was text-zinc-950 */
 }
 .mercenta-next .text-muted {
-  color: #52525b; /* was text-zinc-600 */
+  color: var(--mr-text-muted, #52525b); /* was text-zinc-600 */
 }
 .mercenta-next .text-faint {
-  color: #71717a; /* was text-zinc-500 */
+  color: var(--mr-text-faint, #71717a); /* was text-zinc-500 */
 }
 .mercenta-next .text-accent,
 .mercenta-next .text-accent-300,
 .mercenta-next .text-accent-400 {
-  color: #c2410c;
+  color: var(--mr-accent, #c2410c);
 }
 .mercenta-next .bg-surface {
-  background-color: #fafafa; /* was bg-zinc-50 */
+  background-color: var(--mr-bg, #fafafa); /* was bg-zinc-50 */
 }
 .mercenta-next .bg-surface-raised {
-  background-color: #ffffff; /* was bg-white */
+  background-color: var(--mr-surface-raised, #ffffff); /* was bg-white */
 }
 .mercenta-next .bg-tint {
-  background-color: #f4f4f5; /* was bg-zinc-100 */
+  background-color: var(--mr-surface, #f4f4f5); /* was bg-zinc-100 */
 }
 .mercenta-next .bg-surface-hover {
-  background-color: rgba(9, 9, 11, 0.35);
+  background-color: var(--mr-surface-hover, rgba(9, 9, 11, 0.35));
 }
 .mercenta-next .border-hairline {
-  border-color: #e4e4e7; /* was border-zinc-200 */
+  border-color: var(--mr-hairline, #e4e4e7); /* was border-zinc-200 */
 }
 .mercenta-next .border-hairline-strong {
-  border-color: #d4d4d8; /* was border-zinc-300 */
+  border-color: var(--mr-hairline-strong, #d4d4d8); /* was border-zinc-300 */
 }
 .mercenta-next .divide-hairline-06 > :not(:first-child) {
-  border-color: #e4e4e7; /* was divide-zinc-200 */
+  border-color: var(--mr-hairline, #e4e4e7); /* was divide-zinc-200 */
 }
 .mercenta-next .rounded-ds-sm {
   border-radius: 8px;
@@ -183,7 +183,7 @@
   border-color: #c7d2fe;
 }
 .mercenta-next .text-palette-orange {
-  color: #c2410c;
+  color: var(--mr-accent, #c2410c);
 }
 .mercenta-next .bg-palette-orange\/10 {
   background-color: #fff7ed;
@@ -212,52 +212,52 @@
  * because a translated value would change what the panel composites over.
  */
 .mercenta-next .text-secondary {
-  color: #3f3f46; /* was text-zinc-700 */
+  color: var(--mr-text, #3f3f46); /* was text-zinc-700 */
 }
 .mercenta-next .text-ink-900 {
-  color: #18181b; /* was text-zinc-900 */
+  color: var(--mr-text-strong, #18181b); /* was text-zinc-900 */
 }
 .mercenta-next .text-ink-800 {
-  color: #27272a; /* was text-zinc-800 */
+  color: var(--mr-text, #27272a); /* was text-zinc-800 */
 }
 .mercenta-next .text-quiet {
-  color: #a1a1aa; /* was text-zinc-400 */
+  color: var(--mr-text-faint, #a1a1aa); /* was text-zinc-400 */
 }
 .mercenta-next .text-quieter {
-  color: #d4d4d8; /* was text-zinc-300 */
+  color: var(--mr-text-soft, #d4d4d8); /* was text-zinc-300 */
 }
 .mercenta-next .text-on-dark {
-  color: #ffffff; /* was text-white, used on a dark or accent fill */
+  color: var(--mr-btn-text, #ffffff); /* was text-white, used on a dark or accent fill */
 }
 .mercenta-next .bg-tint-strong {
-  background-color: #e4e4e7; /* was bg-zinc-200 */
+  background-color: var(--mr-surface-hover, #e4e4e7); /* was bg-zinc-200 */
 }
 .mercenta-next .bg-ink-800 {
-  background-color: #27272a; /* was bg-zinc-800 */
+  background-color: var(--mr-btn-bg-hover, #27272a); /* was bg-zinc-800 */
 }
 .mercenta-next .bg-ink-900 {
-  background-color: #18181b; /* was bg-zinc-900 */
+  background-color: var(--mr-btn-bg-hover, #18181b); /* was bg-zinc-900 */
 }
 .mercenta-next .bg-ink-950 {
-  background-color: #09090b; /* was bg-zinc-950 */
+  background-color: var(--mr-btn-bg, #09090b); /* was bg-zinc-950 */
 }
 .mercenta-next .bg-scrim-30 {
   background-color: rgba(9, 9, 11, 0.3); /* was bg-zinc-950/30 */
 }
 .mercenta-next .bg-canvas-40 {
-  background-color: rgba(250, 250, 250, 0.4); /* was bg-zinc-50/40 */
+  background-color: color-mix(in srgb, var(--mr-bg) 40%, transparent); /* was bg-zinc-50/40 */
 }
 .mercenta-next .bg-canvas-50 {
-  background-color: rgba(250, 250, 250, 0.5); /* was bg-zinc-50/50 */
+  background-color: color-mix(in srgb, var(--mr-bg) 50%, transparent); /* was bg-zinc-50/50 */
 }
 .mercenta-next .bg-canvas-60 {
-  background-color: rgba(250, 250, 250, 0.6); /* was bg-zinc-50/60 */
+  background-color: color-mix(in srgb, var(--mr-bg) 60%, transparent); /* was bg-zinc-50/60 */
 }
 .mercenta-next .bg-canvas-70 {
-  background-color: rgba(250, 250, 250, 0.7); /* was bg-zinc-50/70 */
+  background-color: color-mix(in srgb, var(--mr-bg) 70%, transparent); /* was bg-zinc-50/70 */
 }
 .mercenta-next .bg-canvas-80 {
-  background-color: rgba(250, 250, 250, 0.8); /* was bg-zinc-50/80 */
+  background-color: color-mix(in srgb, var(--mr-bg) 80%, transparent); /* was bg-zinc-50/80 */
 }
 /* §FRONTEND-REDESIGN BATCH 2b (2026-11-26) — REMOVED `.bg-tint-70`. It was a
    §WAVE 3m migration target for `bg-zinc-100/70`, but after the screens were
@@ -267,19 +267,19 @@
    in `.bg-tint-80` below, which IS used; if a future screen needs the 70% step,
    the rule is re-added at that real call site, not in advance. */
 .mercenta-next .bg-tint-80 {
-  background-color: rgba(244, 244, 245, 0.8); /* was bg-zinc-100/80 */
+  background-color: color-mix(in srgb, var(--mr-surface) 80%, transparent); /* was bg-zinc-100/80 */
 }
 .mercenta-next .border-hairline-soft {
-  border-color: #f4f4f5; /* was border-zinc-100 */
+  border-color: var(--mr-surface, #f4f4f5); /* was border-zinc-100 */
 }
 .mercenta-next .border-hairline-bold {
-  border-color: #a1a1aa; /* was border-zinc-400 */
+  border-color: var(--mr-hairline-strong, #a1a1aa); /* was border-zinc-400 */
 }
 .mercenta-next .border-ink {
-  border-color: #18181b; /* was border-zinc-900 */
+  border-color: var(--mr-hairline-strong, #18181b); /* was border-zinc-900 */
 }
 .mercenta-next .border-ink-strong {
-  border-color: #09090b; /* was border-zinc-950 */
+  border-color: var(--mr-text, #09090b); /* was border-zinc-950 */
 }
 
 @media (prefers-reduced-motion: reduce) {
