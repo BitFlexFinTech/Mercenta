@@ -6716,3 +6716,66 @@ browser spec proves all 10 pictures decode and are local · screenshots at 1440 
 
 **Known and stated:** the automotive photograph is black-and-white — the best of its shortlist, and the one picture to
 revisit when better material exists. The other fifteen public pages are unchanged: ~2 content blocks each, no pictures.
+
+---
+
+## §PUBLIC SURFACES BATCH 5 PART 2 — THE SEVEN RETAIL INFRASTRUCTURE PAGES, AND THE STANDARD MADE A GATE (2026-11-27)
+
+**What the owner asked for** was already recorded as this project's NEXT TASK: the remaining public pages need more
+content and images, page by page, to a stated standard — opening, what you get, how it works, a labelled worked
+illustration, what it does NOT do, one next step. This session did the first group: the seven Retail Infrastructure
+pages.
+
+**Measured before touching anything:** each of the seven had an opening, two or three prose blocks and a call to action
+— no picture at all, nothing labelled, and no statement of their own limits. The page MODEL could not express the last
+two, so the model was the first thing to fix rather than the pages.
+
+**What was built.** `src/config/publicPages.ts` gained `illustration` (a label, an intro, and labelled stages) and
+`limits` (what the page does NOT do); `PublicContentPage.tsx` renders both — the illustration as a numbered four-up
+labelled grid, the limits as an accent-bordered panel — reusing the ONE `PublicImage`. All seven pages were rewritten to
+the standard, each with an opening picture and a picture in one block.
+
+**The standard is now a gate.** `scripts/validate-public-page-standard.mjs` (12 assertions, auto-discovered by
+`validate:all`) fails the build if a page carries HALF the illustration/limits pair, and requires, for every page in the
+batch's DERIVED scope (the group read from the pages' own `navGroup`, never a retyped list): a declared opening picture
+present on disk in both sizes, a labelled illustration with at least three real stages, at least two real limits,
+exactly one next step, and NO FIGURE anywhere in the illustration or the limits — an illustration of a sequence must
+never become a claim about money. **Proved able to fail three times**, each restored byte-identical (sha256
+`578e8aa5ac7282b44a20be36eaeeda85e189c1352e5e982f795cafbb1ec30751`): a stage label made junk => S4; a hero set to an
+undeclared role => S8; a percentage introduced into a limit => S7.
+
+**A false claim was corrected, and the check it promised now exists.** `PublicImage.tsx` said since Batch 5 that
+`validate-public-chrome.mjs` asserts every picture a page names has its files on disk. **IT DID NOT** — that check
+counts headers, footers and nav, so a page could name a picture whose file was never fetched and render an empty box
+while every gate passed. The comment is corrected in place and the assertion now lives in the gate it names (S8).
+
+**Judged by LOOKING, which is the only thing that catches a wrong picture.** Three of the first choices were wrong and
+were fixed at source: a supermarket mid-refit (bare block wall, an empty freezer with its door open, cardboard on the
+floor) opened the price-governance page and read as a CLOSED SHOP; a near-empty dark desk opened the creative-assets
+page, whose subject is producing photography; and one alt text asserted "a stocked grocery aisle in a UK supermarket"
+for a photograph that shows an aisle mid-replenishment, with nothing establishing the country. Two replacements
+(`page-product-display`, `page-photo-studio`) were chosen from a labelled contact sheet by eye and pinned in the NEW
+`scripts/fetch-public-page-imagery.mjs` (CC0/PDM only, two widths, never upscaled), licensed in the NEW
+`public/imagery/CREDITS-PAGES.md`; two alt texts were rewritten to say what their photographs actually show.
+
+**Two defects found and fixed on the way.** (1) The word `commission` — the commercial model, a declared PUBLIC red
+line — had entered the creative-assets limits copy; caught by `validate-public-claims` in the corpus, fixed at source,
+and the gate then passed alone (70 rendered pages, 0 red-line). (2) BOTH e2e specs (the new one and
+`e2e/categories-page.spec.ts`) were ORPHANS: named by no scenario in `docs/scenario-catalogue.json`. Two
+platform-foundation scenarios were added and the coverage matrix regenerated. The categories spec was an INHERITED gap
+from Batch 5 Part 1, so the class is closed here, not just the instance.
+
+**Evidence:** typecheck 0 · eslint 0 errors · build ✓ 8.61s · `validate-public-page-standard` 12/12 · e2e
+`public-infrastructure-pages` + `categories-page` 17 passed · `validate-public-claims` PASS (70 pages) · registry
+integrity PASS (594 entries; every count recomputed from the entries) · `validate:all` 209 PASS / 1 FAIL of 210, the one
+failure being the resume block this commit updates · screenshots at 1440 and 390 of all seven pages: every picture
+decoded, 0 overflow, and the illustration and limits SEEN rendering as designed.
+
+**Corrected record:** the previous block claimed `validate-public-claims` HANGS inside the corpus run while passing
+alone. Measured twice this session, it does not: the corpus completed and the gate returned a real verdict. The claim is
+removed rather than softened, because a blocker that names a hang which does not exist sends the next session hunting it.
+
+**Known and stated:** five groups remain below the standard (Platform, Solutions, Company, Commercial, Resources — the
+categories page included: it has a picture, but not yet the illustration/limits pair). NOT deployed, deliberately: one
+publish covers this work plus the homepage's two contrast defects and the login restyle.
+
