@@ -21,9 +21,17 @@
  *
  * WHAT IT DELIBERATELY DOES NOT assert (recorded as outstanding work, because a
  * failing gate must never be introduced as "progress"): 32 rows are missing at
- * least one of {description, source, evidence, last_verified}, and 3 rows carry a
- * status outside the declared enum (`removed`, `removed`, `complete`). Both need a
- * DECISION about the matrix's vocabulary before a gate can be written for them.
+ * least one of {description, source, evidence, last_verified} — that needs a
+ * DECISION about the matrix's vocabulary before a gate can be written.
+ *
+ * §CORRECTED 2026-11-27 — A FALSE CLAIM REMOVED. This comment also read "3 rows carry a
+ * status outside the declared enum (`removed`, `removed`, `complete`)". Both of those
+ * statuses ARE declared in `_meta.status_enum`, and the registry actually holds **35
+ * `removed` + 2 `complete`** rows, not three — so the sentence was wrong twice over. It
+ * was removed rather than restated, because a reader cannot check a per-row claim from a
+ * comment; the per-status counts are asserted from the entries themselves by this gate's
+ * sibling `scripts/validate-no-stale-blockers.mjs`. The same false sentence appeared in
+ * the registry's own row for this check and was corrected in the same change.
  */
 import { readFileSync } from 'fs';
 import path from 'path';
