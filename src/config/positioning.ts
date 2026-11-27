@@ -699,13 +699,14 @@ export const PUBLIC_NAV: readonly PublicNavGroup[] = [
       PUBLIC_LINK.partnerships,
     ],
   },
-  {
-    label: 'Categories',
-    page: PUBLIC_LINK.categorySpecialization.page,
-    children: [
-      PUBLIC_LINK.categorySpecialization,
-    ],
-  },
+  /* §PUBLIC SURFACES BATCH 2 (2026-11-27) — THE "CATEGORIES" GROUP IS DELETED FROM THE MENU.
+     It held ONE child, "Category Specialization", and that same destination is already
+     published by "Solutions" above — so the header offered the identical link in two
+     groups, which is what the owner saw as a duplicate. The PAGE is unchanged and still
+     reachable two ways: through "Solutions" in the header, and through the footer's
+     "Product Categories" column (which renders the ten approved categories from
+     `APPROVED_CATEGORIES`, not from a group). The `Categories` slot in the header was
+     therefore a second name for a link that already had one. */
   {
     label: 'Commercial',
     page: PUBLIC_LINK.commercialTerms.page,
@@ -736,14 +737,15 @@ export const PUBLIC_NAV: readonly PublicNavGroup[] = [
       PUBLIC_LINK.forBrands,
     ],
   },
-  {
-    label: 'Legal',
-    page: PUBLIC_LINK.privacy.page,
-    children: [
-      PUBLIC_LINK.privacy,
-      PUBLIC_LINK.terms,
-    ],
-  },
+  /* §PUBLIC SURFACES BATCH 2 (2026-11-27) — THE "LEGAL" GROUP IS DELETED FROM THE MENU.
+     Legal documents do not belong in a marketing menu: a visitor looking for them looks at
+     the FOOTER, and the header slot pushed a nav row that was already at its width limit.
+     Both pages remain reachable, and are asserted reachable, exactly as before:
+     `PublicFooter` renders its own Legal column from `PUBLIC_LINK.privacy` and
+     `PUBLIC_LINK.terms` plus the cookie-settings control, filtering those two pages out of
+     the model columns so they are never printed twice. `e2e/public-pages.spec.ts` still
+     renders and theme-checks both documents, now resolving their route from their own
+     owner rather than from the menu. */
 ] as const;
 
 /**
@@ -768,10 +770,12 @@ export type PublicFooterColumn =
  * WHY THIS CHANGED. Every column below used to be read as `PUBLIC_NAV[0] … PUBLIC_NAV[8]`,
  * and the comments immediately above record the defect that positional reads have ALREADY
  * caused once: deleting a group shifted every index, Legal then appeared TWICE, and only
- * `e2e/public-chrome.spec.ts` caught it. Batch 2 removes TWO groups from the menu (Legal
- * and Categories), so with positional reads `PUBLIC_NAV[8]` would become `undefined` and
- * the footer would crash on EVERY public page. This repoint is behaviour-identical —
- * the same columns, in the same order — and it is the prerequisite for those removals.
+ * `e2e/public-chrome.spec.ts` caught it. Batch 2 removed TWO groups from the menu (Legal and
+ * Categories), and the repoint above was its PREREQUISITE: with positional reads `PUBLIC_NAV[8]`
+ * would have become `undefined` and the footer would have crashed on EVERY public page.
+ * A SECOND trap replaced the first, and it is sharper: `navGroup()` THROWS at module load for a
+ * name that is not there, so the Legal group and its column had to be removed in the SAME change
+ * (the column is now rendered by the footer directly — see its note below).
  *
  * `navGroup()` fails LOUDLY rather than yielding `undefined`, so a future rename is a named
  * error at first render, not a silently missing column.
@@ -803,8 +807,13 @@ export const PUBLIC_FOOTER_COLUMNS: readonly PublicFooterColumn[] = [
   navColumn('Resources'),
   navColumn('Explore'),
   { kind: 'categories', heading: 'Product Categories' },
-  /* Legal — read from its owner like every other column (see §NAVIGATION REPAIR above). */
-  navColumn('Legal'),
+  /* §PUBLIC SURFACES BATCH 2 (2026-11-27) — THE "Legal" COLUMN IS NO LONGER READ FROM A GROUP.
+     The header's Legal group is deleted (see PUBLIC_NAV above), so there is no group left to read
+     it from. Nothing a visitor sees changes: `PublicFooter` has ALWAYS rendered its Legal column
+     directly from `PUBLIC_LINK.privacy`, `PUBLIC_LINK.terms` and the cookie-settings control, and
+     it filters those two pages out of the model columns precisely because that hand-built column
+     already publishes them. A model column here was therefore a second copy of a column that was
+     filtered out at render time — reading it from a menu group was the duplicate. */
 ] as const;
 
 /** The control that re-opens the cookie notice after it has been answered. */

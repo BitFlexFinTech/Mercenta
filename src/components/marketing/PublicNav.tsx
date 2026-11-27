@@ -130,11 +130,15 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal, surface = 'ap
           </span>
         </a>
 
-        {/* ── Desktop: nine groups, each a real menu ────────────────────────
+        {/* ── Desktop: seven groups, each a real menu ────────────────────────
             §BATCH 2 (2026-11-21) — the row appears from `xl`, not `lg`. Measured:
-            nine groups plus both utility actions need 1029px, and the 80rem header
-            offers 1062px only at 1280px and above. At `lg` (1024–1279) the row
-            would overflow again, so the drawer carries the same nine groups there. */}
+            nine groups (the count when this was measured) plus both utility actions
+            need 1029px, and the 80rem header offers 1062px only at 1280px and above.
+            At `lg` (1024–1279) the row would overflow again, so the drawer carries the
+            same groups there. §PUBLIC SURFACES BATCH 2 (2026-11-27) removed two groups
+            (Legal and Categories), so the model now declares seven and this row has MORE
+            room than the measurement assumed — the breakpoint is left as measured rather
+            than tightened without a fresh measurement. */}
         <div className="hidden items-center gap-0.5 xl:flex" ref={dropdownRef}>
           {NAV_LINKS.map((item) => {
             const isOpen = openGroup === item.label;
@@ -161,9 +165,10 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal, surface = 'ap
                      two new header utility actions pushed this row to 1541px against
                      1062px available inside the 80rem container, so "Partner Login"
                      sat at x=1360 on a 1280px viewport — OFF-SCREEN and unclickable.
-                     Measured fit with the recipe below: 1029px, 33px spare. The row
-                     now appears from `xl` (1280px); below that the drawer carries all
-                     nine groups. The label uses the NAMED 11px floor (`ds-micro`), not
+                     Measured fit with the recipe below: 1029px, 33px spare (measured with
+                     nine groups; the model now declares seven, so the row has more room than
+                     this assumes). The row now appears from `xl` (1280px); below that the
+                     drawer carries all of them. The label uses the NAMED 11px floor (`ds-micro`), not
                      an arbitrary sub-12px size: `validate-typography-scale` forbids any
                      arbitrary micro size, and 11px is the scale's readable floor.
                      Tracking is kept wide because that is the approved Concept 3 label

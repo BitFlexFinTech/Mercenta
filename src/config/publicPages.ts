@@ -398,7 +398,12 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
 export const PUBLIC_CATEGORY_PAGE: PublicContentPage = {
   id: 'categories',
   path: '/categories',
-  navGroup: 'Categories',
+  /* §PUBLIC SURFACES BATCH 2 (2026-11-27) — REPOINTED, NOT LEFT DANGLING. The header's
+     "Categories" group is deleted (it duplicated this same destination inside "Solutions"), so this
+     page must name the group that ACTUALLY publishes it. A page naming a group that is no longer in
+     `PUBLIC_NAV` is a pointer to something removed — the exact class the removal-coherence rule
+     forbids — so it now names "Solutions", which carries Category Specialization. */
+  navGroup: 'Solutions',
   navLabel: 'All Categories',
   title: 'Categories',
   description:

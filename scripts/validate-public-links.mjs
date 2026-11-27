@@ -174,6 +174,39 @@ test(
 const platformToolsGroup = /label:\s*'Platform Tools'/.test(CODE_POSITIONING);
 test('the duplicate "Platform Tools" group is gone', !platformToolsGroup);
 
+/* ── 6. §PUBLIC SURFACES BATCH 2 — ABSENCE GUARD FOR THE TWO GROUPS THAT LEFT ──
+ *
+ * The owner removed the "Legal" group (legal documents belong in the FOOTER) and the "Categories"
+ * group (its single child, Category Specialization, was already published by "Solutions", so the
+ * header showed the same link twice). Both deletions need a guard that fails if either comes back,
+ * and — separately — proof that removing the MENU ENTRY did not remove the PAGE. Those are two
+ * different statements: the first is about a duplicate menu slot, the second about a visitor's
+ * ability to reach the privacy policy, the terms and the categories page at all.
+ */
+const removedGroups = ['Legal', 'Categories'].filter((label) =>
+  new RegExp(`label:\\s*'${label}'\\s*,`).test(CODE_POSITIONING)
+);
+test(
+  'the removed "Legal" and "Categories" menu groups are gone from CODE (absence guard)',
+  removedGroups.length === 0,
+  removedGroups.join(', ')
+);
+
+const legalLinks = ['privacy', 'terms'].map((name) => ({ name, page: linkToPage.get(name) }));
+const unresolvedLegal = legalLinks.filter((l) => !l.page || !declared.has(l.page));
+test(
+  'both legal documents still resolve to a declared page (they left the MENU, not the site)',
+  unresolvedLegal.length === 0,
+  unresolvedLegal.map((l) => `${l.name} → ${l.page ?? '(not declared)'}`).join(', ')
+);
+
+const categoriesPage = linkToPage.get('categorySpecialization');
+test(
+  'the categories page still resolves to a declared page (its menu group was deleted, the page was not)',
+  !!categoriesPage && declared.has(categoriesPage),
+  `categorySpecialization → ${categoriesPage ?? '(not declared)'}`
+);
+
 /* ── RESULT ─────────────────────────────────────────────────────────────────── */
 
 console.log('');

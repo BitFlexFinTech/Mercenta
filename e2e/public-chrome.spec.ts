@@ -24,6 +24,7 @@ import { test, expect } from '@playwright/test';
 import { APPROVED_CATEGORIES } from '../src/types';
 import {
   PUBLIC_NAV,
+  PUBLIC_LINK,
   PUBLIC_FOOTER_COLUMNS,
   PUBLIC_COOKIE_NOTICE,
   PUBLIC_COOKIE_NOTICE_REGION,
@@ -90,6 +91,28 @@ test.describe('Public chrome — footer, cookie notice and nav labels (B4)', () 
         await expect(footer.getByRole('button', { name: link.label })).toBeVisible();
       }
     }
+
+    /**
+     * §PUBLIC SURFACES BATCH 2 (2026-11-27) — WHAT WAS REMOVED FROM THE MENU MUST STILL BE REACHABLE.
+     *
+     * Two groups were deleted (Legal and Categories). A removal that also removed the PAGES would be
+     * a regression, not a tidy-up, and neither a typecheck nor the corpus can see it — the pages
+     * would simply have no way in. Both are therefore asserted here, from their own owners:
+     * the two legal documents through the footer's Legal column (which reads `PUBLIC_LINK`, not a
+     * group), and the categories page through whichever MENU GROUP publishes it — derived, so this
+     * assertion follows the owner instead of naming a group that may be renamed.
+     */
+    for (const legal of [PUBLIC_LINK.privacy, PUBLIC_LINK.terms]) {
+      await expect(footer.getByRole('button', { name: legal.label })).toBeVisible();
+    }
+    const categoriesHost = PUBLIC_NAV.find((g) =>
+      g.children.some((c) => c.page === PUBLIC_LINK.categorySpecialization.page)
+    );
+    expect(
+      categoriesHost,
+      'the categories page must remain reachable from a menu group (it was published by the deleted "Categories" group)'
+    ).toBeTruthy();
+    await expect(nav.getByRole('button', { name: categoriesHost!.label })).toBeVisible();
   });
 
   test('the cookie notice is shown to a first-time visitor and states what is actually stored', async ({ page }) => {

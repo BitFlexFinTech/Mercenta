@@ -33,10 +33,13 @@ matches only `rgb()`/`rgba()`**, so it ignored the bar and measured the text aga
 measurement, in the walk as well as in my probes. That is the next instrument fix, and it also explains why the walk
 reported the homepage as a WARN rather than a FAIL.
 
-**NOT DONE in Batch 2:** the menu's ITEMS — Legal out, Categories out, Retail Infrastructure's grouping — with the
-by-index footer repoint that must accompany them (`PUBLIC_FOOTER_COLUMNS` reads `PUBLIC_NAV[8]` for Legal, so removing
-the Legal group makes it `undefined` and crashes the footer unless it becomes a name-based lookup in the same change).
-**Batch 3 (the login) and Batch 4 (the proof and the single deployment) are not started.**
+**DONE in Batch 2 (2026-11-27, second session):** the menu's ITEMS — **"Legal" and "Categories" are removed** from
+`PUBLIC_NAV` (nine groups → **seven**). The by-index footer trap is GONE: `PUBLIC_FOOTER_COLUMNS` reads its columns by
+NAME (`navGroup()`), and the Legal group + its `navColumn('Legal')` entry were removed in the SAME change because
+`navGroup('Legal')` would otherwise throw at module load and break EVERY public page. Both removed destinations were
+proved still reachable: privacy/terms through the footer's hand-built Legal column, Category Specialization through
+"Solutions". **STILL NOT DONE:** the Retail Infrastructure grouping (an OWNER DECISION — nested, flattened or peer),
+the homepage's own two contrast defects, **Batch 3 (the login)** and **Batch 4 (the proof and the single deployment)**.
 
 
 ## §PUBLIC SURFACES BATCH 1 — ONE FOOTER, ONE TOP BAR, AND A BLACK FOOTER BAND (2026-11-27)
@@ -71,11 +74,10 @@ light, which fails three assertions (the identity one plus two contrast ones), r
 **86 checks** · `e2e/public-chrome.spec.ts` **6 passed** (was 4/2) · state gates: resume-state 61 assertions,
 rules-application 33/0, plain-english 20/0.
 
-**NOT DONE, and said plainly: BATCH 2 (the menu's items — Legal out, Categories out, the Retail Infrastructure
-grouping — and the menu's colours, which must be MEASURED first), BATCH 3 (the demo login's design) and BATCH 4 (the
-measurement, the corpus, ONE deployment and the live check).** The trap for Batch 2 is recorded in `PROJECT_STATUS.md`
-→ `OUTSTANDING BLOCKER`: `PUBLIC_FOOTER_COLUMNS` reads `PUBLIC_NAV` **by index**, so removing the Legal group makes
-`PUBLIC_NAV[8]` undefined and crashes the footer unless it is repointed to a name-based lookup in the same change.
+**NOT DONE, and said plainly: the RETAIL INFRASTRUCTURE grouping (an OWNER DECISION), the homepage's own contrast
+defects, BATCH 3 (the demo login's design) and BATCH 4 (the measurement, the corpus, ONE deployment and the live
+check).** Batch 2's menu ITEMS are done — Legal and Categories are out (see the entry above); the by-index footer trap
+it warned about is fixed, and the replacement trap was handled in the same change.
 
 
 ## §PHASE C BATCH C1 — THE HOMEPAGE EDITOR REACHES THE CONSOLE (2026-11-27)

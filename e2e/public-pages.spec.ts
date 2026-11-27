@@ -29,7 +29,7 @@
  * Dev server is started by playwright.config.ts (`npm run dev`, :5182).
  */
 import { test, expect } from '@playwright/test';
-import { PUBLIC_NAV, PUBLIC_CLAIM_RED_LINES } from '../src/config/positioning';
+import { PUBLIC_NAV, PUBLIC_LINK, PUBLIC_CLAIM_RED_LINES } from '../src/config/positioning';
 
 /**
  * §BRAND REDESIGN (2026-11-19) — RESOLVED BY PAGE, NOT BY POSITION.
@@ -47,7 +47,24 @@ const routeOf = (page: string): string => {
     const link = group.children.find((l) => l.page === page);
     if (link) return link.page;
   }
-  throw new Error(`public page "${page}" is not reachable from PUBLIC_NAV — the navigation owner and this spec disagree`);
+  /**
+   * §PUBLIC SURFACES BATCH 2 (2026-11-27) — A PAGE NEED NOT BE IN THE MENU TO BE A PAGE.
+   *
+   * This lookup used to search `PUBLIC_NAV` ONLY and throw otherwise, which made the menu the
+   * gatekeeper for whether a page could be tested at all. When the owner removed the header's
+   * "Legal" group, `routeOf('privacy')` and `routeOf('terms')` threw AT COLLECTION TIME — before a
+   * single test ran — and took the other five pages' coverage with them. The two documents had not
+   * stopped existing; they stopped being in the MENU.
+   *
+   * A page's reachability is its DECLARED route, not its menu slot, so the fallback asks the link
+   * owner (`PUBLIC_LINK`, which is where the footer's own Legal column reads them). The throw is
+   * kept for a page that exists in neither place: that is a real disagreement and must be loud.
+   */
+  const declared = Object.values(PUBLIC_LINK).find((l) => l.page === page);
+  if (declared) return declared.page;
+  throw new Error(
+    `public page "${page}" is neither in PUBLIC_NAV nor declared in PUBLIC_LINK — the navigation owner and this spec disagree`
+  );
 };
 
 /** Each page, its route (read from the navigation owner) and its H1. */

@@ -5375,19 +5375,25 @@ const BRAND_REDESIGN_SCOPE = new Set([
      footer. The retired two-group model (and its separate PUBLIC_FOOTER_COLUMNS list)
      is gone: one owner, read by both surfaces. */
   /**
-   * §NAVIGATION REPAIR (2026-11-20) — NINE groups, down from ten.
+   * §PUBLIC SURFACES BATCH 2 (2026-11-27) — REPOINTED. SEVEN groups (down from nine).
    *
-   * The tenth group was "Platform Tools", an exact DUPLICATE of "Platform": the
-   * same four destinations (Order Automation, Client Portal, Listing Health,
-   * Reporting & Analytics) under four page ids that had no page behind them.
-   * Every one of those links rendered a blank screen, and the extra group also
-   * overflowed the header at 1440px.
+   * The count has been repointed twice, never removed, because the count is the assertion that the
+   * model is a MODEL rather than an unbounded list:
+   *   · ten → nine (2026-11-20): the duplicate "Platform Tools" group was deleted — the same four
+   *     destinations as "Platform" under four page ids that had no page, every link blank, and the
+   *     extra group overflowed the header at 1440px;
+   *   · nine → seven (2026-11-27): the owner removed "Legal" (legal documents belong in the footer,
+   *     and the slot pushed a row already at its width limit) and "Categories" (its single child,
+   *     Category Specialization, was ALREADY published by "Solutions" — a duplicate link, which is
+   *     what the owner saw).
    *
-   * The Founder approved the deletion. The model is still declared ONCE and read
-   * by BOTH surfaces; only the duplicate group is gone.
+   * The two removed groups are asserted ABSENT in the same test, so a re-introduction fails here
+   * rather than quietly restoring the duplication. The model is still declared ONCE and read by
+   * BOTH surfaces.
    */
   test('B4 the navigation model is declared ONCE, in positioning.ts §12',
-    Array.isArray(positioning.PUBLIC_NAV) && positioning.PUBLIC_NAV.length === 9 &&
+    Array.isArray(positioning.PUBLIC_NAV) && positioning.PUBLIC_NAV.length === 7 &&
+    !positioning.PUBLIC_NAV.some((g) => g.label === 'Legal' || g.label === 'Categories') &&
     !!positioning.PUBLIC_LINK);
 
   /**

@@ -543,12 +543,23 @@ function readRedLines() {
     const m = typesSrc.match(/export const APPROVED_CATEGORIES = \[([\s\S]*?)\] as const;/);
     return m ? [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]) : [];
   })();
+  /**
+   * §PUBLIC SURFACES BATCH 2 (2026-11-27) — REPOINTED, AND NO LONGER ABLE TO FIND NOTHING.
+   *
+   * The footer's columns are now declared BY NAME (`navColumn('Platform')`), so the previous
+   * literal-heading regex matched ZERO entries against the current source. That broke these checks
+   * in BOTH directions at once, which is worse than failing outright: "the footer declares four owner
+   * columns" failed on 0, while "the footer carries all the headings" PASSED — because `0 === 0`. A
+   * measurement that finds nothing must be a FAILURE (rule 10 §5), so the parser understands the
+   * name-based form, includes the categories column, and the assertion below refuses an empty list.
+   */
   const footerHeadings = (() => {
     const m = positioningSrc.match(/export const PUBLIC_FOOTER_COLUMNS[\s\S]*?\n\] as const;/);
-    return m
-      ? [...m[0].matchAll(/heading: '([^']+)'|heading: PUBLIC_NAV\[0\]\.label/g)]
-          .map((x) => x[1] || 'Solutions & Services')
-      : [];
+    if (!m) return [];
+    const byName = [...m[0].matchAll(/navColumn\('([^']+)'\)/g)].map((x) => x[1]);
+    const categories = [...m[0].matchAll(/kind: 'categories',\s*heading: '([^']+)'/g)].map((x) => x[1]);
+    const literal = [...m[0].matchAll(/heading: '([^']+)'/g)].map((x) => x[1]);
+    return [...new Set([...byName, ...literal, ...categories])];
   })();
 
   check(`L12 the canonical category list was READ from src/types.ts (found ${canonicalCategories.length})`,

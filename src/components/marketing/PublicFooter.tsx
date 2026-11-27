@@ -1,7 +1,6 @@
 import {
   PUBLIC_COOKIE_SETTINGS_LABEL,
   PUBLIC_PROMISE,
-  PUBLIC_NAV,
   PUBLIC_FOOTER_COLUMNS,
   PUBLIC_COMPANY_NUMBER,
   PUBLIC_REGISTERED_OFFICE,
@@ -84,14 +83,20 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
    * §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — EACH DESTINATION IS
    * PUBLISHED ONCE.
    *
-   * MEASURED DEFECT: `PUBLIC_NAV` legitimately offers "Category Specialization"
-   * in TWO groups (Solutions and Categories), so the footer — which renders every
-   * group's children — printed the same link twice. The browser spec
+   * MEASURED DEFECT: the menu offered "Category Specialization" in TWO groups
+   * (Solutions and Categories), so the footer — which renders every group's
+   * children — printed the same link twice. The browser spec
    * `e2e/public-chrome.spec.ts` caught it as a strict-mode violation; the static
    * validator could not, because it collects the referenced ids into a Set and a
    * Set collapses duplicates. A sitemap that lists one destination twice is a real
-   * defect (duplicate content, two tab stops for one page), so the footer now
-   * records what it has already published and skips a repeat.
+   * defect (duplicate content, two tab stops for one page), so the footer records
+   * what it has already published and skips a repeat.
+   *
+   * §PUBLIC SURFACES BATCH 2 (2026-11-27) — the duplicate GROUP is gone: the
+   * "Categories" group was deleted from `PUBLIC_NAV`, so today no group repeats
+   * that destination. The guard STAYS, and is not dead code: it is what stops a
+   * future duplicate from being published silently, which is the only way the
+   * footer can stay an unambiguous sitemap as the menu changes.
    *
    * The HEADER is deliberately unchanged: a menu may offer the same destination in
    * two places without being wrong. Only the footer, whose job is an exhaustive

@@ -25,7 +25,11 @@
  *   P3  the canonical `PublicFooter` declares exactly one `<footer>` element, so "one
  *       footer" has a single owner and cannot become two inside it;
  *   P4  the homepage composition declares BOTH, so a page cannot silently lose its chrome;
- *   P5  zero network.
+ *   P5  zero network;
+ *   P6  the footer still publishes BOTH legal documents and the cookie-settings control. Added
+ *       2026-11-27 with the §PUBLIC SURFACES BATCH 2 removal of the header's "Legal" group: the
+ *       menu slot went, the pages did not, and a static check is needed because the corpus runs
+ *       without a browser (`e2e/public-chrome.spec.ts` is the runtime half).
  *
  * The runtime half of the same contract is `e2e/public-chrome.spec.ts`, which asserts the
  * rendered page in a real browser. Static half here, runtime half there: the class is
@@ -137,6 +141,35 @@ test(
 
 /* ── P5 — zero network ───────────────────────────────────────────────────── */
 test('P5 the whole run made zero live network calls', networkCalls === 0, `${networkCalls} call(s)`);
+
+/* ── P6 — the LEGAL pages live in the footer, and must stay there ───────────
+ *
+ * §PUBLIC SURFACES BATCH 2 (2026-11-27). The header's "Legal" group was deleted, and with it the
+ * model column that read it. That is only safe because `PublicFooter` publishes the two documents
+ * itself, from `PUBLIC_LINK` — which it has always done, filtering them out of the model columns so
+ * they never appear twice. Removing the group must never turn into removing the pages: the privacy
+ * policy, the terms and the control that re-opens the cookie notice are all that stand between a
+ * visitor and the legal information, and none of them has a menu slot any more. This is the STATIC
+ * half of that contract; `e2e/public-chrome.spec.ts` is the runtime half (it asserts the buttons are
+ * actually rendered and clickable).
+ */
+const footerBody = clean(FOOTER_FILE);
+
+/**
+ * The RENDER SITE is the array that is `.map()`ed into buttons — not any mention of the two links.
+ * MEASURED, first version of this check: it matched `/PUBLIC_LINK\.terms\b/` anywhere in the file,
+ * which the de-duplication filter also satisfies (`PUBLIC_LINK.terms.page` is excluded from the model
+ * columns). With the terms button deliberately deleted from the rendered column, that check PASSED —
+ * it could not fail, so it proved nothing. This form requires the two links in ONE array that is
+ * mapped, i.e. the list the visitor actually gets.
+ */
+const rendersBothLegalPages =
+  /\[\s*PUBLIC_LINK\.privacy\s*,\s*PUBLIC_LINK\.terms\s*\]\s*\.map\(/.test(footerBody);
+test(
+  'P6 the footer RENDERS both legal documents and the cookie-settings control (they left the MENU, not the site)',
+  rendersBothLegalPages && /PUBLIC_COOKIE_SETTINGS_LABEL/.test(footerBody),
+  rendersBothLegalPages ? '' : 'the linked array [privacy, terms] mapped into buttons was not found'
+);
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${assertions - failures}/${assertions} assertions`);
 process.exit(failures === 0 ? 0 : 1);
