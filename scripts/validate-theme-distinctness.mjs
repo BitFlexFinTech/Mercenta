@@ -705,6 +705,58 @@ try {
     if (H[id].dt === 'light') test(id + ': the tint RECESSES below the card (the light direction)', luminance(tint) <= luminance(card), '');
     else test(id + ': the tint LIFTS above the card (dark surfaces never recess)', luminance(tint) >= luminance(card), '');
   }
+    /* ── §OWNER DECISION 2026-11-27 — THE FOOTER BAND IS ONE BLACK BAND ─────────
+     *
+     * WHY THIS IS HERE. The public footer is now a single black band that does NOT
+     * follow the light/dark appearance, using four tokens declared in `themes.ts`
+     * (`--mr-band-bg` · `--mr-band-text` · `--mr-band-text-muted` · `--mr-band-hairline`).
+     * Two things about that could break silently, and neither was checkable before this
+     * section existed:
+     *   1. the band could start FOLLOWING the appearance — a later edit sets the light
+     *      block's band to a light value and the footer quietly stops being the black band
+     *      the owner asked for; so the four values are asserted IDENTICAL in both blocks;
+     *   2. the band's text could become unreadable on black — precisely the class of defect
+     *      this file exists to catch (the `--mr-text-soft` white-on-white incident). The
+     *      contrast is measured against the band's OWN background, because the ladder above
+     *      is measured against the page and the card, and the band is neither.
+     * Missing tokens FAIL rather than skip: a check that finds nothing is a failure.
+     */
+    const BAND = ['--mr-band-bg', '--mr-band-text', '--mr-band-text-muted', '--mr-band-hairline'];
+    const missingBand = [];
+    for (const id of ids) for (const token of BAND) if (!readVar(id, token)) missingBand.push(`${id}:${token}`);
+    test(
+      'the footer band declares all four of its tokens in BOTH appearances (a missing one is a FAILURE)',
+      missingBand.length === 0,
+      missingBand.join(', ')
+    );
+    if (missingBand.length === 0) {
+      const [a, b] = ids;
+      const differing = BAND.filter((t) => readVar(a, t) !== readVar(b, t));
+      test(
+        `the footer band is the SAME in both appearances (${a} vs ${b}) — one black band, not an appearance`,
+        differing.length === 0,
+        differing.length
+          ? differing.map((t) => `${t}: ${readVar(a, t)} vs ${readVar(b, t)}`).join(' · ')
+          : BAND.map((t) => `${t}=${readVar(a, t)}`).join(' · ')
+      );
+      for (const id of ids) {
+        const bandBg = parseHex(readVar(id, '--mr-band-bg'));
+        for (const token of ['--mr-band-text', '--mr-band-text-muted']) {
+          const fg = parseHex(readVar(id, token));
+          if (!fg || !bandBg) {
+            test(`${id}: ${token} on the band is measurable`, false, 'a colour could not be parsed');
+            continue;
+          }
+          const c = contrast(fg, bandBg);
+          test(
+            `${id}: ${token} on the band ≥ 4.5:1 (measured ${round(c)})`,
+            c >= 4.5,
+            `${readVar(id, token)} vs ${readVar(id, '--mr-band-bg')}`
+          );
+        }
+      }
+    }
+
   console.log(
     failures === 0
       ? `THEME_DISTINCTNESS_PASS (${checks} checks)`

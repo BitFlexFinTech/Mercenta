@@ -2,19 +2,16 @@ import {
   ArrowRight,
   ArrowUpRight,
   Boxes,
-  Menu,
   Plane,
   ScanLine,
   Store,
   TrendingUp,
-  Truck,
   Warehouse,
 } from "lucide-react";
 
 import { ShipmentTracker } from "@/components/lovable/ShipmentTracker";
-import { Wordmark } from "@/components/lovable/Wordmark";
 import { img } from "@/components/lovable/images";
-import { AUDIENCES, CATEGORIES, INFRASTRUCTURE, NAV, REASONS, STEPS, TAGLINE } from "@/components/lovable/mercenta";
+import { AUDIENCES, CATEGORIES, INFRASTRUCTURE, REASONS, STEPS } from "@/components/lovable/mercenta";
 import { cn } from "@/utils/cn";
 
 const MODULE_ICONS = [Boxes, Plane, Warehouse, Store, TrendingUp];
@@ -68,40 +65,28 @@ interface DesignEProps {
 export function DesignE({ content, onPrimary, onOpenPortal }: DesignEProps) {
   return (
     <div className="bg-ink font-geist text-paper">
-      {/* HEADER */}
-      <header className="sticky top-0 z-40 border-b border-paper/10 bg-ink/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Wordmark tone="paper" />
-          <nav className="hidden items-center gap-8 lg:flex">
-            {NAV.map((n) => (
-              <a
-                key={n.href}
-                href={n.href}
-                className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/60 transition-colors hover:text-paper"
-              >
-                {n.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            <a
-              href="/ads-management"
-              className="hidden items-center gap-2 rounded-md border border-paper/15 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-paper/80 transition-colors hover:border-signal hover:text-paper md:inline-flex"
-            >
-              Ads Management
-            </a>
-            <a
-              href="#contact"
-              className="hidden items-center gap-2 rounded-md bg-signal px-4 py-2 text-sm font-semibold text-ink transition-opacity hover:opacity-90 sm:inline-flex"
-            >
-              Start UK entry <ArrowRight className="h-4 w-4" />
-            </a>
-            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-paper/15 lg:hidden">
-              <Menu className="h-4 w-4" />
-            </span>
-          </div>
-        </div>
-      </header>
+      {/* §OWNER DECISION 2026-11-27 — DESIGN E'S OWN TOP BAR IS DELETED.
+          MEASURED DEFECT THIS CLOSES. `Home.tsx` renders the shared `<PublicNav>`
+          for every public page, and Design E carried a second, `sticky` `<header>`
+          as well — ported with the Concept 3 HTML. Both were pinned to the top of
+          the same screen (the shared nav at z-50, this one at z-40), so the front
+          page showed TWO overlapping bars: the owner's report was "the top menu is
+          too cluttered".
+
+          IT WAS A SECOND, NON-WORKING MENU. Its labels came from
+          `@/components/lovable/mercenta` (`NAV`) — a second navigation model beside
+          the owner in `src/config/positioning.ts` — and its links were hardcoded
+          `href`s (`/ads-management`, `#contact`) rather than the app's own
+          navigation, so they caused FULL page loads and `#contact` is not a route at
+          all. The real nav reads its labels, groups and destinations from the owner,
+          is the same menu on every public page, and works.
+
+          WHAT REMAINS IS DESIGN E'S OWN LOOK, NOT ITS CHROME: the section below is
+          the hero, and the `bg-ink` canvas stays, so the page is still the dark
+          Concept 3 design — it simply no longer draws a second navigation on top of
+          the real one. `scripts/validate-public-chrome.mjs` fails if any design
+          renders its own `<header>` or `<footer>` again. */}
+
 
       {/* HERO — 12-col grid; copy left (7), Shipment Tracker top-right (5) */}
       {/* §DEFECT FIXED AT SOURCE (2026-11-25). This fifth design shipped WITHOUT the
@@ -542,40 +527,34 @@ export function DesignE({ content, onPrimary, onOpenPortal }: DesignEProps) {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="pb-24">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <div className="grid gap-12 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <Wordmark tone="paper" />
-              <p className="mt-6 max-w-sm text-paper/55">{TAGLINE}</p>
-              <p className="mt-2 max-w-sm text-sm text-paper/40">
-                UK wholesale distribution and market-entry platform for international brands.
-              </p>
-            </div>
-            {[
-              { h: "Platform", l: ["Infrastructure", "How it works", "Shipment visibility"] },
-              { h: "Company", l: ["Why Mercenta", "Who we work with", "Partnerships"] },
-              { h: "Legal", l: ["Privacy", "Terms", "Cookies"] },
-            ].map((col) => (
-              <div key={col.h} className="md:col-span-2">
-                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-paper/40">{col.h}</p>
-                <ul className="mt-4 space-y-2.5 text-sm text-paper/70">
-                  {col.l.map((x) => (
-                    <li key={x}>{x}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="mt-14 flex flex-col justify-between gap-3 border-t border-paper/10 pt-6 font-mono text-[11px] uppercase tracking-[0.18em] text-paper/40 sm:flex-row">
-            <span>© 2026 Mercenta Partners Ltd</span>
-            <span className="flex items-center gap-2">
-              <Truck className="h-3.5 w-3.5 text-signal" /> United Kingdom
-            </span>
-          </div>
-        </div>
-      </footer>
+      {/* §OWNER DECISION 2026-11-27 — DESIGN E'S OWN FOOTER BAND IS DELETED.
+          MEASURED DEFECT THIS CLOSES. `Home.tsx` renders the canonical
+          `<PublicFooter>` once, for every public page — and Design E carried its
+          own `<footer>` as well, brought across with the Concept 3 HTML. The front
+          page therefore rendered TWO footers: 34 lines of the concept's own columns,
+          its own hardcoded "© 2026 Mercenta Partners Ltd", and "Privacy / Terms /
+          Cookies" as plain text that is NOT a link (see the list items below — they
+          were `<li>{x}</li>`, so a visitor who needs those pages found text that did
+          nothing) — stacked on top of the real footer, which reads its columns from
+          `positioning.ts`, publishes the company number, registered office,
+          jurisdiction and contact, and whose legal links work.
+
+          IT WAS ALREADY BREAKING THE PRODUCT'S OWN TESTS. With two `<footer>`
+          elements on the homepage, `page.locator('footer')` resolves to two nodes and
+          `e2e/public-chrome.spec.ts` failed in strict mode on two tests ("the homepage
+          renders with no uncaught error and shows the footer"; "answering the notice
+          STICKS across a reload, and the footer can re-open it"). The validator corpus
+          does not run the e2e specs, so nothing had reported it since this design
+          became the default.
+
+          NOTHING UNIQUE IS LOST. The closing call to action above this point is
+          Design E's own and stays. `scripts/validate-public-chrome.mjs` now fails if
+          any public page renders more than one header or footer, so it cannot return.
+
+          The band the owner liked is not lost either: the REAL footer is now black in
+          both appearances (`--mr-band-*` in `src/config/themes.ts`), which is where
+          that look belongs — one black band, with working links and the full company
+          disclosure. */}
 
     </div>
   );

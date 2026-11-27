@@ -183,6 +183,20 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-surface-tint': '#161616',
       '--mr-hairline': BRAND_PALETTE.darkBorder,
       '--mr-hairline-strong': '#3D3D3D',
+      /* §OWNER DECISION 2026-11-27 — THE PUBLIC FOOTER BAND IS ALWAYS BLACK.
+         The footer sits at the foot of every public page, and the owner asked for it
+         to read as ONE BLACK BAND rather than following the light/dark appearance. So
+         these four tokens carry THE SAME VALUES IN BOTH APPEARANCES — that identity is
+         the contract, and `scripts/validate-theme-distinctness.mjs` now asserts it, so
+         a future edit cannot quietly make the band follow the appearance again.
+         Every value is DERIVED from `BRAND_PALETTE`, never a new colour: the brand's
+         black and white, and the guidelines' own dark muted step and dark hairline.
+         Measured on the band: white 21:1, muted #A5A5A5 8.53:1 — both far above the
+         4.5:1 AA floor, which the same gate measures. */
+      '--mr-band-bg': BRAND_PALETTE.black,
+      '--mr-band-text': BRAND_PALETTE.white,
+      '--mr-band-text-muted': BRAND_PALETTE.darkMuted,
+      '--mr-band-hairline': BRAND_PALETTE.darkBorder,
       '--mr-text-strong': BRAND_PALETTE.white,
       '--mr-text': '#E8E8E8',
       '--mr-text-active': BRAND_PALETTE.white,
@@ -308,6 +322,15 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-surface-tint': BRAND_PALETTE.lightSurface,
       '--mr-hairline': BRAND_PALETTE.lightBorder,
       '--mr-hairline-strong': '#BFBFBF',
+      /* §OWNER DECISION 2026-11-27 — THE PUBLIC FOOTER BAND IS ALWAYS BLACK, in this
+         appearance TOO. The four values below are IDENTICAL to the dark block's: the
+         band does not follow the appearance, it is the brand's black in both. See the
+         dark block for the full reason and the measured contrast; the gate asserts the
+         two blocks agree, so this copy cannot drift from it. */
+      '--mr-band-bg': BRAND_PALETTE.black,
+      '--mr-band-text': BRAND_PALETTE.white,
+      '--mr-band-text-muted': BRAND_PALETTE.darkMuted,
+      '--mr-band-hairline': BRAND_PALETTE.darkBorder,
       '--mr-text-strong': BRAND_PALETTE.black,
       '--mr-text': '#333333',
       '--mr-text-active': BRAND_PALETTE.black,

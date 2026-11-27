@@ -78,7 +78,7 @@ interface PublicFooterProps {
 
 export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
   const linkClass =
-    'text-ds-label text-[var(--mr-text-muted)] hover:text-[var(--mr-accent)] transition-colors cursor-pointer block py-0.5 text-left';
+    'text-ds-label text-[var(--mr-band-text-muted)] hover:text-[var(--mr-accent)] transition-colors cursor-pointer block py-0.5 text-left';
 
   /**
    * §BATCH 2 GATE DEFECT FIXED AT SOURCE (2026-11-21) — EACH DESTINATION IS
@@ -100,13 +100,13 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
   const renderedPages = new Set<string>();
 
   return (
-    <footer className="border-t border-hairline bg-[var(--mr-surface)]">
+    <footer className="border-t border-[var(--mr-band-hairline)] bg-[var(--mr-band-bg)]">
       <div className="mx-auto max-w-7xl px-6 py-14">
         {/* ── Brand column + the navigation groups ─────────────────────────── */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,320px)_1fr]">
           <div>
             <BrandLockup className="h-14 w-auto" variant="dark" />
-            <p className="mt-5 text-ds-label leading-relaxed text-[var(--mr-text-muted)]">
+            <p className="mt-5 text-ds-label leading-relaxed text-[var(--mr-band-text-muted)]">
               {PUBLIC_PROMISE}
             </p>
             <button
@@ -122,14 +122,14 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
               if (column.kind === 'categories') {
                 return (
                   <div key={column.heading}>
-                    <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                    <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-band-text)]">
                       {column.heading}
                     </h4>
                     <div>
                       {APPROVED_CATEGORIES.map((cat) => (
                         <span
                           key={cat}
-                          className="block py-0.5 text-ds-label text-[var(--mr-text-muted)]"
+                          className="block py-0.5 text-ds-label text-[var(--mr-band-text-muted)]"
                         >
                           {cat}
                         </span>
@@ -149,7 +149,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
               if (children.length === 0) return null;
               return (
                 <div key={column.heading}>
-                  <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+                  <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-band-text)]">
                     {column.heading}
                   </h4>
                   <div>
@@ -176,7 +176,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
                 exact single-source-of-truth violation the model exists to
                 prevent. The model's column is now the only one. */}
             <div>
-              <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+              <h4 className="mb-3 font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-band-text)]">
                 Legal
               </h4>
               <div>
@@ -198,7 +198,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
 
         {/* ── Trust and membership positions (6 + 1 reserved for AWRS) ─────── */}
         <div
-          className="mt-14 grid grid-cols-2 gap-px border border-hairline bg-[var(--mr-hairline)] sm:grid-cols-3 lg:grid-cols-7"
+          className="mt-14 grid grid-cols-2 gap-px border border-[var(--mr-band-hairline)] bg-[var(--mr-band-hairline)] sm:grid-cols-3 lg:grid-cols-7"
           data-testid="footer-trust-row"
         >
           {TRUST_POSITIONS.map((pos) => (
@@ -207,15 +207,15 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
               data-testid={`footer-trust-${pos.id}`}
               className={
                 pos.reserved
-                  ? 'bg-[var(--mr-surface)] px-4 py-5 opacity-60'
-                  : 'bg-[var(--mr-surface)] px-4 py-5'
+                  ? 'bg-[var(--mr-band-bg)] px-4 py-5 opacity-60'
+                  : 'bg-[var(--mr-band-bg)] px-4 py-5'
               }
             >
-              <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-text-muted)]">
+              <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-band-text-muted)]">
                 {pos.label}
               </p>
               {pos.detail && (
-                <p className="mt-1.5 text-ds-label font-semibold leading-snug text-[var(--mr-text-strong)]">
+                <p className="mt-1.5 text-ds-label font-semibold leading-snug text-[var(--mr-band-text)]">
                   {pos.detail}
                 </p>
               )}
@@ -224,11 +224,11 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
         </div>
 
         {/* ── Company disclosure ───────────────────────────────────────────── */}
-        <div className="mt-10 border-t border-hairline pt-8">
-          <p className="font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-text-strong)]">
+        <div className="mt-10 border-t border-[var(--mr-band-hairline)] pt-8">
+          <p className="font-mono text-ds-label uppercase tracking-[0.16em] text-[var(--mr-band-text)]">
             {publicCompanyLine()}
           </p>
-          <div className="mt-3 flex flex-col gap-1.5 text-ds-label text-[var(--mr-text-muted)]">
+          <div className="mt-3 flex flex-col gap-1.5 text-ds-label text-[var(--mr-band-text-muted)]">
             <span>
               {PUBLIC_JURISDICTION_LINE} · Company number {PUBLIC_COMPANY_NUMBER}
             </span>
@@ -248,11 +248,11 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center gap-2 border-t border-hairline pt-6 text-center">
-          <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-text-muted)]">
+        <div className="mt-8 flex flex-col items-center gap-2 border-t border-[var(--mr-band-hairline)] pt-6 text-center">
+          <p className="font-mono text-ds-micro uppercase tracking-[0.14em] text-[var(--mr-band-text-muted)]">
             Global Brands. UK Distribution. Smarter Growth.
           </p>
-          <p className="font-mono text-ds-micro text-[var(--mr-text-muted)]">
+          <p className="font-mono text-ds-micro text-[var(--mr-band-text-muted)]">
             &copy; {new Date().getFullYear()} Mercenta Partners Ltd. All rights reserved.
           </p>
         </div>
