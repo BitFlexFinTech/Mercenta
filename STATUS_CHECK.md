@@ -4,7 +4,59 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
-## §BATCH 9 — THE LOVABLE CONCEPT 3 TRANSFER LANDED, SIX DEFECTS FIXED, AND THE BUILD DEPLOYED (2026-11-25)
+## §PHASE C BATCH C0 — THE RECORDED BLOCKER, THE REAL DEFECT BEHIND IT, AND THE FIX (2026-11-27)
+
+**State: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Deployed and verified live on `https://demo.mercenta.co.uk`.
+
+**The recorded blocker is closed — and closing it found a real product defect that no gate could see.** The suite's
+only red was `validate-visual-acceptance` A4: the acceptance record was STALE, still marking 44 console screens
+`_(placeholder)_` after §FRONTEND-REDESIGN BATCHES 2–5 made them real (rule 10 — a live describer must match reality).
+FIVE defects were fixed at source, in the order they were discovered:
+
+1. **THE RECORDER COULD NOT BE RE-RUN.** `scripts/visual-acceptance.mjs` reached the legacy shell with
+   `goto('/?console=legacy')`. MEASURED: that URL renders the PUBLIC homepage (`nav[aria-label="Main"]`), because the
+   app derives its environment from the PATH — so the legacy nav was never on the page and the walk died at 30
+   captures. It now clicks the console's OWN **“Legacy UI”** switch, which keeps the session's path. Proven in headless
+   Chromium BEFORE the change was written (`/admin?console=legacy` → `nav[aria-label="Primary"]`, 28 admin items).
+
+2. **THE REAL DEFECT THE WALK THEN FOUND.** `text-ink-950` had NO rule in `src/next/next.css`, so it fell through to
+   the application palette, where the ink scale is a SURFACE scale (`tailwind.config.js → ink.950 = var(--mr-bg-deep)`).
+   The console therefore painted its text in the PAGE-DEEP BACKGROUND colour — measured **1.14:1 in BOTH appearances
+   on 12 console screens (24 captures)**, up to 23 unreadable runs each, the worst being the console's own
+   “Operations Console” label. It was everywhere because `NextShell.tsx` sets the class on the console ROOT, so every
+   uncoloured run inherited it. ONE appearance-aware rule fixes all 220 sites. Verified **22 unreadable runs → 0**
+   locally, and **22 → 0 LIVE**.
+
+3. **A GATE THAT DID NOT EXIST.** `scripts/validate-next-console-tokens.mjs` cited “C3, which guards the undeclared
+   `text-strong`” — no such assertion existed; the gate jumped from C2 straight to the dead-palette guard. That false
+   citation is why (2) shipped. The real C3 is now written — every `ink`-family class the console authors must have a
+   rule in `next.css`, both sides DISCOVERED, opacity variants fail closed — and mutation-proved (two failures naming
+   `text-ink-950`, file restored byte-identical, sha256 `1b2ee31f…`).
+
+4. **TWO DESCRIBERS REPOINTED AT SOURCE.** The `requirements-registry.json` row claiming six admin views were
+   placeholders is now `complete`, with the fresh measurement and the superseded figures recorded; the generated
+   record's hardcoded `2026-11-25` title now stamps the TRUE pass date, with a banner so no reader has to infer a date
+   from a file name.
+
+5. **FOUND DURING THE SAME PASS, AND FIXED: `HANDOFF.md`'s machine-readable comment was NEVER CLOSED.** No HTML
+   comment close marker existed anywhere in the file, so any renderer treating it as Markdown would swallow the ENTIRE
+   remainder — the handoff's own content was invisible.
+
+**EVIDENCE.** Acceptance **294/294 captures — PASS 291 · PLACEHOLDER 0 · WARN 3 · FAIL 0** · `validate-visual-acceptance`
+**9/9** (was 8/9) · `validate-next-console-tokens` **15 assertions / 0 failures** · typecheck **0** (all four projects) ·
+build **EXIT 0** · project-state gates: resume-state **66 assertions PASS**, rules-application **33/0**, plain-english
+**20/0** · registry gates: integrity **7/0**, evidence-rows **2578/0** · **LIVE**: the console at `/admin/overview` in
+BOTH appearances, navigation present, 5,052 characters of content, ZERO page errors, and **149 text runs sampled with 0
+below 1.6:1** — the same screen and the same 149 runs that measured 22 unreadable before the fix. Full corpus
+**205 PASS / 1 FAIL of 206**; the single red, `validate-public-claims`, **PASSES when run alone with port 5182 free**
+(the recorded two-dev-server race — environment, not a product fault).
+
+**NOT DONE, and said plainly: the rest of §PHASE C is NOT STARTED** — the Homepage Editor, the Appearance settings and
+the Google setup wizard are still absent from the console. They are the recorded `NEXT TASK` and need no Owner
+decision. The brand Settings merge still waits on 12 data-layer functions absent from `src/data/api.ts`.
+
+
+## §BATCH 9 — THE LOVABLE CONCEPT 3 TRANSFER LANDED, SIX DEFECTS FIXED, AND THE BUILD DEPLOYED (2026-11-25) — SUPERSEDED BY §PHASE C BATCH C0 (2026-11-27)
 
 **State: DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE.** Verified locally and committed
 (`validate:all` **205 PASS / 0 FAIL** · typecheck **0** · build **EXIT 0** · browser **62 passed**), pushed to
