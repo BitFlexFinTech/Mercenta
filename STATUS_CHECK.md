@@ -4,6 +4,45 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 5 PART 6 — THE TWO COMMERCIAL PAGES MEET THE PAGE STANDARD, AND THE GATE'S SCOPE GROWS TO FIVE GROUPS (2026-11-28)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `7307ff8` (runtime) plus the state commit that carries this
+section; pushed to `origin/frontend-redesign`. Deployment deliberately held: ONE publish covers this content work together
+with the homepage's two contrast defects and the login restyle, and the owner decides when the demo is published.
+
+**Both Commercial pages enriched to the standard:** `pricing` and `contact` — each with an opening picture, a picture inside
+one block, a labelled worked illustration of the SEQUENCE (no amount, no price, no percentage), an honest limits section and
+exactly one next step. `pricing` is the page the no-figure rule (S7) exists for: it is about what an arrangement costs, so
+its illustration states the ORDER in which terms are agreed and publishes no amount at all.
+
+**The gate's scope grew, it did not move:** `'Commercial'` was APPENDED in both `scripts/validate-public-page-standard.mjs`
+and `e2e/public-infrastructure-pages.spec.ts`, changed in the same edit, so the two scopes cannot drift. S1b now reports
+**20 of 25 pages** in scope (was 18). The group's two pages were counted from the gate's own S1b line, not from the task
+sentence — the sentence named two and S1b confirms two.
+
+**Pictures chosen by LOOKING, not by keyword and not by alt text:** a labelled contact sheet of all fourteen non-category
+candidates was built with Python/PIL and READ before any was chosen — `desk-notebook` (terms written down) as the pricing
+hero with `desk-laptop` inside one block; `desk-phone` (reaching a person) as the contact hero with `desk-notebook` inside
+one block. `shelves-stock` was REJECTED ON SIGHT: an empty aisle mid-refit reads as a closed shop. All four roles are
+declared and on disk in both sizes, so nothing new was fetched and no pin moved. (Recorded for the next session: `ffmpeg`
+here has NO `drawtext` filter — it was built without freetype — so a labelled sheet must be built with Python/PIL.)
+
+**No copy defect on this change:** the red lines were READ from their owner (`src/config/positioning.ts` →
+`PUBLIC_CLAIM_RED_LINES`, 8 families / 42 patterns) BEFORE a word was written, so `validate-public-claims` PASSED first time.
+The traps that reading avoided are `\bpartnership\b` (singular — the word Part 5 was caught by) and `\backnowledg`, which is
+why the contact copy says "a message that says only that it arrived".
+
+**Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.84s EXIT 0 · `validate-public-page-standard`
+13/13 with the scope reporting 20 of 25 pages · e2e `public-infrastructure-pages` 41 passed (was 37) · `validate-public-claims`
+PASS alone (70 renders in both shells, 0 red-line) · registry integrity 10 PASS / 0 FAIL (598 entries) · `validate:all` 210
+PASS / 0 FAIL of 210 · screenshots at 1440 and 390 of both pages, LOOKED AT: `images=2, undecoded=0, horizontal overflow=0,
+stages=4, limits=3`, the numbered illustration stacking vertically at the narrow width.
+
+**Three mutations proved the gates bite, each restored byte-identical** (gate sha256 `9f8c9d57…`, publicPages.ts sha256
+`9557e54f…`, identical before and after): a misspelt scope group ⇒ S1b FAIL naming it (12/13); a typo in the `pricing` hero
+role ⇒ S3 + S8 FAIL naming `pricing` (11/13); a shortened `contact` illustration label ⇒ S4 FAIL naming `contact` (12/13).
+
+
 ## §PUBLIC SURFACES BATCH 5 PART 5 — THE TWO COMPANY PAGES MEET THE PAGE STANDARD, AND TWO REAL REGISTRY DEFECTS WERE FIXED AT SOURCE (2026-11-28)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `25c2ab9` (runtime) plus the state commit that carries this
