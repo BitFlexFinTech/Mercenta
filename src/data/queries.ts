@@ -289,7 +289,7 @@ export function useHomepageContent() {
  * `core` resolves to `{ data: null }` — CORE's records are the hooks above, never
  * another vertical's bundle.
  */
-export function useVerticalDemoData(vertical: OperatingVertical) {
+export function useVerticalDemoData(vertical: OperatingVertical, reloadToken = 0) {
   const [state, setState] = useState<{
     loading: boolean;
     data: VerticalDemoData | null;
@@ -313,14 +313,14 @@ export function useVerticalDemoData(vertical: OperatingVertical) {
     return () => {
       cancelled = true;
     };
-  }, [vertical]);
+  }, [vertical, reloadToken]);
 
   return state;
 }
 
 /** The BWS (Beers, Wines & Spirits) demo bundle — `BitFlexFinTech/Dash-1`. */
-export function useBwsDemo() {
-  return useVerticalDemoData('bws');
+export function useBwsDemo(reloadToken = 0) {
+  return useVerticalDemoData('bws', reloadToken);
 }
 
 /** The Talent Commerce demo bundle — `BitFlexFinTech/CAA-TalAg`. */

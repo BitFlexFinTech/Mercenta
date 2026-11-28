@@ -46,10 +46,27 @@ export interface BwsExciseCustomsRow {
   brandName: string;
   sku: string;
   productName: string;
-  commodityCode: string;
-  vatStatus: string;
-  hazmat: boolean;
-  exWorksGbp: number;
+  /** D4 (2026-11-28): the Dash-1 source carries NO commodity code, VAT status or hazmat
+   *  flag for any of its 89 products (measured 0/89). They are `null` — rendered as “—”
+   *  with a tooltip naming the source — NEVER defaulted to a plausible-looking value
+   *  ('Unassigned' / 'Standard' were invented by this view before this change). */
+  commodityCode: string | null;
+  vatStatus: string | null;
+  hazmat: boolean | null;
+  /** D2: the source's `illustrativeWholesaleGbp`. Labelled “Illustrative Wholesale”,
+   *  never presented as an ex-Works cost, which the source does not contain. */
+  illustrativeWholesaleGbp: number | null;
+}
+
+/** AWRS / EORI / duty pathway — wired from Dash-1's partner accounts (owner, 2026-11-28). */
+export interface BwsPartnerAccountRow {
+  brandName: string;
+  eori: string;
+  awrsUrn: string;
+  defaultPathway: string;
+  wetBondPartner: string;
+  dhlAccount: string;
+  accountManager: string;
 }
 
 export interface BwsShipmentCustomsRow {
@@ -66,9 +83,10 @@ export interface BwsGrowthSkuRow {
   sku: string;
   productName: string;
   brandName: string;
-  score: number;
-  issuesCount: number;
-  recommendationCount: number;
+  /** D3: `AMAZON_UK_LISTINGS.rangeCoveragePct`; `null` when the source has no listing. */
+  score: number | null;
+  issuesCount: number | null;
+  recommendationCount: number | null;
 }
 
 export interface BwsReportLineRow {
@@ -76,7 +94,8 @@ export interface BwsReportLineRow {
   brandName: string;
   statusLabel: string;
   poValueGbp: number;
-  commissionGbp: number;
+  /** BWS is not a commission model; the source has no commission figure. */
+  commissionGbp: number | null;
   orderDate: string;
 }
 
@@ -102,6 +121,7 @@ export interface BwsPortfolioOpsViewProps {
   partnerShipments: BwsShipmentCustomsRow[];
   exciseRows: BwsExciseCustomsRow[];
   customsShipments: BwsShipmentCustomsRow[];
+  partnerAccounts: BwsPartnerAccountRow[];
   growthSkus: BwsGrowthSkuRow[];
   poTrendSeries: { label: string; value: number }[];
   carrierSeries: { label: string; value: number }[];
@@ -120,10 +140,10 @@ const SECTION_COPY: Record<
   'brand-portfolio': {
     title: 'Brand Portfolio',
     description:
-      'Active commercial partner brands across Mercenta fulfilment, compliance, and retail purchase orders.',
-    bannerTitle: 'Vertical isolation pending backend schema',
+      'BWS brands imported from the Dash-1 workspace, with their portfolio status, SKU count, vendor POs and compliance records.',
+    bannerTitle: 'BWS records: the Dash-1 workspace',
     bannerMessage:
-      'Displaying all canonical Mercenta brands because DemoBrandRow / BrandProfile does not yet define a vertical discriminator.',
+      'All 88 brand records imported from BitFlexFinTech/Dash-1 are listed. Four carry an active portfolio record (wholesale + Vendor Central status); the remaining source brands have no portfolio entry and say so — none is hidden or given a fabricated status.',
   },
   'partner-portal': {
     title: 'Partner Portal Stewardship',
@@ -137,9 +157,9 @@ const SECTION_COPY: Record<
     title: 'Import & UK Customs Clearance',
     description:
       'UK commodity codes, VAT status, hazmat declarations, and inbound HMRC port consignments from canonical records.',
-    bannerTitle: 'Alcohol excise & AWRS fields omitted (not modelled)',
+    bannerTitle: 'AWRS / EORI and duty-bond status, live from Dash-1',
     bannerMessage:
-      'Canonical Product records supply commodityCode, vatStatus, and hazmat; Shipment records supply uk_port_hmrc customs status. Alcohol-specific fields from Dash-1 (ABV%, AWRS registration number, UK excise duty band, and alcohol duty calculator) are intentionally omitted.',
+      'Partner accounts supply the Mercenta EORI and AWRS URN, the default duty pathway and the wet-bond partner; import records supply customs and excise-duty status per shipment. Commodity code, VAT status and hazmat are NOT provided by Dash-1 and render as “—” rather than being inferred.',
   },
   'brand-growth': {
     title: 'Brand Growth & Listing Quality',
@@ -182,6 +202,7 @@ export function BwsPortfolioOpsView({
   partnerShipments,
   exciseRows,
   customsShipments,
+  partnerAccounts,
   growthSkus,
   poTrendSeries,
   carrierSeries,
@@ -257,31 +278,53 @@ export function BwsPortfolioOpsView({
       key: 'hs',
       header: 'UK Commodity Code',
       render: (r) => (
-        <span className="font-mono text-[12px] text-zinc-900">
-          {r.commodityCode || 'Unassigned'}
+        <span
+          className="font-mono text-[12px] text-zinc-500"
+          title="Not provided by the Dash-1 source — no product record carries a commodity code."
+        >
+          {r.commodityCode ?? '—'}
         </span>
       ),
     },
     {
       key: 'vat',
       header: 'VAT Status',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.vatStatus || 'Standard'}</span>,
+      render: (r) => (
+        <span
+          className="text-[12px] text-zinc-500"
+          title="Not provided by the Dash-1 source — no product record carries a VAT status."
+        >
+          {r.vatStatus ?? '—'}
+        </span>
+      ),
     },
     {
       key: 'hazmat',
       header: 'Hazmat',
-      render: (r) => (
-        <InlineStatus
-          label={r.hazmat ? 'Hazmat flagged' : 'Non-hazmat'}
-          tone={r.hazmat ? 'warning' : 'neutral'}
-        />
-      ),
+      render: (r) =>
+        r.hazmat === null ? (
+          <span
+            className="text-[12px] text-zinc-500"
+            title="Not provided by the Dash-1 source — no product record carries a hazmat flag."
+          >
+            —
+          </span>
+        ) : (
+          <InlineStatus
+            label={r.hazmat ? 'Hazmat flagged' : 'Non-hazmat'}
+            tone={r.hazmat ? 'warning' : 'neutral'}
+          />
+        ),
     },
     {
-      key: 'exw',
-      header: 'Ex-Works',
+      key: 'wholesale',
+      header: 'Illustrative Wholesale',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.exWorksGbp, 2)}</span>,
+      render: (r) => (
+        <span className="font-mono tabular-nums" title="The source's illustrative wholesale price — never an ex-Works cost.">
+          {r.illustrativeWholesaleGbp === null ? '—' : formatGbp(r.illustrativeWholesaleGbp, 2)}
+        </span>
+      ),
     },
   ];
 
@@ -302,25 +345,61 @@ export function BwsPortfolioOpsView({
       key: 'score',
       header: 'Listing Score',
       align: 'right',
-      render: (r) => (
-        <InlineStatus
-          label={`${r.score} / 100`}
-          tone={r.score >= 80 ? 'success' : r.score >= 60 ? 'warning' : 'danger'}
-        />
-      ),
+      render: (r) =>
+        r.score === null ? (
+          <span
+            className="text-[12px] text-zinc-500"
+            title="Not provided by the Dash-1 source — this brand has no Amazon UK listing record, so there is no range-coverage figure."
+          >
+            —
+          </span>
+        ) : (
+          <InlineStatus
+            label={`${r.score} / 100`}
+            tone={r.score >= 80 ? 'success' : r.score >= 60 ? 'warning' : 'danger'}
+          />
+        ),
     },
     {
       key: 'issues',
       header: 'Open Findings',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.issuesCount}</span>,
+      render: (r) => (
+        <span
+          className="font-mono tabular-nums text-zinc-500"
+          title="Not provided by the Dash-1 source."
+        >
+          {r.issuesCount === null ? '—' : r.issuesCount}
+        </span>
+      ),
     },
     {
       key: 'recs',
       header: 'Recommendations',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.recommendationCount}</span>,
+      render: (r) => (
+        <span
+          className="font-mono tabular-nums text-zinc-500"
+          title="Not provided by the Dash-1 source."
+        >
+          {r.recommendationCount === null ? '—' : r.recommendationCount}
+        </span>
+      ),
     },
+  ];
+
+  const accountColumns: ConsoleColumn<BwsPartnerAccountRow>[] = [
+    {
+      key: 'brand',
+      header: 'Brand',
+      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+    },
+    { key: 'eori', header: 'Mercenta EORI', render: (r) => <span className="font-mono text-[12px]">{r.eori}</span> },
+    { key: 'awrs', header: 'AWRS URN', render: (r) => <span className="font-mono text-[12px]">{r.awrsUrn}</span> },
+    { key: 'pathway', header: 'Default Pathway', render: (r) => <span className="text-[12px]">{r.defaultPathway}</span> },
+    { key: 'bond', header: 'Wet-Bond Partner', render: (r) => <span className="text-[12px]">{r.wetBondPartner}</span> },
+    { key: 'dhl', header: 'DHL Account', render: (r) => <span className="font-mono text-[12px]">{r.dhlAccount}</span> },
+    { key: 'am', header: 'Account Manager', render: (r) => <span className="text-[12px]">{r.accountManager}</span> },
   ];
 
   const reportColumns: ConsoleColumn<BwsReportLineRow>[] = [
@@ -354,7 +433,14 @@ export function BwsPortfolioOpsView({
       key: 'comm',
       header: 'Commission',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.commissionGbp, 2)}</span>,
+      render: (r) => (
+        <span
+          className="font-mono tabular-nums text-zinc-500"
+          title="Not provided by the Dash-1 source — BWS is not a commission model."
+        >
+          {r.commissionGbp === null ? '—' : formatGbp(r.commissionGbp, 2)}
+        </span>
+      ),
     },
   ];
 
@@ -494,12 +580,23 @@ export function BwsPortfolioOpsView({
             <div className="space-y-6">
               <SectionCard
                 title="UK Customs & Commodity Declarations"
-                description="Commodity codes, VAT classifications, and hazmat indicators read from canonical Product records."
+                description="Read from the Dash-1 records. Commodity code, VAT status and hazmat are NOT present in that source, so they render as “—” with a tooltip — never inferred."
               >
                 <ConsoleTable
                   rows={exciseRows}
                   columns={exciseColumns}
                   rowKey={(r) => r.productId}
+                />
+              </SectionCard>
+
+              <SectionCard
+                title="UK Duty, Bond & Account Credentials"
+                description="Wired from the Dash-1 partner-account and import records — Mercenta's EORI and AWRS URN per brand, the default duty pathway, and the wet-bond partner."
+              >
+                <ConsoleTable
+                  rows={partnerAccounts}
+                  columns={accountColumns}
+                  rowKey={(r) => r.brandName}
                 />
               </SectionCard>
 

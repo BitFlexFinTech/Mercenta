@@ -1,31 +1,31 @@
+/**
+ * §BWS PORTFOLIO OPS — WIRED TO THE OWNER'S DASH-1 RECORDS (2026-11-28).
+ *
+ * BEFORE THIS CHANGE the screen read CORE hooks (`useBrands`, `useProducts`,
+ * `usePurchaseOrders`, `useShipmentsAll`, `useComplianceDocuments`, `useCommissions`,
+ * `useAdSpendBudgets`) — i.e. it showed Mercenta's CORE brands under a BWS heading, which
+ * is exactly the cross-vertical leak the owner forbade. Those hooks are GONE from this
+ * screen. It now asks `useBwsDemo()` for its own vertical, and `buildBwsPortfolio` maps the
+ * Dash-1 records onto the view's props field-for-field (mapping table:
+ * `docs/BWS_PORTFOLIO_OPS_FIELD_MAPPING.md`).
+ *
+ * The owner's decisions, honoured here and in the adapter:
+ *   D1 all 88 source brands are listed · D2 the price is labelled ILLUSTRATIVE WHOLESALE ·
+ *   D3 the growth score is the source's range coverage · D4 absent fields render “—” with
+ *   a tooltip naming the source, never a fabricated default.
+ *
+ * Nothing in this file reaches another vertical's module or CORE's demo store.
+ */
 import { useMemo, useState } from 'react';
-import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { useApp } from '@/context/GlobalStateContext';
-import {
-  useAdSpendBudgets,
-  useBrands,
-  useCommissions,
-  useComplianceDocuments,
-  useProducts,
-  usePurchaseOrders,
-  useShipmentsAll,
-} from '@/data/queries';
+import { useBwsDemo } from '@/data/queries';
+import { buildBwsPortfolio } from '@/data/bws/bwsPortfolioAdapter';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { downloadCsv } from '@/lib/csv';
-import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
-import { poStatusPresentation, shipmentStatusPresentation } from '@/lib/statusPresentation';
 import { formatGbp } from '@/next/components/ConsoleCharts';
-import type { MetricItem, SemanticTone } from '@/next/components/ConsolePrimitives';
+import type { MetricItem } from '@/next/components/ConsolePrimitives';
 import { SuperAdminScreen } from '@/next/screens/admin/SuperAdminScreen';
-import {
-  BwsPortfolioOpsView,
-  type BwsPortfolioOpsSection,
-} from './BwsPortfolioOpsView';
-
-function mapTone(t: string): SemanticTone {
-  if (t === 'success' || t === 'warning' || t === 'danger' || t === 'info') return t;
-  return 'neutral';
-}
+import { BwsPortfolioOpsView, type BwsPortfolioOpsSection } from './BwsPortfolioOpsView';
 
 export function BwsPortfolioOpsScreen({
   section,
@@ -38,265 +38,78 @@ export function BwsPortfolioOpsScreen({
 }) {
   const { session, actingStaff, canCurrentUserMutate } = useApp();
   const { integrations, modes } = useIntegrations();
-  const brandsQ = useBrands();
-  const productsQ = useProducts();
-  const posQ = usePurchaseOrders();
-  const shipsQ = useShipmentsAll();
-  const docsQ = useComplianceDocuments();
-  const commQ = useCommissions();
-  const budgetsQ = useAdSpendBudgets();
+  const [retryToken, setRetryToken] = useState(0);
+  const bws = useBwsDemo(retryToken);
 
   const [selectedBrandId, setSelectedBrandId] = useState<string>('');
   const [drawerBrandId, setDrawerBrandId] = useState<string | null>(null);
 
-  const brands = useMemo(() => {
-    const raw = brandsQ.data?.data ?? [];
-    if (!allowedBrandIds) return raw;
-    return raw.filter((b) => allowedBrandIds.has(b.id));
-  }, [brandsQ.data, allowedBrandIds]);
-
-  const products = useMemo(() => productsQ.data?.data ?? [], [productsQ.data]);
-  const pos = useMemo(() => posQ.data?.data ?? [], [posQ.data]);
-  const shipments = useMemo(() => shipsQ.data?.data ?? [], [shipsQ.data]);
-  const docs = useMemo(() => docsQ.data?.data ?? [], [docsQ.data]);
-  const commissions = useMemo(() => commQ.data?.data ?? [], [commQ.data]);
-  const budgets = useMemo(() => budgetsQ.data?.data ?? [], [budgetsQ.data]);
-
-  const brandNameMap = useMemo(
-    () => new Map(brands.map((b) => [b.id, b.profile.businessName])),
-    [brands]
+  /** The mapping runs once per loaded bundle — never per render. */
+  const derived = useMemo(
+    () => (bws.data?.vertical === 'bws' && bws.data.data ? buildBwsPortfolio(bws.data.data) : null),
+    [bws.data]
   );
 
-  const brandRows = useMemo(
-    () =>
-      brands.map((b) => {
-        const bPos = pos.filter((p) => p.brandId === b.id);
-        const bDocs = docs.filter((d) => d.brandId === b.id);
-        return {
-          id: b.id,
-          businessName: b.profile.businessName,
-          category: b.category,
-          nation: b.nation ?? '',
-          trackLabel: fulfillmentTrackLabel(b.track),
-          contractStatus: b.contractStatus,
-          skuCount: products.filter((p) => p.brandId === b.id).length,
-          poCount: bPos.length,
-          poValueGbp: bPos.reduce((s, p) => s + p.poValue, 0),
-          approvedDocsCount: bDocs.filter((d) => d.status === 'approved').length,
-          totalDocsCount: bDocs.length,
-        };
-      }),
-    [brands, pos, docs, products]
-  );
+  const brandRows = useMemo(() => {
+    const rows = derived?.brandRows ?? [];
+    return allowedBrandIds ? rows.filter((r) => allowedBrandIds.has(r.id)) : rows;
+  }, [derived, allowedBrandIds]);
 
   const activeBrandId =
-    brands.find((b) => b.id === selectedBrandId)?.id ?? brands[0]?.id ?? '';
+    brandRows.find((b) => b.id === selectedBrandId)?.id ?? brandRows[0]?.id ?? '';
 
-  const partnerPos = useMemo(
-    () =>
-      pos
-        .filter((p) => p.brandId === activeBrandId)
-        .map((p) => {
-          const pres = poStatusPresentation(p.status);
-          return {
-            id: p.id,
-            poNumber: p.poNumber,
-            statusLabel: pres.label,
-            statusTone: mapTone(pres.tone),
-            poValueGbp: p.poValue,
-            orderDate: p.orderDate.slice(0, 10),
-          };
-        }),
-    [pos, activeBrandId]
-  );
+  const partnerPos = derived?.partnerPosByBrand[activeBrandId] ?? [];
 
-  const partnerShipments = useMemo(
-    () =>
-      shipments
-        .filter((s) => s.brandId === activeBrandId)
-        .map((s) => {
-          const pres = shipmentStatusPresentation(s.status);
-          return {
-            id: s.id,
-            reference: s.reference,
-            carrier: s.carrier,
-            origin: s.origin,
-            destination: s.destination,
-            statusLabel: pres.label,
-            statusTone: mapTone(pres.tone),
-          };
-        }),
-    [shipments, activeBrandId]
-  );
-
-  const exciseRows = useMemo(
-    () =>
-      products
-        .filter((p) => !allowedBrandIds || allowedBrandIds.has(p.brandId))
-        .map((p) => ({
-          productId: p.id,
-          brandName: brandNameMap.get(p.brandId) ?? p.brandId,
-          sku: p.sku,
-          productName: p.name,
-          commodityCode: p.commodityCode ?? '',
-          vatStatus: p.vatStatus ?? 'standard',
-          hazmat: Boolean(p.hazmat),
-          exWorksGbp: p.exWorksPrice,
-        })),
-    [products, allowedBrandIds, brandNameMap]
-  );
-
-  const customsShipments = useMemo(
-    () =>
-      shipments
-        .filter((s) => !allowedBrandIds || (s.brandId ? allowedBrandIds.has(s.brandId) : true))
-        .filter(
-          (s) =>
-            s.status === 'uk_customs_cleared' ||
-            s.status === 'sea_transit' ||
-            s.status === 'air_transit' ||
-            s.status === 'bak_depot'
-        )
-        .map((s) => {
-          const pres = shipmentStatusPresentation(s.status);
-          return {
-            id: s.id,
-            reference: s.reference,
-            carrier: s.carrier,
-            origin: s.origin,
-            destination: s.destination,
-            statusLabel: pres.label,
-            statusTone: mapTone(pres.tone),
-          };
-        }),
-    [shipments, allowedBrandIds]
-  );
-
-  const brandCategoryMap = useMemo(
-    () => new Map(brands.map((b) => [b.id, b.category])),
-    [brands]
-  );
-
-  const growthSkus = useMemo(
-    () =>
-      products
-        .filter((p) => !allowedBrandIds || allowedBrandIds.has(p.brandId))
-        .map((p) => {
-          const analysis = analyzeProductListing(p as unknown as Record<string, unknown>, {
-            category: brandCategoryMap.get(p.brandId) ?? 'Home',
-            brandId: p.brandId,
-          });
-          return {
-            sku: p.sku,
-            productName: p.name,
-            brandName: brandNameMap.get(p.brandId) ?? p.brandId,
-            score: analysis.healthScore,
-            issuesCount: analysis.dimensions.filter((d) => d.score < 60).length,
-            recommendationCount: analysis.recommendations.length,
-          };
-        }),
-    [products, allowedBrandIds, brandNameMap, brandCategoryMap]
-  );
-
-  const { poTrendSeries, carrierSeries } = useMemo(() => {
-    const byMonth = new Map<string, number>();
-    for (const po of pos) {
-      const m = (po.orderDate ?? '').slice(0, 7);
-      if (m) byMonth.set(m, (byMonth.get(m) ?? 0) + po.poValue);
-    }
-    const byCarrier = new Map<string, number>();
-    for (const s of shipments) {
-      const key = s.carrier.toUpperCase();
-      byCarrier.set(key, (byCarrier.get(key) ?? 0) + 1);
-    }
-    return {
-      poTrendSeries: Array.from(byMonth.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .slice(-6)
-        .map(([m, value]) => ({ label: m, value: Math.round(value) })),
-      carrierSeries: Array.from(byCarrier.entries()).map(([label, value]) => ({
-        label,
-        value,
-      })),
-    };
-  }, [pos, shipments]);
-
-  const reportRows = useMemo(
-    () =>
-      pos.map((p) => ({
-        poNumber: p.poNumber,
-        brandName: brandNameMap.get(p.brandId) ?? p.brandId,
-        statusLabel: poStatusPresentation(p.status).label,
-        poValueGbp: p.poValue,
-        commissionGbp: p.commissionAmount,
-        orderDate: p.orderDate.slice(0, 10),
-      })),
-    [pos, brandNameMap]
-  );
-
-  if (section === 'settings' && session?.tier === 'super_admin') {
-    return <SuperAdminScreen onNavigateView={onNavigateView} />;
-  }
-
-  const totalPoVal = pos.reduce((s, p) => s + p.poValue, 0);
-  const totalCommVal = commissions.reduce((s, c) => s + c.commissionAmount, 0);
-  const totalAdBudget = budgets.reduce((s, b) => s + b.monthlyBudgetGbp, 0);
-
-  const metrics: MetricItem[] =
-    section === 'import-excise'
+  const metrics: MetricItem[] = !derived
+    ? []
+    : section === 'import-excise'
       ? [
           {
             id: 'hs',
             label: 'SKUs with HS code',
-            value: `${exciseRows.filter((r) => Boolean(r.commodityCode)).length} / ${exciseRows.length}`,
+            value: '0 / ' + derived.exciseRows.length,
           },
-          {
-            id: 'hazmat',
-            label: 'Hazmat SKUs',
-            value: String(exciseRows.filter((r) => r.hazmat).length),
-          },
+          { id: 'hazmat', label: 'Hazmat SKUs', value: '0 / ' + derived.exciseRows.length },
           {
             id: 'customs-ship',
-            label: 'In-transit / Port clearance',
-            value: String(customsShipments.length),
+            label: 'Import / bond consignments',
+            value: String(derived.customsShipments.length),
           },
           {
             id: 'docs-ok',
-            label: 'Approved compliance docs',
-            value: String(docs.filter((d) => d.status === 'approved').length),
+            label: 'Compliance records complete',
+            value: String(derived.totals.completeDocs),
           },
         ]
       : section === 'brand-growth'
         ? [
             {
               id: 'avg-score',
-              label: 'Mean listing score',
-              value:
-                growthSkus.length > 0
-                  ? `${Math.round(growthSkus.reduce((s, x) => s + x.score, 0) / growthSkus.length)} / 100`
-                  : '—',
+              label: 'Mean listing coverage',
+              value: (() => {
+                const scored = derived.growthSkus.filter((g) => g.score !== null);
+                if (!scored.length) return '—';
+                const mean = scored.reduce((s, g) => s + (g.score ?? 0), 0) / scored.length;
+                return `${Math.round(mean)}%`;
+              })(),
             },
             {
               id: 'skus',
-              label: 'Analysed SKUs',
-              value: String(growthSkus.length),
+              label: 'SKUs with a listing record',
+              value: `${derived.growthSkus.filter((g) => g.score !== null).length} / ${derived.growthSkus.length}`,
             },
             {
-              id: 'ad-budget',
-              label: 'Monthly ad budgets',
-              value: formatGbp(totalAdBudget),
+              id: 'brands-listed',
+              label: 'Brands with an Amazon UK listing',
+              value: String(new Set(derived.growthSkus.filter((g) => g.score !== null).map((g) => g.brandName)).size),
             },
-            {
-              id: 'issues',
-              label: 'Listing findings',
-              value: String(growthSkus.reduce((s, x) => s + x.issuesCount, 0)),
-            },
+            { id: 'issues', label: 'Open findings', value: '—' },
           ]
         : [
-            { id: 'brands', label: 'Portfolio brands', value: String(brandRows.length) },
-            { id: 'skus', label: 'Active SKUs', value: String(products.length) },
-            { id: 'po-val', label: 'PO pipeline value', value: formatGbp(totalPoVal) },
-            { id: 'comm', label: 'Commission ledger', value: formatGbp(totalCommVal, 2) },
+            { id: 'brands', label: 'Portfolio brands', value: String(derived.totals.brands) },
+            { id: 'skus', label: 'Active SKUs', value: String(derived.totals.skus) },
+            { id: 'pos', label: 'Vendor POs', value: String(derived.totals.pos) },
+            { id: 'po-val', label: 'PO value', value: formatGbp(derived.totals.poValueGbp) },
           ];
 
   const integrationStatuses = Object.entries(integrations).map(([id, cfg]) => ({
@@ -306,28 +119,16 @@ export function BwsPortfolioOpsScreen({
     status: cfg?.status ?? 'disconnected',
   }));
 
-  const errObj = brandsQ.error || productsQ.error || posQ.error || shipsQ.error || docsQ.error;
-  const error =
-    errObj instanceof Error ? errObj.message : errObj ? 'Failed to load BWS workspace data.' : null;
+  const error = bws.error ? 'Failed to load the BWS workspace data.' : null;
 
-  return (
+  if (section === 'settings' && session?.tier === 'super_admin') {
+    return <SuperAdminScreen onNavigateView={onNavigateView} />;
+  }return (
     <BwsPortfolioOpsView
       section={section}
-      loading={
-        brandsQ.isPending ||
-        productsQ.isPending ||
-        posQ.isPending ||
-        shipsQ.isPending ||
-        docsQ.isPending
-      }
+      loading={bws.loading}
       error={error}
-      onRetry={() => {
-        void brandsQ.refetch();
-        void productsQ.refetch();
-        void posQ.refetch();
-        void shipsQ.refetch();
-        void docsQ.refetch();
-      }}
+      onRetry={() => setRetryToken((t) => t + 1)}
       metrics={metrics}
       brands={brandRows}
       selectedBrandId={activeBrandId}
@@ -335,40 +136,32 @@ export function BwsPortfolioOpsScreen({
       drawerBrand={brandRows.find((b) => b.id === drawerBrandId) ?? null}
       onSelectDrawerBrand={setDrawerBrandId}
       partnerPos={partnerPos}
-      partnerShipments={partnerShipments}
-      exciseRows={exciseRows}
-      customsShipments={customsShipments}
-      growthSkus={growthSkus}
-      poTrendSeries={poTrendSeries}
-      carrierSeries={carrierSeries}
-      reportRows={reportRows}
+      partnerShipments={derived?.partnerShipments ?? []}
+      exciseRows={derived?.exciseRows ?? []}
+      customsShipments={derived?.customsShipments ?? []}
+      partnerAccounts={derived?.partnerAccounts ?? []}
+      growthSkus={derived?.growthSkus ?? []}
+      poTrendSeries={derived?.poTrendSeries ?? []}
+      carrierSeries={derived?.carrierSeries ?? []}
+      reportRows={derived?.reportRows ?? []}
       integrationStatuses={integrationStatuses}
       actingStaffName={actingStaff?.name ?? 'Mercenta Operator'}
       canMutate={canCurrentUserMutate}
       onExportCsv={(kind) => {
+        const rows = derived?.reportRows ?? [];
         if (kind === 'pos') {
           downloadCsv(
             'bws-purchase-orders.csv',
             ['PO', 'Brand', 'Status', 'Date', 'ValueGBP'],
-            reportRows.map((r) => [
-              r.poNumber,
-              r.brandName,
-              r.statusLabel,
-              r.orderDate,
-              String(r.poValueGbp),
-            ])
+            rows.map((r) => [r.poNumber, r.brandName, r.statusLabel, r.orderDate, String(r.poValueGbp)])
           );
         } else {
+          /* BWS is not a commission model: the source carries no commission figure, so the
+             export states that rather than printing a fabricated zero. */
           downloadCsv(
             'bws-commissions.csv',
             ['PO', 'Brand', 'POValueGBP', 'CommissionGBP', 'Status'],
-            commissions.map((c) => [
-              c.purchaseOrderId,
-              brandNameMap.get(c.brandId) ?? c.brandId,
-              String(c.poValue),
-              String(c.commissionAmount),
-              c.status,
-            ])
+            rows.map((r) => [r.poNumber, r.brandName, String(r.poValueGbp), '— not provided by the source', r.statusLabel])
           );
         }
       }}
