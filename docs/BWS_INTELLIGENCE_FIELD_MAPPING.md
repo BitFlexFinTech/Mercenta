@@ -44,11 +44,34 @@
 ## 6. WHAT IS SAFE TO MAP NOW (no decisions needed)
 `metrics` (counts of the source collections), `searchQuery`/`tierFilter` (view-local state), `canMutate` (session), `actingStaffName` (session).
 
-## 7. DECISIONS I NEED
-- **D5** category benchmarks: keep CORE TAM/SAM market data in a BWS screen, or drop it?
-- **D6** prospect score: source verification text, or no score column?
-- **D7** “Run discovery”: relabel honestly, or remove?
-- **D8** outreach actions: read-only, or BWS-local simulation?
-- **D9** opportunity stage changes: hide until the source export is proven?
+## 7. DECISIONS — ANSWERED BY THE OWNER 2026-11-28, AND IMPLEMENTED
 
-**No wiring has been written for this screen.** The three false statements to fix in it are the section descriptions that say data comes from "canonical Mercenta stores" / "UK category TAM/SAM benchmarks" — they must name Dash-1 once wired.
+| # | Decision | Implemented as |
+|---|---|---|
+| D5 | market sizing | Panel replaced by a plain notice. No TAM/SAM figure is shown. |
+| D6 | prospect score | Numeric score and tier columns REMOVED; text indicators only. |
+| D7 | "Run discovery" | Button DELETED (not disabled). |
+| D8 | outreach actions | All five write controls DELETED; `INITIAL_OUTREACH_LOGS` renders read-only. |
+| D9 | opportunity stage | Mutating select + "Set Stage" DELETED; `OPPORTUNITY_ASSESSMENTS.status` is a read-only badge. |
+
+### The two approved row models (final)
+
+`BwsCountrySummaryRow`: `regionKey`, `label` (`COUNTRIES.name`), `brandCount`
+(`brandsDiscoveredCount`), `categories`, `ukPresenceIndicator`,
+`commercialOpportunityIndicator`, `featuredProducerCount`, `evidenceCount`.
+Removed: `productCount`, `leadCount`, `openPoValueGbp` — no source, and 0 would be fabricated.
+
+`BwsProspectRow`: `id`, `brand`, `category`, `website`, `description`,
+`ownershipVerification`, `licensingArrangement`, `ukPresenceIndicator`,
+`commercialOpportunityIndicator`, `asinCount` (count of `AMAZON_UK_LISTINGS` rows for
+that brand), `outreach` (`INITIAL_OUTREACH_LOGS[brandId]` — an OBJECT keyed by brand,
+36 entries, **not** an array), `opportunityStatus` (`OPPORTUNITY_ASSESSMENTS.status`).
+Removed: `totalScore`, `tier`, `tierLabel`, `rawOfferClass`, `offerSummary`,
+`disqualified`, `leadDistributor`, `leadContact`, `wholesaleAvailable`,
+`distributorProgramme`, `acquisitionStage`, `opportunityId`, `opportunityStage`,
+`asins[]`, `contacts[]`, `distributors[]`, all five `can*Outreach` flags.
+
+**Status: WIRED** (commit `15feee4`). The screen reads `useBwsDemo()` only; the adapter is
+`src/data/bws/bwsIntelligenceAdapter.ts`. Evidence: typecheck 0 · build EXIT=0 ·
+`validate-vertical-isolation` PASS (66 assertions) · live render 0 page errors, scan button
+absent, D5 notice present.
