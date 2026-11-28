@@ -233,21 +233,21 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
 
   return (
     <div className="mercenta-next min-h-screen bg-[#FAFAFA] text-[#09090B]">
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-6 py-3 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onExit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
           >
             <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
             Back to Workspace
           </button>
           <div>
-            <div className="text-[14px] font-semibold text-zinc-950">
+            <div className="text-[14px] font-semibold text-ink-950">
               Pure Presentation Preview Harness
             </div>
-            <div className="text-[12px] text-zinc-500">
+            <div className="text-[12px] text-faint">
               Renders View components offline without data-layer or context dependencies
             </div>
           </div>
@@ -258,7 +258,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             aria-label="Select screen to preview"
             value={screen}
             onChange={(e) => setScreen(e.target.value as PreviewScreen)}
-            className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+            className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
           >
             <option value="purchase_orders">2a · Brand Purchase Orders View</option>
             <option value="logistics">2b · Brand Logistics View</option>
@@ -273,7 +273,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
               aria-label="Select vertical policy"
               value={vertical}
               onChange={(e) => setVertical(e.target.value as AdsVertical)}
-              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+              className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
             >
               <option value="core">Core Admin</option>
               <option value="bws">BWS Campaign Studio</option>
@@ -281,7 +281,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             </select>
           )}
 
-          <div className="inline-flex rounded border border-zinc-200 bg-zinc-50 p-0.5">
+          <div className="inline-flex rounded border border-hairline bg-surface p-0.5">
             {(['populated', 'loading', 'error', 'empty'] as PreviewStateMode[]).map((mode) => (
               <button
                 key={mode}
@@ -289,8 +289,8 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
                 onClick={() => setStateMode(mode)}
                 className={`px-2.5 py-1 rounded capitalize ${
                   stateMode === mode
-                    ? 'bg-zinc-950 text-white font-medium'
-                    : 'text-zinc-600 hover:text-zinc-950'
+                    ? 'bg-ink-950 text-on-dark font-medium'
+                    : 'text-ink-600 hover:text-ink-950'
                 }`}
               >
                 {mode}
@@ -351,17 +351,17 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             acceptedUnshippedPos={[]}
             onDownloadHtml={() => {}}
             renderDocumentQueueSlot={() => (
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-[12px] text-ink-600">
                 Preview slot: PoDocumentQueuePanel renders accepted POs inside the 24h/dispatch window.
               </p>
             )}
             renderDocumentPackSlot={() => (
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-[12px] text-ink-600">
                 Preview slot: PoDocumentPackPanel renders commercial invoice, packing list, and carrier labels.
               </p>
             )}
             providerConfigsSlot={
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-[12px] text-ink-600">
                 Preview slot: DHL Express (simulation), Palletline (simulation).
               </p>
             }

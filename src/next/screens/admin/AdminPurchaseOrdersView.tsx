@@ -199,7 +199,7 @@ export function AdminPurchaseOrdersView({
       key: 'poNumber',
       header: 'PO Reference',
       render: (r) => (
-        <div className="font-mono text-[12px] font-medium text-zinc-950">
+        <div className="font-mono text-[12px] font-medium text-ink-950">
           {r.po.poNumber}
           {r.po.simulated === true && <span className="ml-1.5 text-[11px] text-[var(--mr-accent)]">(sim)</span>}
         </div>
@@ -208,13 +208,13 @@ export function AdminPurchaseOrdersView({
     {
       key: 'brand',
       header: 'Brand',
-      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
     },
     {
       key: 'orderDate',
       header: 'Order date',
       hideOnMobile: true,
-      render: (r) => <span className="font-mono text-[12px] text-zinc-600">{orderDateLabel(r.po.orderDate)}</span>,
+      render: (r) => <span className="font-mono text-[12px] text-ink-600">{orderDateLabel(r.po.orderDate)}</span>,
     },
     {
       key: 'items',
@@ -236,7 +236,7 @@ export function AdminPurchaseOrdersView({
         <div className="flex flex-col gap-0.5">
           <InlineStatus label={r.statusLabel} tone={r.statusTone} />
           {r.deductionsCount > 0 && (
-            <span className="text-[11px] text-amber-800">{r.deductionsCount} deduction(s)</span>
+            <span className="text-[11px] text-state-warning">{r.deductionsCount} deduction(s)</span>
           )}
         </div>
       ),
@@ -280,7 +280,7 @@ export function AdminPurchaseOrdersView({
             data-state="admin-po-ingest"
             disabled={!canMutate || ingestBusy}
             onClick={onReadChannel}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800 disabled:opacity-50 whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-ink-950 text-on-dark text-[12px] font-medium hover:bg-ink-800 disabled:opacity-50 whitespace-nowrap"
           >
             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
             {ingestBusy ? 'Reading…' : 'Read channel POs'}
@@ -300,7 +300,7 @@ export function AdminPurchaseOrdersView({
               data-state="admin-po-simulate-change"
               disabled={!canMutate || revisionBusy || ingestResult?.mode !== 'mock'}
               onClick={onSimulateRevision}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 disabled:opacity-40 hover:bg-zinc-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium text-ink-900 disabled:opacity-40 hover:bg-surface"
             >
               <FlaskConical className="w-3 h-3" aria-hidden="true" />
               Simulate channel change
@@ -310,7 +310,7 @@ export function AdminPurchaseOrdersView({
               data-state="admin-po-simulate-hold"
               disabled={!canMutate || holdBusy || ingestResult?.mode !== 'mock'}
               onClick={() => onSimulateHold('declared')}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 disabled:opacity-40 hover:bg-zinc-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium text-ink-900 disabled:opacity-40 hover:bg-surface"
             >
               Simulate hold
             </button>
@@ -319,7 +319,7 @@ export function AdminPurchaseOrdersView({
               data-state="admin-po-simulate-hold-lift"
               disabled={!canMutate || holdBusy || ingestResult?.mode !== 'mock'}
               onClick={() => onSimulateHold('cleared')}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 disabled:opacity-40 hover:bg-zinc-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium text-ink-900 disabled:opacity-40 hover:bg-surface"
             >
               Lift hold
             </button>
@@ -327,10 +327,10 @@ export function AdminPurchaseOrdersView({
         }
       >
         <div className="space-y-3 text-[12px]" data-testid="channel-po-ingestion">
-          <div className="flex items-center gap-3 text-zinc-600">
+          <div className="flex items-center gap-3 text-ink-600">
             <span>
               Channel read:{' '}
-              <strong className="font-mono text-zinc-950" data-state="channel-mode">
+              <strong className="font-mono text-ink-950" data-state="channel-mode">
                 {ingestResult ? (ingestResult.mode === 'mock' ? 'Simulation (mock)' : 'Live') : 'Not yet read'}
               </strong>
             </span>
@@ -339,18 +339,18 @@ export function AdminPurchaseOrdersView({
           {revisionNotice && <NoticeBanner tone="info" message={revisionNotice} />}
           {holdNotice && <NoticeBanner tone="info" message={holdNotice} />}
           {ingestResult && (
-            <div className="border border-zinc-200 rounded-md p-3 space-y-2" data-testid="channel-po-outcomes">
-              <div className="font-mono text-zinc-800">
+            <div className="border border-hairline rounded-md p-3 space-y-2" data-testid="channel-po-outcomes">
+              <div className="font-mono text-ink-800">
                 Read {ingestResult.polled} · Filed {ingestResult.ingested} · Already held {ingestResult.alreadyPresent} · Refused {ingestResult.refused}
               </div>
               {ingestResult.outcomes.length > 0 && (
-                <ul className="divide-y divide-zinc-200">
+                <ul className="divide-y divide-hairline-06">
                   {ingestResult.outcomes.map((o) => (
                     <li key={o.channelPurchaseOrderId} className="py-1.5 flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-mono text-zinc-950">
+                      <span className="font-mono text-ink-950">
                         {o.channelPurchaseOrderId} — {o.status.replace(/_/g, ' ')} ({o.brandId ? brandNameFor(o.brandId) : 'Not routed'})
                       </span>
-                      {o.reason && <span className="text-zinc-600">{o.reason}</span>}
+                      {o.reason && <span className="text-ink-600">{o.reason}</span>}
                     </li>
                   ))}
                 </ul>
@@ -366,21 +366,21 @@ export function AdminPurchaseOrdersView({
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+              <Search className="w-3.5 h-3.5 text-quiet absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search PO or brand…"
                 aria-label="Search purchase orders"
-                className="pl-8 pr-3 py-1.5 rounded border border-zinc-300 text-[12px] text-zinc-950 bg-white focus:outline-none focus:border-zinc-900"
+                className="pl-8 pr-3 py-1.5 rounded border border-hairline-strong text-[12px] text-ink-950 bg-surface-raised focus:outline-none focus:border-ink-900"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
               aria-label="Filter by status"
-              className="px-2.5 py-1.5 rounded border border-zinc-300 text-[12px] text-zinc-950 bg-white"
+              className="px-2.5 py-1.5 rounded border border-hairline-strong text-[12px] text-ink-950 bg-surface-raised"
             >
               <option value="all">All statuses</option>
               {statusOrder.map((s) => (
@@ -394,7 +394,7 @@ export function AdminPurchaseOrdersView({
               onClick={onToggleSimOnly}
               data-testid="po-sim-filter"
               className={`px-2.5 py-1.5 rounded border text-[12px] font-medium ${
-                simOnly ? 'border-zinc-950 bg-zinc-950 text-white' : 'border-zinc-300 bg-white text-zinc-700'
+                simOnly ? 'border-ink-950 bg-ink-950 text-on-dark' : 'border-hairline-strong bg-surface-raised text-secondary'
               }`}
             >
               Simulated only
@@ -422,18 +422,18 @@ export function AdminPurchaseOrdersView({
       >
         {selectedDetail && (
           <div className="space-y-5 text-[13px]">
-            <dl className="grid grid-cols-2 gap-3 border border-zinc-200 rounded-md p-3">
+            <dl className="grid grid-cols-2 gap-3 border border-hairline rounded-md p-3">
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Order date</dt>
-                <dd className="font-mono text-zinc-950">{orderDateLabel(selectedDetail.po.orderDate)}</dd>
+                <dt className="text-[11px] uppercase text-faint">Order date</dt>
+                <dd className="font-mono text-ink-950">{orderDateLabel(selectedDetail.po.orderDate)}</dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Status</dt>
-                <dd className="capitalize text-zinc-950">{selectedDetail.po.status.replace(/_/g, ' ')}</dd>
+                <dt className="text-[11px] uppercase text-faint">Status</dt>
+                <dd className="capitalize text-ink-950">{selectedDetail.po.status.replace(/_/g, ' ')}</dd>
               </div>
               <div className="col-span-2">
-                <dt className="text-[11px] uppercase text-zinc-500">Acknowledgement window</dt>
-                <dd className="text-[12px] text-zinc-700">{selectedDetail.ackWindow.reason}</dd>
+                <dt className="text-[11px] uppercase text-faint">Acknowledgement window</dt>
+                <dd className="text-[12px] text-secondary">{selectedDetail.ackWindow.reason}</dd>
               </div>
             </dl>
 
@@ -444,30 +444,30 @@ export function AdminPurchaseOrdersView({
             />
 
             <div>
-              <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 mb-2">
+              <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint mb-2">
                 Line items ({selectedDetail.po.lineItems.length})
               </div>
-              <div className="border border-zinc-200 rounded-md divide-y divide-zinc-200">
+              <div className="border border-hairline rounded-md divide-y divide-hairline-06">
                 {selectedDetail.po.lineItems.map((li) => (
                   <div key={li.sku} className="p-2.5 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <div>
-                        <span className="font-mono text-[12px] text-zinc-950">{li.sku}</span>
-                        <div className="text-[12px] text-zinc-600">{li.productName}</div>
+                        <span className="font-mono text-[12px] text-ink-950">{li.sku}</span>
+                        <div className="text-[12px] text-ink-600">{li.productName}</div>
                       </div>
                       <div className="text-right font-mono text-[12px]">
                         <div>{li.quantity} × £{li.unitPrice.toFixed(2)}</div>
-                        <div className="text-[11px] text-zinc-500 capitalize">{li.ackStatus ?? 'pending'}</div>
+                        <div className="text-[11px] text-faint capitalize">{li.ackStatus ?? 'pending'}</div>
                       </div>
                     </div>
                     {onBehalfAckOpen && (
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-100">
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-hairline">
                         <select
                           value={ackStatuses[li.sku] ?? 'accepted'}
                           onChange={(e) =>
                             onAckStatusChange(li.sku, e.target.value as 'accepted' | 'rejected' | 'backordered')
                           }
-                          className="border border-zinc-300 rounded px-2 py-1 text-[12px] bg-white"
+                          className="border border-hairline-strong rounded px-2 py-1 text-[12px] bg-surface-raised"
                         >
                           <option value="accepted">Accept</option>
                           <option value="backordered">Backorder</option>
@@ -477,20 +477,20 @@ export function AdminPurchaseOrdersView({
                           type="number"
                           value={ackQtys[li.sku] ?? li.quantity}
                           onChange={(e) => onAckQtyChange(li.sku, Number(e.target.value))}
-                          className="border border-zinc-300 rounded px-2 py-1 text-[12px] font-mono bg-white"
+                          className="border border-hairline-strong rounded px-2 py-1 text-[12px] font-mono bg-surface-raised"
                         />
                         <input
                           type="number"
                           step="0.01"
                           value={ackPrices[li.sku] ?? li.unitPrice}
                           onChange={(e) => onAckPriceChange(li.sku, Number(e.target.value))}
-                          className="border border-zinc-300 rounded px-2 py-1 text-[12px] font-mono bg-white"
+                          className="border border-hairline-strong rounded px-2 py-1 text-[12px] font-mono bg-surface-raised"
                         />
                         {ackStatuses[li.sku] === 'rejected' && (
                           <select
                             value={ackRejectionCodes[li.sku] ?? ''}
                             onChange={(e) => onAckRejectionCodeChange(li.sku, e.target.value)}
-                            className="col-span-3 border border-zinc-300 rounded px-2 py-1 text-[12px] bg-white"
+                            className="col-span-3 border border-hairline-strong rounded px-2 py-1 text-[12px] bg-surface-raised"
                           >
                             <option value="">Select rejection code…</option>
                             {Object.entries(PO_REJECTION_CODES).map(([code, label]) => (
@@ -513,26 +513,26 @@ export function AdminPurchaseOrdersView({
                 <button
                   type="button"
                   onClick={onBeginBehalfAck}
-                  className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
+                  className="px-3.5 py-2 rounded-md bg-ink-950 text-on-dark text-[12px] font-medium hover:bg-ink-800"
                 >
                   Acknowledge on behalf of {selectedDetail.brandName}
                 </button>
               )}
 
             {onBehalfAckOpen && (
-              <div className="border border-zinc-200 rounded-md p-3 space-y-2 bg-zinc-50">
+              <div className="border border-hairline rounded-md p-3 space-y-2 bg-surface">
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={onSubmitBehalfAck}
-                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Submit on-behalf acknowledgement
                   </button>
                   <button
                     type="button"
                     onClick={onCancelBehalfAck}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                   >
                     Cancel
                   </button>
@@ -542,13 +542,13 @@ export function AdminPurchaseOrdersView({
             )}
 
             {selectedDetail.onBehalfRejectDraft?.available && (
-              <div className="border border-red-200 bg-red-50/60 rounded-md p-3 space-y-2">
-                <div className="font-semibold text-red-950">On-behalf rejection draft</div>
-                <p className="text-[12px] text-zinc-700">{selectedDetail.onBehalfRejectDraft.ruleText}</p>
+              <div className="border border-state-danger/20 bg-red-50/60 rounded-md p-3 space-y-2">
+                <div className="font-semibold text-state-danger">On-behalf rejection draft</div>
+                <p className="text-[12px] text-secondary">{selectedDetail.onBehalfRejectDraft.ruleText}</p>
                 <button
                   type="button"
                   onClick={onApproveBehalfRejection}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-700 text-white text-[12px] font-medium hover:bg-red-800"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-700 text-on-dark text-[12px] font-medium hover:bg-red-800"
                 >
                   <Gavel className="w-3.5 h-3.5" aria-hidden="true" />
                   Approve rejection override
@@ -558,26 +558,26 @@ export function AdminPurchaseOrdersView({
             {behalfRejectNotice && <NoticeBanner tone="info" message={behalfRejectNotice} />}
 
             {selectedDetail.instruction && (
-              <div className="border border-zinc-200 rounded-md p-3 space-y-2">
-                <div className="text-[11px] uppercase text-zinc-500">Proxy channel instruction</div>
+              <div className="border border-hairline rounded-md p-3 space-y-2">
+                <div className="text-[11px] uppercase text-faint">Proxy channel instruction</div>
                 <div className="text-[12px]">
                   State: <strong className="font-mono">{selectedDetail.instruction.state.replace(/_/g, ' ')}</strong>
                 </div>
                 {selectedDetail.instruction.outcome?.refusedReason && (
-                  <p className="text-[12px] text-red-800">{selectedDetail.instruction.outcome.refusedReason}</p>
+                  <p className="text-[12px] text-state-danger">{selectedDetail.instruction.outcome.refusedReason}</p>
                 )}
                 {(selectedDetail.instruction.state === 'refused' ||
                   selectedDetail.instruction.state === 'pending_mercenta_action') && (
                   <button
                     type="button"
                     onClick={onRetryInstruction}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium"
                   >
                     <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                     Retry channel action
                   </button>
                 )}
-                {proxyNotice && <p className="text-[12px] text-zinc-700">{proxyNotice}</p>}
+                {proxyNotice && <p className="text-[12px] text-secondary">{proxyNotice}</p>}
               </div>
             )}
 
@@ -585,7 +585,7 @@ export function AdminPurchaseOrdersView({
               <button
                 type="button"
                 onClick={onBeginBehalfAsn}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
               >
                 <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                 File / correct ASN on behalf of {selectedDetail.brandName}
@@ -593,13 +593,13 @@ export function AdminPurchaseOrdersView({
             )}
 
             {onBehalfAsnOpen && (
-              <div className="border border-zinc-200 rounded-md p-3 space-y-2.5 bg-zinc-50">
-                <div className="text-[12px] font-medium text-zinc-950">On-behalf ASN filing</div>
+              <div className="border border-hairline rounded-md p-3 space-y-2.5 bg-surface">
+                <div className="text-[12px] font-medium text-ink-950">On-behalf ASN filing</div>
                 <div className="grid grid-cols-2 gap-2">
                   <select
                     value={asnCarrier}
                     onChange={(e) => onAsnCarrierChange(e.target.value)}
-                    className="border border-zinc-300 rounded px-2 py-1.5 text-[12px] bg-white"
+                    className="border border-hairline-strong rounded px-2 py-1.5 text-[12px] bg-surface-raised"
                   >
                     {selectedDetail.carrierOptions.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -611,26 +611,26 @@ export function AdminPurchaseOrdersView({
                     type="date"
                     value={asnShipDate}
                     onChange={(e) => onAsnShipDateChange(e.target.value)}
-                    className="border border-zinc-300 rounded px-2 py-1.5 text-[12px] bg-white"
+                    className="border border-hairline-strong rounded px-2 py-1.5 text-[12px] bg-surface-raised"
                   />
                   <input
                     type="text"
                     value={asnLot}
                     onChange={(e) => onAsnLotChange(e.target.value)}
                     placeholder="Lot number (Grocery / H&PC)"
-                    className="border border-zinc-300 rounded px-2 py-1.5 text-[12px] bg-white"
+                    className="border border-hairline-strong rounded px-2 py-1.5 text-[12px] bg-surface-raised"
                   />
                   <input
                     type="date"
                     value={asnExpiry}
                     onChange={(e) => onAsnExpiryChange(e.target.value)}
-                    className="border border-zinc-300 rounded px-2 py-1.5 text-[12px] bg-white"
+                    className="border border-hairline-strong rounded px-2 py-1.5 text-[12px] bg-surface-raised"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={onSubmitBehalfAsn}
-                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Submit On-Behalf ASN
                 </button>
@@ -653,10 +653,10 @@ export function AdminPurchaseOrdersView({
 
             {selectedDetail.deductions.length > 0 && (
               <div>
-                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1.5">
+                <div className="text-[11px] uppercase tracking-[0.06em] text-faint mb-1.5">
                   Deductions ({selectedDetail.deductions.length})
                 </div>
-                <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-md">
+                <ul className="divide-y divide-hairline-06 border border-hairline rounded-md">
                   {selectedDetail.deductions.map((d) => (
                     <li key={d.id} className="px-3 py-2 flex items-center justify-between text-[12px]">
                       <span>{d.type.replace(/_/g, ' ')}</span>

@@ -85,21 +85,21 @@ export function FounderInvestorView({
             <button
               type="button"
               onClick={onDownloadBrief}
-              className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
             >
               Download founder brief
             </button>
             <button
               type="button"
               onClick={onDownloadDeck}
-              className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
             >
               Download investor deck
             </button>
             <button
               type="button"
               onClick={() => setDeckOpen(true)}
-              className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+              className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Present deck
             </button>
@@ -152,11 +152,11 @@ export function FounderInvestorView({
         {tab === 'pitches' && (
           <div className="space-y-4">
             {pitches.map((p) => (
-              <div key={p.id} className="border border-zinc-200 rounded-md p-4 bg-zinc-50/40">
-                <div className="text-[13px] font-semibold text-zinc-950 mb-1.5">
+              <div key={p.id} className="border border-hairline rounded-md p-4 bg-surface/40">
+                <div className="text-[13px] font-semibold text-ink-950 mb-1.5">
                   {p.label} — {p.duration}
                 </div>
-                <p className="text-[13px] text-zinc-800 whitespace-pre-line leading-relaxed">
+                <p className="text-[13px] text-ink-800 whitespace-pre-line leading-relaxed">
                   {p.body}
                 </p>
               </div>
@@ -167,9 +167,9 @@ export function FounderInvestorView({
         {tab === 'model' && (
           <div className="space-y-4">
             {businessModel.map((s) => (
-              <div key={s.id} className="border border-zinc-200 rounded-md p-4 bg-zinc-50/40">
-                <div className="text-[13px] font-semibold text-zinc-950 mb-1.5">{s.title}</div>
-                <p className="text-[13px] text-zinc-800 whitespace-pre-line leading-relaxed">
+              <div key={s.id} className="border border-hairline rounded-md p-4 bg-surface/40">
+                <div className="text-[13px] font-semibold text-ink-950 mb-1.5">{s.title}</div>
+                <p className="text-[13px] text-ink-800 whitespace-pre-line leading-relaxed">
                   {s.body}
                 </p>
               </div>
@@ -178,11 +178,11 @@ export function FounderInvestorView({
         )}
 
         {tab === 'points' && (
-          <div className="divide-y divide-zinc-200">
+          <div className="divide-y divide-hairline-06">
             {talkingPoints.map((t) => (
               <div key={t.id} className="py-3 first:pt-0 last:pb-0">
-                <div className="text-[13px] font-semibold text-zinc-950">{t.title}</div>
-                <p className="mt-1 text-[13px] text-zinc-700">{t.body}</p>
+                <div className="text-[13px] font-semibold text-ink-950">{t.title}</div>
+                <p className="mt-1 text-[13px] text-secondary">{t.body}</p>
               </div>
             ))}
           </div>
@@ -193,17 +193,17 @@ export function FounderInvestorView({
             {questions.map((q) => {
               const isOpen = openQuestion === q.id;
               return (
-                <div key={q.id} className="border border-zinc-200 rounded-md overflow-hidden">
+                <div key={q.id} className="border border-hairline rounded-md overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setOpenQuestion(isOpen ? null : q.id)}
-                    className="w-full text-left px-4 py-3 text-[13px] font-medium text-zinc-950 hover:bg-zinc-50 flex items-center justify-between gap-2"
+                    className="w-full text-left px-4 py-3 text-[13px] font-medium text-ink-950 hover:bg-surface flex items-center justify-between gap-2"
                   >
                     <span>{q.question}</span>
-                    <span className="text-[12px] text-zinc-500">{isOpen ? 'Hide' : 'Show'}</span>
+                    <span className="text-[12px] text-faint">{isOpen ? 'Hide' : 'Show'}</span>
                   </button>
                   {isOpen && (
-                    <div className="px-4 py-3 border-t border-zinc-200 bg-zinc-50/60 text-[13px] text-zinc-700 leading-relaxed">
+                    <div className="px-4 py-3 border-t border-hairline bg-surface/60 text-[13px] text-secondary leading-relaxed">
                       {q.answer}
                     </div>
                   )}
@@ -214,15 +214,15 @@ export function FounderInvestorView({
         )}
 
         {tab === 'practice' && (
-          <div className="divide-y divide-zinc-200">
+          <div className="divide-y divide-hairline-06">
             {practice.map((s) => (
               <div key={s.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-semibold text-zinc-950">{s.label}</span>
+                  <span className="text-[13px] font-semibold text-ink-950">{s.label}</span>
                   <span className="text-[11px] font-mono text-[var(--mr-accent)]">{s.targetTime}</span>
                 </div>
-                <p className="text-[13px] text-zinc-700">{s.direction}</p>
-                <p className="text-[12px] text-zinc-500">Cue: {s.cue}</p>
+                <p className="text-[13px] text-secondary">{s.direction}</p>
+                <p className="text-[12px] text-faint">Cue: {s.cue}</p>
               </div>
             ))}
           </div>
@@ -238,10 +238,10 @@ export function FounderInvestorView({
       >
         <div className="space-y-4">
           {slides.map((s, idx) => (
-            <div key={s.title} className="border border-zinc-200 rounded-md p-4 bg-zinc-50/40">
-              <div className="text-[11px] font-mono text-zinc-500">Slide {idx + 1}</div>
-              <div className="text-[15px] font-semibold text-zinc-950 mt-0.5">{s.title}</div>
-              <ul className="mt-2 space-y-1 text-[13px] text-zinc-700">
+            <div key={s.title} className="border border-hairline rounded-md p-4 bg-surface/40">
+              <div className="text-[11px] font-mono text-faint">Slide {idx + 1}</div>
+              <div className="text-[15px] font-semibold text-ink-950 mt-0.5">{s.title}</div>
+              <ul className="mt-2 space-y-1 text-[13px] text-secondary">
                 {s.lines.map((line, li) => (
                   <li key={li}>{line}</li>
                 ))}

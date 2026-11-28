@@ -62,13 +62,13 @@ export function AdminUsertourView({
               onChange={(e) => onTourQueryChange(e.target.value)}
               placeholder="Search tours…"
               aria-label="Search onboarding tours"
-              className="w-52 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="w-52 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             />
             <select
               value={tourStatus}
               onChange={(e) => onTourStatusChange(e.target.value as TourStatusFilter)}
               aria-label="Filter tours by status"
-              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             >
               <option value="all">Status: all</option>
               <option value="published">Published</option>
@@ -135,18 +135,18 @@ export function AdminUsertourView({
               return (
                 <div
                   key={t.id}
-                  className="border border-zinc-200 rounded-md bg-white p-4 flex flex-col justify-between gap-3"
+                  className="border border-hairline rounded-md bg-surface-raised p-4 flex flex-col justify-between gap-3"
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-[14px] font-semibold text-zinc-950">{t.name}</h3>
+                      <h3 className="text-[14px] font-semibold text-ink-950">{t.name}</h3>
                       <InlineStatus
                         label={t.autoStart ? 'Published' : 'Draft'}
                         tone={t.autoStart ? 'success' : 'neutral'}
                       />
                     </div>
-                    <p className="text-[12px] text-zinc-600">{t.description}</p>
-                    <div className="text-[11px] font-mono text-zinc-500">
+                    <p className="text-[12px] text-ink-600">{t.description}</p>
+                    <div className="text-[11px] font-mono text-faint">
                       {t.steps.length} steps
                       {t.forceFirst ? ' · Required' : ''}
                       {t.autoStartViews?.length
@@ -155,12 +155,12 @@ export function AdminUsertourView({
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-zinc-200 space-y-2">
+                  <div className="pt-3 border-t border-hairline space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <button
                         type="button"
                         onClick={() => setExpandedTourId(stepsOpen ? null : t.id)}
-                        className="text-[12px] text-zinc-600 hover:text-zinc-950"
+                        className="text-[12px] text-ink-600 hover:text-ink-950"
                       >
                         {stepsOpen ? 'Hide steps' : `Inspect ${t.steps.length} steps`}
                       </button>
@@ -170,16 +170,16 @@ export function AdminUsertourView({
                           setStepIndex(0);
                           setPreviewTour(t);
                         }}
-                        className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                        className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
                       >
                         Preview
                       </button>
                     </div>
                     {stepsOpen && (
-                      <ol className="list-decimal pl-4 space-y-1 text-[11px] text-zinc-600">
+                      <ol className="list-decimal pl-4 space-y-1 text-[11px] text-ink-600">
                         {t.steps.map((s) => (
                           <li key={s.id}>
-                            <span className="font-medium text-zinc-900">{s.title}</span> —{' '}
+                            <span className="font-medium text-ink-900">{s.title}</span> —{' '}
                             {s.description.slice(0, 68)}
                             {s.description.length > 68 ? '…' : ''}
                           </li>
@@ -208,7 +208,7 @@ export function AdminUsertourView({
               <button
                 type="button"
                 onClick={() => setPreviewTour(null)}
-                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700"
+                className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-secondary"
               >
                 Close
               </button>
@@ -217,7 +217,7 @@ export function AdminUsertourView({
                   <button
                     type="button"
                     onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-800"
                   >
                     Previous
                   </button>
@@ -231,7 +231,7 @@ export function AdminUsertourView({
                       setPreviewTour(null);
                     }
                   }}
-                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   {stepIndex < previewTour.steps.length - 1 ? 'Next step' : 'Done'}
                 </button>
@@ -242,22 +242,22 @@ export function AdminUsertourView({
       >
         {previewTour && step && (
           <div className="space-y-4">
-            <div className="border border-zinc-200 rounded-md p-4 bg-zinc-50/60 space-y-2">
-              <div className="text-[11px] font-mono text-zinc-500">
+            <div className="border border-hairline rounded-md p-4 bg-surface/60 space-y-2">
+              <div className="text-[11px] font-mono text-faint">
                 Position: {step.position}
               </div>
-              <h3 className="text-[15px] font-semibold text-zinc-950">{step.title}</h3>
-              <p className="text-[13px] text-zinc-700 leading-relaxed">{step.description}</p>
+              <h3 className="text-[15px] font-semibold text-ink-950">{step.title}</h3>
+              <p className="text-[13px] text-secondary leading-relaxed">{step.description}</p>
             </div>
-            <div className="border border-zinc-200 rounded-md p-3 text-[12px]">
-              <div className="text-zinc-500 mb-1">Target selector</div>
+            <div className="border border-hairline rounded-md p-3 text-[12px]">
+              <div className="text-faint mb-1">Target selector</div>
               <code className="font-mono text-[var(--mr-accent)]">{step.targetSelector}</code>
             </div>
-            <ol className="list-decimal pl-5 space-y-1 text-[12px] text-zinc-600">
+            <ol className="list-decimal pl-5 space-y-1 text-[12px] text-ink-600">
               {previewTour.steps.map((s, idx) => (
                 <li
                   key={s.id}
-                  className={idx === stepIndex ? 'font-semibold text-zinc-950' : ''}
+                  className={idx === stepIndex ? 'font-semibold text-ink-950' : ''}
                 >
                   {s.title}
                 </li>

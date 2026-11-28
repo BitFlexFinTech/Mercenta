@@ -68,8 +68,8 @@ const columns: ConsoleColumn<ApprovalVerificationRow>[] = [
     header: 'Subject',
     render: (r) => (
       <div>
-        <div className="font-medium text-zinc-950">{r.subject}</div>
-        <div className="text-[12px] text-zinc-500">{r.subjectKind}</div>
+        <div className="font-medium text-ink-950">{r.subject}</div>
+        <div className="text-[12px] text-faint">{r.subjectKind}</div>
       </div>
     ),
   },
@@ -81,7 +81,7 @@ const columns: ConsoleColumn<ApprovalVerificationRow>[] = [
   {
     key: 'confidence',
     header: 'Confidence',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.confidence}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.confidence}</span>,
   },
   {
     key: 'unknown',
@@ -92,13 +92,13 @@ const columns: ConsoleColumn<ApprovalVerificationRow>[] = [
   {
     key: 'date',
     header: 'Date Checked',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.dateChecked}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.dateChecked}</span>,
   },
   {
     key: 'evidence',
     header: 'Evidence',
     hideOnMobile: true,
-    render: (r) => <span className="text-[12px] text-zinc-600">{r.evidenceSummary}</span>,
+    render: (r) => <span className="text-[12px] text-ink-600">{r.evidenceSummary}</span>,
   },
 ];
 
@@ -133,7 +133,7 @@ export function TalentApprovalsView({
         <>
           <MetricStrip items={metrics} columns={4} />
 
-          <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200" role="tablist">
+          <div className="flex flex-wrap items-center gap-2 border-b border-hairline" role="tablist">
             <button
               type="button"
               role="tab"
@@ -141,8 +141,8 @@ export function TalentApprovalsView({
               onClick={() => onTabChange('verification')}
               className={`px-3 py-2 text-[13px] font-medium border-b-2 -mb-px ${
                 activeTab === 'verification'
-                  ? 'border-[var(--mr-accent)] text-zinc-950'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800'
+                  ? 'border-[var(--mr-accent)] text-ink-950'
+                  : 'border-transparent text-faint hover:text-ink-800'
               }`}
             >
               Verification
@@ -163,7 +163,7 @@ export function TalentApprovalsView({
           </SectionCard>
 
           <SectionCard title="Not available in this workspace" description="Stated rather than faked.">
-            <ul className="text-[13px] text-zinc-600 space-y-1 list-disc pl-5">
+            <ul className="text-[13px] text-ink-600 space-y-1 list-disc pl-5">
               <li>Product submissions — no submission records in the dataset.</li>
               <li>Listing recommendations — no recommendation records in the dataset.</li>
               <li>Compliance documents — the dataset holds verification stamps, not documents.</li>

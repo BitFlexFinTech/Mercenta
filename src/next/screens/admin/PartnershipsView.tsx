@@ -82,32 +82,32 @@ export function PartnershipsView({
       key: 'name',
       header: 'Route',
       mobilePrimary: true,
-      render: (r) => <span className="font-medium text-zinc-950">{r.name}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.name}</span>,
     },
     {
       key: 'kind',
       header: 'Kind',
-      render: (r) => <span className="text-zinc-600">{r.kind}</span>,
+      render: (r) => <span className="text-ink-600">{r.kind}</span>,
     },
     {
       key: 'market',
       header: 'Market',
-      render: (r) => <span className="text-zinc-600">{r.market}</span>,
+      render: (r) => <span className="text-ink-600">{r.market}</span>,
     },
     {
       key: 'programme',
       header: 'Programme',
-      render: (r) => <span className="text-zinc-700">{r.programmeLabel}</span>,
+      render: (r) => <span className="text-secondary">{r.programmeLabel}</span>,
     },
     {
       key: 'objective',
       header: 'Objective',
-      render: (r) => <span className="text-[12px] text-zinc-600">{r.objective}</span>,
+      render: (r) => <span className="text-[12px] text-ink-600">{r.objective}</span>,
     },
     {
       key: 'status',
       header: 'Status',
-      render: (r) => <span className="text-[12px] text-amber-800">{r.statusLabel}</span>,
+      render: (r) => <span className="text-[12px] text-state-warning">{r.statusLabel}</span>,
     },
   ];
 
@@ -116,7 +116,7 @@ export function PartnershipsView({
       key: 'label',
       header: 'Route',
       mobilePrimary: true,
-      render: (r) => <span className="font-medium text-zinc-950">{r.label}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.label}</span>,
     },
     {
       key: 'discovered',
@@ -140,7 +140,7 @@ export function PartnershipsView({
       key: 'onboarded',
       header: 'Onboarded',
       align: 'right',
-      render: (r) => <span className="font-mono text-emerald-800">{r.onboarded}</span>,
+      render: (r) => <span className="font-mono text-state-success">{r.onboarded}</span>,
     },
   ];
 
@@ -199,12 +199,12 @@ export function PartnershipsView({
         <div className="space-y-4">
           <div className="flex flex-wrap items-end gap-3">
             <label className="block flex-1 min-w-[240px] text-[12px]">
-              <span className="text-zinc-600 font-medium block mb-1">Recipient address</span>
+              <span className="text-ink-600 font-medium block mb-1">Recipient address</span>
               <input
                 type="email"
                 value={recipient}
                 onChange={(e) => onRecipientChange(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
+                className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px]"
               />
             </label>
             <button
@@ -213,25 +213,25 @@ export function PartnershipsView({
                 setConfirmed(false);
                 onGenerateDraft();
               }}
-              className="px-3.5 py-2 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="px-3.5 py-2 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
             >
               Generate message
             </button>
           </div>
 
           {draft && (
-            <div className="space-y-3 border-t border-zinc-200 pt-3">
-              <div className="text-[12px] text-zinc-700">
+            <div className="space-y-3 border-t border-hairline pt-3">
+              <div className="text-[12px] text-secondary">
                 <strong>Subject:</strong> {draft.subject}
               </div>
-              <pre className="whitespace-pre-wrap rounded-md border border-zinc-200 bg-zinc-50 p-3 text-[12px] text-zinc-900 font-mono">
+              <pre className="whitespace-pre-wrap rounded-md border border-hairline bg-surface p-3 text-[12px] text-ink-900 font-mono">
                 {draft.text}
               </pre>
-              <div className="text-[11px] font-mono text-zinc-500">
+              <div className="text-[11px] font-mono text-faint">
                 Basis: {draft.basis} · wording gate:{' '}
                 {draft.lintPassed ? 'PASS' : `FAIL (${draft.lintReasons.join('; ')})`}
               </div>
-              <label className="flex items-center gap-2 text-[12px] text-zinc-700">
+              <label className="flex items-center gap-2 text-[12px] text-secondary">
                 <input
                   type="checkbox"
                   checked={confirmed}
@@ -250,7 +250,7 @@ export function PartnershipsView({
                     setSending(false);
                   }
                 }}
-                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 {sending ? 'Sending…' : 'Send now'}
               </button>
@@ -265,36 +265,36 @@ export function PartnershipsView({
         description={`Target ${formatGbp(fundraisingPlan.targetGbp)} · Committed ${formatGbp(fundraisingPlan.committedGbp)} · Commitments claimed: ${String(fundraisingPlan.commitmentsClaimed)}`}
       >
         <div className="space-y-4">
-          <div className="text-[12px] text-zinc-600">
+          <div className="text-[12px] text-ink-600">
             <div>{fundraisingPlan.instrument}</div>
-            <div className="text-zinc-500 mt-0.5">{fundraisingPlan.note}</div>
+            <div className="text-faint mt-0.5">{fundraisingPlan.note}</div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div className="text-[11px] uppercase tracking-[0.06em] font-medium text-zinc-500 mb-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] font-medium text-faint mb-2">
                 Use of funds
               </div>
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-md">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded-md">
                 {fundraisingPlan.useOfFunds.map((u) => (
                   <div key={u.label} className="p-3 text-[12px]">
-                    <div className="flex justify-between font-medium text-zinc-950">
+                    <div className="flex justify-between font-medium text-ink-950">
                       <span>{u.label}</span>
                       <span className="font-mono text-[var(--mr-accent)]">{u.pct}%</span>
                     </div>
-                    <p className="text-zinc-600 mt-0.5">{u.note}</p>
+                    <p className="text-ink-600 mt-0.5">{u.note}</p>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-[0.06em] font-medium text-zinc-500 mb-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] font-medium text-faint mb-2">
                 Milestones
               </div>
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-md">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded-md">
                 {fundraisingPlan.milestones.map((m) => (
                   <div key={m.label} className="p-3 text-[12px]">
-                    <div className="font-medium text-zinc-950">{m.label}</div>
-                    <p className="text-zinc-600 mt-0.5">{m.detail}</p>
+                    <div className="font-medium text-ink-950">{m.label}</div>
+                    <p className="text-ink-600 mt-0.5">{m.detail}</p>
                   </div>
                 ))}
               </div>

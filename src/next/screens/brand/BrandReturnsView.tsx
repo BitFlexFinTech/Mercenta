@@ -101,15 +101,15 @@ export function BrandReturnsView({
       key: 'poNumber',
       header: 'PO Ref',
       mobilePrimary: true,
-      render: (r) => <span className="font-mono font-medium text-zinc-950">{r.poNumber}</span>,
+      render: (r) => <span className="font-mono font-medium text-ink-950">{r.poNumber}</span>,
     },
     {
       key: 'product',
       header: 'Product & SKU',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.productName}</div>
-          <div className="font-mono text-[11px] text-zinc-500">{r.productSku}</div>
+          <div className="font-medium text-ink-950">{r.productName}</div>
+          <div className="font-mono text-[11px] text-faint">{r.productSku}</div>
         </div>
       ),
     },
@@ -133,9 +133,9 @@ export function BrandReturnsView({
       hideOnMobile: true,
       render: (r) =>
         r.linkedDeductionId ? (
-          <span className="font-mono text-[12px] text-amber-800">{r.linkedDeductionId}</span>
+          <span className="font-mono text-[12px] text-state-warning">{r.linkedDeductionId}</span>
         ) : (
-          <span className="text-[12px] text-zinc-400">—</span>
+          <span className="text-[12px] text-quiet">—</span>
         ),
     },
     {
@@ -144,7 +144,7 @@ export function BrandReturnsView({
       align: 'right',
       hideOnMobile: true,
       render: (r) => (
-        <span className="font-mono text-[12px] text-zinc-600">{r.returnDate.slice(0, 10)}</span>
+        <span className="font-mono text-[12px] text-ink-600">{r.returnDate.slice(0, 10)}</span>
       ),
     },
   ];
@@ -171,7 +171,7 @@ export function BrandReturnsView({
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search PO, SKU, product, or reason…"
           aria-label="Search returns"
-          className="w-full sm:w-80 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[14px] text-zinc-950"
+          className="w-full sm:w-80 px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[14px] text-ink-950"
         />
         {filterMode !== 'all' && (
           <button
@@ -202,37 +202,37 @@ export function BrandReturnsView({
       >
         {selected && (
           <div className="space-y-4 text-[14px]">
-            <div className="grid grid-cols-2 gap-3 border border-zinc-200 rounded-md p-3 bg-zinc-50/50 text-[12px]">
+            <div className="grid grid-cols-2 gap-3 border border-hairline rounded-md p-3 bg-surface/50 text-[12px]">
               <div>
-                <span className="text-zinc-500 block">Quantity returned</span>
-                <span className="font-mono text-zinc-950 font-semibold">{selected.quantity} units</span>
+                <span className="text-faint block">Quantity returned</span>
+                <span className="font-mono text-ink-950 font-semibold">{selected.quantity} units</span>
               </div>
               <div>
-                <span className="text-zinc-500 block">Reason</span>
+                <span className="text-faint block">Reason</span>
                 <InlineStatus label={REASON_LABELS[selected.reason]} tone={REASON_TONE[selected.reason]} />
               </div>
               <div>
-                <span className="text-zinc-500 block">Return date</span>
-                <span className="font-mono text-zinc-950">{selected.returnDate.slice(0, 10)}</span>
+                <span className="text-faint block">Return date</span>
+                <span className="font-mono text-ink-950">{selected.returnDate.slice(0, 10)}</span>
               </div>
               <div>
-                <span className="text-zinc-500 block">Linked deduction</span>
-                <span className="font-mono text-zinc-950">
+                <span className="text-faint block">Linked deduction</span>
+                <span className="font-mono text-ink-950">
                   {selected.linkedDeductionId ?? 'None'}
                 </span>
               </div>
             </div>
             {selected.description && (
               <div>
-                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Return details</div>
-                <p className="text-zinc-700">{selected.description}</p>
+                <div className="text-[11px] uppercase tracking-[0.06em] text-faint mb-1">Return details</div>
+                <p className="text-secondary">{selected.description}</p>
               </div>
             )}
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-200">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline">
               <button
                 type="button"
                 onClick={() => onOpenPo(selected.poNumber)}
-                className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
               >
                 Inspect PO {selected.poNumber}
               </button>
@@ -240,7 +240,7 @@ export function BrandReturnsView({
                 <button
                   type="button"
                   onClick={onOpenDeductions}
-                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900"
+                  className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900"
                 >
                   Open Deduction {selected.linkedDeductionId}
                 </button>

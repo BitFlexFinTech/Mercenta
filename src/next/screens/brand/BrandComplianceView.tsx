@@ -108,10 +108,10 @@ export function BrandComplianceView({
       mobilePrimary: true,
       render: (r) => (
         <div data-record-id={r.type}>
-          <div className="font-medium text-zinc-950 capitalize">{r.label}</div>
-          {r.blockingReason && <div className="text-[11px] text-zinc-600 mt-0.5">{r.blockingReason}</div>}
+          <div className="font-medium text-ink-950 capitalize">{r.label}</div>
+          {r.blockingReason && <div className="text-[11px] text-ink-600 mt-0.5">{r.blockingReason}</div>}
           {r.verificationSummary && (
-            <div className="text-[11px] font-mono text-zinc-500 mt-0.5">{r.verificationSummary}</div>
+            <div className="text-[11px] font-mono text-faint mt-0.5">{r.verificationSummary}</div>
           )}
         </div>
       ),
@@ -121,7 +121,7 @@ export function BrandComplianceView({
       header: 'Scope',
       hideOnMobile: true,
       render: (r) => (
-        <span className="text-[12px] text-zinc-600 capitalize">{r.scope ?? 'universal'}</span>
+        <span className="text-[12px] text-ink-600 capitalize">{r.scope ?? 'universal'}</span>
       ),
     },
     {
@@ -129,7 +129,7 @@ export function BrandComplianceView({
       header: 'Expiry',
       hideOnMobile: true,
       render: (r) => (
-        <span className="text-[12px] font-mono text-zinc-600">{r.expiryLabel ?? '—'}</span>
+        <span className="text-[12px] font-mono text-ink-600">{r.expiryLabel ?? '—'}</span>
       ),
     },
     {
@@ -150,7 +150,7 @@ export function BrandComplianceView({
             <button
               type="button"
               onClick={() => onReplaceDoc(r.type)}
-              className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
             >
               Replace
             </button>
@@ -160,7 +160,7 @@ export function BrandComplianceView({
               type="button"
               disabled={busyType === r.type}
               onClick={() => onUploadDoc(r.type)}
-              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               {busyType === r.type ? 'Uploading…' : 'Upload'}
             </button>
@@ -213,17 +213,17 @@ export function BrandComplianceView({
         {loading ? (
           <LoadingRows rows={3} label="Loading PO customs bundles…" />
         ) : customsGroups.length === 0 ? (
-          <p className="text-[12px] text-zinc-500">
+          <p className="text-[12px] text-faint">
             No accepted purchase orders yet — customs bundles generate automatically once a PO is accepted.
           </p>
         ) : (
           <div className="space-y-4">
             {customsGroups.map(({ po, brandName, docs }) => (
-              <div key={po.id} className="rounded border border-zinc-200 p-4 space-y-3">
+              <div key={po.id} className="rounded border border-hairline p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="text-[13px]">
-                    <span className="font-mono font-semibold text-zinc-950">{po.poNumber}</span>
-                    <span className="ml-2 text-zinc-600">{brandName}</span>
+                    <span className="font-mono font-semibold text-ink-950">{po.poNumber}</span>
+                    <span className="ml-2 text-ink-600">{brandName}</span>
                   </div>
                   <InlineStatus label={po.status.replace(/_/g, ' ')} tone="info" />
                 </div>
@@ -238,20 +238,20 @@ export function BrandComplianceView({
                         className={`text-left rounded border p-3 transition-colors ${
                           confirmed
                             ? 'border-emerald-300 bg-emerald-50/40'
-                            : 'border-zinc-200 bg-white hover:border-zinc-400'
+                            : 'border-hairline bg-surface-raised hover:border-hairline-strong'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <FileCheck2 className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
                           {confirmed && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-state-success">
                               <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                               Confirmed
                             </span>
                           )}
                         </div>
-                        <div className="mt-2 text-[13px] font-medium text-zinc-950">{doc.title}</div>
-                        <ul className="mt-1 space-y-0.5 text-[11px] font-mono text-zinc-500">
+                        <div className="mt-2 text-[13px] font-medium text-ink-950">{doc.title}</div>
+                        <ul className="mt-1 space-y-0.5 text-[11px] font-mono text-faint">
                           {doc.preFilled.slice(0, 2).map((f) => (
                             <li key={f.label} className="truncate">
                               {f.label}: {f.value}
@@ -282,17 +282,17 @@ export function BrandComplianceView({
               <button
                 type="button"
                 onClick={onClosePreview}
-                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700"
+                className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-secondary"
               >
                 Close
               </button>
               {isCustomsConfirmed(previewDoc.poId, previewDoc.doc.type) ? (
-                <span className="text-[12px] font-medium text-emerald-800">Already Confirmed</span>
+                <span className="text-[12px] font-medium text-state-success">Already Confirmed</span>
               ) : (
                 <button
                   type="button"
                   onClick={onConfirmPreview}
-                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Confirm Pre-Filled Values
                 </button>
@@ -305,7 +305,7 @@ export function BrandComplianceView({
           <iframe
             title={previewDoc.doc.title}
             srcDoc={previewDoc.doc.html}
-            className="w-full h-[65vh] border border-zinc-200 rounded bg-white"
+            className="w-full h-[65vh] border border-hairline rounded bg-surface-raised"
           />
         )}
       </SlideOverDrawer>

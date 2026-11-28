@@ -221,7 +221,7 @@ export function BrandCrmView({
           <button
             type="button"
             onClick={onExportCsv}
-            className="px-3.5 py-2 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+            className="px-3.5 py-2 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
           >
             Export CSV
           </button>
@@ -237,16 +237,16 @@ export function BrandCrmView({
         description={`In acquisition: ${acquisitionSummary.enrolled} · Responses: ${acquisitionSummary.responded} · Opportunities: ${acquisitionSummary.opportunities} · In onboarding: ${acquisitionSummary.onboardedCount} · Operational: ${acquisitionSummary.operationalCount} · Persistence: ${acquisitionSummary.persistenceState}`}
       >
         {acquisitionRows.length === 0 ? (
-          <p className="text-[13px] text-zinc-500">
+          <p className="text-[13px] text-faint">
             No acquisition opportunities created yet. Prepare & qualify outreach in Brand Intelligence.
           </p>
         ) : (
-          <ul className="divide-y divide-zinc-200 text-[13px]">
+          <ul className="divide-y divide-hairline-06 text-[13px]">
             {acquisitionRows.map((row) => (
               <li key={row.prospectId} className="py-2.5 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <span className="font-medium text-zinc-950">{row.brandName}</span>
-                  <div className="text-[12px] font-mono text-zinc-500">
+                  <span className="font-medium text-ink-950">{row.brandName}</span>
+                  <div className="text-[12px] font-mono text-faint">
                     {row.opportunityId} · BI {row.biScore}/100 · owner {row.ownerStaffId} · {row.responseCount} response(s)
                     {row.onboardingStatus ? ` · Onboarding ${row.onboardingStatus} (${row.onboardingBrandId})` : ''}
                   </div>
@@ -268,8 +268,8 @@ export function BrandCrmView({
                 onClick={() => onCategoryFilterChange(cat)}
                 className={`px-2.5 py-1 rounded text-[12px] font-medium border ${
                   categoryFilter === cat
-                    ? 'bg-zinc-950 text-white border-zinc-950'
-                    : 'bg-white text-zinc-600 border-zinc-200 hover:text-zinc-950'
+                    ? 'bg-ink-950 text-on-dark border-ink-950'
+                    : 'bg-surface-raised text-ink-600 border-hairline hover:text-ink-950'
                 }`}
               >
                 {cat === 'all' ? 'All' : cat}
@@ -281,7 +281,7 @@ export function BrandCrmView({
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search brands…"
-            className="w-60 rounded border border-zinc-300 bg-white px-3 py-1.5 text-[13px]"
+            className="w-60 rounded border border-hairline-strong bg-surface-raised px-3 py-1.5 text-[13px]"
           />
         </div>
 
@@ -299,23 +299,23 @@ export function BrandCrmView({
             }}
           />
         ) : (
-          <div className="border border-zinc-200 bg-white rounded-md divide-y divide-zinc-200">
+          <div className="border border-hairline bg-surface-raised rounded-md divide-y divide-hairline-06">
             {brands.map((b) => (
               <button
                 key={b.id}
                 type="button"
                 onClick={() => openBrand(b)}
-                className="w-full px-4 py-3 text-left flex flex-wrap items-center justify-between gap-3 hover:bg-zinc-50 transition-colors"
+                className="w-full px-4 py-3 text-left flex flex-wrap items-center justify-between gap-3 hover:bg-surface transition-colors"
               >
                 <div className="min-w-0">
-                  <div className="text-[14px] font-semibold text-zinc-950">{b.businessName}</div>
-                  <div className="text-[12px] text-zinc-500">
+                  <div className="text-[14px] font-semibold text-ink-950">{b.businessName}</div>
+                  <div className="text-[12px] text-faint">
                     {b.category} · {b.trackLabel} · Owner: {b.accountOwnerName}
                     {b.tags.length > 0 ? ` · ${b.tags.join(', ')}` : ''}
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-[12px]">
-                  <span className="font-mono text-zinc-600">{b.recentPos.length} PO(s)</span>
+                  <span className="font-mono text-ink-600">{b.recentPos.length} PO(s)</span>
                   <InlineStatus
                     label={b.contractStatus.replace(/_/g, ' ')}
                     tone={b.contractStatus === 'active' ? 'success' : 'warning'}
@@ -355,12 +355,12 @@ export function BrandCrmView({
             {drawerTab === 'overview' && (
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-zinc-950">Brand identity</h3>
+                  <h3 className="font-semibold text-ink-950">Brand identity</h3>
                   <div className="flex gap-2">
                     <input
                       value={nameDraft}
                       onChange={(e) => setNameDraft(e.target.value)}
-                      className="flex-1 rounded border border-zinc-300 px-2.5 py-1.5"
+                      className="flex-1 rounded border border-hairline-strong px-2.5 py-1.5"
                     />
                     <button
                       type="button"
@@ -369,7 +369,7 @@ export function BrandCrmView({
                         onRenameBrand(selectedBrand.id, nameDraft.trim());
                         setFeedback('Brand name updated.');
                       }}
-                      className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                      className="px-3 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                     >
                       Rename
                     </button>
@@ -377,20 +377,20 @@ export function BrandCrmView({
                 </div>
 
                 {selectedBrand.changeRequests.length > 0 && (
-                  <div className="border-t border-zinc-200 pt-4 space-y-2">
-                    <h3 className="font-semibold text-zinc-950">Pending profile change requests</h3>
+                  <div className="border-t border-hairline pt-4 space-y-2">
+                    <h3 className="font-semibold text-ink-950">Pending profile change requests</h3>
                     {selectedBrand.changeRequests.map((cr) => (
-                      <div key={cr.id} className="border border-zinc-200 rounded p-2.5 space-y-1">
+                      <div key={cr.id} className="border border-hairline rounded p-2.5 space-y-1">
                         <div className="font-mono text-[12px]">
                           {cr.field}: {cr.currentValue || '(empty)'} → {cr.requestedValue}
                         </div>
-                        <div className="text-[12px] text-zinc-500">Reason: {cr.reason}</div>
+                        <div className="text-[12px] text-faint">Reason: {cr.reason}</div>
                         <div className="flex gap-2 pt-1">
                           <button
                             type="button"
                             disabled={!canMutate}
                             onClick={() => onReviewChangeRequest(cr.id, true)}
-                            className="px-2.5 py-1 rounded bg-emerald-700 text-white text-[11px] disabled:opacity-40"
+                            className="px-2.5 py-1 rounded bg-emerald-700 text-on-dark text-[11px] disabled:opacity-40"
                           >
                             Approve
                           </button>
@@ -398,7 +398,7 @@ export function BrandCrmView({
                             type="button"
                             disabled={!canMutate}
                             onClick={() => onReviewChangeRequest(cr.id, false)}
-                            className="px-2.5 py-1 rounded border border-red-200 text-red-700 text-[11px] disabled:opacity-40"
+                            className="px-2.5 py-1 rounded border border-state-danger/20 text-state-danger text-[11px] disabled:opacity-40"
                           >
                             Reject
                           </button>
@@ -408,15 +408,15 @@ export function BrandCrmView({
                   </div>
                 )}
 
-                <div className="border-t border-zinc-200 pt-4 space-y-2">
-                  <h3 className="font-semibold text-zinc-950">Fulfillment track override</h3>
+                <div className="border-t border-hairline pt-4 space-y-2">
+                  <h3 className="font-semibold text-ink-950">Fulfillment track override</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <select
                       value={trackDraft}
                       onChange={(e) =>
                         setTrackDraft(e.target.value as 'direct_fulfillment' | 'financed')
                       }
-                      className="rounded border border-zinc-300 px-2.5 py-1.5"
+                      className="rounded border border-hairline-strong px-2.5 py-1.5"
                     >
                       {trackOptions.map((o) => (
                         <option key={o.value} value={o.value}>
@@ -428,7 +428,7 @@ export function BrandCrmView({
                       value={overrideReason}
                       onChange={(e) => setOverrideReason(e.target.value)}
                       placeholder="Override reason"
-                      className="rounded border border-zinc-300 px-2.5 py-1.5"
+                      className="rounded border border-hairline-strong px-2.5 py-1.5"
                     />
                   </div>
                   <button
@@ -438,14 +438,14 @@ export function BrandCrmView({
                       onOverrideTrack(selectedBrand.id, trackDraft, overrideReason);
                       setFeedback('Fulfillment track updated.');
                     }}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium disabled:opacity-40"
                   >
                     Apply track override
                   </button>
                 </div>
 
-                <div className="border-t border-zinc-200 pt-4 space-y-3">
-                  <h3 className="font-semibold text-zinc-950">Relationship metadata</h3>
+                <div className="border-t border-hairline pt-4 space-y-3">
+                  <h3 className="font-semibold text-ink-950">Relationship metadata</h3>
                   <div className="flex flex-wrap gap-1">
                     {lifecycleStages.map((st) => (
                       <button
@@ -455,8 +455,8 @@ export function BrandCrmView({
                         onClick={() => onSetLifecycle(selectedBrand.id, st.id)}
                         className={`px-2 py-1 rounded border text-[11px] ${
                           selectedBrand.lifecycleLabel === st.label
-                            ? 'bg-zinc-950 text-white border-zinc-950'
-                            : 'border-zinc-200 text-zinc-600'
+                            ? 'bg-ink-950 text-on-dark border-ink-950'
+                            : 'border-hairline text-ink-600'
                         }`}
                       >
                         {st.label}
@@ -468,7 +468,7 @@ export function BrandCrmView({
                       value={tagDraft}
                       onChange={(e) => setTagDraft(e.target.value)}
                       placeholder="Add segmentation tag…"
-                      className="flex-1 rounded border border-zinc-300 px-2.5 py-1 text-[12px]"
+                      className="flex-1 rounded border border-hairline-strong px-2.5 py-1 text-[12px]"
                     />
                     <button
                       type="button"
@@ -477,7 +477,7 @@ export function BrandCrmView({
                         onAddTag(selectedBrand.id, selectedBrand.tags, tagDraft.trim());
                         setTagDraft('');
                       }}
-                      className="px-3 py-1 rounded border border-zinc-300 text-[12px]"
+                      className="px-3 py-1 rounded border border-hairline-strong text-[12px]"
                     >
                       Add tag
                     </button>
@@ -488,7 +488,7 @@ export function BrandCrmView({
                       staffOptions.find((s) => s.name === selectedBrand.accountOwnerName)?.id ?? ''
                     }
                     onChange={(e) => onSetAccountOwner(selectedBrand.id, e.target.value || null)}
-                    className="w-full rounded border border-zinc-300 px-2.5 py-1.5 text-[12px]"
+                    className="w-full rounded border border-hairline-strong px-2.5 py-1.5 text-[12px]"
                   >
                     <option value="">(unassigned account owner)</option>
                     {staffOptions.map((s) => (
@@ -499,22 +499,22 @@ export function BrandCrmView({
                   </select>
                 </div>
 
-                <div className="border-t border-zinc-200 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
+                <div className="border-t border-hairline pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
                   <div>
-                    <h4 className="font-semibold text-zinc-950 mb-1">Compliance docs ({selectedBrand.docs.length})</h4>
+                    <h4 className="font-semibold text-ink-950 mb-1">Compliance docs ({selectedBrand.docs.length})</h4>
                     {selectedBrand.docs.map((d) => (
-                      <div key={d.id} className="flex justify-between py-1 border-b border-zinc-100">
+                      <div key={d.id} className="flex justify-between py-1 border-b border-hairline">
                         <span className="capitalize">{d.typeLabel}</span>
                         <InlineStatus label={d.statusLabel} tone={d.statusTone} />
                       </div>
                     ))}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-zinc-950 mb-1">Agreements ({selectedBrand.agreements.length})</h4>
+                    <h4 className="font-semibold text-ink-950 mb-1">Agreements ({selectedBrand.agreements.length})</h4>
                     {selectedBrand.agreements.map((a) => (
-                      <div key={a.id} className="flex justify-between py-1 border-b border-zinc-100">
+                      <div key={a.id} className="flex justify-between py-1 border-b border-hairline">
                         <span>{a.title}</span>
-                        <span className="font-mono text-zinc-500">v{a.version}</span>
+                        <span className="font-mono text-faint">v{a.version}</span>
                       </div>
                     ))}
                   </div>
@@ -525,15 +525,15 @@ export function BrandCrmView({
             {drawerTab === 'timeline' && (
               <div className="space-y-2 max-h-[420px] overflow-y-auto">
                 {selectedBrand.timeline.length === 0 ? (
-                  <p className="text-zinc-500">No activity recorded yet.</p>
+                  <p className="text-faint">No activity recorded yet.</p>
                 ) : (
                   selectedBrand.timeline.map((e) => (
-                    <div key={e.id} className="border-b border-zinc-200 pb-2">
+                    <div key={e.id} className="border-b border-hairline pb-2">
                       <div className="flex items-center justify-between text-[12px]">
-                        <span className="font-semibold text-zinc-950">{e.label}</span>
-                        <span className="font-mono text-zinc-500">{e.at}</span>
+                        <span className="font-semibold text-ink-950">{e.label}</span>
+                        <span className="font-mono text-faint">{e.at}</span>
                       </div>
-                      <p className="text-[12px] text-zinc-600 mt-0.5">{e.detail}</p>
+                      <p className="text-[12px] text-ink-600 mt-0.5">{e.detail}</p>
                     </div>
                   ))
                 )}
@@ -547,20 +547,20 @@ export function BrandCrmView({
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
                     placeholder="Follow-up task…"
-                    className="rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="rounded border border-hairline-strong px-2.5 py-1.5"
                   />
                   <input
                     type="date"
                     value={taskDue}
                     onChange={(e) => setTaskDue(e.target.value)}
-                    className="rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="rounded border border-hairline-strong px-2.5 py-1.5"
                   />
                 </div>
                 <div className="flex gap-2">
                   <select
                     value={taskAssignee}
                     onChange={(e) => setTaskAssignee(e.target.value)}
-                    className="flex-1 rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="flex-1 rounded border border-hairline-strong px-2.5 py-1.5"
                   >
                     {staffOptions.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -576,19 +576,19 @@ export function BrandCrmView({
                       setTaskTitle('');
                       setTaskDue('');
                     }}
-                    className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                   >
                     Add task
                   </button>
                 </div>
-                <ul className="divide-y divide-zinc-200">
+                <ul className="divide-y divide-hairline-06">
                   {selectedBrand.tasks.map((t) => (
                     <li key={t.id} className="py-2 flex items-center justify-between gap-2">
                       <div>
-                        <span className={t.status === 'done' ? 'line-through text-zinc-400' : 'text-zinc-950'}>
+                        <span className={t.status === 'done' ? 'line-through text-quiet' : 'text-ink-950'}>
                           {t.title}
                         </span>
-                        <div className="text-[11px] font-mono text-zinc-500">
+                        <div className="text-[11px] font-mono text-faint">
                           Due {t.dueDate} · {t.assigneeName}
                           {t.overdue ? ' · Overdue' : ''}
                         </div>
@@ -597,7 +597,7 @@ export function BrandCrmView({
                         type="button"
                         disabled={!canMutate}
                         onClick={() => onToggleTask(t.id, t.status)}
-                        className="px-2 py-1 rounded border border-zinc-200 text-[11px]"
+                        className="px-2 py-1 rounded border border-hairline text-[11px]"
                       >
                         {t.status === 'open' ? 'Mark done' : 'Reopen'}
                       </button>
@@ -614,7 +614,7 @@ export function BrandCrmView({
                   onChange={(e) => setNoteDraft(e.target.value)}
                   rows={2}
                   placeholder="Internal timestamped note (never shown to brand)…"
-                  className="w-full rounded border border-zinc-300 px-3 py-2"
+                  className="w-full rounded border border-hairline-strong px-3 py-2"
                 />
                 <button
                   type="button"
@@ -623,17 +623,17 @@ export function BrandCrmView({
                     onAddNote(selectedBrand.id, noteDraft);
                     setNoteDraft('');
                   }}
-                  className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                  className="px-3.5 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                 >
                   Add internal note
                 </button>
-                <div className="divide-y divide-zinc-200">
+                <div className="divide-y divide-hairline-06">
                   {selectedBrand.notes.map((n) => (
                     <div key={n.id} className="py-2">
-                      <div className="text-[11px] font-mono text-zinc-500">
+                      <div className="text-[11px] font-mono text-faint">
                         {n.createdAt} · {n.authorName}
                       </div>
-                      <p className="text-zinc-900 mt-0.5">{n.body}</p>
+                      <p className="text-ink-900 mt-0.5">{n.body}</p>
                     </div>
                   ))}
                 </div>
@@ -642,16 +642,16 @@ export function BrandCrmView({
 
             {drawerTab === 'comms' && (
               <div className="space-y-4">
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-zinc-200 rounded p-3 bg-zinc-50">
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-hairline rounded p-3 bg-surface">
                   {selectedBrand.messages.length === 0 ? (
-                    <p className="text-[12px] text-zinc-500">No messages logged yet.</p>
+                    <p className="text-[12px] text-faint">No messages logged yet.</p>
                   ) : (
                     selectedBrand.messages.map((m) => (
-                      <div key={m.id} className="border-b border-zinc-200 pb-1.5 last:border-0 text-[12px]">
-                        <div className="font-mono text-[11px] text-zinc-500">
+                      <div key={m.id} className="border-b border-hairline pb-1.5 last:border-0 text-[12px]">
+                        <div className="font-mono text-[11px] text-faint">
                           {m.createdAt} · {m.direction} · {m.channel}
                         </div>
-                        <div className="text-zinc-900">{m.body}</div>
+                        <div className="text-ink-900">{m.body}</div>
                       </div>
                     ))
                   )}
@@ -661,14 +661,14 @@ export function BrandCrmView({
                     value={msgSubject}
                     onChange={(e) => setMsgSubject(e.target.value)}
                     placeholder="Message subject"
-                    className="w-full rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="w-full rounded border border-hairline-strong px-2.5 py-1.5"
                   />
                   <textarea
                     value={msgBody}
                     onChange={(e) => setMsgBody(e.target.value)}
                     rows={2}
                     placeholder="Write email message…"
-                    className="w-full rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="w-full rounded border border-hairline-strong px-2.5 py-1.5"
                   />
                   <button
                     type="button"
@@ -684,18 +684,18 @@ export function BrandCrmView({
                       setMsgSubject('');
                       setMsgBody('');
                     }}
-                    className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                   >
                     Send message
                   </button>
                 </div>
-                <div className="border-t border-zinc-200 pt-3 space-y-2">
+                <div className="border-t border-hairline pt-3 space-y-2">
                   <textarea
                     value={callNote}
                     onChange={(e) => setCallNote(e.target.value)}
                     rows={2}
                     placeholder="Log phone call summary…"
-                    className="w-full rounded border border-zinc-300 px-2.5 py-1.5"
+                    className="w-full rounded border border-hairline-strong px-2.5 py-1.5"
                   />
                   <button
                     type="button"
@@ -705,7 +705,7 @@ export function BrandCrmView({
                       setFeedback(res);
                       setCallNote('');
                     }}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium"
                   >
                     Log call to timeline
                   </button>

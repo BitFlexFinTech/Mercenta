@@ -147,19 +147,19 @@ export function BrandCommercialReadinessView({
                 <div
                   key={r.id}
                   data-testid="brand-commercial-product"
-                  className="border border-zinc-200 bg-white rounded-md overflow-hidden"
+                  className="border border-hairline bg-surface-raised rounded-md overflow-hidden"
                 >
                   <button
                     type="button"
                     onClick={() => onToggleExpand(r.id)}
                     aria-expanded={open}
-                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-zinc-50/70 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
+                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-surface/70 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
                   >
                     <div className="min-w-0">
-                      <div className="text-[14px] font-semibold text-zinc-950 truncate">
+                      <div className="text-[14px] font-semibold text-ink-950 truncate">
                         {r.productLabel ?? r.id}
                       </div>
-                      <div className="mt-0.5 text-[12px] text-zinc-600 tabular-nums font-mono">
+                      <div className="mt-0.5 text-[12px] text-ink-600 tabular-nums font-mono">
                         {row.progressSatisfied} of {row.progressTotal} checks passed · {row.progressPercent}%
                       </div>
                     </div>
@@ -168,25 +168,25 @@ export function BrandCommercialReadinessView({
                     </div>
                   </button>
 
-                  <div className="border-t border-zinc-200 px-4 py-3 space-y-4">
-                    <p className="text-[12px] text-zinc-700">{row.explanation}</p>
+                  <div className="border-t border-hairline px-4 py-3 space-y-4">
+                    <p className="text-[12px] text-secondary">{row.explanation}</p>
 
                     {open && (
-                      <div className="space-y-4 pt-2 border-t border-zinc-100">
+                      <div className="space-y-4 pt-2 border-t border-hairline">
                         {row.reasons.length > 0 && (
                           <div data-testid="brand-commercial-guidance" className="space-y-2">
-                            <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+                            <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint">
                               What Mercenta needs, and why
                             </h3>
                             <ul className="space-y-2">
                               {row.reasons.map((reason) => (
                                 <li
                                   key={reason.label}
-                                  className="rounded border border-zinc-200 bg-zinc-50/70 p-3 text-[12px] space-y-1"
+                                  className="rounded border border-hairline bg-surface/70 p-3 text-[12px] space-y-1"
                                 >
-                                  <div className="font-semibold text-zinc-950">{reason.label}</div>
-                                  <p className="text-zinc-700">{reason.what}</p>
-                                  <p className="text-zinc-600">{reason.why}</p>
+                                  <div className="font-semibold text-ink-950">{reason.label}</div>
+                                  <p className="text-secondary">{reason.what}</p>
+                                  <p className="text-ink-600">{reason.why}</p>
                                   <div className="text-[11px] text-[var(--mr-accent)] font-medium">
                                     Guide: {reason.articleTitle}
                                   </div>
@@ -197,12 +197,12 @@ export function BrandCommercialReadinessView({
                         )}
 
                         {row.fields.length === 0 ? (
-                          <p className="text-[12px] text-emerald-800 font-medium">
+                          <p className="text-[12px] text-state-success font-medium">
                             Nothing is needed from you right now.
                           </p>
                         ) : (
                           <div data-testid="brand-commercial-missing" className="space-y-3">
-                            <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+                            <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint">
                               Your actions
                             </h3>
                             <ul className="space-y-3">
@@ -216,10 +216,10 @@ export function BrandCommercialReadinessView({
                                   <li
                                     key={f.field}
                                     data-testid={`brand-commercial-field-${f.field}`}
-                                    className="rounded border border-zinc-200 p-3 space-y-2"
+                                    className="rounded border border-hairline p-3 space-y-2"
                                   >
-                                    <div className="text-[12px] font-medium text-zinc-950">{f.what}</div>
-                                    <div className="text-[12px] text-zinc-600">{f.action}</div>
+                                    <div className="text-[12px] font-medium text-ink-950">{f.what}</div>
+                                    <div className="text-[12px] text-ink-600">{f.action}</div>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <input
                                         aria-label={f.label}
@@ -227,7 +227,7 @@ export function BrandCommercialReadinessView({
                                         onChange={(e) => onChangeDraft(key, { value: e.target.value })}
                                         placeholder="Enter value…"
                                         data-testid={`brand-commercial-input-${f.field}`}
-                                        className="w-36 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950 tabular-nums"
+                                        className="w-36 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950 tabular-nums"
                                       />
                                       <select
                                         aria-label={`${f.label} basis`}
@@ -238,7 +238,7 @@ export function BrandCommercialReadinessView({
                                           })
                                         }
                                         data-testid={`brand-commercial-basis-${f.field}`}
-                                        className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+                                        className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
                                       >
                                         {BASIS_OPTIONS.map((o) => (
                                           <option key={o.id} value={o.id}>
@@ -250,13 +250,13 @@ export function BrandCommercialReadinessView({
                                         type="button"
                                         onClick={() => onSubmitField(r, f.field)}
                                         data-testid={`brand-commercial-submit-${f.field}`}
-                                        className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                                        className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                                       >
                                         Submit for reassessment
                                       </button>
                                     </div>
                                     {f.confirmExisting && (
-                                      <p className="text-[11px] text-amber-800">
+                                      <p className="text-[11px] text-state-warning">
                                         Mercenta currently holds this as an assumption. Please confirm the actual figure.
                                       </p>
                                     )}
@@ -267,41 +267,41 @@ export function BrandCommercialReadinessView({
                           </div>
                         )}
 
-                        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-zinc-100 text-[12px]">
+                        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-hairline text-[12px]">
                           <div>
-                            <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Status</dt>
-                            <dd className="mt-0.5 font-medium text-zinc-950">{row.headline}</dd>
+                            <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Status</dt>
+                            <dd className="mt-0.5 font-medium text-ink-950">{row.headline}</dd>
                           </div>
                           <div>
-                            <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Next step</dt>
-                            <dd className="mt-0.5 text-zinc-700">{row.nextStep}</dd>
+                            <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Next step</dt>
+                            <dd className="mt-0.5 text-secondary">{row.nextStep}</dd>
                           </div>
                           <div>
-                            <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Checks</dt>
-                            <dd className="mt-0.5 font-mono tabular-nums text-zinc-950">
+                            <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Checks</dt>
+                            <dd className="mt-0.5 font-mono tabular-nums text-ink-950">
                               {row.progressSatisfied}/{row.progressTotal}
                             </dd>
                           </div>
                           <div>
-                            <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Updated</dt>
-                            <dd className="mt-0.5 font-mono tabular-nums text-zinc-700">{r.updatedAt}</dd>
+                            <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Updated</dt>
+                            <dd className="mt-0.5 font-mono tabular-nums text-secondary">{r.updatedAt}</dd>
                           </div>
                         </dl>
-                        <p className="text-[11px] text-zinc-500">{r.moqDisclaimer}</p>
+                        <p className="text-[11px] text-faint">{r.moqDisclaimer}</p>
                       </div>
                     )}
                   </div>
                 </div>
               );
             })}
-            <p className="text-[11px] text-zinc-500 pt-1" data-testid="brand-commercial-disclaimer">
+            <p className="text-[11px] text-faint pt-1" data-testid="brand-commercial-disclaimer">
               {disclaimer}
             </p>
           </div>
 
           <div>
             <SectionCard title="How this works">
-              <ol className="space-y-2 text-[12px] text-zinc-700">
+              <ol className="space-y-2 text-[12px] text-secondary">
                 <li>1. Learn — every field links to a verified guidance topic.</li>
                 <li>2. Understand — Mercenta explains which condition requires the term.</li>
                 <li>3. Do — supply or confirm the actual or estimated figure.</li>

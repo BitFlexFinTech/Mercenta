@@ -248,6 +248,29 @@ export default {
           tint: 'var(--mr-surface-tint)',
         },
         /**
+         * §PHASE 4 (2026-11-28) — the tokens the owner's class-migration map requires and
+         * that did not exist. Adding them is what makes the map executable: a mapping that
+         * targets a missing token produces a DEAD CLASS (no CSS), which is exactly the class
+         * of bug `validate-next-console-tokens` C1/B3 exists to catch.
+         *
+         * Values are the owner's, declared here once:
+         *   'tint-strong'  #e2e2df                     — the darker tint step
+         *   'scrim-30'     rgba(0,0,0,0.30)            — the overlay scrim
+         *   secondary      → existing --mr-text-muted   (an alias, not a new value)
+         *   quiet          → existing --mr-text-soft    (an alias, not a new value)
+         *   'on-dark'      #ffffff                      — text on a dark fill
+         *   'accent-tint'  → existing --mr-accent-tint  (an alias, not a new value)
+         *
+         * `divide-hairline-06` needs nothing added: the `hairline` scale already declares
+         * the `06` step, so that class was valid before this change.
+         */
+        'tint-strong': '#e2e2df',
+        'scrim-30': 'rgba(0, 0, 0, 0.30)',
+        secondary: 'var(--mr-text-muted)',
+        quiet: 'var(--mr-text-soft)',
+        'on-dark': '#ffffff',
+        'accent-tint': 'var(--mr-accent-tint)',
+        /**
          * §OPENSHIP BATCH 4 (2026-10-15) — the FLOATING-SURFACE hover tint.
          *
          * A row on a floating surface (a dropdown menu item) must show a hover that

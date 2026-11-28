@@ -656,7 +656,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             <button
               type="button"
               onClick={() => setOversightMode('none')}
-              className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800 hover:bg-zinc-50"
+              className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-800 hover:bg-surface"
             >
               Close drill-down
             </button>
@@ -717,20 +717,20 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     type="button"
                     disabled={!canMutate}
                     onClick={() => setShowAddStaff((v) => !v)}
-                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                   >
                     {showAddStaff ? 'Cancel' : 'Add Staff Member'}
                   </button>
                 }
               >
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-3 pb-3 border-b border-zinc-200 text-[12px]">
-                    <span className="font-medium text-zinc-700">Acting staff selector:</span>
+                  <div className="flex flex-wrap items-center gap-3 pb-3 border-b border-hairline text-[12px]">
+                    <span className="font-medium text-secondary">Acting staff selector:</span>
                     <select
                       aria-label="Acting staff member"
                       value={actingStaffId}
                       onChange={(e) => onActingStaffChange(e.target.value)}
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     >
                       {staff.map((s) => (
                         <option key={s.id} value={s.id}>
@@ -745,34 +745,34 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   </div>
 
                   {showAddStaff && (
-                    <div className="border border-zinc-200 rounded p-4 bg-zinc-50/70 space-y-3">
+                    <div className="border border-hairline rounded p-4 bg-surface/70 space-y-3">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12px]">
                         <label className="block">
-                          <span className="text-zinc-600 font-medium block mb-1">Full Name</span>
+                          <span className="text-ink-600 font-medium block mb-1">Full Name</span>
                           <input
                             type="text"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
                             placeholder="Jane Doe"
-                            className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                           />
                         </label>
                         <label className="block">
-                          <span className="text-zinc-600 font-medium block mb-1">Email</span>
+                          <span className="text-ink-600 font-medium block mb-1">Email</span>
                           <input
                             type="email"
                             value={newEmail}
                             onChange={(e) => setNewEmail(e.target.value)}
                             placeholder="name@mercenta.co.uk"
-                            className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                           />
                         </label>
                         <label className="block">
-                          <span className="text-zinc-600 font-medium block mb-1">Role</span>
+                          <span className="text-ink-600 font-medium block mb-1">Role</span>
                           <select
                             value={newRole}
                             onChange={(e) => setNewRole(e.target.value as StaffRole)}
-                            className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                           >
                             {roleOptions.map((r) => (
                               <option key={r.value} value={r.value}>
@@ -782,11 +782,11 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           </select>
                         </label>
                         <label className="block">
-                          <span className="text-zinc-600 font-medium block mb-1">Operating Channel</span>
+                          <span className="text-ink-600 font-medium block mb-1">Operating Channel</span>
                           <select
                             value={newChannel}
                             onChange={(e) => setNewChannel(e.target.value)}
-                            className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                            className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                           >
                             {channelOptions.map((c) => (
                               <option key={c} value={c}>
@@ -810,7 +810,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           setNewEmail('');
                           setShowAddStaff(false);
                         }}
-                        className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                        className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                       >
                         Create Staff Profile
                       </button>
@@ -826,8 +826,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         header: 'Operator',
                         render: (m) => (
                           <div>
-                            <div className="font-medium text-zinc-950">{m.name}</div>
-                            <div className="text-[12px] font-mono text-zinc-500">{m.email}</div>
+                            <div className="font-medium text-ink-950">{m.name}</div>
+                            <div className="text-[12px] font-mono text-faint">{m.email}</div>
                           </div>
                         ),
                       },
@@ -840,7 +840,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                             value={m.role}
                             disabled={!canMutate}
                             onChange={(e) => onUpdateStaffRole(m.id, e.target.value as StaffRole)}
-                            className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
+                            className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                           >
                             {roleOptions.map((r) => (
                               <option key={r.value} value={r.value}>
@@ -860,7 +860,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                             value={m.channel}
                             disabled={!canMutate}
                             onChange={(e) => onUpdateStaffChannel(m.id, e.target.value)}
-                            className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
+                            className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                           >
                             {channelOptions.map((c) => (
                               <option key={c} value={c}>
@@ -881,7 +881,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                             onChange={(e) =>
                               onUpdateStaffTier(m.id, e.target.value as StaffMember['permissionTier'])
                             }
-                            className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
+                            className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                           >
                             <option value="full">Full admin</option>
                             <option value="view_only">View-only</option>
@@ -902,7 +902,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate}
                               onClick={() => onToggleStaffActive(m.id)}
-                              className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] hover:bg-zinc-50 disabled:opacity-40"
+                              className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] hover:bg-surface disabled:opacity-40"
                             >
                               {m.active ? 'Deactivate' : 'Activate'}
                             </button>
@@ -910,7 +910,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate}
                               onClick={() => onRemoveStaff(m.id)}
-                              className="px-2 py-1 rounded border border-red-200 bg-red-50 text-[11px] text-red-900 hover:bg-red-100 disabled:opacity-40"
+                              className="px-2 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] text-state-danger hover:bg-red-100 disabled:opacity-40"
                             >
                               Remove
                             </button>
@@ -930,11 +930,11 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   {carrierMarkups.map((cfg) => (
                     <div
                       key={cfg.id}
-                      className="flex flex-wrap items-center justify-between gap-3 border border-zinc-200 rounded px-3.5 py-2.5"
+                      className="flex flex-wrap items-center justify-between gap-3 border border-hairline rounded px-3.5 py-2.5"
                     >
                       <div className="min-w-0">
-                        <div className="text-[13px] font-medium text-zinc-950">{cfg.label}</div>
-                        <div className="text-[11px] font-mono text-zinc-500">
+                        <div className="text-[13px] font-medium text-ink-950">{cfg.label}</div>
+                        <div className="text-[11px] font-mono text-faint">
                           {cfg.carrier === 'global' ? 'Fallback across carriers' : cfg.carrier}
                         </div>
                       </div>
@@ -952,17 +952,17 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               markupValue: Math.max(0, Number(e.target.value)) / 100,
                             })
                           }
-                          className="w-20 px-2 py-1 rounded border border-zinc-300 bg-white text-right font-mono text-[12px]"
+                          className="w-20 px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-right font-mono text-[12px]"
                         />
-                        <span className="text-[12px] text-zinc-500">%</span>
+                        <span className="text-[12px] text-faint">%</span>
                         <button
                           type="button"
                           disabled={!canMutate}
                           onClick={() => onUpdateCarrierMarkup(cfg.id, { active: !cfg.active })}
                           className={`px-2.5 py-1 rounded border text-[11px] font-medium ${
                             cfg.active
-                              ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
-                              : 'border-zinc-300 bg-white text-zinc-600'
+                              ? 'border-emerald-300 bg-state-success/10 text-state-success'
+                              : 'border-hairline-strong bg-surface-raised text-ink-600'
                           }`}
                         >
                           {cfg.active ? 'ON' : 'OFF'}
@@ -977,10 +977,10 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             <div className="space-y-6">
               <SectionCard title="Feature Modules & Isolation">
                 <div className="space-y-3 text-[12px]">
-                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-zinc-200">
+                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-hairline">
                     <div>
-                      <div className="font-semibold text-zinc-950">EU Market Module</div>
-                      <p className="text-zinc-600 mt-0.5">
+                      <div className="font-semibold text-ink-950">EU Market Module</div>
+                      <p className="text-ink-600 mt-0.5">
                         CE marking, EU EORI, REACH/GPSR scaffolding. Currently UK-only operations.
                       </p>
                     </div>
@@ -989,7 +989,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       tone={euMarketEnabled ? 'success' : 'neutral'}
                     />
                   </div>
-                  <p className="text-zinc-600 leading-relaxed">
+                  <p className="text-ink-600 leading-relaxed">
                     Super-Admin-only governance enforces strict tenant isolation: partner brand
                     sessions never receive platform-wide work, finance, compliance, or audit streams.
                   </p>
@@ -998,16 +998,16 @@ export function SuperAdminView(props: SuperAdminViewProps) {
 
               <SectionCard title="Open Work by Source">
                 {workBySource.length === 0 ? (
-                  <p className="text-[12px] text-zinc-500">No open operational work.</p>
+                  <p className="text-[12px] text-faint">No open operational work.</p>
                 ) : (
                   <ul className="space-y-2 text-[12px]">
                     {workBySource.map((row) => (
                       <li
                         key={row.sourceLabel}
-                        className="flex items-center justify-between border-b border-zinc-100 pb-1.5"
+                        className="flex items-center justify-between border-b border-hairline pb-1.5"
                       >
-                        <span className="text-zinc-700">{row.sourceLabel}</span>
-                        <span className="font-mono font-semibold text-zinc-950">{row.count}</span>
+                        <span className="text-secondary">{row.sourceLabel}</span>
+                        <span className="font-mono font-semibold text-ink-950">{row.count}</span>
                       </li>
                     ))}
                   </ul>
@@ -1033,13 +1033,13 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   value={appSearch}
                   onChange={(e) => setAppSearch(e.target.value)}
                   placeholder="Search company name…"
-                  className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
+                  className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                 />
                 <button
                   type="button"
                   disabled={!canMutate}
                   onClick={() => setShowManualBrand((v) => !v)}
-                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                 >
                   {showManualBrand ? 'Close Manual Form' : 'Add Brand Manually'}
                 </button>
@@ -1048,8 +1048,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           >
             <div className="space-y-4">
               {showManualBrand && (
-                <div className="border border-zinc-200 rounded p-4 bg-zinc-50/70 space-y-3">
-                  <div className="text-[13px] font-semibold text-zinc-950">
+                <div className="border border-hairline rounded p-4 bg-surface/70 space-y-3">
+                  <div className="text-[13px] font-semibold text-ink-950">
                     Manual Brand Creation (deterministic tenant ID)
                   </div>
                   {manualError && <NoticeBanner tone="danger" message={manualError} />}
@@ -1059,33 +1059,33 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       value={manualCo}
                       onChange={(e) => setManualCo(e.target.value)}
                       placeholder="Company Legal Name *"
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                     <input
                       type="text"
                       value={manualContact}
                       onChange={(e) => setManualContact(e.target.value)}
                       placeholder="Primary Signatory *"
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                     <input
                       type="email"
                       value={manualEmail}
                       onChange={(e) => setManualEmail(e.target.value)}
                       placeholder="Contact Email *"
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                     <input
                       type="text"
                       value={manualCountry}
                       onChange={(e) => setManualCountry(e.target.value)}
                       placeholder="Origin Country *"
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                     <select
                       value={manualCat}
                       onChange={(e) => setManualCat(e.target.value)}
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     >
                       {PRODUCT_CATEGORIES.map((c) => (
                         <option key={c} value={c}>
@@ -1098,7 +1098,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       onChange={(e) =>
                         setManualTrack(e.target.value as 'direct_fulfillment' | 'financed')
                       }
-                      className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     >
                       <option value="direct_fulfillment">Direct Fulfillment Track</option>
                       <option value="financed">Financed Track</option>
@@ -1129,7 +1129,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       setManualCountry('');
                       setShowManualBrand(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     {manualBusy ? 'Creating…' : 'Create Brand & Start Onboarding'}
                   </button>
@@ -1169,14 +1169,14 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     return (
                       <div
                         key={app.id}
-                        className="border border-zinc-200 rounded p-4 space-y-3 bg-white"
+                        className="border border-hairline rounded p-4 space-y-3 bg-surface-raised"
                       >
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div>
-                            <div className="text-[14px] font-semibold text-zinc-950">
+                            <div className="text-[14px] font-semibold text-ink-950">
                               {app.companyName}
                             </div>
-                            <div className="text-[12px] text-zinc-500">
+                            <div className="text-[12px] text-faint">
                               {app.country} · {app.category} · Phone: {app.phone} · SKUs:{' '}
                               {app.skuCount ?? 'N/A'} · Revenue: {app.monthlyRevenue ?? 'N/A'}
                             </div>
@@ -1196,22 +1196,22 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         </div>
 
                         {app.description && (
-                          <p className="text-[12px] text-zinc-600">{app.description}</p>
+                          <p className="text-[12px] text-ink-600">{app.description}</p>
                         )}
                         {app.adminNotes && (
-                          <div className="border border-amber-200 bg-amber-50/70 rounded px-3 py-2 text-[12px] text-amber-950">
+                          <div className="border border-state-warning/20 bg-amber-50/70 rounded px-3 py-2 text-[12px] text-state-warning">
                             <strong>Admin notes:</strong> {app.adminNotes}
                           </div>
                         )}
 
                         {canReview && (
-                          <div className="pt-2 border-t border-zinc-200 space-y-2">
+                          <div className="pt-2 border-t border-hairline space-y-2">
                             <div className="flex flex-wrap gap-2">
                               <button
                                 type="button"
                                 disabled={!canMutate}
                                 onClick={() => void onApplicationAction(app.id, 'approved')}
-                                className="px-3 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                                className="px-3 py-1 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                               >
                                 Approve & Start Onboarding
                               </button>
@@ -1219,7 +1219,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                 type="button"
                                 disabled={!canMutate}
                                 onClick={() => void onApplicationAction(app.id, 'rejected')}
-                                className="px-3 py-1 rounded border border-red-200 bg-red-50 text-[12px] text-red-900 hover:bg-red-100 disabled:opacity-40"
+                                className="px-3 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[12px] text-state-danger hover:bg-red-100 disabled:opacity-40"
                               >
                                 Reject
                               </button>
@@ -1232,7 +1232,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                     [app.id]: { mode: 'info_requested', text: '' },
                                   }))
                                 }
-                                className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800 hover:bg-zinc-50 disabled:opacity-40"
+                                className="px-3 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-800 hover:bg-surface disabled:opacity-40"
                               >
                                 Request Info
                               </button>
@@ -1245,7 +1245,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                     [app.id]: { mode: 'flagged', text: '' },
                                   }))
                                 }
-                                className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-800 hover:bg-zinc-50 disabled:opacity-40"
+                                className="px-3 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-800 hover:bg-surface disabled:opacity-40"
                               >
                                 Flag for Review
                               </button>
@@ -1267,7 +1267,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                       ? 'Specify additional information requested…'
                                       : 'Add internal review flag notes…'
                                   }
-                                  className="flex-1 min-w-[220px] px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
+                                  className="flex-1 min-w-[220px] px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                                 />
                                 <button
                                   type="button"
@@ -1284,7 +1284,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                       return next;
                                     });
                                   }}
-                                  className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                                  className="px-3 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                                 >
                                   Submit Note
                                 </button>
@@ -1297,7 +1297,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                       return next;
                                     })
                                   }
-                                  className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
+                                  className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                                 >
                                   Cancel
                                 </button>
@@ -1356,7 +1356,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowXeroCreds((v) => !v)}
-                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   {showXeroCreds ? 'Cancel' : 'Enter Xero Credentials'}
                 </button>
@@ -1365,7 +1365,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   type="button"
                   disabled={Boolean(xeroBusy)}
                   onClick={() => void onXeroManualReseed()}
-                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50"
+                  className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium hover:bg-surface"
                 >
                   {xeroBusy || 'Manual Reseed'}
                 </button>
@@ -1385,7 +1385,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   tone={xeroConnected ? 'success' : 'warning'}
                 />
                 {xeroLastSync && (
-                  <span className="font-mono text-zinc-500">
+                  <span className="font-mono text-faint">
                     Last sync: {new Date(xeroLastSync).toLocaleString()}
                   </span>
                 )}
@@ -1403,34 +1403,34 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               {xeroError && <NoticeBanner tone="danger" message={xeroError} />}
 
               {showXeroCreds && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border border-zinc-200 rounded p-4 bg-zinc-50/60 text-[12px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border border-hairline rounded p-4 bg-surface/60 text-[12px]">
                   <input
                     type="text"
                     value={credClientId}
                     onChange={(e) => setCredClientId(e.target.value)}
                     placeholder="Xero Client ID"
-                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                    className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                   />
                   <input
                     type="password"
                     value={credClientSecret}
                     onChange={(e) => setCredClientSecret(e.target.value)}
                     placeholder="Xero Client Secret"
-                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                    className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                   />
                   <input
                     type="text"
                     value={credTenantId}
                     onChange={(e) => setCredTenantId(e.target.value)}
                     placeholder="Xero Tenant ID"
-                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                    className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                   />
                   <input
                     type="password"
                     value={credAccessToken}
                     onChange={(e) => setCredAccessToken(e.target.value)}
                     placeholder="Xero Access Token"
-                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                    className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                   />
                   <div className="sm:col-span-2">
                     <button
@@ -1445,7 +1445,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         });
                         setShowXeroCreds(false);
                       }}
-                      className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
+                      className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium disabled:opacity-40"
                     >
                       Save & Connect
                     </button>
@@ -1515,8 +1515,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     header: 'Brand / Commission',
                     render: (c) => (
                       <div>
-                        <div className="font-medium text-zinc-950">{c.brandName}</div>
-                        <div className="font-mono text-[11px] text-zinc-500">{c.id}</div>
+                        <div className="font-medium text-ink-950">{c.brandName}</div>
+                        <div className="font-mono text-[11px] text-faint">{c.id}</div>
                       </div>
                     ),
                   },
@@ -1541,7 +1541,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       <div>
                         <InlineStatus label={c.reconciliationLabel} tone={c.reconciliationTone} />
                         {c.paymentId && (
-                          <div className="font-mono text-[11px] text-zinc-500">{c.paymentId}</div>
+                          <div className="font-mono text-[11px] text-faint">{c.paymentId}</div>
                         )}
                       </div>
                     ),
@@ -1553,7 +1553,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       <div>
                         <InlineStatus label={c.payoutStateLabel} tone={c.payoutStateTone} />
                         {c.payoutBlockedReason && (
-                          <div className="text-[11px] text-amber-800">{c.payoutBlockedReason}</div>
+                          <div className="text-[11px] text-state-warning">{c.payoutBlockedReason}</div>
                         )}
                       </div>
                     ),
@@ -1567,7 +1567,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         type="button"
                         disabled={!canMutate || payoutBusyId === c.id || c.status === 'paid'}
                         onClick={() => void onSettlePayout(c.id)}
-                        className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-40"
+                        className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium hover:bg-surface disabled:opacity-40"
                       >
                         {payoutBusyId === c.id ? 'Settling…' : c.status === 'paid' ? 'Paid' : 'Settle (sim)'}
                       </button>
@@ -1586,14 +1586,14 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               <div className="space-y-3">
                 {destinationNotice && <NoticeBanner tone="info" message={destinationNotice} />}
                 {destinations.length === 0 ? (
-                  <p className="text-[12px] text-zinc-500">No brand payout destinations on file.</p>
+                  <p className="text-[12px] text-faint">No brand payout destinations on file.</p>
                 ) : (
-                  <div className="divide-y divide-zinc-200">
+                  <div className="divide-y divide-hairline-06">
                     {destinations.map((d) => (
                       <div key={d.id} className="py-2.5 flex items-center justify-between gap-2">
                         <div>
-                          <div className="text-[13px] font-medium text-zinc-950">{d.accountName}</div>
-                          <div className="text-[11px] font-mono text-zinc-500">
+                          <div className="text-[13px] font-medium text-ink-950">{d.accountName}</div>
+                          <div className="text-[11px] font-mono text-faint">
                             {d.accountRefMasked} · {d.bankName}
                           </div>
                         </div>
@@ -1604,7 +1604,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate || destinationBusyId === d.id}
                               onClick={() => void onReviewDestination(d.id, 'verified')}
-                              className="px-2 py-1 rounded border border-emerald-300 bg-emerald-50 text-[11px] text-emerald-900"
+                              className="px-2 py-1 rounded border border-emerald-300 bg-state-success/10 text-[11px] text-state-success"
                             >
                               Verify
                             </button>
@@ -1614,7 +1614,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate || destinationBusyId === d.id}
                               onClick={() => void onReviewDestination(d.id, 'suspended')}
-                              className="px-2 py-1 rounded border border-red-200 bg-red-50 text-[11px] text-red-900"
+                              className="px-2 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] text-state-danger"
                             >
                               Suspend
                             </button>
@@ -1633,15 +1633,15 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             >
               <div className="space-y-3 text-[12px]">
                 <div className="grid grid-cols-2 gap-3 font-mono">
-                  <div className="border border-zinc-200 rounded p-2.5">
-                    <div className="text-zinc-500">Allocated / Void</div>
-                    <div className="font-semibold text-zinc-950 mt-0.5">
+                  <div className="border border-hairline rounded p-2.5">
+                    <div className="text-faint">Allocated / Void</div>
+                    <div className="font-semibold text-ink-950 mt-0.5">
                       {invoiceRegistry.totalAllocated} / {invoiceRegistry.voidCount}
                     </div>
                   </div>
-                  <div className="border border-zinc-200 rounded p-2.5">
-                    <div className="text-zinc-500">Upcoming 30d</div>
-                    <div className="font-semibold text-zinc-950 mt-0.5">
+                  <div className="border border-hairline rounded p-2.5">
+                    <div className="text-faint">Upcoming 30d</div>
+                    <div className="font-semibold text-ink-950 mt-0.5">
                       {formatGbp(invoiceRegistry.upcomingGbp, 2)}
                     </div>
                   </div>
@@ -1651,7 +1651,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     {invoiceRegistry.recent.map((r) => (
                       <li key={r.number} className="flex justify-between font-mono">
                         <span>{r.number}</span>
-                        <span className="text-zinc-500">
+                        <span className="text-faint">
                           {r.voided ? 'void — never reusable' : 'in force'}
                         </span>
                       </li>
@@ -1673,50 +1673,50 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12px]">
-                <div className="border border-zinc-200 rounded p-4 space-y-2">
-                  <div className="font-semibold text-zinc-950">{modelAExample.label}</div>
+                <div className="border border-hairline rounded p-4 space-y-2">
+                  <div className="font-semibold text-ink-950">{modelAExample.label}</div>
                   <div className="flex justify-between font-mono">
-                    <span className="text-zinc-500">Retail-channel PO</span>
+                    <span className="text-faint">Retail-channel PO</span>
                     <span>{formatGbp(modelAExample.retailChannelRevenueGbp, 2)}</span>
                   </div>
                   <div className="flex justify-between font-mono">
-                    <span className="text-zinc-500">Commission ({modelAExample.commissionRatePct}%)</span>
-                    <span className="text-emerald-800">
+                    <span className="text-faint">Commission ({modelAExample.commissionRatePct}%)</span>
+                    <span className="text-state-success">
                       {formatGbp(modelAExample.mercentaCommissionGbp, 2)}
                     </span>
                   </div>
-                  <div className="flex justify-between font-mono border-t border-zinc-200 pt-1.5">
-                    <span className="text-zinc-500">Brand economic amount</span>
+                  <div className="flex justify-between font-mono border-t border-hairline pt-1.5">
+                    <span className="text-faint">Brand economic amount</span>
                     <span className="font-semibold">{formatGbp(modelAExample.brandAmountGbp, 2)}</span>
                   </div>
-                  <p className="text-[11px] text-zinc-500">{modelAExample.vatBasis}</p>
+                  <p className="text-[11px] text-faint">{modelAExample.vatBasis}</p>
                 </div>
 
-                <div className="border border-zinc-200 rounded p-4 space-y-2">
-                  <div className="font-semibold text-zinc-950">{modelBExample.label}</div>
-                  <p className="text-zinc-600">{modelBExample.summary}</p>
+                <div className="border border-hairline rounded p-4 space-y-2">
+                  <div className="font-semibold text-ink-950">{modelBExample.label}</div>
+                  <p className="text-ink-600">{modelBExample.summary}</p>
                   <div className="flex justify-between font-mono">
-                    <span className="text-zinc-500">Retail-channel revenue</span>
+                    <span className="text-faint">Retail-channel revenue</span>
                     <span>{formatGbp(modelBExample.retailChannelRevenueGbp, 2)}</span>
                   </div>
                   <div className="flex justify-between font-mono">
-                    <span className="text-zinc-500">Brand acquisition cost</span>
+                    <span className="text-faint">Brand acquisition cost</span>
                     <span>{formatGbp(modelBExample.brandAcquisitionCostGbp, 2)}</span>
                   </div>
                   <div className="flex justify-between font-mono">
-                    <span className="text-zinc-500">Gross commercial spread</span>
+                    <span className="text-faint">Gross commercial spread</span>
                     <span>{formatGbp(modelBExample.grossCommercialSpreadGbp, 2)}</span>
                   </div>
-                  <div className="flex justify-between font-mono border-t border-zinc-200 pt-1.5">
-                    <span className="text-zinc-500">NET Mercenta margin</span>
-                    <span className="font-semibold text-emerald-800">
+                  <div className="flex justify-between font-mono border-t border-hairline pt-1.5">
+                    <span className="text-faint">NET Mercenta margin</span>
+                    <span className="font-semibold text-state-success">
                       {formatGbp(modelBExample.netMercentaMarginGbp, 2)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="border border-zinc-200 rounded p-3 bg-zinc-50/60 font-mono text-[12px] text-zinc-700">
+              <div className="border border-hairline rounded p-3 bg-surface/60 font-mono text-[12px] text-secondary">
                 {shippingEconomicsText}
               </div>
             </div>
@@ -1729,7 +1729,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             <div className="space-y-4">
               {commercialMessage && <NoticeBanner tone="info" message={commercialMessage} />}
               <label className="block max-w-md text-[12px]">
-                <span className="text-zinc-600 font-medium block mb-1">
+                <span className="text-ink-600 font-medium block mb-1">
                   Audit reason (required before recording change)
                 </span>
                 <input
@@ -1737,7 +1737,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   value={cmReason}
                   onChange={(e) => setCmReason(e.target.value)}
                   placeholder="e.g. Agreed at quarterly commercial review"
-                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                  className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                 />
               </label>
 
@@ -1750,8 +1750,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     header: 'Brand',
                     render: (r) => (
                       <div>
-                        <div className="font-medium text-zinc-950">{r.brandName}</div>
-                        <div className="text-[12px] text-zinc-500">{r.category}</div>
+                        <div className="font-medium text-ink-950">{r.brandName}</div>
+                        <div className="text-[12px] text-faint">{r.category}</div>
                       </div>
                     ),
                   },
@@ -1764,7 +1764,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           label={r.selectedModelLabel}
                           tone={r.selectedModel === 'commission_agent' ? 'success' : r.selectedModel === 'buy_resell' ? 'info' : 'warning'}
                         />
-                        <div className="font-mono text-[11px] text-zinc-500">{r.termsSummary}</div>
+                        <div className="font-mono text-[11px] text-faint">{r.termsSummary}</div>
                       </div>
                     ),
                   },
@@ -1773,7 +1773,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     header: 'Required Docs',
                     hideOnMobile: true,
                     render: (r) => (
-                      <span className="text-[12px] text-zinc-700">
+                      <span className="text-[12px] text-secondary">
                         {r.requirementCount} required (model-independent)
                       </span>
                     ),
@@ -1793,7 +1793,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               [r.brandId]: e.target.value as 'commission_agent' | 'buy_resell',
                             }))
                           }
-                          className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
+                          className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px]"
                         >
                           <option value="">Select…</option>
                           <option value="commission_agent">Model A — Commission</option>
@@ -1808,7 +1808,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                             onRecordCommercialModel(r.brandId, r.brandName, nextModel, cmReason);
                             setCmReason('');
                           }}
-                          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-40"
+                          className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium hover:bg-surface disabled:opacity-40"
                         >
                           Record
                         </button>
@@ -1819,10 +1819,10 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               />
 
               {commercialAudit.length > 0 && (
-                <div className="pt-3 border-t border-zinc-200 space-y-1.5 text-[12px]">
-                  <div className="font-semibold text-zinc-950">Commercial Model Audit Trail</div>
+                <div className="pt-3 border-t border-hairline space-y-1.5 text-[12px]">
+                  <div className="font-semibold text-ink-950">Commercial Model Audit Trail</div>
                   {commercialAudit.map((e) => (
-                    <div key={e.id} className="border-b border-zinc-100 pb-1.5">
+                    <div key={e.id} className="border-b border-hairline pb-1.5">
                       <span className="font-medium">{e.brandName}</span> · {e.action} ·{' '}
                       {e.modelLabel} · {e.actorId} — {e.reason} (compliance unchanged:{' '}
                       {String(e.complianceUnchanged)})
@@ -1846,7 +1846,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 type="button"
                 disabled={companyBusy || !canReadRegister}
                 onClick={() => void onReadCompanyRegister()}
-                className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 {companyBusy ? 'Reading register…' : 'Read Company Record'}
               </button>
@@ -1855,31 +1855,31 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3 text-[12px]">
                 <InlineStatus label={`Companies House: ${chModeLabel}`} tone="info" />
-                <span className="font-mono text-zinc-500">
+                <span className="font-mono text-faint">
                   Company No: {companyRegistration.companyNumber}
                 </span>
-                <span className="font-mono text-zinc-500">Audit entries: {companyAuditCount}</span>
+                <span className="font-mono text-faint">Audit entries: {companyAuditCount}</span>
               </div>
 
               {companyMessage && <NoticeBanner tone="success" message={companyMessage} />}
               {companyReadError && <NoticeBanner tone="danger" message={companyReadError} />}
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-[12px]">
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500">Status ({companySnapshot.dataSource ?? 'founder'})</div>
-                  <div className="font-semibold text-zinc-950 mt-0.5">
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint">Status ({companySnapshot.dataSource ?? 'founder'})</div>
+                  <div className="font-semibold text-ink-950 mt-0.5">
                     {companySnapshot.status ?? companyRegistration.registrarStatusLabel}
                   </div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500">Incorporation Date</div>
-                  <div className="font-semibold text-zinc-950 mt-0.5">
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint">Incorporation Date</div>
+                  <div className="font-semibold text-ink-950 mt-0.5">
                     {companySnapshot.incorporationDate ?? 'Not read from register'}
                   </div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500">Registered Office</div>
-                  <div className="font-semibold text-zinc-950 mt-0.5">
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint">Registered Office</div>
+                  <div className="font-semibold text-ink-950 mt-0.5">
                     {companySnapshot.registeredOfficeAddress ?? 'Not read from register'}
                   </div>
                 </div>
@@ -1899,8 +1899,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     title={s.detail}
                     className={`px-2.5 py-1 rounded border font-mono ${
                       s.id === confirmationWorkflow.stage
-                        ? 'border-zinc-950 bg-zinc-950 text-white'
-                        : 'border-zinc-200 bg-zinc-50 text-zinc-700'
+                        ? 'border-ink-950 bg-ink-950 text-on-dark'
+                        : 'border-hairline bg-surface text-secondary'
                     }`}
                   >
                     {s.label}
@@ -1909,16 +1909,16 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="font-semibold text-zinc-950">Confirmation Statement</div>
-                  <div className="text-zinc-600 mt-0.5">
+                <div className="border border-hairline rounded p-3">
+                  <div className="font-semibold text-ink-950">Confirmation Statement</div>
+                  <div className="text-ink-600 mt-0.5">
                     Due: {confirmationWorkflow.nextDueDate ?? 'Not read'} ·{' '}
                     {confirmationWorkflow.csDueLabel} ({confirmationWorkflow.csDueState})
                   </div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="font-semibold text-zinc-950">Annual Accounts</div>
-                  <div className="text-zinc-600 mt-0.5">
+                <div className="border border-hairline rounded p-3">
+                  <div className="font-semibold text-ink-950">Annual Accounts</div>
+                  <div className="text-ink-600 mt-0.5">
                     Due: {confirmationWorkflow.accountsDueDate ?? 'Not read'} ·{' '}
                     {confirmationWorkflow.accountsDueLabel} ({confirmationWorkflow.accountsDueState})
                   </div>
@@ -1929,39 +1929,39 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 <button
                   type="button"
                   onClick={onAdvanceConfirmationReview}
-                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white font-medium hover:bg-zinc-50"
+                  className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised font-medium hover:bg-surface"
                 >
                   Move to Review
                 </button>
                 <button
                   type="button"
                   onClick={onApproveConfirmation}
-                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Founder Approve
                 </button>
                 <button
                   type="button"
                   onClick={onFileViaOfficialApi}
-                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white font-medium hover:bg-zinc-50"
+                  className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised font-medium hover:bg-surface"
                 >
                   File via Official API
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end pt-2 border-t border-zinc-200">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end pt-2 border-t border-hairline">
                 <input
                   type="text"
                   value={filingRef}
                   onChange={(e) => setFilingRef(e.target.value)}
                   placeholder="Companies House filing reference"
-                  className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                  className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                 />
                 <input
                   type="date"
                   value={filedAt}
                   onChange={(e) => setFiledAt(e.target.value)}
-                  className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                  className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                 />
                 <div className="flex gap-2">
                   <button
@@ -1970,14 +1970,14 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       onRecordManualFiling(filingRef, filedAt);
                       setFilingRef('');
                     }}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white font-medium hover:bg-zinc-50"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised font-medium hover:bg-surface"
                   >
                     Record Reference
                   </button>
                   <button
                     type="button"
                     onClick={onVerifyFilingOnRegister}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white font-medium hover:bg-zinc-50"
+                    className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised font-medium hover:bg-surface"
                   >
                     Verify on Register
                   </button>
@@ -1993,15 +1993,15 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             >
               <div className="space-y-3 text-[12px]">
                 {governmentSecrets.map((sec) => (
-                  <div key={sec.id} className="border border-zinc-200 rounded p-3 space-y-2">
+                  <div key={sec.id} className="border border-hairline rounded p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-zinc-950">{sec.label}</span>
+                      <span className="font-semibold text-ink-950">{sec.label}</span>
                       <InlineStatus
                         label={sec.secretRef ? `Stored ${sec.masked}` : 'Not stored'}
                         tone={sec.secretRef ? 'success' : 'neutral'}
                       />
                     </div>
-                    <p className="text-zinc-600">{sec.purpose}</p>
+                    <p className="text-ink-600">{sec.purpose}</p>
                     <div className="flex flex-wrap gap-2">
                       <input
                         type="password"
@@ -2010,7 +2010,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           setSecretDrafts((p) => ({ ...p, [sec.id]: e.target.value }))
                         }
                         placeholder={sec.enterAt}
-                        className="flex-1 min-w-[160px] px-2.5 py-1 rounded border border-zinc-300 bg-white"
+                        className="flex-1 min-w-[160px] px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised"
                       />
                       <button
                         type="button"
@@ -2018,7 +2018,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           onStoreGovernmentSecret(sec.id, secretDrafts[sec.id] ?? '');
                           setSecretDrafts((p) => ({ ...p, [sec.id]: '' }));
                         }}
-                        className="px-2.5 py-1 rounded border border-zinc-300 bg-white font-medium"
+                        className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised font-medium"
                       >
                         Store Mask
                       </button>
@@ -2026,7 +2026,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         type="button"
                         disabled={!sec.secretRef}
                         onClick={() => onVerifyGovernmentSecret(sec.id)}
-                        className="px-2.5 py-1 rounded border border-zinc-300 bg-white disabled:opacity-40"
+                        className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised disabled:opacity-40"
                       >
                         Confirm Working
                       </button>
@@ -2034,7 +2034,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         type="button"
                         disabled={!sec.secretRef}
                         onClick={() => onClearGovernmentSecret(sec.id)}
-                        className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-900 disabled:opacity-40"
+                        className="px-2.5 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-state-danger disabled:opacity-40"
                       >
                         Remove
                       </button>
@@ -2057,8 +2057,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   }
                   tone="warning"
                 />
-                <p className="text-zinc-700">{hmrcReadiness.reason}</p>
-                <p className="text-zinc-500">Blocker: {hmrcReadiness.blocker}</p>
+                <p className="text-secondary">{hmrcReadiness.reason}</p>
+                <p className="text-faint">Blocker: {hmrcReadiness.blocker}</p>
               </div>
             </SectionCard>
           </div>
@@ -2107,7 +2107,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               <button
                 type="button"
                 onClick={onResetAiUsageLog}
-                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50"
+                className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium hover:bg-surface"
               >
                 Clear Demo Usage Log
               </button>
@@ -2122,8 +2122,8 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   header: 'Provider',
                   render: (p) => (
                     <div>
-                      <div className="font-medium text-zinc-950">{p.name}</div>
-                      <div className="text-[12px] text-zinc-500">
+                      <div className="font-medium text-ink-950">{p.name}</div>
+                      <div className="text-[12px] text-faint">
                         {p.plan} · {p.billing} · {p.category}
                       </div>
                     </div>
@@ -2171,31 +2171,31 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             <SectionCard title="Unit Economics & Pricing Inputs">
               <div className="space-y-3 text-[12px]">
                 <div className="grid grid-cols-2 gap-2 font-mono">
-                  <div className="border border-zinc-200 rounded p-2.5">
+                  <div className="border border-hairline rounded p-2.5">
                     Per brand ({costSummary.units.brands}): {formatGbp(costSummary.perUnit.perBrandGbp, 2)}
                   </div>
-                  <div className="border border-zinc-200 rounded p-2.5">
+                  <div className="border border-hairline rounded p-2.5">
                     Per opportunity ({costSummary.units.opportunities}):{' '}
                     {formatGbp(costSummary.perUnit.perOpportunityGbp, 2)}
                   </div>
-                  <div className="border border-zinc-200 rounded p-2.5">
+                  <div className="border border-hairline rounded p-2.5">
                     Per lead ({costSummary.units.leads}): {formatGbp(costSummary.perUnit.perLeadGbp, 2)}
                   </div>
-                  <div className="border border-zinc-200 rounded p-2.5">
+                  <div className="border border-hairline rounded p-2.5">
                     Per AI op ({costSummary.units.aiOperations}):{' '}
                     {formatGbp(costSummary.perUnit.perAiOperationGbp, 2)}
                   </div>
                 </div>
-                <div className="border-t border-zinc-200 pt-2 space-y-1">
+                <div className="border-t border-hairline pt-2 space-y-1">
                   {costSummary.costInputs.map((ci) => (
                     <div key={ci.id} className="flex justify-between">
-                      <span className="text-zinc-600">{ci.label}</span>
+                      <span className="text-ink-600">{ci.label}</span>
                       <span className="font-mono font-medium">
                         {ci.formattedValue} {ci.requiresFounderApproval ? '(Founder approval)' : ''}
                       </span>
                     </div>
                   ))}
-                  <div className="text-zinc-600 pt-1">
+                  <div className="text-ink-600 pt-1">
                     Break-even subscription: <strong>{costSummary.minSubscriptionLabel}</strong> ·{' '}
                     {costSummary.minSubscriptionNote}
                   </div>
@@ -2240,7 +2240,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
               <button
                 type="button"
                 onClick={() => setEditingLaunchCopy((v) => !v)}
-                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50"
+                className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium hover:bg-surface"
               >
                 {editingLaunchCopy ? 'Close Copy Editor' : 'Modify Launch Copy'}
               </button>
@@ -2248,32 +2248,32 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           >
             <div className="space-y-4">
               {editingLaunchCopy && (
-                <div className="border border-zinc-200 rounded p-4 bg-zinc-50/70 space-y-3 text-[12px]">
+                <div className="border border-hairline rounded p-4 bg-surface/70 space-y-3 text-[12px]">
                   <label className="block">
-                    <span className="font-medium text-zinc-700 block mb-1">Tagline</span>
+                    <span className="font-medium text-secondary block mb-1">Tagline</span>
                     <input
                       type="text"
                       value={launchProfile.tagline}
                       onChange={(e) => onUpdateLaunchProfile({ tagline: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                   </label>
                   <label className="block">
-                    <span className="font-medium text-zinc-700 block mb-1">Short Description</span>
+                    <span className="font-medium text-secondary block mb-1">Short Description</span>
                     <textarea
                       rows={2}
                       value={launchProfile.shortDescription}
                       onChange={(e) => onUpdateLaunchProfile({ shortDescription: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                   </label>
                   <label className="block">
-                    <span className="font-medium text-zinc-700 block mb-1">Long Description</span>
+                    <span className="font-medium text-secondary block mb-1">Long Description</span>
                     <textarea
                       rows={4}
                       value={launchProfile.longDescription}
                       onChange={(e) => onUpdateLaunchProfile({ longDescription: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised"
                     />
                   </label>
                 </div>
@@ -2319,21 +2319,21 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         <button
                           type="button"
                           onClick={() => onPrepareLaunchProfile(item.id)}
-                          className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] hover:bg-zinc-50"
+                          className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] hover:bg-surface"
                         >
                           Prepare
                         </button>
                         <button
                           type="button"
                           onClick={() => void onCopyLaunchText(item.name, item.packageText)}
-                          className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] hover:bg-zinc-50"
+                          className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] hover:bg-surface"
                         >
                           Copy
                         </button>
                         <button
                           type="button"
                           onClick={() => onMarkLaunchSubmitted(item.id)}
-                          className="px-2 py-1 rounded bg-[var(--mr-accent)] text-white text-[11px] hover:bg-[var(--mr-accent-600)]"
+                          className="px-2 py-1 rounded bg-[var(--mr-accent)] text-on-dark text-[11px] hover:bg-[var(--mr-accent-600)]"
                         >
                           Mark Submitted
                         </button>
@@ -2359,12 +2359,12 @@ export function SuperAdminView(props: SuperAdminViewProps) {
           >
             {selectedLaunch && (
               <div className="space-y-4 text-[12px]">
-                <p className="text-zinc-700">{selectedLaunch.audience}</p>
+                <p className="text-secondary">{selectedLaunch.audience}</p>
                 <div className="space-y-1.5">
-                  <div className="font-semibold text-zinc-950">Submission Checklist</div>
+                  <div className="font-semibold text-ink-950">Submission Checklist</div>
                   {selectedLaunch.checklist.map((c) => (
                     <div key={c.label} className="flex items-start gap-2">
-                      <span className={c.done ? 'text-emerald-700 font-bold' : 'text-amber-700'}>
+                      <span className={c.done ? 'text-state-success font-bold' : 'text-state-warning'}>
                         {c.done ? '✓' : '○'}
                       </span>
                       <span>
@@ -2392,7 +2392,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     Requirements URL
                   </a>
                 </div>
-                <pre className="whitespace-pre-wrap bg-zinc-50 border border-zinc-200 rounded p-3 font-mono text-[11px]">
+                <pre className="whitespace-pre-wrap bg-surface border border-hairline rounded p-3 font-mono text-[11px]">
                   {selectedLaunch.packageText}
                 </pre>
               </div>
@@ -2442,17 +2442,17 @@ export function SuperAdminView(props: SuperAdminViewProps) {
             ].map((card) => (
               <div
                 key={card.viewId}
-                className="border border-zinc-200 rounded p-4 flex flex-col justify-between gap-3"
+                className="border border-hairline rounded p-4 flex flex-col justify-between gap-3"
               >
                 <div>
-                  <div className="font-semibold text-zinc-950">{card.title}</div>
-                  <p className="text-zinc-600 mt-1">{card.desc}</p>
+                  <div className="font-semibold text-ink-950">{card.title}</div>
+                  <p className="text-ink-600 mt-1">{card.desc}</p>
                 </div>
                 {onNavigateView && (
                   <button
                     type="button"
                     onClick={() => onNavigateView(card.viewId)}
-                    className="self-start px-3 py-1 rounded border border-zinc-300 bg-white font-medium text-zinc-900 hover:bg-zinc-50"
+                    className="self-start px-3 py-1 rounded border border-hairline-strong bg-surface-raised font-medium text-ink-900 hover:bg-surface"
                   >
                     Open Screen
                   </button>

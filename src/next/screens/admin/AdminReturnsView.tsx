@@ -73,15 +73,15 @@ export function AdminReturnsView({
       key: 'brand',
       header: 'Brand',
       hideOnMobile: true,
-      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
     },
     {
       key: 'return',
       header: 'Return',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.productName}</div>
-          <div className="font-mono text-[11px] text-zinc-500">
+          <div className="font-medium text-ink-950">{r.productName}</div>
+          <div className="font-mono text-[11px] text-faint">
             {r.entry.returnId} · {r.quantity ?? '?'} units
           </div>
         </div>
@@ -93,8 +93,8 @@ export function AdminReturnsView({
       hideOnMobile: true,
       render: (r) => (
         <div>
-          <div className="font-mono text-[12px] text-zinc-900">{r.entry.inboundTrackingNumber}</div>
-          <div className="text-[11px] text-zinc-500">{r.entry.inboundCarrier}</div>
+          <div className="font-mono text-[12px] text-ink-900">{r.entry.inboundTrackingNumber}</div>
+          <div className="text-[11px] text-faint">{r.entry.inboundCarrier}</div>
         </div>
       ),
     },
@@ -110,11 +110,11 @@ export function AdminReturnsView({
       render: (r) =>
         r.entry.forwardedTrackingNumber ? (
           <div>
-            <div className="font-mono text-[12px] text-zinc-900">{r.entry.forwardedTrackingNumber}</div>
-            <div className="text-[11px] text-zinc-500">{r.entry.forwardedCarrier}</div>
+            <div className="font-mono text-[12px] text-ink-900">{r.entry.forwardedTrackingNumber}</div>
+            <div className="text-[11px] text-faint">{r.entry.forwardedCarrier}</div>
           </div>
         ) : (
-          <span className="text-zinc-400">—</span>
+          <span className="text-quiet">—</span>
         ),
     },
     {
@@ -129,7 +129,7 @@ export function AdminReturnsView({
               e.stopPropagation();
               onAdvanceStage(r.entry.id);
             }}
-            className="px-2.5 py-1 rounded bg-zinc-950 text-white text-[11px] font-medium hover:bg-zinc-800"
+            className="px-2.5 py-1 rounded bg-ink-950 text-on-dark text-[11px] font-medium hover:bg-ink-800"
           >
             Advance
           </button>
@@ -174,14 +174,14 @@ export function AdminReturnsView({
             description="Open any return entry to inspect forwarding condition or advance its stage."
             actions={
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+                <Search className="w-3.5 h-3.5 text-quiet absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder="Search return or tracking…"
                   aria-label="Search return tracking"
-                  className="pl-8 pr-3 py-1.5 rounded border border-zinc-300 text-[12px] bg-white focus:outline-none focus:border-zinc-900"
+                  className="pl-8 pr-3 py-1.5 rounded border border-hairline-strong text-[12px] bg-surface-raised focus:outline-none focus:border-ink-900"
                 />
               </div>
             }
@@ -200,22 +200,22 @@ export function AdminReturnsView({
 
         <aside className="space-y-6">
           <SectionCard title="Warehouse partner">
-            <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-950">
+            <div className="flex items-center gap-2 text-[13px] font-medium text-ink-950">
               <Boxes className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
               <span>{warehousePartner.name}</span>
             </div>
-            <p className="mt-1.5 text-[12px] text-zinc-600">
+            <p className="mt-1.5 text-[12px] text-ink-600">
               {warehousePartner.address}, {warehousePartner.postcode}
             </p>
-            <p className="mt-1.5 text-[12px] text-zinc-500">{warehousePartner.notes}</p>
+            <p className="mt-1.5 text-[12px] text-faint">{warehousePartner.notes}</p>
           </SectionCard>
 
           <SectionCard title="Forwarding stages">
             <ul className="space-y-2 text-[12px]">
               {stageSteps.map((s) => (
                 <li key={s.status} className="flex items-center justify-between">
-                  <span className="text-zinc-700">{s.label}</span>
-                  <span className="font-mono font-medium text-zinc-950">{s.count}</span>
+                  <span className="text-secondary">{s.label}</span>
+                  <span className="font-mono font-medium text-ink-950">{s.count}</span>
                 </li>
               ))}
             </ul>
@@ -235,7 +235,7 @@ export function AdminReturnsView({
             <button
               type="button"
               onClick={() => onAdvanceStage(selectedRow.entry.id)}
-              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Advance stage
             </button>
@@ -245,20 +245,20 @@ export function AdminReturnsView({
         {selectedRow && (
           <div className="space-y-4 text-[13px]">
             <InlineStatus label={selectedRow.statusLabel} tone={selectedRow.statusTone} />
-            <dl className="space-y-2 border border-zinc-200 rounded-md p-3">
-              <div className="flex justify-between"><dt className="text-zinc-500">Product</dt><dd>{selectedRow.productName}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Quantity</dt><dd className="font-mono">{selectedRow.quantity ?? '?'}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Received</dt><dd className="font-mono">{selectedRow.entry.receivedAtWarehouse}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Condition</dt><dd>{selectedRow.entry.conditionOnReceipt}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Inbound carrier</dt><dd className="font-mono">{selectedRow.entry.inboundCarrier} · {selectedRow.entry.inboundTrackingNumber}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Forward carrier</dt><dd className="font-mono">{selectedRow.entry.forwardedCarrier ?? '—'} {selectedRow.entry.forwardedTrackingNumber ?? ''}</dd></div>
+            <dl className="space-y-2 border border-hairline rounded-md p-3">
+              <div className="flex justify-between"><dt className="text-faint">Product</dt><dd>{selectedRow.productName}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Quantity</dt><dd className="font-mono">{selectedRow.quantity ?? '?'}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Received</dt><dd className="font-mono">{selectedRow.entry.receivedAtWarehouse}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Condition</dt><dd>{selectedRow.entry.conditionOnReceipt}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Inbound carrier</dt><dd className="font-mono">{selectedRow.entry.inboundCarrier} · {selectedRow.entry.inboundTrackingNumber}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Forward carrier</dt><dd className="font-mono">{selectedRow.entry.forwardedCarrier ?? '—'} {selectedRow.entry.forwardedTrackingNumber ?? ''}</dd></div>
             </dl>
             {selectedRow.entry.qualityCheckNotes && (
-              <div className="border border-zinc-200 rounded-md p-3">
-                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">
+              <div className="border border-hairline rounded-md p-3">
+                <div className="text-[11px] uppercase tracking-[0.06em] text-faint mb-1">
                   Quality check notes
                 </div>
-                <p className="text-[12px] text-zinc-700">{selectedRow.entry.qualityCheckNotes}</p>
+                <p className="text-[12px] text-secondary">{selectedRow.entry.qualityCheckNotes}</p>
               </div>
             )}
           </div>

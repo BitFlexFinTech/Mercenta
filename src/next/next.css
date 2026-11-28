@@ -194,3 +194,80 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * §PHASE 4 (2026-11-28) — THE CLASS-TOKEN MIGRATION, RECORDED HERE.
+ *
+ * Every rule below names the legacy class it replaced. This file is the token
+ * owner, so the record lives beside the tokens rather than in a commit message:
+ * `validate-next-console-tokens` reads these `was <class>` comments and fails if
+ * a token is declared but unused, if a replaced class is still authored, or if an
+ * `ink` class the console authors has no rule here.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+.mercenta-next .bg-surface-raised {
+  background-color: var(--mr-surface-raised); /* was bg-white */
+}
+.mercenta-next .bg-surface {
+  background-color: var(--mr-surface); /* was bg-zinc-50 */
+}
+.mercenta-next .bg-tint {
+  background-color: var(--mr-hover-tint); /* was bg-zinc-100 */
+}
+.mercenta-next .bg-tint-strong {
+  background-color: #e2e2df; /* was bg-zinc-200 */
+}
+.mercenta-next .bg-accent-tint {
+  background-color: var(--mr-accent-tint); /* was bg-orange-50 */
+}
+.mercenta-next .bg-scrim-30 {
+  background-color: rgba(0, 0, 0, 0.3); /* was bg-zinc-950/30 */
+}
+.mercenta-next .bg-ink-950 {
+  background-color: var(--mr-surface); /* was bg-zinc-950 */
+}
+.mercenta-next .bg-ink-900 {
+  background-color: var(--mr-surface-raised); /* was bg-zinc-900 */
+}
+.mercenta-next .bg-ink-800 {
+  background-color: var(--mr-surface-overlay); /* was bg-zinc-800 */
+}
+.mercenta-next .text-ink-950 {
+  color: var(--mr-text-strong); /* was text-zinc-950 */
+}
+.mercenta-next .text-ink-900 {
+  color: var(--mr-text-strong); /* was text-zinc-900 */
+}
+.mercenta-next .text-ink-800 {
+  color: var(--mr-text); /* was text-zinc-800 */
+}
+.mercenta-next .text-ink-600 {
+  color: var(--mr-text-muted); /* was text-zinc-600 */
+}
+.mercenta-next .text-secondary {
+  color: var(--mr-text-muted); /* was text-zinc-700 */
+}
+.mercenta-next .text-faint {
+  color: var(--mr-text-faint); /* was text-zinc-500 */
+}
+.mercenta-next .text-quiet {
+  color: var(--mr-text-soft); /* was text-zinc-400 */
+}
+.mercenta-next .text-on-dark {
+  color: #ffffff; /* was text-white */
+}
+.mercenta-next .border-hairline {
+  border-color: var(--mr-hairline); /* was border-zinc-200 */
+}
+.mercenta-next .border-hairline-strong {
+  border-color: var(--mr-hairline-strong); /* was border-zinc-300 */
+}
+.mercenta-next .border-ink-950 {
+  border-color: var(--mr-hairline); /* was border-zinc-950 */
+}
+.mercenta-next .border-ink-900 {
+  border-color: var(--mr-hairline); /* was border-zinc-900 */
+}
+.mercenta-next .divide-hairline-06 {
+  border-color: var(--mr-hairline); /* was divide-zinc-200 */
+}

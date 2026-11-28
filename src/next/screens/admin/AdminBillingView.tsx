@@ -174,10 +174,10 @@ export function AdminBillingView({
                 {brands.map((b) => (
                   <div
                     key={b.brandId}
-                    className="border border-zinc-200 bg-white rounded-md flex flex-col justify-between"
+                    className="border border-hairline bg-surface-raised rounded-md flex flex-col justify-between"
                   >
-                    <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between gap-2">
-                      <span className="text-[14px] font-semibold text-zinc-950 truncate">
+                    <div className="px-4 py-3 border-b border-hairline flex items-center justify-between gap-2">
+                      <span className="text-[14px] font-semibold text-ink-950 truncate">
                         {b.brandName}
                       </span>
                       {b.planTier && (
@@ -189,37 +189,37 @@ export function AdminBillingView({
                     </div>
                     <div className="p-4 space-y-2 text-[13px]">
                       <div className="flex justify-between">
-                        <span className="text-zinc-500">Invoice ({b.invoiceNumber})</span>
-                        <span className="font-mono font-medium text-zinc-950">
+                        <span className="text-faint">Invoice ({b.invoiceNumber})</span>
+                        <span className="font-mono font-medium text-ink-950">
                           {formatGbp(b.invoiceSubtotalGbp, 2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-zinc-500">Shipping margin</span>
+                        <span className="text-faint">Shipping margin</span>
                         <span
                           className={`font-mono ${
-                            b.shippingMarginGbp >= 0 ? 'text-emerald-800' : 'text-red-800'
+                            b.shippingMarginGbp >= 0 ? 'text-state-success' : 'text-state-danger'
                           }`}
                         >
                           {formatGbp(b.shippingMarginGbp, 2)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-zinc-500">Deductions</span>
-                        <span className="font-mono text-red-800">
+                        <span className="text-faint">Deductions</span>
+                        <span className="font-mono text-state-danger">
                           {formatGbp(b.deductionsTotalGbp, 2)}
                         </span>
                       </div>
                       {b.invoiceNotes.length > 0 && (
-                        <p className="text-[11px] text-zinc-500 pt-1">{b.invoiceNotes.join(' · ')}</p>
+                        <p className="text-[11px] text-faint pt-1">{b.invoiceNotes.join(' · ')}</p>
                       )}
                     </div>
-                    <div className="px-4 py-2.5 border-t border-zinc-200 bg-zinc-50/40 flex justify-end">
+                    <div className="px-4 py-2.5 border-t border-hairline bg-surface/40 flex justify-end">
                       <button
                         type="button"
                         disabled={!b.hasCommissions}
                         onClick={() => onExportCommissionCsv(b.brandId)}
-                        className="text-[12px] font-medium text-zinc-700 hover:text-zinc-950 disabled:opacity-40"
+                        className="text-[12px] font-medium text-secondary hover:text-ink-950 disabled:opacity-40"
                       >
                         Export CSV
                       </button>
@@ -232,7 +232,7 @@ export function AdminBillingView({
                 title="Remittance statements — current period"
                 description="Gross PO value − commission − deductions = net paid per payout period."
               >
-                <div className="divide-y divide-zinc-200">
+                <div className="divide-y divide-hairline-06">
                   {brands.map((b) => {
                     const empty = b.remittance.lines.length === 0;
                     return (
@@ -241,10 +241,10 @@ export function AdminBillingView({
                         className="py-3 flex flex-wrap items-center justify-between gap-3"
                       >
                         <div>
-                          <div className="text-[13px] font-medium text-zinc-950">{b.brandName}</div>
-                          <div className="text-[12px] font-mono text-zinc-500">
+                          <div className="text-[13px] font-medium text-ink-950">{b.brandName}</div>
+                          <div className="text-[12px] font-mono text-faint">
                             {b.remittance.statementNumber} · net paid{' '}
-                            <span className={empty ? 'text-zinc-400' : 'text-emerald-800 font-semibold'}>
+                            <span className={empty ? 'text-quiet' : 'text-state-success font-semibold'}>
                               {formatGbp(b.remittance.netPaid, 2)}
                             </span>
                             {empty ? ' · no settled POs' : ` · ${b.remittance.lines.length} settled PO(s)`}
@@ -271,30 +271,30 @@ export function AdminBillingView({
           <SectionCard title="Period summary">
             <dl className="space-y-2 text-[13px]">
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Brands</dt>
-                <dd className="font-mono text-zinc-950">{totalBrands}</dd>
+                <dt className="text-faint">Brands</dt>
+                <dd className="font-mono text-ink-950">{totalBrands}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Invoiced</dt>
-                <dd className="font-mono text-zinc-950">{formatGbp(periodInvoicedGbp, 2)}</dd>
+                <dt className="text-faint">Invoiced</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(periodInvoicedGbp, 2)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Shipping margin</dt>
-                <dd className="font-mono text-zinc-950">{formatGbp(shippingMarginGbp, 2)}</dd>
+                <dt className="text-faint">Shipping margin</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(shippingMarginGbp, 2)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Deductions</dt>
-                <dd className="font-mono text-zinc-950">{formatGbp(totalDeductionsGbp, 2)}</dd>
+                <dt className="text-faint">Deductions</dt>
+                <dd className="font-mono text-ink-950">{formatGbp(totalDeductionsGbp, 2)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Active subscriptions</dt>
-                <dd className="font-mono text-zinc-950">{activeSubscriptionsCount}</dd>
+                <dt className="text-faint">Active subscriptions</dt>
+                <dd className="font-mono text-ink-950">{activeSubscriptionsCount}</dd>
               </div>
             </dl>
           </SectionCard>
 
           <SectionCard title="Payout rails">
-            <p className="text-[12px] text-zinc-600 leading-relaxed">
+            <p className="text-[12px] text-ink-600 leading-relaxed">
               Payoneer is the default payout rail and Wise is secondary. Stripe bills flat
               subscriptions only. No payout leaves Mercenta without explicit human approval.
             </p>
@@ -314,50 +314,50 @@ export function AdminBillingView({
       >
         {selectedStatement && (
           <div className="space-y-5 text-[13px]">
-            <dl className="grid grid-cols-2 gap-3 border border-zinc-200 rounded p-4 bg-zinc-50">
+            <dl className="grid grid-cols-2 gap-3 border border-hairline rounded p-4 bg-surface">
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Gross PO value</dt>
-                <dd className="font-mono font-medium text-zinc-950">
+                <dt className="text-[11px] uppercase text-faint">Gross PO value</dt>
+                <dd className="font-mono font-medium text-ink-950">
                   {formatGbp(selectedStatement.grossTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Commission</dt>
-                <dd className="font-mono text-zinc-800">
+                <dt className="text-[11px] uppercase text-faint">Commission</dt>
+                <dd className="font-mono text-ink-800">
                   −{formatGbp(selectedStatement.commissionTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Deductions</dt>
-                <dd className="font-mono text-red-800">
+                <dt className="text-[11px] uppercase text-faint">Deductions</dt>
+                <dd className="font-mono text-state-danger">
                   −{formatGbp(selectedStatement.deductionsTotal, 2)}
                 </dd>
               </div>
               <div>
-                <dt className="text-[11px] uppercase text-zinc-500">Net paid</dt>
-                <dd className="font-mono font-semibold text-emerald-800">
+                <dt className="text-[11px] uppercase text-faint">Net paid</dt>
+                <dd className="font-mono font-semibold text-state-success">
                   {formatGbp(selectedStatement.netPaid, 2)}
                 </dd>
               </div>
             </dl>
 
             <div className="space-y-2">
-              <h3 className="font-semibold text-zinc-950">Settled PO breakdown</h3>
-              <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+              <h3 className="font-semibold text-ink-950">Settled PO breakdown</h3>
+              <ul className="divide-y divide-hairline-06 border border-hairline rounded">
                 {selectedStatement.lines.map((line) => (
                   <li key={line.poNumber} className="p-3 space-y-1">
                     <div className="flex justify-between font-mono text-[12px]">
-                      <span className="font-semibold text-zinc-950">{line.poNumber}</span>
-                      <span className="font-semibold text-emerald-800">
+                      <span className="font-semibold text-ink-950">{line.poNumber}</span>
+                      <span className="font-semibold text-state-success">
                         Net {formatGbp(line.net, 2)}
                       </span>
                     </div>
-                    <div className="flex justify-between text-[12px] text-zinc-500 font-mono">
+                    <div className="flex justify-between text-[12px] text-faint font-mono">
                       <span>Gross {formatGbp(line.grossValue, 2)}</span>
                       <span>Commission −{formatGbp(line.commission, 2)}</span>
                     </div>
                     {line.deductions.length > 0 && (
-                      <div className="text-[11px] text-red-700 font-mono">
+                      <div className="text-[11px] text-state-danger font-mono">
                         Deductions:{' '}
                         {line.deductions
                           .map((d) => `${d.type.replace(/_/g, ' ')} −${formatGbp(d.amountGbp, 2)}`)

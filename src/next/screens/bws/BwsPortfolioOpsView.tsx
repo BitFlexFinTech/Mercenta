@@ -221,8 +221,8 @@ export function BwsPortfolioOpsView({
       header: 'Brand',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.businessName}</div>
-          <div className="text-[12px] text-zinc-500">
+          <div className="font-medium text-ink-950">{r.businessName}</div>
+          <div className="text-[12px] text-faint">
             {r.category} · {r.nation || 'Origin N/A'}
           </div>
         </div>
@@ -231,7 +231,7 @@ export function BwsPortfolioOpsView({
     {
       key: 'track',
       header: 'Fulfilment Track',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.trackLabel}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.trackLabel}</span>,
     },
     {
       key: 'contract',
@@ -267,8 +267,8 @@ export function BwsPortfolioOpsView({
       header: 'SKU & Product',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.productName}</div>
-          <div className="text-[12px] text-zinc-500 font-mono">
+          <div className="font-medium text-ink-950">{r.productName}</div>
+          <div className="text-[12px] text-faint font-mono">
             {r.sku} · {r.brandName}
           </div>
         </div>
@@ -279,7 +279,7 @@ export function BwsPortfolioOpsView({
       header: 'UK Commodity Code',
       render: (r) => (
         <span
-          className="font-mono text-[12px] text-zinc-500"
+          className="font-mono text-[12px] text-faint"
           title="Not provided by the Dash-1 source — no product record carries a commodity code."
         >
           {r.commodityCode ?? '—'}
@@ -291,7 +291,7 @@ export function BwsPortfolioOpsView({
       header: 'VAT Status',
       render: (r) => (
         <span
-          className="text-[12px] text-zinc-500"
+          className="text-[12px] text-faint"
           title="Not provided by the Dash-1 source — no product record carries a VAT status."
         >
           {r.vatStatus ?? '—'}
@@ -304,7 +304,7 @@ export function BwsPortfolioOpsView({
       render: (r) =>
         r.hazmat === null ? (
           <span
-            className="text-[12px] text-zinc-500"
+            className="text-[12px] text-faint"
             title="Not provided by the Dash-1 source — no product record carries a hazmat flag."
           >
             —
@@ -334,8 +334,8 @@ export function BwsPortfolioOpsView({
       header: 'Product',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.productName}</div>
-          <div className="text-[12px] text-zinc-500 font-mono">
+          <div className="font-medium text-ink-950">{r.productName}</div>
+          <div className="text-[12px] text-faint font-mono">
             {r.sku} · {r.brandName}
           </div>
         </div>
@@ -348,7 +348,7 @@ export function BwsPortfolioOpsView({
       render: (r) =>
         r.score === null ? (
           <span
-            className="text-[12px] text-zinc-500"
+            className="text-[12px] text-faint"
             title="Not provided by the Dash-1 source — this brand has no Amazon UK listing record, so there is no range-coverage figure."
           >
             —
@@ -366,7 +366,7 @@ export function BwsPortfolioOpsView({
       align: 'right',
       render: (r) => (
         <span
-          className="font-mono tabular-nums text-zinc-500"
+          className="font-mono tabular-nums text-faint"
           title="Not provided by the Dash-1 source."
         >
           {r.issuesCount === null ? '—' : r.issuesCount}
@@ -379,7 +379,7 @@ export function BwsPortfolioOpsView({
       align: 'right',
       render: (r) => (
         <span
-          className="font-mono tabular-nums text-zinc-500"
+          className="font-mono tabular-nums text-faint"
           title="Not provided by the Dash-1 source."
         >
           {r.recommendationCount === null ? '—' : r.recommendationCount}
@@ -392,7 +392,7 @@ export function BwsPortfolioOpsView({
     {
       key: 'brand',
       header: 'Brand',
-      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
     },
     { key: 'eori', header: 'Mercenta EORI', render: (r) => <span className="font-mono text-[12px]">{r.eori}</span> },
     { key: 'awrs', header: 'AWRS URN', render: (r) => <span className="font-mono text-[12px]">{r.awrsUrn}</span> },
@@ -406,7 +406,7 @@ export function BwsPortfolioOpsView({
     {
       key: 'po',
       header: 'PO Number',
-      render: (r) => <span className="font-mono font-medium text-zinc-950">{r.poNumber}</span>,
+      render: (r) => <span className="font-mono font-medium text-ink-950">{r.poNumber}</span>,
     },
     {
       key: 'brand',
@@ -416,12 +416,12 @@ export function BwsPortfolioOpsView({
     {
       key: 'status',
       header: 'Status',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.statusLabel}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.statusLabel}</span>,
     },
     {
       key: 'date',
       header: 'Order Date',
-      render: (r) => <span className="font-mono text-[12px] text-zinc-600">{r.orderDate}</span>,
+      render: (r) => <span className="font-mono text-[12px] text-ink-600">{r.orderDate}</span>,
     },
     {
       key: 'value',
@@ -435,7 +435,7 @@ export function BwsPortfolioOpsView({
       align: 'right',
       render: (r) => (
         <span
-          className="font-mono tabular-nums text-zinc-500"
+          className="font-mono tabular-nums text-faint"
           title="Not provided by the Dash-1 source — BWS is not a commission model."
         >
           {r.commissionGbp === null ? '—' : formatGbp(r.commissionGbp, 2)}
@@ -455,14 +455,14 @@ export function BwsPortfolioOpsView({
               <button
                 type="button"
                 onClick={() => onExportCsv('pos')}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
               >
                 Export POs CSV
               </button>
               <button
                 type="button"
                 onClick={() => onExportCsv('commissions')}
-                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
+                className="px-3.5 py-2 rounded-md bg-ink-950 text-on-dark text-[12px] font-medium hover:bg-ink-800"
               >
                 Export Commissions CSV
               </button>
@@ -471,7 +471,7 @@ export function BwsPortfolioOpsView({
             <button
               type="button"
               onClick={() => onNavigateView('campaign-studio')}
-              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Open Campaign Studio
             </button>
@@ -504,13 +504,13 @@ export function BwsPortfolioOpsView({
           {section === 'partner-portal' && (
             <div className="space-y-5">
               <div className="flex flex-wrap items-center gap-3">
-                <label className="text-[12px] font-medium text-zinc-700 flex items-center gap-2">
+                <label className="text-[12px] font-medium text-secondary flex items-center gap-2">
                   Inspect Partner Brand:
                   <select
                     aria-label="Select partner brand"
                     value={selectedBrandId}
                     onChange={(e) => onSelectBrandId(e.target.value)}
-                    className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] text-zinc-950"
+                    className="px-3 py-1.5 rounded-md border border-hairline-strong bg-surface-raised text-[14px] text-ink-950"
                   >
                     {brands.map((b) => (
                       <option key={b.id} value={b.id}>
@@ -529,12 +529,12 @@ export function BwsPortfolioOpsView({
                       description="This brand does not have recorded POs yet."
                     />
                   ) : (
-                    <ul className="divide-y divide-zinc-200">
+                    <ul className="divide-y divide-hairline-06">
                       {partnerPos.map((po) => (
                         <li key={po.id} className="py-2.5 flex items-center justify-between gap-3 text-[13px]">
                           <div>
-                            <div className="font-mono font-medium text-zinc-950">{po.poNumber}</div>
-                            <div className="text-[12px] text-zinc-500">{po.orderDate}</div>
+                            <div className="font-mono font-medium text-ink-950">{po.poNumber}</div>
+                            <div className="text-[12px] text-faint">{po.orderDate}</div>
                           </div>
                           <div className="text-right space-y-0.5">
                             <div className="font-mono tabular-nums font-medium">
@@ -555,14 +555,14 @@ export function BwsPortfolioOpsView({
                       description="Accepted POs await ASN dispatch in Wholesale Distribution / Inventory & Fulfilment."
                     />
                   ) : (
-                    <ul className="divide-y divide-zinc-200">
+                    <ul className="divide-y divide-hairline-06">
                       {partnerShipments.map((s) => (
                         <li key={s.id} className="py-2.5 flex items-center justify-between gap-3 text-[13px]">
                           <div>
-                            <div className="font-mono font-medium text-zinc-950">
+                            <div className="font-mono font-medium text-ink-950">
                               {s.reference} · {s.carrier.toUpperCase()}
                             </div>
-                            <div className="text-[12px] text-zinc-500">
+                            <div className="text-[12px] text-faint">
                               {s.origin} → {s.destination}
                             </div>
                           </div>
@@ -610,14 +610,14 @@ export function BwsPortfolioOpsView({
                     description="Check Inventory & Fulfilment for all active domestic and international movements."
                   />
                 ) : (
-                  <ul className="divide-y divide-zinc-200">
+                  <ul className="divide-y divide-hairline-06">
                     {customsShipments.map((s) => (
                       <li key={s.id} className="py-2.5 flex items-center justify-between gap-3 text-[13px]">
                         <div>
-                          <div className="font-mono font-medium text-zinc-950">
+                          <div className="font-mono font-medium text-ink-950">
                             {s.reference} ({s.carrier.toUpperCase()})
                           </div>
-                          <div className="text-[12px] text-zinc-500">
+                          <div className="text-[12px] text-faint">
                             {s.origin} → {s.destination}
                           </div>
                         </div>
@@ -676,12 +676,12 @@ export function BwsPortfolioOpsView({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SectionCard title="Operator Session">
                 <dl className="space-y-2 text-[13px]">
-                  <div className="flex justify-between border-b border-zinc-100 pb-2">
-                    <dt className="text-zinc-500">Acting staff</dt>
-                    <dd className="font-medium text-zinc-950">{actingStaffName}</dd>
+                  <div className="flex justify-between border-b border-hairline pb-2">
+                    <dt className="text-faint">Acting staff</dt>
+                    <dd className="font-medium text-ink-950">{actingStaffName}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-zinc-500">Write permission</dt>
+                    <dt className="text-faint">Write permission</dt>
                     <dd>
                       <InlineStatus
                         label={canMutate ? 'Full mutation rights' : 'Read-only operator'}
@@ -693,11 +693,11 @@ export function BwsPortfolioOpsView({
               </SectionCard>
 
               <SectionCard title="Connected Provider Modes">
-                <ul className="divide-y divide-zinc-200 text-[13px]">
+                <ul className="divide-y divide-hairline-06 text-[13px]">
                   {integrationStatuses.map((it) => (
                     <li key={it.id} className="py-2 flex items-center justify-between gap-2">
-                      <span className="font-medium text-zinc-900">{it.label}</span>
-                      <span className="font-mono text-[12px] text-zinc-600">
+                      <span className="font-medium text-ink-900">{it.label}</span>
+                      <span className="font-mono text-[12px] text-ink-600">
                         {it.status} ({it.mode})
                       </span>
                     </li>
@@ -718,26 +718,26 @@ export function BwsPortfolioOpsView({
         {drawerBrand && (
           <div className="space-y-4 text-[14px]">
             <dl className="space-y-2 text-[13px]">
-              <div className="flex justify-between border-b border-zinc-100 pb-2">
-                <dt className="text-zinc-500">Origin Nation</dt>
+              <div className="flex justify-between border-b border-hairline pb-2">
+                <dt className="text-faint">Origin Nation</dt>
                 <dd className="font-medium">{drawerBrand.nation || 'Unspecified'}</dd>
               </div>
-              <div className="flex justify-between border-b border-zinc-100 pb-2">
-                <dt className="text-zinc-500">Contract Status</dt>
+              <div className="flex justify-between border-b border-hairline pb-2">
+                <dt className="text-faint">Contract Status</dt>
                 <dd className="font-medium">{drawerBrand.contractStatus}</dd>
               </div>
-              <div className="flex justify-between border-b border-zinc-100 pb-2">
-                <dt className="text-zinc-500">Listed SKUs</dt>
+              <div className="flex justify-between border-b border-hairline pb-2">
+                <dt className="text-faint">Listed SKUs</dt>
                 <dd className="font-mono tabular-nums">{drawerBrand.skuCount}</dd>
               </div>
-              <div className="flex justify-between border-b border-zinc-100 pb-2">
-                <dt className="text-zinc-500">Purchase Orders</dt>
+              <div className="flex justify-between border-b border-hairline pb-2">
+                <dt className="text-faint">Purchase Orders</dt>
                 <dd className="font-mono tabular-nums">
                   {drawerBrand.poCount} ({formatGbp(drawerBrand.poValueGbp)})
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-500">Compliance Documents</dt>
+                <dt className="text-faint">Compliance Documents</dt>
                 <dd className="font-mono tabular-nums">
                   {drawerBrand.approvedDocsCount} / {drawerBrand.totalDocsCount} approved
                 </dd>
@@ -751,7 +751,7 @@ export function BwsPortfolioOpsView({
                   onSelectDrawerBrand(null);
                   onNavigateView('partner-portal');
                 }}
-                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium"
+                className="px-3.5 py-2 rounded-md bg-ink-950 text-on-dark text-[12px] font-medium"
               >
                 Open in Partner Portal
               </button>
@@ -761,7 +761,7 @@ export function BwsPortfolioOpsView({
                   onSelectDrawerBrand(null);
                   onNavigateView('product-catalogue');
                 }}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900"
+                className="px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900"
               >
                 View Catalogue
               </button>

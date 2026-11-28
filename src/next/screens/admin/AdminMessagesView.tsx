@@ -107,15 +107,15 @@ export function AdminMessagesView({
               onChange={(e) => onThreadQueryChange(e.target.value)}
               placeholder="Search threads…"
               aria-label="Search message threads"
-              className="w-52 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="w-52 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             />
             <button
               type="button"
               onClick={onToggleNeedsHuman}
               className={`px-3 py-1.5 rounded border text-[12px] font-medium ${
                 needsHumanOnly
-                  ? 'border-red-300 bg-red-50 text-red-900'
-                  : 'border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50'
+                  ? 'border-red-300 bg-state-danger/10 text-state-danger'
+                  : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >
               Needs human only
@@ -187,7 +187,7 @@ export function AdminMessagesView({
                 onAction={onResetFilters}
               />
             ) : (
-              <ul className="divide-y divide-zinc-200 -m-4">
+              <ul className="divide-y divide-hairline-06 -m-4">
                 {threads.map((t) => {
                   const active = activeThread?.key === t.key;
                   const last = t.messages[t.messages.length - 1];
@@ -197,18 +197,18 @@ export function AdminMessagesView({
                         type="button"
                         onClick={() => onSelectThread(t.key)}
                         className={`w-full text-left px-4 py-3 transition-colors ${
-                          active ? 'bg-zinc-100' : 'hover:bg-zinc-50'
+                          active ? 'bg-tint' : 'hover:bg-surface'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[13px] font-semibold text-zinc-950 truncate">
+                          <span className="text-[13px] font-semibold text-ink-950 truncate">
                             {t.brandName}
                           </span>
                           {t.hasHotLead && (
                             <InlineStatus label="Hot lead" tone="danger" dataStatus="needs_human" />
                           )}
                         </div>
-                        <p className="mt-1 text-[12px] text-zinc-600 truncate">
+                        <p className="mt-1 text-[12px] text-ink-600 truncate">
                           {last ? last.body.slice(0, 72) : 'No messages yet'}
                         </p>
                       </button>
@@ -221,13 +221,13 @@ export function AdminMessagesView({
 
           <SectionCard title="Open outreach follow-ups" description="Shared with Work Management">
             {outreachWork.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">No open outreach follow-up items.</p>
+              <p className="text-[12px] text-faint">No open outreach follow-up items.</p>
             ) : (
               <ul className="space-y-2 text-[12px]">
                 {outreachWork.slice(0, 5).map((w) => (
-                  <li key={w.id} className="border-b border-zinc-100 pb-2 last:border-b-0 last:pb-0">
-                    <div className="font-medium text-zinc-950">{w.title}</div>
-                    <div className="text-zinc-500 font-mono">
+                  <li key={w.id} className="border-b border-hairline pb-2 last:border-b-0 last:pb-0">
+                    <div className="font-medium text-ink-950">{w.title}</div>
+                    <div className="text-faint font-mono">
                       {w.sourceLabel}
                       {w.dueDate ? ` · due ${w.dueDate}` : ''}
                     </div>
@@ -264,15 +264,15 @@ export function AdminMessagesView({
                         <div
                           className={`max-w-[80%] rounded-md border px-3.5 py-2.5 text-[13px] leading-relaxed ${
                             outbound
-                              ? 'border-zinc-300 bg-zinc-50 text-zinc-950'
-                              : 'border-zinc-200 bg-white text-zinc-900'
+                              ? 'border-hairline-strong bg-surface text-ink-950'
+                              : 'border-hairline bg-surface-raised text-ink-900'
                           }`}
                         >
                           {m.subject && (
-                            <div className="font-semibold text-zinc-950 mb-1">{m.subject}</div>
+                            <div className="font-semibold text-ink-950 mb-1">{m.subject}</div>
                           )}
                           <div className="whitespace-pre-wrap">{m.body}</div>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] font-mono text-zinc-500">
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] font-mono text-faint">
                             <span>{new Date(m.createdAt).toLocaleString()}</span>
                             <span>· {m.channel}</span>
                             <span>· {m.sentBy}</span>
@@ -287,15 +287,15 @@ export function AdminMessagesView({
                 </div>
 
                 {(emailLive || emailSandbox) && (
-                  <div className="pt-4 border-t border-zinc-200 space-y-2.5">
+                  <div className="pt-4 border-t border-hairline space-y-2.5">
                     <label className="block text-[12px]">
-                      <span className="text-zinc-600 font-medium block mb-1">Subject</span>
+                      <span className="text-ink-600 font-medium block mb-1">Subject</span>
                       <input
                         type="text"
                         value={draftSubject}
                         onChange={(e) => setDraftSubject(e.target.value)}
                         placeholder="Re: your wholesale enquiry"
-                        className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+                        className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
                       />
                     </label>
                     <textarea
@@ -303,10 +303,10 @@ export function AdminMessagesView({
                       onChange={(e) => setDraftBody(e.target.value)}
                       rows={3}
                       placeholder="Write a reply…"
-                      className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+                      className="w-full px-3 py-2 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
                     />
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      {sendNote && <span className="text-[12px] text-zinc-600">{sendNote}</span>}
+                      {sendNote && <span className="text-[12px] text-ink-600">{sendNote}</span>}
                       <button
                         type="button"
                         disabled={!draftBody.trim() || sending}
@@ -321,7 +321,7 @@ export function AdminMessagesView({
                             setSending(false);
                           }
                         }}
-                        className="ml-auto px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                        className="ml-auto px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                       >
                         {emailSandbox ? 'Send (Sandbox)' : 'Send'}
                       </button>

@@ -107,7 +107,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       key: 'poNumber',
       header: 'Purchase order',
       mobilePrimary: true,
-      render: (c) => <span className="font-mono font-medium text-zinc-950">{c.poNumber}</span>,
+      render: (c) => <span className="font-mono font-medium text-ink-950">{c.poNumber}</span>,
     },
     {
       key: 'poValue',
@@ -120,13 +120,13 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       header: 'Mercenta Fee',
       align: 'right',
       hideOnMobile: true,
-      render: (c) => <span className="text-zinc-600">−{formatGbp(c.commissionAmount, 2)}</span>,
+      render: (c) => <span className="text-ink-600">−{formatGbp(c.commissionAmount, 2)}</span>,
     },
     {
       key: 'netShare',
       header: 'Net Share',
       align: 'right',
-      render: (c) => <span className="font-semibold text-zinc-950">{formatGbp(c.netShare, 2)}</span>,
+      render: (c) => <span className="font-semibold text-ink-950">{formatGbp(c.netShare, 2)}</span>,
     },
     {
       key: 'status',
@@ -138,7 +138,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       header: 'Accrued',
       align: 'right',
       hideOnMobile: true,
-      render: (c) => <span className="font-mono text-[12px] text-zinc-600">{c.createdAt.slice(0, 10)}</span>,
+      render: (c) => <span className="font-mono text-[12px] text-ink-600">{c.createdAt.slice(0, 10)}</span>,
     },
   ];
 
@@ -162,7 +162,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
             <button
               type="button"
               onClick={() => onNavigate('purchase_orders')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Purchase Orders
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -170,7 +170,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
             <button
               type="button"
               onClick={() => onNavigate('work')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
             >
               Tasks & Deadlines
             </button>
@@ -183,14 +183,14 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       ) : (
         <>
           <div className="space-y-2">
-            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint">
               Your earnings position
             </h2>
             <MetricStrip items={earningsMetrics} columns={4} />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint">
               Account telemetry
             </h2>
             <MetricStrip items={accountMetrics} columns={4} />
@@ -222,25 +222,25 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                 }
               >
                 {openPos.length === 0 ? (
-                  <p className="text-[12px] text-zinc-500">No open purchase orders right now.</p>
+                  <p className="text-[12px] text-faint">No open purchase orders right now.</p>
                 ) : (
-                  <ul className="divide-y divide-zinc-200">
+                  <ul className="divide-y divide-hairline-06">
                     {openPos.map((po) => (
                       <li key={po.id} className="py-2.5 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <button
                             type="button"
                             onClick={() => onNavigate('purchase_orders', po.poNumber)}
-                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[var(--mr-accent)]"
+                            className="font-mono text-[14px] font-medium text-ink-950 hover:text-[var(--mr-accent)]"
                           >
                             {po.poNumber}
                           </button>
-                          <div className="text-[12px] text-zinc-500 font-mono">
+                          <div className="text-[12px] text-faint font-mono">
                             {po.orderDateLabel} · {po.unitCount} units
                           </div>
                         </div>
                         <div className="text-right shrink-0 space-y-0.5">
-                          <div className="font-mono text-[14px] tabular-nums font-medium text-zinc-950">
+                          <div className="font-mono text-[14px] tabular-nums font-medium text-ink-950">
                             {formatGbp(po.poValue)}
                           </div>
                           <InlineStatus label={po.statusLabel} tone={po.statusTone} />
@@ -264,20 +264,20 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                 }
               >
                 {activeShipments.length === 0 ? (
-                  <p className="text-[12px] text-zinc-500">No active consignments currently in motion.</p>
+                  <p className="text-[12px] text-faint">No active consignments currently in motion.</p>
                 ) : (
-                  <ul className="divide-y divide-zinc-200">
+                  <ul className="divide-y divide-hairline-06">
                     {activeShipments.map((s) => (
                       <li key={s.id} className="py-2.5 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <button
                             type="button"
                             onClick={() => onNavigate('logistics', s.poNumber)}
-                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[var(--mr-accent)]"
+                            className="font-mono text-[14px] font-medium text-ink-950 hover:text-[var(--mr-accent)]"
                           >
                             {s.reference} ({s.carrier})
                           </button>
-                          <div className="text-[12px] text-zinc-500">
+                          <div className="text-[12px] text-faint">
                             PO {s.poNumber} · {s.route}
                           </div>
                         </div>
@@ -323,7 +323,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                 <ul className="space-y-2 text-[12px]">
                   {complianceDocs.map((d) => (
                     <li key={d.label} className="flex items-center justify-between gap-2">
-                      <span className="text-zinc-700 truncate">{d.label}</span>
+                      <span className="text-secondary truncate">{d.label}</span>
                       <InlineStatus label={d.statusLabel} tone={d.present ? 'success' : 'warning'} />
                     </li>
                   ))}
@@ -343,13 +343,13 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                 }
               >
                 {recentMessages.length === 0 ? (
-                  <p className="text-[12px] text-zinc-500">No messages recorded for your tenant.</p>
+                  <p className="text-[12px] text-faint">No messages recorded for your tenant.</p>
                 ) : (
-                  <ul className="divide-y divide-zinc-200 text-[12px]">
+                  <ul className="divide-y divide-hairline-06 text-[12px]">
                     {recentMessages.map((m) => (
                       <li key={m.id} className="py-2">
-                        <div className="font-medium text-zinc-950 truncate">{m.subject}</div>
-                        <div className="text-[11px] font-mono text-zinc-500">
+                        <div className="font-medium text-ink-950 truncate">{m.subject}</div>
+                        <div className="text-[11px] font-mono text-faint">
                           {m.direction} · {m.at.slice(0, 10)}
                         </div>
                       </li>

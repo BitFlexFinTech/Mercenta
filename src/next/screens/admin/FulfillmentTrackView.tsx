@@ -117,19 +117,19 @@ export function FulfillmentTrackView({
       key: 'brand',
       header: 'Brand',
       mobilePrimary: true,
-      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
     },
     {
       key: 'category',
       header: 'Category',
-      render: (r) => <span className="text-[12px] text-zinc-600">{r.category}</span>,
+      render: (r) => <span className="text-[12px] text-ink-600">{r.category}</span>,
     },
     {
       key: 'totalScore',
       header: 'Score',
       align: 'right',
       render: (r) => (
-        <span className={`font-mono font-semibold ${r.borderline ? 'text-amber-700' : 'text-zinc-950'}`}>
+        <span className={`font-mono font-semibold ${r.borderline ? 'text-state-warning' : 'text-ink-950'}`}>
           {r.totalScore}
         </span>
       ),
@@ -159,7 +159,7 @@ export function FulfillmentTrackView({
         ) : r.manualOverride ? (
           <InlineStatus label="Manual override" tone="info" />
         ) : (
-          <span className="text-[12px] text-zinc-500">Auto</span>
+          <span className="text-[12px] text-faint">Auto</span>
         ),
     },
     {
@@ -167,7 +167,7 @@ export function FulfillmentTrackView({
       header: 'Calculated',
       align: 'right',
       hideOnMobile: true,
-      render: (r) => <span className="font-mono text-[12px] text-zinc-500">{r.lastCalculated}</span>,
+      render: (r) => <span className="font-mono text-[12px] text-faint">{r.lastCalculated}</span>,
     },
   ];
 
@@ -182,7 +182,7 @@ export function FulfillmentTrackView({
           <button
             type="button"
             onClick={onBulkRecalculate}
-            className="px-3.5 py-2 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+            className="px-3.5 py-2 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
           >
             Bulk recalculate
           </button>
@@ -210,7 +210,7 @@ export function FulfillmentTrackView({
             <select
               value={trackFilter}
               onChange={(e) => onTrackFilterChange(e.target.value as FulfillmentTrackKey | 'all')}
-              className="rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-zinc-900"
+              className="rounded border border-hairline-strong bg-surface-raised px-2.5 py-1.5 text-ink-900"
             >
               <option value="all">All tracks</option>
               {trackOptions.map((o) => (
@@ -219,27 +219,27 @@ export function FulfillmentTrackView({
                 </option>
               ))}
             </select>
-            <label className="flex items-center gap-1.5 text-zinc-600">
+            <label className="flex items-center gap-1.5 text-ink-600">
               <span>Score ≥</span>
               <input
                 type="number"
                 value={minScore}
                 onChange={(e) => onMinScoreChange(e.target.value)}
                 placeholder="0"
-                className="w-16 rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-zinc-900"
+                className="w-16 rounded border border-hairline-strong bg-surface-raised px-2 py-1 font-mono text-ink-900"
               />
             </label>
-            <label className="flex items-center gap-1.5 text-zinc-600">
+            <label className="flex items-center gap-1.5 text-ink-600">
               <span>Score ≤</span>
               <input
                 type="number"
                 value={maxScore}
                 onChange={(e) => onMaxScoreChange(e.target.value)}
                 placeholder="100"
-                className="w-16 rounded border border-zinc-300 bg-white px-2 py-1 font-mono text-zinc-900"
+                className="w-16 rounded border border-hairline-strong bg-surface-raised px-2 py-1 font-mono text-ink-900"
               />
             </label>
-            <span className="ml-auto font-mono text-[12px] text-zinc-500">
+            <span className="ml-auto font-mono text-[12px] text-faint">
               {filteredRows.length} of {rows.length} brands
             </span>
           </div>
@@ -281,7 +281,7 @@ export function FulfillmentTrackView({
                 key: 'brand',
                 header: 'Brand',
                 mobilePrimary: true,
-                render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+                render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
               },
               { key: 'total', header: 'Total', align: 'right', render: (r) => <span className="font-mono">{r.totalScore}</span> },
               { key: 'hist', header: 'History', align: 'right', render: (r) => <span className="font-mono">{r.tradingHistoryScore}/20</span> },
@@ -308,14 +308,14 @@ export function FulfillmentTrackView({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-3 text-[13px]">
               <label className="block space-y-1">
-                <span className="text-zinc-600">Years exporting</span>
+                <span className="text-ink-600">Years exporting</span>
                 <input
                   type="number"
                   value={simulatorInputs.yearsExporting}
                   onChange={(e) =>
                     onSimulatorInputsChange({ ...simulatorInputs, yearsExporting: Number(e.target.value) })
                   }
-                  className="w-full rounded border border-zinc-300 px-2.5 py-1.5 font-mono"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-1.5 font-mono"
                 />
               </label>
               <div className="flex flex-wrap gap-4">
@@ -354,29 +354,29 @@ export function FulfillmentTrackView({
                 </label>
               </div>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Annual revenue (GBP)</span>
+                <span className="text-ink-600">Annual revenue (GBP)</span>
                 <input
                   type="number"
                   value={simulatorInputs.annualRevenueGbp}
                   onChange={(e) =>
                     onSimulatorInputsChange({ ...simulatorInputs, annualRevenueGbp: Number(e.target.value) })
                   }
-                  className="w-full rounded border border-zinc-300 px-2.5 py-1.5 font-mono"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-1.5 font-mono"
                 />
               </label>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Catalog size (SKUs)</span>
+                <span className="text-ink-600">Catalog size (SKUs)</span>
                 <input
                   type="number"
                   value={simulatorInputs.catalogSize}
                   onChange={(e) =>
                     onSimulatorInputsChange({ ...simulatorInputs, catalogSize: Number(e.target.value) })
                   }
-                  className="w-full rounded border border-zinc-300 px-2.5 py-1.5 font-mono"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-1.5 font-mono"
                 />
               </label>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Working capital (30–90 days)</span>
+                <span className="text-ink-600">Working capital (30–90 days)</span>
                 <select
                   value={simulatorInputs.workingCapitalAnswer}
                   onChange={(e) =>
@@ -385,7 +385,7 @@ export function FulfillmentTrackView({
                       workingCapitalAnswer: e.target.value as 'yes' | 'partially' | 'no',
                     })
                   }
-                  className="w-full rounded border border-zinc-300 px-2.5 py-1.5"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-1.5"
                 >
                   <option value="yes">Yes</option>
                   <option value="partially">Partially</option>
@@ -395,11 +395,11 @@ export function FulfillmentTrackView({
             </div>
 
             <div className="space-y-4">
-              <div className="border border-zinc-200 rounded p-4 text-center bg-zinc-50/50">
-                <div className="text-[36px] font-semibold font-mono text-zinc-950">
+              <div className="border border-hairline rounded p-4 text-center bg-surface/50">
+                <div className="text-[36px] font-semibold font-mono text-ink-950">
                   {simulatorOutput.totalScore}
                 </div>
-                <div className="text-[12px] text-zinc-500">Projected Total Score</div>
+                <div className="text-[12px] text-faint">Projected Total Score</div>
                 <div className="mt-2">
                   <InlineStatus
                     label={simulatorOutput.proposedTrackLabel}
@@ -407,7 +407,7 @@ export function FulfillmentTrackView({
                   />
                 </div>
                 {simulatorOutput.needsManualReview && (
-                  <p className="mt-2 text-[12px] text-amber-800">
+                  <p className="mt-2 text-[12px] text-state-warning">
                     Borderline score (55–74) — held for manual review
                   </p>
                 )}
@@ -433,7 +433,7 @@ export function FulfillmentTrackView({
             <select
               value={historyBrandId}
               onChange={(e) => setHistoryBrandId(e.target.value)}
-              className="rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-[13px]"
+              className="rounded border border-hairline-strong bg-surface-raised px-2.5 py-1.5 text-[13px]"
             >
               <option value="">Select a brand…</option>
               {rows.map((r) => (
@@ -444,22 +444,22 @@ export function FulfillmentTrackView({
             </select>
             {historyTarget && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[13px]">
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500 text-[11px] uppercase">Total</div>
-                  <div className="font-mono font-semibold text-zinc-950">{historyTarget.totalScore}</div>
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint text-[11px] uppercase">Total</div>
+                  <div className="font-mono font-semibold text-ink-950">{historyTarget.totalScore}</div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500 text-[11px] uppercase">Track</div>
-                  <div className="text-zinc-950">{historyTarget.trackLabel}</div>
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint text-[11px] uppercase">Track</div>
+                  <div className="text-ink-950">{historyTarget.trackLabel}</div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500 text-[11px] uppercase">History / Export</div>
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint text-[11px] uppercase">History / Export</div>
                   <div className="font-mono">
                     {historyTarget.tradingHistoryScore}/20 · {historyTarget.exportExperienceScore}/15
                   </div>
                 </div>
-                <div className="border border-zinc-200 rounded p-3">
-                  <div className="text-zinc-500 text-[11px] uppercase">Last run</div>
+                <div className="border border-hairline rounded p-3">
+                  <div className="text-faint text-[11px] uppercase">Last run</div>
                   <div className="font-mono">{historyTarget.lastCalculated}</div>
                 </div>
               </div>
@@ -478,10 +478,10 @@ export function FulfillmentTrackView({
       >
         {selectedRow && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border border-zinc-200 rounded p-4 bg-zinc-50">
+            <div className="flex items-center justify-between border border-hairline rounded p-4 bg-surface">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Total score</div>
-                <div className="text-[28px] font-semibold font-mono text-zinc-950">
+                <div className="text-[11px] uppercase tracking-[0.06em] text-faint">Total score</div>
+                <div className="text-[28px] font-semibold font-mono text-ink-950">
                   {selectedRow.totalScore} / 100
                 </div>
               </div>
@@ -499,7 +499,7 @@ export function FulfillmentTrackView({
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-[13px] font-semibold text-zinc-950">Score breakdown</h3>
+              <h3 className="text-[13px] font-semibold text-ink-950">Score breakdown</h3>
               <ConsoleProgressTrack
                 label={`Trading history (${selectedRow.tradingHistoryScore}/20)`}
                 value={selectedRow.tradingHistoryScore}
@@ -532,15 +532,15 @@ export function FulfillmentTrackView({
               />
             </div>
 
-            <div className="border-t border-zinc-200 pt-4 space-y-3">
-              <h3 className="text-[13px] font-semibold text-zinc-950">Manual track override</h3>
-              <p className="text-[12px] text-zinc-600">
+            <div className="border-t border-hairline pt-4 space-y-3">
+              <h3 className="text-[13px] font-semibold text-ink-950">Manual track override</h3>
+              <p className="text-[12px] text-ink-600">
                 Overrides take precedence over the auto-scoring engine and are logged to the audit trail.
               </p>
               <select
                 value={overrideTrack}
                 onChange={(e) => setOverrideTrack(e.target.value as FulfillmentTrackKey)}
-                className="w-full rounded border border-zinc-300 bg-white px-2.5 py-2 text-[13px]"
+                className="w-full rounded border border-hairline-strong bg-surface-raised px-2.5 py-2 text-[13px]"
               >
                 {trackOptions.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -553,22 +553,22 @@ export function FulfillmentTrackView({
                 value={overrideReason}
                 onChange={(e) => setOverrideReason(e.target.value)}
                 placeholder="Reason (required — logged to audit trail)"
-                className="w-full rounded border border-zinc-300 px-2.5 py-2 text-[13px]"
+                className="w-full rounded border border-hairline-strong px-2.5 py-2 text-[13px]"
               />
               <button
                 type="button"
                 disabled={!overrideReason.trim()}
                 onClick={() => onApplyOverride(selectedRow.brandId, overrideTrack, overrideReason)}
-                className="px-4 py-2 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                className="px-4 py-2 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 Apply override
               </button>
             </div>
 
             {selectedRow.track === 'financed' && (
-              <div className="border-t border-zinc-200 pt-4 space-y-2 text-[13px]">
-                <h3 className="font-semibold text-zinc-950">Financing status</h3>
-                <p className="text-[12px] text-zinc-500">
+              <div className="border-t border-hairline pt-4 space-y-2 text-[13px]">
+                <h3 className="font-semibold text-ink-950">Financing status</h3>
+                <p className="text-[12px] text-faint">
                   PO Finance Facility A · Drawn: {formatGbp(0)} · Headroom unallocated until external credit provider is connected.
                 </p>
               </div>

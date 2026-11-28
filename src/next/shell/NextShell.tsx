@@ -777,7 +777,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-4 border-b border-zinc-200 flex items-center justify-between">
+      <div className="px-4 py-4 border-b border-hairline flex items-center justify-between">
         <div>
           {/* §MERCENTA BRANDING (2026-11-28) — the approved LOCKUP, never typed text.
               `BrandLockup` is appearance-aware and carries the tagline inside its outlined
@@ -785,13 +785,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               chosen because this rail is the light surface; the box, spacing and the
               surface label beneath it are unchanged. */}
           <BrandLockup variant="light" className="h-7 w-auto" />
-          <div className="text-[12px] text-zinc-500">{surfaceCfg.label}</div>
+          <div className="text-[12px] text-faint">{surfaceCfg.label}</div>
         </div>
         <button
           type="button"
           onClick={() => setMobileNavOpen(false)}
           aria-label="Close navigation menu"
-          className="lg:hidden p-1.5 rounded text-zinc-500 hover:text-zinc-900"
+          className="lg:hidden p-1.5 rounded text-faint hover:text-ink-900"
         >
           <X className="w-4 h-4" />
         </button>
@@ -800,7 +800,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5" aria-label="Workspace navigation">
         {groupedItems.map((group) => (
           <div key={group.group} className="space-y-1">
-            <div className="px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
+            <div className="px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-faint">
               {group.group}
             </div>
             <ul className="space-y-0.5">
@@ -814,8 +814,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       aria-current={isActive ? 'page' : undefined}
                       className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-[14px] text-left transition-colors focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)] ${
                         isActive
-                          ? 'bg-zinc-950 text-white font-medium'
-                          : 'text-zinc-900 hover:bg-zinc-100 font-medium'
+                          ? 'bg-ink-950 text-on-dark font-medium'
+                          : 'text-ink-900 hover:bg-tint font-medium'
                       }`}
                     >
                       <span className="truncate">{item.label}</span>
@@ -828,10 +828,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-zinc-200 space-y-2 text-[12px]">
-        <div className="px-2 py-1.5 rounded bg-zinc-50 border border-zinc-200">
-          <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Session</div>
-          <div className="font-medium text-zinc-950 truncate">
+      <div className="p-3 border-t border-hairline space-y-2 text-[12px]">
+        <div className="px-2 py-1.5 rounded bg-surface border border-hairline">
+          <div className="text-[11px] uppercase tracking-[0.06em] text-faint">Session</div>
+          <div className="font-medium text-ink-950 truncate">
             {session
               ? `${session.role}${session.tenantId ? ` (${session.tenantId})` : ''}`
               : 'No active session'}
@@ -841,7 +841,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           <button
             type="button"
             onClick={onOpenLegacy}
-            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-800 hover:bg-surface"
           >
             Legacy UI
             <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -850,7 +850,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             <button
               type="button"
               onClick={signOut}
-              className="px-2.5 py-1.5 rounded border border-zinc-200 bg-white text-[12px] text-zinc-600 hover:text-zinc-950"
+              className="px-2.5 py-1.5 rounded border border-hairline bg-surface-raised text-[12px] text-ink-600 hover:text-ink-950"
             >
               Sign out
             </button>
@@ -863,7 +863,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   return (
     <div className="mercenta-next min-h-screen flex bg-[#FAFAFA] text-[#09090B]">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-zinc-200 bg-white">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-hairline bg-surface-raised">
         {sidebarContent}
       </aside>
 
@@ -871,11 +871,11 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       {mobileNavOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-zinc-950/30"
+            className="fixed inset-0 bg-scrim-30"
             onClick={() => setMobileNavOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-white border-r border-zinc-200 flex flex-col">
+          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-surface-raised border-r border-hairline flex flex-col">
             {sidebarContent}
           </aside>
         </div>
@@ -883,7 +883,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
       {/* Main Column */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white px-4 sm:px-6 py-2.5">
+        <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-4 sm:px-6 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Zone 1: Mobile trigger + Surface Switcher */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -891,7 +891,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 type="button"
                 onClick={() => setMobileNavOpen(true)}
                 aria-label="Open navigation menu"
-                className="lg:hidden p-2 -ml-2 rounded border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                className="lg:hidden p-2 -ml-2 rounded border border-hairline text-secondary hover:bg-surface"
               >
                 <Menu className="w-4 h-4" />
               </button>
@@ -899,7 +899,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               <div
                 role="tablist"
                 aria-label="Operating model surface"
-                className="inline-flex flex-wrap items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-0.5"
+                className="inline-flex flex-wrap items-center gap-1 rounded-md border border-hairline bg-surface p-0.5"
               >
                 {(
                   ['core_brand', 'core_admin', 'bws', 'talent_commerce'] as OperatingSurfaceId[]
@@ -915,8 +915,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       onClick={() => selectSurface(sId)}
                       className={`px-2.5 py-1 rounded text-[12px] font-medium transition-colors whitespace-nowrap ${
                         active
-                          ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
-                          : 'text-zinc-600 hover:text-zinc-950'
+                          ? 'bg-surface-raised text-ink-950 shadow-xs border border-hairline'
+                          : 'text-ink-600 hover:text-ink-950'
                       }`}
                     >
                       {cfg.label}
@@ -928,8 +928,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
             {/* Zone 2: Demo Actor / Brand Switcher */}
             <div className="flex flex-wrap items-center gap-2 text-[12px]">
-              <label className="inline-flex items-center gap-1.5 text-zinc-600">
-                <UserCheck className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+              <label className="inline-flex items-center gap-1.5 text-ink-600">
+                <UserCheck className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
                 <span className="hidden sm:inline">Demo actor</span>
                 <select
                   aria-label="Switch demo role or brand"
@@ -956,7 +956,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       if (surface === 'core_brand') setSurface('core_admin');
                     }
                   }}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   {!session && <option value="none">Select session…</option>}
                   <optgroup label="Partner Brand Accounts">
@@ -974,13 +974,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               </label>
 
               {surface !== 'core_brand' && staff.length > 0 && (
-                <label className="inline-flex items-center gap-1.5 text-zinc-600">
-                  <Shield className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+                <label className="inline-flex items-center gap-1.5 text-ink-600">
+                  <Shield className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
                   <select
                     aria-label="Acting staff member"
                     value={actingStaffId}
                     onChange={(e) => setActingStaffId(e.target.value)}
-                    className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     {staff.map((st) => (
                       <option key={st.id} value={st.id}>
@@ -989,7 +989,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                     ))}
                   </select>
                   {!canCurrentUserMutate && (
-                    <span className="text-[11px] font-mono text-amber-800">Read-only</span>
+                    <span className="text-[11px] font-mono text-state-warning">Read-only</span>
                   )}
                 </label>
               )}
@@ -1000,7 +1000,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               <button
                 type="button"
                 onClick={onOpenPreview}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-800 hover:bg-surface"
               >
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                 Preview Harness
@@ -1011,20 +1011,20 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
         {/* Super-Admin Portfolio Filter Strip */}
         {showSuperAdminFilterBar && (
-          <div className="border-b border-zinc-200 bg-zinc-50/70 px-4 sm:px-6 py-2.5 space-y-2">
+          <div className="border-b border-hairline bg-surface/70 px-4 sm:px-6 py-2.5 space-y-2">
             <div className="flex flex-wrap items-center gap-3 text-[12px]">
-              <span className="inline-flex items-center gap-1.5 font-medium text-zinc-700">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
+              <span className="inline-flex items-center gap-1.5 font-medium text-secondary">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
                 Portfolio scope
               </span>
 
-              <label className="inline-flex items-center gap-1.5 text-zinc-600">
+              <label className="inline-flex items-center gap-1.5 text-ink-600">
                 Vertical
                 <select
                   aria-label="Filter portfolio by vertical"
                   value={verticalFilter}
                   onChange={(e) => setVerticalFilter(e.target.value as VerticalFilterValue)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All verticals</option>
                   <option value="core">Core</option>
@@ -1033,13 +1033,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-zinc-600">
+              <label className="inline-flex items-center gap-1.5 text-ink-600">
                 Region
                 <select
                   aria-label="Filter portfolio by nation"
                   value={nationFilter}
                   onChange={(e) => setNationFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All nations</option>
                   {nations.map((n) => (
@@ -1050,13 +1050,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-zinc-600">
+              <label className="inline-flex items-center gap-1.5 text-ink-600">
                 Track
                 <select
                   aria-label="Filter portfolio by fulfillment track"
                   value={trackFilter}
                   onChange={(e) => setTrackFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All tracks</option>
                   <option value="financed">Financed</option>
@@ -1065,13 +1065,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-zinc-600">
+              <label className="inline-flex items-center gap-1.5 text-ink-600">
                 Contract
                 <select
                   aria-label="Filter portfolio by contract status"
                   value={contractFilter}
                   onChange={(e) => setContractFilter(e.target.value)}
-                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="px-2 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="all">All statuses</option>
                   {contractStatuses.map((s) => (
@@ -1082,8 +1082,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <span className="ml-auto inline-flex items-center gap-1 text-zinc-600 font-mono">
-                <Building2 className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+              <span className="ml-auto inline-flex items-center gap-1 text-ink-600 font-mono">
+                <Building2 className="w-3.5 h-3.5 text-quiet" aria-hidden="true" />
                 {filteredBrandIds ? filteredBrandIds.size : brands.length} / {brands.length} brands
               </span>
             </div>
@@ -1091,9 +1091,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded border border-amber-200 bg-amber-50/80 px-3 py-2 text-[12px] text-amber-950"
+                className="flex items-start gap-2 rounded border border-state-warning/20 bg-amber-50/80 px-3 py-2 text-[12px] text-state-warning"
               >
-                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertCircle className="w-4 h-4 text-state-warning shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
                   <strong>Vertical filter unavailable (`Brand.vertical` missing):</strong>{' '}
                   <code>src/types.ts</code> / <code>DemoBrandRow</code> does not define a{' '}

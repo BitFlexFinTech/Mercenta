@@ -24,7 +24,7 @@ export function ConsoleBarChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="py-8 text-center text-[12px] text-zinc-500 border border-dashed border-zinc-200 rounded-md">
+      <div className="py-8 text-center text-[12px] text-faint border border-dashed border-hairline rounded-md">
         {emptyText}
       </div>
     );
@@ -35,7 +35,7 @@ export function ConsoleBarChart({
   return (
     <div className="space-y-2">
       <div
-        className="flex items-end gap-2 pt-3 border-b border-zinc-200 px-1"
+        className="flex items-end gap-2 pt-3 border-b border-hairline px-1"
         style={{ height }}
         role="img"
         aria-label={data.map((d) => `${d.label}: ${formatValue(d.value)}`).join(', ')}
@@ -45,14 +45,14 @@ export function ConsoleBarChart({
           const isLast = idx === data.length - 1;
           return (
             <div key={d.label} className="flex-1 min-w-0 flex flex-col items-center justify-end h-full gap-1">
-              <span className="text-[11px] font-mono tabular-nums text-zinc-600 truncate max-w-full">
+              <span className="text-[11px] font-mono tabular-nums text-ink-600 truncate max-w-full">
                 {formatValue(d.value)}
               </span>
               <div className="w-full max-w-[36px] flex items-end flex-1">
                 <div
                   title={d.hint ?? `${d.label}: ${formatValue(d.value)}`}
                   className={`w-full rounded-t-[3px] transition-all ${
-                    isLast ? 'bg-[var(--mr-accent)]' : 'bg-zinc-900'
+                    isLast ? 'bg-[var(--mr-accent)]' : 'bg-ink-900'
                   }`}
                   style={{ height: `${pct}%` }}
                 />
@@ -65,7 +65,7 @@ export function ConsoleBarChart({
         {data.map((d) => (
           <div
             key={d.label}
-            className="flex-1 min-w-0 text-center text-[11px] text-zinc-500 truncate font-mono"
+            className="flex-1 min-w-0 text-center text-[11px] text-faint truncate font-mono"
           >
             {d.label}
           </div>
@@ -89,7 +89,7 @@ export function ConsoleTrendChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="py-8 text-center text-[12px] text-zinc-500 border border-dashed border-zinc-200 rounded-md">
+      <div className="py-8 text-center text-[12px] text-faint border border-dashed border-hairline rounded-md">
         {emptyText}
       </div>
     );
@@ -116,7 +116,7 @@ export function ConsoleTrendChart({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-zinc-500">
+      <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-faint">
         <span>Peak: {formatValue(maxVal)}</span>
         <span>Latest: {formatValue(data[data.length - 1].value)}</span>
       </div>
@@ -151,7 +151,7 @@ export function ConsoleTrendChart({
           </circle>
         ))}
       </svg>
-      <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-zinc-500">
+      <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-faint">
         {data.map((d) => (
           <span key={d.label} className="truncate">
             {d.label}
@@ -178,13 +178,13 @@ export function ConsoleProgressTrack({
   return (
     <div className="space-y-1">
       {label && (
-        <div className="flex items-center justify-between text-[12px] text-zinc-600 tabular-nums font-mono">
+        <div className="flex items-center justify-between text-[12px] text-ink-600 tabular-nums font-mono">
           <span>{label}</span>
           <span>{pct}%</span>
         </div>
       )}
-      <div className="h-2 w-full rounded bg-zinc-100 overflow-hidden">
-        <div className="h-full bg-zinc-900 rounded" style={{ width: `${pct}%` }} />
+      <div className="h-2 w-full rounded bg-tint overflow-hidden">
+        <div className="h-full bg-ink-900 rounded" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -209,13 +209,13 @@ export function SectionCard({
   return (
     <section
       data-testid={testId}
-      className="border border-zinc-200 bg-white rounded-md overflow-hidden"
+      className="border border-hairline bg-surface-raised rounded-md overflow-hidden"
     >
-      <div className="px-4 py-3 border-b border-zinc-200 flex flex-wrap items-start justify-between gap-3">
+      <div className="px-4 py-3 border-b border-hairline flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-[14px] font-semibold text-zinc-950">{title}</h2>
+          <h2 className="text-[14px] font-semibold text-ink-950">{title}</h2>
           {description && (
-            <p className="mt-0.5 text-[12px] text-zinc-600 max-w-3xl">{description}</p>
+            <p className="mt-0.5 text-[12px] text-ink-600 max-w-3xl">{description}</p>
           )}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
@@ -243,7 +243,7 @@ export function ConsoleTabs<T extends string>({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className="flex flex-wrap items-center gap-1 border-b border-zinc-200 pb-2 mb-4"
+      className="flex flex-wrap items-center gap-1 border-b border-hairline pb-2 mb-4"
     >
       {tabs.map((t) => {
         const active = value === t.id;
@@ -256,15 +256,15 @@ export function ConsoleTabs<T extends string>({
             onClick={() => onChange(t.id)}
             className={`px-3 py-1.5 rounded text-[12px] font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)] ${
               active
-                ? 'bg-zinc-950 text-white'
-                : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                ? 'bg-ink-950 text-on-dark'
+                : 'text-ink-600 hover:text-ink-950 hover:bg-tint'
             }`}
           >
             {t.label}
             {typeof t.count === 'number' && (
               <span
                 className={`ml-1.5 font-mono text-[11px] tabular-nums ${
-                  active ? 'text-zinc-300' : 'text-zinc-500'
+                  active ? 'text-quiet' : 'text-faint'
                 }`}
               >
                 {t.count}
@@ -291,12 +291,12 @@ export function NoticeBanner({
 }) {
   const styles =
     tone === 'danger'
-      ? 'border-red-200 bg-red-50/70 text-red-950'
+      ? 'border-state-danger/20 bg-state-danger/10/70 text-state-danger'
       : tone === 'warning'
-        ? 'border-amber-200 bg-amber-50/70 text-amber-950'
+        ? 'border-state-warning/20 bg-state-warning/10/70 text-state-warning'
         : tone === 'success'
-          ? 'border-emerald-200 bg-emerald-50/70 text-emerald-950'
-          : 'border-zinc-200 bg-zinc-50 text-zinc-800';
+          ? 'border-state-success/20 bg-state-success/10/70 text-state-success'
+          : 'border-hairline bg-surface text-ink-800';
 
   const Icon =
     tone === 'success'
@@ -310,7 +310,7 @@ export function NoticeBanner({
       <Icon className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
       <div className="min-w-0">
         {title && <div className="font-semibold">{title}</div>}
-        <div className="text-zinc-700 leading-relaxed">{message}</div>
+        <div className="text-secondary leading-relaxed">{message}</div>
       </div>
     </div>
   );

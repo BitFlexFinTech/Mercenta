@@ -169,20 +169,20 @@ const rightsColumns: ConsoleColumn<TalentRightsHolderRow>[] = [
     header: 'Brand',
     render: (r) => (
       <div>
-        <div className="font-medium text-zinc-950">{r.businessName}</div>
-        <div className="text-[12px] text-zinc-500">{r.category}</div>
+        <div className="font-medium text-ink-950">{r.businessName}</div>
+        <div className="text-[12px] text-faint">{r.category}</div>
       </div>
     ),
   },
   {
     key: 'trackLabel',
     header: 'Talent Role',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.trackLabel}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.trackLabel}</span>,
   },
   {
     key: 'nation',
     header: 'Origin',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.nation}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.nation}</span>,
   },
   {
     key: 'rights',
@@ -193,7 +193,7 @@ const rightsColumns: ConsoleColumn<TalentRightsHolderRow>[] = [
     key: 'phone',
     header: 'Phone',
     render: (r) => (
-      <span className="text-[12px] text-zinc-500" title="The CAA-TalAg dataset holds no phone field.">
+      <span className="text-[12px] text-faint" title="The CAA-TalAg dataset holds no phone field.">
         {r.contactPhone}
       </span>
     ),
@@ -212,8 +212,8 @@ const readinessColumns: ConsoleColumn<TalentProductReadinessRow>[] = [
     header: 'Product',
     render: (r) => (
       <div>
-        <div className="font-medium text-zinc-950">{r.name}</div>
-        <div className="text-[12px] text-zinc-500">
+        <div className="font-medium text-ink-950">{r.name}</div>
+        <div className="text-[12px] text-faint">
           {r.brandName}
           {r.sku ? ` · ${r.sku}` : ''}
         </div>
@@ -238,7 +238,7 @@ const readinessColumns: ConsoleColumn<TalentProductReadinessRow>[] = [
     key: 'image',
     header: 'Image',
     render: (r) => (
-      <span className="text-[12px] text-zinc-700">{r.imagePresent ? 'Image present' : 'No image'}</span>
+      <span className="text-[12px] text-secondary">{r.imagePresent ? 'Image present' : 'No image'}</span>
     ),
   },
 ];
@@ -249,44 +249,44 @@ const prospectColumns: ConsoleColumn<TalentProspectRow>[] = [
     header: 'Brand',
     render: (r) => (
       <div>
-        <div className="font-medium text-zinc-950">{r.brand}</div>
-        <div className="text-[12px] text-zinc-500">{r.category}</div>
+        <div className="font-medium text-ink-950">{r.brand}</div>
+        <div className="text-[12px] text-faint">{r.category}</div>
       </div>
     ),
   },
   {
     key: 'ukRoute',
     header: 'UK Wholesale Route',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.ukRoute}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.ukRoute}</span>,
   },
   {
     key: 'verification',
     header: 'Source Verification',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.verification}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.verification}</span>,
   },
   {
     key: 'description',
     header: 'Source Description',
     hideOnMobile: true,
-    render: (r) => <span className="text-[12px] text-zinc-600">{r.description}</span>,
+    render: (r) => <span className="text-[12px] text-ink-600">{r.description}</span>,
   },
 ];
 
 const ukColumns: ConsoleColumn<TalentUkOpportunityRow>[] = [
-  { key: 'brand', header: 'Brand', render: (r) => <span className="font-medium text-zinc-950">{r.brand}</span> },
-  { key: 'type', header: 'Opportunity', render: (r) => <span className="text-[12px] text-zinc-700">{r.opportunityType}</span> },
-  { key: 'amazon', header: 'Amazon UK', render: (r) => <span className="text-[12px] text-zinc-700">{r.amazonUkPresence}</span> },
-  { key: 'dtc', header: 'UK DTC', render: (r) => <span className="text-[12px] text-zinc-700">{r.ukDtcPresence}</span> },
+  { key: 'brand', header: 'Brand', render: (r) => <span className="font-medium text-ink-950">{r.brand}</span> },
+  { key: 'type', header: 'Opportunity', render: (r) => <span className="text-[12px] text-secondary">{r.opportunityType}</span> },
+  { key: 'amazon', header: 'Amazon UK', render: (r) => <span className="text-[12px] text-secondary">{r.amazonUkPresence}</span> },
+  { key: 'dtc', header: 'UK DTC', render: (r) => <span className="text-[12px] text-secondary">{r.ukDtcPresence}</span> },
   {
     key: 'distributor',
     header: 'Distributor Detected',
-    render: (r) => <span className="text-[12px] text-zinc-700">{r.distributorPresent ? 'Yes' : 'No'}</span>,
+    render: (r) => <span className="text-[12px] text-secondary">{r.distributorPresent ? 'Yes' : 'No'}</span>,
   },
   {
     key: 'gap',
     header: 'Estimated Gap',
     hideOnMobile: true,
-    render: (r) => <span className="text-[12px] text-zinc-600">{r.gapSummary}</span>,
+    render: (r) => <span className="text-[12px] text-ink-600">{r.gapSummary}</span>,
   },
 ];
 
@@ -324,7 +324,7 @@ export function TalentWorkspaceView({
         <ErrorStateBlock message={error} onRetry={onRetry} />
       ) : NOT_IN_DATASET.includes(section) ? (
         <SectionCard title={copy.title} description={copy.description}>
-          <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+          <div className="border border-hairline rounded-md p-4 text-[13px] text-ink-600">
             {copy.title} is not part of the CAA-TalAg dataset. Nothing is shown here rather than
             inventing records.
           </div>
@@ -366,11 +366,11 @@ export function TalentWorkspaceView({
                     ['Role summary', profile.roleSummary],
                     ['Portfolio summary', profile.portfolioSummary],
                   ].map(([label, value]) => (
-                    <div key={label} className="border border-zinc-200 rounded-md p-3">
-                      <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+                    <div key={label} className="border border-hairline rounded-md p-3">
+                      <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">
                         {label}
                       </dt>
-                      <dd className="text-zinc-900 mt-0.5">{value}</dd>
+                      <dd className="text-ink-900 mt-0.5">{value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -422,7 +422,7 @@ export function TalentWorkspaceView({
 
           {section === 'settings' && (
             <SectionCard title="Settings" description={copy.description}>
-              <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+              <div className="border border-hairline rounded-md p-4 text-[13px] text-ink-600">
                 Workspace settings are not part of the CAA-TalAg dataset.
               </div>
             </SectionCard>

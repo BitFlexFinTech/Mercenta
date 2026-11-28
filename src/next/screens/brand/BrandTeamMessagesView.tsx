@@ -100,7 +100,7 @@ export function BrandTeamMessagesView({
               <div className="space-y-4">
                 <div className="max-h-[420px] overflow-y-auto space-y-2.5 pr-1">
                   {activeList.length === 0 ? (
-                    <p className="text-[12px] text-zinc-500 py-8 text-center">
+                    <p className="text-[12px] text-faint py-8 text-center">
                       {tab === 'support'
                         ? 'No support messages yet. Start a conversation below.'
                         : 'No internal team notes recorded yet.'}
@@ -111,23 +111,23 @@ export function BrandTeamMessagesView({
                         key={m.id}
                         className={`rounded-md border p-3 text-[12px] ${
                           m.direction === 'outbound'
-                            ? 'border-zinc-200 bg-zinc-50'
-                            : 'border-zinc-300 bg-white'
+                            ? 'border-hairline bg-surface'
+                            : 'border-hairline-strong bg-surface-raised'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 text-[11px] text-zinc-500 mb-1">
-                          <span className="font-medium text-zinc-800">{m.sentBy}</span>
+                        <div className="flex items-center justify-between gap-2 text-[11px] text-faint mb-1">
+                          <span className="font-medium text-ink-800">{m.sentBy}</span>
                           <span className="font-mono">
                             {new Date(m.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-zinc-900 whitespace-pre-wrap">{m.body}</p>
+                        <p className="text-ink-900 whitespace-pre-wrap">{m.body}</p>
                       </div>
                     ))
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-zinc-200 flex items-center gap-2">
+                <div className="pt-3 border-t border-hairline flex items-center gap-2">
                   <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
@@ -142,13 +142,13 @@ export function BrandTeamMessagesView({
                         ? 'Message Mercenta support…'
                         : 'Add an internal note for your team…'
                     }
-                    className="flex-1 px-3 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+                    className="flex-1 px-3 py-2 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
                   />
                   <button
                     type="button"
                     disabled={!draft.trim() || sending}
                     onClick={() => void submitMessage()}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                   >
                     <Send className="w-3.5 h-3.5" aria-hidden="true" />
                     Send
@@ -162,17 +162,17 @@ export function BrandTeamMessagesView({
         <div>
           <SectionCard title={`Team Roster (${teamMembers.length})`}>
             {teamMembers.length === 0 ? (
-              <p className="text-[12px] text-zinc-500 flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-zinc-400" aria-hidden="true" />
+              <p className="text-[12px] text-faint flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-quiet" aria-hidden="true" />
                 No team members invited yet. Manage roles in Settings.
               </p>
             ) : (
-              <ul className="divide-y divide-zinc-200">
+              <ul className="divide-y divide-hairline-06">
                 {teamMembers.map((m) => (
                   <li key={m.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-2 text-[12px]">
                     <div className="min-w-0">
-                      <div className="font-medium text-zinc-950 truncate">{m.name}</div>
-                      <div className="text-[11px] text-zinc-500 truncate">{m.email}</div>
+                      <div className="font-medium text-ink-950 truncate">{m.name}</div>
+                      <div className="text-[11px] text-faint truncate">{m.email}</div>
                     </div>
                     <InlineStatus
                       label={m.active ? m.role : `${m.role} (Invited)`}

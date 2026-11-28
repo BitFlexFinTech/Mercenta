@@ -310,8 +310,8 @@ export function AdsManagerView({
       header: 'Campaign',
       render: (c) => (
         <div>
-          <div className="font-medium text-zinc-950">{c.name}</div>
-          <div className="text-[12px] text-zinc-500">{c.placement}</div>
+          <div className="font-medium text-ink-950">{c.name}</div>
+          <div className="text-[12px] text-faint">{c.placement}</div>
         </div>
       ),
     },
@@ -357,7 +357,7 @@ export function AdsManagerView({
     {
       key: 'brand',
       header: 'Brand',
-      render: (r) => <span className="font-medium text-zinc-950">{r.brandName}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.brandName}</span>,
     },
     {
       key: 'status',
@@ -417,7 +417,7 @@ export function AdsManagerView({
     }
 
     return (
-      <div className="border border-zinc-200 bg-white rounded-md divide-y divide-zinc-200">
+      <div className="border border-hairline bg-surface-raised rounded-md divide-y divide-hairline-06">
         {recs.map((rec) => {
           const isProposed = rec.status === 'proposed';
           const isAmending = amendingRecId === rec.id;
@@ -425,8 +425,8 @@ export function AdsManagerView({
             <div key={rec.id} className="p-4 space-y-2.5" data-testid={`ads-rec-${rec.id}`}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="text-[14px] font-semibold text-zinc-950">{rec.month}</span>
-                  <span className="text-[12px] text-zinc-500 font-mono tabular-nums">
+                  <span className="text-[14px] font-semibold text-ink-950">{rec.month}</span>
+                  <span className="text-[12px] text-faint font-mono tabular-nums">
                     Recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo
                   </span>
                 </div>
@@ -445,10 +445,10 @@ export function AdsManagerView({
                 />
               </div>
 
-              <p className="text-[14px] text-zinc-700">{rec.basis}</p>
+              <p className="text-[14px] text-secondary">{rec.basis}</p>
 
               {rec.reviewedAt && (
-                <p className="text-[12px] text-zinc-500">
+                <p className="text-[12px] text-faint">
                   Decided {rec.reviewedAt.slice(0, 16).replace('T', ' ')}
                   {rec.actorDisplay ? ` · ${rec.actorDisplay}` : ''}
                   {' · '}
@@ -463,7 +463,7 @@ export function AdsManagerView({
                     type="button"
                     disabled={recBusyId === rec.id}
                     onClick={() => void handleDecideRecommendation(rec.id, 'approved')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Approve
@@ -476,7 +476,7 @@ export function AdsManagerView({
                       setAmendBudget(String(rec.recommendedMonthlyBudgetGbp));
                       setAmendNote('');
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-zinc-900 text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-hairline-strong bg-surface-raised text-ink-900 text-[12px] font-medium hover:bg-surface disabled:opacity-50 whitespace-nowrap"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                     Amend
@@ -485,7 +485,7 @@ export function AdsManagerView({
                     type="button"
                     disabled={recBusyId === rec.id}
                     onClick={() => void handleDecideRecommendation(rec.id, 'rejected')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-zinc-700 text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-hairline bg-surface-raised text-secondary text-[12px] font-medium hover:bg-surface disabled:opacity-50 whitespace-nowrap"
                   >
                     <X className="w-3.5 h-3.5" />
                     Reject
@@ -494,7 +494,7 @@ export function AdsManagerView({
               )}
 
               {isProposed && !allowDecision && (
-                <p className="text-[12px] text-zinc-500">
+                <p className="text-[12px] text-faint">
                   Read-only access ({actingStaffLabel}): switch to a Full admin staff profile to decide on behalf of a brand.
                 </p>
               )}
@@ -509,7 +509,7 @@ export function AdsManagerView({
                     onChange={(e) => setAmendBudget(e.target.value)}
                     placeholder="Budget (GBP)"
                     aria-label="Amended monthly budget in GBP"
-                    className="w-36 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
+                    className="w-36 px-3 py-1.5 text-[14px] font-mono border border-hairline-strong rounded-md bg-surface-raised text-ink-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <input
                     type="text"
@@ -517,13 +517,13 @@ export function AdsManagerView({
                     onChange={(e) => setAmendNote(e.target.value)}
                     placeholder="Reason or note (optional)"
                     aria-label="Amendment note"
-                    className="min-w-[200px] flex-1 px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
+                    className="min-w-[200px] flex-1 px-3 py-1.5 text-[14px] border border-hairline-strong rounded-md bg-surface-raised text-ink-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <button
                     type="button"
                     disabled={recBusyId === rec.id}
                     onClick={() => void handleDecideRecommendation(rec.id, 'amended')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Confirm
@@ -531,7 +531,7 @@ export function AdsManagerView({
                   <button
                     type="button"
                     onClick={() => setAmendingRecId(null)}
-                    className="px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-zinc-700 text-[12px] font-medium hover:bg-zinc-50 whitespace-nowrap"
+                    className="px-3 py-1.5 rounded-md border border-hairline bg-surface-raised text-secondary text-[12px] font-medium hover:bg-surface whitespace-nowrap"
                   >
                     Cancel
                   </button>
@@ -549,8 +549,8 @@ export function AdsManagerView({
       <PageHeader title={policy.title} description={policy.description} meta={headerMeta} />
 
       {/* Truth & policy notice */}
-      <div className="border border-zinc-200 bg-white rounded-md px-4 py-3 flex items-start gap-2.5 text-[14px] text-zinc-700">
-        <Info className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" aria-hidden="true" />
+      <div className="border border-hairline bg-surface-raised rounded-md px-4 py-3 flex items-start gap-2.5 text-[14px] text-secondary">
+        <Info className="w-4 h-4 text-faint shrink-0 mt-0.5" aria-hidden="true" />
         <div>
           <span>
             {isLiveIntegration
@@ -559,18 +559,18 @@ export function AdsManagerView({
             {policy.commissionNote}
           </span>
           {policy.verticalRuleNote && (
-            <div className="mt-1 text-[12px] text-zinc-500">{policy.verticalRuleNote}</div>
+            <div className="mt-1 text-[12px] text-faint">{policy.verticalRuleNote}</div>
           )}
         </div>
       </div>
 
       {feedbackNotice && (
-        <div role="status" className="border border-emerald-200 bg-emerald-50 rounded-md px-4 py-3 text-[14px] text-emerald-900">
+        <div role="status" className="border border-state-success/20 bg-state-success/10 rounded-md px-4 py-3 text-[14px] text-state-success">
           {feedbackNotice}
         </div>
       )}
       {feedbackError && (
-        <div role="alert" className="border border-red-200 bg-red-50 rounded-md px-4 py-3 text-[14px] text-red-900">
+        <div role="alert" className="border border-state-danger/20 bg-state-danger/10 rounded-md px-4 py-3 text-[14px] text-state-danger">
           {feedbackError}
         </div>
       )}
@@ -581,8 +581,8 @@ export function AdsManagerView({
 
           <section className="space-y-3">
             <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-[16px] font-semibold text-zinc-950">Campaigns</h2>
-              <span className="text-[12px] text-zinc-500">
+              <h2 className="text-[16px] font-semibold text-ink-950">Campaigns</h2>
+              <span className="text-[12px] text-faint">
                 Select a campaign to inspect placement and attribution metrics
               </span>
             </div>
@@ -603,7 +603,7 @@ export function AdsManagerView({
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-[16px] font-semibold text-zinc-950">
+            <h2 className="text-[16px] font-semibold text-ink-950">
               Recommended monthly budgets
             </h2>
             {isLoading ? (
@@ -620,14 +620,14 @@ export function AdsManagerView({
           <section className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1 max-w-sm">
-                <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
+                <Search className="w-4 h-4 text-quiet absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
                 <input
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Filter by brand name…"
                   aria-label="Filter brands"
-                  className="w-full pl-9 pr-3 py-2 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
+                  className="w-full pl-9 pr-3 py-2 text-[14px] border border-hairline-strong rounded-md bg-surface-raised text-ink-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                 />
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -638,8 +638,8 @@ export function AdsManagerView({
                     onClick={() => setFocus(f)}
                     className={`px-3 py-1.5 rounded-md text-[12px] font-medium whitespace-nowrap ${
                       focus === f
-                        ? 'bg-zinc-950 text-white'
-                        : 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                        ? 'bg-ink-950 text-on-dark'
+                        : 'border border-hairline bg-surface-raised text-secondary hover:bg-surface'
                     }`}
                   >
                     {f.replace(/_/g, ' ')}
@@ -650,8 +650,8 @@ export function AdsManagerView({
                   onClick={() => setSortByUtil((v) => !v)}
                   className={`px-3 py-1.5 rounded-md text-[12px] font-medium whitespace-nowrap ${
                     sortByUtil
-                      ? 'bg-[var(--mr-accent)] text-white'
-                      : 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                      ? 'bg-[var(--mr-accent)] text-on-dark'
+                      : 'border border-hairline bg-surface-raised text-secondary hover:bg-surface'
                   }`}
                 >
                   {sortByUtil ? 'Sorted: utilisation' : 'Sort: utilisation'}
@@ -688,8 +688,8 @@ export function AdsManagerView({
       )}
 
       {/* Honest Schema & Unsupported Capability Disclosure */}
-      <section className="border border-zinc-200 bg-white rounded-md p-4 space-y-1.5 text-[12px] text-zinc-600">
-        <div className="font-semibold text-zinc-900">Scope & Backend Availability</div>
+      <section className="border border-hairline bg-surface-raised rounded-md p-4 space-y-1.5 text-[12px] text-ink-600">
+        <div className="font-semibold text-ink-900">Scope & Backend Availability</div>
         <p>{policy.creativeAssetGapNote}</p>
         <p>{policy.campaignMutationGapNote}</p>
       </section>
@@ -709,35 +709,35 @@ export function AdsManagerView({
         {selectedBrandRow && (
           <div className="space-y-6">
             {selectedBrandRow.status === 'not_configured' ? (
-              <div className="border border-zinc-200 bg-zinc-50 rounded-md p-3 text-[14px] text-zinc-700">
+              <div className="border border-hairline bg-surface rounded-md p-3 text-[14px] text-secondary">
                 No Amazon Ads budget row is configured for this brand yet. Setting a monthly budget creates its initial active budget configuration.
               </div>
             ) : (
               <dl className="grid grid-cols-2 gap-3 text-[14px]">
-                <div className="border border-zinc-200 rounded-md p-3">
-                  <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Monthly budget</dt>
-                  <dd className="mt-1 font-mono font-semibold text-zinc-950">{gbp(selectedBrandRow.budget)}</dd>
+                <div className="border border-hairline rounded-md p-3">
+                  <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Monthly budget</dt>
+                  <dd className="mt-1 font-mono font-semibold text-ink-950">{gbp(selectedBrandRow.budget)}</dd>
                 </div>
-                <div className="border border-zinc-200 rounded-md p-3">
-                  <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Spend to date</dt>
-                  <dd className="mt-1 font-mono font-semibold text-zinc-950">{gbp(selectedBrandRow.spend)}</dd>
+                <div className="border border-hairline rounded-md p-3">
+                  <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">Spend to date</dt>
+                  <dd className="mt-1 font-mono font-semibold text-ink-950">{gbp(selectedBrandRow.spend)}</dd>
                 </div>
-                <div className="border border-zinc-200 rounded-md p-3">
-                  <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">ACOS</dt>
-                  <dd className="mt-1 font-mono font-semibold text-zinc-950">{pct(selectedBrandRow.acos)}</dd>
+                <div className="border border-hairline rounded-md p-3">
+                  <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">ACOS</dt>
+                  <dd className="mt-1 font-mono font-semibold text-ink-950">{pct(selectedBrandRow.acos)}</dd>
                 </div>
-                <div className="border border-zinc-200 rounded-md p-3">
-                  <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">TACOS</dt>
-                  <dd className="mt-1 font-mono font-semibold text-zinc-950">{pct(selectedBrandRow.tacos)}</dd>
+                <div className="border border-hairline rounded-md p-3">
+                  <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">TACOS</dt>
+                  <dd className="mt-1 font-mono font-semibold text-ink-950">{pct(selectedBrandRow.tacos)}</dd>
                 </div>
               </dl>
             )}
 
             {/* Manual monthly budget editor (RBAC gated) */}
-            <div className="border-t border-zinc-200 pt-4 space-y-2.5">
-              <h3 className="text-[14px] font-semibold text-zinc-950">Manual monthly budget</h3>
+            <div className="border-t border-hairline pt-4 space-y-2.5">
+              <h3 className="text-[14px] font-semibold text-ink-950">Manual monthly budget</h3>
               {!canStaffMutate ? (
-                <p className="text-[12px] text-zinc-500">
+                <p className="text-[12px] text-faint">
                   View-only staff session ({actingStaffLabel}): monthly budget edits require Full admin permission.
                 </p>
               ) : editingBudgetBrandId === selectedBrandRow.brandId ? (
@@ -749,13 +749,13 @@ export function AdsManagerView({
                     value={budgetDraft}
                     onChange={(e) => setBudgetDraft(e.target.value)}
                     aria-label="Monthly budget in GBP"
-                    className="w-40 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
+                    className="w-40 px-3 py-1.5 text-[14px] font-mono border border-hairline-strong rounded-md bg-surface-raised text-ink-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <button
                     type="button"
                     disabled={budgetBusy}
                     onClick={() => void handleSaveBudget(selectedBrandRow.brandId)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Save budget
@@ -763,7 +763,7 @@ export function AdsManagerView({
                   <button
                     type="button"
                     onClick={() => setEditingBudgetBrandId(null)}
-                    className="px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-zinc-700 text-[12px] font-medium hover:bg-zinc-50"
+                    className="px-3 py-1.5 rounded-md border border-hairline bg-surface-raised text-secondary text-[12px] font-medium hover:bg-surface"
                   >
                     Cancel
                   </button>
@@ -775,7 +775,7 @@ export function AdsManagerView({
                     setEditingBudgetBrandId(selectedBrandRow.brandId);
                     setBudgetDraft(String(selectedBrandRow.budget));
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-zinc-900 text-[12px] font-medium hover:bg-zinc-50"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-ink-900 text-[12px] font-medium hover:bg-surface"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Set monthly budget
@@ -784,8 +784,8 @@ export function AdsManagerView({
             </div>
 
             {/* Brand campaigns */}
-            <div className="border-t border-zinc-200 pt-4 space-y-2.5">
-              <h3 className="text-[14px] font-semibold text-zinc-950">Campaigns</h3>
+            <div className="border-t border-hairline pt-4 space-y-2.5">
+              <h3 className="text-[14px] font-semibold text-ink-950">Campaigns</h3>
               <ConsoleTable
                 rows={campaignsByBrand.get(selectedBrandRow.brandId) ?? []}
                 columns={campaignColumns}
@@ -797,8 +797,8 @@ export function AdsManagerView({
             </div>
 
             {/* Brand budget recommendations */}
-            <div className="border-t border-zinc-200 pt-4 space-y-2.5">
-              <h3 className="text-[14px] font-semibold text-zinc-950">Budget recommendations</h3>
+            <div className="border-t border-hairline pt-4 space-y-2.5">
+              <h3 className="text-[14px] font-semibold text-ink-950">Budget recommendations</h3>
               {renderRecommendationList(
                 (recommendationsByBrand.get(selectedBrandRow.brandId) ?? [])
                   .slice()
@@ -838,9 +838,9 @@ export function AdsManagerView({
               ['Attributed sales', gbp(selectedCampaign.attributedSalesGbp)],
               ['ACOS', pct(selectedCampaign.acos)],
             ].map(([label, val]) => (
-              <div key={String(label)} className="border border-zinc-200 rounded-md p-3">
-                <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">{label}</dt>
-                <dd className="mt-1 font-mono font-semibold text-zinc-950">{val}</dd>
+              <div key={String(label)} className="border border-hairline rounded-md p-3">
+                <dt className="text-[11px] uppercase tracking-[0.06em] text-faint">{label}</dt>
+                <dd className="mt-1 font-mono font-semibold text-ink-950">{val}</dd>
               </div>
             ))}
           </dl>

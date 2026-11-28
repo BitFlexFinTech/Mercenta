@@ -241,7 +241,7 @@ export function BrandSettingsView({
         description="Manage banking change requests, commercial terms, login posture, permissions, PO outages, return addresses, compliance references, notification preferences, contacts, and guided tours."
       />
 
-      <div className="flex flex-wrap gap-1 border-b border-zinc-200 pb-2" role="tablist" aria-label="Brand settings sections">
+      <div className="flex flex-wrap gap-1 border-b border-hairline pb-2" role="tablist" aria-label="Brand settings sections">
         {SETTINGS_TABS.map(({ id, label, icon: Icon }) => {
           const active = activeTab === id;
           return (
@@ -253,8 +253,8 @@ export function BrandSettingsView({
               onClick={() => setActiveTab(id)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-medium transition-colors whitespace-nowrap ${
                 active
-                  ? 'bg-zinc-950 text-white'
-                  : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                  ? 'bg-ink-950 text-on-dark'
+                  : 'text-ink-600 hover:text-ink-950 hover:bg-tint'
               }`}
             >
               <Icon className="w-3.5 h-3.5" aria-hidden="true" />
@@ -271,7 +271,7 @@ export function BrandSettingsView({
             description="Bank account mutations require admin verification before payouts route to new details."
           >
             {!bankInfo ? (
-              <p className="text-[14px] text-zinc-600">Banking details are not configured yet.</p>
+              <p className="text-[14px] text-ink-600">Banking details are not configured yet.</p>
             ) : (
               <div className="space-y-3 text-[12px]">
                 {bankInfo.status === 'pending_approval' && bankInfo.requestedChange && (
@@ -283,14 +283,14 @@ export function BrandSettingsView({
                 )}
                 {bankNote && <NoticeBanner tone="success" message={bankNote} />}
 
-                <div className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+                <div className="divide-y divide-hairline-06 border border-hairline rounded">
                   {bankFields.map(({ key, label, value }) => (
                     <div
                       key={key}
                       className="px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-3"
                     >
-                      <span className="text-zinc-600 w-32 shrink-0">{label}</span>
-                      <span className="font-mono text-zinc-950 flex-1">{value || '—'}</span>
+                      <span className="text-ink-600 w-32 shrink-0">{label}</span>
+                      <span className="font-mono text-ink-950 flex-1">{value || '—'}</span>
                       <input
                         value={bankRequested[key] ?? ''}
                         onChange={(e) =>
@@ -298,7 +298,7 @@ export function BrandSettingsView({
                         }
                         placeholder="Requested change…"
                         aria-label={`New value for ${label}`}
-                        className="w-44 px-2.5 py-1 rounded border border-zinc-300 bg-white text-zinc-950 font-mono"
+                        className="w-44 px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-ink-950 font-mono"
                       />
                     </div>
                   ))}
@@ -310,7 +310,7 @@ export function BrandSettingsView({
                     onChange={(e) => setBankReason(e.target.value)}
                     placeholder="Reason for change…"
                     aria-label="Reason for bank change"
-                    className="flex-1 min-w-[200px] px-3 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="flex-1 min-w-[200px] px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                   <button
                     type="button"
@@ -328,7 +328,7 @@ export function BrandSettingsView({
                       );
                       setBankReason('');
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Submit Change
                   </button>
@@ -350,27 +350,27 @@ export function BrandSettingsView({
                     label={COMMERCIAL_MODELS[commercialRecord.model].label}
                     tone={commercialRecord.model === 'commission_agent' ? 'success' : 'info'}
                   />
-                  <span className="font-mono text-zinc-500">
+                  <span className="font-mono text-faint">
                     Recorded {commercialRecord.recordedAt.slice(0, 10)}
                   </span>
                 </div>
-                <p className="text-[14px] text-zinc-700">
+                <p className="text-[14px] text-secondary">
                   {COMMERCIAL_MODELS[commercialRecord.model].summary}
                 </p>
-                <dl className="divide-y divide-zinc-200 border border-zinc-200 rounded font-mono">
+                <dl className="divide-y divide-hairline-06 border border-hairline rounded font-mono">
                   {commercialRecord.model === 'commission_agent' ? (
                     <div className="px-3.5 py-2.5 flex items-center justify-between">
-                      <dt className="font-sans text-zinc-600">Mercenta Commission</dt>
-                      <dd className="font-semibold text-zinc-950">
+                      <dt className="font-sans text-ink-600">Mercenta Commission</dt>
+                      <dd className="font-semibold text-ink-950">
                         {commercialRecord.commissionRatePct ?? 0}% of retail-channel value
                       </dd>
                     </div>
                   ) : (
                     <div className="px-3.5 py-2.5 flex items-center justify-between">
-                      <dt className="font-sans text-zinc-600">
+                      <dt className="font-sans text-ink-600">
                         Brand Share of Retail-Channel Revenue
                       </dt>
-                      <dd className="font-semibold text-zinc-950">
+                      <dd className="font-semibold text-ink-950">
                         {commercialRecord.brandAcquisitionSharePct ?? 0}%
                       </dd>
                     </div>
@@ -383,7 +383,7 @@ export function BrandSettingsView({
                 message={`${COMMERCIAL_MODEL_NOT_SELECTED_LABEL} — contact your Mercenta account manager.`}
               />
             )}
-            <p className="mt-4 text-[12px] text-zinc-500">
+            <p className="mt-4 text-[12px] text-faint">
               This commercial agreement is separate from — and never changes or waives — UK
               compliance document requirements.
             </p>
@@ -395,22 +395,22 @@ export function BrandSettingsView({
             title="Login Settings"
             description="Authentic session authentication posture — Mercenta does not store local passwords or run built-in 2FA."
           >
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-hairline-06 text-[12px]">
               <div className="py-2.5 flex items-center justify-between gap-4">
-                <dt className="text-zinc-600">Sign-in method</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-ink-600">Sign-in method</dt>
+                <dd className="font-medium text-ink-950">
                   Role-based session — no Mercenta password stored
                 </dd>
               </div>
               <div className="py-2.5 flex items-center justify-between gap-4">
-                <dt className="text-zinc-600">Two-factor authentication</dt>
-                <dd className="text-zinc-700">
+                <dt className="text-ink-600">Two-factor authentication</dt>
+                <dd className="text-secondary">
                   Not offered locally — contacts rely on their identity provider&apos;s 2FA
                 </dd>
               </div>
               <div className="py-2.5 flex items-center justify-between gap-4">
-                <dt className="text-zinc-600">Active sessions</dt>
-                <dd className="font-mono text-zinc-950">1 active session</dd>
+                <dt className="text-ink-600">Active sessions</dt>
+                <dd className="font-mono text-ink-950">1 active session</dd>
               </div>
             </dl>
           </SectionCard>
@@ -425,7 +425,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowInvite(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Invite Team Member
@@ -434,17 +434,17 @@ export function BrandSettingsView({
             }
           >
             {teamMembers.length === 0 ? (
-              <p className="text-[14px] text-zinc-600">No team members invited yet.</p>
+              <p className="text-[14px] text-ink-600">No team members invited yet.</p>
             ) : (
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded mb-4">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded mb-4">
                 {teamMembers.map((m) => (
                   <div
                     key={m.id}
                     className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-[12px]"
                   >
                     <div>
-                      <span className="font-medium text-zinc-950">{m.name}</span>
-                      <span className="ml-2 text-zinc-500">{m.email}</span>
+                      <span className="font-medium text-ink-950">{m.name}</span>
+                      <span className="ml-2 text-faint">{m.email}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <InlineStatus
@@ -462,7 +462,7 @@ export function BrandSettingsView({
                         type="button"
                         onClick={() => onRemoveTeamMember(m.id)}
                         aria-label={`Remove ${m.name}`}
-                        className="p-1 text-zinc-500 hover:text-red-700"
+                        className="p-1 text-faint hover:text-state-danger"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -473,32 +473,32 @@ export function BrandSettingsView({
             )}
 
             {showInvite && (
-              <div className="space-y-3 border-t border-zinc-200 pt-4 text-[12px]">
+              <div className="space-y-3 border-t border-hairline pt-4 text-[12px]">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Name</span>
+                    <span className="text-ink-600">Name</span>
                     <input
                       value={invite.name}
                       onChange={(e) => setInvite({ ...invite, name: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Email</span>
+                    <span className="text-ink-600">Email</span>
                     <input
                       value={invite.email}
                       onChange={(e) => setInvite({ ...invite, email: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Role</span>
+                    <span className="text-ink-600">Role</span>
                     <select
                       value={invite.role}
                       onChange={(e) =>
                         setInvite({ ...invite, role: e.target.value as BrandPermissionRole })
                       }
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     >
                       <option value="Owner">Owner</option>
                       <option value="Shipping">Shipping</option>
@@ -516,14 +516,14 @@ export function BrandSettingsView({
                       setInvite({ name: '', email: '', role: 'Owner' });
                       setShowInvite(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Send Invite
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowInvite(false)}
-                    className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700"
+                    className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary"
                   >
                     Cancel
                   </button>
@@ -542,7 +542,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowNewOutage(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Declare Outage
@@ -551,9 +551,9 @@ export function BrandSettingsView({
             }
           >
             {outages.length === 0 ? (
-              <p className="text-[14px] text-zinc-600">No outages declared.</p>
+              <p className="text-[14px] text-ink-600">No outages declared.</p>
             ) : (
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded mb-4">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded mb-4">
                 {outages.map((o) => {
                   const p = poOutageStatusPresentation(o.status);
                   return (
@@ -562,10 +562,10 @@ export function BrandSettingsView({
                       className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-[12px]"
                     >
                       <div>
-                        <div className="font-mono font-medium text-zinc-950">
+                        <div className="font-mono font-medium text-ink-950">
                           {o.startDate} → {o.endDate}
                         </div>
-                        <div className="text-zinc-600">{o.reason}</div>
+                        <div className="text-ink-600">{o.reason}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <InlineStatus label={p.label} tone={p.tone} dataStatus={p.dataStatus} />
@@ -573,7 +573,7 @@ export function BrandSettingsView({
                           <button
                             type="button"
                             onClick={() => onCancelOutage(o.id)}
-                            className="text-red-700 hover:underline font-medium"
+                            className="text-state-danger hover:underline font-medium"
                           >
                             Cancel
                           </button>
@@ -586,35 +586,35 @@ export function BrandSettingsView({
             )}
 
             {showNewOutage && (
-              <div className="space-y-3 border-t border-zinc-200 pt-4 text-[12px]">
+              <div className="space-y-3 border-t border-hairline pt-4 text-[12px]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Start Date</span>
+                    <span className="text-ink-600">Start Date</span>
                     <input
                       type="date"
                       value={outageForm.startDate}
                       onChange={(e) =>
                         setOutageForm({ ...outageForm, startDate: e.target.value })
                       }
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">End Date</span>
+                    <span className="text-ink-600">End Date</span>
                     <input
                       type="date"
                       value={outageForm.endDate}
                       onChange={(e) => setOutageForm({ ...outageForm, endDate: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                 </div>
                 <label className="block space-y-1">
-                  <span className="text-zinc-600">Reason</span>
+                  <span className="text-ink-600">Reason</span>
                   <input
                     value={outageForm.reason}
                     onChange={(e) => setOutageForm({ ...outageForm, reason: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
                 <div className="flex gap-2">
@@ -627,14 +627,14 @@ export function BrandSettingsView({
                       setOutageForm({ startDate: '', endDate: '', reason: '' });
                       setShowNewOutage(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Declare Outage
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowNewOutage(false)}
-                    className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700"
+                    className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary"
                   >
                     Cancel
                   </button>
@@ -653,7 +653,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowNewAddr(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Add Return Address
@@ -662,16 +662,16 @@ export function BrandSettingsView({
             }
           >
             {returnAddresses.length === 0 ? (
-              <p className="text-[14px] text-zinc-600">No return addresses configured.</p>
+              <p className="text-[14px] text-ink-600">No return addresses configured.</p>
             ) : (
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded mb-4">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded mb-4">
                 {returnAddresses.map((a) => (
                   <div key={a.id} className="px-3.5 py-3 text-[12px] space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-zinc-950">{a.label}</span>
+                      <span className="font-semibold text-ink-950">{a.label}</span>
                       {a.isDefault && <InlineStatus label="Default" tone="success" />}
                     </div>
-                    <div className="text-zinc-600">
+                    <div className="text-ink-600">
                       {a.companyName} · {a.addressLine1}
                       {a.addressLine2 ? `, ${a.addressLine2}` : ''} · {a.city}, {a.postalCode},{' '}
                       {a.country}
@@ -689,7 +689,7 @@ export function BrandSettingsView({
                       <button
                         type="button"
                         onClick={() => onRemoveReturnAddress(a.id)}
-                        className="text-red-700 hover:underline font-medium"
+                        className="text-state-danger hover:underline font-medium"
                       >
                         Remove
                       </button>
@@ -700,55 +700,55 @@ export function BrandSettingsView({
             )}
 
             {showNewAddr && (
-              <div className="space-y-3 border-t border-zinc-200 pt-4 text-[12px]">
+              <div className="space-y-3 border-t border-hairline pt-4 text-[12px]">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Label</span>
+                    <span className="text-ink-600">Label</span>
                     <input
                       value={addrForm.label}
                       onChange={(e) => setAddrForm({ ...addrForm, label: e.target.value })}
                       placeholder="UK Returns — Standard"
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Company Name</span>
+                    <span className="text-ink-600">Company Name</span>
                     <input
                       value={addrForm.companyName}
                       onChange={(e) => setAddrForm({ ...addrForm, companyName: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Address Line 1</span>
+                    <span className="text-ink-600">Address Line 1</span>
                     <input
                       value={addrForm.addressLine1}
                       onChange={(e) => setAddrForm({ ...addrForm, addressLine1: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">City</span>
+                    <span className="text-ink-600">City</span>
                     <input
                       value={addrForm.city}
                       onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Postal Code</span>
+                    <span className="text-ink-600">Postal Code</span>
                     <input
                       value={addrForm.postalCode}
                       onChange={(e) => setAddrForm({ ...addrForm, postalCode: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                   <label className="space-y-1">
-                    <span className="text-zinc-600">Contact Name</span>
+                    <span className="text-ink-600">Contact Name</span>
                     <input
                       value={addrForm.contactName}
                       onChange={(e) => setAddrForm({ ...addrForm, contactName: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                      className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                     />
                   </label>
                 </div>
@@ -764,14 +764,14 @@ export function BrandSettingsView({
                       });
                       setShowNewAddr(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Add Address
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowNewAddr(false)}
-                    className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700"
+                    className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary"
                   >
                     Cancel
                   </button>
@@ -802,15 +802,15 @@ export function BrandSettingsView({
             description="Select operational events and delivery channels (email and in-app alerts)."
           >
             {notificationPrefs.length === 0 ? (
-              <p className="text-[14px] text-zinc-600">No notification rules configured.</p>
+              <p className="text-[14px] text-ink-600">No notification rules configured.</p>
             ) : (
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded">
                 {notificationPrefs.map((p) => (
                   <div
                     key={p.id}
                     className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-[12px]"
                   >
-                    <span className={p.enabled ? 'font-medium text-zinc-950' : 'text-zinc-500'}>
+                    <span className={p.enabled ? 'font-medium text-ink-950' : 'text-faint'}>
                       {EVENT_LABELS[p.eventType]}
                     </span>
                     <div className="flex items-center gap-2">
@@ -820,8 +820,8 @@ export function BrandSettingsView({
                         aria-label={`Toggle email notifications for ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.channels.includes('email')
-                            ? 'border-[var(--mr-accent)] bg-orange-50 text-[var(--mr-accent)]'
-                            : 'border-zinc-200 text-zinc-400'
+                            ? 'border-[var(--mr-accent)] bg-accent-tint text-[var(--mr-accent)]'
+                            : 'border-hairline text-quiet'
                         }`}
                       >
                         <Mail className="w-3.5 h-3.5" />
@@ -832,8 +832,8 @@ export function BrandSettingsView({
                         aria-label={`Toggle in-app notifications for ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.channels.includes('in_app')
-                            ? 'border-[var(--mr-accent)] bg-orange-50 text-[var(--mr-accent)]'
-                            : 'border-zinc-200 text-zinc-400'
+                            ? 'border-[var(--mr-accent)] bg-accent-tint text-[var(--mr-accent)]'
+                            : 'border-hairline text-quiet'
                         }`}
                       >
                         <Bell className="w-3.5 h-3.5" />
@@ -844,8 +844,8 @@ export function BrandSettingsView({
                         aria-label={`Enable or disable ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.enabled
-                            ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                            : 'border-zinc-200 text-zinc-400'
+                            ? 'border-emerald-300 bg-state-success/10 text-state-success'
+                            : 'border-hairline text-quiet'
                         }`}
                       >
                         {p.enabled ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
@@ -866,22 +866,22 @@ export function BrandSettingsView({
             {contactNotice && <NoticeBanner tone="success" message={contactNotice} />}
             {!editingContacts ? (
               <div className="space-y-3 text-[12px]">
-                <dl className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+                <dl className="divide-y divide-hairline-06 border border-hairline rounded">
                   {[
                     ['Signatory', brandProfile.signatory],
                     ['Email', brandProfile.email],
                     ['Phone', brandProfile.phone],
                   ].map(([k, v]) => (
                     <div key={k} className="px-3.5 py-2.5 flex items-center justify-between">
-                      <dt className="text-zinc-600">{k}</dt>
-                      <dd className="font-medium text-zinc-950">{v || '—'}</dd>
+                      <dt className="text-ink-600">{k}</dt>
+                      <dd className="font-medium text-ink-950">{v || '—'}</dd>
                     </div>
                   ))}
                 </dl>
                 <button
                   type="button"
                   onClick={() => setEditingContacts(true)}
-                  className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white font-medium text-zinc-900 hover:bg-zinc-50"
+                  className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised font-medium text-ink-900 hover:bg-surface"
                 >
                   Edit
                 </button>
@@ -889,29 +889,29 @@ export function BrandSettingsView({
             ) : (
               <div className="space-y-3 text-[12px]">
                 <label className="block space-y-1">
-                  <span className="text-zinc-600">Signatory Name</span>
+                  <span className="text-ink-600">Signatory Name</span>
                   <input
                     value={contactForm.signatory}
                     onChange={(e) =>
                       setContactForm({ ...contactForm, signatory: e.target.value })
                     }
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
                 <label className="block space-y-1">
-                  <span className="text-zinc-600">Email</span>
+                  <span className="text-ink-600">Email</span>
                   <input
                     value={contactForm.email}
                     onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
                 <label className="block space-y-1">
-                  <span className="text-zinc-600">Phone</span>
+                  <span className="text-ink-600">Phone</span>
                   <input
                     value={contactForm.phone}
                     onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
                 <div className="flex gap-2">
@@ -924,14 +924,14 @@ export function BrandSettingsView({
                       setContactNotice('Contact change request queued for admin review.');
                       setEditingContacts(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Request Change
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingContacts(false)}
-                    className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700"
+                    className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary"
                   >
                     Cancel
                   </button>
@@ -950,7 +950,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={onOpenContracts}
-                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Open Contracts Workspace
                 </button>
@@ -958,19 +958,19 @@ export function BrandSettingsView({
             }
           >
             {contracts.length === 0 ? (
-              <p className="text-[14px] text-zinc-600">No contracts issued yet.</p>
+              <p className="text-[14px] text-ink-600">No contracts issued yet.</p>
             ) : (
-              <div className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+              <div className="divide-y divide-hairline-06 border border-hairline rounded">
                 {contracts.map((c) => (
                   <div
                     key={c.id}
                     className="px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[12px]"
                   >
                     <div>
-                      <div className="font-medium text-zinc-950 capitalize">
+                      <div className="font-medium text-ink-950 capitalize">
                         {c.type.replace(/_/g, ' ')} — v{c.version}
                       </div>
-                      <div className="font-mono text-zinc-500">
+                      <div className="font-mono text-faint">
                         {c.commissionRate}% commission · £{c.monthlyFee}/mo · Effective{' '}
                         {c.effectiveDate || '—'}
                       </div>
@@ -991,22 +991,22 @@ export function BrandSettingsView({
             title="Guided Tours"
             description="Restart any onboarding walkthrough from step one without altering your account data."
           >
-            <div className="divide-y divide-zinc-200 border border-zinc-200 rounded">
+            <div className="divide-y divide-hairline-06 border border-hairline rounded">
               {tours.map((t) => (
                 <div
                   key={t.id}
                   className="px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-[12px]"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-zinc-950">{t.name}</div>
-                    <div className="text-zinc-600 truncate">{t.description}</div>
+                    <div className="font-medium text-ink-950">{t.name}</div>
+                    <div className="text-ink-600 truncate">{t.description}</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <InlineStatus label={t.state} tone={t.tone} />
                     <button
                       type="button"
                       onClick={() => onRestartTour(t.id)}
-                      className="px-2.5 py-1 rounded border border-zinc-300 bg-white font-medium text-zinc-900 hover:bg-zinc-50"
+                      className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised font-medium text-ink-900 hover:bg-surface"
                     >
                       Restart Tour
                     </button>

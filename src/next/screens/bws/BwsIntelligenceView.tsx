@@ -234,33 +234,33 @@ export function BwsIntelligenceView({
       header: 'Brand',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.brand}</div>
-          <div className="text-[12px] text-zinc-500">{r.category}</div>
+          <div className="font-medium text-ink-950">{r.brand}</div>
+          <div className="text-[12px] text-faint">{r.category}</div>
         </div>
       ),
     },
     {
       key: 'verification',
       header: 'Ownership Verification',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.ownershipVerification}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.ownershipVerification}</span>,
     },
     {
       key: 'ukPresence',
       header: 'UK Presence',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.ukPresenceIndicator}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.ukPresenceIndicator}</span>,
     },
     {
       key: 'opportunity',
       header: 'Commercial Opportunity',
       render: (r) => (
-        <span className="text-[12px] text-zinc-700">{r.commercialOpportunityIndicator}</span>
+        <span className="text-[12px] text-secondary">{r.commercialOpportunityIndicator}</span>
       ),
     },
     {
       key: 'asins',
       header: 'Amazon UK ASINs',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums text-zinc-700">{r.asinCount}</span>,
+      render: (r) => <span className="font-mono tabular-nums text-secondary">{r.asinCount}</span>,
     },
     {
       key: 'outreach',
@@ -268,9 +268,9 @@ export function BwsIntelligenceView({
       hideOnMobile: true,
       render: (r) =>
         r.outreach ? (
-          <span className="text-[12px] text-zinc-700">{r.outreach.outreachStatus}</span>
+          <span className="text-[12px] text-secondary">{r.outreach.outreachStatus}</span>
         ) : (
-          <span className="text-[12px] text-zinc-500" title="No outreach log in the Dash-1 source.">
+          <span className="text-[12px] text-faint" title="No outreach log in the Dash-1 source.">
             —
           </span>
         ),
@@ -281,12 +281,12 @@ export function BwsIntelligenceView({
     {
       key: 'label',
       header: 'Origin / Region',
-      render: (r) => <span className="font-medium text-zinc-950">{r.label}</span>,
+      render: (r) => <span className="font-medium text-ink-950">{r.label}</span>,
     },
     {
       key: 'categories',
       header: 'Drink Categories',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.categories.join(', ') || '—'}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.categories.join(', ') || '—'}</span>,
     },
     {
       key: 'brands',
@@ -297,13 +297,13 @@ export function BwsIntelligenceView({
     {
       key: 'ukPresence',
       header: 'UK Presence',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.ukPresenceIndicator}</span>,
+      render: (r) => <span className="text-[12px] text-secondary">{r.ukPresenceIndicator}</span>,
     },
     {
       key: 'opportunity',
       header: 'Commercial Opportunity',
       render: (r) => (
-        <span className="text-[12px] text-zinc-700">{r.commercialOpportunityIndicator}</span>
+        <span className="text-[12px] text-secondary">{r.commercialOpportunityIndicator}</span>
       ),
     },
     {
@@ -311,7 +311,7 @@ export function BwsIntelligenceView({
       header: 'Producers / Evidence',
       align: 'right',
       render: (r) => (
-        <span className="font-mono tabular-nums text-zinc-700">
+        <span className="font-mono tabular-nums text-secondary">
           {r.featuredProducerCount} / {r.evidenceCount}
         </span>
       ),
@@ -330,7 +330,7 @@ export function BwsIntelligenceView({
               <button
                 type="button"
                 onClick={() => onNavigateSection('campaign-studio')}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
               >
                 Open Campaign Studio
               </button>
@@ -375,9 +375,9 @@ export function BwsIntelligenceView({
               >
                 <div className="space-y-2">
                   {coverage.map((c) => (
-                    <div key={c.label} className="flex items-center justify-between gap-2 text-[12px] border-b border-zinc-100 pb-2 last:border-b-0">
-                      <span className="text-zinc-700">{c.label}</span>
-                      <span className="font-mono tabular-nums text-zinc-950">{c.value}</span>
+                    <div key={c.label} className="flex items-center justify-between gap-2 text-[12px] border-b border-hairline pb-2 last:border-b-0">
+                      <span className="text-secondary">{c.label}</span>
+                      <span className="font-mono tabular-nums text-ink-950">{c.value}</span>
                     </div>
                   ))}
                 </div>
@@ -404,7 +404,7 @@ export function BwsIntelligenceView({
                 title="Market Sizing"
                 description="Market sizing data not available in this workspace (D5)."
               >
-                <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+                <div className="border border-hairline rounded-md p-4 text-[13px] text-ink-600">
                   Market sizing data not available in this workspace.
                 </div>
               </SectionCard>
@@ -418,13 +418,13 @@ export function BwsIntelligenceView({
                   onChange={(e) => onSearchQueryChange(e.target.value)}
                   placeholder="Filter by brand or category…"
                   aria-label="Filter BWS prospects"
-                  className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] w-full sm:w-72"
+                  className="px-3 py-1.5 rounded-md border border-hairline-strong bg-surface-raised text-[14px] w-full sm:w-72"
                 />
                 <select
                   aria-label="Filter by outreach log"
                   value={outreachFilter}
                   onChange={(e) => onOutreachFilterChange(e.target.value)}
-                  className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px]"
+                  className="px-3 py-1.5 rounded-md border border-hairline-strong bg-surface-raised text-[14px]"
                 >
                   <option value="">All brands</option>
                   <option value="with">With an outreach log</option>
@@ -473,87 +473,87 @@ export function BwsIntelligenceView({
         {selectedProspect && (
           <div className="space-y-5 text-[14px]">
             <div className="space-y-1.5">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-faint">
                 Brand record (Dash-1)
               </div>
-              <p className="text-zinc-800">{selectedProspect.description}</p>
+              <p className="text-ink-800">{selectedProspect.description}</p>
               {selectedProspect.website && (
-                <div className="text-[12px] font-mono text-zinc-500">{selectedProspect.website}</div>
+                <div className="text-[12px] font-mono text-faint">{selectedProspect.website}</div>
               )}
               <dl className="pt-1 space-y-1 text-[12px]">
                 <div className="flex gap-2">
-                  <dt className="text-zinc-500 w-44 shrink-0">Ownership verification</dt>
-                  <dd className="text-zinc-800">{selectedProspect.ownershipVerification}</dd>
+                  <dt className="text-faint w-44 shrink-0">Ownership verification</dt>
+                  <dd className="text-ink-800">{selectedProspect.ownershipVerification}</dd>
                 </div>
                 <div className="flex gap-2">
-                  <dt className="text-zinc-500 w-44 shrink-0">Licensing arrangement</dt>
-                  <dd className="text-zinc-800">{selectedProspect.licensingArrangement}</dd>
+                  <dt className="text-faint w-44 shrink-0">Licensing arrangement</dt>
+                  <dd className="text-ink-800">{selectedProspect.licensingArrangement}</dd>
                 </div>
                 <div className="flex gap-2">
-                  <dt className="text-zinc-500 w-44 shrink-0">UK presence</dt>
-                  <dd className="text-zinc-800">{selectedProspect.ukPresenceIndicator}</dd>
+                  <dt className="text-faint w-44 shrink-0">UK presence</dt>
+                  <dd className="text-ink-800">{selectedProspect.ukPresenceIndicator}</dd>
                 </div>
               </dl>
             </div>
 
             {/* §D9 — read-only badge; the stage is never mutated from this screen. */}
-            <div className="border-t border-zinc-200 pt-4 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+            <div className="border-t border-hairline pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-faint">
                 Opportunity assessment (read-only)
               </div>
               {selectedProspect.opportunityStatus ? (
                 <InlineStatus label={selectedProspect.opportunityStatus} tone="info" />
               ) : (
-                <p className="text-[12px] text-zinc-500">
+                <p className="text-[12px] text-faint">
                   No opportunity assessment recorded for this brand.
                 </p>
               )}
             </div>
 
             {/* §D8 — the outreach log is displayed as recorded; no write controls exist. */}
-            <div className="border-t border-zinc-200 pt-4 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+            <div className="border-t border-hairline pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-faint">
                 Outreach log (read-only)
               </div>
               {selectedProspect.outreach ? (
                 <dl className="space-y-1 text-[12px]">
                   <div className="flex gap-2">
-                    <dt className="text-zinc-500 w-44 shrink-0">Outreach status</dt>
-                    <dd className="text-zinc-800">{selectedProspect.outreach.outreachStatus}</dd>
+                    <dt className="text-faint w-44 shrink-0">Outreach status</dt>
+                    <dd className="text-ink-800">{selectedProspect.outreach.outreachStatus}</dd>
                   </div>
                   <div className="flex gap-2">
-                    <dt className="text-zinc-500 w-44 shrink-0">Contact</dt>
-                    <dd className="text-zinc-800">
+                    <dt className="text-faint w-44 shrink-0">Contact</dt>
+                    <dd className="text-ink-800">
                       {selectedProspect.outreach.contactPerson} · {selectedProspect.outreach.contactRole}
                     </dd>
                   </div>
                   <div className="flex gap-2">
-                    <dt className="text-zinc-500 w-44 shrink-0">Email</dt>
-                    <dd className="text-zinc-800 font-mono">{selectedProspect.outreach.contactEmail}</dd>
+                    <dt className="text-faint w-44 shrink-0">Email</dt>
+                    <dd className="text-ink-800 font-mono">{selectedProspect.outreach.contactEmail}</dd>
                   </div>
                   <div className="flex gap-2">
-                    <dt className="text-zinc-500 w-44 shrink-0">Last contacted / next follow-up</dt>
-                    <dd className="text-zinc-800">
+                    <dt className="text-faint w-44 shrink-0">Last contacted / next follow-up</dt>
+                    <dd className="text-ink-800">
                       {selectedProspect.outreach.lastContacted} / {selectedProspect.outreach.nextFollowUp}
                     </dd>
                   </div>
                   <div className="flex gap-2">
-                    <dt className="text-zinc-500 w-44 shrink-0">Discussion notes</dt>
-                    <dd className="text-zinc-800">{selectedProspect.outreach.discussionNotes}</dd>
+                    <dt className="text-faint w-44 shrink-0">Discussion notes</dt>
+                    <dd className="text-ink-800">{selectedProspect.outreach.discussionNotes}</dd>
                   </div>
                 </dl>
               ) : (
-                <p className="text-[12px] text-zinc-500">
+                <p className="text-[12px] text-faint">
                   No outreach log recorded for this brand in the Dash-1 dataset.
                 </p>
               )}
             </div>
 
-            <div className="border-t border-zinc-200 pt-4 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+            <div className="border-t border-hairline pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-faint">
                 Amazon UK listings
               </div>
-              <p className="text-[12px] text-zinc-700">
+              <p className="text-[12px] text-secondary">
                 {selectedProspect.asinCount === 0
                   ? 'No Amazon UK listing recorded for this brand.'
                   : `${selectedProspect.asinCount} Amazon UK listing${selectedProspect.asinCount === 1 ? '' : 's'} recorded for this brand in the Dash-1 dataset.`}

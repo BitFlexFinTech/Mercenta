@@ -40,7 +40,7 @@ export function AdminMonitoringView({
             type="button"
             disabled={running}
             onClick={() => void onRunHealthCheck()}
-            className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40 whitespace-nowrap"
+            className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40 whitespace-nowrap"
           >
             {running ? 'Running check…' : 'Run Health Check'}
           </button>
@@ -75,9 +75,9 @@ export function AdminMonitoringView({
         title="Dependency Monitoring"
         description="Automated repository security advisory scanning."
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-zinc-700">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-secondary">
           <p className="max-w-2xl">
-            Dependabot is configured in <code className="font-mono text-zinc-950">.github/dependabot.yml</code> to scan npm and GitHub Actions dependencies weekly.
+            Dependabot is configured in <code className="font-mono text-ink-950">.github/dependabot.yml</code> to scan npm and GitHub Actions dependencies weekly.
           </p>
           <InlineStatus label="Configured" tone="success" />
         </div>
@@ -88,20 +88,20 @@ export function AdminMonitoringView({
         description="Checks start empty each session and read local provider readiness via computeReadiness()."
       >
         {entries.length === 0 ? (
-          <p className="text-[13px] text-zinc-600">
+          <p className="text-[13px] text-ink-600">
             No health checks have been run in this session. Press &ldquo;Run Health Check&rdquo; to evaluate current platform readiness.
           </p>
         ) : (
-          <div className="divide-y divide-zinc-200 -m-4">
+          <div className="divide-y divide-hairline-06 -m-4">
             {entries.map((e) => (
               <div key={e.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="text-[13px] font-medium text-zinc-950">{e.summary}</div>
-                  <div className="text-[11px] font-mono text-zinc-500 mt-0.5">
+                  <div className="text-[13px] font-medium text-ink-950">{e.summary}</div>
+                  <div className="text-[11px] font-mono text-faint mt-0.5">
                     {new Date(e.timestamp).toLocaleString()} · severity: {e.severity}
                   </div>
                   {e.triageSummary && (
-                    <div className="text-[12px] text-amber-800 mt-1">Triage: {e.triageSummary}</div>
+                    <div className="text-[12px] text-state-warning mt-1">Triage: {e.triageSummary}</div>
                   )}
                 </div>
                 <InlineStatus

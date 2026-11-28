@@ -250,8 +250,8 @@ export function AdminBrandIntelligenceView({
       mobilePrimary: true,
       render: (p) => (
         <div>
-          <div className="font-medium text-zinc-950">{p.brand}</div>
-          <div className="text-[12px] text-zinc-500">{p.category}</div>
+          <div className="font-medium text-ink-950">{p.brand}</div>
+          <div className="text-[12px] text-faint">{p.category}</div>
         </div>
       ),
     },
@@ -260,7 +260,7 @@ export function AdminBrandIntelligenceView({
       header: 'Score',
       align: 'right',
       render: (p) => (
-        <span className="font-mono font-semibold text-zinc-950">{p.totalScore}</span>
+        <span className="font-mono font-semibold text-ink-950">{p.totalScore}</span>
       ),
     },
     {
@@ -277,19 +277,19 @@ export function AdminBrandIntelligenceView({
       key: 'offer',
       header: 'Amazon offer',
       hideOnMobile: true,
-      render: (p) => <span className="text-[12px] text-zinc-700">{p.offerSummary}</span>,
+      render: (p) => <span className="text-[12px] text-secondary">{p.offerSummary}</span>,
     },
     {
       key: 'distrib',
       header: 'Distributor',
       hideOnMobile: true,
-      render: (p) => <span className="text-[12px] text-zinc-600">{p.leadDistributor}</span>,
+      render: (p) => <span className="text-[12px] text-ink-600">{p.leadDistributor}</span>,
     },
     {
       key: 'contact',
       header: 'Contact',
       hideOnMobile: true,
-      render: (p) => <span className="text-[12px] text-zinc-600">{p.leadContact}</span>,
+      render: (p) => <span className="text-[12px] text-ink-600">{p.leadContact}</span>,
     },
   ];
 
@@ -310,7 +310,7 @@ export function AdminBrandIntelligenceView({
             type="button"
             disabled={runningDiscovery}
             onClick={() => void onRunDiscovery()}
-            className="px-3.5 py-2 rounded bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800 disabled:opacity-40"
+            className="px-3.5 py-2 rounded bg-ink-950 text-on-dark text-[12px] font-medium hover:bg-ink-800 disabled:opacity-40"
           >
             {runningDiscovery ? 'Scanning…' : 'Run discovery'}
           </button>
@@ -328,12 +328,12 @@ export function AdminBrandIntelligenceView({
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           placeholder="Search prospects…"
-          className="w-60 rounded border border-zinc-300 bg-white px-3 py-1.5"
+          className="w-60 rounded border border-hairline-strong bg-surface-raised px-3 py-1.5"
         />
         <select
           value={categoryFilter}
           onChange={(e) => onCategoryFilterChange(e.target.value)}
-          className="rounded border border-zinc-300 bg-white px-2.5 py-1.5"
+          className="rounded border border-hairline-strong bg-surface-raised px-2.5 py-1.5"
         >
           <option value="">All categories</option>
           {categories.map((c) => (
@@ -345,7 +345,7 @@ export function AdminBrandIntelligenceView({
         <select
           value={tierFilter}
           onChange={(e) => onTierFilterChange(e.target.value)}
-          className="rounded border border-zinc-300 bg-white px-2.5 py-1.5"
+          className="rounded border border-hairline-strong bg-surface-raised px-2.5 py-1.5"
         >
           <option value="">All tiers</option>
           <option value="tier_1">Tier 1 (Attack)</option>
@@ -354,7 +354,7 @@ export function AdminBrandIntelligenceView({
           <option value="tier_4">Tier 4 (Reserve)</option>
         </select>
         {nextScheduledCheck && (
-          <span className="ml-auto font-mono text-[12px] text-zinc-500">
+          <span className="ml-auto font-mono text-[12px] text-faint">
             Next check: {nextScheduledCheck.slice(0, 10)}
           </span>
         )}
@@ -387,9 +387,9 @@ export function AdminBrandIntelligenceView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title={`Discovery run history (${runs.length})`}>
           {runs.length === 0 ? (
-            <p className="text-[13px] text-zinc-500">No discovery runs recorded yet.</p>
+            <p className="text-[13px] text-faint">No discovery runs recorded yet.</p>
           ) : (
-            <div className="divide-y divide-zinc-200 text-[12px]">
+            <div className="divide-y divide-hairline-06 text-[12px]">
               {runs.slice(0, 8).map((r) => {
                 const open = expandedRunId === r.runId;
                 return (
@@ -399,17 +399,17 @@ export function AdminBrandIntelligenceView({
                       onClick={() => setExpandedRunId(open ? null : r.runId)}
                       className="w-full flex justify-between text-left"
                     >
-                      <span className="font-mono font-medium text-zinc-950">{r.runId}</span>
-                      <span className="font-mono text-zinc-500">
+                      <span className="font-mono font-medium text-ink-950">{r.runId}</span>
+                      <span className="font-mono text-faint">
                         {r.trigger} · {r.completedAt.slice(0, 16).replace('T', ' ')}
                       </span>
                     </button>
-                    <div className="mt-0.5 font-mono text-zinc-500">
+                    <div className="mt-0.5 font-mono text-faint">
                       scan {r.scannedCount} · +{r.newCount} new · {r.updatedCount} updated ·{' '}
                       {r.disqualifiedCount} dq
                     </div>
                     {open && r.changes.length > 0 && (
-                      <ul className="mt-1.5 pl-3 border-l border-zinc-200 space-y-0.5 font-mono text-zinc-600">
+                      <ul className="mt-1.5 pl-3 border-l border-hairline space-y-0.5 font-mono text-ink-600">
                         {r.changes.map((c) => (
                           <li key={c.id}>
                             {c.brand} — {c.changeType}: {c.summary}
@@ -429,14 +429,14 @@ export function AdminBrandIntelligenceView({
           description="Disqualifications persist across discovery runs until manually requalified."
         >
           {disqualifiedProspects.length === 0 ? (
-            <p className="text-[13px] text-zinc-500">No disqualified prospects.</p>
+            <p className="text-[13px] text-faint">No disqualified prospects.</p>
           ) : (
-            <div className="divide-y divide-zinc-200 text-[13px]">
+            <div className="divide-y divide-hairline-06 text-[13px]">
               {disqualifiedProspects.map((p) => (
                 <div key={p.id} className="py-2 flex items-center justify-between gap-2">
                   <div>
-                    <div className="font-medium text-zinc-950">{p.brand}</div>
-                    <div className="text-[11px] font-mono text-amber-800">
+                    <div className="font-medium text-ink-950">{p.brand}</div>
+                    <div className="text-[11px] font-mono text-state-warning">
                       {p.disqualificationReason || 'Disqualified'}
                     </div>
                   </div>
@@ -444,7 +444,7 @@ export function AdminBrandIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onRequalify(p.id, p.brand)}
-                    className="px-2.5 py-1 rounded border border-zinc-300 text-[12px] hover:bg-zinc-50"
+                    className="px-2.5 py-1 rounded border border-hairline-strong text-[12px] hover:bg-surface"
                   >
                     Requalify
                   </button>
@@ -504,14 +504,14 @@ export function AdminBrandIntelligenceView({
                 </div>
 
                 {!selectedProspect.disqualified && (
-                  <div className="border-t border-zinc-200 pt-4 space-y-2">
-                    <h4 className="font-semibold text-zinc-950">Disqualify prospect</h4>
+                  <div className="border-t border-hairline pt-4 space-y-2">
+                    <h4 className="font-semibold text-ink-950">Disqualify prospect</h4>
                     <div className="flex gap-2">
                       <input
                         value={disqualifyReason}
                         onChange={(e) => setDisqualifyReason(e.target.value)}
                         placeholder="Disqualification reason"
-                        className="flex-1 rounded border border-zinc-300 px-2.5 py-1.5 text-[12px]"
+                        className="flex-1 rounded border border-hairline-strong px-2.5 py-1.5 text-[12px]"
                       />
                       <button
                         type="button"
@@ -523,7 +523,7 @@ export function AdminBrandIntelligenceView({
                           );
                           onSelectProspect(null);
                         }}
-                        className="px-3 py-1.5 rounded border border-red-200 text-red-700 text-[12px] font-medium hover:bg-red-50 disabled:opacity-40"
+                        className="px-3 py-1.5 rounded border border-state-danger/20 text-state-danger text-[12px] font-medium hover:bg-state-danger/10 disabled:opacity-40"
                       >
                         Disqualify
                       </button>
@@ -536,12 +536,12 @@ export function AdminBrandIntelligenceView({
             {drawerTab === 'amazon' && (
               <div className="space-y-3">
                 {selectedProspect.asins.map((a) => (
-                  <div key={a.asin} className="border border-zinc-200 rounded p-3 space-y-1">
+                  <div key={a.asin} className="border border-hairline rounded p-3 space-y-1">
                     <div className="flex justify-between gap-2">
-                      <span className="font-medium text-zinc-950">{a.title}</span>
-                      <span className="font-mono text-[11px] text-zinc-500">{a.asin}</span>
+                      <span className="font-medium text-ink-950">{a.title}</span>
+                      <span className="font-mono text-[11px] text-faint">{a.asin}</span>
                     </div>
-                    <div className="text-[12px] text-zinc-600 font-mono">
+                    <div className="text-[12px] text-ink-600 font-mono">
                       £{a.price.toFixed(2)} · ★{a.rating} ({a.reviewCount}) · BSR #{a.bsr} · {a.sellerCount} sellers · {a.offerClass.replace(/_/g, ' ')}
                     </div>
                   </div>
@@ -551,33 +551,33 @@ export function AdminBrandIntelligenceView({
 
             {drawerTab === 'commercial' && (
               <div className="space-y-4">
-                <dl className="grid grid-cols-3 gap-2 border border-zinc-200 rounded p-3">
+                <dl className="grid grid-cols-3 gap-2 border border-hairline rounded p-3">
                   <div>
-                    <dt className="text-[11px] text-zinc-500">Wholesale</dt>
+                    <dt className="text-[11px] text-faint">Wholesale</dt>
                     <dd className="font-medium">{selectedProspect.wholesaleAvailable ? 'Yes' : 'No'}</dd>
                   </div>
                   <div>
-                    <dt className="text-[11px] text-zinc-500">Distributor Prg</dt>
+                    <dt className="text-[11px] text-faint">Distributor Prg</dt>
                     <dd className="font-medium">{selectedProspect.distributorProgramme ? 'Yes' : 'No'}</dd>
                   </div>
                   <div>
-                    <dt className="text-[11px] text-zinc-500">Retailer Prg</dt>
+                    <dt className="text-[11px] text-faint">Retailer Prg</dt>
                     <dd className="font-medium">{selectedProspect.retailerProgramme ? 'Yes' : 'No'}</dd>
                   </div>
                 </dl>
                 <div>
-                  <h4 className="font-semibold text-zinc-950 mb-1.5">Contacts ({selectedProspect.contacts.length})</h4>
+                  <h4 className="font-semibold text-ink-950 mb-1.5">Contacts ({selectedProspect.contacts.length})</h4>
                   {selectedProspect.contacts.map((c, idx) => (
-                    <div key={`${c.name}-${idx}`} className="py-1.5 border-b border-zinc-100 text-[12px]">
-                      <span className="font-medium text-zinc-950">{c.name}</span> · {c.jobTitle} ({c.email ?? 'no email'})
+                    <div key={`${c.name}-${idx}`} className="py-1.5 border-b border-hairline text-[12px]">
+                      <span className="font-medium text-ink-950">{c.name}</span> · {c.jobTitle} ({c.email ?? 'no email'})
                     </div>
                   ))}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-zinc-950 mb-1.5">Distributors ({selectedProspect.distributors.length})</h4>
+                  <h4 className="font-semibold text-ink-950 mb-1.5">Distributors ({selectedProspect.distributors.length})</h4>
                   {selectedProspect.distributors.map((d, idx) => (
-                    <div key={`${d.company}-${idx}`} className="py-1.5 border-b border-zinc-100 text-[12px]">
-                      <span className="font-medium text-zinc-950">{d.company}</span> · {d.territory}
+                    <div key={`${d.company}-${idx}`} className="py-1.5 border-b border-hairline text-[12px]">
+                      <span className="font-medium text-ink-950">{d.company}</span> · {d.territory}
                     </div>
                   ))}
                 </div>
@@ -589,14 +589,14 @@ export function AdminBrandIntelligenceView({
                 <div className="flex flex-wrap items-center gap-3">
                   <InlineStatus label={`Stage: ${workflowSnapshot.stage}`} tone="info" />
                   {workflowSnapshot.status && (
-                    <span className="font-mono text-[12px] text-zinc-500">
+                    <span className="font-mono text-[12px] text-faint">
                       Rev {workflowSnapshot.revision ?? 1} · {workflowSnapshot.status}
                     </span>
                   )}
                 </div>
 
                 {workflowSnapshot.evidenceSummary && (
-                  <pre className="whitespace-pre-wrap font-sans text-[12px] bg-zinc-50 border border-zinc-200 rounded p-3 text-zinc-700">
+                  <pre className="whitespace-pre-wrap font-sans text-[12px] bg-surface border border-hairline rounded p-3 text-secondary">
                     {workflowSnapshot.evidenceSummary}
                   </pre>
                 )}
@@ -605,14 +605,14 @@ export function AdminBrandIntelligenceView({
                   value={subjectDraft}
                   onChange={(e) => setSubjectDraft(e.target.value)}
                   placeholder="Outreach subject"
-                  className="w-full rounded border border-zinc-300 px-2.5 py-1.5"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-1.5"
                 />
                 <textarea
                   value={bodyDraft}
                   onChange={(e) => setBodyDraft(e.target.value)}
                   rows={6}
                   placeholder="Outreach message body"
-                  className="w-full rounded border border-zinc-300 px-2.5 py-2 text-[12px]"
+                  className="w-full rounded border border-hairline-strong px-2.5 py-2 text-[12px]"
                 />
 
                 <div className="flex flex-wrap gap-2">
@@ -620,7 +620,7 @@ export function AdminBrandIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => void onOutreachAction(selectedProspect.id, 'prepare')}
-                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
                   >
                     {workflowSnapshot.status ? 'Prepare new revision' : 'Prepare recommendation'}
                   </button>
@@ -635,7 +635,7 @@ export function AdminBrandIntelligenceView({
                             body: bodyDraft,
                           })
                         }
-                        className="px-3 py-1.5 rounded border border-zinc-300 text-[12px]"
+                        className="px-3 py-1.5 rounded border border-hairline-strong text-[12px]"
                       >
                         Modify
                       </button>
@@ -643,7 +643,7 @@ export function AdminBrandIntelligenceView({
                         type="button"
                         disabled={!canMutate}
                         onClick={() => void onOutreachAction(selectedProspect.id, 'approve')}
-                        className="px-3 py-1.5 rounded bg-emerald-700 text-white text-[12px]"
+                        className="px-3 py-1.5 rounded bg-emerald-700 text-on-dark text-[12px]"
                       >
                         Approve
                       </button>
@@ -651,7 +651,7 @@ export function AdminBrandIntelligenceView({
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                         placeholder="Reject reason"
-                        className="rounded border border-zinc-300 px-2 py-1 text-[12px]"
+                        className="rounded border border-hairline-strong px-2 py-1 text-[12px]"
                       />
                       <button
                         type="button"
@@ -659,7 +659,7 @@ export function AdminBrandIntelligenceView({
                         onClick={() =>
                           void onOutreachAction(selectedProspect.id, 'reject', { reason: rejectReason })
                         }
-                        className="px-3 py-1.5 rounded border border-red-200 text-red-700 text-[12px]"
+                        className="px-3 py-1.5 rounded border border-state-danger/20 text-state-danger text-[12px]"
                       >
                         Reject
                       </button>
@@ -670,7 +670,7 @@ export function AdminBrandIntelligenceView({
                       type="button"
                       disabled={!canMutate}
                       onClick={() => void onOutreachAction(selectedProspect.id, 'send')}
-                      className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px]"
+                      className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px]"
                     >
                       {workflowSnapshot.transportLive ? 'Send' : 'Send (Simulated)'}
                     </button>
@@ -680,7 +680,7 @@ export function AdminBrandIntelligenceView({
                       type="button"
                       disabled={!canMutate}
                       onClick={() => void onOutreachAction(selectedProspect.id, 'simulate_response')}
-                      className="px-3 py-1.5 rounded border border-zinc-300 text-[12px]"
+                      className="px-3 py-1.5 rounded border border-hairline-strong text-[12px]"
                     >
                       Simulate response
                     </button>
@@ -690,7 +690,7 @@ export function AdminBrandIntelligenceView({
                       type="button"
                       disabled={!canMutate}
                       onClick={() => void onOutreachAction(selectedProspect.id, 'create_opportunity')}
-                      className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px]"
+                      className="px-3 py-1.5 rounded bg-ink-950 text-on-dark text-[12px]"
                     >
                       Create opportunity
                     </button>
@@ -698,8 +698,8 @@ export function AdminBrandIntelligenceView({
                 </div>
 
                 {workflowSnapshot.opportunity && (
-                  <div className="border-t border-zinc-200 pt-3 space-y-2">
-                    <div className="text-[12px] font-mono text-zinc-700">
+                  <div className="border-t border-hairline pt-3 space-y-2">
+                    <div className="text-[12px] font-mono text-secondary">
                       Opportunity {workflowSnapshot.opportunity.id} · Stage:{' '}
                       {workflowSnapshot.opportunity.stage}
                     </div>
@@ -710,7 +710,7 @@ export function AdminBrandIntelligenceView({
                           type="button"
                           disabled={!canMutate || workflowSnapshot.opportunity?.stage === s}
                           onClick={() => onSetOpportunityStage(workflowSnapshot.opportunity!.id, s)}
-                          className="px-2.5 py-1 rounded border border-zinc-200 text-[11px] capitalize disabled:opacity-40"
+                          className="px-2.5 py-1 rounded border border-hairline text-[11px] capitalize disabled:opacity-40"
                         >
                           {s}
                         </button>
@@ -722,13 +722,13 @@ export function AdminBrandIntelligenceView({
                         type="button"
                         disabled={!canMutate || !workflowSnapshot.onboardingEligible}
                         onClick={() => void onOutreachAction(selectedProspect.id, 'start_onboarding')}
-                        className="mt-2 px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] disabled:opacity-40"
+                        className="mt-2 px-3 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] disabled:opacity-40"
                       >
                         Start onboarding
                       </button>
                     ) : (
-                      <div className="mt-2 border border-zinc-200 rounded p-2.5 space-y-1.5">
-                        <div className="font-mono text-[11px] text-zinc-600">
+                      <div className="mt-2 border border-hairline rounded p-2.5 space-y-1.5">
+                        <div className="font-mono text-[11px] text-ink-600">
                           Onboarding {workflowSnapshot.onboarding.status} · {workflowSnapshot.onboarding.brandId}
                         </div>
                         {workflowSnapshot.onboarding.steps.map((st) => (
@@ -746,7 +746,7 @@ export function AdminBrandIntelligenceView({
                                 Complete
                               </button>
                             ) : (
-                              <span className="font-mono text-emerald-800">{st.status}</span>
+                              <span className="font-mono text-state-success">{st.status}</span>
                             )}
                           </div>
                         ))}
@@ -755,7 +755,7 @@ export function AdminBrandIntelligenceView({
                             type="button"
                             disabled={!canMutate}
                             onClick={() => void onOutreachAction(selectedProspect.id, 'finish_onboarding')}
-                            className="px-3 py-1 rounded bg-[var(--mr-accent)] text-white text-[11px]"
+                            className="px-3 py-1 rounded bg-[var(--mr-accent)] text-on-dark text-[11px]"
                           >
                             Complete onboarding
                           </button>
@@ -774,7 +774,7 @@ export function AdminBrandIntelligenceView({
                   onChange={(e) => setNotesDraft(e.target.value)}
                   rows={6}
                   placeholder="Internal notes / acquisition rationale…"
-                  className="w-full rounded border border-zinc-300 px-3 py-2 font-mono text-[12px]"
+                  className="w-full rounded border border-hairline-strong px-3 py-2 font-mono text-[12px]"
                 />
                 <div className="flex items-center gap-3">
                   <button
@@ -783,11 +783,11 @@ export function AdminBrandIntelligenceView({
                       onSaveNotes(selectedProspect.id, notesDraft);
                       setNotesSavedMsg('Internal notes saved.');
                     }}
-                    className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium"
+                    className="px-3.5 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium"
                   >
                     Save notes
                   </button>
-                  {notesSavedMsg && <span className="text-[12px] text-emerald-800">{notesSavedMsg}</span>}
+                  {notesSavedMsg && <span className="text-[12px] text-state-success">{notesSavedMsg}</span>}
                 </div>
               </div>
             )}
@@ -795,15 +795,15 @@ export function AdminBrandIntelligenceView({
             {drawerTab === 'history' && (
               <div className="space-y-2">
                 {selectedProspect.timeline.length === 0 ? (
-                  <p className="text-zinc-500">No change events recorded yet.</p>
+                  <p className="text-faint">No change events recorded yet.</p>
                 ) : (
                   selectedProspect.timeline.map((e) => (
-                    <div key={e.id} className="border-b border-zinc-200 pb-2 text-[12px]">
-                      <div className="font-mono text-zinc-500">
+                    <div key={e.id} className="border-b border-hairline pb-2 text-[12px]">
+                      <div className="font-mono text-faint">
                         {e.timestamp.slice(0, 16).replace('T', ' ')} · {e.changeType}
                         {e.field ? ` (${e.field})` : ''}
                       </div>
-                      <div className="text-zinc-900">{e.summary}</div>
+                      <div className="text-ink-900">{e.summary}</div>
                     </div>
                   ))
                 )}

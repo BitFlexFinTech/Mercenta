@@ -150,20 +150,20 @@ export function AdminOverviewView({
   }
 
   const revenueColumns: ConsoleColumn<OverviewRevenueRow>[] = [
-    { key: 'label', header: 'Revenue stream', render: (r) => <span className="font-medium text-zinc-950">{r.label}</span> },
+    { key: 'label', header: 'Revenue stream', render: (r) => <span className="font-medium text-ink-950">{r.label}</span> },
     { key: 'gbp', header: 'Recorded', align: 'right', render: (r) => formatGbp(r.gbp) },
-    { key: 'source', header: 'Basis', hideOnMobile: true, render: (r) => <span className="text-[12px] text-zinc-600">{r.source}</span> },
+    { key: 'source', header: 'Basis', hideOnMobile: true, render: (r) => <span className="text-[12px] text-ink-600">{r.source}</span> },
   ];
 
   const fulfilmentColumns: ConsoleColumn<OverviewFulfilmentRow>[] = [
-    { key: 'ref', header: 'Reference', render: (r) => <span className="font-mono text-[12px] font-medium text-zinc-950">{r.ref}</span> },
+    { key: 'ref', header: 'Reference', render: (r) => <span className="font-mono text-[12px] font-medium text-ink-950">{r.ref}</span> },
     {
       key: 'title',
       header: 'Consignment / Order',
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.title}</div>
-          <div className="text-[12px] text-zinc-500">{r.meta}</div>
+          <div className="font-medium text-ink-950">{r.title}</div>
+          <div className="text-[12px] text-faint">{r.meta}</div>
         </div>
       ),
     },
@@ -191,7 +191,7 @@ export function AdminOverviewView({
             <button
               type="button"
               onClick={() => onNavigate('purchase_orders_admin')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-ink-950 text-on-dark text-[12px] font-medium hover:bg-ink-800 whitespace-nowrap"
             >
               Review purchase orders
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -213,14 +213,14 @@ export function AdminOverviewView({
         description="Hero money metrics derived live from purchase orders, operating cost summary, and the commerce invoice ledger."
       >
         <MetricStrip items={moneyMetrics} columns={4} />
-        <div className="pt-2 border-t border-zinc-200">
-          <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 mb-3">
+        <div className="pt-2 border-t border-hairline">
+          <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint mb-3">
             Operations
           </div>
           <MetricStrip items={operationalMetrics} columns={4} />
         </div>
-        <div className="pt-2 border-t border-zinc-200">
-          <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 mb-3">
+        <div className="pt-2 border-t border-hairline">
+          <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-faint mb-3">
             Portfolio volume
           </div>
           <MetricStrip items={volumeMetrics} columns={4} />
@@ -250,16 +250,16 @@ export function AdminOverviewView({
                   key={s.id}
                   type="button"
                   onClick={() => onNavigate?.('purchase_orders_admin')}
-                  className="text-left border border-zinc-200 rounded-md p-3 hover:bg-zinc-50 transition-colors"
+                  className="text-left border border-hairline rounded-md p-3 hover:bg-surface transition-colors"
                 >
-                  <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">{s.label}</div>
-                  <div className="mt-1 text-[20px] font-semibold font-mono tabular-nums text-zinc-950">
+                  <div className="text-[11px] uppercase tracking-[0.06em] text-faint">{s.label}</div>
+                  <div className="mt-1 text-[20px] font-semibold font-mono tabular-nums text-ink-950">
                     {s.count}
                   </div>
                   <div className="mt-2">
                     <ConsoleProgressTrack value={s.count} max={Math.max(1, pipelineTotal)} />
                   </div>
-                  <div className="mt-1 text-[11px] font-mono tabular-nums text-zinc-500">{s.sharePct}% of POs</div>
+                  <div className="mt-1 text-[11px] font-mono tabular-nums text-faint">{s.sharePct}% of POs</div>
                 </button>
               ))}
             </div>
@@ -281,22 +281,22 @@ export function AdminOverviewView({
             }
           >
             <ConsoleTable rows={revenueStreams} columns={revenueColumns} rowKey={(r) => r.id} pageSize={10} />
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-zinc-200 pt-4 text-[12px]">
-              <div className="flex items-center justify-between border border-zinc-200 rounded-md px-3 py-2">
-                <span className="text-zinc-600">Total recorded revenue</span>
-                <span className="font-mono font-semibold tabular-nums text-zinc-950">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-hairline pt-4 text-[12px]">
+              <div className="flex items-center justify-between border border-hairline rounded-md px-3 py-2">
+                <span className="text-ink-600">Total recorded revenue</span>
+                <span className="font-mono font-semibold tabular-nums text-ink-950">
                   {formatGbp(totalRevenueGbp)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border border-zinc-200 rounded-md px-3 py-2">
-                <span className="text-zinc-600">Monthly cost base ({providerCount} providers)</span>
-                <span className="font-mono font-semibold tabular-nums text-zinc-950">
+              <div className="flex items-center justify-between border border-hairline rounded-md px-3 py-2">
+                <span className="text-ink-600">Monthly cost base ({providerCount} providers)</span>
+                <span className="font-mono font-semibold tabular-nums text-ink-950">
                   {formatGbp(monthlyCostGbp)}
                 </span>
               </div>
-              <div className="flex items-center justify-between border border-zinc-200 rounded-md px-3 py-2">
-                <span className="text-zinc-600">Gross profit {provisional ? '(provisional)' : ''}</span>
-                <span className="font-mono font-semibold tabular-nums text-zinc-950">
+              <div className="flex items-center justify-between border border-hairline rounded-md px-3 py-2">
+                <span className="text-ink-600">Gross profit {provisional ? '(provisional)' : ''}</span>
+                <span className="font-mono font-semibold tabular-nums text-ink-950">
                   {formatGbp(grossProfitGbp)} ({marginPct}%)
                 </span>
               </div>
@@ -313,7 +313,7 @@ export function AdminOverviewView({
                 emptyText="No dated purchase orders recorded yet."
               />
               {orderCountTrend.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-zinc-200 flex flex-wrap gap-3 text-[11px] font-mono text-zinc-500">
+                <div className="mt-3 pt-3 border-t border-hairline flex flex-wrap gap-3 text-[11px] font-mono text-faint">
                   {orderCountTrend.map((pt) => (
                     <span key={pt.label}>
                       {pt.label}: {pt.value} POs
@@ -383,7 +383,7 @@ export function AdminOverviewView({
             }
           >
             {docStatusBreakdown.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">No compliance documents recorded yet.</p>
+              <p className="text-[12px] text-faint">No compliance documents recorded yet.</p>
             ) : (
               <ul className="space-y-2.5">
                 {docStatusBreakdown.map((seg) => (
@@ -415,38 +415,38 @@ export function AdminOverviewView({
             }
           >
             {shipmentsCount === 0 ? (
-              <p className="text-[12px] text-zinc-500">
+              <p className="text-[12px] text-faint">
                 No consignments yet. Distribution appears once a PO moves into dispatch.
               </p>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-2">
+                  <div className="text-[11px] uppercase tracking-[0.06em] text-faint mb-2">
                     By status
                   </div>
                   <ul className="space-y-1.5 text-[12px]">
                     {shipmentStatusBreakdown.map((s) => (
                       <li key={s.label} className="flex items-center justify-between">
-                        <span className="text-zinc-700">{s.label}</span>
-                        <span className="font-mono tabular-nums font-medium text-zinc-950">{s.value}</span>
+                        <span className="text-secondary">{s.label}</span>
+                        <span className="font-mono tabular-nums font-medium text-ink-950">{s.value}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-zinc-200 pt-3">
-                  <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-2">
+                <div className="border-t border-hairline pt-3">
+                  <div className="text-[11px] uppercase tracking-[0.06em] text-faint mb-2">
                     By carrier
                   </div>
                   <ul className="space-y-1.5 text-[12px]">
                     {carrierBreakdown.map((c) => (
                       <li key={c.label} className="flex items-center justify-between">
-                        <span className="text-zinc-700">{c.label}</span>
-                        <span className="font-mono tabular-nums font-medium text-zinc-950">{c.value}</span>
+                        <span className="text-secondary">{c.label}</span>
+                        <span className="font-mono tabular-nums font-medium text-ink-950">{c.value}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-zinc-200 pt-3 text-[12px] text-zinc-600 font-mono tabular-nums">
+                <div className="border-t border-hairline pt-3 text-[12px] text-ink-600 font-mono tabular-nums">
                   {shipmentExceptions} exception(s) · {delayedShipments} delayed · {formatGbp(valueInMotionGbp)} in motion
                 </div>
               </div>
@@ -468,9 +468,9 @@ export function AdminOverviewView({
             }
           >
             {recentMessages.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">No recent communications recorded.</p>
+              <p className="text-[12px] text-faint">No recent communications recorded.</p>
             ) : (
-              <ul className="divide-y divide-zinc-200">
+              <ul className="divide-y divide-hairline-06">
                 {recentMessages.map((m) => (
                   <li key={m.id} className="py-2.5 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between gap-2">
@@ -483,8 +483,8 @@ export function AdminOverviewView({
                         Open
                       </button>
                     </div>
-                    <p className="mt-1 text-[13px] font-medium text-zinc-950 line-clamp-2">{m.subject}</p>
-                    <p className="mt-0.5 text-[11px] text-zinc-500">{m.meta}</p>
+                    <p className="mt-1 text-[13px] font-medium text-ink-950 line-clamp-2">{m.subject}</p>
+                    <p className="mt-0.5 text-[11px] text-faint">{m.meta}</p>
                   </li>
                 ))}
               </ul>

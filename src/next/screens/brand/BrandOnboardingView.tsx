@@ -87,7 +87,7 @@ export function BrandOnboardingView({
               <button
                 type="button"
                 onClick={onNavigateSettings}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
+                className="px-3.5 py-2 rounded-md border border-hairline-strong bg-surface-raised text-[12px] font-medium text-ink-900 hover:bg-surface"
               >
                 Request Profile / Bank Change in Settings
               </button>
@@ -107,7 +107,7 @@ export function BrandOnboardingView({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <SectionCard title="Brand Profile">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-hairline-06 text-[12px]">
               {[
                 ['Business Name', profile.businessName],
                 ['Category', profile.category],
@@ -118,22 +118,22 @@ export function BrandOnboardingView({
                 ['Phone', profile.phone],
               ].map(([k, v]) => (
                 <div key={String(k)} className="py-2 flex items-center justify-between gap-4">
-                  <dt className="text-zinc-500">{k}</dt>
-                  <dd className="font-medium text-zinc-950 text-right">{v || '—'}</dd>
+                  <dt className="text-faint">{k}</dt>
+                  <dd className="font-medium text-ink-950 text-right">{v || '—'}</dd>
                 </div>
               ))}
             </dl>
           </SectionCard>
 
           <SectionCard title="Legal & Commercial Model">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-hairline-06 text-[12px]">
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Authorized Signatory</dt>
-                <dd className="font-medium text-zinc-950">{profile.signatory || '—'}</dd>
+                <dt className="text-faint">Authorized Signatory</dt>
+                <dd className="font-medium text-ink-950">{profile.signatory || '—'}</dd>
               </div>
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Commercial Model</dt>
-                <dd className="font-medium text-zinc-950">
+                <dt className="text-faint">Commercial Model</dt>
+                <dd className="font-medium text-ink-950">
                   {profile.commercialModel === 'commission_agent'
                     ? COMMERCIAL_MODELS.commission_agent.label
                     : profile.commercialModel === 'buy_resell'
@@ -142,7 +142,7 @@ export function BrandOnboardingView({
                 </dd>
               </div>
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Logistics SLA (§4.1)</dt>
+                <dt className="text-faint">Logistics SLA (§4.1)</dt>
                 <dd>
                   <InlineStatus
                     label={logisticsSlaAccepted ? 'Accepted' : 'Pending'}
@@ -151,7 +151,7 @@ export function BrandOnboardingView({
                 </dd>
               </div>
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Chargeback Indemnity (§4.2)</dt>
+                <dt className="text-faint">Chargeback Indemnity (§4.2)</dt>
                 <dd>
                   <InlineStatus
                     label={chargebackIndemnityAccepted ? 'Accepted' : 'Pending'}
@@ -163,7 +163,7 @@ export function BrandOnboardingView({
           </SectionCard>
 
           <SectionCard title="Banking & Payouts">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-hairline-06 text-[12px]">
               {[
                 ['SWIFT / BIC', profile.bic],
                 ['IBAN / Account', profile.iban],
@@ -171,24 +171,24 @@ export function BrandOnboardingView({
                 ['Working Capital', profile.workingCapitalAnswer],
               ].map(([k, v]) => (
                 <div key={String(k)} className="py-2 flex items-center justify-between gap-4">
-                  <dt className="text-zinc-500">{k}</dt>
-                  <dd className="font-mono text-zinc-950">{v || '—'}</dd>
+                  <dt className="text-faint">{k}</dt>
+                  <dd className="font-mono text-ink-950">{v || '—'}</dd>
                 </div>
               ))}
             </dl>
           </SectionCard>
 
           <SectionCard title="Fulfillment Track">
-            <dl className="divide-y divide-zinc-200 text-[12px]">
+            <dl className="divide-y divide-hairline-06 text-[12px]">
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Assigned Track</dt>
-                <dd className="font-medium text-zinc-950 capitalize">
+                <dt className="text-faint">Assigned Track</dt>
+                <dd className="font-medium text-ink-950 capitalize">
                   {profile.fulfillmentTrack.replace(/_/g, ' ')}
                 </dd>
               </div>
               <div className="py-2 flex items-center justify-between gap-4">
-                <dt className="text-zinc-500">Compliance Gate</dt>
-                <dd className="font-medium text-zinc-950 capitalize">
+                <dt className="text-faint">Compliance Gate</dt>
+                <dd className="font-medium text-ink-950 capitalize">
                   {profile.complianceGateStatus.replace(/_/g, ' ')}
                 </dd>
               </div>
@@ -243,10 +243,10 @@ export function BrandOnboardingView({
             }}
             className={`px-3 py-2 rounded border text-left text-[12px] ${
               step === s.id
-                ? 'border-zinc-950 bg-zinc-950 text-white font-medium'
+                ? 'border-ink-950 bg-ink-950 text-on-dark font-medium'
                 : step > s.id
-                  ? 'border-emerald-200 bg-emerald-50/50 text-emerald-900'
-                  : 'border-zinc-200 bg-white text-zinc-500'
+                  ? 'border-state-success/20 bg-emerald-50/50 text-state-success'
+                  : 'border-hairline bg-surface-raised text-faint'
             }`}
           >
             <div className="font-mono text-[11px] flex items-center justify-between">
@@ -263,15 +263,15 @@ export function BrandOnboardingView({
           {step === 1 && (
             <>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Business Name</span>
+                <span className="text-ink-600">Business Name</span>
                 <input
                   value={profile.businessName}
                   onChange={(e) => onUpdateProfile({ businessName: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 />
               </label>
               <div className="space-y-1.5">
-                <span className="text-zinc-600 block">Approved Category</span>
+                <span className="text-ink-600 block">Approved Category</span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {APPROVED_CATEGORIES.map((cat) => (
                     <button
@@ -280,8 +280,8 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ category: cat })}
                       className={`px-2.5 py-1.5 rounded border text-left ${
                         profile.category === cat
-                          ? 'border-[var(--mr-accent)] bg-orange-50 text-zinc-950 font-medium'
-                          : 'border-zinc-200 bg-white text-zinc-700'
+                          ? 'border-[var(--mr-accent)] bg-accent-tint text-ink-950 font-medium'
+                          : 'border-hairline bg-surface-raised text-secondary'
                       }`}
                     >
                       {cat}
@@ -291,13 +291,13 @@ export function BrandOnboardingView({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Region</span>
+                  <span className="text-ink-600">Region</span>
                   <select
                     value={profile.region}
                     onChange={(e) =>
                       onUpdateProfile({ region: e.target.value as BrandRegion, nation: '' })
                     }
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     {REGIONS.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -307,11 +307,11 @@ export function BrandOnboardingView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Country / Nation</span>
+                  <span className="text-ink-600">Country / Nation</span>
                   <select
                     value={profile.nation}
                     onChange={(e) => onUpdateProfile({ nation: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     <option value="">Select nation…</option>
                     {(NATIONS_BY_REGION[profile.region] ?? []).map((n) => (
@@ -322,20 +322,20 @@ export function BrandOnboardingView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Tax ID / VAT / EIN</span>
+                  <span className="text-ink-600">Tax ID / VAT / EIN</span>
                   <input
                     value={profile.taxId}
                     onChange={(e) => onUpdateProfile({ taxId: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Contact Email</span>
+                  <span className="text-ink-600">Contact Email</span>
                   <input
                     type="email"
                     value={profile.email}
                     onChange={(e) => onUpdateProfile({ email: e.target.value })}
-                    className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   />
                 </label>
               </div>
@@ -345,11 +345,11 @@ export function BrandOnboardingView({
           {step === 2 && (
             <>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Authorized Signatory Name</span>
+                <span className="text-ink-600">Authorized Signatory Name</span>
                 <input
                   value={profile.signatory}
                   onChange={(e) => onUpdateProfile({ signatory: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 />
               </label>
               <div className="space-y-2">
@@ -360,7 +360,7 @@ export function BrandOnboardingView({
                     ['payment', 'I accept the negotiated Ex-Works wholesale payout terms'],
                   ] as const
                 ).map(([key, label]) => (
-                  <label key={key} className="flex items-center gap-2 text-zinc-800">
+                  <label key={key} className="flex items-center gap-2 text-ink-800">
                     <input
                       type="checkbox"
                       checked={checks[key]}
@@ -370,8 +370,8 @@ export function BrandOnboardingView({
                   </label>
                 ))}
               </div>
-              <div className="pt-2 border-t border-zinc-200 space-y-2">
-                <div className="font-semibold text-zinc-950">Commercial Relationship with Mercenta</div>
+              <div className="pt-2 border-t border-hairline space-y-2">
+                <div className="font-semibold text-ink-950">Commercial Relationship with Mercenta</div>
                 {COMMERCIAL_MODEL_ORDER.map((id) => {
                   const def = COMMERCIAL_MODELS[id];
                   const selected = profile.commercialModel === id;
@@ -382,12 +382,12 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ commercialModel: id })}
                       className={`w-full text-left p-3 rounded border ${
                         selected
-                          ? 'border-[var(--mr-accent)] bg-orange-50'
-                          : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                          ? 'border-[var(--mr-accent)] bg-accent-tint'
+                          : 'border-hairline bg-surface-raised hover:bg-surface'
                       }`}
                     >
-                      <div className="font-medium text-zinc-950">{def.label}</div>
-                      <div className="text-zinc-600 mt-0.5">{def.summary}</div>
+                      <div className="font-medium text-ink-950">{def.label}</div>
+                      <div className="text-ink-600 mt-0.5">{def.summary}</div>
                     </button>
                   );
                 })}
@@ -398,11 +398,11 @@ export function BrandOnboardingView({
           {step === 3 && (
             <>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Select Bank</span>
+                <span className="text-ink-600">Select Bank</span>
                 <select
                   value={profile.bic}
                   onChange={(e) => onUpdateProfile({ bic: e.target.value })}
-                  className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-2.5 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 >
                   <option value="">Select bank…</option>
                   {banks.map((b) => (
@@ -413,15 +413,15 @@ export function BrandOnboardingView({
                 </select>
               </label>
               <label className="block space-y-1">
-                <span className="text-zinc-600">IBAN / Account Number</span>
+                <span className="text-ink-600">IBAN / Account Number</span>
                 <input
                   value={profile.iban}
                   onChange={(e) => onUpdateProfile({ iban: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
+                  className="w-full px-3 py-2 rounded border border-hairline-strong bg-surface-raised font-mono text-ink-950"
                 />
               </label>
               <div className="space-y-1">
-                <span className="text-zinc-600 block">
+                <span className="text-ink-600 block">
                   Can your business fund 30–90 days of stock before Mercenta payment lands?
                 </span>
                 <div className="flex gap-2">
@@ -432,8 +432,8 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ workingCapitalAnswer: ans })}
                       className={`px-3 py-1.5 rounded border capitalize ${
                         profile.workingCapitalAnswer === ans
-                          ? 'border-[var(--mr-accent)] bg-orange-50 font-medium text-zinc-950'
-                          : 'border-zinc-200 bg-white text-zinc-700'
+                          ? 'border-[var(--mr-accent)] bg-accent-tint font-medium text-ink-950'
+                          : 'border-hairline bg-surface-raised text-secondary'
                       }`}
                     >
                       {ans}
@@ -457,12 +457,12 @@ export function BrandOnboardingView({
                   onClick={() => onUpdateProfile({ fulfillmentTrack: track })}
                   className={`w-full text-left p-3 rounded border ${
                     profile.fulfillmentTrack === track
-                      ? 'border-[var(--mr-accent)] bg-orange-50'
-                      : 'border-zinc-200 bg-white'
+                      ? 'border-[var(--mr-accent)] bg-accent-tint'
+                      : 'border-hairline bg-surface-raised'
                   }`}
                 >
-                  <div className="font-medium text-zinc-950">{fulfillmentTrackLabel(track)}</div>
-                  <div className="text-zinc-600 mt-0.5">{FULFILLMENT_TRACK_HINTS[track]}</div>
+                  <div className="font-medium text-ink-950">{fulfillmentTrackLabel(track)}</div>
+                  <div className="text-ink-600 mt-0.5">{FULFILLMENT_TRACK_HINTS[track]}</div>
                 </button>
               ))}
             </div>
@@ -470,7 +470,7 @@ export function BrandOnboardingView({
 
           {step === 5 && (
             <div className="space-y-3">
-              <label className="flex items-start gap-2 text-zinc-800">
+              <label className="flex items-start gap-2 text-ink-800">
                 <input
                   type="checkbox"
                   checked={legal.logisticsSla}
@@ -478,7 +478,7 @@ export function BrandOnboardingView({
                 />
                 <span>Accept Schedule 4.1 Logistics SLAs</span>
               </label>
-              <label className="flex items-start gap-2 text-zinc-800">
+              <label className="flex items-start gap-2 text-ink-800">
                 <input
                   type="checkbox"
                   checked={legal.chargebackIndemnity}
@@ -493,11 +493,11 @@ export function BrandOnboardingView({
 
           {step === 6 && (
             <div className="space-y-3">
-              <div className="rounded border border-zinc-200 bg-zinc-50 p-3 text-zinc-700">
+              <div className="rounded border border-hairline bg-surface p-3 text-secondary">
                 Purchase orders must be acknowledged within 24 hours on Mercenta. Unconfirmed POs
                 risk automated channel deductions.
               </div>
-              <label className="flex items-center gap-2 font-medium text-zinc-950">
+              <label className="flex items-center gap-2 font-medium text-ink-950">
                 <input
                   type="checkbox"
                   checked={guidanceAck}
@@ -509,12 +509,12 @@ export function BrandOnboardingView({
             </div>
           )}
 
-          <div className="pt-4 border-t border-zinc-200 flex items-center justify-between">
+          <div className="pt-4 border-t border-hairline flex items-center justify-between">
             <button
               type="button"
               disabled={step === 1}
               onClick={() => setStep((s) => Math.max(1, s - 1))}
-              className="px-3.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700 disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary disabled:opacity-40"
             >
               Previous
             </button>
@@ -523,7 +523,7 @@ export function BrandOnboardingView({
                 type="button"
                 disabled={!canNext}
                 onClick={() => setStep((s) => Math.min(6, s + 1))}
-                className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 Continue
               </button>
@@ -538,7 +538,7 @@ export function BrandOnboardingView({
                     chargebackIndemnity: legal.chargebackIndemnity,
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 Complete Onboarding

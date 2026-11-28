@@ -57,7 +57,7 @@ export function AdminAuditLogView({
       key: 'createdAt',
       header: 'When',
       render: (e) => (
-        <span className="font-mono text-[12px] text-zinc-600 whitespace-nowrap">
+        <span className="font-mono text-[12px] text-ink-600 whitespace-nowrap">
           {new Date(e.createdAt).toLocaleString()}
         </span>
       ),
@@ -65,7 +65,7 @@ export function AdminAuditLogView({
     {
       key: 'actorId',
       header: 'Actor',
-      render: (e) => <span className="font-mono text-[12px] text-zinc-950">{e.actorId}</span>,
+      render: (e) => <span className="font-mono text-[12px] text-ink-950">{e.actorId}</span>,
     },
     {
       key: 'action',
@@ -77,18 +77,18 @@ export function AdminAuditLogView({
       key: 'entityId',
       header: 'Entity',
       render: (e) => (
-        <div className="font-mono text-[12px] text-zinc-700">
+        <div className="font-mono text-[12px] text-secondary">
           <div>
             {e.entityType}/{e.entityId}
           </div>
-          {e.brandId && <div className="text-[11px] text-zinc-500">brand: {e.brandId}</div>}
+          {e.brandId && <div className="text-[11px] text-faint">brand: {e.brandId}</div>}
         </div>
       ),
     },
     {
       key: 'reason',
       header: 'Reason',
-      render: (e) => <span className="text-[12px] text-zinc-700">{e.reason}</span>,
+      render: (e) => <span className="text-[12px] text-secondary">{e.reason}</span>,
     },
   ];
 
@@ -111,13 +111,13 @@ export function AdminAuditLogView({
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Search actor, action, brand, reason…"
               aria-label="Search audit records"
-              className="w-60 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="w-60 px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             />
             <select
               value={actionFilter}
               onChange={(e) => onActionFilterChange(e.target.value)}
               aria-label="Filter by action"
-              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             >
               <option value="all">Action: all</option>
               {actions.map((a) => (
@@ -130,7 +130,7 @@ export function AdminAuditLogView({
               value={range}
               onChange={(e) => onRangeChange(e.target.value as AuditRange)}
               aria-label="Filter by time range"
-              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
+              className="px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] text-ink-950"
             >
               <option value="all">All time</option>
               <option value="24h">Last 24h</option>

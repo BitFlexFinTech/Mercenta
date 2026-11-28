@@ -138,7 +138,7 @@ export function OnboardingPipelineView({
             onAction={filter !== 'all' ? () => onFilterChange('all') : undefined}
           />
         ) : (
-          <div className="divide-y divide-zinc-200">
+          <div className="divide-y divide-hairline-06">
             {rows.map((row) => {
               const isOpen = openId === row.id;
               return (
@@ -150,8 +150,8 @@ export function OnboardingPipelineView({
                     className="w-full flex flex-wrap items-center justify-between gap-3 text-left"
                   >
                     <div className="min-w-0">
-                      <div className="text-[14px] font-semibold text-zinc-950">{row.businessName}</div>
-                      <div className="text-[12px] font-mono text-zinc-500">
+                      <div className="text-[14px] font-semibold text-ink-950">{row.businessName}</div>
+                      <div className="text-[12px] font-mono text-faint">
                         {row.brandId} · {row.originLabel} · {row.stepsDone}/{row.stepsTotal} steps
                         {row.prospectId ? ` · prospect ${row.prospectId}` : ''}
                       </div>
@@ -165,11 +165,11 @@ export function OnboardingPipelineView({
                   </button>
 
                   {isOpen && (
-                    <div className="mt-4 border border-zinc-200 rounded bg-zinc-50/70 p-4 space-y-4">
+                    <div className="mt-4 border border-hairline rounded bg-surface/70 p-4 space-y-4">
                       {row.opportunitySummary && (
-                        <p className="text-[12px] font-mono text-zinc-600">{row.opportunitySummary}</p>
+                        <p className="text-[12px] font-mono text-ink-600">{row.opportunitySummary}</p>
                       )}
-                      <ol className="divide-y divide-zinc-200 border border-zinc-200 rounded bg-white">
+                      <ol className="divide-y divide-hairline-06 border border-hairline rounded bg-surface-raised">
                         {row.steps.map((s) => (
                           <li
                             key={s.id}
@@ -177,10 +177,10 @@ export function OnboardingPipelineView({
                             className="px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-[13px]"
                           >
                             <div>
-                              <span className="font-mono text-[11px] text-zinc-500 mr-2">{s.id}</span>
-                              <span className="text-zinc-900">{s.label}</span>
+                              <span className="font-mono text-[11px] text-faint mr-2">{s.id}</span>
+                              <span className="text-ink-900">{s.label}</span>
                               {s.completedBy && (
-                                <span className="text-[11px] text-zinc-500 ml-2">by {s.completedBy}</span>
+                                <span className="text-[11px] text-faint ml-2">by {s.completedBy}</span>
                               )}
                             </div>
                             <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export function OnboardingPipelineView({
                                   type="button"
                                   disabled={!canMutate}
                                   onClick={() => onCompleteStep(row.id, s.id)}
-                                  className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium hover:bg-zinc-50 disabled:opacity-40"
+                                  className="px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium hover:bg-surface disabled:opacity-40"
                                 >
                                   Complete
                                 </button>
@@ -216,7 +216,7 @@ export function OnboardingPipelineView({
                               type="button"
                               disabled={!canMutate}
                               onClick={() => onAccept(row.id)}
-                              className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
+                              className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium disabled:opacity-40"
                             >
                               Record acceptance
                             </button>
@@ -226,13 +226,13 @@ export function OnboardingPipelineView({
                               type="button"
                               disabled={!canMutate}
                               onClick={() => onFinishOnboarding(row.id)}
-                              className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                              className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                             >
                               Complete onboarding
                             </button>
                           )}
                         </div>
-                        <span className="text-[11px] font-mono text-zinc-500">
+                        <span className="text-[11px] font-mono text-faint">
                           {row.id} · initiated {row.initiatedAt.slice(0, 10)} by {row.initiatedBy}
                         </span>
                       </div>

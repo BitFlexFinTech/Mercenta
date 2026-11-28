@@ -129,8 +129,8 @@ export function MarketingHubView({
       mobilePrimary: true,
       render: (r) => (
         <div>
-          <div className="font-medium text-zinc-950">{r.brand}</div>
-          <div className="text-[12px] text-zinc-500">{r.category}</div>
+          <div className="font-medium text-ink-950">{r.brand}</div>
+          <div className="text-[12px] text-faint">{r.category}</div>
         </div>
       ),
     },
@@ -138,8 +138,8 @@ export function MarketingHubView({
       key: 'score',
       header: 'BI Score',
       render: (r) => (
-        <span className="font-mono text-zinc-900">
-          {r.scoreTotal} <span className="text-zinc-500">{r.scoreTier}</span>
+        <span className="font-mono text-ink-900">
+          {r.scoreTotal} <span className="text-faint">{r.scoreTier}</span>
         </span>
       ),
     },
@@ -176,7 +176,7 @@ export function MarketingHubView({
   ];
 
   const campaignCols: ConsoleColumn<CampaignRowItem>[] = [
-    { key: 'name', header: 'Campaign', mobilePrimary: true, render: (c) => <span className="font-medium text-zinc-950">{c.name}</span> },
+    { key: 'name', header: 'Campaign', mobilePrimary: true, render: (c) => <span className="font-medium text-ink-950">{c.name}</span> },
     { key: 'status', header: 'Status', render: (c) => <InlineStatus label={c.status} tone="info" /> },
     { key: 'cpl', header: 'Cost / Lead', align: 'right', render: (c) => <span className="font-mono">{formatGbp(c.costPerLead)}</span> },
     { key: 'dispatched', header: 'Dispatched', align: 'right', render: (c) => <span className="font-mono">{c.dispatched}</span> },
@@ -211,7 +211,7 @@ export function MarketingHubView({
             value={icpDescription}
             onChange={(e) => onIcpDescriptionChange(e.target.value)}
             rows={2}
-            className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-zinc-900"
+            className="w-full rounded border border-hairline-strong bg-surface-raised px-3 py-2 text-ink-900"
           />
           <div className="flex flex-wrap gap-1.5">
             {allCategories.map((cat) => {
@@ -223,8 +223,8 @@ export function MarketingHubView({
                   onClick={() => onToggleCategory(cat)}
                   className={`px-2.5 py-1 rounded text-[12px] border ${
                     active
-                      ? 'bg-zinc-950 text-white border-zinc-950'
-                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                      ? 'bg-ink-950 text-on-dark border-ink-950'
+                      : 'bg-surface-raised text-ink-600 border-hairline hover:border-hairline-strong'
                   }`}
                 >
                   {cat}
@@ -242,8 +242,8 @@ export function MarketingHubView({
                   onClick={() => onToggleRegion(r.value)}
                   className={`px-2.5 py-1 rounded text-[12px] border ${
                     active
-                      ? 'bg-emerald-800 text-white border-emerald-800'
-                      : 'bg-white text-zinc-600 border-zinc-200'
+                      ? 'bg-emerald-800 text-on-dark border-emerald-800'
+                      : 'bg-surface-raised text-ink-600 border-hairline'
                   }`}
                 >
                   {r.label}
@@ -279,7 +279,7 @@ export function MarketingHubView({
               type="button"
               disabled={discoveryRunning || !icpValid}
               onClick={() => void onRunDiscovery()}
-              className="px-3.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded bg-ink-950 text-on-dark text-[12px] font-medium disabled:opacity-40"
             >
               {discoveryRunning ? 'Scanning…' : 'Run discovery pipeline'}
             </button>
@@ -287,14 +287,14 @@ export function MarketingHubView({
         >
           {discoverySummary ? (
             <div className="space-y-2 text-[13px]">
-              <div className="font-mono text-[12px] text-zinc-700">
+              <div className="font-mono text-[12px] text-secondary">
                 Discovered {discoverySummary.discovered} · Enrolled {discoverySummary.enrolled} · Dropped{' '}
                 {discoverySummary.dropped}
               </div>
-              <ul className="divide-y divide-zinc-200 max-h-44 overflow-y-auto">
+              <ul className="divide-y divide-hairline-06 max-h-44 overflow-y-auto">
                 {discoverySummary.leads.map((l, idx) => (
                   <li key={`${l.name}-${idx}`} className="py-1.5 flex justify-between text-[12px]">
-                    <span className="font-medium text-zinc-900">{l.name}</span>
+                    <span className="font-medium text-ink-900">{l.name}</span>
                     <InlineStatus
                       label={l.enrolled ? 'Enrolled' : l.reason ?? 'Dropped'}
                       tone={l.enrolled ? 'success' : 'neutral'}
@@ -304,7 +304,7 @@ export function MarketingHubView({
               </ul>
             </div>
           ) : (
-            <p className="text-[13px] text-zinc-500">
+            <p className="text-[13px] text-faint">
               Run discovery to simulate trade-directory prospecting against your current ICP.
             </p>
           )}
@@ -320,7 +320,7 @@ export function MarketingHubView({
               onChange={(e) => setCsvDraft(e.target.value)}
               rows={3}
               placeholder="Acme Organics,Jane Doe,jane@acme.com,Austin TX,us,Health & Personal Care"
-              className="w-full rounded border border-zinc-300 px-3 py-2 font-mono text-[12px]"
+              className="w-full rounded border border-hairline-strong px-3 py-2 font-mono text-[12px]"
             />
             <div className="flex items-center justify-between gap-2">
               <button
@@ -331,11 +331,11 @@ export function MarketingHubView({
                   setCsvFeedback('CSV imported into acquisition pipeline.');
                   setCsvDraft('');
                 }}
-                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark text-[12px] font-medium disabled:opacity-40"
               >
                 Import leads
               </button>
-              {csvFeedback && <span className="text-[12px] text-emerald-800">{csvFeedback}</span>}
+              {csvFeedback && <span className="text-[12px] text-state-success">{csvFeedback}</span>}
             </div>
           </div>
         </SectionCard>
@@ -349,18 +349,18 @@ export function MarketingHubView({
             type="button"
             disabled={autoEnrollCount === 0 || !icpValid}
             onClick={onRunAutoEnroll}
-            className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
+            className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-[12px] font-medium disabled:opacity-40"
           >
             Auto-enroll qualified ({autoEnrollCount})
           </button>
         }
       >
-        <div className="divide-y divide-zinc-200 text-[13px]">
+        <div className="divide-y divide-hairline-06 text-[13px]">
           {scoredLeads.slice(0, 8).map((l) => (
             <div key={l.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <div className="font-medium text-zinc-950">{l.company}</div>
-                <div className="text-[11px] font-mono text-zinc-500">
+                <div className="font-medium text-ink-950">{l.company}</div>
+                <div className="text-[11px] font-mono text-faint">
                   {l.region.toUpperCase()} · {l.segment} · {l.prospectId ?? 'unlinked'}
                 </div>
               </div>
@@ -384,19 +384,19 @@ export function MarketingHubView({
           {pipelineStages.map((stage) => {
             const stageLeads = pipelineLeads.filter((l) => l.outreachStatus === stage);
             return (
-              <div key={stage} className="border border-zinc-200 rounded p-2.5 bg-zinc-50/50">
-                <div className="flex justify-between text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 mb-2">
+              <div key={stage} className="border border-hairline rounded p-2.5 bg-surface/50">
+                <div className="flex justify-between text-[11px] font-medium uppercase tracking-[0.06em] text-faint mb-2">
                   <span>{stage}</span>
                   <span className="font-mono">{stageLeads.length}</span>
                 </div>
                 <div className="space-y-1.5">
                   {stageLeads.length === 0 ? (
-                    <span className="text-[11px] text-zinc-400">Empty</span>
+                    <span className="text-[11px] text-quiet">Empty</span>
                   ) : (
                     stageLeads.map((l) => (
-                      <div key={l.id} className="bg-white border border-zinc-200 rounded px-2 py-1 text-[12px]">
-                        <div className="font-medium text-zinc-900 truncate">{l.company}</div>
-                        <div className="font-mono text-[11px] text-zinc-500">fit {l.fitScore}</div>
+                      <div key={l.id} className="bg-surface-raised border border-hairline rounded px-2 py-1 text-[12px]">
+                        <div className="font-medium text-ink-900 truncate">{l.company}</div>
+                        <div className="font-mono text-[11px] text-faint">fit {l.fitScore}</div>
                       </div>
                     ))
                   )}
@@ -405,12 +405,12 @@ export function MarketingHubView({
             );
           })}
         </div>
-        <div className="border-t border-zinc-200 pt-3 space-y-1.5 text-[12px]">
+        <div className="border-t border-hairline pt-3 space-y-1.5 text-[12px]">
           {sequenceSteps.map((s) => (
             <div key={s.step} className="flex flex-wrap items-center gap-3">
-              <span className="font-mono text-zinc-500 w-14">Day {s.dayOffset}</span>
-              <span className="font-medium text-zinc-900">{s.subjectTemplate}</span>
-              <span className="text-zinc-500 ml-auto">{s.purpose}</span>
+              <span className="font-mono text-faint w-14">Day {s.dayOffset}</span>
+              <span className="font-medium text-ink-900">{s.subjectTemplate}</span>
+              <span className="text-faint ml-auto">{s.purpose}</span>
             </div>
           ))}
         </div>

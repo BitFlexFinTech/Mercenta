@@ -122,11 +122,11 @@ export function BrandSupportView({
             <div className="space-y-3 text-[12px]" data-state="brand-case-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="space-y-1">
-                  <span className="text-zinc-600">What is this about?</span>
+                  <span className="text-ink-600">What is this about?</span>
                   <select
                     value={category}
                     onChange={(e) => onChangeCategory(e.target.value as CaseCategory)}
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     {categoryOptions.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -136,11 +136,11 @@ export function BrandSupportView({
                   </select>
                 </label>
                 <label className="space-y-1">
-                  <span className="text-zinc-600">Related PO (optional)</span>
+                  <span className="text-ink-600">Related PO (optional)</span>
                   <select
                     value={relatedPoNumber}
                     onChange={(e) => setRelatedPoNumber(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                    className="w-full px-2.5 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                   >
                     <option value="">Not related to a purchase order</option>
                     {ownPurchaseOrders.map((po) => (
@@ -152,33 +152,33 @@ export function BrandSupportView({
                 </label>
               </div>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Subject</span>
+                <span className="text-ink-600">Subject</span>
                 <input
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Short summary of the issue"
-                  className="w-full px-3 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 />
               </label>
               <label className="block space-y-1">
-                <span className="text-zinc-600">Details</span>
+                <span className="text-ink-600">Details</span>
                 <textarea
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Include dates, SKUs, ASN/POD references, and checks already completed."
-                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
+                  className="w-full px-3 py-2 rounded border border-hairline-strong bg-surface-raised text-ink-950"
                 />
               </label>
               {previewVerdict && (
-                <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2 space-y-1">
+                <div className="rounded border border-hairline bg-surface px-3 py-2 space-y-1">
                   <InlineStatus
                     label={BRAND_VERDICT_LABELS[previewVerdict.verdict]}
                     tone={VERDICT_TONE[previewVerdict.verdict]}
                     dataStatus={previewVerdict.verdict}
                   />
                   {previewVerdict.reason && (
-                    <p className="text-zinc-600">{previewVerdict.reason}</p>
+                    <p className="text-ink-600">{previewVerdict.reason}</p>
                   )}
                 </div>
               )}
@@ -188,7 +188,7 @@ export function BrandSupportView({
                   disabled={!canSubmit}
                   onClick={submit}
                   data-testid="brand-case-submit"
-                  className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
+                  className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-on-dark font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                 >
                   Submit Case to Mercenta
                 </button>
@@ -199,7 +199,7 @@ export function BrandSupportView({
                     setDescription('');
                     setRelatedPoNumber('');
                   }}
-                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-zinc-700"
+                  className="px-3 py-1.5 rounded border border-hairline-strong bg-surface-raised text-secondary"
                 >
                   Clear
                 </button>
@@ -209,9 +209,9 @@ export function BrandSupportView({
 
           <SectionCard title={`Your Cases (${cases.length})`}>
             {cases.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">You have not raised any cases yet.</p>
+              <p className="text-[12px] text-faint">You have not raised any cases yet.</p>
             ) : (
-              <ul className="divide-y divide-zinc-200" data-state="brand-case-list">
+              <ul className="divide-y divide-hairline-06" data-state="brand-case-list">
                 {cases.map(({ ticket: c, verdict }) => (
                   <li key={c.id} className="py-3 first:pt-0 last:pb-0 space-y-1.5" data-state="brand-case-row">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
@@ -219,7 +219,7 @@ export function BrandSupportView({
                         <span className="font-mono text-[var(--mr-accent)] font-medium mr-2">
                           {c.caseRef ?? c.id}
                         </span>
-                        <span className="font-medium text-zinc-950">{c.subject}</span>
+                        <span className="font-medium text-ink-950">{c.subject}</span>
                       </div>
                       <InlineStatus
                         label={
@@ -234,15 +234,15 @@ export function BrandSupportView({
                         }
                       />
                     </div>
-                    <div className="text-[11px] text-zinc-500">
+                    <div className="text-[11px] text-faint">
                       {categoryOptions.find((o) => o.value === c.caseCategory)?.label ?? 'Support'}
                       {verdict !== 'not_applicable' ? ` · ${BRAND_VERDICT_LABELS[verdict]}` : ''}
                     </div>
                     {c.resolution && (
-                      <p className="text-[12px] text-zinc-700">Mercenta: {c.resolution.note}</p>
+                      <p className="text-[12px] text-secondary">Mercenta: {c.resolution.note}</p>
                     )}
                     {c.providerResponse && (
-                      <p className="text-[12px] text-zinc-700">
+                      <p className="text-[12px] text-secondary">
                         Retail channel{c.amazonCase?.simulated ? ' (simulated)' : ''}:{' '}
                         {c.providerResponse.response}
                       </p>
@@ -250,7 +250,7 @@ export function BrandSupportView({
                     {!c.resolution &&
                       !c.providerResponse &&
                       c.escalationState === 'awaiting_brand_info' && (
-                        <p className="text-[12px] text-amber-800">
+                        <p className="text-[12px] text-state-warning">
                           Mercenta needs additional information from you to continue.
                         </p>
                       )}
@@ -267,15 +267,15 @@ export function BrandSupportView({
             description={categoryLabel}
           >
             {guidanceArticles.length === 0 ? (
-              <p className="text-[12px] text-amber-800">
+              <p className="text-[12px] text-state-warning">
                 No published Knowledge Base article covers this category yet — a specialist will review personally.
               </p>
             ) : (
-              <ul className="divide-y divide-zinc-200 space-y-2">
+              <ul className="divide-y divide-hairline-06 space-y-2">
                 {guidanceArticles.map((a) => (
                   <li key={a.id} className="pt-2 first:pt-0 text-[12px]">
-                    <div className="font-medium text-zinc-950">{a.title}</div>
-                    <p className="text-zinc-600 mt-0.5 leading-relaxed">{a.summary}</p>
+                    <div className="font-medium text-ink-950">{a.title}</div>
+                    <p className="text-ink-600 mt-0.5 leading-relaxed">{a.summary}</p>
                   </li>
                 ))}
               </ul>

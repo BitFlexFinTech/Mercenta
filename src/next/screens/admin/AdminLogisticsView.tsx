@@ -178,7 +178,7 @@ export function AdminLogisticsView({
       key: 'po',
       header: 'PO',
       render: (s) => (
-        <span className="font-mono text-[12px] font-medium text-zinc-950">
+        <span className="font-mono text-[12px] font-medium text-ink-950">
           {s.poNumber}
           {s.simulatedPo && <span className="ml-1.5 text-[11px] text-[var(--mr-accent)]">(sim)</span>}
         </span>
@@ -187,18 +187,18 @@ export function AdminLogisticsView({
     {
       key: 'brand',
       header: 'Brand',
-      render: (s) => <span className="font-medium text-zinc-950">{s.brandName}</span>,
+      render: (s) => <span className="font-medium text-ink-950">{s.brandName}</span>,
     },
     {
       key: 'carrier',
       header: 'Carrier',
-      render: (s) => <span className="capitalize text-zinc-700">{s.carrier.replace(/_/g, ' ')}</span>,
+      render: (s) => <span className="capitalize text-secondary">{s.carrier.replace(/_/g, ' ')}</span>,
     },
     {
       key: 'reference',
       header: 'Reference',
       hideOnMobile: true,
-      render: (s) => <span className="font-mono text-[12px] text-zinc-600">{s.reference}</span>,
+      render: (s) => <span className="font-mono text-[12px] text-ink-600">{s.reference}</span>,
     },
     {
       key: 'status',
@@ -225,8 +225,8 @@ export function AdminLogisticsView({
       header: 'Reference',
       render: (s) => (
         <div>
-          <div className="font-mono text-[12px] text-zinc-950">{s.reference}</div>
-          <div className="font-mono text-[11px] text-zinc-500">{s.trackingNumber ?? '—'}</div>
+          <div className="font-mono text-[12px] text-ink-950">{s.reference}</div>
+          <div className="font-mono text-[11px] text-faint">{s.trackingNumber ?? '—'}</div>
         </div>
       ),
     },
@@ -235,8 +235,8 @@ export function AdminLogisticsView({
       header: 'Consignment',
       render: (s) => (
         <div>
-          <div className="font-medium text-zinc-950">{s.title}</div>
-          <div className="text-[12px] text-zinc-500">{s.brandName}</div>
+          <div className="font-medium text-ink-950">{s.title}</div>
+          <div className="text-[12px] text-faint">{s.brandName}</div>
         </div>
       ),
     },
@@ -255,7 +255,7 @@ export function AdminLogisticsView({
               value={s.status}
               aria-label={`Update milestone for ${s.reference}`}
               onChange={(e) => onUpdateMilestone(s, e.target.value as ShipmentStatus)}
-              className="border border-zinc-300 rounded px-2 py-1 text-[12px] bg-white text-zinc-950"
+              className="border border-hairline-strong rounded px-2 py-1 text-[12px] bg-surface-raised text-ink-950"
             >
               {milestoneOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -267,14 +267,14 @@ export function AdminLogisticsView({
               type="button"
               disabled={busyShipmentId === s.id}
               onClick={() => onRequestDhlUpdate(s)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-hairline-strong bg-surface-raised text-[11px] font-medium text-ink-900 hover:bg-surface disabled:opacity-50"
             >
               <RefreshCw className="w-3 h-3" aria-hidden="true" />
               DHL update (sim)
             </button>
           </div>
           {lastCarrierResult[s.id] && (
-            <div className="font-mono text-[11px] text-zinc-600">{lastCarrierResult[s.id]}</div>
+            <div className="font-mono text-[11px] text-ink-600">{lastCarrierResult[s.id]}</div>
           )}
         </div>
       ),
@@ -339,15 +339,15 @@ export function AdminLogisticsView({
               emptyDescription="Switch focus filter above to view all consignments."
             />
             {apiLogs.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-zinc-200 space-y-1.5 max-h-56 overflow-y-auto" data-testid="carrier-api-log">
-                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+              <div className="mt-4 pt-4 border-t border-hairline space-y-1.5 max-h-56 overflow-y-auto" data-testid="carrier-api-log">
+                <div className="text-[11px] uppercase tracking-[0.06em] text-faint">
                   Carrier API request log
                 </div>
                 {apiLogs.map((log) => (
-                  <div key={log.id} className="font-mono text-[11px] text-zinc-700 border border-zinc-200 rounded px-2.5 py-1.5">
-                    <span className="text-zinc-500">{log.timestamp}</span>{' '}
+                  <div key={log.id} className="font-mono text-[11px] text-secondary border border-hairline rounded px-2.5 py-1.5">
+                    <span className="text-faint">{log.timestamp}</span>{' '}
                     <span className="font-semibold text-[var(--mr-accent)]">{log.method}</span> {log.endpoint}{' '}
-                    <span className="text-emerald-800">{log.status}</span>
+                    <span className="text-state-success">{log.status}</span>
                   </div>
                 ))}
               </div>
@@ -372,19 +372,19 @@ export function AdminLogisticsView({
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="carrier-provider-configuration-admin">
               {providerConfigs.map((c) => (
-                <div key={c.carrier} className="border border-zinc-200 rounded-md p-3 space-y-1.5">
+                <div key={c.carrier} className="border border-hairline rounded-md p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[13px] font-semibold text-zinc-950">{c.accountLabel}</span>
+                    <span className="text-[13px] font-semibold text-ink-950">{c.accountLabel}</span>
                     <InlineStatus
                       label={c.stateLabel}
                       tone={c.operational ? 'success' : 'neutral'}
                     />
                   </div>
-                  <p className="text-[12px] text-zinc-600">{c.capabilityLabel}</p>
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-[12px] text-ink-600">{c.capabilityLabel}</p>
+                  <p className="text-[11px] text-faint">
                     Lane: {c.laneLabels.join(' · ')} · Service: {c.services.join(' · ')}
                   </p>
-                  <p className="text-[11px] text-zinc-500">{c.basis}</p>
+                  <p className="text-[11px] text-faint">{c.basis}</p>
                 </div>
               ))}
             </div>
@@ -396,25 +396,25 @@ export function AdminLogisticsView({
           >
             <div className="space-y-3" data-testid="supply-route-escalation">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12px]">
-                <div className="border border-zinc-200 rounded p-2.5">
-                  <div className="text-zinc-500">Max direct door-to-FC days</div>
-                  <div className="font-mono text-zinc-950">{routeEvaluation.maxDirectDaysLabel}</div>
+                <div className="border border-hairline rounded p-2.5">
+                  <div className="text-faint">Max direct door-to-FC days</div>
+                  <div className="font-mono text-ink-950">{routeEvaluation.maxDirectDaysLabel}</div>
                 </div>
-                <div className="border border-zinc-200 rounded p-2.5">
-                  <div className="text-zinc-500">Min PO frequency / month</div>
-                  <div className="font-mono text-zinc-950">{routeEvaluation.minPoFreqLabel}</div>
+                <div className="border border-hairline rounded p-2.5">
+                  <div className="text-faint">Min PO frequency / month</div>
+                  <div className="font-mono text-ink-950">{routeEvaluation.minPoFreqLabel}</div>
                 </div>
               </div>
               {routeEvaluation.consignmentOptions.length === 0 ? (
-                <p className="text-[12px] text-zinc-500">No consignment available to evaluate.</p>
+                <p className="text-[12px] text-faint">No consignment available to evaluate.</p>
               ) : (
-                <div className="space-y-3 border border-zinc-200 rounded-md p-3">
+                <div className="space-y-3 border border-hairline rounded-md p-3">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <select
                       value={routeEvaluation.selectedConsignmentId}
                       onChange={(e) => onSelectRouteConsignment(e.target.value)}
                       aria-label="Select consignment for route evaluation"
-                      className="border border-zinc-300 rounded px-2.5 py-1.5 text-[12px] bg-white"
+                      className="border border-hairline-strong rounded px-2.5 py-1.5 text-[12px] bg-surface-raised"
                     >
                       {routeEvaluation.consignmentOptions.map((o) => (
                         <option key={o.id} value={o.id}>
@@ -428,14 +428,14 @@ export function AdminLogisticsView({
                     />
                   </div>
                   <dl className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[12px]">
-                    <div><dt className="text-zinc-500">Origin</dt><dd>{routeEvaluation.selectedOrigin}</dd></div>
-                    <div><dt className="text-zinc-500">Freight mode</dt><dd>{routeEvaluation.freightMode}</dd></div>
-                    <div><dt className="text-zinc-500">Customs</dt><dd>{routeEvaluation.customsLabel}</dd></div>
-                    <div><dt className="text-zinc-500">Appointment</dt><dd>{routeEvaluation.appointmentLabel}</dd></div>
-                    <div><dt className="text-zinc-500">Door-to-FC</dt><dd>{routeEvaluation.doorToFcLabel}</dd></div>
-                    <div><dt className="text-zinc-500">Lead time</dt><dd>{routeEvaluation.planningLeadLabel}</dd></div>
+                    <div><dt className="text-faint">Origin</dt><dd>{routeEvaluation.selectedOrigin}</dd></div>
+                    <div><dt className="text-faint">Freight mode</dt><dd>{routeEvaluation.freightMode}</dd></div>
+                    <div><dt className="text-faint">Customs</dt><dd>{routeEvaluation.customsLabel}</dd></div>
+                    <div><dt className="text-faint">Appointment</dt><dd>{routeEvaluation.appointmentLabel}</dd></div>
+                    <div><dt className="text-faint">Door-to-FC</dt><dd>{routeEvaluation.doorToFcLabel}</dd></div>
+                    <div><dt className="text-faint">Lead time</dt><dd>{routeEvaluation.planningLeadLabel}</dd></div>
                   </dl>
-                  <ul className="text-[12px] text-zinc-600 list-disc pl-5 space-y-0.5">
+                  <ul className="text-[12px] text-ink-600 list-disc pl-5 space-y-0.5">
                     {routeEvaluation.reasons.map((r) => (
                       <li key={r}>{r}</li>
                     ))}
@@ -462,18 +462,18 @@ export function AdminLogisticsView({
                 description="Document packs appear when a purchase order is accepted prior to dispatch."
               />
             ) : (
-              <ul className="divide-y divide-zinc-200 border border-zinc-200 rounded-md">
+              <ul className="divide-y divide-hairline-06 border border-hairline rounded-md">
                 {poDocSummaries.map((p) => (
                   <li key={p.poId} className="px-3 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[12px]">
                     <div>
-                      <span className="font-mono font-medium text-zinc-950">{p.poNumber}</span>
-                      <span className="ml-2 text-zinc-600">{p.brandName}</span>
-                      <div className="text-[11px] text-zinc-500">
+                      <span className="font-mono font-medium text-ink-950">{p.poNumber}</span>
+                      <span className="ml-2 text-ink-600">{p.brandName}</span>
+                      <div className="text-[11px] text-faint">
                         {p.destinationLabel} · {p.laneLabel}
                         {p.generatedAt ? ` · generated ${p.generatedAt}` : ''}
                       </div>
                     </div>
-                    <span className="font-mono text-zinc-900">
+                    <span className="font-mono text-ink-900">
                       {p.readyCount}/{p.applicableCount} ready
                     </span>
                   </li>
@@ -487,27 +487,27 @@ export function AdminLogisticsView({
           <SectionCard title="Operational logistics work">
             <dl className="space-y-1.5 text-[12px] mb-3">
               <div className="flex justify-between">
-                <dt className="text-zinc-600">Open items</dt>
-                <dd className="font-mono text-zinc-950">{logisticsWork.length}</dd>
+                <dt className="text-ink-600">Open items</dt>
+                <dd className="font-mono text-ink-950">{logisticsWork.length}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-600">Overdue</dt>
-                <dd className="font-mono text-zinc-950">{overdueWorkCount}</dd>
+                <dt className="text-ink-600">Overdue</dt>
+                <dd className="font-mono text-ink-950">{overdueWorkCount}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-zinc-600">Due this week</dt>
-                <dd className="font-mono text-zinc-950">{dueThisWeekCount}</dd>
+                <dt className="text-ink-600">Due this week</dt>
+                <dd className="font-mono text-ink-950">{dueThisWeekCount}</dd>
               </div>
             </dl>
             {logisticsWork.length === 0 ? (
-              <p className="text-[12px] text-zinc-500">No open logistics work items.</p>
+              <p className="text-[12px] text-faint">No open logistics work items.</p>
             ) : (
-              <ul className="divide-y divide-zinc-200 border-t border-zinc-200 pt-2">
+              <ul className="divide-y divide-hairline-06 border-t border-hairline pt-2">
                 {logisticsWork.slice(0, 6).map((w) => (
                   <li key={w.id} className="py-2 text-[12px]">
-                    <div className="font-medium text-zinc-950">{w.sourceLabel}</div>
-                    <div className="text-zinc-600">{w.title}</div>
-                    {w.dueDate && <div className="font-mono text-[11px] text-zinc-500">Due {w.dueDate}</div>}
+                    <div className="font-medium text-ink-950">{w.sourceLabel}</div>
+                    <div className="text-ink-600">{w.title}</div>
+                    {w.dueDate && <div className="font-mono text-[11px] text-faint">Due {w.dueDate}</div>}
                   </li>
                 ))}
               </ul>
@@ -525,13 +525,13 @@ export function AdminLogisticsView({
         {selectedLeg && (
           <div className="space-y-4 text-[13px]" data-testid="admin-logistics-inspector">
             <InlineStatus label={selectedLeg.truthLabel} tone={selectedLeg.truthTone} />
-            <dl className="space-y-2 border border-zinc-200 rounded-md p-3">
-              <div className="flex justify-between"><dt className="text-zinc-500">Carrier</dt><dd>{selectedLeg.carrier}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Origin</dt><dd>{selectedLeg.origin}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Destination</dt><dd>{selectedLeg.destination}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Value</dt><dd className="font-mono">{formatGbp(selectedLeg.valueGbp)}</dd></div>
+            <dl className="space-y-2 border border-hairline rounded-md p-3">
+              <div className="flex justify-between"><dt className="text-faint">Carrier</dt><dd>{selectedLeg.carrier}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Origin</dt><dd>{selectedLeg.origin}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Destination</dt><dd>{selectedLeg.destination}</dd></div>
+              <div className="flex justify-between"><dt className="text-faint">Value</dt><dd className="font-mono">{formatGbp(selectedLeg.valueGbp)}</dd></div>
             </dl>
-            <p className="text-[12px] text-zinc-600">{selectedLeg.truthReason}</p>
+            <p className="text-[12px] text-ink-600">{selectedLeg.truthReason}</p>
             {selectedLeg.channelArranged && (
               <NoticeBanner
                 tone="info"
