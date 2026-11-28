@@ -6779,3 +6779,51 @@ removed rather than softened, because a blocker that names a hang which does not
 categories page included: it has a picture, but not yet the illustration/limits pair). NOT deployed, deliberately: one
 publish covers this work plus the homepage's two contrast defects and the login restyle.
 
+---
+
+## §PUBLIC SURFACES BATCH 5 PART 3 — THE FOUR PLATFORM PAGES, AND A GATE WHOSE SCOPE GROWS RATHER THAN MOVES (2026-11-27)
+
+**What this session did** is the next group in the order the previous session recorded: Platform — `order-automation`,
+`client-portal`, `listing-health`, `reporting-analytics`. Measured before touching anything, each was an opening, two or
+three prose blocks and a call to action, with no picture at all, nothing labelled and no statement of its own limits.
+
+**The gate's scope was the first thing to get right, and the obvious move was the wrong one.** The previous session
+scoped `validate-public-page-standard.mjs` to one group by name. Repointing that name to `Platform` would have silently
+stopped checking the seven Retail Infrastructure pages — a gate that drops its first batch is a weaker gate, not a moved
+one. It now holds a LIST of enriched groups and only ever grows; and because a list can be mis-typed, the S1b assertion
+now FAILS if a named group matches NO page (a vacuous scope is a failure, not a green).
+
+**Proved able to fail twice, each restored byte-identical:**
+- a scope group naming no page (`Platforms`) => **S1b FAIL** (11/12; gate sha256
+  `3d511d23ff21c0a5378c7d8c4a2a3f312c4140adb08c58ae437e2f833d4949d0` before and after);
+- removing the opening picture from a RETAIL page (`vendor-of-record`) => **S3 FAIL naming that page** (10/12; pages
+  sha256 `c2d7b00254d04c7d0f3b93f223751f1cea6b704fa63c5e5a0ca20a3d16e6a345` before and after). **This second mutation is
+  the important one: it is the proof that the first batch is still checked, not lost.**
+
+**Two pages had no call to action at all.** `order-automation` and `reporting-analytics` declared no `cta` in the model,
+and the renderer substituted a default — so nothing looked broken and nothing was actually decided. Both now declare
+one. Two new blocks add the depth the standard asks for: “What stays yours” on listing-health and “Who can see a report”
+on reporting-analytics.
+
+**The pictures were looked at, not assumed.** All four new opening pictures were judged by eye on a labelled contact
+sheet and again on the rendered pages: a dashboard tablet for the portal, priced stocked shelves for listing health, a
+working desk for reporting, stacked cartons for orders. All four suit their page — and the reason there was no wrong
+picture this time is that every one of them had already been judged by eye in the previous session. The pattern is now
+clear and worth keeping: **a picture is chosen by looking, and then reused only after it has been looked at again on the
+page it lands on.**
+
+**One observation recorded, and it is not a defect.** Running `validate-public-claims` in the SAME command as
+`vite build` makes it fail: it builds and renders the PRODUCTION bundle, and read `dist/` while the build was still
+writing it. Run alone it PASSES (70 rendered pages, 0 red-line). This is the same class as the “hang” the previous
+session recorded and corrected — a concurrency artefact, not a fault in the gate.
+
+**Evidence:** typecheck 0 · eslint 0 errors · build ✓ 8.71s · `validate-public-page-standard` 12/12 with the scope
+reporting 11 of 25 pages · e2e `public-infrastructure-pages` + `categories-page` 25 passed · `validate-public-claims`
+PASS (70 pages) · registry integrity PASS (595 entries, every count recomputed from the entries) · screenshots at 1440
+and 390 of all four pages: every picture decoded, the labelled grid and the limits panel seen rendering as designed, 0
+horizontal overflow.
+
+**Known and stated:** four groups remain below the standard (Solutions, Company, Commercial, Resources — the categories
+page included: it has a picture, but not yet the illustration/limits pair). NOT deployed, deliberately: one publish
+covers this work plus the homepage's two contrast defects and the login restyle.
+
