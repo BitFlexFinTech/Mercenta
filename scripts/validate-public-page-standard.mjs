@@ -66,6 +66,16 @@
  * arrangement costs, so its illustration states the ORDER in which terms are agreed and carries no
  * amount, no price and no percentage — a page about pricing must never publish a figure it has not
  * agreed with anybody.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — THE LIST GROWS AGAIN, BY THE SAME RULE.
+ * `'Resources'` is APPENDED, so the twenty pages already checked stay checked. Resources holds five
+ * pages — `insights`, `blog`, `case-studies`, `guides` and `uk-retail-guide` — the count read from
+ * S1b below and not from a task sentence. THREE of the five (`blog`, `case-studies`, `guides`)
+ * declared NO `cta` at all before this part, so they rendered no closing section and nothing looked
+ * broken while nothing was stated; each now declares exactly one, which is what S6 requires.
+ * `uk-retail-guide` is the page S7 matters most on in this group: it is about figures with their
+ * sources attached, so its illustration shows how a figure is ADMITTED to the page and carries no
+ * figure of its own.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -92,7 +102,7 @@ globalThis.fetch = async (...args) => {
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
 /** This batch's scope — the navigation groups whose pages have been enriched, in the order they were done. */
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial', 'Resources'];
 
 /* ── S0 — the owners were found at all ────────────────────────────────────── */
 const pagesSrc = read('src/config/publicPages.ts');

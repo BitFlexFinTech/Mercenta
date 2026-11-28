@@ -1053,12 +1053,18 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
     heading: 'What we are seeing.',
     lede:
       'Notes on entering the UK, on wholesale distribution, and on the operational detail that decides whether a product keeps selling.',
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the page opens with a picture. The subject is
+       the reading of the work — what the operation shows — so it opens on a reporting screen rather
+       than on goods. */
+    hero: 'desk-tablet',
     blocks: [
       {
         heading: 'Where these come from',
         body: [
           'Everything published here comes from the work itself — the enquiries we receive, the products we are asked to assess, and the problems brands bring us. Nothing is invented to fill a page.',
         ],
+        /* The work the notes come from: the operation itself. */
+        media: 'warehouse-aisle',
       },
       {
         heading: 'Starting with the market question',
@@ -1066,6 +1072,40 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
           'The most useful thing we publish is the honest read on whether the UK wants a product. That is what the UK Market Fit assessment exists to produce.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the worked example: how something observed in
+       the work becomes a published note. The SEQUENCE only — no amount, no price and no percentage. */
+    illustration: {
+      label: 'How a note gets published',
+      intro:
+        'What appears here comes from the work rather than from a publishing schedule. These are the stages between something being noticed and it appearing on this page.',
+      stages: [
+        {
+          label: 'It is noticed',
+          detail:
+            'Something shows up in the work — an enquiry we receive, a product we are asked to assess, or a problem a brand brings to us.',
+        },
+        {
+          label: 'It is checked',
+          detail:
+            'Before it is written up, the observation is checked against the records behind it, so it describes what happened rather than what we assumed.',
+        },
+        {
+          label: 'It is written plainly',
+          detail:
+            'It is written so a brand can act on it, without jargon and without a conclusion the evidence in front of us does not support.',
+        },
+        {
+          label: 'It is published',
+          detail:
+            'If it cannot help a brand decide something, it is not published at all, however interesting the observation happens to be.',
+        },
+      ],
+    },
+    limits: [
+      'We do not publish anything we cannot point at a record for.',
+      'We do not publish a brand’s information, a client’s name or a figure without the agreement that has to sit behind it.',
+      'We do not write a piece to fill a publishing schedule; nothing goes up that does not help a decision.',
     ],
     cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
@@ -1079,6 +1119,9 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
     eyebrow: 'Resources',
     heading: 'Shorter notes.',
     lede: 'Brief pieces on the practical questions we are asked most often about selling into the UK.',
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the page opens with a picture. The page calls
+       itself “shorter notes”, so it opens on the notebook the notes are written in. */
+    hero: 'desk-notebook',
     blocks: [
       {
         heading: 'What gets written',
@@ -1087,12 +1130,49 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
           'What has to be true before a product can be listed.',
           'What a brand keeps, and what it can hand over.',
         ],
+        /* Answering a question properly, once, rather than leaving it to a call. */
+        media: 'desk-laptop',
       },
       {
         heading: 'Nothing here is a sales page',
         body: ['If a piece does not help you decide something, it does not get published.'],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the worked example: what happens to a question
+       between it being asked and it being answered in writing. The SEQUENCE only — no figure. */
+    illustration: {
+      label: 'What a short note answers',
+      intro:
+        'Every piece here answers one practical question a brand has actually asked us. These are the stages between the question arriving and the answer being published.',
+      stages: [
+        {
+          label: 'The question arrives',
+          detail:
+            'A brand asks something specific — what a buyer needs, what has to be true before a listing, or what can be handed over.',
+        },
+        {
+          label: 'It is answered once',
+          detail:
+            'The answer is written down properly, so the same question can be answered without a call and without waiting on a reply.',
+        },
+        {
+          label: 'It is kept short',
+          detail:
+            'A note is written to be read in one sitting, because a long piece nobody finishes does not help anybody decide.',
+        },
+        {
+          label: 'It is checked',
+          detail:
+            'Anything stated as fact is checked against the work behind it before the note is published under Mercenta’s name.',
+        },
+      ],
+    },
+    limits: [
+      'We do not publish a sales page dressed up as an article.',
+      'We do not write about a brand or a client without that brand’s or client’s agreement.',
+      'We do not publish a figure we cannot source, or a claim we cannot stand behind.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
   {
     id: 'case-studies',
@@ -1105,12 +1185,18 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
     heading: 'How it works in practice.',
     lede:
       'We publish how an arrangement actually runs only where the brand has agreed to it — and we never publish a result we cannot stand behind.',
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the page opens with a picture. A case study is
+       about work that ran, so it opens on the operation rather than on a document. */
+    hero: 'warehouse-racks',
     blocks: [
       {
         heading: 'Why this page is short for now',
         body: [
           'A case study that names a brand, a category or a figure requires that brand’s consent and a record behind every number. Until those exist, this page says so rather than filling the space with a story that did not happen.',
         ],
+        /* The goods an arrangement actually moves — the subject a case study would describe once the
+           brand concerned has agreed to it. */
+        media: 'boxes-stacked',
       },
       {
         heading: 'What we can tell you today',
@@ -1119,11 +1205,48 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
         ],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the worked example: the stages that must be
+       passed before anything is published here. The SEQUENCE only — no amount, no price and no
+       percentage, because a case study's numbers may only be published with the brand's consent and a
+       record behind them. */
+    illustration: {
+      label: 'How a case study would be published',
+      intro:
+        'A case study is published only when the brand concerned has agreed to it and there is a record behind every statement. These are the stages, in order.',
+      stages: [
+        {
+          label: 'The work happens',
+          detail:
+            'An arrangement runs, and what actually happened is recorded as it happens rather than reconstructed from memory afterwards.',
+        },
+        {
+          label: 'The brand is asked',
+          detail:
+            'The brand is asked directly whether it is willing to be described, and it may decline at any point without giving a reason.',
+        },
+        {
+          label: 'The record is checked',
+          detail:
+            'Every statement that would go into the piece is matched to the record behind it, and anything that cannot be matched is left out.',
+        },
+        {
+          label: 'It is published',
+          detail:
+            'Only then is anything published. Where consent or a record is missing, this page stays short and says exactly why.',
+        },
+      ],
+    },
+    limits: [
+      'We do not publish a case study without the brand’s explicit agreement.',
+      'We do not publish a result, a figure or a name that has no record behind it.',
+      'We do not invent a story to fill this page; a short page is the honest version of it.',
+    ],
     availability: {
       label: 'Published as consent is given',
       detail:
         'No case study is published without the brand’s agreement and a supporting record. This is a deliberate limit, not an oversight.',
     },
+    cta: { label: 'Contact Mercenta', to: 'contact' },
   },
   {
     id: 'guides',
@@ -1135,6 +1258,9 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
     eyebrow: 'Resources',
     heading: 'The practical version.',
     lede: 'Step-by-step guides for the questions a brand has before it commits to the UK.',
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the page opens with a picture. The guides are
+       written from the operation, so the page opens on the operation. */
+    hero: 'warehouse-aisle',
     blocks: [
       {
         heading: 'Guides to start with',
@@ -1143,6 +1269,8 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
           'What a UK buyer needs from a brand before it will list.',
           'What changes when someone else carries the retail side.',
         ],
+        /* Reading it through and deciding, in one sitting — what the guides exist for. */
+        media: 'desk-tablet',
       },
       {
         heading: 'How to use them',
@@ -1151,6 +1279,41 @@ export const PUBLIC_RESOURCE_PAGES: readonly PublicContentPage[] = [
         ],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the worked example: how a guide is put together
+       and kept true. The SEQUENCE only — no figure. */
+    illustration: {
+      label: 'How a guide is put together',
+      intro:
+        'Each guide is written from the questions brands actually ask, in the order they ask them. These are the stages it goes through before it is published.',
+      stages: [
+        {
+          label: 'The question is chosen',
+          detail:
+            'A guide starts from a question we are asked often enough that answering it once, properly, is worth writing down.',
+        },
+        {
+          label: 'The answer is tested',
+          detail:
+            'The answer is checked against the work behind it, so a guide describes how it really runs rather than how it is meant to.',
+        },
+        {
+          label: 'It is written to be used',
+          detail:
+            'It is written so a brand can read it in one sitting and act on it, with no call to us needed first.',
+        },
+        {
+          label: 'It is kept current',
+          detail:
+            'A guide that stops being true is corrected or withdrawn, because a stale guide is worse than no guide at all.',
+        },
+      ],
+    },
+    limits: [
+      'We do not write a guide to lead into a sales conversation; each one stands on its own.',
+      'We do not give advice we would not follow in our own operation.',
+      'We do not describe a step we cannot show, or a result we cannot point at a record for.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
 ];
 
@@ -1734,6 +1897,9 @@ const PAGE_UK_RETAIL_GUIDE: PublicContentPage = {
   heading: 'The UK retail market, with its sources attached.',
   lede:
     'A market guide is only useful if you can check it. Every figure on this page names the body that published it and the period it covers, and a figure with no publisher is not shown at all.',
+  /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the page opens with a picture. The guide is about
+     the market goods arrive into, so it opens on goods arriving rather than on a chart. */
+  hero: 'port-containers',
   blocks: [
     {
       heading: 'Where the numbers come from',
@@ -1742,6 +1908,8 @@ const PAGE_UK_RETAIL_GUIDE: PublicContentPage = {
         'World Bank — trade and output for the UK and for corridor countries.',
         'Published periods only. A projection is labelled as one, and an estimate is never dressed as a measurement.',
       ],
+      /* The destination the figures describe: the UK retail shelf. */
+      media: 'shelves-grocery',
     },
     {
       heading: 'How to read a figure here',
@@ -1755,6 +1923,41 @@ const PAGE_UK_RETAIL_GUIDE: PublicContentPage = {
         'This is not a sales forecast for your product. It describes the market a product would enter, so a conversation about your brand can start from real numbers instead of from optimism.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — the worked example: how a figure is ADMITTED to
+     this page. The SEQUENCE only, and deliberately carrying no figure of its own — a page whose whole
+     argument is that every number must name its source must not illustrate itself with a number. */
+  illustration: {
+    label: 'How a figure reaches this page',
+    intro:
+      'A market guide is only useful if you can check it. These are the stages a figure passes through before it is allowed to appear here.',
+    stages: [
+      {
+        label: 'The publisher is named',
+        detail:
+          'A figure is only considered if a named body publishes it — a national statistics office, or a development bank — and that body is recorded with it.',
+      },
+      {
+        label: 'The period is recorded',
+        detail:
+          'The period the figure describes is recorded alongside it, so it can never be read as more current than it actually is.',
+      },
+      {
+        label: 'It is checked',
+        detail:
+          'The figure is checked against the publication it came from, and a projection is labelled as a projection rather than shown as a measurement.',
+      },
+      {
+        label: 'It is shown, or left out',
+        detail:
+          'If the source has not answered, the figure is left off the page and the missing source is named, rather than an old number being shown as if it were current.',
+      },
+    ],
+  },
+  limits: [
+    'We do not show a figure without naming the body that published it and the period it covers.',
+    'We do not present an estimate or a projection as a measurement.',
+    'We do not fill a gap with an older number; where a source has not answered, the figure is absent.',
   ],
   availability: {
     label: 'Live figures — sources being connected',

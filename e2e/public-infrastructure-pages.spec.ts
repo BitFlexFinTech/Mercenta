@@ -32,11 +32,16 @@
  * §Phase §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — `'Commercial'` is APPENDED by the same rule,
  * in the same change as the gate, so the two scopes cannot drift: the two Commercial pages (`pricing`,
  * `contact`) are asserted here exactly as the eighteen before them are.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 7 (2026-11-28) — `'Resources'` is APPENDED by the same rule, in
+ * the same change as the gate, so the two scopes cannot drift: the five Resources pages (`insights`,
+ * `blog`, `case-studies`, `guides`, `uk-retail-guide`) are asserted here exactly as the twenty before
+ * them are.
  */
 import { test, expect } from '@playwright/test';
 import { PUBLIC_CONTENT_PAGES } from '../src/config/publicPages';
 
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial', 'Resources'];
 const PAGES = PUBLIC_CONTENT_PAGES.filter((p) => SCOPE_GROUPS.includes(p.navGroup));
 
 test.describe('The enriched public pages — the full page standard, rendered', () => {
