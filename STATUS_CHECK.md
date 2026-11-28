@@ -45,8 +45,13 @@ was real. The assertion now runs at BOTH 1440 and 390 and WAITS for the images i
 and it was proved able to fail: with `cat-grocery-sm.webp` temporarily removed it FAILED naming `cat-grocery-sm.webp at
 390px` (the old version would have passed), and the file was restored byte-identical (sha256 `1a82d1c6…`).
 
+**The derived-list fix carries an ABSENCE GUARD (S11):** `PUBLIC_CONTENT_NAV_GROUPS` is now computed from each page's
+`navGroup`, and assertion **S11** in the same gate fails if a hand-written list of group names returns — proved by putting
+the old five-name list back (**S11 FAIL naming all five**) and restoring the file byte-identical (sha256 `ac071831…`). The
+gate now makes **13** assertions, not 12.
+
 **Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.94s EXIT 0 · `validate-public-page-standard`
-**12/12** · e2e `public-infrastructure-pages` + `categories-page` **35 passed** · `validate-public-claims` PASS alone
+**13/13** · e2e `public-infrastructure-pages` + `categories-page` **35 passed** · `validate-public-claims` PASS alone
 (70 rendered pages, 0 red-line) · `validate:all` **210 PASS / 0 FAIL of 210** · registry integrity **8 PASS / 0 FAIL**
 (596 entries) · screenshots at 1440 and 390 of all five pages, LOOKED AT: every picture decoded, the labelled grid and the
 limits panel render as designed, **0 horizontal overflow**. Two mutations proved the gate still bites, each restored
