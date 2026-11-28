@@ -7198,3 +7198,14 @@ plain-English **20/20** · e2e-scenarios **18/18**.
 the ONE publish remains the owner's decision). **25 hand-rolled tables remain across 18 files** — the recorded
 next work.
 
+**§PHASE D SLICE 2, SAME SESSION — AND THE OWNER AUTHORISED THE PUBLISH.** `BrandGuidance.tsx` migrated to the
+canonical `DataTable`; `CsvCatalogImport.tsx` adopted the canonical contract while keeping its sticky header and
+invalid-row tint. Debt **25 → 23** across **16 files**, baseline lowered with it. Four guidance accordion headers
+reported no open/closed state — all now `aria-expanded` (five disclosure controls fixed in total this session).
+`e2e/canonical-tables.spec.ts` grew a second test on the real brand path (Astonish → Product Catalog → CSV panel
+→ Add New Product → Net PPM section): **2 passed (7.4s)**. Writing it found a UX fact recorded inline: the CSV
+control is unreachable while the guidance modal's overlay is mounted, so the test exercises the real order.
+`validate:all` **213 PASS / 0 FAIL (exit 0)**. The owner then instructed the publisher to run, so the verified
+commit is deployed to `demo.mercenta.co.uk` and the live site is opened and checked — the three-way status and
+the live evidence are recorded in `PROJECT_STATUS.md → CURRENT RESUME STATE`.
+
