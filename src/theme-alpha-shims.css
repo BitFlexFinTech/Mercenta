@@ -120,6 +120,9 @@
 .border-zinc-500\/30{border-color:color-mix(in srgb, var(--mr-text-muted) 30%, transparent)}
 .bg-zinc-500\/5{background-color:color-mix(in srgb, var(--mr-text-muted) 5%, transparent)}
 .border-zinc-500\/20{border-color:color-mix(in srgb, var(--mr-text-muted) 20%, transparent)}
+.bg-surface\/60{background-color:color-mix(in srgb, var(--mr-surface) 60%, transparent)}
+.bg-surface\/40{background-color:color-mix(in srgb, var(--mr-surface) 40%, transparent)}
+.bg-surface\/70{background-color:color-mix(in srgb, var(--mr-surface) 70%, transparent)}
 .bg-brass-500\/5{background-color:color-mix(in srgb, var(--mr-accent) 5%, transparent)}
 .bg-brass-500\/10{background-color:color-mix(in srgb, var(--mr-accent) 10%, transparent)}
 .bg-brass-500\/12{background-color:color-mix(in srgb, var(--mr-accent) 12%, transparent)}

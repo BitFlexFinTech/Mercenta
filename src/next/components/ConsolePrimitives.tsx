@@ -463,7 +463,7 @@ function FragmentRow<T>({
         data-row-id={rowId}
         onClick={onRowClick ? () => onRowClick(row) : undefined}
         className={`${onRowClick ? 'cursor-pointer' : ''} ${
-          isSelected ? 'bg-tint/80' : 'hover:bg-surface/80'
+          isSelected ? 'bg-surface/80' : 'hover:bg-surface/80'
         } transition-colors`}
       >
         {columns.map((col) => (
