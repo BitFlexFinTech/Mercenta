@@ -1,8 +1,8 @@
 import {
   InlineStatus,
   MetricStrip,
-  PageHeader,
-} from '@/next/components/ConsolePrimitives';
+  } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { SectionCard } from '@/next/components/ConsoleCharts';
 
 export interface HealthCheckItem {
@@ -31,7 +31,7 @@ export function AdminMonitoringView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="System Monitoring"
         description="Readiness checks evaluated from local integration configuration, dependency advisories, and triage summaries."
         meta={<span>Environment: {environmentLabel}</span>}

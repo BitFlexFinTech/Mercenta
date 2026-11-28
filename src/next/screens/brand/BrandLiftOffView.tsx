@@ -2,9 +2,9 @@ import { CheckCircle2, Circle } from 'lucide-react';
 import {
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { SectionCard } from '@/next/components/ConsoleCharts';
 import type { LiftOffTerm } from '@/config/liftOff';
 import type { LiftOffEligibilityResult } from '@/lib/liftOff/eligibility';
@@ -60,7 +60,7 @@ export function BrandLiftOffView({
 
   return (
     <div className="space-y-6" data-testid="lift-off-brand-section">
-      <PageHeader
+      <ConsolePageHeader
         title={wordmark}
         description={summary}
         actions={

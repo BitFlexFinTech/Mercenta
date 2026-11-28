@@ -4,11 +4,11 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export interface PipelineSubmissionRow {
@@ -267,7 +267,7 @@ export function RetailPipelineView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Retail Pipeline"
         description={`Marketplace ${marketplaceId} · catalog submissions, commission board, delivery reconciliation, deductions, and channel operations.`}
         meta={

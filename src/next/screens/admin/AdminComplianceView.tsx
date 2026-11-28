@@ -6,10 +6,10 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type ComplianceReviewFilter = 'all' | 'awaiting' | 'approved' | 'attention';
@@ -99,7 +99,7 @@ export function AdminComplianceView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Compliance Approvals"
         description="Per-brand compliance gate — automated verification via Companies House / HMRC and Founder / Super Admin sign-off."
         meta={

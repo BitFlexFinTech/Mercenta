@@ -5,9 +5,9 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 import type { Contract } from '@/types';
 
@@ -107,7 +107,7 @@ export function BrandDocumentsView({
 
   return (
     <div className="space-y-6" data-testid="brand-documents-account">
-      <PageHeader
+      <ConsolePageHeader
         title="Documents & Account"
         description="Download signed distribution agreements, monthly remittance statements, and submit verification-gated account or banking change requests."
       />

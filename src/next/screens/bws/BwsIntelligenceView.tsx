@@ -13,12 +13,12 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export type BwsIntelligenceSection =
   | 'overview'
@@ -320,7 +320,7 @@ export function BwsIntelligenceView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title={copy.title}
         description={copy.description}
         meta={<span>BWS Workspace · Dash-1 BWS research dataset (88 brands, 13 origin regions)</span>}

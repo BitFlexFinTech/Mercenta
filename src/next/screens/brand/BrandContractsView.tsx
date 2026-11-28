@@ -4,10 +4,10 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { CONTRACT_STATUS_LABELS, renewalUrgency } from '@/lib/contracts';
 import type { Contract } from '@/types';
 
@@ -120,7 +120,7 @@ export function BrandContractsView({
 
   return (
     <div className="space-y-6" data-testid="brand-contracts">
-      <PageHeader
+      <ConsolePageHeader
         title="Contracts"
         description="Your signed distribution agreements, commercial tracks, commission terms, and renewal schedule."
       />

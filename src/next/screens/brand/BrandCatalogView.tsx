@@ -5,11 +5,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import { ProductThumb } from '@/components/shared/ProductThumb';
 import { ASIN_STATE_LABELS, deriveAsinState } from '@/lib/catalog/asin';
@@ -313,7 +313,7 @@ export function BrandCatalogView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Master Product Catalog"
         description="Wholesale pricing schema, UK compliance metadata, availability toggles, and canonical retail-channel submissions."
         actions={

@@ -3,9 +3,9 @@ import {
   ErrorStateBlock,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleProgressTrack, NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type OnboardingFilter = 'all' | 'initiated' | 'in_progress' | 'completed';
@@ -109,7 +109,7 @@ export function OnboardingPipelineView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Onboarding Pipeline"
         description="Canonical onboarding records for brands handed off from qualified acquisition opportunities, partner applications, or manual operator creation."
         meta={

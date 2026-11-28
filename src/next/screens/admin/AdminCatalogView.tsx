@@ -6,11 +6,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export type CatalogFocus = 'all' | 'not_submitted' | 'inactive';
@@ -245,7 +245,7 @@ export function AdminCatalogView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Global Catalog Manager"
         description="Every catalogue record, its owning brand tenant, and its channel-submission state. Product readiness is derived from canonical submission and compliance records."
         meta={

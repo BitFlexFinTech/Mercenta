@@ -4,10 +4,10 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export type BillingFocus = 'all' | 'subscriptions' | 'commissions' | 'deductions';
@@ -122,7 +122,7 @@ export function AdminBillingView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Billing & Remittance"
         description="Brand subscriptions, commission invoices, and remittance statements. Gross PO value − commission − deductions = net paid per payout period."
         meta={

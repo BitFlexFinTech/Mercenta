@@ -6,9 +6,9 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export interface HelpdeskCaseItem {
@@ -129,7 +129,7 @@ export function AdminHelpdeskView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Helpdesk"
         description="Brand support cases reviewed by Mercenta before any channel escalation. Mercenta operates the channel relationship directly."
         meta={

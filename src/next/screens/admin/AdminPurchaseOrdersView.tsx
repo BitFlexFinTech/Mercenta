@@ -11,12 +11,12 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { orderDateLabel } from '@/lib/dates';
 import type {
   ChannelInstruction,
@@ -179,7 +179,7 @@ export function AdminPurchaseOrdersView({
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Purchase Orders" description="Loading purchase order queue…" />
+        <ConsolePageHeader title="Purchase Orders" description="Loading purchase order queue…" />
         <LoadingRows rows={6} />
       </div>
     );
@@ -188,7 +188,7 @@ export function AdminPurchaseOrdersView({
   if (error) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Purchase Orders" description="Unable to load purchase orders." />
+        <ConsolePageHeader title="Purchase Orders" description="Unable to load purchase orders." />
         <ErrorStateBlock message="Could not read purchase order records." onRetry={onRetry} />
       </div>
     );
@@ -264,7 +264,7 @@ export function AdminPurchaseOrdersView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Purchase Orders"
         description={`${totalPos} POs across ${totalBrands} brands — read from the retail channel, routed by line items, acknowledged, and filed as ASNs on brand behalf.`}
         meta={

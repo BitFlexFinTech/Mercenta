@@ -4,9 +4,9 @@ import type { PartnerOutreachDraft } from '@/lib/founder/partnerOutreach';
 import {
   ConsoleTable,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export interface PartnerTargetRow {
@@ -146,7 +146,7 @@ export function PartnershipsView({
 
   return (
     <div className="space-y-6" data-testid="partnerships-centre">
-      <PageHeader
+      <ConsolePageHeader
         title="Partnerships & Fundraising"
         description="Prospective trade-programme routes, measured Brand Intelligence acquisition pipeline, and capital planning."
       />

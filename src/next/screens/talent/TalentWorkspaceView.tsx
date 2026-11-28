@@ -24,11 +24,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export type TalentWorkspaceSection =
   | 'dashboard'
@@ -306,7 +306,7 @@ export function TalentWorkspaceView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title={copy.title}
         description={copy.description}
         meta={<span>Talent Commerce · CAA-TalAg dataset</span>}

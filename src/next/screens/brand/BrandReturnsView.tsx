@@ -4,12 +4,12 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { formatGbp } from '@/next/components/ConsoleCharts';
 
 const REASON_LABELS: Record<ReturnReason, string> = {
@@ -151,7 +151,7 @@ export function BrandReturnsView({
 
   return (
     <div className="space-y-6" data-testid="brand-returns">
-      <PageHeader
+      <ConsolePageHeader
         title="Returns"
         description="Returned units per purchase order recorded by the warehouse and channel reconciliation feed."
         meta={

@@ -6,11 +6,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export interface OverviewPoRow {
   id: string;
@@ -96,7 +96,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
   if (isError) {
     return (
       <div className="space-y-4">
-        <PageHeader title={`${brandName} Overview`} />
+        <ConsolePageHeader title={`${brandName} Overview`} />
         <ErrorStateBlock message={errorMessage} onRetry={onRetry} />
       </div>
     );
@@ -144,7 +144,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
 
   return (
     <div className="space-y-6" data-testid="brand-dashboard-loaded">
-      <PageHeader
+      <ConsolePageHeader
         title={`${brandName} — Overview`}
         description="Observe your tenant-scoped earnings, active purchase orders, in-flight shipments, and compliance standing. Actionable tasks live in Tasks & Deadlines."
         meta={

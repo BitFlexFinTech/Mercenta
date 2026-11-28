@@ -6,9 +6,9 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { SectionCard } from '@/next/components/ConsoleCharts';
 
 export type AuditRange = 'all' | '24h' | '7d';
@@ -94,7 +94,7 @@ export function AdminAuditLogView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Admin Audit Log"
         description="Immutable record of significant operator actions across overrides, CRM updates, compliance reviews, and payouts."
         meta={

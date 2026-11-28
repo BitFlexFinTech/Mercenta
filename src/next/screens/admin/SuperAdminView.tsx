@@ -13,11 +13,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import type {
   ApplicationStatus,
   BrandApplication,
@@ -619,7 +619,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Super Admin Control Plane"
         description="Master governance for staff & RBAC, brand applications, accounting payouts, internal commercial models, Mercenta statutory filings, operating cost guardrails, and founder launch directories."
         meta={

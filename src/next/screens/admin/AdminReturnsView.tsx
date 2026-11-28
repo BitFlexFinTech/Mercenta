@@ -5,12 +5,12 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import type { ReturnTrackingEntry, ReturnTrackingStatus } from '@/types';
 
 export interface AdminReturnRow {
@@ -62,7 +62,7 @@ export function AdminReturnsView({
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Returns Warehouse Tracking" description="Loading return tracking queue…" />
+        <ConsolePageHeader title="Returns Warehouse Tracking" description="Loading return tracking queue…" />
         <LoadingRows rows={5} />
       </div>
     );
@@ -139,7 +139,7 @@ export function AdminReturnsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Returns Warehouse Tracking"
         description="Internal forwarding flow — received at warehouse to quality check, forward to brand, and brand receipt confirmation."
         meta={

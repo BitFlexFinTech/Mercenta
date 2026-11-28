@@ -10,11 +10,11 @@ import {
   EmptyStateBlock,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import type {
   AutomationId,
   AutomationRun,
@@ -116,7 +116,7 @@ export function ControlCentreView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Control Centre"
         description="Founder operating centre across business, brands, commercial readiness, acquisition, operations, finance, compliance, automation, AI, and audit."
         meta={

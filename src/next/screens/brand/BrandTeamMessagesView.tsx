@@ -5,8 +5,8 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
-} from '@/next/components/ConsolePrimitives';
+  } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, SectionCard } from '@/next/components/ConsoleCharts';
 import type { BrandTeamMember, Message } from '@/types';
 
@@ -40,7 +40,7 @@ export function BrandTeamMessagesView({
   if (!hasTenant) {
     return (
       <div className="space-y-6">
-        <PageHeader
+        <ConsolePageHeader
           title="Support & Team"
           description="Direct support messaging with Mercenta and internal team notes."
         />
@@ -68,7 +68,7 @@ export function BrandTeamMessagesView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Support & Team"
         description="Threaded support conversation with Mercenta operations and internal team collaboration notes."
       />

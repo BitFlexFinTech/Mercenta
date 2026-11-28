@@ -12,12 +12,12 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export type BwsPortfolioOpsSection =
   | 'brand-portfolio'
@@ -446,7 +446,7 @@ export function BwsPortfolioOpsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title={copy.title}
         description={copy.description}
         actions={

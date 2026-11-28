@@ -48,11 +48,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export interface LineAckDraft {
   ackStatus: 'accepted' | 'rejected' | 'backordered';
@@ -472,7 +472,7 @@ export function BrandPurchaseOrdersView({
   if (isError) {
     return (
       <div>
-        <PageHeader
+        <ConsolePageHeader
           title="Purchase Orders"
           description="Review, accept, amend, or reject purchase orders from the UK retail network."
         />
@@ -487,7 +487,7 @@ export function BrandPurchaseOrdersView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Purchase Orders"
         description="Review, accept, amend, or reject purchase orders from the UK retail network."
         meta={

@@ -4,9 +4,9 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import type {
   CommercialConditionId,
@@ -115,7 +115,7 @@ export function BrandCommercialReadinessView({
 
   return (
     <div className="space-y-6" data-testid="brand-commercial-readiness">
-      <PageHeader
+      <ConsolePageHeader
         title="Commercial Readiness"
         description="What Mercenta needs in order to assess each product commercially, why it is needed, and how to update assumptions. Nothing here is a promise of an order."
       />

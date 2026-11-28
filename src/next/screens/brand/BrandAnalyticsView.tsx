@@ -6,11 +6,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import {
   ConsoleTrendChart,
   NoticeBanner,
@@ -193,7 +193,7 @@ export function BrandAnalyticsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Sales Analytics"
         description={`Wholesale order performance, top SKUs, and tenant deductions ledger for ${brandName || 'your brand'}.`}
       />

@@ -12,12 +12,12 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import type { ShipmentStatus } from '@/types';
 import type { CarrierProviderConfiguration } from '@/lib/shipping/providerConfiguration';
 import type { LogisticsRouteDecision } from '@/lib/fulfillment';
@@ -158,7 +158,7 @@ export function AdminLogisticsView({
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Logistics Hub" description="Loading shipments and carrier state…" />
+        <ConsolePageHeader title="Logistics Hub" description="Loading shipments and carrier state…" />
         <LoadingRows rows={6} />
       </div>
     );
@@ -167,7 +167,7 @@ export function AdminLogisticsView({
   if (error) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Logistics Hub" description="Unable to load logistics state." />
+        <ConsolePageHeader title="Logistics Hub" description="Unable to load logistics state." />
         <ErrorStateBlock message="Could not read shipments or purchase orders." onRetry={onRetry} />
       </div>
     );
@@ -283,7 +283,7 @@ export function AdminLogisticsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Logistics Hub"
         description="Cross-brand consignments, carrier accounts operated by API, 3PL route escalation, and PO shipping document queue."
         meta={

@@ -19,11 +19,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 /** The only tab that has a source. The type is kept narrow on purpose. */
 export type ApprovalQueueTab = 'verification';
@@ -113,7 +113,7 @@ export function TalentApprovalsView({
 }: TalentApprovalsViewProps) {
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Approvals & Verification"
         description="The verification stamps recorded in the CAA-TalAg dataset, shown exactly as the source publishes them."
         meta={<span>Talent Commerce · CAA-TalAg dataset</span>}

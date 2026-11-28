@@ -43,11 +43,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export interface LogisticsRowItem {
   id: string;
@@ -518,7 +518,7 @@ export function BrandLogisticsView({
   if (isError) {
     return (
       <div>
-        <PageHeader
+        <ConsolePageHeader
           title="Logistics Hub"
           description="Inbound consignments, route provenance, freight terms, and shipping document packs."
         />
@@ -537,7 +537,7 @@ export function BrandLogisticsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Logistics Hub"
         description="Consignments Mercenta moves on your behalf, declared routes, carrier evidence states, and PO shipping document packs."
         meta={

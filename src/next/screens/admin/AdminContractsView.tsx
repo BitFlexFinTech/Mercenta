@@ -7,11 +7,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export interface AdminContractRow {
@@ -234,7 +234,7 @@ export function AdminContractsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Contract Cycle"
         description="Full distribution agreement lifecycle — generate from canonical terms, dispatch e-signature envelopes, and process renewals or terminations."
         meta={

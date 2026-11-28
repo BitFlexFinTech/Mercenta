@@ -5,10 +5,10 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type CrmCohort = 'all' | 'with_po' | 'with_docs' | 'no_contract';
@@ -208,7 +208,7 @@ export function BrandCrmView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Brand CRM"
         description="Canonical brand tenants with contract, compliance, relationship tasks, timeline, and pre-onboarding acquisition opportunities."
         meta={

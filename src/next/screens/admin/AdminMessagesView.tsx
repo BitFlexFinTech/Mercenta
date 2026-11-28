@@ -5,8 +5,8 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
-} from '@/next/components/ConsolePrimitives';
+  } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export interface MessageEntryRow {
@@ -87,7 +87,7 @@ export function AdminMessagesView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Messages"
         description="Unified brand and acquisition inbox — one canonical thread per brand or prospect across automation and staff."
         meta={

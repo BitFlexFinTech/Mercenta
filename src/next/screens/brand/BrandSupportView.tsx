@@ -2,8 +2,8 @@ import { useState } from 'react';
 import {
   EmptyStateBlock,
   InlineStatus,
-  PageHeader,
-} from '@/next/components/ConsolePrimitives';
+  } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import { CASE_ESCALATION_LABELS } from '@/lib/helpdesk/ticketStore';
 import type { CaseSufficiencyVerdict } from '@/lib/helpdesk/kbSufficiency';
@@ -70,7 +70,7 @@ export function BrandSupportView({
   if (!hasTenant) {
     return (
       <div className="space-y-6">
-        <PageHeader
+        <ConsolePageHeader
           title="Support & Cases"
           description="Open a case with Mercenta and follow resolution progress."
         />
@@ -101,7 +101,7 @@ export function BrandSupportView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Support & Cases"
         description="Mercenta verifies your platform records and guidance first, then resolves directly or handles retail-channel escalation on your behalf."
         meta={

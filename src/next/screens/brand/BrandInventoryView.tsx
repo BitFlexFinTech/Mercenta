@@ -7,11 +7,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner } from '@/next/components/ConsoleCharts';
 import { ProductThumb } from '@/components/shared/ProductThumb';
 import {
@@ -228,7 +228,7 @@ export function BrandInventoryView({
   if (!hasTenant) {
     return (
       <div className="space-y-6">
-        <PageHeader
+        <ConsolePageHeader
           title="Inventory"
           description="Stock and channel identifiers linked to your catalogue inside Mercenta."
         />
@@ -242,7 +242,7 @@ export function BrandInventoryView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Inventory"
         description="Stock positions and channel identifiers for every catalogue SKU, derived from Mercenta's append-only movement ledger."
         meta={<span>{uomSource}</span>}

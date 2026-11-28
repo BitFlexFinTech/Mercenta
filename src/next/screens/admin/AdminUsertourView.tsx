@@ -4,9 +4,9 @@ import {
   EmptyStateBlock,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { SectionCard } from '@/next/components/ConsoleCharts';
 
 export type TourStatusFilter = 'all' | 'published' | 'draft' | 'required';
@@ -44,7 +44,7 @@ export function AdminUsertourView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Onboarding Tours"
         description="Guided brand portal walkthroughs rendered by TourEngine at runtime. Inspect triggers and preview each step."
         meta={

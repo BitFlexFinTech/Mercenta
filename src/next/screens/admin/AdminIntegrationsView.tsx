@@ -10,10 +10,10 @@ import {
   EmptyStateBlock,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type IntegrationsFilter = 'all' | IntegrationMode | 'attention';
@@ -141,7 +141,7 @@ export function AdminIntegrationsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Integration Settings"
         description="External service control plane. A provider is treated as simulation-safe only when its mode positively resolves to simulation; unverified states fail closed."
         meta={

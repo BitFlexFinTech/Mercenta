@@ -23,12 +23,12 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type WorkTabMode = 'list' | 'board' | 'calendar' | 'reminders';
@@ -307,7 +307,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
 
   return (
     <div className="space-y-6" data-testid="work-workspace">
-      <PageHeader
+      <ConsolePageHeader
         title={title}
         description={description}
         meta={

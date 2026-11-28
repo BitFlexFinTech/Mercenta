@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Check, CheckCircle2, ShieldCheck } from 'lucide-react';
 import {
   InlineStatus,
-  PageHeader,
-} from '@/next/components/ConsolePrimitives';
+  } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
   COMMERCIAL_MODELS,
@@ -79,7 +79,7 @@ export function BrandOnboardingView({
     const gateCleared = allGateDocsApproved && logisticsSlaAccepted && chargebackIndemnityAccepted;
     return (
       <div className="space-y-6">
-        <PageHeader
+        <ConsolePageHeader
           title="Onboarding & Legal Summary"
           description={`${profile.businessName || 'Your brand'} onboarding submission is locked on record.`}
           actions={
@@ -228,7 +228,7 @@ export function BrandOnboardingView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Brand Onboarding & Legal"
         description="Complete all six onboarding steps to establish your distribution agreement, commercial model, banking details, and fulfillment track."
       />

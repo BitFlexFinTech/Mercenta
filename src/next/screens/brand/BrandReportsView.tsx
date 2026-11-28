@@ -6,10 +6,10 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import {
   ConsoleBarChart,
   NoticeBanner,
@@ -124,7 +124,7 @@ export function BrandReportsView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Reports"
         description={`Operational confirmation rates, ledger on-hand inventory, and dispatch volume for ${brandName || 'your brand'}.`}
         actions={

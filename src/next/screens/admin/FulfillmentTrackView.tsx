@@ -5,10 +5,10 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import {
   ConsoleProgressTrack,
   ConsoleTabs,
@@ -175,7 +175,7 @@ export function FulfillmentTrackView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Fulfillment Track"
         description="Auto-scored brand placement — Brand-direct supply vs Financed, per brand."
         actions={

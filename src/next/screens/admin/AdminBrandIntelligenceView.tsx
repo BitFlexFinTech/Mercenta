@@ -6,11 +6,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import {
   ConsoleProgressTrack,
   ConsoleTabs,
@@ -295,7 +295,7 @@ export function AdminBrandIntelligenceView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Brand Intelligence"
         description="Canonical prospect universe, deterministic scoring, automated discovery runs, and acquisition outreach workflow."
         meta={

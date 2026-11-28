@@ -19,9 +19,9 @@ import {
 import {
   ConsoleTable,
   InlineStatus,
-  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
   COMMERCIAL_MODELS,
@@ -236,7 +236,7 @@ export function BrandSettingsView({
 
   return (
     <div className="space-y-6" data-testid="brand-settings">
-      <PageHeader
+      <ConsolePageHeader
         title="Settings"
         description="Manage banking change requests, commercial terms, login posture, permissions, PO outages, return addresses, compliance references, notification preferences, contacts, and guided tours."
       />

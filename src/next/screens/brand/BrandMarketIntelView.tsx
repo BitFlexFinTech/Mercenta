@@ -4,9 +4,9 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import {
   ConsoleTabs,
   NoticeBanner,
@@ -201,7 +201,7 @@ export function BrandMarketIntelView({
 
   return (
     <div className="space-y-6" data-testid="brand-market-intel">
-      <PageHeader
+      <ConsolePageHeader
         title="Market Intelligence"
         description="Qualitative category positioning, deterministic listing diagnostics, and simulated UK retail-channel sales modelling."
         meta={

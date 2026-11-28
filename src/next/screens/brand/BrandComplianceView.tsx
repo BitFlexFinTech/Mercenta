@@ -4,11 +4,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import type { CustomsDocumentBundle } from '@/lib/customsDocs';
@@ -172,7 +172,7 @@ export function BrandComplianceView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="UK Compliance & Customs"
         description="Mercenta acts as Importer of Record using its UK EORI and VAT numbers. Upload statutory product documents here and confirm auto-generated customs bundles for accepted POs."
       />

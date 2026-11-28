@@ -3,10 +3,10 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { NoticeBanner, SectionCard, formatGbp } from '@/next/components/ConsoleCharts';
 
 export interface AcquisitionRowItem {
@@ -186,7 +186,7 @@ export function MarketingHubView({
 
   return (
     <div className="space-y-6">
-      <PageHeader
+      <ConsolePageHeader
         title="Marketing & Lead Sourcing"
         description="ICP targeting, prospect acquisition outreach preparation, discovery pipeline (mock), and CSV lead import."
       />

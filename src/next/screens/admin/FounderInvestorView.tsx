@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 import { ConsoleTabs, NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 
 export type FounderTab = 'pitches' | 'model' | 'points' | 'questions' | 'practice';
@@ -77,7 +77,7 @@ export function FounderInvestorView({
 
   return (
     <div className="space-y-6" data-testid="founder-investor-centre">
-      <PageHeader
+      <ConsolePageHeader
         title="Founder Investor Centre"
         description="Super-Admin-only investor briefings, economic model arithmetic, difficult questions, and downloadable artifacts."
         actions={

@@ -15,11 +15,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export interface OverviewRevenueRow {
   id: string;
@@ -129,7 +129,7 @@ export function AdminOverviewView({
   if (loading) {
     return (
       <div className="space-y-6" data-testid="dashboard-loading" aria-busy="true">
-        <PageHeader title="Overview" description="Loading operational state…" />
+        <ConsolePageHeader title="Overview" description="Loading operational state…" />
         <MetricStrip items={[]} loading columns={4} />
         <LoadingRows rows={5} label="Loading portfolio overview…" />
       </div>
@@ -139,7 +139,7 @@ export function AdminOverviewView({
   if (error) {
     return (
       <div className="space-y-6" data-testid="dashboard-error">
-        <PageHeader title="Overview" description="Operational state could not be loaded." />
+        <ConsolePageHeader title="Overview" description="Operational state could not be loaded." />
         <ErrorStateBlock
           title="Overview records unavailable"
           message="Could not read purchase orders, brands, or compliance documents from the canonical store."
@@ -172,7 +172,7 @@ export function AdminOverviewView({
 
   return (
     <div className="space-y-6" data-testid="dashboard-loaded">
-      <PageHeader
+      <ConsolePageHeader
         title="Overview"
         description={headerSummary}
         meta={

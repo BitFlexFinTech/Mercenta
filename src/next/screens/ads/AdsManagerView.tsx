@@ -9,11 +9,11 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
 } from '@/next/components/ConsolePrimitives';
+import { ConsolePageHeader } from '@/next/components/ConsolePageHeader';
 
 export interface AdsPortfolioRow {
   brandId: string;
@@ -214,7 +214,7 @@ export function AdsManagerView({
   if (policy.scope === 'brand' && !tenantId) {
     return (
       <div>
-        <PageHeader title={policy.title} description={policy.description} meta={headerMeta} />
+        <ConsolePageHeader title={policy.title} description={policy.description} meta={headerMeta} />
         <EmptyStateBlock
           title="No brand tenant active"
           description="Sign in as a brand partner to view advertising budgets, campaigns, and recommendations for your tenant."
@@ -226,7 +226,7 @@ export function AdsManagerView({
   if (isError) {
     return (
       <div>
-        <PageHeader title={policy.title} description={policy.description} meta={headerMeta} />
+        <ConsolePageHeader title={policy.title} description={policy.description} meta={headerMeta} />
         <ErrorStateBlock
           title="Unable to load advertising records"
           message={errorMessage}
@@ -546,7 +546,7 @@ export function AdsManagerView({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={policy.title} description={policy.description} meta={headerMeta} />
+      <ConsolePageHeader title={policy.title} description={policy.description} meta={headerMeta} />
 
       {/* Truth & policy notice */}
       <div className="border border-hairline bg-surface-raised rounded-md px-4 py-3 flex items-start gap-2.5 text-[14px] text-secondary">
