@@ -21,8 +21,9 @@ rm -f "Review Zip/mercenta-review.zip"
 # Including them made the ZIP carry hundreds of screenshots and the Founder's
 # private PDFs. Both are on disk and reproducible; neither belongs in a code review.
 zip -r "Review Zip/mercenta-review.zip" . \
-  -x "node_modules/*" "dist/*" "build/*" ".git/*" \
+  -x "node_modules/*" "*/node_modules/*" "dist/*" "build/*" ".git/*" \
   "Review Zip/*" "*.zip" \
+  ".reference/*" ".skills/*" ".bugpatrol/*" \
   "test-screenshots/*" "forensic-captures/*" "playwright-report/*" \
   "test-results/*" "e2e-report/*" \
   "Admin Accounts/*" "Random/*" "Company Documents/*" "0. Company Documents/*" \
