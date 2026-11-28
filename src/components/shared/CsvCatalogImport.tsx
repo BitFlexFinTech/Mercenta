@@ -105,14 +105,21 @@ return (
           </div>
 
           <div className="max-h-48 overflow-y-auto border border-hairline rounded-ds-md">
-            <table className="w-full text-ds-micro">
+            {/* §PHASE D — this preview KEEPS its own markup because two behaviours the primitive
+               cannot express are functional here: the sticky header inside a fixed-height
+               scroller, and the red tint on invalid rows. It has therefore ADOPTED the canonical
+               CONTRACT instead (the row's documented minimum): the `data-table` hook, a real
+               `<caption>`, `scope` on every header, and a canonical `text-ds-*` step — so it is
+               measurable, addressable by tests, and announced properly by a screen reader. */}
+            <table className="w-full text-ds-micro" data-table="csv-import-preview">
+              <caption className="sr-only">Parsed catalogue rows and their validation status</caption>
               <thead className="sticky top-0 bg-surface-raised">
                 <tr className="border-b border-hairline text-muted">
-                  <th className="px-2 py-1 text-left">#</th>
-                  <th className="px-2 py-1 text-left">SKU</th>
-                  <th className="px-2 py-1 text-left">Name</th>
-                  <th className="px-2 py-1 text-right">Price</th>
-                  <th className="px-2 py-1 text-center">Status</th>
+                  <th scope="col" className="px-2 py-1 text-left">#</th>
+                  <th scope="col" className="px-2 py-1 text-left">SKU</th>
+                  <th scope="col" className="px-2 py-1 text-left">Name</th>
+                  <th scope="col" className="px-2 py-1 text-right">Price</th>
+                  <th scope="col" className="px-2 py-1 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-hairline-06">

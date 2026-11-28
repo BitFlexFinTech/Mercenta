@@ -96,4 +96,64 @@ test.describe('§PHASE D — canonical table contract', () => {
     expect(declaredCount).toBeGreaterThan(0);
     await expect(table.locator('tbody tr')).toHaveCount(declaredCount);
   });
+
+  test('the product-guidance benchmark table renders through the canonical DataTable', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    /* Same real path as the test above: the legacy shell is where `ProductCatalog` lives
+       (`?console=legacy`), and the brand demo card is the canonical entry. */
+    await page.goto('/?console=legacy');
+    const partnerLogin = page.getByRole('button', { name: 'Partner Login' }).first();
+    await expect(partnerLogin).toBeVisible({ timeout: 15000 });
+    await partnerLogin.click();
+    await page.waitForTimeout(600);
+    await page.click('text=Astonish');
+    await page.waitForTimeout(1400);
+
+    const legacyNav = page.getByRole('navigation', { name: 'Primary' });
+    await page.getByRole('searchbox', { name: 'Filter navigation' }).fill('Product Catalog');
+    await page.waitForTimeout(300);
+    await legacyNav.getByRole('button', { name: /Product Catalog/ }).first().click({ timeout: 15000 });
+    await page.waitForTimeout(900);
+
+    /* The CSV preview keeps bespoke row treatment; its control must still open it, or a working
+       feature would be hidden behind a dead button. Exercised BEFORE the guidance modal is
+       opened, because that modal keeps its overlay mounted after acknowledgement. */
+    await page.getByRole('button', { name: /CSV Import/ }).click();
+    await expect(page.getByText('Bulk CSV Import')).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /CSV Import/ }).click();
+    await page.waitForTimeout(300);
+
+    /* The guidance panel appears before a product can be added; the Net PPM benchmark is
+       rendered inside it, which is where the hand-rolled 11px table used to be. */
+    await page.locator('button', { hasText: 'Add New Product' }).first().click();
+    await page.waitForTimeout(500);
+
+    /* The guidance panel is an accordion and opens COLLAPSED, so the real user first expands the
+       section — that disclosure control must also report its state, or a screen reader cannot say
+       whether the benchmark is open. */
+    await page.getByRole('button', { name: 'Net PPM & Wholesale Pricing' }).click();
+    await page.waitForTimeout(400);
+
+    const table = page.locator('table[data-table="net-ppm-benchmarks"]');
+    await expect(table).toBeVisible({ timeout: 8000 });
+    await expect(
+      page.getByRole('button', { name: 'Net PPM & Wholesale Pricing' })
+    ).toHaveAttribute('aria-expanded', 'true');
+    await expect(table.locator('caption')).toHaveText('Net PPM benchmark by product type');
+
+    const headers = table.locator('thead th');
+    await expect(headers).toHaveCount(3);
+    for (let i = 0; i < 3; i += 1) {
+      await expect(headers.nth(i)).toHaveAttribute('scope', 'col');
+    }
+    await expect(table).toContainText('Hardlines');
+    await expect(table).toContainText('Softlines');
+
+    // One canonical size, measured — not read from a class name.
+    const cellSize = await table.evaluate((el) => {
+      const c = el.querySelector('tbody td');
+      return c ? Number.parseFloat(getComputedStyle(c).fontSize) : -1;
+    });
+    expect(cellSize).toBe(14);
+  });
 });

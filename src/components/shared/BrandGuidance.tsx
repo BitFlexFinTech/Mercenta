@@ -6,7 +6,7 @@
  * operational guidance — never duplicated.
  */
 import { useState } from 'react';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { ApprovedCategory } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
@@ -47,6 +47,7 @@ function CasePackSection() {
     <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors"
       >
         <span className="flex items-center gap-2 text-xs font-medium text-strong">
@@ -92,6 +93,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
     <div className="border border-hairline rounded-ds-md overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors"
       >
         <span className="flex items-center gap-2 text-xs font-medium text-strong">
@@ -129,24 +131,27 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
               Your category benchmark:{' '}
               <Badge className="text-ds-micro bg-accent-500/15 text-accent-300">{category ?? 'N/A'} — {target}% minimum Net PPM</Badge>
             </p>
-            <table className="w-full text-ds-micro text-muted mt-1.5">
-              <thead>
-                <tr className="border-b border-hairline text-faint">
-                  <th className="text-left font-medium py-1">Type</th>
-                  <th className="text-left font-medium py-1">Categories</th>
-                  <th className="text-right font-medium py-1">Min Net PPM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {NET_PPM_BENCHMARKS.map((b) => (
-                  <tr key={b.label} className="border-b border-hairline">
-                    <td className="py-1 text-muted">{b.label}</td>
-                    <td className="py-1">{b.categories.join(', ')}</td>
-                    <td className="py-1 text-right font-mono">{b.minNetPpm}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            /* §PHASE D — REPOINTED to the ONE canonical table primitive (registry row
+               `discovered-hand-rolled-tables-outside-the-canonical-primitive`). This was a
+               hand-rolled three-column table inside a guidance panel; it now inherits the
+               canonical type steps, `scope="col"` headers, a caption, the `data-table` hook and
+               the labelled card list below `md`. Same three columns, same values, same order. */
+            <DataTable
+              rows={NET_PPM_BENCHMARKS}
+              rowKey={(b) => b.label}
+              caption="Net PPM benchmark by product type"
+              dataTable="net-ppm-benchmarks"
+              columns={[
+                { key: 'label', label: 'Type', primary: true },
+                { key: 'categories', label: 'Categories', render: (b) => b.categories.join(', ') },
+                {
+                  key: 'minNetPpm',
+                  label: 'Min Net PPM',
+                  align: 'right',
+                  render: (b) => <span className="font-mono">{b.minNetPpm}%</span>,
+                },
+              ]}
+            />
           </div>
 
           {/* ⚠ Cost-price lock-in warning — prominently flagged */}
@@ -185,7 +190,7 @@ function PackagingSection() {
   const [open, setOpen] = useState(false);
   return (
     <div className="border border-hairline rounded-ds-md overflow-hidden">
-      <button onClick={() => setOpen((o) => !o)}
+      <button onClick={() => setOpen((o) => !o)} aria-expanded={open}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors">
         <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <Shield className="w-3.5 h-3.5 text-accent-400" />
@@ -238,7 +243,7 @@ function PORejectionSection() {
   const [open, setOpen] = useState(false);
   return (
     <div className="border border-hairline rounded-ds-md overflow-hidden">
-      <button onClick={() => setOpen((o) => !o)}
+      <button onClick={() => setOpen((o) => !o)} aria-expanded={open}
         className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-tint transition-colors">
         <span className="flex items-center gap-2 text-xs font-medium text-strong">
           <AlertTriangle className="w-3.5 h-3.5 text-accent-400" />

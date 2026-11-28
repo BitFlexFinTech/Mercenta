@@ -4166,7 +4166,7 @@
       "actor": "super_admin",
       "type": "boundary",
       "spec": "e2e/canonical-tables.spec.ts",
-      "expects": "The migrated TAM/SAM breakdown renders through the canonical DataTable: five scope=\"col\" headers, a real caption, cells measured in the browser at the ds-body step (14px) and headers at ds-label (12px), and a row count equal to the count the screen itself declares."
+      "expects": "The migrated market-size breakdown AND the migrated product-guidance benchmark render through the canonical DataTable: scoped headers, a real caption, cells measured in the browser at the ds-body step (14px), a row count equal to the count the screen itself declares, and the CSV preview’s own control still opening its panel."
     }
   ]
 }

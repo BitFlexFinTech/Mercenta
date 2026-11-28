@@ -66,13 +66,11 @@ const DECLARED_DEBT = {
   'src/components/ads/AdsManagement.tsx': 1,
   'src/components/brand/BrandPurchaseOrders.tsx': 4,
   'src/components/brand/BrandSettings.tsx': 1,
-  'src/components/shared/BrandGuidance.tsx': 1,
-  'src/components/shared/CsvCatalogImport.tsx': 1,
   'src/next/screens/brand/BrandPurchaseOrdersView.tsx': 4,
 };
 
 /** The ratchet. It may only ever be LOWERED, in the same change as a real migration. */
-const DEBT_BASELINE = 25;
+const DEBT_BASELINE = 23;
 
 /**
  * Files that legitimately RENDER a table and are NOT debt, each with its reason. Declared so the
