@@ -4,6 +4,46 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 5 PART 4 — THE FIVE SOLUTIONS PAGES MEET THE PAGE STANDARD, AND THE GATE FOUND A PAGE THE RECORDED TASK DID NOT NAME (2026-11-28)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `f2f13ec` (runtime) plus the state commit that carries this
+section; pushed to `origin/frontend-redesign`. Deployment deliberately held: ONE publish covers this content work together
+with the homepage's two contrast defects and the login restyle, and the owner decides when the demo is published.
+
+**The recorded task named FOUR Solutions pages. The gate found FIVE.** `institutional-partners` is also
+`navGroup: 'Solutions'`, and the gate's S3/S4/S5 assertions failed on it BY NAME on the first run — because the scope is
+DERIVED from the pages' own `navGroup` rather than retyped from a task description. That is the whole argument for deriving
+a scope: a list in prose goes stale silently, a derived list fails loudly. It was enriched in the same batch.
+
+**All five enriched to the standard:** `new-to-uk-market`, `scaling-consumer-brands`, `agencies-service-partners`,
+`institutional-partners` and the categories page — each with an opening picture, a picture inside one block, a labelled
+worked illustration of the SEQUENCE (no amount, no price, no percentage), an honest limits section and exactly one next
+step. `scaling-consumer-brands` had NO call to action at all: it declared no `cta`, so the renderer rendered no closing
+section, and nothing looked broken while nothing was stated.
+
+**The gate's scope grew, it did not move:** `'Solutions'` was APPENDED in both `scripts/validate-public-page-standard.mjs`
+and `e2e/public-infrastructure-pages.spec.ts`, changed in the same edit, so the two scopes cannot drift. S1b now reports
+**16 of 25 pages** in scope (was 11).
+
+**Pictures chosen by LOOKING:** a labelled contact sheet of the eighteen existing candidates was built and looked at
+before any was chosen — `port-cranes`, `warehouse-aisle`, `desk-phone`, `port-containers`, and `shelves-grocery` kept on
+the categories page. All declared and on disk in both sizes, so nothing new was fetched.
+
+**Three false records corrected at source (rule 10):** `PUBLIC_CONTENT_NAV_GROUPS` claimed in its own comment to be
+“DERIVED from the pages themselves (never retyped)” while retyping five names and omitting `Retail Infrastructure`, which
+SEVEN pages carry; `scripts/validate-registry-integrity.mjs` said “32 rows” miss a field when the measured figure is
+**52**; and that gate's own registry row repeated it. The debt is now a CEILING the gate asserts — **and that ceiling
+caught this session's own new registry row** (written without `last_verified` ⇒ 53 ⇒ FAIL by name ⇒ row fixed ⇒ 52 ⇒
+PASS), so the gate was proved able to fail by a real event rather than a manufactured one.
+
+**Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.94s EXIT 0 · `validate-public-page-standard`
+**12/12** · e2e `public-infrastructure-pages` + `categories-page` **35 passed** · `validate-public-claims` PASS alone
+(70 rendered pages, 0 red-line) · `validate:all` **210 PASS / 0 FAIL of 210** · registry integrity **8 PASS / 0 FAIL**
+(596 entries) · screenshots at 1440 and 390 of all five pages, LOOKED AT: every picture decoded, the labelled grid and the
+limits panel render as designed, **0 horizontal overflow**. Two mutations proved the gate still bites, each restored
+byte-identical: a scope group naming no page ⇒ S1b FAIL; removing `new-to-uk-market`'s opening picture ⇒ S3 FAIL naming it.
+
+
 ## §PUBLIC SURFACES BATCH 2 (part) — THE MENU NOW MATCHES THE PAGE IT SITS ON, AND AN INSTRUMENT BLIND SPOT (2026-11-27)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** The deployment leg is still deliberately deferred to the

@@ -20,9 +20,16 @@
  *   4. `_meta.status_enum` is non-empty and holds no duplicates.
  *
  * WHAT IT DELIBERATELY DOES NOT assert (recorded as outstanding work, because a
- * failing gate must never be introduced as "progress"): 32 rows are missing at
- * least one of {description, source, evidence, last_verified} — that needs a
- * DECISION about the matrix's vocabulary before a gate can be written.
+ * failing gate must never be introduced as "progress"): rows missing at least one of
+ * {description, source, evidence, last_verified} need a DECISION about the matrix's
+ * vocabulary before a COMPLETENESS gate can be written.
+ *
+ * §CORRECTED 2026-11-28 (BATCH 5 PART 4) — THE FIGURE THAT USED TO BE HERE WAS WRONG. It read
+ * "32 rows are missing at least one of {description, source, evidence, last_verified}". Measured
+ * over the committed registry with exactly that definition it is **52**, not 32 — a false number
+ * in a live comment, which is the defect. Rather than restate a figure a reader cannot check, the
+ * debt is now a CEILING this gate asserts (the final assertion below), so it can only ever shrink
+ * and cannot drift in silence again.
  *
  * §CORRECTED 2026-11-27 — A FALSE CLAIM REMOVED. This comment also read "3 rows carry a
  * status outside the declared enum (`removed`, `removed`, `complete`)". Both of those
@@ -72,6 +79,21 @@ if (registry) {
   check(
     '_meta.status_enum holds no duplicates',
     Array.isArray(meta.status_enum) && new Set(meta.status_enum).size === meta.status_enum.length
+  );
+
+  /**
+   * §2026-11-28 (BATCH 5 PART 4) — THE DEBT IS A CEILING, NOT A SENTENCE IN A COMMENT.
+   *
+   * The header used to state a figure ("32 rows") that a reader could not check and that was
+   * simply wrong (measured: 52). A number in a comment drifts; a number a gate asserts cannot.
+   * The debt may only SHRINK — raising the ceiling is a recorded decision, not an edit.
+   */
+  const incomplete = entries.filter(
+    (e) => !e.description || !e.source || !e.evidence || !e.last_verified
+  );
+  check(
+    `no more than 52 rows lack one of {description, source, evidence, last_verified} — measured ${incomplete.length} (the debt may only shrink)`,
+    incomplete.length <= 52
   );
 }
 
