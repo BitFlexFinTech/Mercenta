@@ -666,6 +666,10 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
     heading: 'The UK is a market, not a destination.',
     lede:
       'Plenty of brands would sell here if selling here were not a second business. Mercenta is the business they would otherwise have had to build.',
+    /* §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — the page opens with a picture rather than as
+       text only. The subject is the operation a brand would otherwise have had to build, and high-bay
+       racking in a distribution centre is the honest image of it. */
+    hero: 'warehouse-racks',
     blocks: [
       {
         heading: 'What we are',
@@ -680,6 +684,9 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
           'The decisions stay with the brand; the operation does not.',
           'Everything is visible in one workspace, updated as it moves.',
         ],
+        /* The reporting surface the page promises — “one workspace, updated as it moves” — shown
+           rather than described. */
+        media: 'desk-tablet',
       },
       {
         heading: 'What we will not do',
@@ -688,6 +695,43 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
         ],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — the worked example: the work that moves off a
+       brand’s desk and into one place, stage by stage. The SEQUENCE only — no amount, no price and no
+       percentage, because an illustration of the order of the work is never a claim about the money
+       it produces. */
+    illustration: {
+      label: 'The job that leaves your desk',
+      intro:
+        'Mercenta takes on the retail side of the business — everything that is not the product itself. These are the stages that move off your desk and into one place.',
+      stages: [
+        {
+          label: 'Demand',
+          detail:
+            'What the UK actually wants from the range is worked out before anything is committed, so the first decision is an informed one.',
+        },
+        {
+          label: 'Orders',
+          detail:
+            'Orders are captured, confirmed and tracked as they arrive, rather than being re-typed into a spreadsheet by hand.',
+        },
+        {
+          label: 'Movement',
+          detail:
+            'Goods are held, picked, packed and despatched from the UK, with the tracking sitting in the same place as the order.',
+        },
+        {
+          label: 'Money',
+          detail:
+            'What comes back is reconciled against what was sent and settled with you, so both sides are looking at the same picture.',
+        },
+      ],
+    },
+    limits: [
+      'We do not make the product, set your prices, or decide what your brand stands for — those stay with you.',
+      'We do not promise that the UK will buy, and we will say so plainly when the evidence says it will not.',
+      'We do not publish a figure we cannot point at a record for.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
   {
     id: 'partnerships',
@@ -701,6 +745,10 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
     heading: 'Working with Mercenta.',
     lede:
       'Mercenta works with brands directly, and with the agencies, consultants and distributors who already serve them.',
+    /* §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — the page opens with a picture. A partnership is
+       an arrangement worked out between people, so it opens on a working session over plans rather
+       than on goods. */
+    hero: 'desk-laptop',
     blocks: [
       {
         heading: 'Ways to work together',
@@ -709,6 +757,8 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
           'Operating as a service partner alongside Mercenta.',
           'Discussing a distribution arrangement for a specific category.',
         ],
+        /* Goods ready for dispatch: what a distribution arrangement actually moves. */
+        media: 'boxes-stacked',
       },
       {
         heading: 'What we ask of a partner',
@@ -716,6 +766,40 @@ export const PUBLIC_COMPANY_PAGES: readonly PublicContentPage[] = [
           'Accuracy about what is being offered, and honesty about what a brand can expect. We hold ourselves to the same standard in public.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — the worked example: the order a partnership runs
+       in, whatever shape it takes. The sequence only — no amount, no price and no percentage. */
+    illustration: {
+      label: 'How it runs, start to finish',
+      intro:
+        'A referral, an operating arrangement and a distribution agreement follow the same order. These are the stages, not the terms.',
+      stages: [
+        {
+          label: 'The conversation',
+          detail:
+            'We start with what the client needs and what you already do for them, so the arrangement is built around a real gap rather than a template.',
+        },
+        {
+          label: 'The fit',
+          detail:
+            'We are honest about whether it fits — the categories, the volume and the way the client already works — before anything is agreed.',
+        },
+        {
+          label: 'The agreement',
+          detail:
+            'What each side does, and who owns the client relationship, is written down, so nothing is left to an assumption made on either side.',
+        },
+        {
+          label: 'The operation',
+          detail:
+            'From then on the retail side runs in one place, and the partner sees the same picture the brand does, at the level they are entitled to.',
+        },
+      ],
+    },
+    limits: [
+      'We do not take a partner’s clients, or approach them directly behind the partner’s back.',
+      'We do not claim a relationship or a capability we do not hold, in public or in private.',
+      'We do not promise a volume of work — what it produces depends on the brands it serves.',
     ],
     cta: { label: 'Contact Mercenta', to: 'contact' },
   },

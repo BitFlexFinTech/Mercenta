@@ -53,6 +53,11 @@
  * categories page (`PUBLIC_CATEGORY_PAGE`, which already opened with a picture but carried neither
  * the illustration nor the limits). S1b is what makes the append safe: a group name matching NO page
  * fails the run, so this addition cannot quietly become a vacuous scope.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — THE LIST GROWS AGAIN, BY THE SAME RULE.
+ * `'Company'` is APPENDED, so the sixteen pages already checked stay checked. Company holds two pages
+ * — `why-mercenta` and `partnerships`, the count read from S1b below and not from a task sentence
+ * (Part 4's sentence named four Solutions pages and the group held five, which S1b found by name).
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -79,7 +84,7 @@ globalThis.fetch = async (...args) => {
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
 /** This batch's scope — the navigation groups whose pages have been enriched, in the order they were done. */
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company'];
 
 /* ── S0 — the owners were found at all ────────────────────────────────────── */
 const pagesSrc = read('src/config/publicPages.ts');

@@ -39,6 +39,14 @@
  * comment; the per-status counts are asserted from the entries themselves by this gate's
  * sibling `scripts/validate-no-stale-blockers.mjs`. The same false sentence appeared in
  * the registry's own row for this check and was corrected in the same change.
+ *
+ * §CORRECTED 2026-11-28 (BATCH 5 PART 5) — THAT LAST SENTENCE WAS ITSELF WRONG, AND IS NOW TRUE.
+ * It claimed the sibling asserted "the per-status counts"; `scripts/validate-no-stale-blockers.mjs`
+ * asserts ONLY `_meta.status_counts.not_started` (its section 7), so `built_and_tested`, `built`,
+ * `deferred`, `removed`, `blocked` and `complete` were UNCHECKED — and `built_and_tested` had drifted
+ * to 347 while the entries held 348 (the declared counts summed to 595 against a `total_entries` of
+ * 596). The claim is corrected here AND made true: the assertion below now compares EVERY declared
+ * per-status count against the entries, so the sibling's narrower check is no longer the only one.
  */
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -94,6 +102,34 @@ if (registry) {
   check(
     `no more than 52 rows lack one of {description, source, evidence, last_verified} — measured ${incomplete.length} (the debt may only shrink)`,
     incomplete.length <= 52
+  );
+
+  /**
+   * §2026-11-28 (BATCH 5 PART 5) — THE PER-STATUS SNAPSHOT IS ASSERTED, NOT TRUSTED.
+   *
+   * Measured when this was added: the declared `_meta.status_counts.built_and_tested` read 347 while the
+   * entries themselves held 348, so the seven declared counts summed to 595 against a `total_entries` of
+   * 596 — and nothing caught it (this gate asserted only `total_entries`; its sibling asserted only
+   * `not_started`). A hand-maintained figure drifts; one a gate compares against the owner cannot. Every
+   * declared count must EQUAL the count computed from the entries, and the counts must sum to the real
+   * total — so the snapshot can never disagree with the matrix again.
+   */
+  const actualCounts = entries.reduce((acc, e) => {
+    acc[e.status] = (acc[e.status] || 0) + 1;
+    return acc;
+  }, {});
+  const declaredCounts = meta.status_counts || {};
+  const declaredKeys = Object.keys(declaredCounts).filter((k) => k !== '_note');
+  const driftedCounts = declaredKeys.filter((k) => declaredCounts[k] !== (actualCounts[k] || 0));
+  check(
+    `every declared per-status count equals the entries themselves (${declaredKeys
+      .map((k) => `${k}=${declaredCounts[k]}`)
+      .join(' · ')})`,
+    declaredKeys.length > 0 && driftedCounts.length === 0
+  );
+  check(
+    'the declared per-status counts sum to the real entry count (the snapshot is internally consistent)',
+    declaredKeys.reduce((s, k) => s + declaredCounts[k], 0) === entries.length
   );
 }
 
