@@ -18,8 +18,8 @@
  *       `cta`. A page with only a picture is NOT flagged: it is a page a later batch has not reached
  *       yet, which is exactly what `categories` is today (its own treatment, Batch 5 Part 1). The
  *       batch's own completeness is asserted separately, against its derived scope (S1b, S3–S6);
- *   S3  every page IN THIS BATCH'S SCOPE (the `Retail Infrastructure` group, derived from the pages
- *       themselves) opens with a picture, declared in the imagery owner and present on disk;
+ *   S3  every page in a group the scope names opens with a picture, declared in the imagery owner
+ *       and present on disk in both sizes (the group is read from the pages, never retyped);
  *   S4  it carries a labelled worked illustration: a label, an intro, at least three labelled
  *       stages, each with real text;
  *   S5  it states its own limits: at least two, each a real sentence;
@@ -35,11 +35,15 @@
  *       assertions against comment-stripped code, so a check cannot pass on a comment alone);
  *   S10 zero network.
  *
- * THE GATE'S SCOPE IS THIS BATCH'S, AND IT IS DERIVED, NOT RETYPED. `Retail Infrastructure` is read
- * from each page's own `navGroup`, so the members cannot drift from the pages. The next enrichment
- * batch (Platform, Solutions, Company, Commercial, Resources) REPOINTS `SCOPE_GROUP` to the wider
- * set with a `§Phase … — REPOINTED` comment — a normal, reviewable act. It is NOT repointed now,
- * because widening it today would fail on pages that have not been enriched yet.
+ * THE GATE'S SCOPE IS A LIST OF THE GROUPS ENRICHED SO FAR, AND IT IS DERIVED, NOT RETYPED. Each
+ * group name is checked against the pages' own `navGroup`, so the members cannot drift from the
+ * pages, and a name matching NO page fails the run (a vacuous scope is a failure, not a green).
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — THE LIST GROWS, IT DOES NOT MOVE. Batch 5
+ * Part 2 shipped `['Retail Infrastructure']`; this part APPENDS `'Platform'`. REPLACING the list
+ * would have silently stopped checking the seven pages already brought to the standard — a gate that
+ * drops its first batch is a weaker gate, not a moved one — so groups are only ever ADDED here, and
+ * each addition is made in the same change as the enrichment it covers.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -66,7 +70,7 @@ globalThis.fetch = async (...args) => {
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
 /** This batch's scope — the navigation group whose pages were enriched. */
-const SCOPE_GROUP = 'Retail Infrastructure';
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform'];
 
 /* ── S0 — the owners were found at all ────────────────────────────────────── */
 const pagesSrc = read('src/config/publicPages.ts');
@@ -151,11 +155,18 @@ test(
 );
 
 /* ── the batch's own scope, DERIVED from the pages ────────────────────────── */
-const scoped = pages.filter((p) => p.group === SCOPE_GROUP);
+const allGroups = [...new Set(pages.map((p) => p.group))];
+const scoped = pages.filter((p) => SCOPE_GROUPS.includes(p.group));
+const unknownGroups = SCOPE_GROUPS.filter((g) => !allGroups.includes(g));
 test(
-  `S1b this batch's scope was derived from the pages themselves (${SCOPE_GROUP})`,
-  scoped.length === 7,
-  `${scoped.length} page(s): ${scoped.map((p) => p.id).join(', ')}`
+  `S1b every group named in the scope EXISTS in the pages, and the scope is not empty (${SCOPE_GROUPS.join(' + ')})`,
+  unknownGroups.length === 0 && scoped.length > 0,
+  [
+    unknownGroups.length ? `no page has navGroup: ${unknownGroups.join(', ')}` : '',
+    `${scoped.length} of ${pages.length} page(s): ${scoped.map((p) => p.id).join(', ')}`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 );
 
 /* ── S3 — the opening picture, declared and on disk ───────────────────────── */

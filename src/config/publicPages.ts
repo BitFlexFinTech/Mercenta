@@ -165,6 +165,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
     heading: 'Orders arrive, and you decide.',
     lede:
       'Mercenta carries the retail side of your business. Orders land in one workspace, with what they are worth and what is waiting on you. You approve, amend or decline — and that decision is what we act on.',
+    hero: 'boxes-stacked',
     blocks: [
       {
         heading: 'What lands in your workspace',
@@ -173,6 +174,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'Anything that has to be resolved before it can move.',
           'The date it has to leave by.',
         ],
+        media: 'desk-laptop',
       },
       {
         heading: 'What you are asked to do',
@@ -187,6 +189,40 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
         ],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — the example that shows the service running. */
+    illustration: {
+      label: 'An order, from arrival to decision',
+      intro:
+        'Every order runs the same path. The stages do not change with the size of the order or the number of lines on it.',
+      stages: [
+        {
+          label: 'It arrives',
+          detail:
+            'An order raised against Mercenta by a UK buyer appears in your workspace, with its lines and quantities.',
+        },
+        {
+          label: 'It is read',
+          detail:
+            'Anything that has to be resolved before the order can move is identified and shown against it, rather than left to be discovered later.',
+        },
+        {
+          label: 'You decide',
+          detail:
+            'One decision, on the record: approve it, amend it or decline it. Nothing moves until you have answered.',
+        },
+        {
+          label: 'It moves',
+          detail:
+            'The movement, the paperwork and the reply to the buyer are carried for you, and the outcome appears beside the decision you made.',
+        },
+      ],
+    },
+    limits: [
+      'We do not approve an order on your behalf, and we do not treat silence as approval.',
+      'We do not change quantities or prices without your decision.',
+      'We do not promise that an order will arrive. We carry the orders that do.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
   {
     id: 'client-portal',
@@ -200,6 +236,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
     heading: 'One place to watch it happen.',
     lede:
       'Your portal is where the retail side of your business lives: what is moving, what is waiting on you, what has landed and what has been paid.',
+    hero: 'desk-tablet',
     blocks: [
       {
         heading: 'What is in the portal',
@@ -209,6 +246,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'Documents and compliance, and what is due for renewal.',
           'Invoices, settlements and every deduction explained against the order behind it.',
         ],
+        media: 'warehouse-aisle',
       },
       {
         heading: 'Who sees what',
@@ -222,6 +260,37 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'The portal is reached through Partner Login. Brand accounts are created during onboarding.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — one product's life, stage by stage. */
+    illustration: {
+      label: 'Your product, from listing to settlement',
+      intro:
+        'This is the life of one product in the portal. Every stage sits on the same record, so a figure at one end can be checked against the order at the other.',
+      stages: [
+        {
+          label: 'Registered',
+          detail:
+            'The product is set up with the requirements and documents that apply to it, and shown as ready or waiting.',
+        },
+        {
+          label: 'Ordered',
+          detail: 'An order arrives against it, and the decision waiting on you appears beside it.',
+        },
+        {
+          label: 'Moved',
+          detail: 'The consignment is tracked with its milestones, from collection through to delivery.',
+        },
+        {
+          label: 'Settled',
+          detail:
+            'The invoice and every deduction are shown against the order behind them, and what you were paid sits on the same record.',
+        },
+      ],
+    },
+    limits: [
+      'We do not show you another brand’s products, orders or money. The workspace is yours alone.',
+      'We do not leave a deduction unexplained: every line is shown against the order behind it.',
+      'We do not create access for anyone who has not been given a named account during onboarding.',
     ],
     cta: { label: 'Partner Login', to: 'contact' },
   },
@@ -237,6 +306,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
     heading: 'A listing that is accurate keeps selling.',
     lede:
       'A product that is described wrongly, missing a document, or out of step with the requirement stops selling — often without anyone noticing. Mercenta watches that, and tells you before it becomes a problem.',
+    hero: 'shelves-grocery',
     blocks: [
       {
         heading: 'What is checked',
@@ -245,6 +315,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'Whether the listing still matches the product you actually supply.',
           'Anything that has lapsed and would put an order on hold.',
         ],
+        media: 'page-product-display',
       },
       {
         heading: 'How you hear about it',
@@ -252,7 +323,43 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'A finding appears against the product, with what is missing and what to do about it. You keep the decisions about the product; we keep the requirement current.',
         ],
       },
+      {
+        heading: 'What stays yours',
+        body: [
+          'The product, the description and the decision about both. A finding is a prompt rather than an instruction: what changes about your product remains your call.',
+        ],
+      },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — what happens between one check and the next. */
+    illustration: {
+      label: 'A listing, checked and corrected',
+      intro:
+        'This is what happens between one check and the next. The point is that you hear about a problem while it is still cheap to fix.',
+      stages: [
+        {
+          label: 'Checked',
+          detail: 'Every requirement that applies to the product is read against what is actually held for it.',
+        },
+        {
+          label: 'Compared',
+          detail: 'The listing is compared with the product you supply, so a description that has drifted is found.',
+        },
+        {
+          label: 'Reported',
+          detail: 'A finding appears against the product, naming what is missing and what to do about it.',
+        },
+        {
+          label: 'Corrected',
+          detail: 'You supply or approve the correction, and the finding closes with the date it was resolved.',
+        },
+      ],
+    },
+    limits: [
+      'We do not change your listing without your approval.',
+      'We do not decide what a product must have: that is set by the product and its category, not by us.',
+      'We do not assume a listing stays healthy. It is watched, and a finding is raised when it is not.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
   {
     id: 'reporting-analytics',
@@ -266,6 +373,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
     heading: 'The picture, without the spreadsheet.',
     lede:
       'Reports are built from the same records you see in your workspace, so a figure in a report and a figure on an order can never disagree.',
+    hero: 'desk-laptop',
     blocks: [
       {
         heading: 'What you can see',
@@ -274,6 +382,7 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'Movement and delivery performance.',
           'Settlements and deductions, reconciled against the orders behind them.',
         ],
+        media: 'desk-tablet',
       },
       {
         heading: 'Why it is trustworthy',
@@ -281,7 +390,44 @@ export const PUBLIC_PLATFORM_PAGES: readonly PublicContentPage[] = [
           'Every number is derived from a tenant-scoped record. Nothing on Mercenta is a decorative chart: if a figure appears, there is a record behind it.',
         ],
       },
+      {
+        heading: 'Who can see a report',
+        body: [
+          'A report is scoped to your workspace like everything else. No figure on it is drawn from another brand’s trading, and there is no shared view across brands.',
+        ],
+      },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 3 (2026-11-27) — how a figure is traced back to its record. */
+    illustration: {
+      label: 'One figure, traced back to its record',
+      intro:
+        'A report is only worth reading if you can follow a number back to the thing that produced it. This is the path every figure here takes.',
+      stages: [
+        {
+          label: 'The order',
+          detail: 'The order is the first record, carrying its lines, quantities and the value behind it.',
+        },
+        {
+          label: 'The movement',
+          detail: 'The consignment and its delivery are recorded against that same order.',
+        },
+        {
+          label: 'The settlement',
+          detail: 'The invoice, the payment and any deduction are matched to it.',
+        },
+        {
+          label: 'The report',
+          detail:
+            'A figure is summed from those records, so a report and an order can never disagree about the same thing.',
+        },
+      ],
+    },
+    limits: [
+      'We do not publish a figure we cannot point at a record for.',
+      'We do not present an estimate as though it were a measurement.',
+      'We do not build a report around another brand’s trading.',
+    ],
+    cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
 ];
 /* ── Solutions ────────────────────────────────────────────────────────────── */

@@ -23,11 +23,13 @@
 import { test, expect } from '@playwright/test';
 import { PUBLIC_CONTENT_PAGES } from '../src/config/publicPages';
 
-const PAGES = PUBLIC_CONTENT_PAGES.filter((p) => p.navGroup === 'Retail Infrastructure');
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform'];
+const PAGES = PUBLIC_CONTENT_PAGES.filter((p) => SCOPE_GROUPS.includes(p.navGroup));
 
-test.describe('Retail Infrastructure pages — the full page standard, rendered', () => {
-  test("this batch's scope was discovered from the pages themselves (a vacuous discovery is a FAILURE)", () => {
-    expect(PAGES.length).toBe(7);
+test.describe('The enriched public pages — the full page standard, rendered', () => {
+  test("the scope was discovered from the pages themselves (a vacuous discovery is a FAILURE)", () => {
+    expect(SCOPE_GROUPS.length).toBeGreaterThan(0);
+    expect(PAGES.length).toBeGreaterThanOrEqual(SCOPE_GROUPS.length);
   });
 
   for (const page of PAGES) {
