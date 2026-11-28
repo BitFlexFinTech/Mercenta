@@ -160,7 +160,16 @@ const firstTaskToken = (text) => {
    * with no work token still yields '' (see the self-check below), so the contract is unchanged
    * in force and only wider in vocabulary.
    */
-  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S|INT)\s?-?\d+[a-z]?|PHASE\s?-?[A-Z]\d?)\b/i);
+  /**
+   * §REPOINTED 2026-11-28 — the vocabulary accepts the PLAIN-DIGIT phase form.
+   * The owner's frontend adoption (docs/FRONTEND_V1_ADOPTION_2026-11-28.md) is a
+   * SEPARATE programme, numbered PHASE 0…6, and its NEXT TASK is "PHASE 1 — …".
+   * The letter form (`PHASE C`) required a letter straight after the keyword, so a
+   * correct, agreed task label produced NO token and the mirror check failed. This is
+   * a WIDENING only: a phrase with no work token still yields '' (self-check below),
+   * and the two files must still name the SAME token.
+   */
+  const m = value.match(/\b(?:(?:BATCH|E2E|WAVE|S|INT)\s?-?\d+[a-z]?|PHASE\s?-?(?:\d+|[A-Z]\d?))\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -187,6 +196,9 @@ test(
        documents agreed. The sub-phase form is now accepted too. */
     firstTaskToken('NEXT TASK: §PHASE C2 → G — continue') === 'PHASE C2' &&
     firstTaskToken('NEXT TASK: PHASE C4 — primitives') === 'PHASE C4' &&
+    /* §REPOINTED 2026-11-28 — the FRONTEND V1 adoption programme uses plain digits. */
+    firstTaskToken('NEXT TASK: **PHASE 1 — FRONTEND V1: adopt the exact code**') === 'PHASE 1' &&
+    firstTaskToken('NEXT TASK: PHASE 0 — read, measure, pin') === 'PHASE 0' &&
     /* §REPOINTED 2026-11-19 — the integration programme's own family. */
     firstTaskToken('NEXT TASK: INT-1 — prove Drive write') === 'INT-1' &&
     firstTaskToken('NEXT TASK: **INT 2 — six system pairs**') === 'INT 2' &&

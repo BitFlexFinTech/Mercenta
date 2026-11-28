@@ -7224,4 +7224,49 @@ longer match that owner; (d) one 404/headers fetch failed and needs a re-run to 
 Two of those need an OWNER DECISION (legacy-shell vs console for the live flows; follow the published design or pin
 one design), so they are recorded in `OUTSTANDING BLOCKER` (7) with the exact question, and `npm run verify:live`
 exits 1 until they are decided and repointed. It must never be reported as green in the meantime.
+## §FRONTEND V1 PHASE 0 — THE OWNER'S EXACT FRONTEND PINNED AND PROVED, AND THE PORT ADMITTED (2026-11-28)
+
+**The owner's correction, recorded verbatim.** *"this is the frontend i asked for:
+https://github.com/BitFlexFinTech/mercenta-frontend-v1 i did not asdk you to just copy the design and layout i said
+use this exact code."* They were right, and the repository's own history says so.
+
+**The claim now falsified at source.** The console in `src/next/**` is a **port**, not their code: commit `de4e667`
+(2026-11-25) is titled *"wip(next): port the AI Studio console behind an explicit switch"* ("42 files / 13,601 lines",
+"83 type errors from the stale AI Studio snapshot"); measured today it has **0** files importing the owner's
+component library and **66** importing the hand-written `ConsolePrimitives`. A port is a rewrite; the instruction
+was the exact code.
+
+**The source of truth, pinned.** `github.com/BitFlexFinTech/mercenta-frontend-v1` (private) · `main` @
+`9f069f51f52a13ec61f348994a0a430c0b9cdf52` · last commit 2026-11-26 · `metadata.json` = an AI Studio export of
+*"Mercenta Partners operations console across wholesale retail, BWS, and talent commerce"* · **254 `.tsx` + 315
+`.ts` = 192,469 lines** · frontend only (no `scripts/`, `e2e/`, `supabase/`). Cloned **read-only** to
+`.reference/mercenta-frontend-v1` (now gitignored with a written reason) — never edited, never bundled.
+
+**Measured against this repository's `src/`:** **610 vs 580 files · 468 byte-identical · 98 different · 44 only
+here · 14 only there.** The divergence is concentrated in `src/next` (69 different / 23 only-here / 14 only-there),
+and the two consoles are **different implementations of the same screens with renamed files** (theirs:
+`AdminAuditLogScreen/View`, `BrandCrmScreen/View`, `ControlCentreScreen/View`, `FounderInvestorScreen/View`,
+`FulfillmentTrackScreen/View`, `MarketingHubScreen/View`, `PartnershipsScreen/View`; here: renamed equivalents plus
+screens they do not have — Calendar, Vertical Portfolio, Homepage Editor, the panel sets). Theirs is larger:
+~**48 screens** in Screen/View pairs and **95** nav destinations. Of the 29 differing files *outside* `src/next`,
+**17 were changed here after 2026-11-26** and carry newer work (public pages, homepage contrast, theme shims, the
+§PHASE D tables) — those are KEPT, with their UI applied to them, never over them.
+
+**Their build, proved on this machine (reference clone only):** `npm install` → **ERESOLVE** (their `esbuild ^0.25.0`
+vs `vite 8.4`'s peer `^0.27 || ^0.28`); with `--legacy-peer-deps` → **EXIT=0**; `npm run build` →
+**`✓ built in 346ms`, BUILD_EXIT=0**. No source file was edited to achieve that.
+
+**Recorded and gated.** `docs/FRONTEND_V1_ADOPTION_2026-11-28.md` holds the measured comparison, the six phases,
+the risks and the **hash gate** (a committed SHA-256 manifest of every adopted file; the standard command FAILS on
+any undeclared change, so "exact code" becomes checkable). Registry row `frontend-v1-exact-adoption` added
+(`in_progress`, BUILD), counts reconciled to **601 entries**. The resume gate's label vocabulary was widened to
+accept the programme's plain-digit phases (`PHASE 0…6`), **self-checked**, never loosened.
+
+**The live site:** the owner chose *"Keep it live until the new frontend is wired, then switch"* — recorded in §9 of
+the adoption document. **No publish until the adoption is wired and rendered-checked.**
+
+**Owed, and named:** the file-by-file decision table (29 + 44 + 14), the manifest + hash gate, adoption of their
+console, the test/gate repoint with absence guards, rendered comparison per screen, then publish and retire the
+port. **Three decisions are the owner's:** D1 the port-only screens · D2 the ads surface and Lovable homepage
+components · D3 the console default. **Nothing in the product has been replaced.**
 

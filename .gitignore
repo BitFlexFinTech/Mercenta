@@ -64,6 +64,15 @@ Review Zip/*
 # read/applied during implementation. Reference material, never bundled.
 .skills/
 
+# ── §PHASE 0 (2026-11-28) — THE OWNER'S FRONTEND, CLONED FOR EXACT ADOPTION ───
+# `mercenta-frontend-v1` (github.com/BitFlexFinTech/mercenta-frontend-v1, commit
+# 9f069f5) is the frontend the owner named as the source of truth: "use this exact
+# code", not a re-implementation. It is cloned here ONLY to be read, diffed and
+# adopted file-by-file. It is never bundled, never edited, and never deployed from
+# this folder. Ignored so the canonical tree stays clean; its provenance is the
+# commit hash and the comparison table in docs/FRONTEND_V1_ADOPTION_2026-11-28.md.
+.reference/
+
 # bug-patrol run data (screenshots, findings, app map, routines) — all machine-generated
 .bugpatrol/runs/
 .bugpatrol/appmap.json
