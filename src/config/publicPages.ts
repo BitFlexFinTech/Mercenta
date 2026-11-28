@@ -896,6 +896,11 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
     heading: 'Terms agreed per brand, not a published price list.',
     lede:
       'Mercenta does not sell a subscription with a posted price. What it costs to carry the UK retail side depends on the products, the volumes and the work — so it is agreed with each brand.',
+    /* §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — the page opens with a picture rather than as text
+       only. The subject is an arrangement worked out and written down, and a notebook and pen on a desk
+       is the honest image of it: a published price list is precisely what this page says does not
+       exist. */
+    hero: 'desk-notebook',
     blocks: [
       {
         heading: 'Why there is no price list',
@@ -908,8 +913,11 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
         bullets: [
           'What Mercenta carries, and what the brand keeps.',
           'The commercial basis, agreed in writing before anything moves.',
-          'What is charged and what is deducted, shown separately so nothing hides inside a margin.',
+          'What is charged and what is deducted, shown separately so nothing hides inside the total.',
         ],
+        /* The working session the section describes — terms worked through together, over the plans
+           for the range. */
+        media: 'desk-laptop',
       },
       {
         heading: 'How to get a real answer',
@@ -917,6 +925,41 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
           'Tell us what you make and where you sell. We will tell you what the arrangement would look like — including if the honest answer is that it does not suit you.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — the worked example: the order in which terms are
+       agreed. The SEQUENCE only — no amount, no price and no percentage, because a page about pricing
+       must never publish a figure it has not agreed with anybody. */
+    illustration: {
+      label: 'How terms are agreed',
+      intro:
+        'An arrangement is worked out with the brand rather than taken off a price list. These are the stages, in the order they happen.',
+      stages: [
+        {
+          label: 'What you make',
+          detail:
+            'The range, the volumes and where the products already sell are the starting point, because the work follows the products.',
+        },
+        {
+          label: 'What we would carry',
+          detail:
+            'Which parts of the retail side Mercenta would take on is set out plainly, so both sides are describing the same job.',
+        },
+        {
+          label: 'The basis, in writing',
+          detail:
+            'How the arrangement is paid for is agreed and written down before anything moves, with what is charged and what is deducted listed separately.',
+        },
+        {
+          label: 'Looked at again',
+          detail:
+            'The arrangement is reviewed as the products and the volumes change, rather than being fixed once and left alone.',
+        },
+      ],
+    },
+    limits: [
+      'We do not publish a price list, and we do not quote a number before we understand the products and the work involved.',
+      'We do not hide a charge inside a total; what is charged and what is deducted are shown separately.',
+      'We do not agree terms that suit us and not the brand — if the honest answer is that it does not fit, we say so.',
     ],
     cta: { label: 'Contact Mercenta', to: 'contact' },
   },
@@ -931,6 +974,9 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
     heading: 'Talk to a person.',
     lede:
       'Whether you are a brand, an agency or a partner, an enquiry reaches a person at Mercenta rather than a queue.',
+    /* §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — the page opens with a picture. The subject is
+       reaching a person, and a telephone beside an open notebook on a desk is the honest image of it. */
+    hero: 'desk-phone',
     blocks: [
       {
         heading: 'What to tell us',
@@ -939,6 +985,8 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
           'Where you sell today, if anywhere.',
           'What you want the UK to look like in a year.',
         ],
+        /* What you write down before getting in touch: the same desk, one step earlier. */
+        media: 'desk-notebook',
       },
       {
         heading: 'What happens next',
@@ -952,6 +1000,40 @@ export const PUBLIC_COMMERCIAL_PAGES: readonly PublicContentPage[] = [
           'Brands ready to apply can use Request Partner Access, which starts the partner application. Mercenta’s registered company details and contact address are in the footer of every page.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — the worked example: what happens after an enquiry
+       arrives. The SEQUENCE only — no amount, no price and no percentage. */
+    illustration: {
+      label: 'What happens after you get in touch',
+      intro:
+        'An enquiry reaches a person rather than a queue. These are the stages that follow, whoever you are and whatever you are asking.',
+      stages: [
+        {
+          label: 'It is read',
+          detail:
+            'The enquiry is read by someone who can answer it, rather than being sorted by a form or left to sit unanswered.',
+        },
+        {
+          label: 'You hear back',
+          detail:
+            'You get a reply from a person — a real answer, or a straight question — rather than a message that says only that it arrived.',
+        },
+        {
+          label: 'The fit is checked',
+          detail:
+            'If it needs it, we look at what you make and where it sells before saying whether the UK retail side is a fit for the product.',
+        },
+        {
+          label: 'You hear either way',
+          detail:
+            'If it is not a fit you are told plainly and quickly, because a fast no is more useful to you than a slow maybe.',
+        },
+      ],
+    },
+    limits: [
+      'We do not put an enquiry into a queue or an automated form; it reaches a person.',
+      'We do not say the UK will want a product before we have looked at it.',
+      'We do not pass an enquiry to anyone outside Mercenta.',
     ],
     cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },

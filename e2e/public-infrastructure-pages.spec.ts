@@ -28,11 +28,15 @@
  * §Phase §PUBLIC SURFACES BATCH 5 PART 5 (2026-11-28) — `'Company'` is APPENDED by the same rule, in
  * the same change as the gate, so the two scopes cannot drift: the two Company pages (`why-mercenta`,
  * `partnerships`) are asserted here exactly as the sixteen before them are.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — `'Commercial'` is APPENDED by the same rule,
+ * in the same change as the gate, so the two scopes cannot drift: the two Commercial pages (`pricing`,
+ * `contact`) are asserted here exactly as the eighteen before them are.
  */
 import { test, expect } from '@playwright/test';
 import { PUBLIC_CONTENT_PAGES } from '../src/config/publicPages';
 
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial'];
 const PAGES = PUBLIC_CONTENT_PAGES.filter((p) => SCOPE_GROUPS.includes(p.navGroup));
 
 test.describe('The enriched public pages — the full page standard, rendered', () => {

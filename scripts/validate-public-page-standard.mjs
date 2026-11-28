@@ -58,6 +58,14 @@
  * `'Company'` is APPENDED, so the sixteen pages already checked stay checked. Company holds two pages
  * — `why-mercenta` and `partnerships`, the count read from S1b below and not from a task sentence
  * (Part 4's sentence named four Solutions pages and the group held five, which S1b found by name).
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 6 (2026-11-28) — THE LIST GROWS AGAIN, BY THE SAME RULE.
+ * `'Commercial'` is APPENDED, so the eighteen pages already checked stay checked. Commercial holds two
+ * pages — `pricing` and `contact`, the count read from S1b below and not from a task sentence (the
+ * task text named two, which S1b confirms). `pricing` is the page S7 exists for: it is about what an
+ * arrangement costs, so its illustration states the ORDER in which terms are agreed and carries no
+ * amount, no price and no percentage — a page about pricing must never publish a figure it has not
+ * agreed with anybody.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -84,7 +92,7 @@ globalThis.fetch = async (...args) => {
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
 /** This batch's scope — the navigation groups whose pages have been enriched, in the order they were done. */
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions', 'Company', 'Commercial'];
 
 /* ── S0 — the owners were found at all ────────────────────────────────────── */
 const pagesSrc = read('src/config/publicPages.ts');
