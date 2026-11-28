@@ -240,5 +240,34 @@ declaration (their `next.css` scale, their components, their copy) or convert it
 proving the port is gone. **No gate may be weakened or deleted to make this pass** — that is the rule, and
 the 16 are listed here so the work cannot be quietly dropped.
 
+---
+
+## 13. THE BLANK SCREEN — IT WAS THE LOCAL SERVER, NOT THE FRONTEND (2026-11-28)
+
+**Symptom.** The owner opened `http://127.0.0.1:5211/` and saw a **blank screen**.
+
+**Cause, measured.** `vite preview` had hung: **two instances were listening on the same port** (one on IPv6
+`::1`, one on IPv4 `127.0.0.1`), and a request to `127.0.0.1:5211` received **no response at all** (`curl` →
+`HTTP 000` after 8 s). The browser therefore never even committed the navigation — the page was not blank
+because the app failed; nothing was ever delivered.
+
+**Proof the frontend was fine.** The SAME built `dist/` served by a plain static server:
+
+| Load | Result |
+|---|---|
+| Cold (no session) | `readyState: complete`, `#root` populated, the public homepage renders |
+| Signed in (Super Admin — Tadii) | *"Mercenta Partners Operations Console"* with Overview / Control Centre / Work Management / Purchase Orders / Logistics Hub / Returns Tracking / Calendar … |
+| Browser console | **zero errors** (one informational Sentry line: no DSN configured) |
+
+**Fixed at source, so it cannot recur.** `scripts/serve-dist.mjs` (`npm run serve:dist`) replaces
+`vite preview` for showing a build locally: one port, one process, a clear refusal if the port is taken,
+correct MIME types, and a single-page fallback. Re-verified through it: cold **complete**, signed-in
+**Operations Console**, **no errors**.
+
+**Command to show the build:** `npm run serve:dist` → **http://127.0.0.1:5223/**
+
+**What this was NOT:** a fault in the owner's frontend, and not a reason to change a single adopted file —
+the fingerprint gate still reports all 106 byte-identical.
+
 **Nothing is merged, nothing is published.** The live site still serves `4b20307` (the port), as the owner
 instructed until the new frontend is wired.

@@ -54,6 +54,7 @@
     "test:e2e": "playwright test",
     "verify:live": "node scripts/verify-live-demo.mjs && node scripts/verify-live-canonical-tables.mjs",
     "verify:live:tables": "node scripts/verify-live-canonical-tables.mjs",
+    "serve:dist": "node scripts/serve-dist.mjs",
     "sync:docs-to-drive": "node scripts/sync-docs-to-drive.mjs",
     "validate:inventory": "node scripts/validate-p8-inventory.mjs",
     "validate:logistics-providers": "node scripts/validate-logistics-providers.mjs",
