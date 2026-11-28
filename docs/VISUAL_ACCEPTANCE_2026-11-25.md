@@ -8,10 +8,13 @@
 > `WHAT THE PASS FOUND` section below is written by hand.
 >
 > **THE TITLE DATE IS THE DATE OF THE PASS THAT PRODUCED THIS TABLE, NOT A HISTORICAL LABEL**
-> (regenerated 2026-11-27 after the console port changed 44 console screens from placeholders to
-> real screens). The FILE NAME keeps its original `2026-11-25` because the path is pinned by
+> — it is generated on every run, so it always names the pass the table came from. The FILE NAME
+> keeps its original `2026-11-25` because the path is pinned by
 > `scripts/validate-visual-acceptance.mjs`; the content is always the LATEST pass, never an
-> archive — so no reader has to infer a date from the file name.
+> archive. **No sentence in this banner may carry a hand-written date** — one did (§BATCH 4b,
+> 2026-11-28: a parenthetical still said the table had been regenerated on 2026-11-27, so the
+> banner contradicted its own generated title), and it was removed rather than re-dated, because
+> a hand-maintained date inside a generated file goes stale on the very next run.
 
 ## HOW THE PASS WAS RUN
 
@@ -189,7 +192,32 @@
 _Written by hand after looking at the captures. The table above proves each screen rendered; only a
 person can say what it looks like._
 
+**§BATCH 4b (2026-11-28) — THE THREE DEFECTS THIS SECTION RECORDED AS "NOT FIXED" ARE FIXED, AND THE
+PASS IS NOW CLEAN.** This pass is **296/296 captures — PASS 296 · PLACEHOLDER 0 · WARN 0 · FAIL 0**. The
+previous pass was PASS 293 · WARN 3, and the three warnings were exactly the ones the §BATCH 4 entry below
+diagnosed. All three were fixed at source in §BATCH 4b (the registry row is
+`design-batch4b-homepage-fixed-dark-contrast`; the full record is in `PROJECT_STATUS.md` and
+`STATUS_CHECK.md`):
+
+| Was | Now | Why it was wrong |
+|---|---|---|
+| “Growth”, the flow diagram's final step — **1:1** in both appearances | PASS | the element authored **two** backgrounds (`bg-paper` *and* `bg-ink`); `cn()` joins rather than merges, so `bg-paper` won under `text-paper` |
+| the photo badges and the “Origin” bar — **1.41:1** / **1.31:1** in the light appearance | PASS | `bg-ink/80` was re-pointed at the appearance-reactive `--mr-surface` by the **generated** alpha-shim layer, so in the light appearance a black scrim became a white wash |
+| brand **Support & Team** — message meta text **1.17:1** | PASS | `text-muted` (#A5A5A5) sat on the **orange** accent fill (#FF6A00); the fill now chooses its own tokens (`--mr-on-accent`) |
+
+**Two further defects were found while proving the middle one, and fixed with it.** The shim generator
+**refused to run at all** (19 unresolved colour keys), so the committed stylesheet had not been its own
+output since the `paper`/`signal` utilities arrived; and because Tailwind v4 **drops** the alpha modifier for
+a `var()`-based colour, that stale file had left **six** alpha utilities rendering **fully opaque**. Those six
+tints are shimmed again.
+
+**THE REST OF THIS SECTION IS THE §BATCH 4 PASS, KEPT AS ITS OWN RECORD.** It describes the pass that
+produced the *previous* table, and it is accurate about what that pass found — including the sentence “None
+of these is fixed in this increment”, which was true then and is not true now. **The state of the three
+defects is the table immediately above, not that sentence.**
+
 **§BATCH 4 (2026-11-28) — THE INSTRUMENT NOW SEES EVERY COLOUR, AND WHAT IT FOUND.**
+
 
 *This section is written by hand and preserved across re-runs (the runner keeps everything below the
 `## WHAT THE PASS FOUND` heading).*
