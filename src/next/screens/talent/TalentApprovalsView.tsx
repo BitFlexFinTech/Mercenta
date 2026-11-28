@@ -1,337 +1,129 @@
-import { useState } from 'react';
-import {
-  ConsoleTabs,
-  NoticeBanner,
-  SectionCard,
-  formatGbp,
-} from '@/next/components/ConsoleCharts';
+/**
+ * §TALENT APPROVALS — ONE READ-ONLY VERIFICATION TAB (2026-11-28).
+ *
+ * The previous version had four tabs — submissions, listings, compliance documents and
+ * purchase-order drafts — with poll/review/approve/reject actions. The CAA-TalAg dataset
+ * contains NONE of those record types and no write store, so every action would have been
+ * a control that changed nothing.
+ *
+ * The owner's decision: remove the three source-less tabs and all write controls, keep ONE
+ * Verification tab showing `SourceVerificationStamp` (tier, confidence, unresolved fields,
+ * date checked) as read-only, keep the metrics panel, and say plainly on screen that
+ * approval workflows are not available here.
+ */
+import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
   ConsoleTable,
+  EmptyStateBlock,
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
   MetricStrip,
   PageHeader,
-  SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
 
-export type ApprovalQueueTab = 'submissions' | 'listings' | 'compliance' | 'purchase_orders';
+/** The only tab that has a source. The type is kept narrow on purpose. */
+export type ApprovalQueueTab = 'verification';
 
-export interface ApprovalSubmissionRow {
+export interface ApprovalVerificationRow {
   id: string;
-  brandId: string;
-  brandName: string;
-  productName: string;
-  sku: string;
-  asin?: string;
-  status: string;
-  statusLabel: string;
-  statusTone: SemanticTone;
-  submittedAt: string;
-  simulated: boolean;
-  rejectionReason?: string;
-}
-
-export interface ApprovalListingRow {
-  id: string;
-  brandId: string;
-  brandName: string;
-  sku: string;
-  productName: string;
-  area: string;
-  title: string;
-  detail: string;
-  impact: string;
-  status: 'suggested' | 'pending' | 'approved' | 'edited' | 'rejected';
-  suggestedCopy?: string;
-  editedCopy?: string;
-}
-
-export interface ApprovalComplianceRow {
-  id: string;
-  brandId: string;
-  brandName: string;
-  docTypeLabel: string;
-  status: string;
-  statusLabel: string;
-  statusTone: SemanticTone;
-  version: number;
-  expiryDate?: string;
-}
-
-export interface ApprovalPoRow {
-  id: string;
-  brandId: string;
-  brandName: string;
-  poNumber: string;
-  statusLabel: string;
-  statusTone: SemanticTone;
-  poValueGbp: number;
-  orderDate: string;
-  hasDraft: boolean;
-  draftId?: string;
-  draftReason?: string;
+  /** What the stamp verifies: a brand or a discovered product. */
+  subject: string;
+  subjectKind: 'Brand' | 'Product';
+  /** `verification.verificationTier`. */
+  tier: string;
+  tierTone: SemanticTone;
+  /** `verification.confidence`. */
+  confidence: string;
+  /** `verification.unknownFields.length`. */
+  unknownFieldCount: number;
+  /** `verification.dateChecked`. */
+  dateChecked: string;
+  /** `verification.evidenceSummary`. */
+  evidenceSummary: string;
 }
 
 export interface TalentApprovalsViewProps {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  canMutate: boolean;
   activeTab: ApprovalQueueTab;
   onTabChange: (tab: ApprovalQueueTab) => void;
   metrics: MetricItem[];
-  submissions: ApprovalSubmissionRow[];
-  listings: ApprovalListingRow[];
-  complianceDocs: ApprovalComplianceRow[];
-  purchaseOrders: ApprovalPoRow[];
-  notice: string | null;
-  actionError: string | null;
-  busyId: string | null;
-  onPollSubmission: (submissionId: string) => void;
-  onReviewListing: (
-    brandId: string,
-    recId: string,
-    decision: 'approved' | 'edited' | 'rejected',
-    editedCopy?: string
-  ) => void;
-  onReviewCompliance: (docId: string, decision: 'approve' | 'reject', note?: string) => void;
-  onApprovePoDraft: (poId: string, brandId: string, draftId?: string) => void;
-  onOpenPurchaseOrders: () => void;
+  stamps: ApprovalVerificationRow[];
 }
 
-function listingTone(s: ApprovalListingRow['status']): SemanticTone {
-  if (s === 'approved' || s === 'edited') return 'success';
-  if (s === 'rejected') return 'danger';
-  return 'warning';
+function tierTone(tier: string): SemanticTone {
+  if (/primary|verified|high/i.test(tier)) return 'success';
+  if (/secondary|medium|partial/i.test(tier)) return 'warning';
+  return 'neutral';
 }
+
+const columns: ConsoleColumn<ApprovalVerificationRow>[] = [
+  {
+    key: 'subject',
+    header: 'Subject',
+    render: (r) => (
+      <div>
+        <div className="font-medium text-zinc-950">{r.subject}</div>
+        <div className="text-[12px] text-zinc-500">{r.subjectKind}</div>
+      </div>
+    ),
+  },
+  {
+    key: 'tier',
+    header: 'Verification Tier (read-only)',
+    render: (r) => <InlineStatus label={r.tier} tone={r.tierTone} />,
+  },
+  {
+    key: 'confidence',
+    header: 'Confidence',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.confidence}</span>,
+  },
+  {
+    key: 'unknown',
+    header: 'Unresolved Fields',
+    align: 'right',
+    render: (r) => <span className="font-mono tabular-nums">{r.unknownFieldCount}</span>,
+  },
+  {
+    key: 'date',
+    header: 'Date Checked',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.dateChecked}</span>,
+  },
+  {
+    key: 'evidence',
+    header: 'Evidence',
+    hideOnMobile: true,
+    render: (r) => <span className="text-[12px] text-zinc-600">{r.evidenceSummary}</span>,
+  },
+];
 
 export function TalentApprovalsView({
   loading,
   error,
   onRetry,
-  canMutate,
   activeTab,
   onTabChange,
   metrics,
-  submissions,
-  listings,
-  complianceDocs,
-  purchaseOrders,
-  notice,
-  actionError,
-  busyId,
-  onPollSubmission,
-  onReviewListing,
-  onReviewCompliance,
-  onApprovePoDraft,
-  onOpenPurchaseOrders,
+  stamps,
 }: TalentApprovalsViewProps) {
-  const [selectedListing, setSelectedListing] = useState<ApprovalListingRow | null>(null);
-  const [editedCopyDraft, setEditedCopyDraft] = useState('');
-  const [selectedCompliance, setSelectedCompliance] = useState<ApprovalComplianceRow | null>(null);
-  const [complianceReason, setComplianceReason] = useState('');
-
-  const subColumns: ConsoleColumn<ApprovalSubmissionRow>[] = [
-    {
-      key: 'product',
-      header: 'Product Submission',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.productName}</div>
-          <div className="text-[12px] text-zinc-500 font-mono">
-            {r.sku} · {r.brandName}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Submission State',
-      render: (r) => <InlineStatus label={r.statusLabel} tone={r.statusTone} />,
-    },
-    {
-      key: 'asin',
-      header: 'ASIN / Date',
-      render: (r) => (
-        <div className="text-[12px] font-mono text-zinc-600">
-          {r.asin || 'Pending ASIN'} · {r.submittedAt}
-        </div>
-      ),
-    },
-    {
-      key: 'action',
-      header: 'Action',
-      align: 'right',
-      render: (r) => (
-        <button
-          type="button"
-          disabled={!canMutate || busyId === r.id}
-          onClick={() => onPollSubmission(r.id)}
-          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-40"
-        >
-          {busyId === r.id ? 'Checking…' : 'Poll status'}
-        </button>
-      ),
-    },
-  ];
-
-  const listingColumns: ConsoleColumn<ApprovalListingRow>[] = [
-    {
-      key: 'title',
-      header: 'Listing Recommendation',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.title}</div>
-          <div className="text-[12px] text-zinc-500">
-            {r.productName} ({r.sku}) · {r.brandName}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'area',
-      header: 'Area',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.area}</span>,
-    },
-    {
-      key: 'status',
-      header: 'Review Status',
-      render: (r) => <InlineStatus label={r.status} tone={listingTone(r.status)} />,
-    },
-    {
-      key: 'actions',
-      header: 'Inspect',
-      align: 'right',
-      render: (r) => (
-        <button
-          type="button"
-          onClick={() => {
-            setSelectedListing(r);
-            setEditedCopyDraft(r.editedCopy ?? r.suggestedCopy ?? '');
-          }}
-          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
-        >
-          Review
-        </button>
-      ),
-    },
-  ];
-
-  const complianceColumns: ConsoleColumn<ApprovalComplianceRow>[] = [
-    {
-      key: 'doc',
-      header: 'Compliance Document',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.docTypeLabel}</div>
-          <div className="text-[12px] text-zinc-500">
-            {r.brandName} · v{r.version}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Verification State',
-      render: (r) => <InlineStatus label={r.statusLabel} tone={r.statusTone} />,
-    },
-    {
-      key: 'expiry',
-      header: 'Expiry',
-      render: (r) => (
-        <span className="font-mono text-[12px] text-zinc-600">{r.expiryDate ?? '—'}</span>
-      ),
-    },
-    {
-      key: 'review',
-      header: 'Decision',
-      align: 'right',
-      render: (r) => (
-        <button
-          type="button"
-          onClick={() => {
-            setSelectedCompliance(r);
-            setComplianceReason('');
-          }}
-          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
-        >
-          Inspect &amp; Decide
-        </button>
-      ),
-    },
-  ];
-
-  const poColumns: ConsoleColumn<ApprovalPoRow>[] = [
-    {
-      key: 'po',
-      header: 'Purchase Order',
-      render: (r) => (
-        <div>
-          <div className="font-mono font-medium text-zinc-950">{r.poNumber}</div>
-          <div className="text-[12px] text-zinc-500">
-            {r.brandName} · {r.orderDate}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Order Status',
-      render: (r) => <InlineStatus label={r.statusLabel} tone={r.statusTone} />,
-    },
-    {
-      key: 'value',
-      header: 'PO Value',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.poValueGbp)}</span>,
-    },
-    {
-      key: 'action',
-      header: 'Queue Action',
-      align: 'right',
-      render: (r) => (
-        <div className="flex justify-end gap-2">
-          {r.hasDraft && (
-            <button
-              type="button"
-              disabled={!canMutate || busyId === r.id}
-              onClick={() => onApprovePoDraft(r.id, r.brandId, r.draftId)}
-              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
-            >
-              Approve Draft
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onOpenPurchaseOrders}
-            className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
-          >
-            Open PO Queue
-          </button>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Approvals & Review Queues"
-        description="Canonical Mercenta approval workflows across product catalog submissions, listing copy recommendations, UK compliance documents, and purchase order acknowledgements."
+        title="Approvals & Verification"
+        description="The verification stamps recorded in the CAA-TalAg dataset, shown exactly as the source publishes them."
+        meta={<span>Talent Commerce · CAA-TalAg dataset</span>}
       />
 
       <NoticeBanner
-        tone="warning"
-        title="IP Creative, Storefront & Royalty approvals omitted (entities not modelled)"
-        message="This queue renders Mercenta’s 4 canonical approval streams (ProductSubmission, ListingRecommendation, ComplianceDocument, PurchaseOrder ack/draft). CAA-TalAg approvals for Talent IP Creative Assets, Brand Storefronts, and Royalty Agreements are omitted until those schemas exist."
+        tone="info"
+        title="Read-only"
+        message="Approval workflows are not available in the Talent Commerce workspace. Verification stamps are read-only — there is no approve, reject, poll or publish action here."
       />
-
-      {notice && <NoticeBanner tone="success" message={notice} />}
-      {actionError && <NoticeBanner tone="danger" message={actionError} />}
 
       {loading ? (
         <LoadingRows rows={6} />
@@ -341,200 +133,45 @@ export function TalentApprovalsView({
         <>
           <MetricStrip items={metrics} columns={4} />
 
-          <ConsoleTabs<ApprovalQueueTab>
-            value={activeTab}
-            onChange={onTabChange}
-            ariaLabel="Approval queues"
-            tabs={[
-              { id: 'submissions', label: 'Product Submissions', count: submissions.length },
-              { id: 'listings', label: 'Listing Recommendations', count: listings.length },
-              { id: 'compliance', label: 'Compliance Documents', count: complianceDocs.length },
-              { id: 'purchase_orders', label: 'PO Ack & Drafts', count: purchaseOrders.length },
-            ]}
-          />
+          <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'verification'}
+              onClick={() => onTabChange('verification')}
+              className={`px-3 py-2 text-[13px] font-medium border-b-2 -mb-px ${
+                activeTab === 'verification'
+                  ? 'border-[var(--mr-accent)] text-zinc-950'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800'
+              }`}
+            >
+              Verification
+            </button>
+          </div>
 
           <SectionCard
-            title={
-              activeTab === 'submissions'
-                ? 'Catalog Product Submissions'
-                : activeTab === 'listings'
-                  ? 'Listing Copy & Readiness Recommendations'
-                  : activeTab === 'compliance'
-                    ? 'Compliance Document Verification Queue'
-                    : 'Purchase Orders Awaiting Action or Draft Approval'
-            }
+            title="Verification stamps"
+            description="Tier, confidence and unresolved-field count come from each record's own SourceVerificationStamp."
           >
-            {activeTab === 'submissions' && (
-              <ConsoleTable
-                rows={submissions}
-                columns={subColumns}
-                rowKey={(r) => r.id}
-                emptyTitle="No catalog submissions recorded"
-                emptyDescription="Submitted SKUs will appear here for SP-API status polling."
-              />
-            )}
-            {activeTab === 'listings' && (
-              <ConsoleTable
-                rows={listings}
-                columns={listingColumns}
-                rowKey={(r) => r.id}
-                emptyTitle="No listing recommendations open"
-                emptyDescription="Run catalog listing analysis to review copy and image proposals."
-              />
-            )}
-            {activeTab === 'compliance' && (
-              <ConsoleTable
-                rows={complianceDocs}
-                columns={complianceColumns}
-                rowKey={(r) => r.id}
-                emptyTitle="No compliance documents in queue"
-                emptyDescription="Uploaded brand compliance documents will appear here."
-              />
-            )}
-            {activeTab === 'purchase_orders' && (
-              <ConsoleTable
-                rows={purchaseOrders}
-                columns={poColumns}
-                rowKey={(r) => r.id}
-                emptyTitle="No POs awaiting acknowledgement"
-                emptyDescription="Received or under-review POs and on-behalf rejection drafts appear here."
-              />
-            )}
+            <ConsoleTable
+              rows={stamps}
+              columns={columns}
+              rowKey={(r) => r.id}
+              emptyTitle="No verification stamps"
+              emptyDescription="The CAA-TalAg dataset contains no verification stamps."
+            />
+          </SectionCard>
+
+          <SectionCard title="Not available in this workspace" description="Stated rather than faked.">
+            <ul className="text-[13px] text-zinc-600 space-y-1 list-disc pl-5">
+              <li>Product submissions — no submission records in the dataset.</li>
+              <li>Listing recommendations — no recommendation records in the dataset.</li>
+              <li>Compliance documents — the dataset holds verification stamps, not documents.</li>
+              <li>Purchase-order drafts — no purchase orders exist in this vertical.</li>
+            </ul>
           </SectionCard>
         </>
       )}
-
-      <SlideOverDrawer
-        open={Boolean(selectedListing)}
-        onClose={() => setSelectedListing(null)}
-        title={selectedListing?.title ?? 'Review Recommendation'}
-        subtitle={
-          selectedListing
-            ? `${selectedListing.productName} (${selectedListing.sku}) · ${selectedListing.brandName}`
-            : undefined
-        }
-      >
-        {selectedListing && (
-          <div className="space-y-4 text-[14px]">
-            <p className="text-zinc-700">{selectedListing.detail}</p>
-            <div className="text-[12px] text-zinc-500">Expected impact: {selectedListing.impact}</div>
-
-            <div className="space-y-1.5">
-              <label className="block text-[12px] font-medium text-zinc-700">
-                Suggested / Amended Copy
-              </label>
-              <textarea
-                rows={4}
-                value={editedCopyDraft}
-                onChange={(e) => setEditedCopyDraft(e.target.value)}
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-[13px]"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                type="button"
-                disabled={!canMutate || busyId === selectedListing.id}
-                onClick={() => {
-                  onReviewListing(selectedListing.brandId, selectedListing.id, 'approved');
-                  setSelectedListing(null);
-                }}
-                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
-              >
-                Approve
-              </button>
-              <button
-                type="button"
-                disabled={!canMutate || !editedCopyDraft.trim() || busyId === selectedListing.id}
-                onClick={() => {
-                  onReviewListing(
-                    selectedListing.brandId,
-                    selectedListing.id,
-                    'edited',
-                    editedCopyDraft
-                  );
-                  setSelectedListing(null);
-                }}
-                className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
-              >
-                Save Amended Copy
-              </button>
-              <button
-                type="button"
-                disabled={!canMutate || busyId === selectedListing.id}
-                onClick={() => {
-                  onReviewListing(selectedListing.brandId, selectedListing.id, 'rejected');
-                  setSelectedListing(null);
-                }}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-red-700 disabled:opacity-40"
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        )}
-      </SlideOverDrawer>
-
-      <SlideOverDrawer
-        open={Boolean(selectedCompliance)}
-        onClose={() => setSelectedCompliance(null)}
-        title={selectedCompliance?.docTypeLabel ?? 'Compliance Review'}
-        subtitle={
-          selectedCompliance
-            ? `${selectedCompliance.brandName} · v${selectedCompliance.version}`
-            : undefined
-        }
-      >
-        {selectedCompliance && (
-          <div className="space-y-4 text-[14px]">
-            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <span className="text-zinc-600">Current status</span>
-              <InlineStatus
-                label={selectedCompliance.statusLabel}
-                tone={selectedCompliance.statusTone}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-[12px] font-medium text-zinc-700">
-                Verification / Decision Note
-              </label>
-              <textarea
-                rows={3}
-                value={complianceReason}
-                onChange={(e) => setComplianceReason(e.target.value)}
-                placeholder="Optional approval note or mandatory rejection explanation…"
-                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-[13px]"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                type="button"
-                disabled={!canMutate || busyId === selectedCompliance.id}
-                onClick={() => {
-                  onReviewCompliance(selectedCompliance.id, 'approve', complianceReason);
-                  setSelectedCompliance(null);
-                }}
-                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
-              >
-                Approve Document
-              </button>
-              <button
-                type="button"
-                disabled={!canMutate || busyId === selectedCompliance.id}
-                onClick={() => {
-                  onReviewCompliance(selectedCompliance.id, 'reject', complianceReason);
-                  setSelectedCompliance(null);
-                }}
-                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-red-700 disabled:opacity-40"
-              >
-                Reject Document
-              </button>
-            </div>
-          </div>
-        )}
-      </SlideOverDrawer>
     </div>
   );
 }

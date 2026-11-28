@@ -457,45 +457,31 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             loading={isLoading}
             error={isError ? 'Simulated approvals fetch error.' : null}
             onRetry={() => setStateMode('populated')}
-            canMutate
-            activeTab="submissions"
+            activeTab="verification"
             onTabChange={() => {}}
             metrics={[
-              { id: 'sub', label: 'Product Submissions', value: isEmpty ? '0' : '2' },
-              { id: 'lst', label: 'Listing Recommendations', value: isEmpty ? '0' : '5' },
-              { id: 'doc', label: 'Compliance Documents', value: isEmpty ? '0' : '3' },
-              { id: 'po', label: 'PO Ack & Drafts', value: isEmpty ? '0' : '1' },
+              { id: 'b', label: 'Brands', value: isEmpty ? '0' : '3' },
+              { id: 'p', label: 'Products', value: isEmpty ? '0' : '5' },
+              { id: 'r', label: 'Relationships', value: isEmpty ? '0' : '3' },
+              { id: 's', label: 'Verification stamps', value: isEmpty ? '0' : '8' },
             ]}
-            submissions={
+            stamps={
               isEmpty
                 ? []
                 : [
                     {
-                      id: 'sub-1',
-                      brandId: 'preview-brand',
-                      brandName: 'Sample Brand Ltd',
-                      productName: 'Sample Signature Edition',
-                      sku: 'SKU-100',
-                      asin: 'B0PREVIEW1',
-                      status: 'under_amazon_review',
-                      statusLabel: 'Under Review',
-                      statusTone: 'info',
-                      submittedAt: '2026-11-24',
-                      simulated: true,
+                      id: 'brand-1',
+                      subject: 'Sample Brand Ltd',
+                      subjectKind: 'Brand',
+                      tier: 'Primary Source Verified',
+                      tierTone: 'success',
+                      confidence: 'High',
+                      unknownFieldCount: 0,
+                      dateChecked: '2026-11-20',
+                      evidenceSummary: 'Companies House record confirmed.',
                     },
                   ]
             }
-            listings={[]}
-            complianceDocs={[]}
-            purchaseOrders={[]}
-            notice={null}
-            actionError={null}
-            busyId={null}
-            onPollSubmission={() => {}}
-            onReviewListing={() => {}}
-            onReviewCompliance={() => {}}
-            onApprovePoDraft={() => {}}
-            onOpenPurchaseOrders={() => {}}
           />
         )}
       </main>

@@ -23,6 +23,7 @@ import type {
   TalentUkOpportunityRow,
   TalentWorkspaceProfile,
 } from '@/next/screens/talent/TalentWorkspaceView';
+import type { ApprovalVerificationRow } from '@/next/screens/talent/TalentApprovalsView';
 
 function rightsTone(status: string): SemanticTone {
   if (/confirmed$/i.test(status) && !/unconfirmed/i.test(status)) return 'success';
@@ -110,4 +111,54 @@ export function buildTalentWorkspace(d: TalentDemoModule) {
   ];
 
   return { profile, rightsHolders, productReadiness, prospects, ukOpportunities, metrics };
+}
+
+/**
+ * §TALENT APPROVALS — the read-only verification stamps (approved 2026-11-28).
+ *
+ * Only records that genuinely carry a `SourceVerificationStamp` are listed: every brand and
+ * every discovered product. No submission, listing recommendation, compliance document or
+ * purchase-order draft exists in this dataset, so none is invented.
+ */
+export function buildTalentApprovals(d: TalentDemoModule) {
+  const tone = (tier: string): SemanticTone => {
+    if (/primary|verified|high/i.test(tier)) return 'success';
+    if (/secondary|medium|partial/i.test(tier)) return 'warning';
+    return 'neutral';
+  };
+
+  const stamps: ApprovalVerificationRow[] = [
+    ...d.INITIAL_BRANDS.map((b) => ({
+      id: `brand-${b.id}`,
+      subject: text(b.name),
+      subjectKind: 'Brand' as const,
+      tier: text(b.verification?.verificationTier),
+      tierTone: tone(b.verification?.verificationTier ?? ''),
+      confidence: text(b.verification?.confidence),
+      unknownFieldCount: (b.verification?.unknownFields ?? []).length,
+      dateChecked: text(b.verification?.dateChecked),
+      evidenceSummary: text(b.verification?.evidenceSummary),
+    })),
+    ...d.INITIAL_DISCOVERED_PRODUCTS.map((p) => ({
+      id: `product-${p.id}`,
+      subject: text(p.title),
+      subjectKind: 'Product' as const,
+      tier: text(p.verification?.verificationTier),
+      tierTone: tone(p.verification?.verificationTier ?? ''),
+      confidence: text(p.verification?.confidence),
+      unknownFieldCount: (p.verification?.unknownFields ?? []).length,
+      dateChecked: text(p.verification?.dateChecked),
+      evidenceSummary: text(p.verification?.evidenceSummary),
+    })),
+  ];
+
+  const allStamps = [...d.INITIAL_BRANDS, ...d.INITIAL_DISCOVERED_PRODUCTS];
+  const metrics = [
+    { id: 'appr-brands', label: 'Brands', value: String(d.INITIAL_BRANDS.length) },
+    { id: 'appr-products', label: 'Products', value: String(d.INITIAL_DISCOVERED_PRODUCTS.length) },
+    { id: 'appr-relationships', label: 'Relationships', value: String(d.INITIAL_RELATIONSHIPS.length) },
+    { id: 'appr-stamps', label: 'Verification stamps', value: String(allStamps.length) },
+  ];
+
+  return { stamps, metrics };
 }
