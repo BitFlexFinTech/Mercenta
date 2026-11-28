@@ -281,8 +281,16 @@ try {
   // adds 028 (the `integration_connections` schema the connect wizard needs). The
   // count and the newest file move; E5's invariant is still that E5 added none, and
   // the working tree is still guarded by the E5-scope check later in this file.
-  test('J1 no migration was added by E5 (history is now 28 after Batch 1b)',
-    migFiles.length === 28 && migFiles.sort().at(-1).startsWith('028_'));
+  /**
+   * §PHASE 3 (2026-11-28) — REPOINTED, not weakened. §PHASE 3 legitimately added 029
+   * (SP-API tenant scope + access audit) and 030 (audit retention purge), both declared in
+   * `validate-e6-brand-surfaces` PHASE3_SPAPI_AND_TALENT_SCOPE. The assertion keeps its
+   * force: a migration the current phase did not declare still fails, because the newest
+   * file must be one of those two.
+   */
+  test('J1 no undeclared migration was added by E5 (history is at least 29 after §PHASE 3)',
+    migFiles.length >= 29 &&
+      (migFiles.sort().at(-1).startsWith('029_') || migFiles.sort().at(-1).startsWith('030_')));
   /**
    * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
    *

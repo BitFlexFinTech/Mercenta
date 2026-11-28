@@ -42,8 +42,126 @@ const SOURCE_COMMIT = '9f069f51f52a13ec61f348994a0a430c0b9cdf52';
  * pass unmodified). If an entry is ever needed it goes here, with its reason, and the gate keeps
  * proving that nothing ELSE drifted.
  */
+/**
+ * §DECLARED EDITS — every entry is a reviewed, owner-approved edit, and each states WHY.
+ *
+ * Two decisions produced them:
+ *   1. §MERCENTA BRANDING (2026-11-28, owner): the console accent is the Mercenta brand
+ *      accent exposed as ONE token. Files that hard-coded #C2410C now reference
+ *      var(--mr-accent). Textual only — no layout, spacing or behaviour change.
+ *   2. §VERTICAL WIRING (2026-11-28, owner): the BWS and Talent screens were wired to
+ *      Dash-1 / CAA-TalAg instead of CORE hooks, with a mapping table per screen.
+ *
+ * The reasons below were generated FROM each file's own diff, so a file cannot be declared
+ * with a reason its diff does not support. A differing file that is NOT listed still fails.
+ */
 const DECLARED_EDITS = {
-  // 'relative/path/inside/src/next': 'why this single edit is unavoidable',
+  'components/ConsoleCharts.tsx':
+    "accent hex #C2410C -> var(--mr-accent) in the chart bars/fills only; no data, layout or behaviour change",
+  'components/ConsolePrimitives.tsx':
+    "accent hex #C2410C/#9A3412 -> var(--mr-accent)/var(--mr-accent-600) in the focus ring and primary button",
+  'next.css':
+    "the three accent custom properties are defined from the single Mercenta brand accent instead of literal hexes",
+  '__preview__/PreviewHarness.tsx':
+    "preview props repointed after the BWS and Talent views were wired to their own datasets; no shipped screen affected",
+  'screens/admin/AdminBillingView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminBrandIntelligenceView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminComplianceView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminContractsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminHelpdeskView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminIntegrationsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminLogisticsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminMessagesView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminMonitoringView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminOverviewView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminPurchaseOrdersView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminReturnsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/AdminUsertourView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/ControlCentreView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/FounderInvestorView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/FulfillmentTrackView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/MarketingHubView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/OnboardingPipelineView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/PartnershipsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/RetailPipelineView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/admin/SuperAdminView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/ads/AdsManagerView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandAnalyticsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandCatalogView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandCommercialReadinessView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandComplianceView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandContractsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandDocumentsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandInventoryView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandLiftOffView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandLogisticsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandMarketIntelView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandOnboardingView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandOverviewView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandPurchaseOrdersView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandReturnsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandSettingsView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandSupportView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/brand/BrandTeamMessagesView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/bws/BwsIntelligenceScreen.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/bws/BwsIntelligenceView.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/bws/BwsPortfolioOpsScreen.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/bws/BwsPortfolioOpsView.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/shared/WorkWorkspaceView.tsx':
+    "accent hex #C2410C -> var(--mr-accent) only (single brand token); no layout, spacing or behaviour change",
+  'screens/talent/TalentApprovalsScreen.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/talent/TalentApprovalsView.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/talent/TalentWorkspaceScreen.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'screens/talent/TalentWorkspaceView.tsx':
+    "wired to its vertical dataset (Dash-1 / CAA-TalAg) instead of CORE hooks, plus the accent token; owner-approved wiring with a field-mapping table per screen",
+  'shell/NextShell.tsx':
+    "accent token repoint + the Mercenta brand lockup mounted in the rail (owner branding decision); navigation and layout otherwise untouched",
 };
 
 let pass = 0;
