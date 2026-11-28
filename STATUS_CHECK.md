@@ -7159,4 +7159,42 @@ horizontal overflow.
 **Known and stated:** four groups remain below the standard (Solutions, Company, Commercial, Resources — the categories
 page included: it has a picture, but not yet the illustration/limits pair). NOT deployed, deliberately: one publish
 covers this work plus the homepage's two contrast defects and the login restyle.
+## §PHASE D SLICE 1 — THE RESUME RECORD'S NEXT TASK WAS A DELETED FILE, AND THE ONE REAL BUILD ROW WAS RESUMED (2026-11-28)
+
+**What the session was told to do, and why it could not be done.** The resume block's `NEXT TASK` named the
+registry row `batch-4-zod-validation` and instructed the session to wire zod schemas into forms ("BUILT BUT
+NEVER WIRED"). Measured: `zod` appears **nowhere** in `package.json` and **nowhere** in `src/`; the row's own
+`_disposition` is **OWNER DECISION**; its `_audit_note` records the layer and the dependency were **REMOVED
+as obsolete on 2026-09-21**. The record was pointing at a file that does not exist — and the same line carried
+a second stale claim (`discovered-micro-typography-and-shim-debt`, a RECORD row, presented as "two halves left").
+
+**Fixed at source, then gated for the class (rules 07, 10 §8).** `NEXT TASK` + `EXACT NEXT STARTING POINT` in
+`PROJECT_STATUS.md` and its `HANDOFF.md` mirror were rewritten to name the repository's only BUILD row; the row
+was reconciled (`not_started` → `in_progress`, description/evidence/disposition updated, counts recomputed).
+`scripts/validate-resume-state.mjs` §7 now DISCOVERS every registry id named by `NEXT TASK` and fails unless
+that row's `_disposition` says BUILD. It fired on the real text with **4 failures**; mutation-proved by putting
+the zod claim back → **FAIL (2 of 68)** → restored byte-identical
+(`d2bf14b7b59c659ffe28300341f9deaf6b915a41702b0ee92122b806a2f5e4e7`).
+
+**The one BUILD row, resumed.** Of 7 `not_started` rows, five are OWNER DECISION, one is a RECORD, one is BUILD:
+`discovered-hand-rolled-tables-outside-the-canonical-primitive`. Its 2026-10-13 count had already drifted, so
+`scripts/validate-canonical-tables.mjs` (`npm run validate:canonical-tables`) now owns it: comment-safe discovery
+of every real `<table>` on the application surfaces, judgement against the canonical contract (a `text-ds-*` step,
+`data-table` hook, `<caption>`, `scope` on every header), a declared debt inventory checked in both directions,
+and a ratchet (`DEBT_BASELINE`, may only fall). Mutation-proved: probe table → **FAIL (3 of 29)** → restored
+byte-identical (`e3b961490d00a68d4ffda51e6ba86341543d2f1d5e8b81010f5d94d5aa8f4bd0`).
+
+**First slice.** `src/components/shared/TamSamDisplay.tsx` now renders through the canonical `DataTable`
+(`data-table="tam-sam-categories"`, caption, `mobile="scroll"`); debt **26 → 25** and the baseline lowered in the
+same change. Its expander had **no accessible name** — fixed with `aria-expanded` + a label. Rendered proof:
+`e2e/canonical-tables.spec.ts` **1 passed (4.7s)** measuring 14px cells / 12px headers from `getComputedStyle` and
+a row count equal to the count the screen declares; the spec is registered in the scenario catalogue (419).
+
+**Evidence:** `validate:all` **213 PASS / 0 FAIL (exit 0)** · typecheck **0** · eslint on touched files **0** ·
+build **✓ 6.55s** · registry integrity **10/10** · resume-state **68/68** · rules-application **33/33** ·
+plain-English **20/20** · e2e-scenarios **18/18**.
+
+**State:** VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (application runtime changed; nothing deployed —
+the ONE publish remains the owner's decision). **25 hand-rolled tables remain across 18 files** — the recorded
+next work.
 
