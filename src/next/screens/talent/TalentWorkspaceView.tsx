@@ -1,10 +1,22 @@
-import { useState } from 'react';
-import {
-  ConsoleBarChart,
-  NoticeBanner,
-  SectionCard,
-  formatGbp,
-} from '@/next/components/ConsoleCharts';
+/**
+ * §TALENT WORKSPACE — THE VIEW, SHAPED BY WHAT CAA-TalAg ACTUALLY CONTAINS (2026-11-28).
+ *
+ * The previous version expected CORE records: numeric readiness scores, tiers, PO values,
+ * commission rows, outreach write buttons, opportunity-stage mutation, CORE "UK states"
+ * and CORE integration statuses. The Talent dataset has NONE of them, so every one of
+ * those columns was either fabricated or a cross-vertical read. The owner's decisions:
+ *
+ *   · readiness = `verification.unknownFields` empty → ready; otherwise "N fields unresolved"
+ *   · image = the single `image` field → "Image present" / "No image"
+ *   · trackLabel = `TalentProfileRecord.roleSummary`
+ *   · rights = `relationshipType` + `ukDistributionRightsConfirmed`, one read-only badge,
+ *     NEVER labelled "contract status"
+ *   · contactPhone = "—" (no phone field exists in the dataset)
+ *   · no PO value column, no commission section, no outreach/stage writes, no CORE panels
+ *
+ * Mapping table: `docs/TALENT_WORKSPACE_FIELD_MAPPING.md`.
+ */
+import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
 import {
   ConsoleTable,
   EmptyStateBlock,
@@ -13,7 +25,6 @@ import {
   LoadingRows,
   MetricStrip,
   PageHeader,
-  SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
@@ -38,56 +49,58 @@ export interface TalentRightsHolderRow {
   businessName: string;
   category: string;
   nation: string;
+  /** `TalentProfileRecord.roleSummary` — the owner's chosen label. */
   trackLabel: string;
-  contractStatus: string;
+  /** relationshipType + ukDistributionRightsConfirmed, read-only, never "contract status". */
+  rightsBadge: string;
+  rightsTone: SemanticTone;
+  /** No phone field exists in the dataset: rendered as "—". */
   contactPhone: string;
-  skuCount: number;
-  poValueGbp: number;
+  /** Count of this brand's `DiscoveredProduct` rows. */
+  productCount: number;
 }
 
 export interface TalentProductReadinessRow {
   id: string;
-  brandId: string;
   brandName: string;
   sku: string;
   name: string;
-  complete: boolean;
-  missingFields: string[];
-  submissionStatus: string;
-  submissionTone: SemanticTone;
-  listingScore: number;
-  imageCount: number;
-}
-
-export interface TalentCommissionRow {
-  id: string;
-  brandName: string;
-  poNumber: string;
-  poValueGbp: number;
-  commissionRatePct: number;
-  commissionAmountGbp: number;
-  netBrandShareGbp: number;
-  statusLabel: string;
-  statusTone: SemanticTone;
-  createdAt: string;
+  /** `verification.unknownFields.length === 0`. */
+  ready: boolean;
+  unknownFieldCount: number;
+  /** The dataset holds ONE image per product. */
+  imagePresent: boolean;
 }
 
 export interface TalentProspectRow {
   id: string;
   brand: string;
   category: string;
-  totalScore: number;
-  tierLabel: string;
-  offerSummary: string;
-  acquisitionStage: string;
-  opportunityStage?: string;
-  opportunityId?: string;
-  canPrepare: boolean;
-  canApprove: boolean;
-  canSend: boolean;
-  canRespond: boolean;
-  canCreateOpp: boolean;
-  whyInteresting: string;
+  /** `BrandRecord.ukWholesaleRouteStatus`. */
+  ukRoute: string;
+  /** The source's own verification confidence and date — never a computed score. */
+  verification: string;
+  description: string;
+}
+
+export interface TalentUkOpportunityRow {
+  id: string;
+  brand: string;
+  opportunityType: string;
+  amazonUkPresence: string;
+  ukDtcPresence: string;
+  distributorPresent: boolean;
+  gapSummary: string;
+}
+
+export interface TalentWorkspaceProfile {
+  name: string;
+  vertical: string;
+  primaryMarket: string;
+  caaStatus: string;
+  discoveryStatus: string;
+  roleSummary: string;
+  portfolioSummary: string;
 }
 
 export interface TalentWorkspaceViewProps {
@@ -95,683 +108,327 @@ export interface TalentWorkspaceViewProps {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  canMutate: boolean;
   metrics: MetricItem[];
+  profile: TalentWorkspaceProfile | null;
   rightsHolders: TalentRightsHolderRow[];
   productReadiness: TalentProductReadinessRow[];
-  commissions: TalentCommissionRow[];
   prospects: TalentProspectRow[];
-  ukStates: { stateId: string; label: string; evidenceSource: string; available: boolean }[];
-  brandValueChart: { label: string; value: number; hint?: string }[];
-  integrationStatuses: { id: string; label: string; mode: string; status: string }[];
-  actingStaffName: string;
-  statusMessage: string | null;
-  onOutreachAction: (
-    prospectId: string,
-    action: 'prepare' | 'approve' | 'send' | 'simulate_response' | 'create_opportunity'
-  ) => void;
-  onSetOpportunityStage: (opportunityId: string, stage: string) => void;
+  ukOpportunities: TalentUkOpportunityRow[];
   onNavigateView: (viewId: string) => void;
 }
 
-const SECTION_COPY: Record<
-  TalentWorkspaceSection,
-  { title: string; description: string; gapTitle: string; gapMessage: string }
-> = {
+const SECTION_COPY: Record<TalentWorkspaceSection, { title: string; description: string }> = {
   dashboard: {
-    title: 'Talent Commerce Dashboard',
+    title: 'Talent Commerce',
     description:
-      'Cross-portfolio overview of rights-holder brand accounts, product readiness, UK opportunities, and PO settlement.',
-    gapTitle: 'Talent IP & Royalty schemas not yet present in Mercenta backend',
-    gapMessage:
-      'KPIs and tables below bind strictly to canonical Mercenta entities (Brand, Product, PurchaseOrder, Commission, Prospect). Dedicated Talent/RightsHolder rosters, RoyaltyAgreement splits, CreativeAsset libraries, BrandStore modules, Collection capsules, and Brand.vertical isolation are omitted until added to src/types.ts.',
+      'The CAA-TalAg dataset: the talent roster, the brands they work with, the products discovered for those brands, and the UK market assessment for each brand.',
   },
   profile: {
-    title: 'Rights Holders',
-    description:
-      'Commercial counterparty accounts and primary brand contacts currently modelled in Mercenta.',
-    gapTitle: 'Talent / RightsHolder roster entity unavailable',
-    gapMessage:
-      'Mercenta stores Brand counterparty records (DemoBrandRow) rather than individual Talent/Creator records or talentId joins. Counterparty accounts are shown under Rights Holders without fabricating talent profiles.',
+    title: 'Talent Profile',
+    description: 'The roster record as the CAA-TalAg dataset publishes it.',
   },
   brands: {
-    title: 'Brands & Products',
+    title: 'Brands & Rights',
     description:
-      'Partner brands, SKU completeness, and UK retail catalog readiness across the workspace.',
-    gapTitle: 'Vertical & licensing category filter pending Brand.vertical',
-    gapMessage:
-      'Displaying all canonical Mercenta brands and products because Brand.vertical and IP licensing tags do not exist in DemoBrandRow.',
+      'Each brand the talent is linked to, its relationship type and its confirmed UK distribution rights. One combined read-only badge; the dataset holds no contract terms.',
   },
   'uk-opportunities': {
     title: 'UK Opportunities',
     description:
-      'Amazon UK offer classification and evidence coverage derived from tracked prospect ASIN snapshots.',
-    gapTitle: 'Live talent-brand affinity matching omitted',
-    gapMessage:
-      'Opportunity states derive strictly from Mercenta Prospect and UK evidence provider status; talent-audience overlap scores from CAA-TalAg require Talent entities.',
+      'The UK assessment recorded per brand: Amazon UK presence, DTC presence, whether a distributor was detected, and the estimated gap.',
   },
   acquisition: {
-    title: 'Brand Acquisition',
+    title: 'Acquisition',
     description:
-      'Outreach preparation, approval gating, response tracking, and opportunity progression.',
-    gapTitle: 'Canonical Mercenta acquisition workflow',
-    gapMessage:
-      'All outreach approvals and opportunity stage changes persist directly to Mercenta’s canonical acquisitionStore.',
+      "Brands with their UK wholesale route status and the source's own verification confidence. No score, tier or stage is computed here.",
   },
-  'brand-stores': {
-    title: 'Brand Store Studio',
-    description:
-      'Listing content quality metrics paired with disclosure for unmodelled Amazon Brand Store modules.',
-    gapTitle: 'BrandStore module entity omitted (not modelled)',
-    gapMessage:
-      'Mercenta does not store BrandStore layout modules, store slugs, or hero banners yet. Storefront copy readiness from analyzeProductListing is shown below; mock storefront builders are omitted.',
-  },
-  concepts: {
-    title: 'Product Concepts',
-    description:
-      'SKU specification completeness and catalog intake status across listed products.',
-    gapTitle: 'ProductConcept ideation entity omitted (not modelled)',
-    gapMessage:
-      'Pre-SKU ProductConcept records do not exist in src/types.ts. Showing canonical Product spec completeness and missing attributes instead.',
-  },
-  development: {
-    title: 'Product Development',
-    description:
-      'Catalog submission states and pre-launch compliance/specification checks per SKU.',
-    gapTitle: 'Sample / prototype tracking entity omitted (not modelled)',
-    gapMessage:
-      'DevelopmentBrief and sample-approval stages are not modelled in Mercenta; live CatalogSubmission status and completeness checks are shown below.',
-  },
-  collections: {
-    title: 'Collections',
-    description:
-      'Brand assortment grouping and SKU readiness overview.',
-    gapTitle: 'Collection / Capsule entity omitted (not modelled)',
-    gapMessage:
-      'Seasonal Collection / Capsule entities and drop windows are not present in Mercenta schemas. Grouped brand SKU readiness is displayed instead of fabricated capsules.',
-  },
-  assets: {
-    title: 'Creative Assets',
-    description:
-      'Product imagery coverage across canonical SKUs.',
-    gapTitle: 'CreativeAsset library & CRUD endpoints omitted (not modelled)',
-    gapMessage:
-      'CreativeAsset records, upload endpoints (createCreativeAssetAPI), and rights clearance expirations do not exist in src/data/api.ts. Showing SKU product-image counts only.',
-  },
-  royalties: {
-    title: 'Royalties & Commission Splits',
-    description:
-      'Verified Mercenta PO commission and net brand payout ledger.',
-    gapTitle: 'Contractual Talent Royalty agreements omitted (not modelled)',
-    gapMessage:
-      'Showing real Mercenta PO Commission & net brand payout calculations (computeBrandNetShare). Dedicated Talent RoyaltyAgreement splits, minimum guarantees, and recoupment schedules do not exist in Mercenta.',
-  },
+  'brand-stores': { title: 'Brand Stores', description: 'Not part of the CAA-TalAg dataset.' },
+  concepts: { title: 'Concepts', description: 'Not part of the CAA-TalAg dataset.' },
+  development: { title: 'Development', description: 'Not part of the CAA-TalAg dataset.' },
+  collections: { title: 'Collections', description: 'Not part of the CAA-TalAg dataset.' },
+  assets: { title: 'Assets', description: 'Not part of the CAA-TalAg dataset.' },
+  royalties: { title: 'Royalties', description: 'Not part of the CAA-TalAg dataset.' },
   settings: {
-    title: 'Talent Commerce Settings',
-    description:
-      'Operator permission tier and connected integration status.',
-    gapTitle: 'Super Admin required for global administration',
-    gapMessage:
-      'Staff RBAC, Accounting/Xero, Commercial Models, and Company Controls require a Super Admin session.',
+    title: 'Settings',
+    description: 'Workspace settings are not part of the CAA-TalAg dataset.',
   },
 };
+
+const NOT_IN_DATASET: TalentWorkspaceSection[] = [
+  'brand-stores',
+  'concepts',
+  'development',
+  'collections',
+  'assets',
+  'royalties',
+];
+
+const rightsColumns: ConsoleColumn<TalentRightsHolderRow>[] = [
+  {
+    key: 'businessName',
+    header: 'Brand',
+    render: (r) => (
+      <div>
+        <div className="font-medium text-zinc-950">{r.businessName}</div>
+        <div className="text-[12px] text-zinc-500">{r.category}</div>
+      </div>
+    ),
+  },
+  {
+    key: 'trackLabel',
+    header: 'Talent Role',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.trackLabel}</span>,
+  },
+  {
+    key: 'nation',
+    header: 'Origin',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.nation}</span>,
+  },
+  {
+    key: 'rights',
+    header: 'Relationship & UK Rights (read-only)',
+    render: (r) => <InlineStatus label={r.rightsBadge} tone={r.rightsTone} />,
+  },
+  {
+    key: 'phone',
+    header: 'Phone',
+    render: (r) => (
+      <span className="text-[12px] text-zinc-500" title="The CAA-TalAg dataset holds no phone field.">
+        {r.contactPhone}
+      </span>
+    ),
+  },
+  {
+    key: 'products',
+    header: 'Products',
+    align: 'right',
+    render: (r) => <span className="font-mono tabular-nums">{r.productCount}</span>,
+  },
+];
+
+const readinessColumns: ConsoleColumn<TalentProductReadinessRow>[] = [
+  {
+    key: 'product',
+    header: 'Product',
+    render: (r) => (
+      <div>
+        <div className="font-medium text-zinc-950">{r.name}</div>
+        <div className="text-[12px] text-zinc-500">
+          {r.brandName}
+          {r.sku ? ` · ${r.sku}` : ''}
+        </div>
+      </div>
+    ),
+  },
+  {
+    key: 'ready',
+    header: 'Verification',
+    render: (r) => (
+      <InlineStatus
+        label={
+          r.ready
+            ? 'All fields verified'
+            : `${r.unknownFieldCount} field${r.unknownFieldCount === 1 ? '' : 's'} unresolved`
+        }
+        tone={r.ready ? 'success' : 'warning'}
+      />
+    ),
+  },
+  {
+    key: 'image',
+    header: 'Image',
+    render: (r) => (
+      <span className="text-[12px] text-zinc-700">{r.imagePresent ? 'Image present' : 'No image'}</span>
+    ),
+  },
+];
+
+const prospectColumns: ConsoleColumn<TalentProspectRow>[] = [
+  {
+    key: 'brand',
+    header: 'Brand',
+    render: (r) => (
+      <div>
+        <div className="font-medium text-zinc-950">{r.brand}</div>
+        <div className="text-[12px] text-zinc-500">{r.category}</div>
+      </div>
+    ),
+  },
+  {
+    key: 'ukRoute',
+    header: 'UK Wholesale Route',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.ukRoute}</span>,
+  },
+  {
+    key: 'verification',
+    header: 'Source Verification',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.verification}</span>,
+  },
+  {
+    key: 'description',
+    header: 'Source Description',
+    hideOnMobile: true,
+    render: (r) => <span className="text-[12px] text-zinc-600">{r.description}</span>,
+  },
+];
+
+const ukColumns: ConsoleColumn<TalentUkOpportunityRow>[] = [
+  { key: 'brand', header: 'Brand', render: (r) => <span className="font-medium text-zinc-950">{r.brand}</span> },
+  { key: 'type', header: 'Opportunity', render: (r) => <span className="text-[12px] text-zinc-700">{r.opportunityType}</span> },
+  { key: 'amazon', header: 'Amazon UK', render: (r) => <span className="text-[12px] text-zinc-700">{r.amazonUkPresence}</span> },
+  { key: 'dtc', header: 'UK DTC', render: (r) => <span className="text-[12px] text-zinc-700">{r.ukDtcPresence}</span> },
+  {
+    key: 'distributor',
+    header: 'Distributor Detected',
+    render: (r) => <span className="text-[12px] text-zinc-700">{r.distributorPresent ? 'Yes' : 'No'}</span>,
+  },
+  {
+    key: 'gap',
+    header: 'Estimated Gap',
+    hideOnMobile: true,
+    render: (r) => <span className="text-[12px] text-zinc-600">{r.gapSummary}</span>,
+  },
+];
 
 export function TalentWorkspaceView({
   section,
   loading,
   error,
   onRetry,
-  canMutate,
   metrics,
+  profile,
   rightsHolders,
   productReadiness,
-  commissions,
   prospects,
-  ukStates,
-  brandValueChart,
-  integrationStatuses,
-  actingStaffName,
-  statusMessage,
-  onOutreachAction,
-  onSetOpportunityStage,
-  onNavigateView,
+  ukOpportunities,
 }: TalentWorkspaceViewProps) {
-  const [search, setSearch] = useState('');
-  const [selectedProspectId, setSelectedProspectId] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<TalentProductReadinessRow | null>(null);
-  const [stageTarget, setStageTarget] = useState('qualified');
-
   const copy = SECTION_COPY[section];
-  const selectedProspect = prospects.find((p) => p.id === selectedProspectId) ?? null;
-
-  const q = search.trim().toLowerCase();
-  const filteredRightsHolders = rightsHolders.filter(
-    (r) =>
-      !q ||
-      r.businessName.toLowerCase().includes(q) ||
-      r.category.toLowerCase().includes(q)
-  );
-  const filteredProducts = productReadiness.filter(
-    (p) =>
-      !q ||
-      p.name.toLowerCase().includes(q) ||
-      p.sku.toLowerCase().includes(q) ||
-      p.brandName.toLowerCase().includes(q)
-  );
-  const filteredProspects = prospects.filter(
-    (p) => !q || p.brand.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-  );
-
-  const rhColumns: ConsoleColumn<TalentRightsHolderRow>[] = [
-    {
-      key: 'name',
-      header: 'Rights Holder / Brand Account',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.businessName}</div>
-          <div className="text-[12px] text-zinc-500">
-            {r.category} · {r.nation || 'Origin N/A'}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'contact',
-      header: 'Primary Phone',
-      render: (r) => <span className="text-[12px] text-zinc-700 font-mono">{r.contactPhone}</span>,
-    },
-    {
-      key: 'track',
-      header: 'Fulfilment Track',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.trackLabel}</span>,
-    },
-    {
-      key: 'skus',
-      header: 'SKUs',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.skuCount}</span>,
-    },
-    {
-      key: 'poVal',
-      header: 'PO Value',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.poValueGbp)}</span>,
-    },
-  ];
-
-  const prodColumns: ConsoleColumn<TalentProductReadinessRow>[] = [
-    {
-      key: 'product',
-      header: 'SKU & Product',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.name}</div>
-          <div className="text-[12px] text-zinc-500 font-mono">
-            {r.sku} · {r.brandName}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'completeness',
-      header: 'Spec Completeness',
-      render: (r) => (
-        <InlineStatus
-          label={r.complete ? 'Complete' : `${r.missingFields.length} missing`}
-          tone={r.complete ? 'success' : 'warning'}
-        />
-      ),
-    },
-    {
-      key: 'sub',
-      header: 'Submission State',
-      render: (r) => <InlineStatus label={r.submissionStatus} tone={r.submissionTone} />,
-    },
-    {
-      key: 'score',
-      header: 'Listing Score',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.listingScore}/100</span>,
-    },
-    {
-      key: 'imgs',
-      header: 'Media Count',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.imageCount}</span>,
-    },
-  ];
-
-  const commissionColumns: ConsoleColumn<TalentCommissionRow>[] = [
-    {
-      key: 'brand',
-      header: 'Counterparty / PO',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.brandName}</div>
-          <div className="text-[12px] text-zinc-500 font-mono">
-            {r.poNumber} · {r.createdAt}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'poVal',
-      header: 'PO Gross',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.poValueGbp, 2)}</span>,
-    },
-    {
-      key: 'rate',
-      header: 'Mercenta Rate',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.commissionRatePct}%</span>,
-    },
-    {
-      key: 'comm',
-      header: 'Mercenta Commission',
-      align: 'right',
-      render: (r) => (
-        <span className="font-mono tabular-nums">{formatGbp(r.commissionAmountGbp, 2)}</span>
-      ),
-    },
-    {
-      key: 'net',
-      header: 'Net Counterparty Share',
-      align: 'right',
-      render: (r) => (
-        <span className="font-mono tabular-nums font-medium">{formatGbp(r.netBrandShareGbp, 2)}</span>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Settlement',
-      render: (r) => <InlineStatus label={r.statusLabel} tone={r.statusTone} />,
-    },
-  ];
-
-  const prospectColumns: ConsoleColumn<TalentProspectRow>[] = [
-    {
-      key: 'brand',
-      header: 'Brand Prospect',
-      render: (r) => (
-        <div>
-          <div className="font-medium text-zinc-950">{r.brand}</div>
-          <div className="text-[12px] text-zinc-500">{r.category}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'score',
-      header: 'Score / Tier',
-      render: (r) => (
-        <span className="font-mono text-[12px]">
-          {r.totalScore}/100 · {r.tierLabel}
-        </span>
-      ),
-    },
-    {
-      key: 'offer',
-      header: 'UK Channel Offer',
-      render: (r) => <span className="text-[12px] text-zinc-700">{r.offerSummary}</span>,
-    },
-    {
-      key: 'stage',
-      header: 'Pipeline Stage',
-      render: (r) => (
-        <span className="font-mono text-[12px] text-zinc-800">
-          {r.opportunityStage ?? r.acquisitionStage}
-        </span>
-      ),
-    },
-  ];
-
-  const isEmptyModuleSection =
-    section === 'brand-stores' || section === 'collections' || section === 'assets';
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={copy.title}
         description={copy.description}
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {section === 'dashboard' && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => onNavigateView('approvals')}
-                  className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
-                >
-                  Open Approvals Queue
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onNavigateView('campaigns')}
-                  className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
-                >
-                  Open Amazon Campaigns
-                </button>
-              </>
-            )}
-          </div>
-        }
+        meta={<span>Talent Commerce · CAA-TalAg dataset</span>}
       />
 
-      <NoticeBanner tone="warning" title={copy.gapTitle} message={copy.gapMessage} />
-      {statusMessage && <NoticeBanner tone="info" message={statusMessage} />}
+      <NoticeBanner
+        tone="info"
+        title="CAA-TalAg dataset — shown as published"
+        message="Talents, brands, relationships, discovered products and UK assessments come from the CAA-TalAg dataset. A field it does not contain is shown as an em dash (—) and is never defaulted or estimated."
+      />
 
       {loading ? (
         <LoadingRows rows={6} />
       ) : error ? (
         <ErrorStateBlock message={error} onRetry={onRetry} />
+      ) : NOT_IN_DATASET.includes(section) ? (
+        <SectionCard title={copy.title} description={copy.description}>
+          <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+            {copy.title} is not part of the CAA-TalAg dataset. Nothing is shown here rather than
+            inventing records.
+          </div>
+        </SectionCard>
       ) : (
         <>
           <MetricStrip items={metrics} columns={4} />
 
-          {(section === 'profile' ||
-            section === 'brands' ||
-            section === 'uk-opportunities' ||
-            section === 'acquisition' ||
-            section === 'concepts' ||
-            section === 'development') && (
-            <div className="flex items-center gap-3">
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search brands, SKUs, or categories…"
-                aria-label="Filter records"
-                className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] w-full sm:w-80"
-              />
-            </div>
-          )}
-
           {section === 'dashboard' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SectionCard
-                title="PO Value by Counterparty"
-                description="Top brands ranked by cumulative Purchase Order value."
-              >
-                <ConsoleBarChart data={brandValueChart} />
-              </SectionCard>
-
-              <SectionCard
-                title="UK Channel Opportunity States"
-                description="Live UK market states backed by canonical evidence providers."
-              >
-                <div className="space-y-3">
-                  {ukStates.map((st) => (
-                    <div
-                      key={st.stateId}
-                      className="flex items-center justify-between gap-2 border-b border-zinc-100 pb-2 last:border-b-0 text-[12px]"
-                    >
-                      <div>
-                        <div className="font-medium text-zinc-900">{st.label}</div>
-                        <div className="text-[11px] text-zinc-500">{st.evidenceSource}</div>
-                      </div>
-                      <InlineStatus
-                        label={st.available ? 'Evidence active' : 'Unasserted (no provider)'}
-                        tone={st.available ? 'success' : 'neutral'}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </SectionCard>
-            </div>
+            <SectionCard
+              title="Product Readiness"
+              description="Readiness is the source's own field: a product is ready when its verification lists no unresolved fields."
+            >
+              <ConsoleTable
+                rows={productReadiness}
+                columns={readinessColumns}
+                rowKey={(r) => r.id}
+                emptyTitle="No discovered products"
+                emptyDescription="The CAA-TalAg dataset contains no discovered products to verify."
+              />
+            </SectionCard>
           )}
 
           {section === 'profile' && (
-            <SectionCard title="Rights Holders (Canonical Brand Accounts)">
+            <SectionCard title="Roster record" description="As published by CAA-TalAg.">
+              {!profile ? (
+                <EmptyStateBlock
+                  title="No talent record"
+                  description="The dataset contains no talent profile."
+                />
+              ) : (
+                <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[13px]">
+                  {[
+                    ['Name', profile.name],
+                    ['Vertical', profile.vertical],
+                    ['Primary market', profile.primaryMarket],
+                    ['CAA status', profile.caaStatus],
+                    ['Discovery status', profile.discoveryStatus],
+                    ['Role summary', profile.roleSummary],
+                    ['Portfolio summary', profile.portfolioSummary],
+                  ].map(([label, value]) => (
+                    <div key={label} className="border border-zinc-200 rounded-md p-3">
+                      <dt className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+                        {label}
+                      </dt>
+                      <dd className="text-zinc-900 mt-0.5">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </SectionCard>
+          )}
+
+          {section === 'brands' && (
+            <SectionCard
+              title="Brands & rights"
+              description="The dataset records a relationship type and whether UK distribution rights are confirmed. It holds no contract terms, so no contract status is shown."
+            >
               <ConsoleTable
-                rows={filteredRightsHolders}
-                columns={rhColumns}
+                rows={rightsHolders}
+                columns={rightsColumns}
                 rowKey={(r) => r.id}
+                emptyTitle="No brands"
+                emptyDescription="The dataset contains no brands linked to this talent."
               />
             </SectionCard>
           )}
 
-          {(section === 'brands' || section === 'concepts' || section === 'development') && (
-            <SectionCard
-              title={
-                section === 'concepts'
-                  ? 'Product Spec Completeness'
-                  : section === 'development'
-                    ? 'Catalog Submissions & Launch Checks'
-                    : 'Brands & SKU Portfolio'
-              }
-            >
+          {section === 'uk-opportunities' && (
+            <SectionCard title="UK assessments" description="Recorded per brand in the source.">
               <ConsoleTable
-                rows={filteredProducts}
-                columns={prodColumns}
+                rows={ukOpportunities}
+                columns={ukColumns}
                 rowKey={(r) => r.id}
-                onRowClick={setSelectedProduct}
+                emptyTitle="No UK assessments"
+                emptyDescription="The dataset contains no UK market assessment."
               />
             </SectionCard>
           )}
 
-          {(section === 'uk-opportunities' || section === 'acquisition') && (
+          {section === 'acquisition' && (
             <SectionCard
-              title={
-                section === 'uk-opportunities'
-                  ? 'UK Market Opportunities'
-                  : 'Acquisition Outreach & Opportunities'
-              }
+              title="Brands by UK route"
+              description="Source verification is the dataset's own confidence, not a computed score."
             >
               <ConsoleTable
-                rows={filteredProspects}
+                rows={prospects}
                 columns={prospectColumns}
                 rowKey={(r) => r.id}
-                selectedKey={selectedProspectId}
-                onRowClick={(r) => setSelectedProspectId(r.id)}
-              />
-            </SectionCard>
-          )}
-
-          {isEmptyModuleSection && (
-            <div className="space-y-6">
-              <EmptyStateBlock
-                title={
-                  section === 'brand-stores'
-                    ? 'No BrandStore entity records exist in Mercenta'
-                    : section === 'collections'
-                      ? 'No Collection / Capsule entity records exist in Mercenta'
-                      : 'No CreativeAsset records exist in Mercenta'
-                }
-                description="Rather than displaying fabricated modules or mock media galleries, this workspace renders real SKU readiness and product-image counts from canonical Product records."
-                actionLabel="Review Real Approval Queues"
-                onAction={() => onNavigateView('approvals')}
-              />
-              <SectionCard title="Canonical SKU Readiness &amp; Product Media Counts">
-                <ConsoleTable
-                  rows={productReadiness}
-                  columns={prodColumns}
-                  rowKey={(r) => r.id}
-                  onRowClick={setSelectedProduct}
-                />
-              </SectionCard>
-            </div>
-          )}
-
-          {section === 'royalties' && (
-            <SectionCard
-              title="Mercenta Commission &amp; Net Counterparty Settlement Ledger"
-              description="Calculated from Commission + PurchaseOrder + fulfilment track rules."
-            >
-              <ConsoleTable
-                rows={commissions}
-                columns={commissionColumns}
-                rowKey={(r) => r.id}
+                emptyTitle="No brands"
+                emptyDescription="The dataset contains no brands."
               />
             </SectionCard>
           )}
 
           {section === 'settings' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SectionCard title="Operator Session">
-                <dl className="space-y-2 text-[13px]">
-                  <div className="flex justify-between border-b border-zinc-100 pb-2">
-                    <dt className="text-zinc-500">Acting staff</dt>
-                    <dd className="font-medium text-zinc-950">{actingStaffName}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-zinc-500">Write permission</dt>
-                    <dd>
-                      <InlineStatus
-                        label={canMutate ? 'Full mutation rights' : 'Read-only operator'}
-                        tone={canMutate ? 'success' : 'warning'}
-                      />
-                    </dd>
-                  </div>
-                </dl>
-              </SectionCard>
-              <SectionCard title="Integration Modes">
-                <ul className="divide-y divide-zinc-200 text-[13px]">
-                  {integrationStatuses.map((it) => (
-                    <li key={it.id} className="py-2 flex items-center justify-between gap-2">
-                      <span className="font-medium text-zinc-900">{it.label}</span>
-                      <span className="font-mono text-[12px] text-zinc-600">
-                        {it.status} ({it.mode})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </SectionCard>
-            </div>
+            <SectionCard title="Settings" description={copy.description}>
+              <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+                Workspace settings are not part of the CAA-TalAg dataset.
+              </div>
+            </SectionCard>
           )}
         </>
       )}
-
-      <SlideOverDrawer
-        open={Boolean(selectedProduct)}
-        onClose={() => setSelectedProduct(null)}
-        title={selectedProduct?.name ?? 'Product Details'}
-        subtitle={
-          selectedProduct ? `${selectedProduct.sku} · ${selectedProduct.brandName}` : undefined
-        }
-      >
-        {selectedProduct && (
-          <div className="space-y-4 text-[14px]">
-            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
-              <span className="text-zinc-600">Listing readiness</span>
-              <span className="font-mono font-semibold">{selectedProduct.listingScore} / 100</span>
-            </div>
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1.5">
-                Missing Specification Fields
-              </div>
-              {selectedProduct.missingFields.length === 0 ? (
-                <p className="text-[13px] text-emerald-800">All mandatory catalog fields complete.</p>
-              ) : (
-                <ul className="list-disc pl-5 text-[13px] text-amber-900 space-y-1">
-                  {selectedProduct.missingFields.map((f) => (
-                    <li key={f}>{f}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
-      </SlideOverDrawer>
-
-      <SlideOverDrawer
-        open={Boolean(selectedProspect)}
-        onClose={() => setSelectedProspectId(null)}
-        title={selectedProspect?.brand ?? 'Prospect'}
-        subtitle={
-          selectedProspect
-            ? `${selectedProspect.category} · ${selectedProspect.totalScore}/100`
-            : undefined
-        }
-      >
-        {selectedProspect && (
-          <div className="space-y-4 text-[14px]">
-            <p className="text-zinc-800">{selectedProspect.whyInteresting}</p>
-            <div className="border-t border-zinc-200 pt-3 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
-                Outreach &amp; Stage Controls
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedProspect.canPrepare && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'prepare')}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Prepare Outreach
-                  </button>
-                )}
-                {selectedProspect.canApprove && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'approve')}
-                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Approve Draft
-                  </button>
-                )}
-                {selectedProspect.canSend && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'send')}
-                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Send Outreach
-                  </button>
-                )}
-                {selectedProspect.canRespond && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'simulate_response')}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Log Reply (Sim)
-                  </button>
-                )}
-                {selectedProspect.canCreateOpp && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'create_opportunity')}
-                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Create Opportunity
-                  </button>
-                )}
-              </div>
-
-              {selectedProspect.opportunityId && (
-                <div className="flex items-center gap-2 pt-2">
-                  <select
-                    aria-label="Opportunity stage"
-                    value={stageTarget}
-                    onChange={(e) => setStageTarget(e.target.value)}
-                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px]"
-                  >
-                    <option value="qualified">Qualified</option>
-                    <option value="meeting_booked">Meeting Booked</option>
-                    <option value="proposal_sent">Proposal Sent</option>
-                    <option value="won">Won</option>
-                  </select>
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() =>
-                      onSetOpportunityStage(selectedProspect.opportunityId!, stageTarget)
-                    }
-                    className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Update Stage
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </SlideOverDrawer>
     </div>
   );
 }
