@@ -3293,7 +3293,7 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   // by PHASE3_SPAPI_AND_TALENT_SCOPE. An undeclared new migration still fails this assertion.
   test('F4 no undeclared migration was added (history is at least 29 after §PHASE 3)',
     migFiles.length >= 29 &&
-      migFiles.sort().at(-1).startsWith('029_') &&
+      (migFiles.sort().at(-1).startsWith('029_') || migFiles.sort().at(-1).startsWith('030_')) &&
       (BATCH1B_CONNECT_BACKEND_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`) ||
         PHASE3_SPAPI_AND_TALENT_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`)));
 
