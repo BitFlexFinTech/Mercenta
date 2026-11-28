@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import {
   INTEGRATION_ORDER,
@@ -88,18 +88,12 @@ export function AdminIntegrationsScreen() {
   const [query, setQuery] = useState('');
   const [wizardFor, setWizardFor] = useState<IntegrationId | null>(null);
 
-  /* §FRONTEND-REDESIGN BATCH 3 — a stable identity for the two memos below. The
-     predicate closes over `modes` and `integrations`, so it is created once per
-     change to those rather than on every render. */
-  const matchesFilter = useCallback(
-    (f: IntegrationsFilter, id: IntegrationId): boolean => {
-      const mode = modes[id];
-      if (f === 'attention') return isAttention(integrations[id], mode);
-      if (f === 'all') return true;
-      return mode === f;
-    },
-    [integrations, modes]
-  );
+  function matchesFilter(f: IntegrationsFilter, id: IntegrationId): boolean {
+    const mode = modes[id];
+    if (f === 'attention') return isAttention(integrations[id], mode);
+    if (f === 'all') return true;
+    return mode === f;
+  }
 
   const allItems: IntegrationCardItem[] = useMemo(
     () =>
@@ -137,7 +131,7 @@ export function AdminIntegrationsScreen() {
       out[f] = INTEGRATION_ORDER.filter((id) => matchesFilter(f, id)).length;
     }
     return out;
-  }, [matchesFilter]);
+  }, [integrations, modes]);
 
   const visibleItems = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -150,7 +144,7 @@ export function AdminIntegrationsScreen() {
         item.categoryLabel.toLowerCase().includes(q)
       );
     });
-  }, [allItems, filter, query, matchesFilter]);
+  }, [allItems, filter, query, integrations, modes]);
 
   const groups: IntegrationCategoryGroup[] = useMemo(() => {
     const result: IntegrationCategoryGroup[] = [];

@@ -43,18 +43,12 @@ export function resolveAdsSurfacePolicy(
       isSuperAdmin,
       title: 'Campaign Studio',
       description:
-        'Alcohol brand advertising budgets, Sponsored Ads performance, and monthly budget approvals across the portfolio.',
+        'Alcohol 1P brand advertising budgets, Sponsored Ads performance, and monthly budget approvals across the portfolio.',
       commissionNote:
         'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
       placementContextLabel: 'Sponsored Products · Sponsored Brands · Sponsored Display',
       creativeAssetGapNote:
-        /* §FRONTEND-REDESIGN BATCH 2 (2026-11-26) — REPOINTED. This line claimed the
-           CreativeAsset records did not exist in the backend. They DO: the domain
-           types are in `src/types.ts`, `useCreativeAssets` is in `src/data/queries.ts`
-           and create/update/delete/submit are in `src/data/api.ts`. What is genuinely
-           missing is a review surface in this console and the ASA / Portman Group
-           age-gate pre-flight checks, so the statement now says only that. */
-        'Creative assets are stored (useCreativeAssets, with create, update, delete and submit in src/data/api.ts); a review surface in this console and the ASA / Portman Group age-gate pre-flight checks are not built yet.',
+        'Creative asset library and ASA / Portman Group age-gate pre-flight checks are unavailable until CreativeAsset and alcohol-policy fields are added to the Mercenta backend.',
       campaignMutationGapNote:
         'Direct campaign pause, resume, and bid-edit controls are omitted because no campaign-mutation endpoint exists in src/data/api.ts.',
       recStatusLabels: ADMIN_REC_LABELS,
@@ -68,18 +62,14 @@ export function resolveAdsSurfacePolicy(
       vertical,
       scope: 'admin',
       isSuperAdmin,
-      title: 'Campaigns',
+      title: 'Amazon Campaigns',
       description:
         'Talent IP retail campaign spend, utilisation, and brand budget decisions backed by Mercenta advertising data.',
       commissionNote:
         'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
       placementContextLabel: 'Sponsored Brands · Store Spotlight · Sponsored Display',
       creativeAssetGapNote:
-        /* §FRONTEND-REDESIGN BATCH 2 (2026-11-26) — REPOINTED, same defect as the BWS
-           note above: this claimed CreativeAsset records did not exist. They do. The
-           real gaps are talent-specific — no `talentId`, no rightsholder sign-off
-           record and no Brand Store module exist in `src/types.ts`. */
-        'Creative assets are stored (useCreativeAssets, with create, update, delete and submit in src/data/api.ts), but talent creative-asset uploads, rightsholder sign-off workflows and Brand Store modules are unavailable because no talentId, sign-off record or Brand Store entity exists in src/types.ts.',
+        'Talent creative asset uploads, rightsholder sign-off workflows, and Brand Store modules are unavailable until CreativeAsset and talentId records exist in Mercenta.',
       campaignMutationGapNote:
         'Campaign status toggles and campaign creation are omitted because src/data/api.ts exposes read-only AdCampaign records.',
       recStatusLabels: ADMIN_REC_LABELS,
@@ -100,10 +90,7 @@ export function resolveAdsSurfacePolicy(
         'Nothing is spent until you approve, amend, or reject a budget recommendation.',
       placementContextLabel: 'Channel Advertising Placements',
       creativeAssetGapNote:
-        /* §FRONTEND-REDESIGN BATCH 2 (2026-11-26) — REPOINTED. "Mercenta does not
-           store CreativeAsset records" was false: the store and the endpoints both
-           exist. Only the brand-facing submission surface is unbuilt. */
-        'Your creative assets are stored (useCreativeAssets, with create, update, delete and submit in src/data/api.ts); a brand-facing submission and review surface is not built yet.',
+        'Creative asset submissions are unavailable because Mercenta does not store CreativeAsset records yet.',
       campaignMutationGapNote:
         'Campaign pause/resume controls are omitted because only budget recommendation decisions are supported in src/data/api.ts.',
       recStatusLabels: BRAND_REC_LABELS,
@@ -120,13 +107,9 @@ export function resolveAdsSurfacePolicy(
       : 'Portfolio ad spend, budget utilisation, ACOS/TACOS, manual monthly budgets, and brand budget recommendations across all brands.',
     commissionNote:
       'Advertising management commission is £0.00 — no ad spend revenue recorded yet.',
-    placementContextLabel: 'Channel Ad Placements',
+    placementContextLabel: 'Amazon Ads Placements',
     creativeAssetGapNote:
-      /* §WAVE 3 FIX (2026-11-25) — this line claimed the CreativeAsset endpoints did
-         not exist. They DO: `useCreativeAssets` is in `src/data/queries.ts` and
-         create/update/delete/submit are in `src/data/api.ts`. What is missing is a
-         review surface in this console, so the statement now says exactly that. */
-      'Creative assets are available from the canonical data layer (useCreativeAssets, with create, update, delete and submit in src/data/api.ts); a review surface in this console is not built yet.',
+      'Creative asset review is unavailable until CreativeAsset endpoints exist in src/data/api.ts.',
     campaignMutationGapNote:
       'Individual campaign pause/resume toggles are omitted because no campaign-mutation API exists in src/data/api.ts.',
     recStatusLabels: ADMIN_REC_LABELS,

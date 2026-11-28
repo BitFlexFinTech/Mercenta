@@ -7,7 +7,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type SemanticTone,
@@ -190,15 +190,15 @@ export function AdminContractsView({
       mobilePrimary: true,
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.brandName}</div>
-          <div className="text-ds-micro font-mono text-faint">v{r.version}</div>
+          <div className="font-medium text-zinc-950">{r.brandName}</div>
+          <div className="text-[11px] font-mono text-zinc-500">v{r.version}</div>
         </div>
       ),
     },
     {
       key: 'type',
       header: 'Type',
-      render: (r) => <span className="capitalize text-secondary">{r.type.replace(/_/g, ' ')}</span>,
+      render: (r) => <span className="capitalize text-zinc-700">{r.type.replace(/_/g, ' ')}</span>,
     },
     {
       key: 'commissionRate',
@@ -225,7 +225,7 @@ export function AdminContractsView({
       align: 'right',
       render: (r) => (
         <div className="inline-flex items-center justify-end gap-2">
-          <span className="font-mono text-ds-label text-secondary">{r.renewalDate}</span>
+          <span className="font-mono text-[12px] text-zinc-700">{r.renewalDate}</span>
           {urgencyBadge(r.urgency)}
         </div>
       ),
@@ -234,7 +234,7 @@ export function AdminContractsView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Contract Cycle"
         description="Full distribution agreement lifecycle — generate from canonical terms, dispatch e-signature envelopes, and process renewals or terminations."
         meta={
@@ -249,7 +249,7 @@ export function AdminContractsView({
             type="button"
             disabled={brandOptions.length === 0 || !canMutate}
             onClick={openGenerate}
-            className="px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40 whitespace-nowrap"
+            className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40 whitespace-nowrap"
           >
             New contract
           </button>
@@ -327,13 +327,13 @@ export function AdminContractsView({
               onChange={(e) => onSearchQueryChange(e.target.value)}
               placeholder="Search brand, type, renewal…"
               aria-label="Search contracts"
-              className="w-56 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              className="w-56 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
             />
             <select
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value)}
               aria-label="Filter contracts by status"
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
             >
               <option value="all">Status: all</option>
               {statusOptions.map((o) => (
@@ -395,7 +395,7 @@ export function AdminContractsView({
                   <button
                     type="button"
                     onClick={() => onCreateRenewalDraft(selectedContract.raw)}
-                    className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
                   >
                     Create renewal draft
                   </button>
@@ -404,7 +404,7 @@ export function AdminContractsView({
                   <button
                     type="button"
                     onClick={() => onCreateAmendment(selectedContract.raw)}
-                    className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                    className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
                   >
                     Track amendment
                   </button>
@@ -413,7 +413,7 @@ export function AdminContractsView({
                   <button
                     type="button"
                     onClick={() => onRenew(selectedContract.id)}
-                    className="px-2.5 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800"
+                    className="px-2.5 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
                   >
                     Renew (advance term)
                   </button>
@@ -422,7 +422,7 @@ export function AdminContractsView({
                   <button
                     type="button"
                     onClick={() => onTerminate(selectedContract.id)}
-                    className="px-2.5 py-1.5 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-label font-medium hover:bg-state-danger/10"
+                    className="px-2.5 py-1.5 rounded border border-red-200 bg-red-50 text-red-900 text-[12px] font-medium hover:bg-red-100"
                   >
                     Terminate
                   </button>
@@ -431,7 +431,7 @@ export function AdminContractsView({
               <button
                 type="button"
                 onClick={() => onSelectContract(null)}
-                className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary hover:bg-surface"
+                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700 hover:bg-zinc-50"
               >
                 Close
               </button>
@@ -453,57 +453,57 @@ export function AdminContractsView({
 
             {drawerTab === 'document' ? (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-ds-label border border-hairline rounded-ds-md p-3 bg-canvas-60">
+                <div className="grid grid-cols-2 gap-3 text-[12px] border border-zinc-200 rounded-md p-3 bg-zinc-50/60">
                   <div>
-                    <div className="text-faint">Commission</div>
-                    <div className="font-mono font-medium text-ink-950">
+                    <div className="text-zinc-500">Commission</div>
+                    <div className="font-mono font-medium text-zinc-950">
                       {selectedContract.commissionRate}%
                     </div>
                   </div>
                   <div>
-                    <div className="text-faint">Monthly Fee</div>
-                    <div className="font-mono font-medium text-ink-950">
+                    <div className="text-zinc-500">Monthly Fee</div>
+                    <div className="font-mono font-medium text-zinc-950">
                       {formatGbp(selectedContract.monthlyFee)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-faint">Effective</div>
-                    <div className="font-mono text-ink-950">{selectedContract.effectiveDate}</div>
+                    <div className="text-zinc-500">Effective</div>
+                    <div className="font-mono text-zinc-950">{selectedContract.effectiveDate}</div>
                   </div>
                   <div>
-                    <div className="text-faint">Renewal</div>
-                    <div className="font-mono text-ink-950">{selectedContract.renewalDate}</div>
+                    <div className="text-zinc-500">Renewal</div>
+                    <div className="font-mono text-zinc-950">{selectedContract.renewalDate}</div>
                   </div>
                 </div>
-                <pre className="whitespace-pre-wrap rounded-ds-md border border-hairline bg-surface p-4 text-ds-label leading-relaxed text-ink-900 font-mono">
+                <pre className="whitespace-pre-wrap rounded-md border border-zinc-200 bg-zinc-50 p-4 text-[12px] leading-relaxed text-zinc-900 font-mono">
                   {selectedContract.agreementPreview}
                 </pre>
               </div>
             ) : (
               <div className="space-y-2.5">
-                <p className="text-ds-label text-faint">
+                <p className="text-[12px] text-zinc-600">
                   {brandVersions.length} version(s) of {selectedContract.brandName}&rsquo;s distribution agreement.
                 </p>
                 {brandVersions.map((v) => (
                   <div
                     key={v.id}
-                    className={`border rounded-ds-md p-3 text-ds-label ${
+                    className={`border rounded-md p-3 text-[12px] ${
                       v.version === selectedContract.version
-                        ? 'border-accent bg-surface'
-                        : 'border-hairline bg-surface-raised'
+                        ? 'border-zinc-900 bg-zinc-50'
+                        : 'border-zinc-200 bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-ink-950">
+                      <span className="font-semibold text-zinc-950">
                         Version {v.version}
                         {v.version === selectedContract.version ? ' (Current)' : ''}
                       </span>
                       <InlineStatus label={v.statusLabel} tone={v.statusTone} />
                     </div>
-                    <div className="mt-1 text-faint font-mono">
+                    <div className="mt-1 text-zinc-600 font-mono">
                       {v.commissionRate}% commission · {formatGbp(v.monthlyFee)}/mo · {v.trackLabel}
                     </div>
-                    <div className="mt-1 text-faint">
+                    <div className="mt-1 text-zinc-500">
                       Effective {v.effectiveDate} · Renewal {v.renewalDate}
                       {v.signatoriesCount > 0 ? ` · ${v.signatoriesCount} signatory(s)` : ''}
                     </div>
@@ -529,7 +529,7 @@ export function AdminContractsView({
             <button
               type="button"
               onClick={() => setGenerateOpen(false)}
-              className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary hover:bg-surface"
+              className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700 hover:bg-zinc-50"
             >
               Cancel
             </button>
@@ -552,7 +552,7 @@ export function AdminContractsView({
                   setBusy(false);
                 }
               }}
-              className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+              className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
             >
               {esignLive ? 'Create & send for e-signature' : 'Create & send (Mock E-Signature)'}
             </button>
@@ -561,12 +561,12 @@ export function AdminContractsView({
       >
         {generateBrand ? (
           <div className="space-y-4">
-            <label className="block text-ds-label">
-              <span className="text-faint font-medium block mb-1">Partner Brand</span>
+            <label className="block text-[12px]">
+              <span className="text-zinc-600 font-medium block mb-1">Partner Brand</span>
               <select
                 value={generateBrand.id}
                 onChange={(e) => handleBrandSelect(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
               >
                 {brandOptions.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -577,30 +577,30 @@ export function AdminContractsView({
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <label className="block text-ds-label">
-                <span className="text-faint font-medium block mb-1">Commission (%)</span>
+              <label className="block text-[12px]">
+                <span className="text-zinc-600 font-medium block mb-1">Commission (%)</span>
                 <input
                   type="number"
                   value={draftRate}
                   onChange={(e) => setDraftRate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-mono text-ink-950"
+                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-mono text-zinc-950"
                 />
               </label>
-              <label className="block text-ds-label">
-                <span className="text-faint font-medium block mb-1">Monthly Fee (£)</span>
+              <label className="block text-[12px]">
+                <span className="text-zinc-600 font-medium block mb-1">Monthly Fee (£)</span>
                 <input
                   type="number"
                   value={draftFee}
                   onChange={(e) => setDraftFee(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-mono text-ink-950"
+                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-mono text-zinc-950"
                 />
               </label>
-              <label className="block text-ds-label">
-                <span className="text-faint font-medium block mb-1">Track</span>
+              <label className="block text-[12px]">
+                <span className="text-zinc-600 font-medium block mb-1">Track</span>
                 <select
                   value={draftTrack}
                   onChange={(e) => setDraftTrack(e.target.value as FulfillmentTrack)}
-                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                 >
                   <option value="direct_fulfillment">{trackLabels.direct_fulfillment}</option>
                   <option value="financed">{trackLabels.financed}</option>
@@ -609,7 +609,7 @@ export function AdminContractsView({
               </label>
             </div>
 
-            <pre className="whitespace-pre-wrap rounded-ds-md border border-hairline bg-surface p-3 text-ds-label leading-relaxed text-ink-900 font-mono max-h-72 overflow-y-auto">
+            <pre className="whitespace-pre-wrap rounded-md border border-zinc-200 bg-zinc-50 p-3 text-[12px] leading-relaxed text-zinc-900 font-mono max-h-72 overflow-y-auto">
               {previewText}
             </pre>
           </div>

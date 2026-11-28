@@ -6,7 +6,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
@@ -70,17 +70,6 @@ export interface AdminComplianceViewProps {
   fullRecordBundle: ComplianceDeclarationBundle | null;
   onSelectFullRecordDoc: (id: string | null) => void;
   onManualVerdict: (id: string, decision: 'approve' | 'reject') => Promise<void>;
-  /**
-   * §FRONTEND-REDESIGN (2026-11-26) — RESTORED, and why it matters.
-   *
-   * The ported screen recorded a manual verification with a HARD-CODED reason and
-   * collected nothing from the operator, so the §WAVE 3e property this project
-   * established — a manual decision on a regulated document carries the operator's
-   * own reason — was silently dropped. The audit record still existed; the reason
-   * behind it did not. These two props are the input it needs.
-   */
-  verdictReason: string;
-  onVerdictReasonChange: (value: string) => void;
   onRunAutomated: (id: string) => Promise<void>;
   onUploadOnBehalf: (brandId: string, type: ComplianceDocument['type']) => void;
 }
@@ -102,8 +91,6 @@ export function AdminComplianceView({
   fullRecordBundle,
   onSelectFullRecordDoc,
   onManualVerdict,
-  verdictReason,
-  onVerdictReasonChange,
   onRunAutomated,
   onUploadOnBehalf,
 }: AdminComplianceViewProps) {
@@ -112,7 +99,7 @@ export function AdminComplianceView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Compliance Approvals"
         description="Per-brand compliance gate — automated verification via Companies House / HMRC and Founder / Super Admin sign-off."
         meta={
@@ -128,7 +115,7 @@ export function AdminComplianceView({
               value={reviewFilter}
               onChange={(e) => onReviewFilterChange(e.target.value as ComplianceReviewFilter)}
               aria-label="Filter by review state"
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
             >
               <option value="all">All ({metrics.total})</option>
               <option value="awaiting">Awaiting review ({metrics.awaiting})</option>
@@ -139,7 +126,7 @@ export function AdminComplianceView({
               value={density}
               onChange={(e) => setDensity(e.target.value as 'compact' | 'comfortable')}
               aria-label="Row density"
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
             >
               <option value="compact">Density: Compact</option>
               <option value="comfortable">Density: Comfortable</option>
@@ -218,26 +205,26 @@ export function AdminComplianceView({
                 <div
                   key={g.brandId}
                   data-testid="compliance-brand-card"
-                  className="border border-hairline rounded-ds-md overflow-hidden bg-surface-raised"
+                  className="border border-zinc-200 rounded-md overflow-hidden bg-white"
                 >
                   <button
                     type="button"
                     onClick={() => setExpandedBrandId(isExpanded ? null : g.brandId)}
-                    className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-surface"
+                    className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-zinc-50"
                   >
                     <div>
-                      <div className="text-ds-body font-semibold text-ink-950">{g.brandName}</div>
-                      <div className="text-ds-label text-faint font-mono">
+                      <div className="text-[14px] font-semibold text-zinc-950">{g.brandName}</div>
+                      <div className="text-[12px] text-zinc-500 font-mono">
                         {g.total} docs · {g.pending} pending · {g.approved} approved
                       </div>
                     </div>
-                    <span className="text-ds-label font-medium text-secondary">
+                    <span className="text-[12px] font-medium text-zinc-700">
                       {isExpanded ? 'Collapse' : 'Inspect'}
                     </span>
                   </button>
 
                   {isExpanded && (
-                    <div className="border-t border-hairline divide-y divide-hairline-06">
+                    <div className="border-t border-zinc-200 divide-y divide-zinc-200">
                       {g.docs.map((d) => (
                         <div
                           key={d.id}
@@ -247,10 +234,10 @@ export function AdminComplianceView({
                           }`}
                         >
                           <div className="flex flex-wrap items-center gap-2 min-w-0">
-                            <span className="text-ds-label font-medium text-ink-950 capitalize">
+                            <span className="text-[13px] font-medium text-zinc-950 capitalize">
                               {d.type.replace(/_/g, ' ')}
                             </span>
-                            <span className="text-ds-micro font-mono text-faint">v{d.version}</span>
+                            <span className="text-[11px] font-mono text-zinc-500">v{d.version}</span>
                             <InlineStatus
                               label={d.statusLabel}
                               tone={d.statusTone}
@@ -268,14 +255,14 @@ export function AdminComplianceView({
                             <button
                               type="button"
                               onClick={() => onSelectDrawerDoc(d.id)}
-                              className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                              className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-800 hover:bg-zinc-50"
                             >
                               Preview
                             </button>
                             <button
                               type="button"
                               onClick={() => onSelectFullRecordDoc(d.id)}
-                              className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                              className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-800 hover:bg-zinc-50"
                             >
                               Full record
                             </button>
@@ -283,7 +270,7 @@ export function AdminComplianceView({
                               <button
                                 type="button"
                                 onClick={() => void onManualVerdict(d.id, 'approve')}
-                                className="px-2 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+                                className="px-2 py-1 rounded bg-zinc-950 text-white text-[11px] font-medium hover:bg-zinc-800"
                               >
                                 Approve (manual)
                               </button>
@@ -292,7 +279,7 @@ export function AdminComplianceView({
                               <button
                                 type="button"
                                 onClick={() => void onManualVerdict(d.id, 'reject')}
-                                className="px-2 py-1 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-micro font-medium hover:bg-state-danger/10"
+                                className="px-2 py-1 rounded border border-red-200 bg-red-50 text-red-900 text-[11px] font-medium hover:bg-red-100"
                               >
                                 Reject
                               </button>
@@ -302,14 +289,14 @@ export function AdminComplianceView({
                                 <button
                                   type="button"
                                   onClick={() => void onRunAutomated(d.id)}
-                                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-accent hover:bg-surface"
+                                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-[#C2410C] hover:bg-zinc-50"
                                 >
                                   Verify (auto)
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => onUploadOnBehalf(d.brandId, d.type)}
-                                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-secondary hover:bg-surface"
+                                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-700 hover:bg-zinc-50"
                                 >
                                   Upload
                                 </button>
@@ -318,7 +305,7 @@ export function AdminComplianceView({
                           </div>
                         </div>
                       ))}
-                      <div className="px-4 py-1.5 text-ds-micro text-faint bg-canvas-50 text-right">
+                      <div className="px-4 py-1.5 text-[11px] text-zinc-500 bg-zinc-50/50 text-right">
                         Actions attributed as admin on behalf of brand
                       </div>
                     </div>
@@ -340,7 +327,7 @@ export function AdminComplianceView({
         footer={
           drawerDoc ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-micro text-faint">
+              <span className="text-[11px] text-zinc-500">
                 Version {drawerDoc.version} · operator attributed
               </span>
               <div className="flex items-center gap-2">
@@ -348,7 +335,7 @@ export function AdminComplianceView({
                   <button
                     type="button"
                     onClick={() => void onManualVerdict(drawerDoc.id, 'approve')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95"
+                    className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
                   >
                     Approve (manual)
                   </button>
@@ -360,7 +347,7 @@ export function AdminComplianceView({
                     onSelectDrawerDoc(null);
                     onSelectFullRecordDoc(id);
                   }}
-                  className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
+                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
                 >
                   Open full record
                 </button>
@@ -385,7 +372,7 @@ export function AdminComplianceView({
               )}
             </div>
 
-            <dl className="divide-y divide-hairline-06 border border-hairline rounded-ds-md text-ds-label">
+            <dl className="divide-y divide-zinc-200 border border-zinc-200 rounded-md text-[12px]">
               {[
                 { label: 'Brand', value: drawerDoc.brandName },
                 { label: 'Document type', value: drawerDoc.type.replace(/_/g, ' ') },
@@ -405,14 +392,14 @@ export function AdminComplianceView({
                 { label: 'Issuing body', value: drawerDoc.issuer ?? '—' },
               ].map((row) => (
                 <div key={row.label} className="px-3 py-2 flex items-center justify-between gap-3">
-                  <dt className="text-faint">{row.label}</dt>
-                  <dd className="font-medium text-ink-950 text-right capitalize">{row.value}</dd>
+                  <dt className="text-zinc-500">{row.label}</dt>
+                  <dd className="font-medium text-zinc-950 text-right capitalize">{row.value}</dd>
                 </div>
               ))}
             </dl>
 
-            <div className="border border-hairline rounded-ds-md p-3 bg-canvas-70 text-ds-label text-secondary">
-              <div className="font-semibold text-ink-950 mb-1">Gate effect</div>
+            <div className="border border-zinc-200 rounded-md p-3 bg-zinc-50/70 text-[12px] text-zinc-700">
+              <div className="font-semibold text-zinc-950 mb-1">Gate effect</div>
               {drawerDoc.status === 'approved'
                 ? 'This document satisfies its requirement for the products in scope.'
                 : 'This document does not yet satisfy its requirement — affected products stay behind the compliance gate.'}
@@ -434,28 +421,11 @@ export function AdminComplianceView({
         testId="doc-full-record-drawer"
         footer={
           fullRecordDoc ? (
-            <div className="space-y-3">
-              {/* §FRONTEND-REDESIGN — the operator's OWN reason for the decision.
-                  It is what the audit record must carry; left blank, the canonical
-                  command falls back to its truthful default sentence. */}
-              <label className="block">
-                <span className="block text-ds-micro font-mono uppercase tracking-[0.06em] text-faint mb-1">
-                  Reason for the decision (recorded in the audit trail)
-                </span>
-                <input
-                  type="text"
-                  value={verdictReason}
-                  onChange={(e) => onVerdictReasonChange(e.target.value)}
-                  aria-label="Reason for the decision"
-                  placeholder="e.g. Verified against the issuing body public register."
-                  className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
-                />
-              </label>
-              <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => onSelectFullRecordDoc(null)}
-                className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary hover:bg-surface"
+                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700 hover:bg-zinc-50"
               >
                 Close
               </button>
@@ -464,27 +434,26 @@ export function AdminComplianceView({
                   <button
                     type="button"
                     onClick={() => void onRunAutomated(fullRecordDoc.id)}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-accent hover:bg-surface"
+                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-[#C2410C] hover:bg-zinc-50"
                   >
                     Verify (automated)
                   </button>
                   <button
                     type="button"
                     onClick={() => void onManualVerdict(fullRecordDoc.id, 'reject')}
-                    className="px-3 py-1.5 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-label font-medium hover:bg-state-danger/10"
+                    className="px-3 py-1.5 rounded border border-red-200 bg-red-50 text-red-900 text-[12px] font-medium hover:bg-red-100"
                   >
-                    Reject document
+                    Reject
                   </button>
                   <button
                     type="button"
                     onClick={() => void onManualVerdict(fullRecordDoc.id, 'approve')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium hover:bg-ink-800"
+                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium hover:bg-zinc-800"
                   >
-                    Approve document
+                    Approve (manual)
                   </button>
                 </>
               )}
-              </div>
             </div>
           ) : undefined
         }
@@ -493,32 +462,32 @@ export function AdminComplianceView({
           <div className="space-y-4">
             {fullRecordBundle ? (
               <>
-                <div className="border border-hairline rounded-ds-md p-4 bg-canvas-50 space-y-2">
-                  <div className="text-ds-body font-semibold text-ink-950">
+                <div className="border border-zinc-200 rounded-md p-4 bg-zinc-50/50 space-y-2">
+                  <div className="text-[14px] font-semibold text-zinc-950">
                     {fullRecordBundle.title}
                   </div>
-                  <div className="text-ds-label font-mono text-faint">
+                  <div className="text-[12px] font-mono text-zinc-600">
                     Reference {fullRecordBundle.poNumber} · {fullRecordBundle.brandName}
                   </div>
                 </div>
-                <dl className="divide-y divide-hairline-06 border border-hairline rounded-ds-md text-ds-label">
+                <dl className="divide-y divide-zinc-200 border border-zinc-200 rounded-md text-[12px]">
                   {fullRecordBundle.preFilled.map((item) => (
                     <div
                       key={item.label}
                       className="px-3 py-2 flex items-center justify-between gap-3"
                     >
-                      <dt className="text-faint">{item.label}</dt>
-                      <dd className="font-mono text-ink-950">{item.value}</dd>
+                      <dt className="text-zinc-500">{item.label}</dt>
+                      <dd className="font-mono text-zinc-950">{item.value}</dd>
                     </div>
                   ))}
                 </dl>
                 <div>
-                  <div className="text-ds-label font-semibold text-ink-950 mb-1.5">
+                  <div className="text-[12px] font-semibold text-zinc-950 mb-1.5">
                     Products covered ({fullRecordBundle.productNames.length})
                   </div>
-                  <ul className="border border-hairline rounded-ds-md divide-y divide-hairline-06 text-ds-label">
+                  <ul className="border border-zinc-200 rounded-md divide-y divide-zinc-200 text-[12px]">
                     {fullRecordBundle.productNames.map((name) => (
-                      <li key={name} className="px-3 py-2 text-ink-800">
+                      <li key={name} className="px-3 py-2 text-zinc-800">
                         {name}
                       </li>
                     ))}

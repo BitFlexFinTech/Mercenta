@@ -13,7 +13,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -26,13 +26,7 @@ export type BwsIntelligenceSection =
   | 'brand-discovery'
   | 'brand-intelligence'
   | 'uk-distribution'
-  /**
-   * §FRONTEND-REDESIGN BATCH 4 — v1 called this section 'amazon-uk', which never
-   * matched the nav id this project sends (`bws › uk-channel-research`), so the
-   * section could not render at all. Renamed to the nav's own id, and the wording
-   * guard also requires the neutral channel term.
-   */
-  | 'uk-channel-research'
+  | 'amazon-uk'
   | 'pitch-targets'
   | 'opportunity-assessment'
   | 'acquisition-pipeline';
@@ -170,20 +164,20 @@ const SECTION_COPY: Record<
     description:
       'Audit of existing UK distributors, exclusivity flags, wholesale programme status, and suggested channel approaches.',
   },
-  'uk-channel-research': {
-    title: 'UK Channel Research',
+  'amazon-uk': {
+    title: 'Amazon UK 1P Research',
     description:
-      'ASIN-level UK retail-offer classification, pricing, ratings, and observed seller pressure across tracked brands.',
+      'ASIN-level UK retail offer classification, pricing, ratings, and observed seller pressure across tracked brands.',
   },
   'pitch-targets': {
-    title: 'Pitch Targets',
+    title: '1P Pitch Targets',
     description:
-      'Brands lacking a direct retail-channel offer (marketplace-only or absent) prioritised for wholesale outreach.',
+      'Brands lacking a direct Amazon retail offer (3P-only or absent) prioritised for Vendor Central UK outreach.',
   },
   'opportunity-assessment': {
     title: 'Opportunity Assessment',
     description:
-      'Multi-factor qualification matrix comparing channel demand, UK distribution openness, and Mercenta fit.',
+      'Multi-factor qualification matrix comparing Amazon demand, UK channel openness, and Mercenta fit.',
   },
   'acquisition-pipeline': {
     title: 'Acquisition Pipeline',
@@ -236,7 +230,7 @@ export function BwsIntelligenceView({
       );
     } else if (section === 'uk-distribution') {
       rows = rows.filter((p) => !p.disqualified);
-    } else if (section === 'uk-channel-research') {
+    } else if (section === 'amazon-uk') {
       rows = rows.filter((p) => p.asins.length > 0);
     } else if (section === 'opportunity-assessment') {
       rows = rows.filter((p) => !p.disqualified).sort((a, b) => b.totalScore - a.totalScore);
@@ -250,8 +244,8 @@ export function BwsIntelligenceView({
       header: 'Brand',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.brand}</div>
-          <div className="text-ds-label text-faint">{r.category}</div>
+          <div className="font-medium text-zinc-950">{r.brand}</div>
+          <div className="text-[12px] text-zinc-500">{r.category}</div>
         </div>
       ),
     },
@@ -261,7 +255,7 @@ export function BwsIntelligenceView({
       render: (r) => (
         <div className="flex items-center gap-2">
           <InlineStatus label={r.tierLabel} tone={tierTone(r.tier)} />
-          <span className="font-mono text-ds-label tabular-nums text-faint">{r.totalScore}</span>
+          <span className="font-mono text-[12px] tabular-nums text-zinc-600">{r.totalScore}</span>
         </div>
       ),
     },
@@ -270,17 +264,17 @@ export function BwsIntelligenceView({
       header: section === 'uk-distribution' ? 'UK Distributor / Wholesale' : 'UK Channel Status',
       render: (r) =>
         section === 'uk-distribution' ? (
-          <div className="text-ds-label">
-            <div className="text-ink-900">{r.leadDistributor}</div>
-            <div className="text-faint">
+          <div className="text-[12px]">
+            <div className="text-zinc-900">{r.leadDistributor}</div>
+            <div className="text-zinc-500">
               {r.wholesaleAvailable ? 'Wholesale open' : 'No stated wholesale'} ·{' '}
               {r.distributorProgramme ? 'Distributor prog.' : 'Direct review'}
             </div>
           </div>
         ) : (
-          <div className="text-ds-label">
-            <div className="text-ink-900">{r.offerSummary}</div>
-            <div className="text-faint">
+          <div className="text-[12px]">
+            <div className="text-zinc-900">{r.offerSummary}</div>
+            <div className="text-zinc-500">
               {r.asins.length} ASIN{r.asins.length === 1 ? '' : 's'} ·{' '}
               {r.ukPresence ? 'UK footprint' : 'No UK footprint'}
             </div>
@@ -291,7 +285,7 @@ export function BwsIntelligenceView({
       key: 'stage',
       header: 'Acquisition Stage',
       render: (r) => (
-        <span className="font-mono text-ds-label text-secondary">
+        <span className="font-mono text-[12px] text-zinc-700">
           {r.opportunityStage ? r.opportunityStage.replace(/_/g, ' ') : r.acquisitionStage}
         </span>
       ),
@@ -300,7 +294,7 @@ export function BwsIntelligenceView({
       key: 'contact',
       header: 'Primary Contact',
       hideOnMobile: true,
-      render: (r) => <span className="text-ds-label text-faint">{r.leadContact}</span>,
+      render: (r) => <span className="text-[12px] text-zinc-600">{r.leadContact}</span>,
     },
   ];
 
@@ -308,7 +302,7 @@ export function BwsIntelligenceView({
     {
       key: 'label',
       header: 'Origin / Region',
-      render: (r) => <span className="font-medium text-ink-950">{r.label}</span>,
+      render: (r) => <span className="font-medium text-zinc-950">{r.label}</span>,
     },
     {
       key: 'brands',
@@ -338,7 +332,7 @@ export function BwsIntelligenceView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title={copy.title}
         description={copy.description}
         meta={<span>BWS Workspace · Backed by canonical Mercenta Brand, Prospect &amp; Acquisition stores</span>}
@@ -349,7 +343,7 @@ export function BwsIntelligenceView({
                 type="button"
                 disabled={runningDiscovery || !canMutate}
                 onClick={onRunDiscovery}
-                className="px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-50"
+                className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
               >
                 {runningDiscovery ? 'Running scan…' : 'Run Intelligence Scan'}
               </button>
@@ -358,7 +352,7 @@ export function BwsIntelligenceView({
               <button
                 type="button"
                 onClick={() => onNavigateSection('campaign-studio')}
-                className="px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
               >
                 Open Campaign Studio
               </button>
@@ -405,15 +399,15 @@ export function BwsIntelligenceView({
               >
                 <div className="space-y-3">
                   {opportunityStates.map((st) => (
-                    <div key={st.stateId} className="space-y-1 border-b border-hairline pb-2 last:border-b-0">
-                      <div className="flex items-center justify-between gap-2 text-ds-label">
-                        <span className="font-medium text-ink-900">{st.label}</span>
+                    <div key={st.stateId} className="space-y-1 border-b border-zinc-100 pb-2 last:border-b-0">
+                      <div className="flex items-center justify-between gap-2 text-[12px]">
+                        <span className="font-medium text-zinc-900">{st.label}</span>
                         <InlineStatus
                           label={st.available ? 'Evidence active' : 'Unasserted (no provider)'}
                           tone={st.available ? 'success' : 'neutral'}
                         />
                       </div>
-                      <div className="text-ds-micro text-faint">
+                      <div className="text-[11px] text-zinc-500">
                         Evidence source: {st.evidenceSource}
                       </div>
                     </div>
@@ -444,17 +438,17 @@ export function BwsIntelligenceView({
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {categoryBenchmarks.map((b) => (
-                    <div key={b.category} className="border border-hairline rounded-ds-md p-3.5 space-y-1.5">
+                    <div key={b.category} className="border border-zinc-200 rounded-md p-3.5 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-ink-950 text-ds-body">{b.category}</span>
-                        <span className="font-mono text-ds-label text-accent">
+                        <span className="font-medium text-zinc-950 text-[14px]">{b.category}</span>
+                        <span className="font-mono text-[12px] text-[#C2410C]">
                           SAM share: {b.sharePct}%
                         </span>
                       </div>
-                      <div className="text-ds-label font-mono text-faint">
+                      <div className="text-[12px] font-mono text-zinc-600">
                         TAM: {b.tamLabel} · SAM: {b.samLabel}
                       </div>
-                      <p className="text-ds-label text-faint">{b.rationale}</p>
+                      <p className="text-[12px] text-zinc-600">{b.rationale}</p>
                     </div>
                   ))}
                 </div>
@@ -469,13 +463,13 @@ export function BwsIntelligenceView({
                   onChange={(e) => onSearchQueryChange(e.target.value)}
                   placeholder="Filter by brand or category…"
                   aria-label="Filter BWS prospects"
-                  className="px-3 py-1.5 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-body w-full sm:w-72"
+                  className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] w-full sm:w-72"
                 />
                 <select
                   aria-label="Filter by qualification tier"
                   value={tierFilter}
                   onChange={(e) => onTierFilterChange(e.target.value)}
-                  className="px-3 py-1.5 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-body"
+                  className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px]"
                 >
                   <option value="">All score tiers</option>
                   <option value="tier_1">Tier 1 · Attack Now</option>
@@ -524,22 +518,22 @@ export function BwsIntelligenceView({
         }
       >
         {selectedProspect && (
-          <div className="space-y-5 text-ds-body">
+          <div className="space-y-5 text-[14px]">
             <div className="space-y-1.5">
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
                 Commercial Thesis
               </div>
-              <p className="text-ink-800">{selectedProspect.whyInteresting}</p>
+              <p className="text-zinc-800">{selectedProspect.whyInteresting}</p>
               {selectedProspect.website && (
-                <div className="text-ds-label font-mono text-faint">{selectedProspect.website}</div>
+                <div className="text-[12px] font-mono text-zinc-500">{selectedProspect.website}</div>
               )}
             </div>
 
-            <div className="border-t border-hairline pt-4 space-y-2">
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+            <div className="border-t border-zinc-200 pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
                 Outreach &amp; Acquisition Lifecycle
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-ds-label">
+              <div className="flex flex-wrap items-center gap-2 text-[12px]">
                 <InlineStatus
                   label={`Stage: ${selectedProspect.opportunityStage ?? selectedProspect.acquisitionStage}`}
                   tone="info"
@@ -551,7 +545,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'prepare')}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium hover:bg-surface disabled:opacity-40"
+                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
                   >
                     Prepare Outreach
                   </button>
@@ -561,7 +555,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'approve')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-ink-900 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-zinc-900 text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Approve Draft
                   </button>
@@ -571,7 +565,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'send')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Send Outreach
                   </button>
@@ -581,7 +575,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'simulate_response')}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium hover:bg-surface disabled:opacity-40"
+                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
                   >
                     Log Reply (Sim)
                   </button>
@@ -591,7 +585,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'create_opportunity')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-ink-900 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-zinc-900 text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Promote to Opportunity
                   </button>
@@ -604,7 +598,7 @@ export function BwsIntelligenceView({
                     aria-label="Update opportunity stage"
                     value={stageTarget}
                     onChange={(e) => setStageTarget(e.target.value)}
-                    className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px]"
                   >
                     <option value="qualified">Qualified</option>
                     <option value="meeting_booked">Meeting Booked</option>
@@ -617,7 +611,7 @@ export function BwsIntelligenceView({
                     onClick={() =>
                       onSetOpportunityStage(selectedProspect.opportunityId!, stageTarget)
                     }
-                    className="px-3 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium hover:bg-surface disabled:opacity-40"
+                    className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
                   >
                     Set Stage
                   </button>
@@ -625,21 +619,21 @@ export function BwsIntelligenceView({
               )}
             </div>
 
-            <div className="border-t border-hairline pt-4 space-y-2">
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
-                Observed channel ASINs ({selectedProspect.asins.length})
+            <div className="border-t border-zinc-200 pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+                Observed Amazon UK ASINs ({selectedProspect.asins.length})
               </div>
               {selectedProspect.asins.length === 0 ? (
-                <p className="text-ds-label text-faint">No ASIN snapshots attached.</p>
+                <p className="text-[12px] text-zinc-500">No ASIN snapshots attached.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedProspect.asins.map((a) => (
                     <div
                       key={a.asin}
-                      className="border border-hairline rounded-ds-sm p-2.5 text-ds-label space-y-1"
+                      className="border border-zinc-200 rounded p-2.5 text-[12px] space-y-1"
                     >
-                      <div className="font-medium text-ink-950">{a.title}</div>
-                      <div className="flex flex-wrap gap-x-3 text-faint font-mono">
+                      <div className="font-medium text-zinc-950">{a.title}</div>
+                      <div className="flex flex-wrap gap-x-3 text-zinc-600 font-mono">
                         <span>{a.asin}</span>
                         <span>{a.offerClass.replace(/_/g, ' ')}</span>
                         <span>{formatGbp(a.price, 2)}</span>
@@ -653,19 +647,19 @@ export function BwsIntelligenceView({
               )}
             </div>
 
-            <div className="border-t border-hairline pt-4 space-y-2">
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+            <div className="border-t border-zinc-200 pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
                 UK Distributors ({selectedProspect.distributors.length})
               </div>
               {selectedProspect.distributors.length === 0 ? (
-                <p className="text-ds-label text-faint">No third-party UK distributor recorded.</p>
+                <p className="text-[12px] text-zinc-500">No third-party UK distributor recorded.</p>
               ) : (
                 selectedProspect.distributors.map((d, i) => (
-                  <div key={`${d.company}-${i}`} className="border border-hairline rounded-ds-sm p-2.5 text-ds-label">
-                    <div className="font-medium text-ink-950">
+                  <div key={`${d.company}-${i}`} className="border border-zinc-200 rounded p-2.5 text-[12px]">
+                    <div className="font-medium text-zinc-950">
                       {d.company} ({d.territory}) {d.exclusive ? '· Exclusive' : ''}
                     </div>
-                    <div className="text-faint mt-0.5">{d.suggestedApproach}</div>
+                    <div className="text-zinc-600 mt-0.5">{d.suggestedApproach}</div>
                   </div>
                 ))
               )}

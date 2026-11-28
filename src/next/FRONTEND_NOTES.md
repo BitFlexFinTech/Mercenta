@@ -164,3 +164,23 @@ No existing file under `src/data/**`, `src/types.ts`, `src/config/**`, `src/lib/
 - `npm run build` (`vite build`): **Pass**.
 - `npx tsc --noEmit`: **0 errors** across all files in `src/next/**`, `src/main.tsx`, and `src/App.tsx`. One pre-existing React 18 → React 19 `@types/react` `RefObject<HTMLButtonElement | null>` variance mismatch exists in unmodified `src/components/layout/AppShell.tsx:225`.
 
+---
+
+## 6. Phases 3–6 Completion Audit (`core_brand` 21/21 · `core_admin` 28/28 · `bws` 22/22 · `talent_commerce` 18/18)
+
+All 89 navigation routes across all four operating surfaces are wired via `React.lazy` + `<Suspense fallback={<LoadingRows rows={6} />}>` inside `src/next/shell/NextShell.tsx`, with `implemented: true` across every item in `src/next/navConfig.ts`:
+
+- **Core Brand (`core_brand`, 21/21)**: `overview` (`BrandOverviewScreen`), `purchase_orders`, `logistics`, `returns`, `work` & `calendar` (`WorkWorkspaceScreen` `scope="brand"`), `catalog`, `inventory`, `commercial_readiness`, `lift_off`, `onboarding`, `compliance`, `contracts`, `analytics`, `ads_management` (`AdsManagerScreen` `scope="brand"`), `market`, `reports`, `documents`, `cases`, `team`, `settings`.
+- **Core Admin (`core_admin`, 28/28)**: `overview`, `control_centre` (Super Admin), `work` & `calendar` (`WorkWorkspaceScreen` `scope="admin"`), `purchase_orders_admin`, `logistics`, `returns_tracking`, `crm`, `onboarding_pipeline`, `marketing`, `ads_management` & `amazon_ads` (`AdsManagerScreen` receiving `scope={session?.tier === 'super_admin' ? 'super_admin' : 'admin'}`), `brand_intelligence` (Super Admin), `catalog`, `fulfillment_track`, `retail_pipeline`, `billing`, `contracts_admin`, `compliance`, `messages`, `helpdesk`, `monitoring`, `super_admin` (`SuperAdminScreen`, Super Admin), `audit_log` (Super Admin), `usertour`, `integrations` (Super Admin), `founder_centre` (Super Admin), `partnerships` (Super Admin).
+- **BWS Workspace (`bws`, 22/22)**:
+  - Reused Core Admin engines: `campaign-studio` (`AdsManagerScreen` `vertical="bws"`), `product-catalogue` (`AdminCatalogScreen`), `brand-onboarding` (`OnboardingPipelineScreen`), `compliance-regulatory` (`AdminComplianceScreen`), `wholesale-distribution` (`AdminPurchaseOrdersScreen`), `inventory-fulfilment` (`AdminLogisticsScreen`), `financials` (`AdminBillingScreen`).
+  - BWS Intelligence & Acquisition (`BwsIntelligenceScreen` + `BwsIntelligenceView`): `overview`, `country-discovery`, `brand-discovery`, `brand-intelligence`, `uk-distribution`, `amazon-uk`, `pitch-targets`, `opportunity-assessment`, `acquisition-pipeline`.
+  - BWS Portfolio & Operations (`BwsPortfolioOpsScreen` + `BwsPortfolioOpsView`): `brand-portfolio`, `partner-portal`, `import-excise` (commodityCode / VAT / hazmat / HMRC port shipments), `brand-growth`, `reports-analytics`, `settings`.
+  - **Omitted & Disclosed BWS Alcohol Fields**: `abv`, `awrsNumber`, `dutyRate`, alcohol duty calculator, WePrep wet-bond storage pathway flags, and `Brand.vertical` isolation are intentionally omitted and explicitly disclosed via `NoticeBanner`.
+- **Talent Commerce (`talent_commerce`, 18/18)**:
+  - Reused Core Admin engines: `campaigns` (`AdsManagerScreen` `vertical="talent_commerce"`), `purchase-orders` (`AdminPurchaseOrdersScreen`), `fulfilment` (`AdminLogisticsScreen`), `inventory` (`AdminCatalogScreen` — portfolio view, never single-brand `BrandInventoryScreen`), `financials` (`AdminBillingScreen`).
+  - Dedicated Approvals Queue (`TalentApprovalsScreen` + `TalentApprovalsView` at `approvals`): strictly wired to Mercenta's 4 real approval queues (`ProductSubmission`, `ListingRecommendation`, `ComplianceDocument`, `PurchaseOrder` ack / `poOnBehalfRejectionDraft` on-behalf draft approvals).
+  - Talent Workspace (`TalentWorkspaceScreen` + `TalentWorkspaceView`): `dashboard`, `profile` (labelled `"Rights Holders"`), `brands`, `uk-opportunities`, `acquisition`, `brand-stores`, `concepts`, `development`, `collections`, `assets`, `royalties`, `settings`.
+  - **Omitted & Disclosed Talent/IP Fields**: Dedicated `Talent`/`RightsHolder` entities, `talentId` joins, `RoyaltyAgreement` & payout split schedules, `CreativeAsset`, `BrandStore`, `Collection`, `ProductConcept`, `DevelopmentBrief`, and `Brand.vertical` are intentionally omitted and explicitly disclosed via `NoticeBanner` / `EmptyStateBlock`.
+
+

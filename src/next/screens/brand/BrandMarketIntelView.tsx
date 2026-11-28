@@ -4,7 +4,7 @@ import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   type ConsoleColumn,
 } from '@/next/components/ConsolePrimitives';
 import {
@@ -133,8 +133,8 @@ export function BrandMarketIntelView({
       mobilePrimary: true,
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.product.name}</div>
-          <div className="text-ds-micro font-mono text-faint">
+          <div className="font-medium text-zinc-950">{r.product.name}</div>
+          <div className="text-[11px] font-mono text-zinc-500">
             {r.product.sku} · {r.analysis.estimates.monthlyUnitsLow}–
             {r.analysis.estimates.monthlyUnitsHigh} est. units/mo
           </div>
@@ -174,7 +174,7 @@ export function BrandMarketIntelView({
       header: 'Listing Health',
       align: 'right',
       render: (r) => (
-        <span className="font-mono text-ds-label">
+        <span className="font-mono text-[12px]">
           {r.analysis.healthLevel} ({r.analysis.healthScore}/100)
         </span>
       ),
@@ -191,7 +191,7 @@ export function BrandMarketIntelView({
             onSelectSku(r.product.sku);
             setTab('analyzer');
           }}
-          className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
         >
           Analyse
         </button>
@@ -201,12 +201,12 @@ export function BrandMarketIntelView({
 
   return (
     <div className="space-y-6" data-testid="brand-market-intel">
-      <ConsoleHeader
+      <PageHeader
         title="Market Intelligence"
         description="Qualitative category positioning, deterministic listing diagnostics, and simulated UK retail-channel sales modelling."
         meta={
           <>
-            <span className="font-medium text-ink-800">
+            <span className="font-medium text-zinc-800">
               {brandName} · {brandCategory}
             </span>
             <span className="font-mono tabular-nums">
@@ -281,10 +281,10 @@ export function BrandMarketIntelView({
                 key={d}
                 type="button"
                 onClick={() => setMarketDetail(d)}
-                className={`px-2.5 py-1 rounded-ds-sm text-ds-label font-medium border ${
+                className={`px-2.5 py-1 rounded text-[12px] font-medium border ${
                   marketDetail === d
-                    ? 'border-accent bg-ink-950 text-on-dark'
-                    : 'border-hairline bg-surface-raised text-secondary hover:bg-surface'
+                    ? 'border-zinc-950 bg-zinc-950 text-white'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
                 }`}
               >
                 {d === 'all'
@@ -307,7 +307,7 @@ export function BrandMarketIntelView({
                   <button
                     type="button"
                     onClick={() => setShowAllCompetitors((v) => !v)}
-                    className="text-ds-label font-medium text-accent hover:underline"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     {showAllCompetitors ? 'Show fewer' : `Show all ${competitors.length}`}
                   </button>
@@ -315,7 +315,7 @@ export function BrandMarketIntelView({
               }
             >
               {competitors.length === 0 ? (
-                <p className="text-ds-label text-faint">
+                <p className="text-[12px] text-zinc-500">
                   No comparable brands tracked in {brandCategory} yet.
                 </p>
               ) : (
@@ -323,10 +323,10 @@ export function BrandMarketIntelView({
                   {visibleCompetitors.map((c) => (
                     <div
                       key={c.id}
-                      className="rounded-ds-sm border border-hairline bg-canvas-60 px-3.5 py-2.5"
+                      className="rounded border border-zinc-200 bg-zinc-50/60 px-3.5 py-2.5"
                     >
-                      <div className="text-ds-body font-medium text-ink-950">{c.brand}</div>
-                      <div className="text-ds-label text-faint mt-0.5">{c.positionLabel}</div>
+                      <div className="text-[14px] font-medium text-zinc-950">{c.brand}</div>
+                      <div className="text-[12px] text-zinc-600 mt-0.5">{c.positionLabel}</div>
                     </div>
                   ))}
                 </div>
@@ -355,15 +355,15 @@ export function BrandMarketIntelView({
 
           {(marketDetail === 'all' || marketDetail === 'insights') && (
             <SectionCard title="Market Insights">
-              <div className="space-y-2 text-ds-body text-secondary leading-relaxed">
+              <div className="space-y-2 text-[14px] text-zinc-700 leading-relaxed">
                 <p>
-                  Your brand is aligned to <span className="font-medium text-ink-950">{brandCategory}</span>{' '}
+                  Your brand is aligned to <span className="font-medium text-zinc-950">{brandCategory}</span>{' '}
                   in the UK market — one of {APPROVED_CATEGORIES.length} approved categories.
                 </p>
                 <p>
-                  Mercenta tracks <span className="font-medium text-ink-950">{trackedBrandsTotal}</span>{' '}
+                  Mercenta tracks <span className="font-medium text-zinc-950">{trackedBrandsTotal}</span>{' '}
                   modelled brands overall, including{' '}
-                  <span className="font-medium text-ink-950">{categoryBrandsCount}</span> in{' '}
+                  <span className="font-medium text-zinc-950">{categoryBrandsCount}</span> in{' '}
                   {brandCategory}.
                 </p>
               </div>
@@ -379,7 +379,7 @@ export function BrandMarketIntelView({
 
           {productPerformance.length === 0 ? (
             <SectionCard title="Listing Analyzer">
-              <p className="text-ds-body text-faint">
+              <p className="text-[14px] text-zinc-600">
                 Add products to your catalogue to inspect listing dimensions and Mercenta suggestions.
               </p>
             </SectionCard>
@@ -391,11 +391,11 @@ export function BrandMarketIntelView({
               >
                 <div className="flex flex-wrap items-end justify-between gap-4">
                   <label className="block space-y-1 min-w-[260px] flex-1 max-w-md">
-                    <span className="text-ds-label text-faint">Catalogue Product</span>
+                    <span className="text-[12px] text-zinc-600">Catalogue Product</span>
                     <select
                       value={selectedSku}
                       onChange={(e) => onSelectSku(e.target.value)}
-                      className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-body text-ink-950"
+                      className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-[14px] text-zinc-950"
                     >
                       {productPerformance.map(({ product }) => (
                         <option key={product.sku} value={product.sku}>
@@ -406,8 +406,8 @@ export function BrandMarketIntelView({
                   </label>
                   {selectedAnalysis && (
                     <div className="flex items-center gap-3">
-                      <ScanSearch className="w-4 h-4 text-accent" aria-hidden="true" />
-                      <span className="text-ds-body font-medium text-ink-950">
+                      <ScanSearch className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                      <span className="text-[14px] font-medium text-zinc-950">
                         Health: {selectedAnalysis.healthScore}/100 ({selectedAnalysis.healthLevel})
                       </span>
                     </div>
@@ -417,24 +417,24 @@ export function BrandMarketIntelView({
                 {selectedAnalysis && (
                   <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {selectedAnalysis.dimensions.map((d) => (
-                      <div key={d.key} className="rounded-ds-sm border border-hairline p-3 space-y-1.5">
-                        <div className="flex items-center justify-between text-ds-label">
-                          <span className="font-medium text-ink-950">{d.label}</span>
-                          <span className="font-mono font-medium text-ink-950">{d.score}/100</span>
+                      <div key={d.key} className="rounded border border-zinc-200 p-3 space-y-1.5">
+                        <div className="flex items-center justify-between text-[12px]">
+                          <span className="font-medium text-zinc-950">{d.label}</span>
+                          <span className="font-mono font-medium text-zinc-950">{d.score}/100</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-ds-sm bg-tint overflow-hidden">
+                        <div className="h-1.5 w-full rounded bg-zinc-100 overflow-hidden">
                           <div
                             className={`h-full ${
                               d.score >= 70
-                                ? 'bg-state-success'
+                                ? 'bg-emerald-600'
                                 : d.score >= 45
-                                  ? 'bg-state-warning'
-                                  : 'bg-state-danger'
+                                  ? 'bg-amber-600'
+                                  : 'bg-red-600'
                             }`}
                             style={{ width: `${Math.max(2, d.score)}%` }}
                           />
                         </div>
-                        <p className="text-ds-label text-faint">{d.note}</p>
+                        <p className="text-[12px] text-zinc-600">{d.note}</p>
                       </div>
                     ))}
                   </div>
@@ -446,7 +446,7 @@ export function BrandMarketIntelView({
                   title="Estimated Market Position"
                   description={selectedAnalysis.simulationLabel}
                 >
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-ds-label">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[12px]">
                     {[
                       [
                         'Est. Units / Month',
@@ -460,9 +460,9 @@ export function BrandMarketIntelView({
                       ['Demand Signal', selectedAnalysis.estimates.demandSignal],
                       ['Category Position', selectedAnalysis.estimates.categoryPosition],
                     ].map(([k, v]) => (
-                      <div key={k} className="rounded-ds-sm border border-hairline bg-canvas-70 p-2.5">
-                        <div className="text-ds-micro uppercase tracking-[0.05em] text-faint">{k}</div>
-                        <div className="mt-1 font-mono font-medium text-ink-950">{v}</div>
+                      <div key={k} className="rounded border border-zinc-200 bg-zinc-50/70 p-2.5">
+                        <div className="text-[11px] uppercase tracking-[0.05em] text-zinc-500">{k}</div>
+                        <div className="mt-1 font-mono font-medium text-zinc-950">{v}</div>
                       </div>
                     ))}
                   </div>
@@ -475,21 +475,21 @@ export function BrandMarketIntelView({
                   description="Review, approve, edit, or reject each recommendation. Decisions are one-shot and audited."
                 >
                   {selectedAnalysis.recommendations.length === 0 ? (
-                    <p className="text-ds-body text-faint">No suggestions for this listing right now.</p>
+                    <p className="text-[14px] text-zinc-600">No suggestions for this listing right now.</p>
                   ) : (
                     <div className="space-y-3">
                       {selectedAnalysis.recommendations.map((rec) => {
                         const isEditing = editingRecId === rec.id;
                         const busy = busyRecommendationId === rec.id;
                         return (
-                          <div key={rec.id} className="rounded-ds-sm border border-hairline p-4 space-y-2">
+                          <div key={rec.id} className="rounded border border-zinc-200 p-4 space-y-2">
                             <div className="flex flex-wrap items-start justify-between gap-2">
                               <div>
-                                <div className="text-ds-body font-semibold text-ink-950">
+                                <div className="text-[14px] font-semibold text-zinc-950">
                                   {rec.title}
                                 </div>
-                                <p className="text-ds-label text-faint mt-0.5">{rec.detail}</p>
-                                <p className="text-ds-micro font-mono text-faint mt-0.5">
+                                <p className="text-[12px] text-zinc-600 mt-0.5">{rec.detail}</p>
+                                <p className="text-[11px] font-mono text-zinc-500 mt-0.5">
                                   Impact: {rec.impact}
                                 </p>
                               </div>
@@ -516,16 +516,16 @@ export function BrandMarketIntelView({
                             </div>
 
                             {rec.suggestedCopy && (
-                              <div className="rounded-ds-sm bg-surface border border-hairline px-3 py-2 text-ds-label text-ink-800">
-                                <span className="font-mono uppercase text-ds-micro text-faint mr-1.5">
+                              <div className="rounded bg-zinc-50 border border-zinc-200 px-3 py-2 text-[12px] text-zinc-800">
+                                <span className="font-mono uppercase text-[11px] text-zinc-500 mr-1.5">
                                   Suggestion:
                                 </span>
                                 {rec.suggestedCopy}
                               </div>
                             )}
                             {rec.editedCopy && (
-                              <div className="rounded-ds-sm bg-state-warning/10 border border-state-warning/20 px-3 py-2 text-ds-label text-ink-900">
-                                <span className="font-mono uppercase text-ds-micro text-state-warning mr-1.5">
+                              <div className="rounded bg-amber-50/70 border border-amber-200 px-3 py-2 text-[12px] text-zinc-900">
+                                <span className="font-mono uppercase text-[11px] text-amber-800 mr-1.5">
                                   Your copy:
                                 </span>
                                 {rec.editedCopy}
@@ -538,7 +538,7 @@ export function BrandMarketIntelView({
                                   type="button"
                                   disabled={busy}
                                   onClick={() => onReviewRecommendation(rec, 'approved')}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
                                 >
                                   <Check className="w-3.5 h-3.5" aria-hidden="true" />
                                   Approve
@@ -550,7 +550,7 @@ export function BrandMarketIntelView({
                                     setEditingRecId(rec.id);
                                     setEditCopy(rec.suggestedCopy ?? '');
                                   }}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface disabled:opacity-40"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
                                 >
                                   <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
                                   Edit
@@ -559,7 +559,7 @@ export function BrandMarketIntelView({
                                   type="button"
                                   disabled={busy}
                                   onClick={() => onReviewRecommendation(rec, 'rejected')}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-state-danger hover:bg-state-danger/10 disabled:opacity-40"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
                                 >
                                   <X className="w-3.5 h-3.5" aria-hidden="true" />
                                   Reject
@@ -573,7 +573,7 @@ export function BrandMarketIntelView({
                                   rows={3}
                                   value={editCopy}
                                   onChange={(e) => setEditCopy(e.target.value)}
-                                  className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                                  className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                                 />
                                 <div className="flex gap-2">
                                   <button
@@ -583,7 +583,7 @@ export function BrandMarketIntelView({
                                       onReviewRecommendation(rec, 'edited', editCopy);
                                       setEditingRecId(null);
                                     }}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
                                   >
                                     <Save className="w-3.5 h-3.5" aria-hidden="true" />
                                     Confirm Edit
@@ -591,7 +591,7 @@ export function BrandMarketIntelView({
                                   <button
                                     type="button"
                                     onClick={() => setEditingRecId(null)}
-                                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary"
+                                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700"
                                   >
                                     Cancel
                                   </button>
@@ -615,13 +615,13 @@ export function BrandMarketIntelView({
           title="Retail-Channel Sales Estimator"
           description={`Enter known product inputs to model an estimated monthly sales band and Mercenta economics under your commercial model (${COMMERCIAL_MODELS[commercialModel].label}).`}
         >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-ds-label mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12px] mb-5">
             <label className="space-y-1">
-              <span className="text-faint">Category</span>
+              <span className="text-zinc-600">Category</span>
               <select
                 value={estCategory}
                 onChange={(e) => setEstCategory(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
               >
                 {APPROVED_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -631,43 +631,43 @@ export function BrandMarketIntelView({
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-faint">Retail Price (£)</span>
+              <span className="text-zinc-600">Retail Price (£)</span>
               <input
                 value={estPrice}
                 onChange={(e) => setEstPrice(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised font-mono text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
               />
             </label>
             <label className="space-y-1">
-              <span className="text-faint">Pack Size (units/sale)</span>
+              <span className="text-zinc-600">Pack Size (units/sale)</span>
               <input
                 value={estPackSize}
                 onChange={(e) => setEstPackSize(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised font-mono text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
               />
             </label>
             <label className="space-y-1">
-              <span className="text-faint">Competing Listings</span>
+              <span className="text-zinc-600">Competing Listings</span>
               <input
                 value={estCompetitors}
                 onChange={(e) => setEstCompetitors(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised font-mono text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
               />
             </label>
             <label className="space-y-1">
-              <span className="text-faint">Existing Reviews</span>
+              <span className="text-zinc-600">Existing Reviews</span>
               <input
                 value={estReviews}
                 onChange={(e) => setEstReviews(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised font-mono text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white font-mono text-zinc-950"
               />
             </label>
             <label className="space-y-1">
-              <span className="text-faint">Listing Maturity</span>
+              <span className="text-zinc-600">Listing Maturity</span>
               <select
                 value={estMaturity}
                 onChange={(e) => setEstMaturity(e.target.value)}
-                className="w-full px-2.5 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                className="w-full px-2.5 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
               >
                 <option value="1">1 — Brand new</option>
                 <option value="2">2 — Early</option>
@@ -678,9 +678,9 @@ export function BrandMarketIntelView({
             </label>
           </div>
 
-          <div className="rounded-ds-sm border border-hairline bg-canvas-70 p-4 space-y-3">
+          <div className="rounded border border-zinc-200 bg-zinc-50/70 p-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-ds-body font-semibold text-ink-950">Estimated Monthly Sales</span>
+              <span className="text-[14px] font-semibold text-zinc-950">Estimated Monthly Sales</span>
               <InlineStatus
                 label={`${estimate.confidence} confidence`}
                 tone={
@@ -693,62 +693,62 @@ export function BrandMarketIntelView({
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-ds-label font-mono tabular-nums">
-              <div className="rounded-ds-sm border border-hairline bg-surface-raised p-3">
-                <div className="text-ds-micro uppercase font-sans text-faint">Orders / Month</div>
-                <div className="mt-1 text-ds-title font-semibold text-ink-950">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[12px] font-mono tabular-nums">
+              <div className="rounded border border-zinc-200 bg-white p-3">
+                <div className="text-[11px] uppercase font-sans text-zinc-500">Orders / Month</div>
+                <div className="mt-1 text-[16px] font-semibold text-zinc-950">
                   {estimate.estimatedMonthlyOrders.low} – {estimate.estimatedMonthlyOrders.high}
                 </div>
               </div>
-              <div className="rounded-ds-sm border border-hairline bg-surface-raised p-3">
-                <div className="text-ds-micro uppercase font-sans text-faint">Units / Month</div>
-                <div className="mt-1 text-ds-title font-semibold text-ink-950">
+              <div className="rounded border border-zinc-200 bg-white p-3">
+                <div className="text-[11px] uppercase font-sans text-zinc-500">Units / Month</div>
+                <div className="mt-1 text-[16px] font-semibold text-zinc-950">
                   {estimate.estimatedMonthlyUnits.low} – {estimate.estimatedMonthlyUnits.high}
                 </div>
               </div>
-              <div className="rounded-ds-sm border border-hairline bg-surface-raised p-3">
-                <div className="text-ds-micro uppercase font-sans text-faint">Revenue / Month</div>
-                <div className="mt-1 text-ds-title font-semibold text-state-success">
+              <div className="rounded border border-zinc-200 bg-white p-3">
+                <div className="text-[11px] uppercase font-sans text-zinc-500">Revenue / Month</div>
+                <div className="mt-1 text-[16px] font-semibold text-emerald-800">
                   {formatGbp(estimate.estimatedMonthlyRevenueGbp.low)} –{' '}
                   {formatGbp(estimate.estimatedMonthlyRevenueGbp.high)}
                 </div>
               </div>
             </div>
 
-            <p className="text-ds-label text-faint">
+            <p className="text-[12px] text-zinc-600">
               Midpoint {formatGbp(estimate.estimatedMonthlyRevenueGbp.mid)}/month ·{' '}
               {formatGbp(estimate.estimatedAnnualRevenueGbp.mid)}/year. {estimate.confidenceReason}
             </p>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-hairline space-y-2">
+          <div className="mt-4 pt-4 border-t border-zinc-200 space-y-2">
             <button
               type="button"
               onClick={() => setShowBornToRun((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
             >
-              <TrendingUp className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+              <TrendingUp className="w-3.5 h-3.5 text-[#C2410C]" aria-hidden="true" />
               {showBornToRun ? 'Hide' : 'Model'} a new-to-channel launch
             </button>
 
             {bornToRun && (
-              <div className="rounded-ds-sm border border-hairline bg-surface p-3.5 text-ds-label space-y-1.5">
-                <div className="font-semibold text-ink-950">Launch Modelling — Simulation Only</div>
-                <div className="font-mono text-secondary">
+              <div className="rounded border border-zinc-200 bg-zinc-50 p-3.5 text-[12px] space-y-1.5">
+                <div className="font-semibold text-zinc-950">Launch Modelling — Simulation Only</div>
+                <div className="font-mono text-zinc-700">
                   New to channel: {bornToRun.newToAmazon ? 'yes' : 'no'} · Projected initial demand{' '}
                   {bornToRun.projectedInitialMonthlyOrders} orders/mo · Suggested first qty{' '}
                   {bornToRun.suggestedLaunchQuantity} units · Launch revenue{' '}
                   {formatGbp(bornToRun.estimatedLaunchRevenueGbp)}
                 </div>
-                <div className="font-mono text-secondary">{bornToRun.economics.formula}</div>
-                <div className="text-state-warning">
+                <div className="font-mono text-zinc-700">{bornToRun.economics.formula}</div>
+                <div className="text-amber-800">
                   Programme status: {bornToRun.programmeStatus} — Mercenta does not claim channel
-                  approval and submits nothing to the retail channel.
+                  approval and submits nothing to Amazon.
                 </div>
               </div>
             )}
 
-            <div className="space-y-1 pt-2 text-ds-micro text-faint">
+            <div className="space-y-1 pt-2 text-[11px] text-zinc-500">
               {estimate.disclaimers.map((d) => (
                 <p key={d} className="flex items-start gap-1.5">
                   <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />

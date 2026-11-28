@@ -13,8 +13,6 @@ import {
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
 import { navigateProductView, parseProductPath, recordLinkQuery } from '@/lib/runtime/productRoutes';
-import { BrandLockup } from '@/components/shared/BrandLockup';
-import { ThemeSelector } from '@/components/shared/ThemeSelector';
 import { EmptyStateBlock, LoadingRows } from '@/next/components/ConsolePrimitives';
 import {
   SURFACE_CONFIGS,
@@ -25,12 +23,6 @@ import {
 import type { BwsIntelligenceSection } from '@/next/screens/bws/BwsIntelligenceView';
 import type { BwsPortfolioOpsSection } from '@/next/screens/bws/BwsPortfolioOpsView';
 import type { TalentWorkspaceSection } from '@/next/screens/talent/TalentWorkspaceView';
-/* §FRONTEND-REDESIGN BATCH 2b — two screens v1's shell does not have, kept because
-   THIS project built them and the requirements registry records them as built:
-   the §WAVE 3h deadline calendar, and the §WAVE 3g vertical-scoped portfolio
-   (ONE screen serving every operating model). */
-import { BrandCalendarScreen } from '@/next/screens/brand/BrandCalendarScreen';
-import { VerticalPortfolioScreen } from '@/next/screens/vertical/VerticalPortfolioScreen';
 import '../next.css';
 
 /* ── LAZY SCREEN IMPORTS ──────────────────────────────────────────────────── */
@@ -143,8 +135,8 @@ const AdminOverviewScreen = lazy(() =>
   }))
 );
 const ControlCentreScreen = lazy(() =>
-  import('@/next/screens/admin/AdminControlCentreScreen').then((m) => ({
-    default: m.AdminControlCentreScreen,
+  import('@/next/screens/admin/ControlCentreScreen').then((m) => ({
+    default: m.ControlCentreScreen,
   }))
 );
 const AdminPurchaseOrdersScreen = lazy(() =>
@@ -163,8 +155,8 @@ const AdminReturnsScreen = lazy(() =>
   }))
 );
 const BrandCrmScreen = lazy(() =>
-  import('@/next/screens/admin/AdminCrmScreen').then((m) => ({
-    default: m.AdminCrmScreen,
+  import('@/next/screens/admin/BrandCrmScreen').then((m) => ({
+    default: m.BrandCrmScreen,
   }))
 );
 const OnboardingPipelineScreen = lazy(() =>
@@ -173,8 +165,8 @@ const OnboardingPipelineScreen = lazy(() =>
   }))
 );
 const MarketingHubScreen = lazy(() =>
-  import('@/next/screens/admin/AdminMarketingScreen').then((m) => ({
-    default: m.AdminMarketingScreen,
+  import('@/next/screens/admin/MarketingHubScreen').then((m) => ({
+    default: m.MarketingHubScreen,
   }))
 );
 const AdminBrandIntelligenceScreen = lazy(() =>
@@ -188,8 +180,8 @@ const AdminCatalogScreen = lazy(() =>
   }))
 );
 const FulfillmentTrackScreen = lazy(() =>
-  import('@/next/screens/admin/AdminFulfillmentScreen').then((m) => ({
-    default: m.AdminFulfillmentScreen,
+  import('@/next/screens/admin/FulfillmentTrackScreen').then((m) => ({
+    default: m.FulfillmentTrackScreen,
   }))
 );
 const RetailPipelineScreen = lazy(() =>
@@ -233,8 +225,8 @@ const SuperAdminScreen = lazy(() =>
   }))
 );
 const AdminAuditLogScreen = lazy(() =>
-  import('@/next/screens/admin/AdminAuditScreen').then((m) => ({
-    default: m.AdminAuditScreen,
+  import('@/next/screens/admin/AdminAuditLogScreen').then((m) => ({
+    default: m.AdminAuditLogScreen,
   }))
 );
 const AdminUsertourScreen = lazy(() =>
@@ -248,13 +240,13 @@ const AdminIntegrationsScreen = lazy(() =>
   }))
 );
 const FounderInvestorScreen = lazy(() =>
-  import('@/next/screens/admin/AdminFounderCentreScreen').then((m) => ({
-    default: m.AdminFounderCentreScreen,
+  import('@/next/screens/admin/FounderInvestorScreen').then((m) => ({
+    default: m.FounderInvestorScreen,
   }))
 );
 const PartnershipsScreen = lazy(() =>
-  import('@/next/screens/admin/AdminPartnershipsScreen').then((m) => ({
-    default: m.AdminPartnershipsScreen,
+  import('@/next/screens/admin/PartnershipsScreen').then((m) => ({
+    default: m.PartnershipsScreen,
   }))
 );
 
@@ -288,7 +280,7 @@ const BWS_INTEL_SECTIONS = new Set<BwsIntelligenceSection>([
   'brand-discovery',
   'brand-intelligence',
   'uk-distribution',
-  'uk-channel-research',
+  'amazon-uk',
   'pitch-targets',
   'opportunity-assessment',
   'acquisition-pipeline',
@@ -338,11 +330,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
     canCurrentUserMutate,
   } = useApp();
   const brandsQ = useBrands();
-  /* §FRONTEND-REDESIGN BATCH 2b — `?.data ?? []` allocates a NEW array on every
-     render, so every useMemo keyed on it below re-ran on every render and ESLint
-     correctly flagged it. Memoised at the source instead: one identity per data
-     change, which is also what the filter strips memoise against. */
-  const brands = useMemo(() => brandsQ.data?.data ?? [], [brandsQ.data]);
+  const brands = brandsQ.data?.data ?? [];
 
   const [surface, setSurface] = useState<OperatingSurfaceId>(() => {
     if (typeof window !== 'undefined') {
@@ -532,10 +520,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       case 'work':
         return <WorkWorkspaceScreen scope="brand" initialView="list" onNavigate={selectNavItem} />;
       case 'calendar':
-        /* §FRONTEND-REDESIGN BATCH 2b — v1 rendered the work layer's calendar view
-           here. This project has a dedicated §WAVE 3h deadline calendar, so that
-           screen is kept rather than replaced by a narrower one. */
-        return <BrandCalendarScreen />;
+        return (
+          <WorkWorkspaceScreen scope="brand" initialView="calendar" onNavigate={selectNavItem} />
+        );
       case 'catalog':
         return <BrandCatalogScreen />;
       case 'inventory':
@@ -565,10 +552,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       case 'team':
         return <BrandTeamMessagesScreen />;
       case 'settings':
-        /* §FRONTEND-REDESIGN BATCH 2b — this project's BrandSettingsScreen owns its
-           own contract navigation and accepts no props; v1's took `onOpenContracts`.
-           Passing it would be a dead prop. */
-        return <BrandSettingsScreen />;
+        return <BrandSettingsScreen onOpenContracts={() => selectNavItem('contracts')} />;
       default:
         return (
           <EmptyStateBlock
@@ -626,15 +610,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           />
         );
       case 'brand_intelligence':
-        /* §FRONTEND-REDESIGN BATCH 2b — this project's screen, NOT v1's. v1's version
-           was taken in Batch 3a and the superset check compared hooks and affordances,
-           which MISSED that v1 surfaces NO ten-category rule at all: the ranked board's
-           "Retained but NOT ranked (ineligible)" panel, the 10-category exclusion list
-           and the vertical split were gone. That is the platform's ABSOLUTE category
-           limit, so the compliant screen was restored from 5ff8297 and
-           `e2e/next-console-smoke.spec.ts` caught it. v1's prospect board stays a merge
-           candidate ON TOP of this screen, never instead of it. */
-        return <AdminBrandIntelligenceScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
+        return <AdminBrandIntelligenceScreen />;
       case 'catalog':
         return <AdminCatalogScreen />;
       case 'fulfillment_track':
@@ -662,9 +638,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       case 'integrations':
         return <AdminIntegrationsScreen />;
       case 'founder_centre':
-        return <FounderInvestorScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
+        return <FounderInvestorScreen />;
       case 'partnerships':
-        return <PartnershipsScreen onNavigate={(viewId) => selectNavItem(viewId)} />;
+        return <PartnershipsScreen />;
       default:
         return (
           <EmptyStateBlock
@@ -678,17 +654,6 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   }
 
   function renderBwsScreen() {
-    if (activeViewId === 'overview' || activeViewId === 'brand-portfolio') {
-      /* §FRONTEND-REDESIGN BATCH 2b — the §WAVE 3g vertical portfolio owns the
-         portfolio slot AND the surface's landing view, exactly as this project's
-         previous shell had it (`overview || brand-portfolio`). The BWS Overview was
-         lost when v1's shell was adopted — a real regression, caught by
-         `e2e/next-console-smoke.spec.ts` ("Beers, Wines & Spirits portfolio"). It is
-         scoped by `Brand.vertical`, so a BWS heading can never show core brands.
-         v1's BwsIntelligence keeps the research sections; BwsPortfolioOps keeps the
-         OPERATIONAL ones (partner portal, import & excise, growth, reports). */
-      return <VerticalPortfolioScreen vertical="bws" />;
-    }
     if (BWS_INTEL_SECTIONS.has(activeViewId as BwsIntelligenceSection)) {
       return (
         <BwsIntelligenceScreen
@@ -749,10 +714,6 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   }
 
   function renderTalentCommerceScreen() {
-    if (activeViewId === 'brands') {
-      /* §FRONTEND-REDESIGN BATCH 2b — same reconciliation as BWS above. */
-      return <VerticalPortfolioScreen vertical="talent_commerce" />;
-    }
     if (TALENT_WORKSPACE_SECTIONS.has(activeViewId as TalentWorkspaceSection)) {
       return (
         <TalentWorkspaceScreen
@@ -815,16 +776,18 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-4 border-b border-hairline flex items-center justify-between">
-        <div className="min-w-0">
-          <BrandLockup variant="light" className="h-6 w-auto" />
-          <div className="text-ds-label text-faint mt-0.5">{surfaceCfg.label}</div>
+      <div className="px-4 py-4 border-b border-zinc-200 flex items-center justify-between">
+        <div>
+          <div className="text-[14px] font-semibold tracking-tight text-zinc-950">
+            Mercenta Partners
+          </div>
+          <div className="text-[12px] text-zinc-500">{surfaceCfg.label}</div>
         </div>
         <button
           type="button"
           onClick={() => setMobileNavOpen(false)}
           aria-label="Close navigation menu"
-          className="lg:hidden p-1.5 rounded-ds-sm text-faint hover:text-ink-900"
+          className="lg:hidden p-1.5 rounded text-zinc-500 hover:text-zinc-900"
         >
           <X className="w-4 h-4" />
         </button>
@@ -833,7 +796,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5" aria-label="Workspace navigation">
         {groupedItems.map((group) => (
           <div key={group.group} className="space-y-1">
-            <div className="px-2 text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
+            <div className="px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
               {group.group}
             </div>
             <ul className="space-y-0.5">
@@ -845,10 +808,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       type="button"
                       onClick={() => selectNavItem(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-ds-sm text-ds-body text-left transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-[14px] text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
                         isActive
-                          ? 'bg-ink-950 text-on-dark font-medium'
-                          : 'text-ink-900 hover:bg-tint font-medium'
+                          ? 'bg-zinc-950 text-white font-medium'
+                          : 'text-zinc-900 hover:bg-zinc-100 font-medium'
                       }`}
                     >
                       <span className="truncate">{item.label}</span>
@@ -861,10 +824,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-hairline space-y-2 text-ds-label">
-        <div className="px-2 py-1.5 rounded-ds-sm bg-surface border border-hairline">
-          <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">Session</div>
-          <div className="font-medium text-ink-950 truncate">
+      <div className="p-3 border-t border-zinc-200 space-y-2 text-[12px]">
+        <div className="px-2 py-1.5 rounded bg-zinc-50 border border-zinc-200">
+          <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">Session</div>
+          <div className="font-medium text-zinc-950 truncate">
             {session
               ? `${session.role}${session.tenantId ? ` (${session.tenantId})` : ''}`
               : 'No active session'}
@@ -874,7 +837,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
           <button
             type="button"
             onClick={onOpenLegacy}
-            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
+            className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
           >
             Legacy UI
             <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -883,7 +846,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             <button
               type="button"
               onClick={signOut}
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-ds-label text-faint hover:text-ink-950"
+              className="px-2.5 py-1.5 rounded border border-zinc-200 bg-white text-[12px] text-zinc-600 hover:text-zinc-950"
             >
               Sign out
             </button>
@@ -894,9 +857,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
   );
 
   return (
-    <div className="mercenta-next h-screen overflow-hidden flex bg-surface text-ink-950">
+    <div className="mercenta-next min-h-screen flex bg-[#FAFAFA] text-[#09090B]">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 lg:h-full overflow-hidden border-r border-hairline bg-surface-raised">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-zinc-200 bg-white">
         {sidebarContent}
       </aside>
 
@@ -904,19 +867,19 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
       {mobileNavOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-scrim-30"
+            className="fixed inset-0 bg-zinc-950/30"
             onClick={() => setMobileNavOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-surface-raised border-r border-hairline flex flex-col">
+          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-white border-r border-zinc-200 flex flex-col">
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Main Column */}
-      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
-        <header className="z-30 shrink-0 border-b border-hairline bg-surface-raised px-4 sm:px-6 py-2.5">
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white px-4 sm:px-6 py-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Zone 1: Mobile trigger + Surface Switcher */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -924,7 +887,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 type="button"
                 onClick={() => setMobileNavOpen(true)}
                 aria-label="Open navigation menu"
-                className="lg:hidden p-2 -ml-2 rounded-ds-sm border border-hairline text-secondary hover:bg-surface"
+                className="lg:hidden p-2 -ml-2 rounded border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
               >
                 <Menu className="w-4 h-4" />
               </button>
@@ -932,7 +895,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               <div
                 role="tablist"
                 aria-label="Operating model surface"
-                className="inline-flex flex-wrap items-center gap-1 rounded-ds-md border border-hairline bg-surface p-0.5"
+                className="inline-flex flex-wrap items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-0.5"
               >
                 {(
                   ['core_brand', 'core_admin', 'bws', 'talent_commerce'] as OperatingSurfaceId[]
@@ -946,10 +909,10 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       role="tab"
                       aria-selected={active}
                       onClick={() => selectSurface(sId)}
-                      className={`px-2.5 py-1 rounded-ds-sm text-ds-label font-medium transition-colors whitespace-nowrap ${
+                      className={`px-2.5 py-1 rounded text-[12px] font-medium transition-colors whitespace-nowrap ${
                         active
-                          ? 'bg-surface-raised text-ink-950 shadow-xs border border-hairline'
-                          : 'text-faint hover:text-ink-950'
+                          ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200'
+                          : 'text-zinc-600 hover:text-zinc-950'
                       }`}
                     >
                       {cfg.label}
@@ -960,9 +923,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             </div>
 
             {/* Zone 2: Demo Actor / Brand Switcher */}
-            <div className="flex flex-wrap items-center gap-2 text-ds-label">
-              <label className="inline-flex items-center gap-1.5 text-faint">
-                <UserCheck className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
+            <div className="flex flex-wrap items-center gap-2 text-[12px]">
+              <label className="inline-flex items-center gap-1.5 text-zinc-600">
+                <UserCheck className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
                 <span className="hidden sm:inline">Demo actor</span>
                 <select
                   aria-label="Switch demo role or brand"
@@ -989,7 +952,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       if (surface === 'core_brand') setSurface('core_admin');
                     }
                   }}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                 >
                   {!session && <option value="none">Select session…</option>}
                   <optgroup label="Partner Brand Accounts">
@@ -1007,13 +970,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
               </label>
 
               {surface !== 'core_brand' && staff.length > 0 && (
-                <label className="inline-flex items-center gap-1.5 text-faint">
-                  <Shield className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
+                <label className="inline-flex items-center gap-1.5 text-zinc-600">
+                  <Shield className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
                   <select
                     aria-label="Acting staff member"
                     value={actingStaffId}
                     onChange={(e) => setActingStaffId(e.target.value)}
-                    className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                    className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                   >
                     {staff.map((st) => (
                       <option key={st.id} value={st.id}>
@@ -1022,22 +985,18 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                     ))}
                   </select>
                   {!canCurrentUserMutate && (
-                    <span className="text-ds-micro font-mono text-state-warning">Read-only</span>
+                    <span className="text-[11px] font-mono text-amber-800">Read-only</span>
                   )}
                 </label>
               )}
             </div>
 
-            {/* Zone 3: appearance + preview trigger */}
+            {/* Zone 3: Preview trigger */}
             <div className="flex items-center gap-2">
-              {/* §PHASE B — THE APPEARANCE SWITCHER LIVES IN THE CONSOLE. It used to exist
-                  only in the legacy header, so a session inside the console had no way to
-                  change appearance at all. */}
-              <ThemeSelector compact />
               <button
                 type="button"
                 onClick={onOpenPreview}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
               >
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                 Preview Harness
@@ -1048,20 +1007,20 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
 
         {/* Super-Admin Portfolio Filter Strip */}
         {showSuperAdminFilterBar && (
-          <div className="border-b border-hairline bg-canvas-70 px-4 sm:px-6 py-2.5 space-y-2">
-            <div className="flex flex-wrap items-center gap-3 text-ds-label">
-              <span className="inline-flex items-center gap-1.5 font-medium text-secondary">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-faint" aria-hidden="true" />
+          <div className="border-b border-zinc-200 bg-zinc-50/70 px-4 sm:px-6 py-2.5 space-y-2">
+            <div className="flex flex-wrap items-center gap-3 text-[12px]">
+              <span className="inline-flex items-center gap-1.5 font-medium text-zinc-700">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" aria-hidden="true" />
                 Portfolio scope
               </span>
 
-              <label className="inline-flex items-center gap-1.5 text-faint">
+              <label className="inline-flex items-center gap-1.5 text-zinc-600">
                 Vertical
                 <select
                   aria-label="Filter portfolio by vertical"
                   value={verticalFilter}
                   onChange={(e) => setVerticalFilter(e.target.value as VerticalFilterValue)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All verticals</option>
                   <option value="core">Core</option>
@@ -1070,13 +1029,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-faint">
+              <label className="inline-flex items-center gap-1.5 text-zinc-600">
                 Region
                 <select
                   aria-label="Filter portfolio by nation"
                   value={nationFilter}
                   onChange={(e) => setNationFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All nations</option>
                   {nations.map((n) => (
@@ -1087,13 +1046,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-faint">
+              <label className="inline-flex items-center gap-1.5 text-zinc-600">
                 Track
                 <select
                   aria-label="Filter portfolio by fulfillment track"
                   value={trackFilter}
                   onChange={(e) => setTrackFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All tracks</option>
                   <option value="financed">Financed</option>
@@ -1102,13 +1061,13 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-1.5 text-faint">
+              <label className="inline-flex items-center gap-1.5 text-zinc-600">
                 Contract
                 <select
                   aria-label="Filter portfolio by contract status"
                   value={contractFilter}
                   onChange={(e) => setContractFilter(e.target.value)}
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-zinc-950"
                 >
                   <option value="all">All statuses</option>
                   {contractStatuses.map((s) => (
@@ -1119,8 +1078,8 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                 </select>
               </label>
 
-              <span className="ml-auto inline-flex items-center gap-1 text-faint font-mono">
-                <Building2 className="w-3.5 h-3.5 text-quiet" aria-hidden="true" />
+              <span className="ml-auto inline-flex items-center gap-1 text-zinc-600 font-mono">
+                <Building2 className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                 {filteredBrandIds ? filteredBrandIds.size : brands.length} / {brands.length} brands
               </span>
             </div>
@@ -1128,9 +1087,9 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded-ds-sm border border-state-warning/20 bg-state-warning/10/80 px-3 py-2 text-ds-label text-state-warning"
+                className="flex items-start gap-2 rounded border border-amber-200 bg-amber-50/80 px-3 py-2 text-[12px] text-amber-950"
               >
-                <AlertCircle className="w-4 h-4 text-state-warning shrink-0 mt-0.5" aria-hidden="true" />
+                <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
                   <strong>Vertical filter unavailable (`Brand.vertical` missing):</strong>{' '}
                   <code>src/types.ts</code> / <code>DemoBrandRow</code> does not define a{' '}
@@ -1144,7 +1103,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
         )}
 
         {/* Main Workspace Container */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 max-w-[1440px] w-full mx-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-[1440px] w-full mx-auto">
           <Suspense fallback={<LoadingRows rows={6} />}>{renderMainContent()}</Suspense>
         </main>
       </div>

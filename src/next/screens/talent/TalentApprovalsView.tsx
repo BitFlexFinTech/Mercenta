@@ -11,7 +11,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -141,8 +141,8 @@ export function TalentApprovalsView({
       header: 'Product Submission',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.productName}</div>
-          <div className="text-ds-label text-faint font-mono">
+          <div className="font-medium text-zinc-950">{r.productName}</div>
+          <div className="text-[12px] text-zinc-500 font-mono">
             {r.sku} · {r.brandName}
           </div>
         </div>
@@ -157,7 +157,7 @@ export function TalentApprovalsView({
       key: 'asin',
       header: 'ASIN / Date',
       render: (r) => (
-        <div className="text-ds-label font-mono text-faint">
+        <div className="text-[12px] font-mono text-zinc-600">
           {r.asin || 'Pending ASIN'} · {r.submittedAt}
         </div>
       ),
@@ -171,7 +171,7 @@ export function TalentApprovalsView({
           type="button"
           disabled={!canMutate || busyId === r.id}
           onClick={() => onPollSubmission(r.id)}
-          className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface disabled:opacity-40"
+          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-40"
         >
           {busyId === r.id ? 'Checking…' : 'Poll status'}
         </button>
@@ -185,8 +185,8 @@ export function TalentApprovalsView({
       header: 'Listing Recommendation',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.title}</div>
-          <div className="text-ds-label text-faint">
+          <div className="font-medium text-zinc-950">{r.title}</div>
+          <div className="text-[12px] text-zinc-500">
             {r.productName} ({r.sku}) · {r.brandName}
           </div>
         </div>
@@ -195,7 +195,7 @@ export function TalentApprovalsView({
     {
       key: 'area',
       header: 'Area',
-      render: (r) => <span className="text-ds-label text-secondary">{r.area}</span>,
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.area}</span>,
     },
     {
       key: 'status',
@@ -213,7 +213,7 @@ export function TalentApprovalsView({
             setSelectedListing(r);
             setEditedCopyDraft(r.editedCopy ?? r.suggestedCopy ?? '');
           }}
-          className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
         >
           Review
         </button>
@@ -227,8 +227,8 @@ export function TalentApprovalsView({
       header: 'Compliance Document',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.docTypeLabel}</div>
-          <div className="text-ds-label text-faint">
+          <div className="font-medium text-zinc-950">{r.docTypeLabel}</div>
+          <div className="text-[12px] text-zinc-500">
             {r.brandName} · v{r.version}
           </div>
         </div>
@@ -243,7 +243,7 @@ export function TalentApprovalsView({
       key: 'expiry',
       header: 'Expiry',
       render: (r) => (
-        <span className="font-mono text-ds-label text-faint">{r.expiryDate ?? '—'}</span>
+        <span className="font-mono text-[12px] text-zinc-600">{r.expiryDate ?? '—'}</span>
       ),
     },
     {
@@ -257,7 +257,7 @@ export function TalentApprovalsView({
             setSelectedCompliance(r);
             setComplianceReason('');
           }}
-          className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+          className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
         >
           Inspect &amp; Decide
         </button>
@@ -271,8 +271,8 @@ export function TalentApprovalsView({
       header: 'Purchase Order',
       render: (r) => (
         <div>
-          <div className="font-mono font-medium text-ink-950">{r.poNumber}</div>
-          <div className="text-ds-label text-faint">
+          <div className="font-mono font-medium text-zinc-950">{r.poNumber}</div>
+          <div className="text-[12px] text-zinc-500">
             {r.brandName} · {r.orderDate}
           </div>
         </div>
@@ -300,7 +300,7 @@ export function TalentApprovalsView({
               type="button"
               disabled={!canMutate || busyId === r.id}
               onClick={() => onApprovePoDraft(r.id, r.brandId, r.draftId)}
-              className="px-2.5 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+              className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
             >
               Approve Draft
             </button>
@@ -308,7 +308,7 @@ export function TalentApprovalsView({
           <button
             type="button"
             onClick={onOpenPurchaseOrders}
-            className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+            className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
           >
             Open PO Queue
           </button>
@@ -319,7 +319,7 @@ export function TalentApprovalsView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Approvals & Review Queues"
         description="Canonical Mercenta approval workflows across product catalog submissions, listing copy recommendations, UK compliance documents, and purchase order acknowledgements."
       />
@@ -415,19 +415,19 @@ export function TalentApprovalsView({
         }
       >
         {selectedListing && (
-          <div className="space-y-4 text-ds-body">
-            <p className="text-secondary">{selectedListing.detail}</p>
-            <div className="text-ds-label text-faint">Expected impact: {selectedListing.impact}</div>
+          <div className="space-y-4 text-[14px]">
+            <p className="text-zinc-700">{selectedListing.detail}</p>
+            <div className="text-[12px] text-zinc-500">Expected impact: {selectedListing.impact}</div>
 
             <div className="space-y-1.5">
-              <label className="block text-ds-label font-medium text-secondary">
+              <label className="block text-[12px] font-medium text-zinc-700">
                 Suggested / Amended Copy
               </label>
               <textarea
                 rows={4}
                 value={editedCopyDraft}
                 onChange={(e) => setEditedCopyDraft(e.target.value)}
-                className="w-full rounded-ds-md border border-hairline-strong px-3 py-2 text-ds-label"
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-[13px]"
               />
             </div>
 
@@ -439,7 +439,7 @@ export function TalentApprovalsView({
                   onReviewListing(selectedListing.brandId, selectedListing.id, 'approved');
                   setSelectedListing(null);
                 }}
-                className="px-3.5 py-2 rounded-ds-md bg-ink-950 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
               >
                 Approve
               </button>
@@ -455,7 +455,7 @@ export function TalentApprovalsView({
                   );
                   setSelectedListing(null);
                 }}
-                className="px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
               >
                 Save Amended Copy
               </button>
@@ -466,7 +466,7 @@ export function TalentApprovalsView({
                   onReviewListing(selectedListing.brandId, selectedListing.id, 'rejected');
                   setSelectedListing(null);
                 }}
-                className="px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-state-danger disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-red-700 disabled:opacity-40"
               >
                 Reject
               </button>
@@ -486,9 +486,9 @@ export function TalentApprovalsView({
         }
       >
         {selectedCompliance && (
-          <div className="space-y-4 text-ds-body">
-            <div className="flex items-center justify-between border-b border-hairline pb-3">
-              <span className="text-faint">Current status</span>
+          <div className="space-y-4 text-[14px]">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <span className="text-zinc-600">Current status</span>
               <InlineStatus
                 label={selectedCompliance.statusLabel}
                 tone={selectedCompliance.statusTone}
@@ -496,7 +496,7 @@ export function TalentApprovalsView({
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-ds-label font-medium text-secondary">
+              <label className="block text-[12px] font-medium text-zinc-700">
                 Verification / Decision Note
               </label>
               <textarea
@@ -504,7 +504,7 @@ export function TalentApprovalsView({
                 value={complianceReason}
                 onChange={(e) => setComplianceReason(e.target.value)}
                 placeholder="Optional approval note or mandatory rejection explanation…"
-                className="w-full rounded-ds-md border border-hairline-strong px-3 py-2 text-ds-label"
+                className="w-full rounded-md border border-zinc-300 px-3 py-2 text-[13px]"
               />
             </div>
 
@@ -516,7 +516,7 @@ export function TalentApprovalsView({
                   onReviewCompliance(selectedCompliance.id, 'approve', complianceReason);
                   setSelectedCompliance(null);
                 }}
-                className="px-3.5 py-2 rounded-ds-md bg-ink-950 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
               >
                 Approve Document
               </button>
@@ -527,7 +527,7 @@ export function TalentApprovalsView({
                   onReviewCompliance(selectedCompliance.id, 'reject', complianceReason);
                   setSelectedCompliance(null);
                 }}
-                className="px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-state-danger disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-red-700 disabled:opacity-40"
               >
                 Reject Document
               </button>

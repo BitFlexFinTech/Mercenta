@@ -24,7 +24,7 @@ import {
   poStatusPresentation,
   shipmentStatusPresentation,
 } from '@/lib/statusPresentation';
-import { toSemanticTone, type MetricItem } from '@/next/components/ConsolePrimitives';
+import type { MetricItem, SemanticTone } from '@/next/components/ConsolePrimitives';
 import { formatGbp } from '@/next/components/ConsoleCharts';
 import type { PurchaseOrderStatus } from '@/types';
 import { BrandOverviewView } from './BrandOverviewView';
@@ -50,9 +50,10 @@ const DOC_LABELS: Record<string, string> = {
   baby_product_safety: 'Baby product safety',
 };
 
-/* §PORT FIX (2026-11-25) — one shared tone mapper (`toSemanticTone`, owned by the
-   console primitives) instead of a second private copy in this screen. */
-const mapTone = toSemanticTone;
+function mapTone(t: string): SemanticTone {
+  if (t === 'success' || t === 'warning' || t === 'danger' || t === 'info') return t;
+  return 'neutral';
+}
 
 export function BrandOverviewScreen({
   onNavigate,
@@ -70,9 +71,6 @@ export function BrandOverviewScreen({
   const msgQ = useMessages();
 
   const scopeBrand = useMemo(() => {
-    /* §PORT FIX (2026-11-25) — `assertBrandScope` is declared `(session, rows)`.
-       The AI Studio snapshot called it `(rows, session)`, so the generic resolved
-       to the wrong type and every downstream field read failed to compile. */
     const pos = assertBrandScope(session, posQ.data?.data ?? []);
     const shipments = assertBrandScope(session, shipQ.data?.data ?? []);
     const docs = assertBrandScope(session, docsQ.data?.data ?? []);
@@ -124,20 +122,17 @@ export function BrandOverviewScreen({
     .reduce((s, c) => s + c.netShare, 0);
   const totalPoValue = scopeBrand.pos.reduce((s, p) => s + p.poValue, 0);
   const openPos = scopeBrand.pos.filter((p) => PO_OPEN.has(p.status));
-  /* §PORT FIX (2026-11-25) — `PoAcknowledgementWindow` carries no `status`; the
-     real "still awaiting acknowledgement" signal is `actionable`. */
-  const awaitingAck = openPos.filter((p) => p.status === 'received' || poAcknowledgementWindow(p).actionable);
+  const awaitingAck = openPos.filter((p) => {
+    const w = poAcknowledgementWindow(p);
+    return p.status === 'received' || (w.actionable && (w.hoursLeft ?? 99) <= 12);
+  });
   const openDeductions = scopeBrand.deductions.filter((d) => d.status === 'open' || d.status === 'disputed');
   const openReturns = demoReturns.filter((r) => r.brandId === tenantId);
-  /* §PORT FIX (2026-11-25) — `TicketStatus` is `open | pending | resolved`; there
-     is no `closed`, so "still open" is simply "not resolved". */
   const openTickets = demoTickets.filter((t) => t.brandId === tenantId && t.status !== 'resolved');
   const unpaidInvoices = demoCommerceInvoices.filter(
     (inv) => inv.brandId === tenantId && invoiceIsOutstanding(inv, demoCommercePayments)
   );
-  /* §PORT FIX (2026-11-25) — the canonical field is `isAvailable`, and "out of
-     stock" is the explicit `false` (the convention used by `BrandDashboard`). */
-  const oosProducts = products.filter((p) => p.isAvailable === false);
+  const oosProducts = products.filter((p) => !p.isAvailable);
 
   const earningsMetrics: MetricItem[] = [
     {

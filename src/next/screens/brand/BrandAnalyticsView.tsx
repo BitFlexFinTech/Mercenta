@@ -6,11 +6,10 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
-toSemanticTone,
 } from '@/next/components/ConsolePrimitives';
 import {
   ConsoleTrendChart,
@@ -111,8 +110,8 @@ export function BrandAnalyticsView({
       mobilePrimary: true,
       render: (s) => (
         <div>
-          <div className="font-medium text-strong">{s.name}</div>
-          <div className="text-ds-micro font-mono text-faint">{s.sku}</div>
+          <div className="font-medium text-zinc-950">{s.name}</div>
+          <div className="text-[11px] font-mono text-zinc-500">{s.sku}</div>
         </div>
       ),
     },
@@ -134,7 +133,7 @@ export function BrandAnalyticsView({
     {
       key: 'date',
       header: 'Date',
-      render: (d) => <span className="font-mono text-ds-label text-muted">{d.date}</span>,
+      render: (d) => <span className="font-mono text-[12px] text-zinc-600">{d.date}</span>,
     },
     {
       key: 'po',
@@ -142,8 +141,8 @@ export function BrandAnalyticsView({
       mobilePrimary: true,
       render: (d) => (
         <div>
-          <div className="font-mono font-medium text-strong">{d.purchaseOrderId}</div>
-          <div className="text-ds-label text-muted">{deductionTypeLabel(d.type)}</div>
+          <div className="font-mono font-medium text-zinc-950">{d.purchaseOrderId}</div>
+          <div className="text-[12px] text-zinc-600">{deductionTypeLabel(d.type)}</div>
         </div>
       ),
     },
@@ -161,7 +160,7 @@ export function BrandAnalyticsView({
         return (
           <InlineStatus
             label={`${pres.label}${d.simulated ? ' (sim)' : ''}`}
-            tone={toSemanticTone(pres.tone)}
+            tone={pres.tone}
             dataStatus={pres.dataStatus}
           />
         );
@@ -180,12 +179,12 @@ export function BrandAnalyticsView({
               setDisputingId(d.id);
               setNotes('');
             }}
-            className="px-2.5 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
+            className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
           >
             Dispute
           </button>
         ) : (
-          <span className="text-ds-label text-faint">
+          <span className="text-[12px] text-zinc-500">
             {d.dispute?.outcome ? `Outcome: ${d.dispute.outcome}` : d.dispute ? 'Submitted' : '—'}
           </span>
         ),
@@ -194,7 +193,7 @@ export function BrandAnalyticsView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Sales Analytics"
         description={`Wholesale order performance, top SKUs, and tenant deductions ledger for ${brandName || 'your brand'}.`}
       />
@@ -216,14 +215,14 @@ export function BrandAnalyticsView({
           <SectionCard
             title={chartTab === 'revenue' ? 'Monthly Revenue Trend' : 'Monthly Unit Volume'}
             actions={
-              <div className="inline-flex rounded-ds-sm border border-hairline p-0.5 bg-surface text-ds-label">
+              <div className="inline-flex rounded border border-zinc-200 p-0.5 bg-zinc-50 text-[12px]">
                 {(['revenue', 'volume'] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setChartTab(t)}
-                    className={`px-2.5 py-1 rounded-ds-sm ${
-                      chartTab === t ? 'bg-surface-raised text-strong font-medium shadow-xs' : 'text-muted'
+                    className={`px-2.5 py-1 rounded ${
+                      chartTab === t ? 'bg-white text-zinc-950 font-medium shadow-xs' : 'text-zinc-600'
                     }`}
                   >
                     {t === 'revenue' ? 'Revenue' : 'Volume'}
@@ -276,13 +275,13 @@ export function BrandAnalyticsView({
         title="Submit Deduction Dispute"
         subtitle="Provide ASN / POD / carton evidence notes to challenge this deduction."
       >
-        <div className="space-y-3 text-ds-label">
+        <div className="space-y-3 text-[12px]">
           <textarea
             rows={5}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Describe delivery proof, ASN timestamps, or photo verification…"
-            className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+            className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-zinc-950"
           />
           <button
             type="button"
@@ -295,7 +294,7 @@ export function BrandAnalyticsView({
                 setNotes('');
               }
             }}
-            className="px-4 py-2 rounded-ds-sm bg-accent text-on-dark font-medium hover:bg-accent-600 disabled:opacity-40"
+            className="px-4 py-2 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
           >
             Submit Dispute Evidence
           </button>

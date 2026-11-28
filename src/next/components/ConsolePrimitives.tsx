@@ -1,46 +1,37 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { AlertCircle, ChevronLeft, ChevronRight, Inbox, RefreshCw, X } from 'lucide-react';
-import type { StatusTone } from '@/components/ui';
-import { WorkspaceHeader } from '@/components/shared/workspace';
 
 /* ── PAGE HEADER ──────────────────────────────────────────────────────────── */
 
-/* ── CONSOLE HEADER ─────────────────────────────────────────────────────────
- * §WAVE 2 (2026-11-25) — the console composes the CANONICAL workspace header
- * (`<WorkspaceHeader>` in `src/components/shared/workspace.tsx`) rather than
- * carrying a second page-header implementation. `validate-workspace-shell`
- * rule 5 forbids a retired `PageHeader` on an operational surface, and the
- * canonical primitive is the one that owns surface identity and the toolbar.
- * The API is the subset the console screens already used, plus `eyebrow` and
- * `toolbar` so a screen can adopt the canonical affordances without rewriting.
- */
-
-export interface ConsoleHeaderProps {
+export interface PageHeaderProps {
   title: string;
   description?: string;
   meta?: ReactNode;
   actions?: ReactNode;
-  eyebrow?: string;
-  toolbar?: ReactNode;
 }
 
-export function ConsoleHeader({
-  title,
-  description,
-  meta,
-  actions,
-  eyebrow,
-  toolbar,
-}: ConsoleHeaderProps) {
+export function PageHeader({ title, description, meta, actions }: PageHeaderProps) {
   return (
-    <WorkspaceHeader
-      eyebrow={eyebrow}
-      title={title}
-      description={description}
-      meta={meta}
-      actions={actions}
-      toolbar={toolbar}
-    />
+    <div className="border-b border-zinc-200 pb-4 mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[20px] font-semibold tracking-tight text-zinc-950 text-balance">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-1 text-[14px] text-zinc-600 max-w-3xl">{description}</p>
+          )}
+          {meta && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-zinc-500">
+              {meta}
+            </div>
+          )}
+        </div>
+        {actions && (
+          <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -58,15 +49,15 @@ export function LoadingRows({
       role="status"
       aria-live="polite"
       aria-label={label}
-      className="border border-hairline bg-surface-raised rounded-ds-md divide-y divide-hairline-06"
+      className="border border-zinc-200 bg-white rounded-md divide-y divide-zinc-200"
     >
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-44 bg-tint rounded-ds-sm animate-pulse" />
-            <div className="h-3 w-72 max-w-full bg-tint rounded-ds-sm animate-pulse" />
+            <div className="h-3.5 w-44 bg-zinc-100 rounded animate-pulse" />
+            <div className="h-3 w-72 max-w-full bg-zinc-100 rounded animate-pulse" />
           </div>
-          <div className="h-4 w-20 bg-tint rounded-ds-sm animate-pulse" />
+          <div className="h-4 w-20 bg-zinc-100 rounded animate-pulse" />
         </div>
       ))}
     </div>
@@ -85,13 +76,13 @@ export function ErrorStateBlock({
   return (
     <div
       role="alert"
-      className="border border-state-danger/20 bg-state-danger/10 rounded-ds-md p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      className="border border-red-200 bg-red-50/70 rounded-md p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
     >
       <div className="flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-state-danger shrink-0 mt-0.5" aria-hidden="true" />
+        <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h2 className="text-ds-body font-semibold text-strong">{title}</h2>
-          <p className="mt-1 text-ds-body text-secondary">
+          <h2 className="text-[14px] font-semibold text-zinc-950">{title}</h2>
+          <p className="mt-1 text-[14px] text-zinc-700">
             {message || 'An unexpected error occurred while reading the data store.'}
           </p>
         </div>
@@ -100,7 +91,7 @@ export function ErrorStateBlock({
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent shrink-0 whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] shrink-0 whitespace-nowrap"
         >
           <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
           Retry
@@ -122,15 +113,15 @@ export function EmptyStateBlock({
   onAction?: () => void;
 }) {
   return (
-    <div className="border border-hairline bg-surface-raised rounded-ds-md p-8 text-center">
-      <Inbox className="w-6 h-6 text-quiet mx-auto" aria-hidden="true" />
-      <h2 className="mt-3 text-ds-title font-semibold text-strong">{title}</h2>
-      <p className="mt-1 text-ds-body text-muted max-w-md mx-auto">{description}</p>
+    <div className="border border-zinc-200 bg-white rounded-md p-8 text-center">
+      <Inbox className="w-6 h-6 text-zinc-400 mx-auto" aria-hidden="true" />
+      <h2 className="mt-3 text-[16px] font-semibold text-zinc-950">{title}</h2>
+      <p className="mt-1 text-[14px] text-zinc-600 max-w-md mx-auto">{description}</p>
       {actionLabel && onAction && (
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent whitespace-nowrap"
+          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] whitespace-nowrap"
         >
           {actionLabel}
         </button>
@@ -172,9 +163,9 @@ export function MetricStrip({
     return (
       <div className={`grid ${gridCols} gap-3 mb-6`}>
         {Array.from({ length: columns }).map((_, idx) => (
-          <div key={idx} className="border border-hairline bg-surface-raised rounded-ds-md p-4">
-            <div className="h-3 w-20 bg-tint rounded-ds-sm animate-pulse" />
-            <div className="mt-2 h-6 w-24 bg-tint rounded-ds-sm animate-pulse" />
+          <div key={idx} className="border border-zinc-200 bg-white rounded-md p-4">
+            <div className="h-3 w-20 bg-zinc-100 rounded animate-pulse" />
+            <div className="mt-2 h-6 w-24 bg-zinc-100 rounded animate-pulse" />
           </div>
         ))}
       </div>
@@ -186,17 +177,17 @@ export function MetricStrip({
       {items.map((item) => {
         const inner = (
           <>
-            <div className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
+            <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
               {item.label}
             </div>
             <div
-              className="mt-1.5 text-ds-page font-semibold text-strong tabular-nums font-mono"
+              className="mt-1.5 text-[20px] font-semibold text-zinc-950 tabular-nums font-mono"
               data-testid={item.valueTestId}
             >
               {item.value}
             </div>
             {item.context && (
-              <div className="mt-1 text-ds-label text-muted truncate">{item.context}</div>
+              <div className="mt-1 text-[12px] text-zinc-600 truncate">{item.context}</div>
             )}
           </>
         );
@@ -208,10 +199,10 @@ export function MetricStrip({
               type="button"
               onClick={item.onClick}
               data-testid={item.testId}
-              className={`text-left border rounded-ds-md p-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`text-left border rounded-md p-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] ${
                 item.active
-                  ? 'border-ink bg-surface'
-                  : 'border-hairline bg-surface-raised hover:border-hairline-strong hover:bg-canvas-60'
+                  ? 'border-zinc-900 bg-zinc-50'
+                  : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/60'
               }`}
             >
               {inner}
@@ -223,7 +214,7 @@ export function MetricStrip({
           <div
             key={item.id}
             data-testid={item.testId}
-            className="border border-hairline bg-surface-raised rounded-ds-md p-4"
+            className="border border-zinc-200 bg-white rounded-md p-4"
           >
             {inner}
           </div>
@@ -235,32 +226,15 @@ export function MetricStrip({
 
 /* ── STATE INDICATOR (EXPLICIT TEXT LABEL + OPTIONAL COLOR) ───────────────── */
 
-export type SemanticTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
-
-/**
- * §PORT FIX (2026-11-25) — the canonical status kit (`src/components/ui.tsx`)
- * declares a sixth tone, `brass`, which is a brand accent rather than a state.
- * The console's semantic palette deliberately carries five states, so `brass`
- * maps to `neutral` here instead of widening the console's vocabulary.
- */
-export function toSemanticTone(tone: StatusTone): SemanticTone {
-  return tone === 'brass' ? 'neutral' : tone;
-}
+export type SemanticTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'brass';
 
 const TONE_TEXT: Record<SemanticTone, string> = {
-  /* §WAVE 3 FIX (2026-11-25) — these were `text-state-success` / `amber-800` /
-     `red-800` / `blue-800`. In this project those palette families are a ramp
-     built from the BRAND HUE (`tailwind.config.js → brandHue(var(--mr-state-*))`),
-     not literal greens and reds, so status text rendered very pale — measured on
-     the admin portfolio table, where "Complete" was almost invisible. The console
-     already declares its own AA-safe state colours in `next.css`
-     (the success, warning, danger and info state colours), so the
-     canonical classes are used instead. */
-  neutral: 'text-secondary',
-  success: 'text-state-success',
-  warning: 'text-state-warning',
-  danger: 'text-state-danger',
-  info: 'text-state-info',
+  neutral: 'text-zinc-700',
+  success: 'text-emerald-800',
+  warning: 'text-amber-800',
+  danger: 'text-red-800',
+  info: 'text-blue-800',
+  brass: 'text-amber-700',
 };
 
 export function InlineStatus({
@@ -276,7 +250,7 @@ export function InlineStatus({
     <span
       role="status"
       data-status={dataStatus}
-      className={`text-ds-label font-medium whitespace-nowrap ${TONE_TEXT[tone]}`}
+      className={`text-[12px] font-medium whitespace-nowrap ${TONE_TEXT[tone]}`}
     >
       {label}
     </span>
@@ -347,17 +321,17 @@ export function ConsoleTable<T>({
   const pageRows = rows.slice(start, start + pageSize);
 
   return (
-    <div className="border border-hairline bg-surface-raised rounded-ds-md overflow-hidden" data-testid={testId}>
+    <div className="border border-zinc-200 bg-white rounded-md overflow-hidden" data-testid={testId}>
       {/* Desktop table >= 768px */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-hairline bg-canvas-60">
+            <tr className="border-b border-zinc-200 bg-zinc-50/60">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
-                  className={`px-4 py-2.5 text-ds-micro font-medium uppercase tracking-[0.06em] text-faint whitespace-nowrap ${
+                  className={`px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500 whitespace-nowrap ${
                     col.align === 'right' ? 'text-right' : 'text-left'
                   }`}
                 >
@@ -366,7 +340,7 @@ export function ConsoleTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-hairline-06">
+          <tbody className="divide-y divide-zinc-200">
             {pageRows.map((row) => {
               const key = rowKey(row);
               const isSelected = selectedKey === key;
@@ -389,7 +363,7 @@ export function ConsoleTable<T>({
       </div>
 
       {/* Mobile card list < 768px */}
-      <ul className="md:hidden divide-y divide-hairline-06">
+      <ul className="md:hidden divide-y divide-zinc-200">
         {pageRows.map((row) => {
           const key = rowKey(row);
           const isSelected = selectedKey === key;
@@ -397,16 +371,16 @@ export function ConsoleTable<T>({
           return (
             <li
               key={key}
-              className={`p-4 space-y-2.5 ${isSelected ? 'bg-surface' : 'bg-surface-raised'}`}
+              className={`p-4 space-y-2.5 ${isSelected ? 'bg-zinc-50' : 'bg-white'}`}
             >
               {columns
                 .filter((c) => !c.hideOnMobile)
                 .map((col) => (
                   <div
                     key={col.key}
-                    className="flex items-baseline justify-between gap-3 text-ds-body"
+                    className="flex items-baseline justify-between gap-3 text-[14px]"
                   >
-                    <span className="text-ds-micro uppercase tracking-[0.06em] text-faint shrink-0">
+                    <span className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 shrink-0">
                       {col.header}
                     </span>
                     <div className="min-w-0 text-right">{col.render(row)}</div>
@@ -417,14 +391,14 @@ export function ConsoleTable<T>({
                   <button
                     type="button"
                     onClick={() => onRowClick(row)}
-                    className="text-ds-label font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
                   >
                     Inspect record
                   </button>
                 </div>
               )}
               {isExpanded && renderExpanded && (
-                <div className="pt-3 border-t border-hairline">{renderExpanded(row)}</div>
+                <div className="pt-3 border-t border-zinc-200">{renderExpanded(row)}</div>
               )}
             </li>
           );
@@ -433,7 +407,7 @@ export function ConsoleTable<T>({
 
       {/* Pagination footer when > pageSize */}
       {totalPages > 1 && (
-        <div className="border-t border-hairline bg-canvas-40 px-4 py-2.5 flex items-center justify-between gap-4 text-ds-label text-muted">
+        <div className="border-t border-zinc-200 bg-zinc-50/40 px-4 py-2.5 flex items-center justify-between gap-4 text-[12px] text-zinc-600">
           <span className="tabular-nums font-mono">
             Showing {start + 1}–{Math.min(start + pageSize, rows.length)} of {rows.length}
           </span>
@@ -443,7 +417,7 @@ export function ConsoleTable<T>({
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               aria-label="Previous page"
-              className="p-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-secondary disabled:opacity-40 hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent"
+              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -455,7 +429,7 @@ export function ConsoleTable<T>({
               disabled={safePage >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               aria-label="Next page"
-              className="p-1.5 rounded-ds-sm border border-hairline bg-surface-raised text-secondary disabled:opacity-40 hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent"
+              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -489,13 +463,13 @@ function FragmentRow<T>({
         data-row-id={rowId}
         onClick={onRowClick ? () => onRowClick(row) : undefined}
         className={`${onRowClick ? 'cursor-pointer' : ''} ${
-          isSelected ? 'bg-tint-80' : 'hover:bg-canvas-80'
+          isSelected ? 'bg-zinc-100/80' : 'hover:bg-zinc-50/80'
         } transition-colors`}
       >
         {columns.map((col) => (
           <td
             key={col.key}
-            className={`px-4 py-3 text-ds-body text-ink-900 align-top ${
+            className={`px-4 py-3 text-[14px] text-zinc-900 align-top ${
               col.align === 'right' ? 'text-right tabular-nums font-mono' : 'text-left'
             }`}
           >
@@ -504,7 +478,7 @@ function FragmentRow<T>({
         ))}
       </tr>
       {isExpanded && renderExpanded && (
-        <tr className="bg-canvas-60">
+        <tr className="bg-zinc-50/60">
           <td colSpan={columns.length} className="px-4 py-4">
             {renderExpanded(row)}
           </td>
@@ -553,30 +527,30 @@ export function SlideOverDrawer({
       data-testid={testId}
     >
       <div
-        className="fixed inset-0 bg-scrim-30"
+        className="fixed inset-0 bg-zinc-950/30"
         onClick={onClose}
         aria-hidden="true"
       />
-      <aside className="relative z-10 w-full max-w-xl h-full bg-surface-raised border-l border-hairline flex flex-col">
-        <div className="px-6 py-4 border-b border-hairline flex items-start justify-between gap-4 shrink-0">
+      <aside className="relative z-10 w-full max-w-xl h-full bg-white border-l border-zinc-200 flex flex-col">
+        <div className="px-6 py-4 border-b border-zinc-200 flex items-start justify-between gap-4 shrink-0">
           <div className="min-w-0">
-            <h2 className="text-ds-title font-semibold text-strong truncate">{title}</h2>
+            <h2 className="text-[16px] font-semibold text-zinc-950 truncate">{title}</h2>
             {subtitle && (
-              <p className="mt-0.5 text-ds-label text-faint truncate">{subtitle}</p>
+              <p className="mt-0.5 text-[12px] text-zinc-500 truncate">{subtitle}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-2 -mr-2 rounded-ds-md text-faint hover:text-ink-900 hover:bg-tint focus-visible:outline-2 focus-visible:outline-accent"
+            className="p-2 -mr-2 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">{children}</div>
         {footer && (
-          <div className="px-6 py-3.5 border-t border-hairline bg-canvas-50 shrink-0">
+          <div className="px-6 py-3.5 border-t border-zinc-200 bg-zinc-50/50 shrink-0">
             {footer}
           </div>
         )}

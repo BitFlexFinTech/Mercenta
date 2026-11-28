@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, useDeductions, usePurchaseOrders } from '@/data/queries';
@@ -40,18 +40,7 @@ const STATUS_ORDER = [
   'rejected',
 ];
 
-export function AdminPurchaseOrdersScreen({
-  initialBrandId = null,
-}: {
-  /**
-   * §FRONTEND-REDESIGN BATCH 3 — v1's screen accepted NO props, which meant the
-   * shell's brand-scoped deep link (`adminPoBrandId` → "open this brand's POs")
-   * had nothing to bind to, and the capability was silently lost. Restored here
-   * as a SEEDED filter: the brand arrives pre-selected and the operator can widen
-   * it back to "All brands" in the toolbar, so it is a filter, never a lock.
-   */
-  initialBrandId?: string | null;
-}) {
+export function AdminPurchaseOrdersScreen() {
   const qc = useQueryClient();
   const { canCurrentUserMutate, session, actingStaff } = useApp();
   const canonicalVersion = useCanonicalStoreVersion();
@@ -67,8 +56,6 @@ export function AdminPurchaseOrdersScreen({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  /** Seeded from the deep link, then owned by the operator. */
-  const [brandFilter, setBrandFilter] = useState(initialBrandId ?? 'all');
   const [simOnly, setSimOnly] = useState(false);
   const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
 
@@ -103,11 +90,8 @@ export function AdminPurchaseOrdersScreen({
   const [asnExpiry, setAsnExpiry] = useState('');
   const [asnNotice, setAsnNotice] = useState<string | null>(null);
 
-  /* §FRONTEND-REDESIGN BATCH 3 — stable identity for the memos that label a brand. */
-  const brandName = useCallback(
-    (id: string) => brands.find((b) => b.id === id)?.profile.businessName ?? id,
-    [brands]
-  );
+  const brandName = (id: string) =>
+    brands.find((b) => b.id === id)?.profile.businessName ?? id;
 
   const selectedPo = useMemo(() => pos.find((p) => p.id === selectedPoId) ?? null, [pos, selectedPoId]);
 
@@ -119,7 +103,7 @@ export function AdminPurchaseOrdersScreen({
     setBehalfRejectNotice(null);
     setProxyNotice(null);
     setAsnNotice(null);
-  }, [selectedPo]);
+  }, [selectedPo?.id]);
 
   const queueMetrics = useMemo(() => {
     const awaiting = pos.filter((p) => poAcknowledgementWindow(p).inQueue);
@@ -171,7 +155,6 @@ export function AdminPurchaseOrdersScreen({
 
   const rows = useMemo(() => {
     let list = [...pos];
-    if (brandFilter !== 'all') list = list.filter((p) => p.brandId === brandFilter);
     if (statusFilter !== 'all') list = list.filter((p) => p.status === statusFilter);
     if (simOnly) list = list.filter((p) => p.simulated === true);
     if (searchQuery.trim()) {
@@ -193,7 +176,7 @@ export function AdminPurchaseOrdersScreen({
         statusTone: pres.tone as 'neutral' | 'success' | 'warning' | 'danger' | 'info',
       };
     });
-  }, [pos, brandFilter, statusFilter, simOnly, searchQuery, deductions, brandName]);
+  }, [pos, statusFilter, simOnly, searchQuery, brands, deductions]);
 
   const selectedDetail: AdminPoDetailModel | null = useMemo(() => {
     if (!selectedPo) return null;
@@ -212,7 +195,7 @@ export function AdminPurchaseOrdersScreen({
       label: o.label,
     }));
     if (selectedPo.freightTerm === 'collect') {
-      laneOptions.push({ value: 'amazon_partner', label: 'Partnered carrier (channel freight)' });
+      laneOptions.push({ value: 'amazon_partner', label: 'Partnered carrier (Amazon freight)' });
     }
     return {
       po: selectedPo,
@@ -399,9 +382,6 @@ export function AdminPurchaseOrdersScreen({
       statusFilter={statusFilter}
       onStatusFilterChange={setStatusFilter}
       statusOrder={STATUS_ORDER}
-      brandOptions={brands.map((b) => ({ id: b.id, name: brandName(b.id) }))}
-      brandFilter={brandFilter}
-      onBrandFilterChange={setBrandFilter}
       simOnly={simOnly}
       onToggleSimOnly={() => setSimOnly((v) => !v)}
       rows={rows}

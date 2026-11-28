@@ -34,29 +34,7 @@ const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
   'delivered',
 ]);
 
-export function AdminOverviewScreen({
-  onNavigate,
-  onOpenPurchaseOrders,
-  onOpenLogistics,
-}: {
-  /**
-   * §FRONTEND-REDESIGN BATCH 3 — v1's overview drives every drill-down through
-   * one generic `onNavigate(view)`. This console's shell was written against two
-   * purpose-named callbacks (`onOpenPurchaseOrders`, `onOpenLogistics`). Both
-   * shapes are accepted so that NEITHER call site breaks: the specific callback
-   * wins where it exists, `onNavigate` covers the rest. Nothing about the
-   * overview's behaviour depends on which one the shell supplies.
-   */
-  onNavigate?: (view: string) => void;
-  onOpenPurchaseOrders?: (brandId?: string) => void;
-  onOpenLogistics?: () => void;
-}) {
-  /** One place that turns a view id into the call the shell actually provided. */
-  const go = (view: string) => {
-    if (view === 'purchase_orders_admin') return onOpenPurchaseOrders?.();
-    if (view === 'logistics') return onOpenLogistics?.();
-    return onNavigate?.(view);
-  };
+export function AdminOverviewScreen({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const brandsQuery = useBrands();
   const posQuery = usePurchaseOrders();
   const docsQuery = useComplianceDocuments();
@@ -203,28 +181,28 @@ export function AdminOverviewScreen({
         posAwaitingAction.length > 0
           ? `${posAwaitingAction.length} PO(s) awaiting action`
           : 'Nothing awaiting action',
-      onClick: () => go('purchase_orders_admin'),
+      onClick: () => onNavigate?.('purchase_orders_admin'),
     },
     {
       id: 'revenue',
       label: 'Recorded revenue',
       value: formatGbp(costs.revenue.totalGbp),
       context: 'Canonical streams',
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
     {
       id: 'contribution',
       label: 'Gross contribution',
       value: formatGbp(costs.contribution.grossGbp),
       context: `${costs.contribution.provisional ? 'Provisional · ' : ''}Cost base ${formatGbp(costs.monthlyTotalGbp)}`,
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
     {
       id: 'margin',
       label: 'Contribution margin',
       value: `${costs.contribution.marginPct}%`,
       context: costs.contribution.provisional ? 'Provisional until founder-approved' : 'Derived',
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
     {
       id: 'receivables',
@@ -234,7 +212,7 @@ export function AdminOverviewScreen({
         invoiceLedger.overdue.length > 0
           ? `${invoiceLedger.overdue.length} past terms`
           : `${invoiceLedger.outstanding.length} unpaid (derived terms)`,
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
   ];
 
@@ -244,49 +222,49 @@ export function AdminOverviewScreen({
       label: 'POs awaiting action',
       value: String(posAwaitingAction.length),
       context: `${formatGbp(awaitingValue)} open value`,
-      onClick: () => go('purchase_orders_admin'),
+      onClick: () => onNavigate?.('purchase_orders_admin'),
     },
     {
       id: 'in-fulfilment',
       label: 'POs in fulfilment',
       value: String(posInFulfilment.length),
       context: shipmentsAll.length > 0 ? `${shipmentsAll.length} live shipments` : 'No shipments yet',
-      onClick: () => go('logistics'),
+      onClick: () => onNavigate?.('logistics'),
     },
     {
       id: 'docs-pending',
       label: 'Compliance docs pending',
       value: String(docsPending.length),
       context: `${brandsWithPendingDocs} brand(s) affected`,
-      onClick: () => go('compliance'),
+      onClick: () => onNavigate?.('compliance'),
     },
     {
       id: 'gate',
       label: 'Compliance-gate cleared',
       value: `${complianceCleared} / ${brands.length}`,
       context: complianceBlocked === 0 ? 'All cleared' : `${complianceBlocked} not cleared`,
-      onClick: () => go('compliance'),
+      onClick: () => onNavigate?.('compliance'),
     },
     {
       id: 'renewals',
       label: 'Contract renewals due',
       value: String(renewalsDue.length),
       context: renewalsDue.length > 0 ? `Soonest ${earliestRenewal}` : 'Beyond 60 days',
-      onClick: () => go('contracts_admin'),
+      onClick: () => onNavigate?.('contracts_admin'),
     },
     {
       id: 'tickets',
       label: 'Open support tickets',
       value: String(activeTickets.length),
       context: `${urgentTickets.length} urgent / high`,
-      onClick: () => go('helpdesk'),
+      onClick: () => onNavigate?.('helpdesk'),
     },
     {
       id: 'payouts-pending',
       label: 'Brand payouts pending',
       value: String(pendingPayouts.length),
       context: `${formatGbp(pendingPayoutValue, 2)} net owed`,
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
   ];
 
@@ -296,56 +274,56 @@ export function AdminOverviewScreen({
       label: 'Brands on platform',
       value: String(brands.length),
       context: `${complianceCleared} compliance-cleared`,
-      onClick: () => go('crm'),
+      onClick: () => onNavigate?.('crm'),
     },
     {
       id: 'products',
       label: 'Products listed',
       value: String(productsAll.length),
       context: `Across ${productsByBrand} brand(s)`,
-      onClick: () => go('catalog'),
+      onClick: () => onNavigate?.('catalog'),
     },
     {
       id: 'pos-count',
       label: 'Purchase orders',
       value: String(posAll.length),
       context: `${formatGbp(lifetimePoValue)} lifetime`,
-      onClick: () => go('purchase_orders_admin'),
+      onClick: () => onNavigate?.('purchase_orders_admin'),
     },
     {
       id: 'order-lines',
       label: 'Order lines',
       value: String(orderLineCount),
       context: `${orderedUnits.toLocaleString('en-GB')} units ordered`,
-      onClick: () => go('purchase_orders_admin'),
+      onClick: () => onNavigate?.('purchase_orders_admin'),
     },
     {
       id: 'shipments',
       label: 'Shipments',
       value: String(shipmentsAll.length),
       context: `${formatGbp(valueInMotion)} in motion`,
-      onClick: () => go('logistics'),
+      onClick: () => onNavigate?.('logistics'),
     },
     {
       id: 'volume',
       label: 'Operational volume',
       value: unitsInFulfilment.toLocaleString('en-GB'),
       context: `${posInFulfilment.length} PO(s) in flight`,
-      onClick: () => go('logistics'),
+      onClick: () => onNavigate?.('logistics'),
     },
     {
       id: 'upcoming-payments',
       label: 'Upcoming payments',
       value: formatGbp(invoiceLedger.upcomingGbp, 2),
       context: `${invoiceLedger.upcoming.length} due within ${UPCOMING_PAYMENTS_HORIZON_DAYS}d`,
-      onClick: () => go('super_admin'),
+      onClick: () => onNavigate?.('super_admin'),
     },
     {
       id: 'exceptions',
       label: 'Fulfilment exceptions',
       value: String(shipmentExceptions),
       context: `${delayedShipments} delayed · ${shipmentsAll.length} tracked`,
-      onClick: () => go('logistics'),
+      onClick: () => onNavigate?.('logistics'),
     },
   ];
 

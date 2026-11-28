@@ -343,7 +343,7 @@ export function BwsPortfolioOpsScreen({
       carrierSeries={carrierSeries}
       reportRows={reportRows}
       integrationStatuses={integrationStatuses}
-      actingStaffName={actingStaff?.name ?? 'Founder / Super Admin'}
+      actingStaffName={actingStaff?.name ?? 'Mercenta Operator'}
       canMutate={canCurrentUserMutate}
       onExportCsv={(kind) => {
         if (kind === 'pos') {

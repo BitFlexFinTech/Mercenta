@@ -1,12 +1,10 @@
 import { useState } from 'react';
-/* §PORT FIX (2026-11-25) — the canonical type is `BrandReturn`; `ReturnRecord`
-     was invented by the snapshot and exists nowhere in `src/types.ts`. */
 import type { BrandReturn, ReturnReason } from '@/types';
 import {
   ConsoleTable,
   InlineStatus,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -103,15 +101,15 @@ export function BrandReturnsView({
       key: 'poNumber',
       header: 'PO Ref',
       mobilePrimary: true,
-      render: (r) => <span className="font-mono font-medium text-strong">{r.poNumber}</span>,
+      render: (r) => <span className="font-mono font-medium text-zinc-950">{r.poNumber}</span>,
     },
     {
       key: 'product',
       header: 'Product & SKU',
       render: (r) => (
         <div>
-          <div className="font-medium text-strong">{r.productName}</div>
-          <div className="font-mono text-ds-micro text-faint">{r.productSku}</div>
+          <div className="font-medium text-zinc-950">{r.productName}</div>
+          <div className="font-mono text-[11px] text-zinc-500">{r.productSku}</div>
         </div>
       ),
     },
@@ -135,9 +133,9 @@ export function BrandReturnsView({
       hideOnMobile: true,
       render: (r) =>
         r.linkedDeductionId ? (
-          <span className="font-mono text-ds-label text-state-warning">{r.linkedDeductionId}</span>
+          <span className="font-mono text-[12px] text-amber-800">{r.linkedDeductionId}</span>
         ) : (
-          <span className="text-ds-label text-quiet">—</span>
+          <span className="text-[12px] text-zinc-400">—</span>
         ),
     },
     {
@@ -146,14 +144,14 @@ export function BrandReturnsView({
       align: 'right',
       hideOnMobile: true,
       render: (r) => (
-        <span className="font-mono text-ds-label text-muted">{r.returnDate.slice(0, 10)}</span>
+        <span className="font-mono text-[12px] text-zinc-600">{r.returnDate.slice(0, 10)}</span>
       ),
     },
   ];
 
   return (
     <div className="space-y-6" data-testid="brand-returns">
-      <ConsoleHeader
+      <PageHeader
         title="Returns"
         description="Returned units per purchase order recorded by the warehouse and channel reconciliation feed."
         meta={
@@ -173,13 +171,13 @@ export function BrandReturnsView({
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search PO, SKU, product, or reason…"
           aria-label="Search returns"
-          className="w-full sm:w-80 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-body text-strong"
+          className="w-full sm:w-80 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[14px] text-zinc-950"
         />
         {filterMode !== 'all' && (
           <button
             type="button"
             onClick={() => setFilterMode('all')}
-            className="text-ds-label text-accent hover:underline"
+            className="text-[12px] text-[#C2410C] hover:underline"
           >
             Clear filter
           </button>
@@ -203,40 +201,38 @@ export function BrandReturnsView({
         subtitle={selected ? `${selected.poNumber} · SKU ${selected.productSku}` : undefined}
       >
         {selected && (
-          <div className="space-y-4 text-ds-body">
-            <div className="grid grid-cols-2 gap-3 border border-hairline rounded-ds-md p-3 bg-canvas-50 text-ds-label">
+          <div className="space-y-4 text-[14px]">
+            <div className="grid grid-cols-2 gap-3 border border-zinc-200 rounded-md p-3 bg-zinc-50/50 text-[12px]">
               <div>
-                <span className="text-faint block">Quantity returned</span>
-                <span className="font-mono text-strong font-semibold">{selected.quantity} units</span>
+                <span className="text-zinc-500 block">Quantity returned</span>
+                <span className="font-mono text-zinc-950 font-semibold">{selected.quantity} units</span>
               </div>
               <div>
-                <span className="text-faint block">Reason</span>
+                <span className="text-zinc-500 block">Reason</span>
                 <InlineStatus label={REASON_LABELS[selected.reason]} tone={REASON_TONE[selected.reason]} />
               </div>
               <div>
-                {/* §PORT FIX (2026-11-25) — `BrandReturn` has no `stage`; the real
-                    relationship is the PO number it came from. */}
-                <span className="text-faint block">Purchase order</span>
-                <span className="font-mono text-strong">{selected.poNumber}</span>
+                <span className="text-zinc-500 block">Return date</span>
+                <span className="font-mono text-zinc-950">{selected.returnDate.slice(0, 10)}</span>
               </div>
               <div>
-                {/* §PORT FIX (2026-11-25) — `BrandReturn` carries no credit amount.
-                    The canonical link is the deduction raised against it. */}
-                <span className="text-faint block">Linked deduction</span>
-                <span className="font-mono text-strong">{selected.linkedDeductionId ?? 'None'}</span>
+                <span className="text-zinc-500 block">Linked deduction</span>
+                <span className="font-mono text-zinc-950">
+                  {selected.linkedDeductionId ?? 'None'}
+                </span>
               </div>
             </div>
             {selected.description && (
               <div>
-                <div className="text-ds-micro uppercase tracking-[0.06em] text-faint mb-1">Description</div>
-                <p className="text-secondary">{selected.description}</p>
+                <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1">Return details</div>
+                <p className="text-zinc-700">{selected.description}</p>
               </div>
             )}
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-200">
               <button
                 type="button"
                 onClick={() => onOpenPo(selected.poNumber)}
-                className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
+                className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
               >
                 Inspect PO {selected.poNumber}
               </button>
@@ -244,7 +240,7 @@ export function BrandReturnsView({
                 <button
                   type="button"
                   onClick={onOpenDeductions}
-                  className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900"
+                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900"
                 >
                   Open Deduction {selected.linkedDeductionId}
                 </button>

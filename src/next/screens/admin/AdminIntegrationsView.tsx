@@ -10,7 +10,7 @@ import {
   EmptyStateBlock,
   InlineStatus,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
@@ -141,7 +141,7 @@ export function AdminIntegrationsView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Integration Settings"
         description="External service control plane. A provider is treated as simulation-safe only when its mode positively resolves to simulation; unverified states fail closed."
         meta={
@@ -158,13 +158,13 @@ export function AdminIntegrationsView({
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Search name, capability, category…"
               aria-label="Search integrations"
-              className="w-60 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+              className="w-60 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
             />
             {(filter !== 'all' || query.trim() !== '') && (
               <button
                 type="button"
                 onClick={onResetFilters}
-                className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
+                className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
               >
                 Clear filters
               </button>
@@ -223,11 +223,11 @@ export function AdminIntegrationsView({
                       key={item.id}
                       data-mode={item.mode}
                       data-connection={item.state.status}
-                      className="border border-hairline rounded-ds-md p-4 bg-surface-raised flex flex-col justify-between gap-3"
+                      className="border border-zinc-200 rounded-md p-4 bg-white flex flex-col justify-between gap-3"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-ds-body font-semibold text-ink-950">
+                          <h3 className="text-[14px] font-semibold text-zinc-950">
                             {item.def.name}
                           </h3>
                           <div className="flex items-center gap-2 shrink-0">
@@ -242,12 +242,12 @@ export function AdminIntegrationsView({
                           </div>
                         </div>
 
-                        <p className="text-ds-label text-faint leading-relaxed">
+                        <p className="text-[12px] text-zinc-600 leading-relaxed">
                           {item.def.description}
                         </p>
 
                         {item.serverSecretPresent && item.mode !== 'live' && !connected && (
-                          <div className="border border-hairline bg-surface rounded-ds-sm p-2 text-ds-micro text-secondary">
+                          <div className="border border-zinc-200 bg-zinc-50 rounded p-2 text-[11px] text-zinc-700">
                             <strong>Server-side key hint:</strong>{' '}
                             {item.serverSecretName ?? 'Vault secret'} is present on the server;
                             run the connect flow to verify.
@@ -255,34 +255,34 @@ export function AdminIntegrationsView({
                         )}
 
                         {item.mode === 'simulation' && item.simMockLabel && (
-                          <div className="border border-state-warning/20 bg-state-warning/10 rounded-ds-sm p-2 text-ds-micro text-state-warning">
+                          <div className="border border-amber-200 bg-amber-50/70 rounded p-2 text-[11px] text-amber-950">
                             <strong>Simulation adapter:</strong> {item.simMockLabel}
                           </div>
                         )}
 
                         {item.state.error && (
-                          <div className="border border-state-danger/20 bg-state-danger/10 rounded-ds-sm p-2 text-ds-micro text-state-danger">
+                          <div className="border border-red-200 bg-red-50/70 rounded p-2 text-[11px] text-red-900">
                             {item.state.error}
                           </div>
                         )}
 
                         {health && (
-                          <div className="border border-hairline bg-canvas-60 rounded-ds-sm p-2.5 text-ds-micro font-mono space-y-1">
+                          <div className="border border-zinc-200 bg-zinc-50/60 rounded p-2.5 text-[11px] font-mono space-y-1">
                             <div className="flex justify-between">
-                              <span className="text-faint">Auth</span>
-                              <span className={health.authValid ? 'text-state-success' : 'text-state-danger'}>
+                              <span className="text-zinc-500">Auth</span>
+                              <span className={health.authValid ? 'text-emerald-800' : 'text-red-800'}>
                                 {health.authValid ? 'Valid' : 'Not verified'}
                               </span>
                             </div>
                             {health.lastSyncAt && (
                               <div className="flex justify-between">
-                                <span className="text-faint">Last sync</span>
+                                <span className="text-zinc-500">Last sync</span>
                                 <span>{new Date(health.lastSyncAt).toLocaleString()}</span>
                               </div>
                             )}
                             {health.providerStatus && (
                               <div className="flex justify-between">
-                                <span className="text-faint">Provider</span>
+                                <span className="text-zinc-500">Provider</span>
                                 <span>{health.providerStatus}</span>
                               </div>
                             )}
@@ -290,7 +290,7 @@ export function AdminIntegrationsView({
                         )}
                       </div>
 
-                      <div className="pt-3 border-t border-hairline flex flex-wrap items-center justify-between gap-2">
+                      <div className="pt-3 border-t border-zinc-200 flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <button
                             type="button"
@@ -303,7 +303,7 @@ export function AdminIntegrationsView({
                                 setHealthBusyId(null);
                               }
                             }}
-                            className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                            className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-800 hover:bg-zinc-50"
                           >
                             {healthBusyId === item.id
                               ? 'Checking…'
@@ -316,7 +316,7 @@ export function AdminIntegrationsView({
                             <button
                               type="button"
                               onClick={() => onEnableSimulation(item.id)}
-                              className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                              className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-800 hover:bg-zinc-50"
                             >
                               Enable simulation
                             </button>
@@ -326,7 +326,7 @@ export function AdminIntegrationsView({
                             <button
                               type="button"
                               onClick={() => onDisableIntegration(item.id)}
-                              className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-secondary hover:bg-surface"
+                              className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-700 hover:bg-zinc-50"
                             >
                               Disable
                             </button>
@@ -339,14 +339,14 @@ export function AdminIntegrationsView({
                               <button
                                 type="button"
                                 onClick={() => handleOpenWizard(item)}
-                                className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-900 hover:bg-surface"
+                                className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 hover:bg-zinc-50"
                               >
                                 Reconnect
                               </button>
                               <button
                                 type="button"
                                 onClick={() => onDisconnect(item.id)}
-                                className="px-2.5 py-1 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-ds-micro font-medium text-state-danger hover:bg-state-danger/10"
+                                className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-[11px] font-medium text-red-900 hover:bg-red-100"
                               >
                                 Disconnect
                               </button>
@@ -355,7 +355,7 @@ export function AdminIntegrationsView({
                             <button
                               type="button"
                               onClick={() => handleOpenWizard(item)}
-                              className="px-3 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-micro font-medium hover:brightness-95"
+                              className="px-3 py-1 rounded bg-[#C2410C] text-white text-[11px] font-medium hover:bg-[#9A3412]"
                             >
                               {item.state.status === 'needs_attention' ? 'Retry Connect' : 'Connect'}
                             </button>
@@ -388,7 +388,7 @@ export function AdminIntegrationsView({
                   onSimulateConnect(wizardItem.id, wizardProvider || undefined);
                   onOpenWizard(null);
                 }}
-                className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-800 hover:bg-surface"
+                className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-800 hover:bg-zinc-50"
               >
                 Simulate Connect (mock)
               </button>
@@ -396,7 +396,7 @@ export function AdminIntegrationsView({
                 <button
                   type="button"
                   onClick={() => onOpenWizard(null)}
-                  className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-secondary"
+                  className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-700"
                 >
                   Cancel
                 </button>
@@ -417,7 +417,7 @@ export function AdminIntegrationsView({
                       if (!res.ok) setWizardError(res.error ?? 'Exchange failed.');
                       else onOpenWizard(null);
                     }}
-                    className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
                   >
                     {wizardBusy ? 'Exchanging…' : 'Complete OAuth Exchange'}
                   </button>
@@ -437,7 +437,7 @@ export function AdminIntegrationsView({
                       if (!res.ok) setWizardError(res.error ?? 'Connection failed.');
                       else onOpenWizard(null);
                     }}
-                    className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
                   >
                     {wizardBusy ? 'Testing…' : 'Test Connection & Save'}
                   </button>
@@ -451,17 +451,17 @@ export function AdminIntegrationsView({
           <div className="space-y-4">
             {wizardItem.def.providerOptions && wizardItem.def.providerOptions.length > 0 && (
               <div>
-                <div className="text-ds-label font-medium text-secondary mb-1.5">Provider</div>
+                <div className="text-[12px] font-medium text-zinc-700 mb-1.5">Provider</div>
                 <div className="space-y-1.5">
                   {wizardItem.def.providerOptions.map((opt) => (
                     <button
                       key={opt.id}
                       type="button"
                       onClick={() => setWizardProvider(opt.id)}
-                      className={`w-full text-left px-3 py-2 rounded-ds-sm border text-ds-label ${
+                      className={`w-full text-left px-3 py-2 rounded border text-[13px] ${
                         wizardProvider === opt.id
-                          ? 'border-accent bg-surface font-medium text-ink-950'
-                          : 'border-hairline text-secondary hover:bg-surface'
+                          ? 'border-zinc-950 bg-zinc-50 font-medium text-zinc-950'
+                          : 'border-zinc-200 text-zinc-700 hover:bg-zinc-50'
                       }`}
                     >
                       {opt.label}
@@ -473,8 +473,8 @@ export function AdminIntegrationsView({
 
             {wizardItem.def.authMethod === 'oauth' ? (
               <div className="space-y-3">
-                <label className="block text-ds-label">
-                  <span className="text-faint font-medium block mb-1">
+                <label className="block text-[12px]">
+                  <span className="text-zinc-600 font-medium block mb-1">
                     {wizardItem.def.oauth?.clientIdLabel ?? 'Client ID (public)'}
                   </span>
                   <input
@@ -482,7 +482,7 @@ export function AdminIntegrationsView({
                     value={oauthClientId}
                     onChange={(e) => setOauthClientId(e.target.value)}
                     placeholder="Public application/client ID"
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
                   />
                 </label>
                 {wizardItem.def.oauth && oauthClientId.trim() && (
@@ -494,13 +494,13 @@ export function AdminIntegrationsView({
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-block text-ds-label font-medium text-accent hover:underline"
+                    className="inline-block text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     Open provider consent screen in new tab
                   </a>
                 )}
-                <label className="block text-ds-label">
-                  <span className="text-faint font-medium block mb-1">
+                <label className="block text-[12px]">
+                  <span className="text-zinc-600 font-medium block mb-1">
                     Authorization Code
                   </span>
                   <input
@@ -508,15 +508,15 @@ export function AdminIntegrationsView({
                     value={oauthCode}
                     onChange={(e) => setOauthCode(e.target.value)}
                     placeholder="Paste authorization code from callback"
-                    className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-mono"
+                    className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-mono"
                   />
                 </label>
               </div>
             ) : (
               <div className="space-y-3">
                 {wizardItem.def.fields.map((f) => (
-                  <label key={f.key} className="block text-ds-label">
-                    <span className="text-faint font-medium block mb-1">{f.label}</span>
+                  <label key={f.key} className="block text-[12px]">
+                    <span className="text-zinc-600 font-medium block mb-1">{f.label}</span>
                     <input
                       type={f.secret ? 'password' : 'text'}
                       value={wizardFields[f.key] ?? ''}
@@ -524,7 +524,7 @@ export function AdminIntegrationsView({
                       onChange={(e) =>
                         setWizardFields((prev) => ({ ...prev, [f.key]: e.target.value }))
                       }
-                      className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                      className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px]"
                     />
                   </label>
                 ))}

@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { demoReturns } from '@/data/demoStore';
 import { useBrands } from '@/data/queries';
 import { returnTrackingStatusPresentation } from '@/lib/statusPresentation';
@@ -35,11 +35,8 @@ export function AdminReturnsScreen() {
     );
   }, [mutationStamp]);
 
-  /* §FRONTEND-REDESIGN BATCH 3 — stable identity for the row memo below. */
-  const brandName = useCallback(
-    (id: string) => brands.find((b) => b.id === id)?.profile.businessName ?? id,
-    [brands]
-  );
+  const brandName = (id: string) =>
+    brands.find((b) => b.id === id)?.profile.businessName ?? id;
 
   const stats = useMemo(
     () => ({
@@ -79,7 +76,7 @@ export function AdminReturnsScreen() {
         statusTone: pres.tone as SemanticTone,
       };
     });
-  }, [allTracking, stageFilter, searchQuery, brandName]);
+  }, [allTracking, stageFilter, searchQuery, brands]);
 
   const selectedRow = useMemo(
     () => rows.find((r) => r.entry.id === selectedId) ?? null,

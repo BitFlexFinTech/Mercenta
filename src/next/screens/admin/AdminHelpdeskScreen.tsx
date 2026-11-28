@@ -182,7 +182,7 @@ export function AdminHelpdeskScreen() {
         );
         setNote(
           res.ok
-            ? `Escalated to the retail channel (${res.caseReferenceId}).`
+            ? `Escalated to Amazon (${res.caseReferenceId}).`
             : res.error ?? 'Escalation failed.'
         );
         bumpStore();

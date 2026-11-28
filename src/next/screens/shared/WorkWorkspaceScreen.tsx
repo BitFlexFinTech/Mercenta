@@ -166,47 +166,39 @@ export function WorkWorkspaceScreen({
       selectedItem={allItemsIncludingDone.find((w) => w.id === selectedId) ?? null}
       onSelectItem={setSelectedId}
       onOpenOwningRecord={openOwningRecord}
-      /* §PORT FIX (2026-11-25) — the work-layer commands return `WorkItem | null`
-         rather than an `{ ok, error }` result, and `setWorkItemStatus` takes
-         three arguments. Adapted here so the View's contract is honoured without
-         changing the canonical store. */
       onResolveManual={(id, note) => {
-        const item = resolveWorkItem(id, actor, note);
-        return item ? { ok: true } : { ok: false, error: 'That item could not be resolved.' };
-      }}
-      onReopenManual={(id, note) => {
-        const item = reopenWorkItem(id, actor, note);
-        return item ? { ok: true } : { ok: false, error: 'That item could not be reopened.' };
-      }}
-      onSetStatus={(id, status) => {
-        const item = setWorkItemStatus(id, status, actor);
-        return item ? { ok: true } : { ok: false, error: 'That status change could not be applied.' };
-      }}
-      onCreateTask={(input) => {
         try {
-          createWorkItem(
-            {
-              /* §PORT FIX (2026-11-25) — `CreateWorkItemInput` is exactly
-                 { title, detail?, priority?, dueDate?, tenantId?, owner?,
-                 actionView? }. The snapshot passed `source`, `scope`, `entity`
-                 and `actionLabel`, none of which the canonical input accepts. */
-              title: input.title,
-              detail: input.detail,
-              priority: input.priority,
-              dueDate: input.dueDate || null,
-              tenantId,
-              actionView: 'work',
-            },
-            actor
-          );
+          resolveWorkItem(id, actor, note);
           return { ok: true };
-        } catch (error) {
-          return {
-            ok: false,
-            error: error instanceof Error ? error.message : 'The task could not be created.',
-          };
+        } catch (err) {
+          return { ok: false, error: err instanceof Error ? err.message : 'Unable to resolve work item' };
         }
       }}
+      onReopenManual={(id, note) => {
+        reopenWorkItem(id, actor, note);
+        return { ok: true };
+      }}
+      onSetStatus={(id, status) => {
+        try {
+          setWorkItemStatus(id, status, actor);
+          return { ok: true };
+        } catch (err) {
+          return { ok: false, error: err instanceof Error ? err.message : 'Unable to update work status' };
+        }
+      }}
+      onCreateTask={(input) =>
+        createWorkItem(
+          {
+            title: input.title,
+            detail: input.detail,
+            priority: input.priority,
+            dueDate: input.dueDate || null,
+            tenantId,
+            actionView: 'work',
+          },
+          actor
+        )
+      }
       onRunSweep={() => runReminderSweep(scope, tenantId, actor)}
       onDismissReminder={(id) => dismissReminder(id, actor)}
       onResetWork={() => {

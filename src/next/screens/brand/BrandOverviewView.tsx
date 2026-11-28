@@ -6,7 +6,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   type ConsoleColumn,
   type MetricItem,
   type SemanticTone,
@@ -96,7 +96,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
   if (isError) {
     return (
       <div className="space-y-4">
-        <ConsoleHeader title={`${brandName} Overview`} />
+        <PageHeader title={`${brandName} Overview`} />
         <ErrorStateBlock message={errorMessage} onRetry={onRetry} />
       </div>
     );
@@ -107,7 +107,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       key: 'poNumber',
       header: 'Purchase order',
       mobilePrimary: true,
-      render: (c) => <span className="font-mono font-medium text-strong">{c.poNumber}</span>,
+      render: (c) => <span className="font-mono font-medium text-zinc-950">{c.poNumber}</span>,
     },
     {
       key: 'poValue',
@@ -120,13 +120,13 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       header: 'Mercenta Fee',
       align: 'right',
       hideOnMobile: true,
-      render: (c) => <span className="text-muted">−{formatGbp(c.commissionAmount, 2)}</span>,
+      render: (c) => <span className="text-zinc-600">−{formatGbp(c.commissionAmount, 2)}</span>,
     },
     {
       key: 'netShare',
       header: 'Net Share',
       align: 'right',
-      render: (c) => <span className="font-semibold text-strong">{formatGbp(c.netShare, 2)}</span>,
+      render: (c) => <span className="font-semibold text-zinc-950">{formatGbp(c.netShare, 2)}</span>,
     },
     {
       key: 'status',
@@ -138,13 +138,13 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       header: 'Accrued',
       align: 'right',
       hideOnMobile: true,
-      render: (c) => <span className="font-mono text-ds-label text-muted">{c.createdAt.slice(0, 10)}</span>,
+      render: (c) => <span className="font-mono text-[12px] text-zinc-600">{c.createdAt.slice(0, 10)}</span>,
     },
   ];
 
   return (
     <div className="space-y-6" data-testid="brand-dashboard-loaded">
-      <ConsoleHeader
+      <PageHeader
         title={`${brandName} — Overview`}
         description="Observe your tenant-scoped earnings, active purchase orders, in-flight shipments, and compliance standing. Actionable tasks live in Tasks & Deadlines."
         meta={
@@ -162,7 +162,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
             <button
               type="button"
               onClick={() => onNavigate('purchase_orders')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium hover:bg-accent-600"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
             >
               Purchase Orders
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -170,7 +170,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
             <button
               type="button"
               onClick={() => onNavigate('work')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
             >
               Tasks & Deadlines
             </button>
@@ -183,14 +183,14 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
       ) : (
         <>
           <div className="space-y-2">
-            <h2 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
               Your earnings position
             </h2>
             <MetricStrip items={earningsMetrics} columns={4} />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-ds-micro font-medium uppercase tracking-[0.06em] text-faint">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">
               Account telemetry
             </h2>
             <MetricStrip items={accountMetrics} columns={4} />
@@ -215,32 +215,32 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('purchase_orders')}
-                    className="text-ds-label font-medium text-accent hover:underline"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     Open full PO queue
                   </button>
                 }
               >
                 {openPos.length === 0 ? (
-                  <p className="text-ds-label text-faint">No open purchase orders right now.</p>
+                  <p className="text-[12px] text-zinc-500">No open purchase orders right now.</p>
                 ) : (
-                  <ul className="divide-y divide-hairline-06">
+                  <ul className="divide-y divide-zinc-200">
                     {openPos.map((po) => (
                       <li key={po.id} className="py-2.5 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <button
                             type="button"
                             onClick={() => onNavigate('purchase_orders', po.poNumber)}
-                            className="font-mono text-ds-body font-medium text-strong hover:text-accent"
+                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[#C2410C]"
                           >
                             {po.poNumber}
                           </button>
-                          <div className="text-ds-label text-faint font-mono">
+                          <div className="text-[12px] text-zinc-500 font-mono">
                             {po.orderDateLabel} · {po.unitCount} units
                           </div>
                         </div>
                         <div className="text-right shrink-0 space-y-0.5">
-                          <div className="font-mono text-ds-body tabular-nums font-medium text-strong">
+                          <div className="font-mono text-[14px] tabular-nums font-medium text-zinc-950">
                             {formatGbp(po.poValue)}
                           </div>
                           <InlineStatus label={po.statusLabel} tone={po.statusTone} />
@@ -257,27 +257,27 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('logistics')}
-                    className="text-ds-label font-medium text-accent hover:underline"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     Open Logistics Hub
                   </button>
                 }
               >
                 {activeShipments.length === 0 ? (
-                  <p className="text-ds-label text-faint">No active consignments currently in motion.</p>
+                  <p className="text-[12px] text-zinc-500">No active consignments currently in motion.</p>
                 ) : (
-                  <ul className="divide-y divide-hairline-06">
+                  <ul className="divide-y divide-zinc-200">
                     {activeShipments.map((s) => (
                       <li key={s.id} className="py-2.5 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <button
                             type="button"
                             onClick={() => onNavigate('logistics', s.poNumber)}
-                            className="font-mono text-ds-body font-medium text-strong hover:text-accent"
+                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[#C2410C]"
                           >
                             {s.reference} ({s.carrier})
                           </button>
-                          <div className="text-ds-label text-faint">
+                          <div className="text-[12px] text-zinc-500">
                             PO {s.poNumber} · {s.route}
                           </div>
                         </div>
@@ -314,16 +314,16 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('compliance')}
-                    className="text-ds-label font-medium text-accent hover:underline"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     Manage
                   </button>
                 }
               >
-                <ul className="space-y-2 text-ds-label">
+                <ul className="space-y-2 text-[12px]">
                   {complianceDocs.map((d) => (
                     <li key={d.label} className="flex items-center justify-between gap-2">
-                      <span className="text-secondary truncate">{d.label}</span>
+                      <span className="text-zinc-700 truncate">{d.label}</span>
                       <InlineStatus label={d.statusLabel} tone={d.present ? 'success' : 'warning'} />
                     </li>
                   ))}
@@ -336,20 +336,20 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('team')}
-                    className="text-ds-label font-medium text-accent hover:underline"
+                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
                   >
                     Inbox
                   </button>
                 }
               >
                 {recentMessages.length === 0 ? (
-                  <p className="text-ds-label text-faint">No messages recorded for your tenant.</p>
+                  <p className="text-[12px] text-zinc-500">No messages recorded for your tenant.</p>
                 ) : (
-                  <ul className="divide-y divide-hairline-06 text-ds-label">
+                  <ul className="divide-y divide-zinc-200 text-[12px]">
                     {recentMessages.map((m) => (
                       <li key={m.id} className="py-2">
-                        <div className="font-medium text-strong truncate">{m.subject}</div>
-                        <div className="text-ds-micro font-mono text-faint">
+                        <div className="font-medium text-zinc-950 truncate">{m.subject}</div>
+                        <div className="text-[11px] font-mono text-zinc-500">
                           {m.direction} · {m.at.slice(0, 10)}
                         </div>
                       </li>

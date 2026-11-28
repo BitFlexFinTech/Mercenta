@@ -40,12 +40,6 @@ export function AdminComplianceScreen() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [fullRecordId, setFullRecordId] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  /**
-   * §FRONTEND-REDESIGN — the operator's own reason for a manual verdict. It is
-   * cleared after a decision is recorded, so one decision's reason can never be
-   * silently reused for the next.
-   */
-  const [verdictReason, setVerdictReason] = useState('');
 
   const reviewer = actingStaff?.name ?? 'Tadii';
 
@@ -91,22 +85,19 @@ export function AdminComplianceScreen() {
     [docs, brandNameMap]
   );
 
+  const matchesFilter = (d: ComplianceDocRow) => {
+    if (reviewFilter === 'all') return true;
+    if (reviewFilter === 'awaiting') return d.status === 'under_review' || d.status === 'uploaded';
+    if (reviewFilter === 'approved') return d.status === 'approved';
+    return (
+      d.status === 'expired' ||
+      d.status === 'expiring' ||
+      d.status === 'missing' ||
+      d.status === 'rejected'
+    );
+  };
+
   const groups: ComplianceBrandGroup[] = useMemo(() => {
-    /* §FRONTEND-REDESIGN BATCH 3 — the predicate lives INSIDE the memo. It is a
-       closure over `reviewFilter`, so declaring it outside made its identity change
-       every render and the hook lint could not verify the dependency: it reads the
-       same `reviewFilter` the dep array already lists. Same behaviour, one owner. */
-    const matchesFilter = (d: ComplianceDocRow) => {
-      if (reviewFilter === 'all') return true;
-      if (reviewFilter === 'awaiting') return d.status === 'under_review' || d.status === 'uploaded';
-      if (reviewFilter === 'approved') return d.status === 'approved';
-      return (
-        d.status === 'expired' ||
-        d.status === 'expiring' ||
-        d.status === 'missing' ||
-        d.status === 'rejected'
-      );
-    };
     const map = new Map<string, ComplianceDocRow[]>();
     for (const d of docRows) {
       if (!matchesFilter(d)) continue;
@@ -205,16 +196,10 @@ export function AdminComplianceScreen() {
       id,
       { staffId: reviewer, canMutate: canCurrentUserMutate },
       decision,
-      /* §FRONTEND-REDESIGN — the operator's reason when they gave one; otherwise the
-         same truthful default this screen always recorded. The audit record is
-         written either way; the difference is that a regulated decision can now
-         carry WHY, which is the property §WAVE 3e established. */
-      verdictReason.trim() ||
-        (decision === 'approve'
-          ? 'Document reviewed and accepted by the Founder / Super Admin.'
-          : 'Document rejected by the Founder / Super Admin — a replacement is required.')
+      decision === 'approve'
+        ? 'Document reviewed and accepted by the Founder / Super Admin.'
+        : 'Document rejected by the Founder / Super Admin — a replacement is required.'
     );
-    setVerdictReason('');
     setNote(
       result.ok
         ? `Manual verification -> ${result.value.status} recorded by ${result.value.verifierIdentity}${
@@ -252,8 +237,6 @@ export function AdminComplianceScreen() {
       fullRecordBundle={fullRecordBundle}
       onSelectFullRecordDoc={setFullRecordId}
       onManualVerdict={manualVerdict}
-      verdictReason={verdictReason}
-      onVerdictReasonChange={setVerdictReason}
       onRunAutomated={runAutomated}
       onUploadOnBehalf={(brandId, type: ComplianceDocument['type']) => {
         if (!canCurrentUserMutate) return;

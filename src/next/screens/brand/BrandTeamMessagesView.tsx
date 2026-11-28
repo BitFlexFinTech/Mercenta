@@ -5,7 +5,7 @@ import {
   ErrorStateBlock,
   InlineStatus,
   LoadingRows,
-  ConsoleHeader,
+  PageHeader,
 } from '@/next/components/ConsolePrimitives';
 import { ConsoleTabs, SectionCard } from '@/next/components/ConsoleCharts';
 import type { BrandTeamMember, Message } from '@/types';
@@ -40,7 +40,7 @@ export function BrandTeamMessagesView({
   if (!hasTenant) {
     return (
       <div className="space-y-6">
-        <ConsoleHeader
+        <PageHeader
           title="Support & Team"
           description="Direct support messaging with Mercenta and internal team notes."
         />
@@ -68,7 +68,7 @@ export function BrandTeamMessagesView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Support & Team"
         description="Threaded support conversation with Mercenta operations and internal team collaboration notes."
       />
@@ -100,7 +100,7 @@ export function BrandTeamMessagesView({
               <div className="space-y-4">
                 <div className="max-h-[420px] overflow-y-auto space-y-2.5 pr-1">
                   {activeList.length === 0 ? (
-                    <p className="text-ds-label text-faint py-8 text-center">
+                    <p className="text-[12px] text-zinc-500 py-8 text-center">
                       {tab === 'support'
                         ? 'No support messages yet. Start a conversation below.'
                         : 'No internal team notes recorded yet.'}
@@ -109,25 +109,25 @@ export function BrandTeamMessagesView({
                     activeList.map((m) => (
                       <div
                         key={m.id}
-                        className={`rounded-ds-md border p-3 text-ds-label ${
+                        className={`rounded-md border p-3 text-[12px] ${
                           m.direction === 'outbound'
-                            ? 'border-hairline bg-surface'
-                            : 'border-hairline-strong bg-surface-raised'
+                            ? 'border-zinc-200 bg-zinc-50'
+                            : 'border-zinc-300 bg-white'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 text-ds-micro text-faint mb-1">
-                          <span className="font-medium text-ink-800">{m.sentBy}</span>
+                        <div className="flex items-center justify-between gap-2 text-[11px] text-zinc-500 mb-1">
+                          <span className="font-medium text-zinc-800">{m.sentBy}</span>
                           <span className="font-mono">
                             {new Date(m.createdAt).toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-ink-900 whitespace-pre-wrap">{m.body}</p>
+                        <p className="text-zinc-900 whitespace-pre-wrap">{m.body}</p>
                       </div>
                     ))
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-hairline flex items-center gap-2">
+                <div className="pt-3 border-t border-zinc-200 flex items-center gap-2">
                   <input
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
@@ -142,13 +142,13 @@ export function BrandTeamMessagesView({
                         ? 'Message Mercenta support…'
                         : 'Add an internal note for your team…'
                     }
-                    className="flex-1 px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                    className="flex-1 px-3 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                   />
                   <button
                     type="button"
                     disabled={!draft.trim() || sending}
                     onClick={() => void submitMessage()}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
                   >
                     <Send className="w-3.5 h-3.5" aria-hidden="true" />
                     Send
@@ -162,17 +162,17 @@ export function BrandTeamMessagesView({
         <div>
           <SectionCard title={`Team Roster (${teamMembers.length})`}>
             {teamMembers.length === 0 ? (
-              <p className="text-ds-label text-faint flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-quiet" aria-hidden="true" />
+              <p className="text-[12px] text-zinc-500 flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-zinc-400" aria-hidden="true" />
                 No team members invited yet. Manage roles in Settings.
               </p>
             ) : (
-              <ul className="divide-y divide-hairline-06">
+              <ul className="divide-y divide-zinc-200">
                 {teamMembers.map((m) => (
-                  <li key={m.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-2 text-ds-label">
+                  <li key={m.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-2 text-[12px]">
                     <div className="min-w-0">
-                      <div className="font-medium text-ink-950 truncate">{m.name}</div>
-                      <div className="text-ds-micro text-faint truncate">{m.email}</div>
+                      <div className="font-medium text-zinc-950 truncate">{m.name}</div>
+                      <div className="text-[11px] text-zinc-500 truncate">{m.email}</div>
                     </div>
                     <InlineStatus
                       label={m.active ? m.role : `${m.role} (Invited)`}

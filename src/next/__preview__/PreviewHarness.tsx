@@ -10,10 +10,18 @@ import {
   type LogisticsRowItem,
 } from '@/next/screens/brand/BrandLogisticsView';
 import { BrandPurchaseOrdersView } from '@/next/screens/brand/BrandPurchaseOrdersView';
+import { BwsIntelligenceView } from '@/next/screens/bws/BwsIntelligenceView';
+import { TalentApprovalsView } from '@/next/screens/talent/TalentApprovalsView';
 import type { AdCampaign, AdSpendBudget, AdSpendRecommendation, PurchaseOrder } from '@/types';
 import '../next.css';
 
-type PreviewScreen = 'purchase_orders' | 'logistics' | 'ads_brand' | 'ads_admin';
+type PreviewScreen =
+  | 'purchase_orders'
+  | 'logistics'
+  | 'ads_brand'
+  | 'ads_admin'
+  | 'bws_intel'
+  | 'talent_approvals';
 type PreviewStateMode = 'populated' | 'loading' | 'error' | 'empty';
 
 const SAMPLE_POS: PurchaseOrder[] = [
@@ -184,7 +192,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
   const isError = stateMode === 'error';
   const isEmpty = stateMode === 'empty';
 
-  const logisticsRows = useMemo(() => (isEmpty ? [] : SAMPLE_LOGISTICS_ROWS), [isEmpty]);
+  const logisticsRows = isEmpty ? [] : SAMPLE_LOGISTICS_ROWS;
   const logisticsModel = useMemo(
     () =>
       buildOperationalMap(
@@ -224,38 +232,40 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
   );
 
   return (
-    <div className="mercenta-next min-h-screen bg-surface text-ink-950">
-      <header className="sticky top-0 z-30 border-b border-hairline bg-surface-raised px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div className="mercenta-next min-h-screen bg-[#FAFAFA] text-[#09090B]">
+      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white px-6 py-3 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onExit}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
           >
             <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
             Back to Workspace
           </button>
           <div>
-            <div className="text-ds-body font-semibold text-strong">
+            <div className="text-[14px] font-semibold text-zinc-950">
               Pure Presentation Preview Harness
             </div>
-            <div className="text-ds-label text-faint">
+            <div className="text-[12px] text-zinc-500">
               Renders View components offline without data-layer or context dependencies
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-ds-label">
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
           <select
             aria-label="Select screen to preview"
             value={screen}
             onChange={(e) => setScreen(e.target.value as PreviewScreen)}
-            className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+            className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
           >
             <option value="purchase_orders">2a · Brand Purchase Orders View</option>
             <option value="logistics">2b · Brand Logistics View</option>
             <option value="ads_brand">2c · Ads Manager (Brand Scope)</option>
             <option value="ads_admin">2c · Ads Manager (Portfolio Scope)</option>
+            <option value="bws_intel">5 · BWS Intelligence View</option>
+            <option value="talent_approvals">6 · Talent Commerce Approvals View</option>
           </select>
 
           {screen === 'ads_admin' && (
@@ -263,7 +273,7 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
               aria-label="Select vertical policy"
               value={vertical}
               onChange={(e) => setVertical(e.target.value as AdsVertical)}
-              className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-strong"
+              className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-zinc-950"
             >
               <option value="core">Core Admin</option>
               <option value="bws">BWS Campaign Studio</option>
@@ -271,16 +281,16 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             </select>
           )}
 
-          <div className="inline-flex rounded-ds-sm border border-hairline bg-surface p-0.5">
+          <div className="inline-flex rounded border border-zinc-200 bg-zinc-50 p-0.5">
             {(['populated', 'loading', 'error', 'empty'] as PreviewStateMode[]).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => setStateMode(mode)}
-                className={`px-2.5 py-1 rounded-ds-sm capitalize ${
+                className={`px-2.5 py-1 rounded capitalize ${
                   stateMode === mode
-                    ? 'bg-ink-950 text-on-dark font-medium'
-                    : 'text-muted hover:text-strong'
+                    ? 'bg-zinc-950 text-white font-medium'
+                    : 'text-zinc-600 hover:text-zinc-950'
                 }`}
               >
                 {mode}
@@ -341,17 +351,17 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             acceptedUnshippedPos={[]}
             onDownloadHtml={() => {}}
             renderDocumentQueueSlot={() => (
-              <p className="text-ds-label text-muted">
+              <p className="text-[12px] text-zinc-600">
                 Preview slot: PoDocumentQueuePanel renders accepted POs inside the 24h/dispatch window.
               </p>
             )}
             renderDocumentPackSlot={() => (
-              <p className="text-ds-label text-muted">
+              <p className="text-[12px] text-zinc-600">
                 Preview slot: PoDocumentPackPanel renders commercial invoice, packing list, and carrier labels.
               </p>
             )}
             providerConfigsSlot={
-              <p className="text-ds-label text-muted">
+              <p className="text-[12px] text-zinc-600">
                 Preview slot: DHL Express (simulation), Palletline (simulation).
               </p>
             }
@@ -387,6 +397,117 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
               ok: true,
               message: `Preview recommendation marked ${dec}.`,
             })}
+          />
+        )}
+
+        {screen === 'bws_intel' && (
+          <BwsIntelligenceView
+            section="overview"
+            loading={isLoading}
+            error={isError ? 'Simulated BWS intelligence error.' : null}
+            onRetry={() => setStateMode('populated')}
+            canMutate
+            metrics={[
+              { id: 'b', label: 'Portfolio Brands', value: isEmpty ? '0' : '4' },
+              { id: 'p', label: 'Tracked Prospects', value: isEmpty ? '0' : '12' },
+              { id: 'o', label: 'Opportunities', value: isEmpty ? '0' : '3' },
+              { id: 'v', label: 'PO Volume', value: isEmpty ? '£0' : '£45,000' },
+            ]}
+            countryRows={[]}
+            categoryBenchmarks={[]}
+            opportunityStates={[]}
+            prospects={
+              isEmpty
+                ? []
+                : [
+                    {
+                      id: 'p-1',
+                      brand: 'Sample Producer Co',
+                      category: 'Grocery',
+                      whyInteresting: 'Export-ready line with active UK wholesaler demand.',
+                      totalScore: 84,
+                      tier: 'tier_1',
+                      tierLabel: 'Attack Now',
+                      offerSummary: 'MARKETPLACE ONLY OBSERVED',
+                      rawOfferClass: 'MARKETPLACE_ONLY_OBSERVED',
+                      ukPresence: false,
+                      disqualified: false,
+                      leadDistributor: 'None recorded',
+                      leadContact: 'Head of Export',
+                      wholesaleAvailable: true,
+                      distributorProgramme: false,
+                      outreachStatus: 'not_enrolled',
+                      acquisitionStage: 'not enrolled',
+                      canPrepareOutreach: true,
+                      canApproveOutreach: false,
+                      canSendOutreach: false,
+                      canSimulateResponse: false,
+                      canCreateOpportunity: false,
+                      asins: [],
+                      contacts: [],
+                      distributors: [],
+                    },
+                  ]
+            }
+            selectedProspect={null}
+            onSelectProspect={() => {}}
+            searchQuery=""
+            onSearchQueryChange={() => {}}
+            tierFilter=""
+            onTierFilterChange={() => {}}
+            runningDiscovery={false}
+            statusMessage={null}
+            onRunDiscovery={() => {}}
+            onNavigateSection={() => {}}
+            onOutreachAction={() => {}}
+            onSetOpportunityStage={() => {}}
+          />
+        )}
+
+        {screen === 'talent_approvals' && (
+          <TalentApprovalsView
+            loading={isLoading}
+            error={isError ? 'Simulated approvals fetch error.' : null}
+            onRetry={() => setStateMode('populated')}
+            canMutate
+            activeTab="submissions"
+            onTabChange={() => {}}
+            metrics={[
+              { id: 'sub', label: 'Product Submissions', value: isEmpty ? '0' : '2' },
+              { id: 'lst', label: 'Listing Recommendations', value: isEmpty ? '0' : '5' },
+              { id: 'doc', label: 'Compliance Documents', value: isEmpty ? '0' : '3' },
+              { id: 'po', label: 'PO Ack & Drafts', value: isEmpty ? '0' : '1' },
+            ]}
+            submissions={
+              isEmpty
+                ? []
+                : [
+                    {
+                      id: 'sub-1',
+                      brandId: 'preview-brand',
+                      brandName: 'Sample Brand Ltd',
+                      productName: 'Sample Signature Edition',
+                      sku: 'SKU-100',
+                      asin: 'B0PREVIEW1',
+                      status: 'under_amazon_review',
+                      statusLabel: 'Under Review',
+                      statusTone: 'info',
+                      submittedAt: '2026-11-24',
+                      simulated: true,
+                    },
+                  ]
+            }
+            listings={[]}
+            complianceDocs={[]}
+            purchaseOrders={[]}
+            notice={null}
+            actionError={null}
+            busyId={null}
+            onPollSubmission={() => {}}
+            onReviewListing={() => {}}
+            onReviewCompliance={() => {}}
+            onApprovePoDraft={() => {}}
+            onOpenPurchaseOrders={() => {}}
           />
         )}
       </main>

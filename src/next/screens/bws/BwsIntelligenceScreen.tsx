@@ -271,7 +271,7 @@ export function BwsIntelligenceScreen({
       id: 'prospects',
       label: 'Tracked prospects',
       value: String(rawProspects.length),
-      context: `${pitchTargetCount} pitch targets`,
+      context: `${pitchTargetCount} non-1P pitch targets`,
       onClick: () => onNavigateView?.('pitch-targets'),
     },
     {

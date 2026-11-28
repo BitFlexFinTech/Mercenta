@@ -1,5 +1,6 @@
 import { useApp } from '@/context/GlobalStateContext';
 import { acceptBrandAgreement } from '@/data/api';
+import { BANKS_BY_COUNTRY } from '@/data/banksByCountry';
 import { useBrandAgreements } from '@/data/queries';
 import { AGREEMENT_VERSIONS, type BrandAgreementType } from '@/types';
 import { BrandOnboardingView } from './BrandOnboardingView';
@@ -15,10 +16,12 @@ export function BrandOnboardingScreen({ onNavigateSettings }: { onNavigateSettin
     (a) => a.brandId === brandId && a.agreementType === 'chargeback_indemnity'
   );
   const allGateDocsApproved = gateDocs.length > 0 && gateDocs.every((d) => d.status === 'approved');
+  const banksForNation = brandProfile.nation ? BANKS_BY_COUNTRY[brandProfile.nation] ?? [] : [];
 
   return (
     <BrandOnboardingView
       profile={brandProfile}
+      banksForNation={banksForNation}
       logisticsSlaAccepted={logisticsSlaAccepted}
       chargebackIndemnityAccepted={chargebackIndemnityAccepted}
       allGateDocsApproved={allGateDocsApproved}

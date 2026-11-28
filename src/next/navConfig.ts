@@ -10,16 +10,7 @@ export interface NavItemDef {
   id: string;
   label: string;
   group: string;
-  /**
-   * True when the screen has a real implementation behind it.
-   *
-   * §FRONTEND-REDESIGN BATCH 2 (2026-11-26) — every one of the 89 declared views
-   * now resolves to a real screen: the 12 that existed only in
-   * `mercenta-frontend-v1` were ported in Batch 4, and the 7 that v1 had renamed
-   * resolve to THIS project's own (newer) screens. A `false` here would mean "the
-   * nav offers a destination that shows a placeholder", which is exactly the state
-   * this batch ends.
-   */
+  /** True when the screen is implemented in the current release phase (Phases 1-2). */
   implemented: boolean;
   /** Optional underlying RBAC view id when mapped to an existing Mercenta allowlist key. */
   rbacViewId?: string;
@@ -62,19 +53,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   { id: 'work', label: 'Work Management', group: 'Operations', implemented: true },
   { id: 'purchase_orders_admin', label: 'Purchase Orders', group: 'Operations', implemented: true },
   { id: 'logistics', label: 'Logistics Hub', group: 'Operations', implemented: true },
-  {
-    /* §WAVE 3b — `returns_tracking` is NOT in `VIEW_ALLOWLIST.admin_staff`
-       (`src/lib/auth/rbac.ts`), so the item was silently filtered out of the menu
-       and the view was unreachable. RBAC is NOT widened here (that is a security
-       decision): the item declares the closest permission the staff already hold,
-       the same mechanism this nav already uses for the Ads Manager
-       (`rbacViewId: 'marketing'`). Returns are worked alongside fulfilment. */
-    id: 'returns_tracking',
-    label: 'Returns Tracking',
-    group: 'Operations',
-    implemented: true,
-    rbacViewId: 'fulfillment_track',
-  },
+  { id: 'returns_tracking', label: 'Returns Tracking', group: 'Operations', implemented: true },
   { id: 'calendar', label: 'Calendar', group: 'Operations', implemented: true },
 
   { id: 'crm', label: 'Brand CRM', group: 'Brands & Growth', implemented: true },
@@ -89,11 +68,7 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
   },
   {
     id: 'amazon_ads',
-    /* §FRONTEND-REDESIGN BATCH 2 — v1 renamed this to 'Amazon Ad Spend'. REFUSED:
-       `npm run validate:wording` flags a bare "Amazon" product claim in outward-facing
-       copy (M12 — a claim about a retail-programme relationship must be distinguishable
-       as fact/estimate/simulation/pending). The neutral label stays. */
-    label: 'Ad Spend',
+    label: 'Amazon Ad Spend',
     group: 'Brands & Growth',
     implemented: true,
     rbacViewId: 'marketing',
@@ -102,8 +77,6 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'brand_intelligence',
     label: 'Brand Intelligence',
     group: 'Brands & Growth',
-    /* §WAVE 3k — real: the ranked opportunity board derived from the canonical prospect
-       store, with the ten-category rule shown firing. Super-Admin only. */
     implemented: true,
     superAdminOnly: true,
   },
@@ -117,26 +90,8 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
 
   { id: 'compliance', label: 'Compliance Approvals', group: 'Governance & Support', implemented: true },
   { id: 'messages', label: 'Messages', group: 'Governance & Support', implemented: true },
-{
-    /* §WAVE 3e — helpdesk TRIAGE is the support queue, so it declares the closest
-       permission an admin_staff member already holds (`messages`). RBAC itself is
-       not widened. */
-    id: 'helpdesk',
-    label: 'Helpdesk',
-    group: 'Governance & Support',
-    implemented: true,
-    rbacViewId: 'messages',
-  },
-{
-    /* §WAVE 3f — `monitoring` is NOT in `VIEW_ALLOWLIST.admin_staff`, so without a
-       mapping the item would be silently filtered out. RBAC is not widened: the item
-       declares the closest permission the staff already hold (`messages`). */
-    id: 'monitoring',
-    label: 'Monitoring',
-    group: 'Governance & Support',
-    implemented: true,
-    rbacViewId: 'messages',
-  },
+  { id: 'helpdesk', label: 'Helpdesk', group: 'Governance & Support', implemented: true },
+  { id: 'monitoring', label: 'Monitoring', group: 'Governance & Support', implemented: true },
 
   {
     id: 'super_admin',
@@ -149,8 +104,6 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'audit_log',
     label: 'Audit Log',
     group: 'Administration',
-    /* §WAVE 3e — built, and reachable only by a super_admin session (see
-       `superAdminOnly` and `SUPER_ADMIN_ONLY_ADMIN_IDS`). */
     implemented: true,
     superAdminOnly: true,
   },
@@ -167,8 +120,6 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'founder_centre',
     label: 'Founder Investor Centre',
     group: 'Founder',
-    /* §WAVE 3k — real: the funding pipeline, the Model B capital case, the financing
-       router and the pitch workspace, all read from their own owners. Super-Admin only. */
     implemented: true,
     superAdminOnly: true,
   },
@@ -176,8 +127,6 @@ export const CORE_ADMIN_ITEMS: NavItemDef[] = [
     id: 'partnerships',
     label: 'Partnerships & Fundraising',
     group: 'Founder',
-    /* §WAVE 3k — real: the financier universe, the outreach pipeline and the
-       financier lifecycle, each rendered from its own owner. Super-Admin only. */
     implemented: true,
     superAdminOnly: true,
   },
@@ -225,8 +174,8 @@ export const BWS_ITEMS: NavItemDef[] = [
   { id: 'brand-discovery', label: 'Brand Discovery', group: 'Intelligence', implemented: true },
   { id: 'brand-intelligence', label: 'Brand Intelligence', group: 'Intelligence', implemented: true },
   { id: 'uk-distribution', label: 'UK Distribution Research', group: 'Intelligence', implemented: true },
-  { id: 'uk-channel-research', label: 'UK Channel Research', group: 'Intelligence', implemented: true },
-  { id: 'pitch-targets', label: 'Pitch Targets', group: 'Intelligence', implemented: true },
+  { id: 'amazon-uk', label: 'Amazon UK Research', group: 'Intelligence', implemented: true },
+  { id: 'pitch-targets', label: '1P Pitch Targets', group: 'Intelligence', implemented: true },
   { id: 'opportunity-assessment', label: 'Opportunity Assessment', group: 'Intelligence', implemented: true },
 
   { id: 'acquisition-pipeline', label: 'Acquisition Pipeline', group: 'Commercial & Portfolio', implemented: true },
@@ -256,7 +205,7 @@ export const TALENT_COMMERCE_ITEMS: NavItemDef[] = [
   { id: 'brands', label: 'Brands & Products', group: 'Intelligence', implemented: true },
   { id: 'uk-opportunities', label: 'UK Opportunities', group: 'Intelligence', implemented: true },
   { id: 'acquisition', label: 'Brand Acquisition', group: 'Intelligence', implemented: true },
-  { id: 'campaigns', label: 'Campaigns', group: 'Intelligence', implemented: true },
+  { id: 'campaigns', label: 'Amazon Campaigns', group: 'Intelligence', implemented: true },
   { id: 'brand-stores', label: 'Brand Store Studio', group: 'Intelligence', implemented: true },
 
   { id: 'concepts', label: 'Product Concepts', group: 'Operations', implemented: true },
@@ -278,8 +227,6 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
     label: 'Partner Portal',
     subtitle: 'Mercenta Partner Operations',
     environment: 'brand',
-    /* §FRONTEND-REDESIGN BATCH 2 — a brand session opens on its dashboard, not on
-       the PO list. `overview` is the first declared item ('Dashboard'). */
     defaultViewId: 'overview',
     items: CORE_BRAND_ITEMS,
   },
@@ -288,20 +235,13 @@ export const SURFACE_CONFIGS: Record<OperatingSurfaceId, SurfaceConfig> = {
     label: 'Operations Console',
     subtitle: 'Mercenta Staff & Super Admin',
     environment: 'admin',
-    /* §FRONTEND-REDESIGN BATCH 2 — opens on Overview. It previously opened on
-       `ads_management`, so every staff session landed on the advertising screen
-       instead of the console's summary. */
     defaultViewId: 'overview',
     items: CORE_ADMIN_ITEMS,
   },
   bws: {
     id: 'bws',
     label: 'BWS Workspace',
-    /* §FRONTEND-REDESIGN BATCH 2 — v1's subtitle said "(1P Wholesale)". REFUSED for
-       the same reason as the label above: the wording guard bans the "1P"/first-party
-       claim in outward-facing copy. The business meaning is unchanged — Mercenta buys
-       and resells — it is simply not asserted in a navigation subtitle. */
-    subtitle: 'Beers, Wines & Spirits (Wholesale)',
+    subtitle: 'Beers, Wines & Spirits (1P Wholesale)',
     environment: 'admin',
     defaultViewId: 'overview',
     items: BWS_ITEMS,

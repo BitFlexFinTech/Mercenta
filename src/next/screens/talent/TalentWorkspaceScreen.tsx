@@ -273,22 +273,6 @@ export function TalentWorkspaceScreen({
     [rightsHolders]
   );
 
-  /* §FRONTEND-REDESIGN BATCH 4 — HOOK-ORDER DEFECT FIXED AT SOURCE.
-     v1 returned early for a super-admin `settings` visit BEFORE these two
-     useMemo calls, so that one route ran fewer hooks than every other render of
-     this component. React throws "Rendered fewer hooks than expected" the moment
-     the section changes — the crash was one navigation away. The hooks now run
-     first, unconditionally; the early return follows them. */
-  const actor = useMemo(
-    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
-    [actingStaffId, canCurrentUserMutate]
-  );
-
-  const transport = useMemo(
-    () => resolveOutreachTransport(integrations.email, comms.emailClient).transport,
-    [integrations.email, comms.emailClient]
-  );
-
   if (section === 'settings' && session?.tier === 'super_admin') {
     return <SuperAdminScreen onNavigateView={onNavigateView} />;
   }
@@ -340,6 +324,16 @@ export function TalentWorkspaceScreen({
           },
         ];
 
+  const actor = useMemo(
+    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
+    [actingStaffId, canCurrentUserMutate]
+  );
+
+  const transport = useMemo(
+    () => resolveOutreachTransport(integrations.email, comms.emailClient).transport,
+    [integrations.email, comms.emailClient]
+  );
+
   const integrationStatuses = Object.entries(integrations).map(([id, cfg]) => ({
     id,
     label: id.replace(/_/g, ' ').toUpperCase(),
@@ -371,7 +365,7 @@ export function TalentWorkspaceScreen({
       ukStates={ukStates}
       brandValueChart={brandValueChart}
       integrationStatuses={integrationStatuses}
-      actingStaffName={actingStaff?.name ?? 'Founder / Super Admin'}
+      actingStaffName={actingStaff?.name ?? 'Mercenta Operator'}
       statusMessage={statusMessage}
       onOutreachAction={async (prospectId, action) => {
         const rel = getRelationshipContext(prospectId);

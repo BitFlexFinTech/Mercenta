@@ -202,5 +202,43 @@ npm run build                                         →  ✓ built in 346ms ·
 ```
 
 The only change required was the documented peer-dependency override; **no source file was edited**. The build
-emitted only `INEFFECTIVE_DYNAMIC_IMPORT` notes (a bundling hint, not an error). This is the Phase 1 gate's
-"their build exits 0" half, proven early — the decision table is still owed before adoption starts.
+emitted only `INEFFECTIVE_DYNAMIC_IMPORT` notes (a bundling hint, not an error).
+
+---
+
+## 12. PHASE 2 RESULT — THEIR CONSOLE IS IN, AND WHAT IT COST THE GATES (2026-11-28)
+
+**Done, on branch `frontend-v1-adoption` (not merged, not published).**
+
+| Step | Result |
+|---|---|
+| Adopted `src/next/**` from the source, file for file | **106 files**, manifest written to `docs/frontend-v1-manifest.json` |
+| Their code edited? | **NO — 0 declared edits.** `typecheck` **0 errors** and `npm run build` **EXIT=0** with their files untouched |
+| `App.tsx` seam needed? | **None** — the existing lazy mount resolves `NextShell` and `PreviewHarness` unchanged |
+| The "exact code" gate | `scripts/validate-frontend-adoption.mjs` **PASS (110 assertions, 106 byte-identical)**; **mutation-proved** (one byte added to `navConfig.ts` → FAIL → restored byte-identical `b66409ee9877…`) |
+| Does it render? | **Yes.** Production preview on `127.0.0.1:5211`, Super Admin and Astonish sessions driven with **zero page errors**; screenshots at `test-screenshots/frontend-v1-adoption/console-admin-1440.png` and `console-brand-1440.png` |
+| The screen shows their design | Light canvas, hairline cards, uppercase micro-labels, the Portfolio scope strip, Partner Portal / Operations Console / BWS / Talent tabs, Overview metrics derived from the real store |
+
+**What the swap exposed — and why the branch is not publishable yet.**
+
+`npm run validate:all` → **198 PASS / 16 FAIL**. Every one of the 16 is *our* gate asserting the
+**port's** design system, not a defect in the owner's frontend:
+
+- **design-system gates:** `validate-typography-scale`, `validate-radius-elevation-scale`,
+  `validate-next-console-tokens`, `validate-legacy-styling-migration`, `validate-alpha-shim-integrity`,
+  `validate-visual-acceptance`, `validate-uiux-redesign` — their console declares its OWN scale
+  (11/12/14/16/20/24) and its own tokens in `next.css` (documented in their `FRONTEND_NOTES.md`), so our
+  numbers no longer describe the subject.
+- **structural gates:** `validate-workspace-shell` fails because their views render `PageHeader`, a component
+  our rules retired for the **ported** console; `validate-console-homepage-editor`,
+  `validate-console-founder-views`, `validate-control-centre-panels` read files that exist **only** in the port.
+- **content gates:** `validate:wording` (49), `validate-operator-terminology`, `validate-inference-relabels`,
+  `validate-dead-code`, `validate-built-rows` — they read the port's screens and copy.
+
+**Phase 4 is therefore exactly what the plan said it would be:** repoint each gate to the owner's own
+declaration (their `next.css` scale, their components, their copy) or convert it into an **absence guard**
+proving the port is gone. **No gate may be weakened or deleted to make this pass** — that is the rule, and
+the 16 are listed here so the work cannot be quietly dropped.
+
+**Nothing is merged, nothing is published.** The live site still serves `4b20307` (the port), as the owner
+instructed until the new frontend is wired.

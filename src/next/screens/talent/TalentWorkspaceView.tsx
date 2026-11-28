@@ -12,7 +12,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   SlideOverDrawer,
   type ConsoleColumn,
   type MetricItem,
@@ -145,7 +145,7 @@ const SECTION_COPY: Record<
   'uk-opportunities': {
     title: 'UK Opportunities',
     description:
-      'UK retail-channel offer classification and evidence coverage derived from tracked prospect ASIN snapshots.',
+      'Amazon UK offer classification and evidence coverage derived from tracked prospect ASIN snapshots.',
     gapTitle: 'Live talent-brand affinity matching omitted',
     gapMessage:
       'Opportunity states derive strictly from Mercenta Prospect and UK evidence provider status; talent-audience overlap scores from CAA-TalAg require Talent entities.',
@@ -161,7 +161,7 @@ const SECTION_COPY: Record<
   'brand-stores': {
     title: 'Brand Store Studio',
     description:
-      'Listing content quality metrics paired with disclosure for unmodelled channel brand-store modules.',
+      'Listing content quality metrics paired with disclosure for unmodelled Amazon Brand Store modules.',
     gapTitle: 'BrandStore module entity omitted (not modelled)',
     gapMessage:
       'Mercenta does not store BrandStore layout modules, store slugs, or hero banners yet. Storefront copy readiness from analyzeProductListing is shown below; mock storefront builders are omitted.',
@@ -268,8 +268,8 @@ export function TalentWorkspaceView({
       header: 'Rights Holder / Brand Account',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.businessName}</div>
-          <div className="text-ds-label text-faint">
+          <div className="font-medium text-zinc-950">{r.businessName}</div>
+          <div className="text-[12px] text-zinc-500">
             {r.category} · {r.nation || 'Origin N/A'}
           </div>
         </div>
@@ -278,12 +278,12 @@ export function TalentWorkspaceView({
     {
       key: 'contact',
       header: 'Primary Phone',
-      render: (r) => <span className="text-ds-label text-secondary font-mono">{r.contactPhone}</span>,
+      render: (r) => <span className="text-[12px] text-zinc-700 font-mono">{r.contactPhone}</span>,
     },
     {
       key: 'track',
       header: 'Fulfilment Track',
-      render: (r) => <span className="text-ds-label text-secondary">{r.trackLabel}</span>,
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.trackLabel}</span>,
     },
     {
       key: 'skus',
@@ -305,8 +305,8 @@ export function TalentWorkspaceView({
       header: 'SKU & Product',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.name}</div>
-          <div className="text-ds-label text-faint font-mono">
+          <div className="font-medium text-zinc-950">{r.name}</div>
+          <div className="text-[12px] text-zinc-500 font-mono">
             {r.sku} · {r.brandName}
           </div>
         </div>
@@ -347,8 +347,8 @@ export function TalentWorkspaceView({
       header: 'Counterparty / PO',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.brandName}</div>
-          <div className="text-ds-label text-faint font-mono">
+          <div className="font-medium text-zinc-950">{r.brandName}</div>
+          <div className="text-[12px] text-zinc-500 font-mono">
             {r.poNumber} · {r.createdAt}
           </div>
         </div>
@@ -395,8 +395,8 @@ export function TalentWorkspaceView({
       header: 'Brand Prospect',
       render: (r) => (
         <div>
-          <div className="font-medium text-ink-950">{r.brand}</div>
-          <div className="text-ds-label text-faint">{r.category}</div>
+          <div className="font-medium text-zinc-950">{r.brand}</div>
+          <div className="text-[12px] text-zinc-500">{r.category}</div>
         </div>
       ),
     },
@@ -404,7 +404,7 @@ export function TalentWorkspaceView({
       key: 'score',
       header: 'Score / Tier',
       render: (r) => (
-        <span className="font-mono text-ds-label">
+        <span className="font-mono text-[12px]">
           {r.totalScore}/100 · {r.tierLabel}
         </span>
       ),
@@ -412,13 +412,13 @@ export function TalentWorkspaceView({
     {
       key: 'offer',
       header: 'UK Channel Offer',
-      render: (r) => <span className="text-ds-label text-secondary">{r.offerSummary}</span>,
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.offerSummary}</span>,
     },
     {
       key: 'stage',
       header: 'Pipeline Stage',
       render: (r) => (
-        <span className="font-mono text-ds-label text-ink-800">
+        <span className="font-mono text-[12px] text-zinc-800">
           {r.opportunityStage ?? r.acquisitionStage}
         </span>
       ),
@@ -430,7 +430,7 @@ export function TalentWorkspaceView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title={copy.title}
         description={copy.description}
         actions={
@@ -440,16 +440,16 @@ export function TalentWorkspaceView({
                 <button
                   type="button"
                   onClick={() => onNavigateView('approvals')}
-                  className="px-3.5 py-2 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-label font-medium text-ink-900 hover:bg-surface"
+                  className="px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
                 >
                   Open Approvals Queue
                 </button>
                 <button
                   type="button"
                   onClick={() => onNavigateView('campaigns')}
-                  className="px-3.5 py-2 rounded-ds-md bg-accent text-on-dark text-ds-label font-medium transition-opacity hover:opacity-90"
+                  className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
                 >
-                  Open Campaigns
+                  Open Amazon Campaigns
                 </button>
               </>
             )}
@@ -481,7 +481,7 @@ export function TalentWorkspaceView({
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search brands, SKUs, or categories…"
                 aria-label="Filter records"
-                className="px-3 py-1.5 rounded-ds-md border border-hairline-strong bg-surface-raised text-ds-body w-full sm:w-80"
+                className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] w-full sm:w-80"
               />
             </div>
           )}
@@ -503,11 +503,11 @@ export function TalentWorkspaceView({
                   {ukStates.map((st) => (
                     <div
                       key={st.stateId}
-                      className="flex items-center justify-between gap-2 border-b border-hairline pb-2 last:border-b-0 text-ds-label"
+                      className="flex items-center justify-between gap-2 border-b border-zinc-100 pb-2 last:border-b-0 text-[12px]"
                     >
                       <div>
-                        <div className="font-medium text-ink-900">{st.label}</div>
-                        <div className="text-ds-micro text-faint">{st.evidenceSource}</div>
+                        <div className="font-medium text-zinc-900">{st.label}</div>
+                        <div className="text-[11px] text-zinc-500">{st.evidenceSource}</div>
                       </div>
                       <InlineStatus
                         label={st.available ? 'Evidence active' : 'Unasserted (no provider)'}
@@ -608,13 +608,13 @@ export function TalentWorkspaceView({
           {section === 'settings' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SectionCard title="Operator Session">
-                <dl className="space-y-2 text-ds-label">
-                  <div className="flex justify-between border-b border-hairline pb-2">
-                    <dt className="text-faint">Acting staff</dt>
-                    <dd className="font-medium text-ink-950">{actingStaffName}</dd>
+                <dl className="space-y-2 text-[13px]">
+                  <div className="flex justify-between border-b border-zinc-100 pb-2">
+                    <dt className="text-zinc-500">Acting staff</dt>
+                    <dd className="font-medium text-zinc-950">{actingStaffName}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-faint">Write permission</dt>
+                    <dt className="text-zinc-500">Write permission</dt>
                     <dd>
                       <InlineStatus
                         label={canMutate ? 'Full mutation rights' : 'Read-only operator'}
@@ -625,11 +625,11 @@ export function TalentWorkspaceView({
                 </dl>
               </SectionCard>
               <SectionCard title="Integration Modes">
-                <ul className="divide-y divide-hairline-06 text-ds-label">
+                <ul className="divide-y divide-zinc-200 text-[13px]">
                   {integrationStatuses.map((it) => (
                     <li key={it.id} className="py-2 flex items-center justify-between gap-2">
-                      <span className="font-medium text-ink-900">{it.label}</span>
-                      <span className="font-mono text-ds-label text-faint">
+                      <span className="font-medium text-zinc-900">{it.label}</span>
+                      <span className="font-mono text-[12px] text-zinc-600">
                         {it.status} ({it.mode})
                       </span>
                     </li>
@@ -650,19 +650,19 @@ export function TalentWorkspaceView({
         }
       >
         {selectedProduct && (
-          <div className="space-y-4 text-ds-body">
-            <div className="flex items-center justify-between border-b border-hairline pb-3">
-              <span className="text-faint">Listing readiness</span>
+          <div className="space-y-4 text-[14px]">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <span className="text-zinc-600">Listing readiness</span>
               <span className="font-mono font-semibold">{selectedProduct.listingScore} / 100</span>
             </div>
             <div>
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint mb-1.5">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500 mb-1.5">
                 Missing Specification Fields
               </div>
               {selectedProduct.missingFields.length === 0 ? (
-                <p className="text-ds-label text-state-success">All mandatory catalog fields complete.</p>
+                <p className="text-[13px] text-emerald-800">All mandatory catalog fields complete.</p>
               ) : (
-                <ul className="list-disc pl-5 text-ds-label text-state-warning space-y-1">
+                <ul className="list-disc pl-5 text-[13px] text-amber-900 space-y-1">
                   {selectedProduct.missingFields.map((f) => (
                     <li key={f}>{f}</li>
                   ))}
@@ -684,10 +684,10 @@ export function TalentWorkspaceView({
         }
       >
         {selectedProspect && (
-          <div className="space-y-4 text-ds-body">
-            <p className="text-ink-800">{selectedProspect.whyInteresting}</p>
-            <div className="border-t border-hairline pt-3 space-y-2">
-              <div className="text-ds-micro uppercase tracking-[0.06em] text-faint">
+          <div className="space-y-4 text-[14px]">
+            <p className="text-zinc-800">{selectedProspect.whyInteresting}</p>
+            <div className="border-t border-zinc-200 pt-3 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
                 Outreach &amp; Stage Controls
               </div>
               <div className="flex flex-wrap gap-2">
@@ -696,7 +696,7 @@ export function TalentWorkspaceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'prepare')}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Prepare Outreach
                   </button>
@@ -706,7 +706,7 @@ export function TalentWorkspaceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'approve')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Approve Draft
                   </button>
@@ -716,7 +716,7 @@ export function TalentWorkspaceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'send')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Send Outreach
                   </button>
@@ -726,7 +726,7 @@ export function TalentWorkspaceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'simulate_response')}
-                    className="px-3 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Log Reply (Sim)
                   </button>
@@ -736,7 +736,7 @@ export function TalentWorkspaceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'create_opportunity')}
-                    className="px-3 py-1.5 rounded-ds-sm bg-ink-950 text-on-dark text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-zinc-950 text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Create Opportunity
                   </button>
@@ -749,7 +749,7 @@ export function TalentWorkspaceView({
                     aria-label="Opportunity stage"
                     value={stageTarget}
                     onChange={(e) => setStageTarget(e.target.value)}
-                    className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px]"
                   >
                     <option value="qualified">Qualified</option>
                     <option value="meeting_booked">Meeting Booked</option>
@@ -762,7 +762,7 @@ export function TalentWorkspaceView({
                     onClick={() =>
                       onSetOpportunityStage(selectedProspect.opportunityId!, stageTarget)
                     }
-                    className="px-3 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label font-medium disabled:opacity-40"
+                    className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Update Stage
                   </button>

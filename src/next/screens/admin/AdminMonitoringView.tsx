@@ -1,266 +1,118 @@
-/**
- * §WAVE 3f (2026-11-25) — ADMIN monitoring (presentation).
- *
- * Honesty is the whole point of this screen. `src/lib/monitoring/health.ts` exists
- * because an older dashboard INVENTED a database/Edge-Function response time; it
- * computes a deterministic readiness from the integration modes the client actually
- * holds and states what it cannot see. This screen renders that, and says the same
- * thing on the page.
- */
 import {
-  ConsoleHeader,
-  ConsoleTable,
-  ErrorStateBlock,
   InlineStatus,
-  LoadingRows,
   MetricStrip,
-  SlideOverDrawer,
-  type ConsoleColumn,
-  type MetricItem,
+  PageHeader,
 } from '@/next/components/ConsolePrimitives';
-import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
-import type { HealthResult } from '@/lib/monitoring/health';
-import { INTEGRATION_MODE_LABELS } from '@/integrations/types';
-import type { ProviderResolutionMode } from '@/integrations/types';
+import { SectionCard } from '@/next/components/ConsoleCharts';
 
-export interface AdminProviderRow {
+export interface HealthCheckItem {
   id: string;
-  label: string;
-  category: string;
-  mode: ProviderResolutionMode;
-  needsAttention: boolean;
-  secretName?: string;
+  timestamp: string;
+  healthy: boolean;
+  summary: string;
+  severity: 'critical' | 'high' | 'info';
+  triageSummary?: string;
 }
 
 export interface AdminMonitoringViewProps {
-  rows: AdminProviderRow[];
-  readiness: HealthResult;
-  totalProviders: number;
-  categoryOptions: string[];
-  modeOptions: string[];
-  categoryFilter: string;
-  modeFilter: string;
-  attentionOnly: boolean;
-  liveCount: number;
-  simulationCount: number;
-  attentionCount: number;
-  selected: AdminProviderRow | null;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  onRetry: () => void;
-  onChangeCategory: (value: string) => void;
-  onChangeMode: (value: string) => void;
-  onToggleAttention: () => void;
-  onSelect: (row: AdminProviderRow | null) => void;
-}
-
-/** The two states that sit outside `IntegrationMode` itself. */
-const EXTRA_MODE_LABELS: Record<'unknown' | 'not_registered', string> = {
-  unknown: 'Unknown — failing closed',
-  not_registered: 'Not registered',
-};
-
-/** The canonical label for a resolved mode, including the two states outside it. */
-export function modeLabel(mode: ProviderResolutionMode): string {
-  if (mode === 'unknown' || mode === 'not_registered') return EXTRA_MODE_LABELS[mode];
-  return INTEGRATION_MODE_LABELS[mode];
+  environmentLabel: string;
+  running: boolean;
+  entries: HealthCheckItem[];
+  onRunHealthCheck: () => Promise<void>;
 }
 
 export function AdminMonitoringView({
-  rows,
-  readiness,
-  totalProviders,
-  categoryOptions,
-  modeOptions,
-  categoryFilter,
-  modeFilter,
-  attentionOnly,
-  liveCount,
-  simulationCount,
-  attentionCount,
-  selected,
-  isLoading,
-  isError,
-  errorMessage,
-  onRetry,
-  onChangeCategory,
-  onChangeMode,
-  onToggleAttention,
-  onSelect,
+  environmentLabel,
+  running,
+  entries,
+  onRunHealthCheck,
 }: AdminMonitoringViewProps) {
-  const metrics: MetricItem[] = [
-    {
-      id: 'providers',
-      label: 'Integrations',
-      value: String(totalProviders),
-      context: 'Registered with the platform',
-    },
-    {
-      id: 'attention',
-      label: 'Needing attention',
-      value: String(attentionCount),
-      context: attentionCount > 0 ? 'Degraded or erroring' : 'None degraded or erroring',
-      onClick: onToggleAttention,
-      active: attentionOnly,
-    },
-    { id: 'live', label: 'Live', value: String(liveCount), context: 'Genuinely connected' },
-    {
-      id: 'simulation',
-      label: 'Simulated',
-      value: String(simulationCount),
-      context: 'Usable, and labelled as simulation',
-    },
-  ];
+  const latest = entries[0] ?? null;
 
-  const columns: ConsoleColumn<AdminProviderRow>[] = [
-    {
-      key: 'provider',
-      header: 'Integration',
-      mobilePrimary: true,
-      render: (row) => (
-        <div className="min-w-0">
-          <div className="font-medium text-strong truncate">{row.label}</div>
-          <div className="text-ds-label text-faint truncate">{row.category}</div>
-        </div>
-      ),
-    },
-    {
-      key: 'mode',
-      header: 'Mode',
-      render: (row) => (
-        <InlineStatus
-          label={modeLabel(row.mode)}
-          tone={row.needsAttention ? 'danger' : row.mode === 'live' ? 'success' : 'neutral'}
-          dataStatus={String(row.mode)}
-        />
-      ),
-    },
-    {
-      key: 'secret',
-      header: 'Server secret',
-      hideOnMobile: true,
-      render: (row) => (
-        <span className="font-mono text-ds-label text-muted">{row.secretName ?? 'Not needed'}</span>
-      ),
-    },
-  ];
-return (
-    <div>
-      <ConsoleHeader
-        eyebrow="Mercenta · Governance & Support"
-        title="Monitoring"
-        description="The readiness the client can honestly see: the environment, and the mode every integration resolves to."
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="System Monitoring"
+        description="Readiness checks evaluated from local integration configuration, dependency advisories, and triage summaries."
+        meta={<span>Environment: {environmentLabel}</span>}
+        actions={
+          <button
+            type="button"
+            disabled={running}
+            onClick={() => void onRunHealthCheck()}
+            className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40 whitespace-nowrap"
+          >
+            {running ? 'Running check…' : 'Run Health Check'}
+          </button>
+        }
       />
 
-      {isError ? (
-        <ErrorStateBlock
-          title="Integration modes could not be read"
-          message={errorMessage}
-          onRetry={onRetry}
-        />
-      ) : isLoading ? (
-        <LoadingRows rows={8} />
-      ) : (
-        <>
-          <div className="mb-6 space-y-3">
-            <NoticeBanner
-              tone={readiness.healthy ? 'success' : readiness.severity === 'critical' ? 'danger' : 'warning'}
-              title={readiness.healthy ? 'Client readiness: healthy' : 'Client readiness: attention needed'}
-              message={readiness.summary}
-            />
-            {/* The health module's own limitation, stated on the page: a browser
-                cannot probe the database or the Edge Functions, so this screen never
-                claims it did. */}
-            <p className="text-ds-label text-faint">
-              A browser cannot probe the database or the Edge Functions, so this view never
-              reports their response times. It reflects the mode each integration resolves to in
-              the current environment.
-            </p>
-          </div>
+      <MetricStrip
+        columns={3}
+        items={[
+          {
+            id: 'mon-latest',
+            label: 'Latest Readiness',
+            value: latest ? (latest.healthy ? 'Healthy' : 'Degraded') : 'Not run',
+            context: latest ? new Date(latest.timestamp).toLocaleTimeString() : 'Run a check above',
+          },
+          {
+            id: 'mon-checks',
+            label: 'Session Checks',
+            value: String(entries.length),
+            context: 'Evaluated against real local integration modes',
+          },
+          {
+            id: 'mon-deps',
+            label: 'Dependency Scanner',
+            value: 'Configured',
+            context: '.github/dependabot.yml (weekly scans)',
+          },
+        ]}
+      />
 
-          <MetricStrip items={metrics} columns={4} />
-
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <select
-              value={categoryFilter}
-              onChange={(event) => onChangeCategory(event.target.value)}
-              aria-label="Filter by category"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All categories</option>
-              {categoryOptions.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            <select
-              value={modeFilter}
-              onChange={(event) => onChangeMode(event.target.value)}
-              aria-label="Filter by mode"
-              className="px-3 py-2 text-ds-body border border-hairline-strong rounded-ds-md bg-surface-raised text-strong"
-            >
-              <option value="all">All modes</option>
-              {modeOptions.map((mode) => (
-                <option key={mode} value={mode}>
-                  {modeLabel(mode as ProviderResolutionMode)}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={onToggleAttention}
-              aria-pressed={attentionOnly}
-              className={`px-3 py-2 text-ds-label font-medium rounded-ds-md border ${
-                attentionOnly
-                  ? 'border-ink bg-ink-950 text-on-dark'
-                  : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
-              }`}
-            >
-              Needs attention only
-            </button>
-          </div>
-
-          <SectionCard title="Integrations" description={`${rows.length} of ${totalProviders} shown`}>
-            <ConsoleTable
-              rows={rows}
-              columns={columns}
-              rowKey={(row) => row.id}
-              onRowClick={(row) => onSelect(row)}
-              emptyTitle="No integrations match these filters"
-              emptyDescription="Clear the filters to see every registered integration."
-            />
-          </SectionCard>
-        </>
-      )}
-
-      <SlideOverDrawer
-        open={Boolean(selected)}
-        onClose={() => onSelect(null)}
-        title={selected ? selected.label : ''}
-        subtitle={selected ? selected.category : undefined}
-        testId="admin-monitoring-drawer"
+      <SectionCard
+        title="Dependency Monitoring"
+        description="Automated repository security advisory scanning."
       >
-        {selected && (
-          <dl className="grid grid-cols-2 gap-3 text-ds-body">
-            <div>
-              <dt className="text-ds-label text-faint">Resolved mode</dt>
-              <dd className="font-medium text-strong">{modeLabel(selected.mode)}</dd>
-            </div>
-            <div>
-              <dt className="text-ds-label text-faint">Needs attention</dt>
-              <dd className="font-medium text-strong">{selected.needsAttention ? 'Yes' : 'No'}</dd>
-            </div>
-            <div className="col-span-2">
-              <dt className="text-ds-label text-faint">Server-side secret</dt>
-              <dd className="font-mono text-ds-label text-strong">
-                {selected.secretName ?? 'This provider needs no secret'}
-              </dd>
-            </div>
-          </dl>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-zinc-700">
+          <p className="max-w-2xl">
+            Dependabot is configured in <code className="font-mono text-zinc-950">.github/dependabot.yml</code> to scan npm and GitHub Actions dependencies weekly.
+          </p>
+          <InlineStatus label="Configured" tone="success" />
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Health Check History"
+        description="Checks start empty each session and read local provider readiness via computeReadiness()."
+      >
+        {entries.length === 0 ? (
+          <p className="text-[13px] text-zinc-600">
+            No health checks have been run in this session. Press &ldquo;Run Health Check&rdquo; to evaluate current platform readiness.
+          </p>
+        ) : (
+          <div className="divide-y divide-zinc-200 -m-4">
+            {entries.map((e) => (
+              <div key={e.id} className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-[13px] font-medium text-zinc-950">{e.summary}</div>
+                  <div className="text-[11px] font-mono text-zinc-500 mt-0.5">
+                    {new Date(e.timestamp).toLocaleString()} · severity: {e.severity}
+                  </div>
+                  {e.triageSummary && (
+                    <div className="text-[12px] text-amber-800 mt-1">Triage: {e.triageSummary}</div>
+                  )}
+                </div>
+                <InlineStatus
+                  label={e.healthy ? 'Healthy' : 'Degraded'}
+                  tone={e.healthy ? 'success' : 'warning'}
+                />
+              </div>
+            ))}
+          </div>
         )}
-      </SlideOverDrawer>
+      </SectionCard>
     </div>
   );
 }

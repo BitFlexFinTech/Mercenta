@@ -6,7 +6,7 @@ import {
   InlineStatus,
   LoadingRows,
   MetricStrip,
-  ConsoleHeader,
+  PageHeader,
   type SemanticTone,
 } from '@/next/components/ConsolePrimitives';
 import { NoticeBanner, SectionCard } from '@/next/components/ConsoleCharts';
@@ -129,7 +129,7 @@ export function AdminHelpdeskView({
 
   return (
     <div className="space-y-6">
-      <ConsoleHeader
+      <PageHeader
         title="Helpdesk"
         description="Brand support cases reviewed by Mercenta before any channel escalation. Mercenta operates the channel relationship directly."
         meta={
@@ -183,42 +183,42 @@ export function AdminHelpdeskView({
       {/* Mercenta Case Review & Channel Escalation Queue */}
       <SectionCard
         title="Brand Cases — Mercenta Review Queue"
-        description="Brand cases are checked against Knowledge Base sufficiency and reviewed before optional escalation to the retail channel."
+        description="Brand cases are checked against Knowledge Base sufficiency and reviewed before optional Amazon escalation."
       >
         <div className="space-y-4">
           {awaitingReviewCases.length === 0 ? (
-            <p className="text-ds-label text-faint">No cases awaiting review.</p>
+            <p className="text-[12px] text-zinc-500">No cases awaiting review.</p>
           ) : (
-            <div className="divide-y divide-hairline-06 border border-hairline rounded-ds-md">
+            <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-md">
               {awaitingReviewCases.map((c) => (
                 <div key={c.id} className="p-3 space-y-2" data-state="case-review-row">
                   <div className="flex flex-wrap items-center gap-2 justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-ds-label text-accent">
+                      <span className="font-mono text-[12px] text-[#C2410C]">
                         {c.caseRef ?? c.id}
                       </span>
-                      <span className="text-ds-label font-semibold text-ink-950">{c.subject}</span>
-                      <span className="text-ds-label text-faint">· {c.brandName}</span>
+                      <span className="text-[13px] font-semibold text-zinc-950">{c.subject}</span>
+                      <span className="text-[12px] text-zinc-500">· {c.brandName}</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => onReviewCase(c.id, 'approve_escalation')}
-                        className="px-2.5 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+                        className="px-2.5 py-1 rounded bg-zinc-950 text-white text-[11px] font-medium hover:bg-zinc-800"
                       >
                         Approve escalation
                       </button>
                       <button
                         type="button"
                         onClick={() => onReviewCase(c.id, 'request_info')}
-                        className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-800 hover:bg-surface"
+                        className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-800 hover:bg-zinc-50"
                       >
                         Request info
                       </button>
                       <button
                         type="button"
                         onClick={() => onReviewCase(c.id, 'reject')}
-                        className="px-2.5 py-1 rounded-ds-sm border border-state-danger/20 bg-state-danger/10 text-state-danger text-ds-micro font-medium hover:bg-state-danger/10"
+                        className="px-2.5 py-1 rounded border border-red-200 bg-red-50 text-red-900 text-[11px] font-medium hover:bg-red-100"
                       >
                         Reject
                       </button>
@@ -227,13 +227,13 @@ export function AdminHelpdeskView({
                   <div className="flex flex-wrap items-center gap-2">
                     <InlineStatus label={c.sufficiencyLabel} tone={c.sufficiencyTone} />
                     {c.articleTitles.length > 0 && (
-                      <span className="text-ds-micro text-faint">
+                      <span className="text-[11px] text-zinc-600">
                         KB: {c.articleTitles.join(' · ')}
                       </span>
                     )}
                   </div>
                   {c.reasons.length > 0 && (
-                    <ul className="text-ds-micro text-faint list-disc pl-4 space-y-0.5">
+                    <ul className="text-[11px] text-zinc-600 list-disc pl-4 space-y-0.5">
                       {c.reasons.map((r, i) => (
                         <li key={i}>{r}</li>
                       ))}
@@ -245,25 +245,25 @@ export function AdminHelpdeskView({
           )}
 
           {approvedToEscalateCases.length > 0 && (
-            <div className="border-t border-hairline pt-3 space-y-2">
-              <div className="text-ds-label font-semibold text-ink-950">
-                Reviewed — Ready to escalate to the retail channel
+            <div className="border-t border-zinc-200 pt-3 space-y-2">
+              <div className="text-[12px] font-semibold text-zinc-950">
+                Reviewed — Ready to escalate to Amazon
               </div>
               {approvedToEscalateCases.map((c) => (
                 <div
                   key={c.id}
-                  className="flex flex-wrap items-center justify-between gap-2 text-ds-label"
+                  className="flex flex-wrap items-center justify-between gap-2 text-[12px]"
                 >
                   <span>
-                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
-                    <span className="text-ink-950 font-medium">{c.subject}</span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="text-zinc-950 font-medium">{c.subject}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => void onEscalateCase(c.id)}
-                    className="px-2.5 py-1 rounded-ds-sm bg-accent text-on-dark text-ds-micro font-medium hover:brightness-95"
+                    className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[11px] font-medium hover:bg-[#9A3412]"
                   >
-                    Escalate to the retail channel
+                    Escalate to Amazon
                   </button>
                 </div>
               ))}
@@ -271,14 +271,14 @@ export function AdminHelpdeskView({
           )}
 
           {providerCases.length > 0 && (
-            <div className="border-t border-hairline pt-3 space-y-1.5">
-              <div className="text-ds-label font-semibold text-ink-950">Provider cases</div>
+            <div className="border-t border-zinc-200 pt-3 space-y-1.5">
+              <div className="text-[12px] font-semibold text-zinc-950">Provider cases</div>
               {providerCases.map((c) => (
-                <div key={c.id} className="flex flex-wrap items-center gap-3 text-ds-label">
-                  <span className="font-mono text-accent">{c.caseRef ?? c.id}</span>
-                  <span className="font-mono text-faint">{c.amazonReferenceId}</span>
-                  <span className="text-faint">
-                    {c.amazonSimulated ? 'Simulation — no live retail-channel case' : 'Live retail-channel case'}
+                <div key={c.id} className="flex flex-wrap items-center gap-3 text-[12px]">
+                  <span className="font-mono text-[#C2410C]">{c.caseRef ?? c.id}</span>
+                  <span className="font-mono text-zinc-600">{c.amazonReferenceId}</span>
+                  <span className="text-zinc-600">
+                    {c.amazonSimulated ? 'Simulation — no live Amazon case' : 'Live Amazon case'}
                   </span>
                   <InlineStatus label={c.escalationLabel} tone="info" />
                 </div>
@@ -287,8 +287,8 @@ export function AdminHelpdeskView({
           )}
 
           {awaitingResponseCases.length > 0 && (
-            <div className="border-t border-hairline pt-3 space-y-2">
-              <div className="text-ds-label font-semibold text-ink-950">
+            <div className="border-t border-zinc-200 pt-3 space-y-2">
+              <div className="text-[12px] font-semibold text-zinc-950">
                 Record retail channel response (human-entered)
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -297,7 +297,7 @@ export function AdminHelpdeskView({
                   value={caseResponse}
                   onChange={(e) => setCaseResponse(e.target.value)}
                   placeholder="What the retail channel said…"
-                  className="sm:col-span-2 px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  className="sm:col-span-2 px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                 />
                 <select
                   value={caseOutcome}
@@ -306,7 +306,7 @@ export function AdminHelpdeskView({
                       e.target.value as 'accepted' | 'rejected' | 'info_required' | 'closed'
                     )
                   }
-                  className="px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  className="px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                 >
                   <option value="accepted">Accepted</option>
                   <option value="rejected">Rejected</option>
@@ -315,9 +315,9 @@ export function AdminHelpdeskView({
                 </select>
               </div>
               {awaitingResponseCases.map((c) => (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                   <span>
-                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -326,7 +326,7 @@ export function AdminHelpdeskView({
                       onRecordProviderResponse(c.id, caseOutcome, caseResponse);
                       if (caseResponse.trim()) setCaseResponse('');
                     }}
-                    className="px-2.5 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-micro font-medium text-ink-900 hover:bg-surface"
+                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[11px] font-medium text-zinc-900 hover:bg-zinc-50"
                   >
                     Record response
                   </button>
@@ -336,19 +336,19 @@ export function AdminHelpdeskView({
           )}
 
           {readyToResolveCases.length > 0 && (
-            <div className="border-t border-hairline pt-3 space-y-2">
-              <div className="text-ds-label font-semibold text-ink-950">Resolve case</div>
+            <div className="border-t border-zinc-200 pt-3 space-y-2">
+              <div className="text-[12px] font-semibold text-zinc-950">Resolve case</div>
               <input
                 type="text"
                 value={caseResolution}
                 onChange={(e) => setCaseResolution(e.target.value)}
                 placeholder="Resolution note for the brand…"
-                className="w-full px-2.5 py-1.5 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                className="w-full px-2.5 py-1.5 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
               />
               {readyToResolveCases.map((c) => (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-ds-label">
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                   <span>
-                    <span className="font-mono text-accent mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -357,7 +357,7 @@ export function AdminHelpdeskView({
                       onResolveCase(c.id, caseResolution);
                       if (caseResolution.trim()) setCaseResolution('');
                     }}
-                    className="px-2.5 py-1 rounded-ds-sm bg-ink-950 text-on-dark text-ds-micro font-medium hover:bg-ink-800"
+                    className="px-2.5 py-1 rounded bg-zinc-950 text-white text-[11px] font-medium hover:bg-zinc-800"
                   >
                     Resolve case
                   </button>
@@ -381,13 +381,13 @@ export function AdminHelpdeskView({
                   onChange={(e) => onSearchQueryChange(e.target.value)}
                   placeholder="Search tickets…"
                   aria-label="Search tickets"
-                  className="w-36 px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  className="w-36 px-2 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                 />
                 <select
                   value={priorityFilter}
                   onChange={(e) => onPriorityFilterChange(e.target.value as TicketPriority | 'all')}
                   aria-label="Priority filter"
-                  className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                  className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                 >
                   <option value="all">Priority: all</option>
                   <option value="urgent">Urgent</option>
@@ -404,7 +404,7 @@ export function AdminHelpdeskView({
                 description="Reset search or status filters to inspect all support tickets."
               />
             ) : (
-              <ul className="divide-y divide-hairline-06 -m-4 max-h-[520px] overflow-y-auto">
+              <ul className="divide-y divide-zinc-200 -m-4 max-h-[520px] overflow-y-auto">
                 {tickets.map((t) => {
                   const active = selectedTicket?.id === t.id;
                   const sla = slaLabel(t.slaDeadline, t.status);
@@ -414,21 +414,21 @@ export function AdminHelpdeskView({
                         type="button"
                         onClick={() => onSelectTicket(t.id)}
                         className={`w-full text-left px-4 py-3 ${
-                          active ? 'bg-tint' : 'hover:bg-surface'
+                          active ? 'bg-zinc-100' : 'hover:bg-zinc-50'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-ds-label font-semibold text-ink-950 truncate">
+                          <span className="text-[13px] font-semibold text-zinc-950 truncate">
                             {brandName(t.brandId)}
                           </span>
-                          <span className="text-ds-micro font-mono uppercase text-faint">
+                          <span className="text-[11px] font-mono uppercase text-zinc-600">
                             {t.priority}
                           </span>
                         </div>
-                        <div className="text-ds-label text-secondary truncate mt-0.5">{t.subject}</div>
-                        <div className="mt-1 flex items-center gap-2 text-ds-micro font-mono text-faint">
+                        <div className="text-[12px] text-zinc-700 truncate mt-0.5">{t.subject}</div>
+                        <div className="mt-1 flex items-center gap-2 text-[11px] font-mono text-zinc-500">
                           <span>{t.status}</span>
-                          {sla && <span className="text-state-danger">· {sla}</span>}
+                          {sla && <span className="text-red-700">· {sla}</span>}
                         </div>
                       </button>
                     </li>
@@ -448,8 +448,8 @@ export function AdminHelpdeskView({
               />
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-hairline text-ds-label">
-                  <div className="text-faint">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-zinc-200 text-[12px]">
+                  <div className="text-zinc-600">
                     {brandName(selectedTicket.brandId)} ·{' '}
                     {new Date(selectedTicket.createdAt).toLocaleDateString()}
                   </div>
@@ -460,7 +460,7 @@ export function AdminHelpdeskView({
                         onUpdateTicketStatus(selectedTicket.id, e.target.value as TicketStatus)
                       }
                       aria-label="Ticket status"
-                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                      className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
                     >
                       <option value="open">Open</option>
                       <option value="pending">Pending</option>
@@ -470,7 +470,7 @@ export function AdminHelpdeskView({
                       value={selectedTicket.assignedToStaffId ?? ''}
                       onChange={(e) => onAssignTicket(selectedTicket.id, e.target.value)}
                       aria-label="Assign ticket to"
-                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                      className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
                     >
                       <option value="">Unassigned</option>
                       {staffOptions.map((s) => (
@@ -485,7 +485,7 @@ export function AdminHelpdeskView({
                         onSetTicketPriority(selectedTicket.id, e.target.value as TicketPriority)
                       }
                       aria-label="Ticket priority"
-                      className="px-2 py-1 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label"
+                      className="px-2 py-1 rounded border border-zinc-300 bg-white text-[12px]"
                     >
                       <option value="urgent">Urgent</option>
                       <option value="high">High</option>
@@ -498,20 +498,20 @@ export function AdminHelpdeskView({
                 {loading ? (
                   <LoadingRows rows={3} label="Loading ticket messages…" />
                 ) : ticketMessages.length === 0 ? (
-                  <p className="text-ds-label text-faint">No messages recorded on this ticket yet.</p>
+                  <p className="text-[12px] text-zinc-500">No messages recorded on this ticket yet.</p>
                 ) : (
                   <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
                     {ticketMessages.map((m) => (
                       <div
                         key={m.id}
-                        className={`rounded-ds-md border px-3 py-2 text-ds-label ${
+                        className={`rounded-md border px-3 py-2 text-[12px] ${
                           m.direction === 'outbound'
-                            ? 'border-hairline-strong bg-surface ml-8'
-                            : 'border-hairline bg-surface-raised mr-8'
+                            ? 'border-zinc-300 bg-zinc-50 ml-8'
+                            : 'border-zinc-200 bg-white mr-8'
                         }`}
                       >
-                        <div className="whitespace-pre-wrap text-ink-900">{m.body}</div>
-                        <div className="mt-1 text-ds-micro font-mono text-faint">
+                        <div className="whitespace-pre-wrap text-zinc-900">{m.body}</div>
+                        <div className="mt-1 text-[11px] font-mono text-zinc-500">
                           {new Date(m.createdAt).toLocaleString()}
                         </div>
                       </div>
@@ -520,28 +520,28 @@ export function AdminHelpdeskView({
                 )}
 
                 {suggestedReply && (
-                  <div className="border border-hairline rounded-ds-md p-3 bg-canvas-70 text-ds-label">
+                  <div className="border border-zinc-200 rounded-md p-3 bg-zinc-50/70 text-[12px]">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-ink-950">Suggested Reply Template</span>
+                      <span className="font-semibold text-zinc-950">Suggested Reply Template</span>
                       <button
                         type="button"
                         onClick={() => setReplyDraft(suggestedReply)}
-                        className="text-accent font-medium hover:underline"
+                        className="text-[#C2410C] font-medium hover:underline"
                       >
                         Insert draft
                       </button>
                     </div>
-                    <p className="text-faint">{suggestedReply}</p>
+                    <p className="text-zinc-600">{suggestedReply}</p>
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-hairline space-y-2">
+                <div className="pt-2 border-t border-zinc-200 space-y-2">
                   <textarea
                     value={replyDraft}
                     onChange={(e) => setReplyDraft(e.target.value)}
                     rows={3}
                     placeholder="Type a reply…"
-                    className="w-full px-3 py-2 rounded-ds-sm border border-hairline-strong bg-surface-raised text-ds-label text-ink-950"
+                    className="w-full px-3 py-2 rounded border border-zinc-300 bg-white text-[12px] text-zinc-950"
                   />
                   <div className="flex justify-end">
                     <button
@@ -552,7 +552,7 @@ export function AdminHelpdeskView({
                           setReplyDraft('')
                         );
                       }}
-                      className="px-3.5 py-1.5 rounded-ds-sm bg-accent text-on-dark text-ds-label font-medium hover:brightness-95 disabled:opacity-40"
+                      className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
                     >
                       Send Reply
                     </button>
