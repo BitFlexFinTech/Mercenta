@@ -243,21 +243,168 @@ whether the DPP additionally requires MFA on the *application's* operator accoun
 confirmed from training knowledge. **Current state: Mercenta does not enforce MFA on its own
 operator logins.** That is a real gap, not a satisfied control.
 
-**Gaps that remain — must be closed before submission, and must never be described as done:**
+**Gaps — CURRENT STATUS (updated 2026-11-28).** Each is either CLOSED (procedure written and in
+force), DOCUMENTED (procedure written, not yet enforced by code) or OPEN (nothing exists).
 
-1. **MFA enforcement on operator accounts** — not implemented.
-2. **Incident notification runbook and SLA** (DP-10, AU-10) — not written.
-3. **Data-subject request workflow** (DP-11) — not implemented.
-4. **Termination / data-return procedure** (DP-12) — not documented.
-5. **Named security contact and annual attestation** (DP-13) — a business input, not code.
-6. **Confirmation of every `[UNVERIFIED]` clause** against the live G8888 text.
-7. **A live integration has never run** — every SP-API live route is declared `unsupported`;
-   this pack therefore attests to controls that are *built and statically proven*, not to
-   controls observed under live traffic.
+| # | Gap | Status | Where it now lives |
+|---|---|---|---|
+| 1 | MFA on operator logins | **DOCUMENTED — implementation pending** | §10.1 |
+| 2 | Incident notification runbook | **DOCUMENTED — implementation pending** | §10.2 |
+| 3 | Data-subject request workflow | **DOCUMENTED — implementation pending** | §10.3 |
+| 4 | Termination / data-return procedure | **DOCUMENTED — implementation pending** | §10.4 |
+| 5 | Named security contact | **DOCUMENTED — a role is named; the individual is a business input** | §10.5 |
+| 6 | G8888 confirmation of `[UNVERIFIED]` clauses | **STILL OPEN — every URL attempted returned 404 or a sign-in wall** | §10.6 |
+| 7 | No live SP-API call has ever run | **DOCUMENTED — prerequisites and first-run checklist recorded; blocked on credentials** | §10.7 |
+
+**Gap 6 — what was actually tried, and what each attempt returned** (2026-11-28):
+
+| URL | Result |
+|---|---|
+| `developer-docs.amazon.com/sp-api/docs/usage-policies` | **404** — "Page Not Found" |
+| `developer-docs.amazon.com/sp-api/docs/developer-program-policies` | **404** — "Page Not Found" |
+| `developer-docs.amazon.com/sp-api/page/data-protection-policy` | **404** — "Page Not Found" |
+| `developer-docs.amazon/sp-api/docs/data-protection-policy.md` | **404** |
+| `developer-docs.amazon/sp-api/docs/acceptable-use-policy.md` | **404** |
+| `sellercentral.amazon.com/gp/help/external/G8888` | **Sign-in wall** — the page loads only a JavaScript shell with no policy text |
+
+**One lead found, worth passing to the human:** the 404 page states that a documentation index
+exists at **`https://developer-docs.amazon/sp-api/llms.txt`**, and that appending `.md` to any
+documentation page returns its markdown. That index loads (215 KB) and lists every SP-API guide,
+but its policy entries are not at any slug guessed here. A human with the real policy URLs — or
+who can search that index — can close this gap in minutes; nothing in this environment can.
+
+**Therefore, before submission:** a human MUST open the G8888 policy documents (Seller Central →
+Developer Console) and confirm or correct every `[UNVERIFIED — confirm against G8888]` row in
+§1.1 and §1.2. Until that is done, no clause in this pack may be called `[AMAZON OFFICIAL]`.
 
 ---
 
-## 10. DECLARATION
+## 10. THE DOCUMENTED PROCEDURES (gaps 1–5, 7)
+
+> Every section below is **[DOCUMENTED — implementation pending]** unless it says otherwise: the
+> procedure is written and agreed here, but it is **not yet enforced by code**. A procedure that is
+> written but not enforced is *not* a control, and must never be reported as one.
+
+### 10.1 MFA on operator accounts — [DOCUMENTED — implementation pending]
+
+**Policy.** Every account that can reach an operator surface (`super_admin`, `admin_staff`) MUST
+use multi-factor authentication. Brand portal accounts SHOULD; they cannot reach operator functions
+or live SP-API calls either way.
+
+**Enforcement point (intended).** Supabase Auth MFA (TOTP enrol + challenge). The role claim lives
+in `app_metadata`, which a user cannot write, so a brand cannot self-promote; MFA is an additional
+gate on the same identities, not a second role system.
+
+**Procedure.** (1) On first operator login, a TOTP factor must be enrolled before any operator
+route renders. (2) A session whose assurance level is not `aal2` is refused by the operator shell
+and by the Edge Function (`spapi/index.ts` already refuses a caller with no operator role; MFA adds
+the assurance check in front of it). (3) Recovery: two single-use codes issued at enrolment, held
+by the user only; a lost device plus lost codes means the account is disabled and re-provisioned by
+a `super_admin`, audited. (4) Exceptions: none; a temporary one would be an audited, time-boxed
+decision naming the person and the reason. (5) Enrolments, resets, disablements and exception
+grants are recorded in the internal audit ledger.
+
+**Missing to make it real:** the enforcement check at the shell + Edge Function, and a test that
+fails if an `aal1` session reaches an operator route.
+
+### 10.2 Incident response runbook — [DOCUMENTED — implementation pending]
+
+**Scope.** Suspected unauthorised access to SP-API data, credential compromise, or loss of a device
+holding an operator session.
+
+**Steps.** (1) **Detect** — access log, provider alert, or a report. (2) **Contain** — revoke the
+Vault reference, rotate the SP-API credential, disable the operator account. (3) **Assess** — use
+`spapi_access_audit` to establish which ASINs, brands and routes were touched, and in what window;
+this is precisely why the log exists. (4) **Notify internally** — the security contact (§10.5) and
+the Founder, immediately. (5) **Notify Amazon** without undue delay — `[UNVERIFIED — confirm
+against G8888]` on the exact window and channel. (6) **Notify affected brands** where their data
+was touched. (7) **Record** timeline, evidence and decisions in a restricted document, never in the
+public repository. (8) **Review** within 10 working days, producing at least one preventive action
+with an owner.
+
+**Missing:** the on-call rota, notification templates, and confirmation of the Amazon contact path.
+
+### 10.3 Data-subject request workflow — [DOCUMENTED — implementation pending]
+
+Personal data held is listed in §8 (brand contact fields + the operator email in the access log).
+
+**Procedure.** (1) **Intake** — written request to the security mailbox (§10.5), logged with the date
+received. (2) **Verify** the requester's identity and relationship to the brand; never disclose
+another brand's data to establish identity. (3) **Locate** — `brand_contacts` by brand,
+`spapi_access_audit` by actor email. (4) **Respond** — access/correction within one month
+(extendable once, with the reason recorded); deletion where no overriding legal or accounting
+retention duty applies. (5) **Record** the request, decision and action in a restricted log.
+
+**Boundary:** Mercenta holds no consumer or end-customer personal data, so a consumer request about
+an Amazon order is not ours to answer — it is referred to Amazon.
+
+### 10.4 Termination / data-return procedure — [DOCUMENTED — implementation pending]
+
+On a brand relationship ending: (1) **Export** the brand's records (brands, products, contacts,
+ASIN scope, access-log rows for that brand) to a portable file and hand it to the brand.
+(2) **Delete** the tenant rows — `brand_asin_scope` cascades on brand deletion by design, and the
+other `brand_id` tables are deleted in the same operation. (3) **Retain only what must be retained**:
+the internal append-only audit ledger (accountability) and any financial record under a statutory
+duty. The access log is **not** an exception — its rows go with the brand. (4) **Certify** the
+deletion in writing, naming what was deleted and what was retained with the legal basis.
+(5) **Record** the offboarding in the restricted log.
+
+**Missing:** the export tooling and the deletion routine; today this would be a manual database
+operation.
+
+---
+
+### 10.5 Named security contact — [DOCUMENTED — implementation pending]
+
+**Role named now:** **Head of Security & Compliance, Mercenta Partners**, with the Founder as
+deputy. A single named individual is a **business input** only the owner can supply; until it is
+supplied, the ROLE — not a person — is the contact, and the pack says so rather than inventing a name.
+
+**Mailbox:** `security@mercenta.co.uk` (to be created before submission; not live today).
+**Duties:** owns §10.2 and §10.3, signs the annual attestation, receives Amazon security
+correspondence.
+
+### 10.6 G8888 confirmation — **OPEN, blocked on human access**
+
+See the attempt log in §9: five documentation URLs returned 404 and G8888 returned a JavaScript
+sign-in shell. A human can close this in minutes; nothing in this environment can.
+
+### 10.7 Live integration testing — [DOCUMENTED — blocked on credentials]
+
+**Why it has not run:** a live call needs (a) a Supabase project with `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` available to the Edge Function, and (b) SP-API developer credentials
+(`SPAPI_CLIENT_ID`, `SPAPI_CLIENT_SECRET`, `SPAPI_REFRESH_TOKEN`). Neither exists here. No
+credential was invented, and none was requested — a pending credential never blocks the build.
+
+**Pre-submission first-live-run checklist** (do in order, recording each result):
+
+1. Apply migrations 001–030 to a real Supabase project; confirm `brand_asin_scope` and
+   `spapi_access_audit` exist with their policies.
+2. Insert one real ASIN into `brand_asin_scope` for one real brand.
+3. Set the four `SPAPI_*` values server-side (never as a `VITE_*` value).
+4. Call a **read** route for that ASIN; confirm HTTP 200, a `granted` row in
+   `spapi_access_audit`, and that the brand sees that row while another brand does not.
+5. Call the same route with an ASIN **not** in scope; confirm **403** and a `refused` row.
+6. Call with an operator session carrying no `tenant_id`; confirm **403**
+   `TENANT_ASSERTION_REQUIRED`.
+7. In a staging copy, set retention to 1 day and confirm the purge removes only old rows.
+8. Record the date, actor and outcome of steps 4–7 — that record is the evidence that closes gap 7.
+
+### 10.8 What is still genuinely open after this document
+
+| Gap | Can code close it? | What is needed |
+|---|---|---|
+| 1 MFA enforcement | **yes** — shell + Edge Function check, plus a failing test | an authorised build increment |
+| 2 Incident runbook | no — process | on-call rota, templates, Amazon contact path |
+| 3 Data-subject workflow | partly — a request log | the mailbox and a named owner |
+| 4 Termination procedure | **yes** — export + delete tooling | an authorised build increment |
+| 5 Named contact | no — business input | the owner names the individual |
+| 6 G8888 confirmation | no — access | a human with Seller Central access |
+| 7 Live test | no — credentials | Supabase + SP-API credentials |
+
+---
+
+## 11. DECLARATION
 
 Mercenta states that the controls in §2–§5 are implemented in the files named, and that the
 gaps in §9 are open. Mercenta makes **no** claim of Amazon approval, programme membership or
@@ -270,3 +417,5 @@ because none could be fetched from this environment.
 **Next action (human):** open Seller Central → Developer Console → the G8888 policy documents,
 confirm or correct each `[UNVERIFIED — confirm against G8888]` row, and close the seven gaps
 in §9 before submitting.
+
+---
