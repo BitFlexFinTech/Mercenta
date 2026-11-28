@@ -4,6 +4,45 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 5 PART 5 — THE TWO COMPANY PAGES MEET THE PAGE STANDARD, AND TWO REAL REGISTRY DEFECTS WERE FIXED AT SOURCE (2026-11-28)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `25c2ab9` (runtime) plus the state commit that carries this
+section; pushed to `origin/frontend-redesign`. Deployment deliberately held: ONE publish covers this content work together
+with the homepage's two contrast defects and the login restyle, and the owner decides when the demo is published.
+
+**Both Company pages enriched to the standard:** `why-mercenta` and `partnerships` — each with an opening picture, a picture
+inside one block, a labelled worked illustration of the SEQUENCE (no amount, no price, no percentage), an honest limits
+section and exactly one next step. `why-mercenta` had NO call to action at all (it declared no `cta`, so the renderer
+rendered no closing section — nothing looked broken while nothing was stated); it now declares one.
+
+**The gate's scope grew, it did not move:** `'Company'` was APPENDED in both `scripts/validate-public-page-standard.mjs`
+and `e2e/public-infrastructure-pages.spec.ts`, changed in the same edit, so the two scopes cannot drift. S1b now reports
+**18 of 25 pages** in scope (was 16). The group's two pages were counted from the gate's own S1b line, not from the task
+sentence — Part 4's task text named four Solutions pages and the group held five.
+
+**Pictures chosen by LOOKING:** a labelled contact sheet of the twelve non-category candidates was built with ffmpeg and
+looked at before any was chosen — `warehouse-racks` and `desk-tablet` for why-mercenta; `desk-laptop` and `boxes-stacked`
+for partnerships. All declared and on disk in both sizes, so nothing new was fetched and no pin moved.
+
+**A real defect the gate caught on this session's own change (not a manufactured mutation):** the first draft used the bare
+word “partnership” in delivered copy and `validate-public-claims` FAILED by name on `/company/partnerships` under both
+shells, in its `unevidenced-claims` family (a declared red line; only the homepage is exempted). The copy was reworded and
+the gate then PASSED.
+
+**Two real registry defects fixed at source and pinned (rules 07/10):** `requirements-registry.json`
+`_meta.status_counts.built_and_tested` had been left at **347** while the entries themselves held **348** — the seven
+declared counts summed to **595** against a `total_entries` of **596**, and no gate noticed — and
+`scripts/validate-registry-integrity.mjs`'s own comment FALSELY claimed its sibling `validate-no-stale-blockers.mjs`
+asserted “the per-status counts” (the sibling asserts ONLY `not_started`). The count is corrected, the false sentence is
+corrected, and the gate now asserts EVERY declared per-status count against the entries and that they sum to the real count
+— proved able to fail (mutate `built_and_tested` 349 → 348 ⇒ FAIL by name ⇒ restored byte-identical, sha256 `26f563d6…`).
+
+**Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.80s EXIT 0 · `validate-public-page-standard`
+13/13 with the scope reporting 18 of 25 pages · e2e `public-infrastructure-pages` 37 passed · `validate-public-claims` PASS
+alone (70 renders, 0 red-line) · registry integrity 10 PASS / 0 FAIL (597 entries) · `validate:all` 210 PASS / 0 FAIL of 210
+· screenshots at 1440 and 390 of both pages, LOOKED AT: `images=4, undecoded=0, horizontal overflow=0` on every page.
+
+
 ## §PUBLIC SURFACES BATCH 5 PART 4 — THE FIVE SOLUTIONS PAGES MEET THE PAGE STANDARD, AND THE GATE FOUND A PAGE THE RECORDED TASK DID NOT NAME (2026-11-28)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `f2f13ec` (runtime) plus the state commit that carries this
