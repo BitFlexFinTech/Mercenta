@@ -72,12 +72,32 @@ dropped from `LITERAL_KEYS` ⇒ S2 + S5 FAIL (24/27); (iv) the bare `bg-ink/` ma
 on the light appearance with `surface rgb(255,255,255) · text rgb(255,255,255)`; (v) the FLOW card reverted to
 two arguments ⇒ the spec FAILS in **both** appearances with the same white-on-white.
 
-### The one thing still open is the owner's
+### The one thing that was open is now closed — and it exposed a seventh defect
 
-The brand orange **#FF6A00** measures **~2.9:1** as text on white *and* as the fill under white text, so it
-cannot meet WCAG AA in either direction at its current value — but it is above this instrument's 1.6:1 floor,
-so it is recorded as a **decision**, never silently recoloured. **Not deployed:** one publish still carries this
-work together with the public content work and the login restyle.
+The brand orange **#FF6A00** measures **~2.9:1** as text on white *and* as the fill under white text: above
+this instrument's 1.6:1 floor, below WCAG AA. **The owner decided on 2026-11-28: keep the orange PATCHES
+exactly as they are, and add a darker orange for orange WRITING on white backgrounds.** Implemented as
+`text-accent-700` (`--mr-accent-700` = `BRAND_PALETTE.orangeDeep` **#B34700** — already declared by the
+palette): **2.87:1 → 5.50:1**. Every orange fill and edge is untouched, and the test asserts the fill is
+still `#FF6A00`.
+
+**Measuring it found a seventh defect that nothing could see.** One eyebrow on a light section was still
+flagged `dark`, so its label rendered `text-paper/50` (white at 50%) on `#FFFFFF` — **1:1, invisible** — and
+its index kept the 2.87:1 orange. One flag caused both, so the flag is what was fixed. It had never been
+seen because the walk **skipped any element with element children**, so mixed-content text (a text node
+beside element children) was never measured at all — a blind spot of exactly the kind the instrument exists
+to end. It is now closed in `scripts/visual-acceptance.mjs`, and **with the blind spot open the walk
+reported the homepage as WARN (2 runs below 1.6:1)**, which is the proof the new coverage bites.
+
+**Recorded, not hidden:** the light sections' own dimmed labels measure **4.0:1** (`text-ink/50`) and
+**3.36:1** (`text-ink/45`) — above the project's floor, below WCAG AA. Raising them is a design decision.
+
+**Final evidence this session:** typecheck **0** · eslint **0 errors** (12 pre-existing warnings) · build
+**✓ 9.01s** · `validate:all` **212 PASS / 0 FAIL of 212** · the walk **296/296 — PASS 296 · WARN 0 · FAIL 0**
+(measured with the new coverage) · `e2e/public-fixed-dark-surfaces` **4 passed** ·
+`validate-alpha-shim-integrity` **27/27** · `validate-visual-acceptance` **9/9**. **Six** mutations proved
+the gates bite, each restored byte-identical. **Not deployed:** one publish still carries this work together
+with the public content work and the login restyle.
 
 
 

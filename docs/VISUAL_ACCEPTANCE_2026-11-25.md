@@ -216,6 +216,18 @@ produced the *previous* table, and it is accurate about what that pass found —
 of these is fixed in this increment”, which was true then and is not true now. **The state of the three
 defects is the table immediately above, not that sentence.**
 
+**§BATCH 4b, SECOND HALF — THE OWNER'S COLOUR DECISION, AND A SEVENTH DEFECT THIS PASS COULD NOT SEE.**
+The owner decided (2026-11-28): keep the orange PATCHES exactly as they are, add a darker orange for orange
+WRITING on white. Implemented as `text-accent-700` (`--mr-accent-700` = `BRAND_PALETTE.orangeDeep` #B34700 —
+already declared): **2.87:1 → 5.50:1**, with the fill still `#FF6A00` (asserted). Measuring it exposed a
+seventh defect **and a blind spot in this instrument**: an eyebrow on a light section was still flagged
+`dark`, so its label rendered `text-paper/50` (white at 50%) on `#FFFFFF` — **1:1, invisible** — while its
+index kept the 2.87:1 orange. **The walk had never measured it, because the loop skipped any element with
+element children: mixed-content text — a text node beside element children — was never measured at all.**
+That loop now measures an element's OWN direct text nodes (`ownTextOf`), so a leaf is still covered exactly
+as before and mixed content is covered for the first time. **With the blind spot open, this pass reports the
+homepage as WARN (2 runs below 1.6:1); with it closed and the defect fixed, 296/296 clean.**
+
 **§BATCH 4 (2026-11-28) — THE INSTRUMENT NOW SEES EVERY COLOUR, AND WHAT IT FOUND.**
 
 

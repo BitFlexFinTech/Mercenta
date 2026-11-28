@@ -33,7 +33,22 @@ function Eyebrow({ index, children, dark }: { index: string; children: string; d
         dark ? "text-paper/50" : "text-ink/50",
       )}
     >
-      <span className="text-signal">{index}</span>
+      {/* §OWNER DECISION 2026-11-28 — THE ORANGE WRITING FOLLOWS THE SURFACE IT SITS ON.
+          MEASURED DEFECT THIS CLOSES. `text-signal` is the fixed brand orange (#FF6A00), which
+          reaches only **2.87:1** on a white surface — below WCAG AA (4.5:1) for text — and this
+          eyebrow's index number is painted on the page's TWO LIGHT sections (`#infrastructure`
+          and `#why-mercenta`, both `bg-paper text-ink`). Measured on the running product in BOTH
+          appearances: six orange labels sat on `rgb(255,255,255)` at 2.87:1, while every other
+          orange label on the same page sat on black at 7.31:1.
+          THE OWNER'S DECISION (2026-11-28): keep the orange PATCHES exactly as they are — only
+          orange WRITING on a light surface changes. So this is the `dark` flag's own rule: on a
+          dark surface the brand orange stays; on a light one it becomes the brand's DEEPER step,
+          `text-accent-700` (`--mr-accent-700` = `BRAND_PALETTE.orangeDeep` #B34700), which is
+          **5.50:1** on white. No new colour was invented — the palette already declared it — and
+          `bg-signal`, `border-signal` and `stroke-signal` are untouched everywhere.
+          Pinned by `e2e/public-fixed-dark-surfaces.spec.ts`, which measures these labels in both
+          appearances against a 4.5:1 floor. */}
+      <span className={dark ? "text-signal" : "text-accent-700"}>{index}</span>
       <span className={cn("h-px w-8", dark ? "bg-paper/20" : "bg-ink/20")} />
       {children}
     </p>
@@ -298,7 +313,19 @@ export function DesignE({ content, onPrimary, onOpenPortal }: DesignEProps) {
 
           {/* Modules — "Four ways to work with Mercenta" */}
           <div className="mt-14">
-            <Eyebrow index="04" dark>
+            {/* §OWNER DECISION 2026-11-28 — DEFECT FIXED AT SOURCE. This eyebrow carried `dark`,
+                but it sits INSIDE `#infrastructure`, whose own fill is `bg-paper text-ink` — so
+                `dark` painted its label `text-paper/50` (WHITE at 50%) on `#FFFFFF`: 1:1, white on
+                white, the label was invisible in BOTH appearances. Its index number had the same
+                fault in the brand orange (2.87:1). Two things were wrong and one flag caused both,
+                so the flag is what is fixed: without `dark` the label uses the light-surface ladder
+                (`text-ink/50`) and the index uses the deeper brand orange (`text-accent-700`,
+                5.50:1) — exactly as its siblings `#infrastructure`'s "02" eyebrow and
+                `#why-mercenta`'s "04" already did. FOUND BY A PROBE, not by the instrument: the
+                walk skipped this label because it is a text node beside two element children — that
+                blind spot is now closed in `scripts/visual-acceptance.mjs`, and with it open the
+                walk reports this screen as a WARN (2 runs below 1.6:1) instead of a clean pass. */}
+            <Eyebrow index="04">
               {content.services.heading}
             </Eyebrow>
             <h2 className="mt-5 max-w-2xl text-4xl font-semibold leading-[1.02] tracking-[-0.035em] md:text-6xl">
@@ -441,7 +468,12 @@ export function DesignE({ content, onPrimary, onOpenPortal }: DesignEProps) {
                 <span
                   className={cn(
                     "font-mono text-[11px]",
-                    i === 3 ? "text-ink/60" : i === 4 ? "text-signal" : "text-signal",
+                    /* §OWNER DECISION 2026-11-28 — see `Eyebrow` above. The first three cards have
+                       NO background of their own, so their number sits on this section's LIGHT
+                       fill (`bg-paper`) and the brand orange reaches only 2.87:1 there; the fourth
+                       card is `bg-ink` (7.31:1, unchanged) and the third is `bg-signal`, which
+                       needs dark ink. Only the light-surface step changes. */
+                    i === 3 ? "text-ink/60" : i === 4 ? "text-signal" : "text-accent-700",
                   )}
                 >
                   0{i + 1}

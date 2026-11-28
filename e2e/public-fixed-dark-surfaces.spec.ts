@@ -161,5 +161,97 @@ test.describe('§BATCH 4b — the homepage’s fixed-dark surfaces (both appeara
 
       expect(errors, `page errors on '${theme.label}'`).toEqual([]);
     });
+
+    /* §OWNER DECISION 2026-11-28 — ORANGE WRITING ON A LIGHT SURFACE CLEARS THE AA FLOOR.
+       The owner kept the orange PATCHES exactly as they are and asked for the deeper brand step
+       wherever orange WRITING sits on a light background. This measures the page's two LIGHT
+       sections (`#infrastructure`, `#why-mercenta` — both `bg-paper text-ink`) and requires every
+       orange-writing element inside them to clear 4.5:1, and it also pins the owner's other half:
+       the brand orange FILL is unchanged. */
+    test(`the light sections' orange writing clears 4.5:1, and the fill is unchanged, on '${theme.label}'`, async ({
+      page,
+    }) => {
+      await page.goto('/');
+      await page.evaluate((id) => window.localStorage.setItem('mercenta.theme', id), theme.id);
+      await page.reload();
+      await page.waitForTimeout(700);
+
+      const result = await page.evaluate(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no 2d context — cannot normalise a colour');
+        const rgbOf = (colour: string, over: string): [number, number, number] => {
+          ctx.clearRect(0, 0, 1, 1);
+          ctx.fillStyle = over;
+          ctx.fillRect(0, 0, 1, 1);
+          ctx.fillStyle = colour;
+          ctx.fillRect(0, 0, 1, 1);
+          const d = ctx.getImageData(0, 0, 1, 1).data;
+          return [d[0] ?? 0, d[1] ?? 0, d[2] ?? 0];
+        };
+        const lum = ([r, g, b]: [number, number, number]) => {
+          const f = (v: number) => {
+            const x = v / 255;
+            return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+          };
+          return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+        };
+        const bgOf = (el: Element) => {
+          const chain: Element[] = [];
+          for (let n: Element | null = el; n; n = n.parentElement) chain.push(n);
+          let acc: [number, number, number] = [255, 255, 255];
+          for (let i = chain.length - 1; i >= 0; i -= 1) {
+            const c = getComputedStyle(chain[i]!).backgroundColor;
+            if (!c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)') continue;
+            acc = rgbOf(c, `rgb(${acc.join(' ')})`);
+          }
+          return acc;
+        };
+        const rows: { text: string; fg: string; bg: string; ratio: number }[] = [];
+        for (const section of Array.from(document.querySelectorAll('#infrastructure, #why-mercenta'))) {
+          for (const el of Array.from(section.querySelectorAll('span,p,li,a,button'))) {
+            const own = Array.from(el.childNodes)
+              .filter((n) => n.nodeType === 3)
+              .map((n) => n.textContent || '')
+              .join(' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+            const text = el.children.length > 0 ? own : (el.textContent || '').trim();
+            if (text.length < 2) continue;
+            if (el.getClientRects().length === 0) continue;
+            const colour = getComputedStyle(el).color;
+            const fg = rgbOf(colour, 'rgb(255 255 255)');
+            /* The brand orange family: #FF6A00 and its declared deeper step #B34700. */
+            if (!['255,106,0', '179,71,0'].includes(fg.join(','))) continue;
+            const bg = bgOf(el);
+            const l1 = lum(rgbOf(colour, `rgb(${bg.join(' ')})`));
+            const l2 = lum(bg);
+            rows.push({
+              text: text.slice(0, 26),
+              fg: fg.join(','),
+              bg: bg.join(','),
+              ratio: Math.round(((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)) * 100) / 100,
+            });
+          }
+        }
+        return {
+          rows,
+          signalFill: getComputedStyle(document.documentElement).getPropertyValue('--color-signal').trim(),
+        };
+      });
+
+      /* A check that finds nothing is a FAILURE, never a pass (rule 10 §5). */
+      expect(result.rows.length, 'orange writing found in the light sections').toBeGreaterThan(0);
+
+      const below = result.rows.filter((r) => r.ratio < 4.5);
+      expect(
+        below,
+        `orange writing below 4.5:1 on a light surface: ${JSON.stringify(below)}`
+      ).toEqual([]);
+
+      /* The owner's other half: the orange PATCHES are untouched. */
+      expect(result.signalFill.toUpperCase(), 'the brand orange fill is unchanged').toBe('#FF6A00');
+    });
   }
 });

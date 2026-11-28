@@ -672,10 +672,27 @@ const snapshot = (page) =>
     let unreadableForeground = 0;
     let unreadableBackground = 0;
     const walk = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,span,button,a,th,td,label,li'));
+    /* §OWNER DECISION 2026-11-28 — THE TEXT AN ELEMENT OWNS ITSELF IS MEASURED, NOT ONLY LEAF TEXT.
+       MEASURED BLIND SPOT THIS CLOSES. This loop used to `continue` on any element with element
+       children, so it only ever measured LEAF text. Text that is a DIRECT child of an element which
+       also has element children was therefore never measured at all — and that is exactly where a
+       real defect hid: on the public homepage an eyebrow label inherited the LIGHT-surface variant
+       while its section was light, rendering `text-paper/50` (white at 50%) on `#FFFFFF` — 1:1,
+       invisible — and the walk reported the screen clean because it never looked at it. The probe
+       that found it is `test-results/probe-mixed.mjs` (a multi-line label beside two spans).
+       Now each candidate's OWN direct text nodes are measured under the element's own computed
+       colour, which is what a bare text node inherits; a leaf element still measures its whole text,
+       so nothing that was covered before stops being covered. */
+    const ownTextOf = (el) =>
+      Array.from(el.childNodes)
+        .filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent || '')
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     for (const el of walk) {
       if (sampled >= 600) break;
-      if (el.children.length > 0) continue;
-      const text = (el.textContent || '').trim();
+      const text = el.children.length > 0 ? ownTextOf(el) : (el.textContent || '').trim();
       if (text.length < 3) continue;
       if (el.getClientRects().length === 0) continue;
       const style = getComputedStyle(el);
