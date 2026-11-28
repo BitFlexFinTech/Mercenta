@@ -4,6 +4,52 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §PUBLIC SURFACES BATCH 5 PART 7 — THE FIVE RESOURCES PAGES MEET THE PAGE STANDARD, AND THE SCOPE NOW COVERS EVERY PUBLIC PAGE (2026-11-28)
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `215327c` (runtime) plus the state commit that carries this
+section; pushed to `origin/frontend-redesign`. Deployment deliberately held: ONE publish covers this content work together
+with the homepage's two contrast defects and the login restyle, and the owner decides when the demo is published.
+
+**The gate's scope is now COMPLETE, and it grew rather than moved:** `'Resources'` was APPENDED in both
+`scripts/validate-public-page-standard.mjs` and `e2e/public-infrastructure-pages.spec.ts`, changed in the same edit, so the
+two scopes cannot drift. S1b now reports **25 of 25 pages** (was 20) — every public content page is held to the standard,
+so a page cannot be added below it without the gate failing.
+
+**All five Resources pages enriched to the standard:** `insights`, `blog`, `case-studies`, `guides` and `uk-retail-guide` —
+each with an opening picture, a picture inside one block, a labelled worked illustration of the SEQUENCE (no amount, no
+price, no percentage), an honest limits section and exactly one next step. **THREE of the five declared NO `cta` at all**
+(`blog`, `case-studies`, `guides`), so the renderer rendered no closing section and nothing looked broken while nothing was
+stated; each now declares one. `uk-retail-guide` is the page the no-figure rule matters most on: it is about figures with
+their sources attached, so its illustration states how a figure is ADMITTED to the page and carries no figure of its own.
+
+**Pictures chosen by LOOKING:** the labelled contact sheet of all fourteen non-category candidates (built with Python/PIL
+and READ in Part 6) was used again — `desk-tablet`/`warehouse-aisle` for insights, `desk-notebook`/`desk-laptop` for blog,
+`warehouse-racks`/`boxes-stacked` for case-studies, `warehouse-aisle`/`desk-tablet` for guides, and
+`port-containers`/`shelves-grocery` for the market guide. All declared and on disk in both sizes, so nothing new was
+fetched and no pin moved.
+
+**No copy defect on this change either:** `validate-public-claims` PASSED first time, because the red lines were read from
+their owner (`src/config/positioning.ts`) before a word was written.
+
+**Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.88s EXIT 0 · `validate-public-page-standard`
+13/13 with the scope reporting 25 of 25 pages · e2e `public-infrastructure-pages` 51 passed (was 41) · `validate-public-claims`
+PASS alone (70 renders in both shells, 0 red-line) · registry integrity 10 PASS / 0 FAIL (599 entries) · `validate:all` 210
+PASS / 0 FAIL of 210 · screenshots at 1440 and 390 of all five pages, LOOKED AT: `images=2, undecoded=0, horizontal
+overflow=0, stages=4, limits=3, ctas=1` on every page.
+
+**Three mutations proved the gates bite, each restored byte-identical** (gate sha256 `e26dec2c…`, publicPages.ts sha256
+`42a53b14…`, identical before and after): a misspelt scope group ⇒ S1b FAIL naming it (12/13); **removing blog's newly-added
+call to action** ⇒ S2 + S6 FAIL naming blog (`cta=0`, 11/13); inserting a figure into the market guide's illustration ⇒ S7
+FAIL naming `uk-retail-guide` (12/13).
+
+**One defect was found and fixed at source this session, and the gate that caught it is named:** splicing the new resume
+block removed the blank line between the `PLAIN SUMMARY (OWNER-FACING)` field and the next `##` heading, so
+`validate-plain-english-enforcement.mjs` FAILED with `the owner-facing summary uses no banned word without an explanation —
+migration` — its window (`/^PLAIN SUMMARY \(OWNER-FACING\):([\s\S]*?)\n\s*\n/m`) runs to the first blank line, and the
+following heading is `§WAVE 3m — … THE MIGRATION LEFT WITH ONE HONEST FAILURE`. The blank line was restored in both
+`PROJECT_STATUS.md` and `HANDOFF.md` and the gate now reports **PLAIN_ENGLISH_ENFORCEMENT_PASS (20 passed, 0 failed)**.
+
+
 ## §PUBLIC SURFACES BATCH 5 PART 6 — THE TWO COMMERCIAL PAGES MEET THE PAGE STANDARD, AND THE GATE'S SCOPE GROWS TO FIVE GROUPS (2026-11-28)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `7307ff8` (runtime) plus the state commit that carries this
