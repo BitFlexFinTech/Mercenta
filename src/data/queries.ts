@@ -4,7 +4,8 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import type { PaginationParams } from '@/types';
+import type { OperatingVertical, PaginationParams } from '@/types';
+import { loadVerticalDemoData, type VerticalDemoData } from '@/data/verticalData';
 import {
   fetchAdSpendBudgets,
   fetchAdCampaigns,
@@ -262,4 +263,67 @@ export function useHomepageContent() {
     queryFn: fetchHomepageContent,
     staleTime: STALE_TIME,
   });
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * §VERTICAL DEMO DATA (2026-11-28) — BWS and Talent Commerce, ADDITIVE.
+ *
+ * WHY THESE ARE HERE AND NOT IN THE CORE HOOKS ABOVE
+ * -------------------------------------------------
+ * CORE's records live in the demo store and every hook above reads it. The BWS and
+ * Talent records are imported from the owner's own repositories and are deliberately
+ * NOT in that store — mixing them would be the leak the owner forbade. These hooks ask
+ * `src/data/verticalData.ts` (the ONE resolver) for the caller's OWN vertical, and the
+ * resolver loads that module LAZILY, so:
+ *
+ *   · a CORE session downloads neither vertical's records;
+ *   · a BWS session downloads `src/data/bws` and nothing from Talent;
+ *   · a Talent session downloads `src/data/talent` and nothing from BWS.
+ *
+ * A screen must pass the vertical it belongs to. There is no "current vertical" global
+ * to get out of step with the session, because the session's surface already carries it.
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Load ONE vertical's demo data for a screen that belongs to that vertical.
+ * `core` resolves to `{ data: null }` — CORE's records are the hooks above, never
+ * another vertical's bundle.
+ */
+export function useVerticalDemoData(vertical: OperatingVertical) {
+  const [state, setState] = useState<{
+    loading: boolean;
+    data: VerticalDemoData | null;
+    error: string | null;
+  }>(() => ({ loading: vertical !== 'core', data: vertical === 'core' ? { vertical: 'core', data: null } : null, error: null }));
+
+  useEffect(() => {
+    if (vertical === 'core') {
+      setState({ loading: false, data: { vertical: 'core', data: null }, error: null });
+      return;
+    }
+    let cancelled = false;
+    setState({ loading: true, data: null, error: null });
+    loadVerticalDemoData(vertical)
+      .then((data) => {
+        if (!cancelled) setState({ loading: false, data, error: null });
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setState({ loading: false, data: null, error: String(err) });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [vertical]);
+
+  return state;
+}
+
+/** The BWS (Beers, Wines & Spirits) demo bundle — `BitFlexFinTech/Dash-1`. */
+export function useBwsDemo() {
+  return useVerticalDemoData('bws');
+}
+
+/** The Talent Commerce demo bundle — `BitFlexFinTech/CAA-TalAg`. */
+export function useTalentDemo() {
+  return useVerticalDemoData('talent_commerce');
 }
