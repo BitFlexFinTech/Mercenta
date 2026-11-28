@@ -354,15 +354,23 @@ operation.
 
 ---
 
-### 10.5 Named security contact — [DOCUMENTED — implementation pending]
+### 10.5 Named security contact — [DOCUMENTED — individual TO BE CONFIRMED BY FOUNDER]
 
-**Role named now:** **Head of Security & Compliance, Mercenta Partners**, with the Founder as
-deputy. A single named individual is a **business input** only the owner can supply; until it is
-supplied, the ROLE — not a person — is the contact, and the pack says so rather than inventing a name.
+**Contact address (owner decision, 2026-11-28):** **security@mercenta.com**
 
-**Mailbox:** `security@mercenta.co.uk` (to be created before submission; not live today).
-**Duties:** owns §10.2 and §10.3, signs the annual attestation, receives Amazon security
-correspondence.
+**Role:** Security & Compliance, Mercenta Partners, with the Founder as deputy.
+**Individual name:** **[TO BE CONFIRMED BY FOUNDER]** — this is a business input only the
+owner can supply. It is deliberately left blank rather than filled with an invented name.
+
+**Duties:** owns §10.2 and §10.3, signs the annual attestation, and is the recipient of Amazon
+security correspondence.
+
+**Before it can be used, two operational facts must be true** (neither is true today):
+1. the mailbox `security@mercenta.com` must exist and be monitored;
+2. the named individual must be recorded here and in Amazon's Developer Console profile.
+
+Until both are true, this section names a ROLE and an address, not an accountable person — and
+must not be presented to Amazon as a completed control.
 
 ### 10.6 G8888 confirmation — **OPEN, blocked on human access**
 
