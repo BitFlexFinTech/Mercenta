@@ -77,34 +77,69 @@ test.describe('The enriched public pages — the full page standard, rendered', 
       expect(errors).toEqual([]);
     });
 
-    test(`${page.path} — every picture decodes, and every path is local`, async ({ page: view }) => {
-      await view.goto(page.path);
-
+    test(`${page.path} — every picture decodes at BOTH widths, and every path is local`, async ({ page: view }) => {
       /**
-       * Scroll the whole page so lazy loading actually fetches the pictures below the fold. Without
-       * this the assertion would read `naturalWidth === 0` for images that were never requested, and
-       * the test would pass or fail for the wrong reason.
+       * §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — BOTH WIDTHS, AND IT WAITS.
+       *
+       * `PublicImage` serves TWO files per role: the large one at ≥900px and the small one below it. This
+       * test used to run only at the default viewport, so it exercised the LARGE file on every page and the
+       * SMALL file on NONE — a broken small file would have shipped silently, which is precisely the failure
+       * `PublicImage` documents as silent (the reserved box is painted in the page's own colour, so the page
+       * looks finished with a hole in it). Measured on 2026-11-28: at 390 the lowest four pictures of
+       * `/categories` reported `naturalWidth === 0` while this spec passed at the default width.
+       *
+       * It also WAITS for the images instead of trusting a fixed scroll cadence: lazy loading fetches on
+       * intersection, and a scroll loop can outrun it — which is how a test passes or fails for the WRONG
+       * reason. The wait is bounded, so a genuinely missing file still fails rather than hanging.
        */
-      await view.evaluate(async () => {
-        for (let y = 0; y < document.body.scrollHeight; y += 400) {
-          window.scrollTo(0, y);
-          await new Promise((r) => setTimeout(r, 60));
-        }
-        window.scrollTo(0, 0);
-      });
-      await view.waitForLoadState('networkidle');
+      for (const width of [1440, 390]) {
+        await view.setViewportSize({ width, height: 900 });
+        await view.goto(page.path);
 
-      const pictures = await view.evaluate(() =>
-        [...document.querySelectorAll('main img')].map((img) => ({
-          src: img.getAttribute('src') ?? '',
-          width: (img as HTMLImageElement).naturalWidth,
-        }))
-      );
+        await view.evaluate(async () => {
+          for (let y = 0; y < document.body.scrollHeight; y += 250) {
+            window.scrollTo(0, y);
+            await new Promise((r) => setTimeout(r, 100));
+          }
+          window.scrollTo(0, 0);
+          await Promise.race([
+            Promise.all(
+              [...document.querySelectorAll('main img')].map((node) => {
+                const img = node as HTMLImageElement;
+                return img.complete && img.naturalWidth > 0
+                  ? Promise.resolve()
+                  : new Promise((res) => {
+                      img.addEventListener('load', res, { once: true });
+                      img.addEventListener('error', res, { once: true });
+                    });
+              })
+            ),
+            new Promise((r) => setTimeout(r, 15000)),
+          ]);
+        });
 
-      /* The opening picture, plus the picture in the block that carries one. */
-      expect(pictures.length, `${page.id} renders ${pictures.length} picture(s)`).toBeGreaterThanOrEqual(2);
-      expect(pictures.filter((p) => p.width === 0)).toEqual([]);
-      expect(pictures.filter((p) => !p.src.startsWith('/imagery/'))).toEqual([]);
+        const pictures = await view.evaluate(() =>
+          [...document.querySelectorAll('main img')].map((node) => {
+            const img = node as HTMLImageElement;
+            return {
+              src: img.getAttribute('src') ?? '',
+              current: img.currentSrc,
+              width: img.naturalWidth,
+            };
+          })
+        );
+
+        /* The opening picture, plus the picture in the block that carries one. */
+        expect(
+          pictures.length,
+          `${page.id} at ${width}px renders ${pictures.length} picture(s)`
+        ).toBeGreaterThanOrEqual(2);
+        expect(
+          pictures.filter((p) => p.width === 0).map((p) => `${p.current || p.src} at ${width}px`),
+          `${page.id}: a picture did not decode`
+        ).toEqual([]);
+        expect(pictures.filter((p) => !p.src.startsWith('/imagery/'))).toEqual([]);
+      }
     });
   }
 });
