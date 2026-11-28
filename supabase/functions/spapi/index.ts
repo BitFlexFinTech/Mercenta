@@ -33,6 +33,14 @@ import { defaultLiveFetch } from '../_shared/liveFetch.ts';
 import { parseCredentialBlob, readVaultSecret } from '../_shared/vault.ts';
 import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
 import { rateLimitGuard } from '../_shared/rateLimit.ts';
+import {
+  TenantScopeRefusal,
+  asinsInPayload,
+  asinsInQuery,
+  assertAsinBelongsToBrand,
+  callerFromAuthorization,
+  writeSpapiAudit,
+} from '../_shared/tenantScope.ts';
 import { createSpapiLiveCall, type SpapiLiveCredentials } from '../_shared/live/spapiLive.ts';
 
 const PROVIDER = 'spapi' as const;
@@ -122,6 +130,48 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  /**
+   * §PHASE 3 — ASIN TENANT SCOPE + ACCESS AUDIT (live mode only).
+   *
+   * Simulation returns mock shapes and touches no brand's data, so it is neither
+   * asserted nor audited; a LIVE call is the one that reaches Amazon with Mercenta's
+   * credentials, and that is the access the Data Protection Policy requires us to
+   * attribute and to log. The refusal is a REFUSAL (403), never a silent filter.
+   */
+  const caller = callerFromAuthorization(req.headers.get('Authorization'));
+  const routeLabel = `${req.method} ${target.path}`;
+  const asins = mode === 'live' ? [...asinsInPayload(body), ...asinsInQuery(target.query)] : [];
+
+  if (asins.length > 0) {
+    for (const asin of asins) {
+      try {
+        await assertAsinBelongsToBrand(caller?.brandId ?? null, asin);
+      } catch (err) {
+        const refusal = err instanceof TenantScopeRefusal ? err : null;
+        if (caller) {
+          await writeSpapiAudit({
+            actor: caller.actor,
+            brandId: caller.brandId,
+            asin,
+            route: routeLabel,
+            result: 'refused',
+          }).catch(() => {
+            /* the refusal itself is the answer; the log write cannot mask it */
+          });
+        }
+        return json(
+          {
+            ok: false,
+            simulated: false,
+            mode: 'live',
+            error: refusal ? refusal.message : String(err),
+          },
+          refusal ? refusal.status : 403
+        );
+      }
+    }
+  }
+
   // Simulation does NO credential work at all — that is structural, not a promise.
   const credentials = mode === 'live' ? await resolveCredentials(secretRef ?? null) : null;
 
@@ -139,6 +189,27 @@ Deno.serve(async (req: Request) => {
     serverCredentialsResolved: credentials !== null,
     liveCall: credentials ? createSpapiLiveCall(credentials, defaultLiveFetch) : undefined,
   });
+
+  // §PHASE 3 — every live ASIN access is logged. If the log cannot be written, the
+  // response is refused rather than delivered as an unlogged access.
+  if (asins.length > 0) {
+    try {
+      for (const asin of asins) {
+        await writeSpapiAudit({
+          actor: caller?.actor ?? 'unknown-actor',
+          brandId: caller?.brandId ?? null,
+          asin,
+          route: routeLabel,
+          result: outcome.status < 400 ? 'granted' : 'error',
+        });
+      }
+    } catch (err) {
+      return json(
+        { ok: false, simulated: false, mode: 'live', error: (err as Error).message },
+        503
+      );
+    }
+  }
 
   return json(outcome.body, outcome.status);
 });
