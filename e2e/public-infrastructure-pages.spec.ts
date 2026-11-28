@@ -1,5 +1,5 @@
 /**
- * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — THE SEVEN RETAIL INFRASTRUCTURE PAGES, IN A BROWSER.
+ * §PUBLIC SURFACES BATCH 5 PART 2 (2026-11-27) — THE ENRICHED PUBLIC PAGES, IN A BROWSER.
  *
  * WHY THIS FILE EXISTS. `scripts/validate-public-page-standard.mjs` proves the DATA is complete: a
  * picture is named and on disk, an illustration has stages, a limits section exists. None of that
@@ -17,13 +17,18 @@
  *      LOCAL file — the public site makes no third-party image requests;
  *   6. no uncaught error, and no horizontal overflow at 390.
  *
- * Dev server is started by playwright.config.ts. The seven pages are DISCOVERED from the group the
- * batch names, so renaming the group cannot quietly turn this spec into a test of nothing.
+ * Dev server is started by playwright.config.ts. The pages are DISCOVERED from the groups the batch
+ * names, so renaming a group cannot quietly turn this spec into a test of nothing.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — `'Solutions'` is APPENDED to the same list the
+ * gate appends to, in the same change, so the two scopes cannot drift: the four Solutions pages are
+ * asserted here exactly as the eleven before them are. Replacing the list would have stopped testing
+ * the eleven.
  */
 import { test, expect } from '@playwright/test';
 import { PUBLIC_CONTENT_PAGES } from '../src/config/publicPages';
 
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform'];
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions'];
 const PAGES = PUBLIC_CONTENT_PAGES.filter((p) => SCOPE_GROUPS.includes(p.navGroup));
 
 test.describe('The enriched public pages — the full page standard, rendered', () => {

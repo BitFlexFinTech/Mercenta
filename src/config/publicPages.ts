@@ -445,6 +445,10 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
     heading: 'You make it. We open the market.',
     lede:
       'Entering the UK normally means an entity, a warehouse, a compliance stack and a team who already know the buyers. Mercenta removes that list rather than managing it.',
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the page opens with a picture rather than as
+       text only. The goods in this service arrive by sea, and a container being worked at a terminal
+       is the honest opening image for a brand sending its product into a new market. */
+    hero: 'port-cranes',
     blocks: [
       {
         heading: 'What you do not have to build',
@@ -453,6 +457,8 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
           'Your own warehousing and fulfilment operation.',
           'A compliance function to keep documents current.',
         ],
+        /* The warehousing a brand would otherwise have had to build, shown rather than described. */
+        media: 'warehouse-racks',
       },
       {
         heading: 'What you keep',
@@ -466,6 +472,41 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
           'Start with an honest read on whether the UK wants your product. It costs nothing and is worth having whether or not you go further with us.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the worked example. The sequence only: it
+       carries no amount, no price and no percentage, because an illustration of the ORDER of the
+       work must never become an invented claim about the money it produces. */
+    illustration: {
+      label: 'From your factory to a UK shelf',
+      intro:
+        'The stages below run in the same order whether you are sending one pallet or a container. This is the sequence of the work, not a forecast of the volume.',
+      stages: [
+        {
+          label: 'Look first',
+          detail:
+            'Before anything is shipped, we tell you honestly whether the UK market wants this product, and what would have to change if it does not.',
+        },
+        {
+          label: 'Fit to sell here',
+          detail:
+            'The product is checked against what UK retail expects of it — labelling, safety paperwork, packaging and the space it takes on a shelf.',
+        },
+        {
+          label: 'Arrive',
+          detail:
+            'Goods move into the UK and are held here, so you are not running an import operation from another country while also making the product.',
+        },
+        {
+          label: 'Sell and settle',
+          detail:
+            'Orders are picked, packed and despatched from the UK, and the money that comes back is reconciled and settled with you.',
+        },
+      ],
+    },
+    limits: [
+      'We do not set up a UK company for you; what we remove is the need for one, not the choice to have one.',
+      'We do not tell you the UK wants your product before we have looked, and we do not take on a product that does not fit.',
+      'We do not promise that orders will come. We carry the orders that do.',
     ],
     cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
   },
@@ -481,6 +522,10 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
     heading: 'Growing without the operations growing with it.',
     lede:
       'A brand that is already selling here usually finds that growth adds operational weight faster than it adds margin. Mercenta absorbs the weight instead.',
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the page opens with a picture. This page is
+       about volume and the work volume brings, so it opens on a working warehouse aisle rather than
+       on a desk. */
+    hero: 'warehouse-aisle',
     blocks: [
       {
         heading: 'Where the weight comes from',
@@ -489,6 +534,8 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
           'More products means more documentation to keep current.',
           'More movement means more deductions to explain.',
         ],
+        /* The tracking and reconciliation work, shown as the desk it lands on today. */
+        media: 'desk-laptop',
       },
       {
         heading: 'What changes',
@@ -497,6 +544,41 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
         ],
       },
     ],
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the worked example: what growth adds, and which
+       of it stops landing on the brand. No amount, no price and no percentage appears here. */
+    illustration: {
+      label: 'Where the extra work goes',
+      intro:
+        'Growth adds orders, products and movement. The stages below show what each of those adds, and which of it stops landing on your desk.',
+      stages: [
+        {
+          label: 'More orders',
+          detail:
+            'Every new order has to be captured, confirmed and reconciled. Past a certain volume that stops being a spreadsheet and becomes a job.',
+        },
+        {
+          label: 'More products',
+          detail:
+            'Each additional line needs its documentation kept current, or it holds up the orders sitting around it.',
+        },
+        {
+          label: 'More movement',
+          detail:
+            'More despatches mean more tracking, more exceptions, and more paperwork to answer for when something does not go to plan.',
+        },
+        {
+          label: 'One workspace',
+          detail:
+            'All of it lands in one place, with the decisions still yours and the administration no longer sitting on your side.',
+        },
+      ],
+    },
+    limits: [
+      'We do not take over your brand, your pricing or your product decisions — those stay with you.',
+      'We do not promise that more volume is more profit. What is charged and what is deducted are shown apart, so you can judge it yourself.',
+      'We do not hide a charge inside a figure, and we do not present a projection as though it were a result.',
+    ],
+    cta: { label: 'Contact Mercenta', to: 'contact' },
   },
   {
     id: 'agencies-service-partners',
@@ -510,6 +592,9 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
     heading: 'A partner for the part you do not operate.',
     lede:
       'Agencies are good at the things agencies are for: strategy, brand, growth. Mercenta is the operating layer underneath, so a client does not have to be told to find one.',
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — this page is a conversation between a partner
+       and Mercenta, so it opens on a working desk with a phone and a notebook rather than on goods. */
+    hero: 'desk-phone',
     blocks: [
       {
         heading: 'How it fits',
@@ -518,6 +603,8 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
           'Mercenta operates the orders, movement, paperwork and payments.',
           'The client sees one workspace, and so do you.',
         ],
+        /* The part the agency hands over: goods leaving on the client’s behalf. */
+        media: 'boxes-stacked',
       },
       {
         heading: 'Talking to us',
@@ -525,6 +612,40 @@ export const PUBLIC_SOLUTION_PAGES: readonly PublicContentPage[] = [
           'If you would like to discuss working with Mercenta on behalf of a client, get in touch and we will explain how the arrangement works.',
         ],
       },
+    ],
+    /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the worked example: an engagement from the
+       agency’s side. No amount, no price and no percentage appears here. */
+    illustration: {
+      label: 'How a client engagement runs',
+      intro:
+        'You keep the strategy and the brand work. The stages below are the operating layer underneath, which your client never has to be told to go and find.',
+      stages: [
+        {
+          label: 'You bring the client',
+          detail:
+            'The relationship stays yours, and so does everything you were engaged to do — the positioning, the creative and the growth plan.',
+        },
+        {
+          label: 'We take the operation',
+          detail:
+            'Orders, movement, paperwork and payment for that client sit with Mercenta instead of on their desk or on yours.',
+        },
+        {
+          label: 'One view for both',
+          detail:
+            'Your client sees what is moving in their own workspace, and you see the same picture, so nothing has to be relayed second-hand.',
+        },
+        {
+          label: 'You stay the front door',
+          detail:
+            'Day to day the client deals with you; we are the part behind you that they do not have to manage themselves.',
+        },
+      ],
+    },
+    limits: [
+      'The client relationship stays yours. We do not take it over or stand in front of it.',
+      'We do not do the brand, strategy or creative work — that is what your business is for.',
+      'We do not accept a client product that does not fit an approved category, or one that cannot be documented.',
     ],
     cta: { label: 'Contact Mercenta', to: 'contact' },
   },
@@ -628,6 +749,9 @@ export const PUBLIC_CATEGORY_PAGE: PublicContentPage = {
       body: [
         'The list below is read directly from the platform’s own approved category register, so this page can never disagree with what the business actually operates in.',
       ],
+      /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — a picture inside a block, so the page is not
+         a column of cards and text with a single photograph at the top. */
+      media: 'shelves-aisle',
     },
     {
       heading: 'Not sure which one you are?',
@@ -635,6 +759,40 @@ export const PUBLIC_CATEGORY_PAGE: PublicContentPage = {
         'A product sometimes sits between two. Tell us what you make and we will tell you where it belongs, or that it does not fit.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the worked example: how a product is placed. The
+     sequence only; it carries no amount, no price and no percentage. */
+  illustration: {
+    label: 'How a product is placed in a category',
+    intro:
+      'Placement is decided by what the product is and how it behaves in retail, not by where a brand would prefer it to sit.',
+    stages: [
+      {
+        label: 'Tell us what you make',
+        detail:
+          'A short description of the product is enough to start; the specification and the packaging follow if it looks like a fit.',
+      },
+      {
+        label: 'We place it',
+        detail:
+          'The product is matched to the approved category it actually belongs in, including where two of them are close together.',
+      },
+      {
+        label: 'It is measured',
+        detail:
+          'That category’s own expectations — documentation, safety, packaging and size — are what the product is then measured against.',
+      },
+      {
+        label: 'You hear either way',
+        detail:
+          'If the product does not fit an approved category, we say so plainly rather than take it on and hope it finds a home.',
+      },
+    ],
+  },
+  limits: [
+    'We do not take on a product that sits outside the approved categories, however good the product is.',
+    'We do not move a product into a category to make it fit; the product decides where it belongs.',
+    'We do not add a category because a brand asks for one. The approved list is what the business operates in.',
   ],
   cta: { label: 'Explore UK Market Fit', to: 'explore-uk-market-fit' },
 };
@@ -1333,6 +1491,9 @@ const PAGE_INSTITUTIONAL_PARTNERS: PublicContentPage = {
   heading: 'A route into the UK for the brands you represent.',
   lede:
     'Development finance institutions, export promotion agencies, embassies and trade bodies already carry brands that could sell in the UK and cannot get there alone. This page sets out what Mercenta does for institutions like these.',
+  /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the page opens with a picture. A portfolio of
+     brands from many countries arrives by sea, so the opening image is a container terminal. */
+  hero: 'port-containers',
   blocks: [
     {
       heading: 'Who this is for',
@@ -1348,6 +1509,8 @@ const PAGE_INSTITUTIONAL_PARTNERS: PublicContentPage = {
       body: [
         'A compliant route to UK retail for the brands in your portfolio, one accountable counterparty instead of several, and reporting you can put in front of your own board or funders.',
       ],
+      /* The reporting the sentence above promises, shown as the screen it is read on. */
+      media: 'desk-tablet',
     },
     {
       heading: 'What we do not claim',
@@ -1355,6 +1518,40 @@ const PAGE_INSTITUTIONAL_PARTNERS: PublicContentPage = {
         'Naming a kind of institution is not a claim that any named organisation is a Mercenta partner, client or endorser. Nothing on this page should be read as an existing relationship or an approval by any institution.',
       ],
     },
+  ],
+  /* §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — the worked example: a portfolio brand reaching the
+     UK. The sequence only; it carries no amount, no price and no percentage. */
+  illustration: {
+    label: 'How a brand in a portfolio reaches the UK',
+    intro:
+      'The stages below are what happens between an institution introducing a brand and that brand selling here. The institution stays the route in; Mercenta does the operating.',
+    stages: [
+      {
+        label: 'A brand is put forward',
+        detail:
+          'A brand in the portfolio is looked at against what the UK market actually buys, before anyone commits to shipping anything.',
+      },
+      {
+        label: 'It is assessed honestly',
+        detail:
+          'The product, its documentation and its packaging are measured against the category it would sit in, and the answer may be no.',
+      },
+      {
+        label: 'It is set up to sell',
+        detail:
+          'Compliance, listing and stock are put in place for that brand, so that it can be bought rather than merely announced.',
+      },
+      {
+        label: 'It runs, and it reports',
+        detail:
+          'Orders, movement and payment run through Mercenta, and the brand can then be reported on to a board or to a funder.',
+      },
+    ],
+  },
+  limits: [
+    'Naming a kind of institution is not a claim that we work with it, and no organisation is named here as a partner, client or endorser.',
+    'We do not promise an outcome for any brand in a portfolio; each one is assessed on the product in front of us.',
+    'We do not assess a portfolio as a whole. Every brand is looked at on its own products and its own paperwork.',
   ],
   cta: { label: 'Talk to us about working together', to: 'contact' },
 };
@@ -1434,12 +1631,21 @@ export const PUBLIC_CONTENT_PAGE_BY_ID: Record<string, PublicContentPage> = Obje
   PUBLIC_CONTENT_PAGES.map((p) => [p.id, p])
 );
 
-/** The navigation groups, DERIVED from the pages themselves (never retyped). */
-export const PUBLIC_CONTENT_NAV_GROUPS: readonly { group: string; pages: PublicContentPage[] }[] = [
-  'Platform',
-  'Solutions',
-  'Company',
-  'Commercial',
-  'Resources',
-].map((group) => ({ group, pages: PUBLIC_CONTENT_PAGES.filter((p) => p.navGroup === group) }));
+/**
+ * The content groups, DERIVED from the pages themselves (never retyped).
+ *
+ * §CORRECTED 2026-11-28 (BATCH 5 PART 4) — THIS COMMENT WAS FALSE, AND SO WAS THE CONSTANT. It said
+ * "DERIVED from the pages themselves (never retyped)" while the code retyped five group names — and
+ * those five omitted `'Retail Infrastructure'`, which SEVEN pages in `PUBLIC_CONTENT_PAGES` carry, so
+ * the list could not have described the pages it claimed to be derived from. Nothing consumed it, so
+ * nothing broke; the comment was simply untrue, which is the defect. The list is now genuinely
+ * computed from each page's own `navGroup`, in declaration order, so it cannot disagree again. The
+ * HEADER's own group order is a separate owner (`PUBLIC_NAV` in `src/config/positioning.ts`) and is
+ * deliberately not duplicated here.
+ */
+export const PUBLIC_CONTENT_NAV_GROUPS: readonly { group: string; pages: PublicContentPage[] }[] =
+  Array.from(new Set(PUBLIC_CONTENT_PAGES.map((p) => p.navGroup))).map((group) => ({
+    group,
+    pages: PUBLIC_CONTENT_PAGES.filter((p) => p.navGroup === group),
+  }));
 

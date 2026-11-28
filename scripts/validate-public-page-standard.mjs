@@ -44,6 +44,13 @@
  * would have silently stopped checking the seven pages already brought to the standard — a gate that
  * drops its first batch is a weaker gate, not a moved one — so groups are only ever ADDED here, and
  * each addition is made in the same change as the enrichment it covers.
+ *
+ * §Phase §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — THE LIST GROWS AGAIN, BY THE SAME RULE.
+ * `'Solutions'` is APPENDED, so the eleven pages already checked stay checked. Solutions holds four
+ * pages — `new-to-uk-market`, `scaling-consumer-brands`, `agencies-service-partners` and the
+ * categories page (`PUBLIC_CATEGORY_PAGE`, which already opened with a picture but carried neither
+ * the illustration nor the limits). S1b is what makes the append safe: a group name matching NO page
+ * fails the run, so this addition cannot quietly become a vacuous scope.
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -69,8 +76,8 @@ globalThis.fetch = async (...args) => {
 
 const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
-/** This batch's scope — the navigation group whose pages were enriched. */
-const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform'];
+/** This batch's scope — the navigation groups whose pages have been enriched, in the order they were done. */
+const SCOPE_GROUPS = ['Retail Infrastructure', 'Platform', 'Solutions'];
 
 /* ── S0 — the owners were found at all ────────────────────────────────────── */
 const pagesSrc = read('src/config/publicPages.ts');
