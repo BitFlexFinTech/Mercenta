@@ -53,6 +53,242 @@ export const OWNER_FILES = {
   console: 'src/next/navConfig.ts',
   public: 'src/lib/seo/publicRoutes.ts',
 };
+/**
+ * §BATCH 4 (2026-11-28) — THE COLOUR DECODER: ONE DEFINITION, TWO CONSUMERS.
+ *
+ * WHY THIS EXISTS (the blind spot this closes)
+ * -------------------------------------------
+ * The contrast measurement below used to read ONLY `rgb()` / `rgba()`. A browser
+ * probe of the RUNNING product (headless Chromium against port 5182, 2026-11-28)
+ * showed Chromium returns THREE other syntaxes for the very same palette:
+ *
+ *   · `oklab(0 0 0 / 0.5)`   — every Tailwind v4 `/opacity` utility, e.g.
+ *                              `text-ink/50`, `text-paper/55`;
+ *   · `oklch(0.696 0.17 162.48)` — the Lovable tokens `--color-live` and
+ *                              `--color-tracker-*` (`src/index.css`);
+ *   · `color(srgb 0.0627451 0.0627451 0.0627451 / 0.8)` — e.g. `bg-ink/80`.
+ *
+ * A colour the decoder could not read was SILENTLY SKIPPED (`parse` returned
+ * `null` → `continue`), so any text painted with one was never measured at all.
+ * Measured on the homepage: “Live listings” (`text-ink/50` → `oklab(0 0 0 / 0.5)`)
+ * and “Range · Pricing” (`text-paper/55`) were both invisible to the instrument,
+ * and the semi-transparent card fill
+ * (`oklab(0.700932 0.142874 0.141699 / 0.06)`) was skipped rather than composited.
+ * Blindness that reads as a pass is worse than no measurement.
+ *
+ * THE CONTRACT — a silent skip can never happen again
+ * --------------------------------------------------
+ *   { r, g, b, a }   a decodable colour: channels 0–255, alpha 0–1
+ *   { none: true }   not a colour at all (`none`, `currentcolor`, `inherit`,
+ *                    `unset`, or an empty/non-colour string)
+ *   { unreadable }   a colour SYNTAX this decoder does not implement (`lab()`,
+ *                    `lch()`, `color(display-p3 …)`, an unresolved `var()`).
+ *                    The callers COUNT these, so an unreadable colour is
+ *                    reported — never dropped.
+ *
+ * Implemented spaces: rgb/rgba (numbers and percentages) · hsl/hsla · hwb ·
+ * oklab · oklch · color(srgb …) · color(srgb-linear …) · hex. A colour outside
+ * the sRGB gamut is clipped, exactly as a display clips it.
+ *
+ * SELF-CONTAINED ON PURPOSE (rule 03 — single source of truth). Every helper is
+ * nested, so `readColor.toString()` is a complete definition that can be injected
+ * into the browser with `context.addInitScript` (the walk does that) while
+ * `scripts/validate-visual-acceptance-parser.mjs` imports and tests the SAME
+ * function in Node. One decoder, two consumers, no second copy to drift.
+ */
+export function readColor(css) {
+  const text = String(css == null ? '' : css)
+    .trim()
+    .toLowerCase();
+  const unreadable = () => ({ unreadable: true, css: text });
+
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const clamp255 = (x) => (x < 0 ? 0 : x > 255 ? 255 : x);
+  /** linear-light → sRGB transfer, then 0–255. */
+  const to255 = (lin) =>
+    Math.round(clamp01(lin <= 0.0031308 ? 12.92 * lin : 1.055 * Math.pow(lin, 1 / 2.4) - 0.055) * 255);
+  const hslToRgb = (h, s, l) => {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const hp = (((h % 360) + 360) % 360) / 60;
+    const x = c * (1 - Math.abs((hp % 2) - 1));
+    const m = l - c / 2;
+    const t =
+      hp < 1 ? [c, x, 0] : hp < 2 ? [x, c, 0] : hp < 3 ? [0, c, x] : hp < 4 ? [0, x, c] : hp < 5 ? [x, 0, c] : [c, 0, x];
+    return { r: (t[0] + m) * 255, g: (t[1] + m) * 255, b: (t[2] + m) * 255 };
+  };
+
+  if (!text) return { none: true };
+  if (text === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+  if (['none', 'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'revert-layer'].includes(text)) {
+    return { none: true };
+  }
+
+  const hex = /^#([0-9a-f]{3,8})$/.exec(text);
+  if (hex) {
+    const h = hex[1];
+    const short = h.length === 3 || h.length === 4;
+    if (!short && h.length !== 6 && h.length !== 8) return unreadable();
+    const pair = (i) => parseInt(short ? h[i] + h[i] : h.slice(i * 2, i * 2 + 2), 16);
+    return {
+      r: pair(0),
+      g: pair(1),
+      b: pair(2),
+      a: (short ? h.length === 4 : h.length === 8) ? pair(3) / 255 : 1,
+    };
+  }
+
+  const fn = /^([a-z-]+)\(([\s\S]*)\)$/.exec(text);
+  if (!fn) return { none: true };
+  const name = fn[1];
+  const inside = fn[2];
+  const slash = inside.indexOf('/');
+  const chanPart = (slash === -1 ? inside : inside.slice(0, slash)).trim();
+  const alphaPart = slash === -1 ? null : inside.slice(slash + 1).trim();
+  let channels = chanPart.includes(',')
+    ? chanPart.split(',').map((s) => s.trim()).filter((s) => s !== '')
+    : chanPart.split(/\s+/).filter((s) => s !== '');
+  /* The legacy comma form carries alpha as a FOURTH channel — `rgba(r,g,b,a)`,
+     `hsla(h,s%,l%,a)`. The modern form uses ` / a`. Both are handled: a 4th
+     comma-separated channel is taken as alpha and dropped from the channel list,
+     so every branch below sees exactly three channels. */
+  const legacyAlpha = chanPart.includes(',') && channels.length === 4 ? channels[3] : null;
+  if (legacyAlpha !== null) channels = channels.slice(0, 3);
+
+  /** A number, or a percentage returned as a 0–1 fraction. */
+  const numOf = (s) => {
+    const t = String(s == null ? '' : s).trim();
+    const pct = t.endsWith('%');
+    const v = parseFloat(t);
+    if (!Number.isFinite(v)) return null;
+    return { v: pct ? v / 100 : v, pct };
+  };
+  /** A CSS `<percentage>` where a bare number also means percent (s/l/w/b). */
+  const pctOf = (s) => {
+    const n = numOf(s);
+    return n ? { v: n.pct ? n.v : n.v / 100 } : null;
+  };
+  /** A hue: a bare angle, or deg/turn/rad/grad. */
+  const hueOf = (s) => {
+    const t = String(s == null ? '' : s).trim();
+    const v = parseFloat(t);
+    if (!Number.isFinite(v)) return null;
+    if (t.endsWith('turn')) return v * 360;
+    if (t.endsWith('rad')) return (v * 180) / Math.PI;
+    if (t.endsWith('grad')) return v * 0.9;
+    return v;
+  };
+  const alphaOf = () => {
+    if (legacyAlpha !== null) {
+      const n = numOf(legacyAlpha);
+      return n ? clamp01(n.v) : null;
+    }
+    if (alphaPart == null) return 1;
+    const n = numOf(alphaPart);
+    return n ? clamp01(n.v) : null;
+  };
+
+  const a = alphaOf();
+  if (a === null) return unreadable();
+
+  if (name === 'rgb' || name === 'rgba') {
+    if (channels.length !== 3) return unreadable();
+    const ch = channels.map((s) => {
+      const n = numOf(s);
+      return n ? (n.pct ? n.v * 255 : n.v) : null;
+    });
+    if (ch.some((v) => v === null)) return unreadable();
+    return { r: clamp255(ch[0]), g: clamp255(ch[1]), b: clamp255(ch[2]), a };
+  }
+
+  if (name === 'hsl' || name === 'hsla') {
+    if (channels.length !== 3) return unreadable();
+    const h = hueOf(channels[0]);
+    const s = pctOf(channels[1]);
+    const l = pctOf(channels[2]);
+    if (h === null || !s || !l) return unreadable();
+    const rgb = hslToRgb(h, clamp01(s.v), clamp01(l.v));
+    return { r: Math.round(rgb.r), g: Math.round(rgb.g), b: Math.round(rgb.b), a };
+  }
+
+  if (name === 'hwb') {
+    if (channels.length !== 3) return unreadable();
+    const h = hueOf(channels[0]);
+    const w = pctOf(channels[1]);
+    const b = pctOf(channels[2]);
+    if (h === null || !w || !b) return unreadable();
+    const wv = clamp01(w.v);
+    const bv = clamp01(b.v);
+    if (wv + bv >= 1) {
+      const grey = Math.round((wv / (wv + bv)) * 255);
+      return { r: grey, g: grey, b: grey, a };
+    }
+    const base = hslToRgb(h, 1, 0.5);
+    const mix = (v) => Math.round(((v / 255) * (1 - wv - bv) + wv) * 255);
+    return { r: mix(base.r), g: mix(base.g), b: mix(base.b), a };
+  }
+
+  if (name === 'oklab' || name === 'oklch') {
+    if (channels.length !== 3) return unreadable();
+    const L = numOf(channels[0]);
+    if (!L) return unreadable();
+    let A;
+    let B;
+    if (name === 'oklch') {
+      const C = numOf(channels[1]);
+      const H = hueOf(channels[2]);
+      if (!C || H === null) return unreadable();
+      const rad = (H * Math.PI) / 180;
+      A = C.v * Math.cos(rad);
+      B = C.v * Math.sin(rad);
+    } else {
+      const a1 = numOf(channels[1]);
+      const b1 = numOf(channels[2]);
+      if (!a1 || !b1) return unreadable();
+      A = a1.v;
+      B = b1.v;
+    }
+    const l_ = L.v + 0.3963377774 * A + 0.2158037573 * B;
+    const m_ = L.v - 0.1055613458 * A - 0.0638541728 * B;
+    const s_ = L.v - 0.0894841775 * A - 1.291485548 * B;
+    const l = l_ * l_ * l_;
+    const m = m_ * m_ * m_;
+    const s = s_ * s_ * s_;
+    return {
+      r: to255(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+      g: to255(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+      b: to255(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+      a,
+    };
+  }
+
+  if (name === 'color') {
+    const space = channels[0];
+    const nums = channels.slice(1).map(numOf);
+    if (nums.length !== 3 || nums.some((n) => !n)) return unreadable();
+    if (space === 'srgb') {
+      /* `color(srgb …)` channels are NON-linear sRGB, 0–1 — multiply only. */
+      return {
+        r: Math.round(clamp01(nums[0].v) * 255),
+        g: Math.round(clamp01(nums[1].v) * 255),
+        b: Math.round(clamp01(nums[2].v) * 255),
+        a,
+      };
+    }
+    if (space === 'srgb-linear') {
+      return { r: to255(nums[0].v), g: to255(nums[1].v), b: to255(nums[2].v), a };
+    }
+    return unreadable(); /* display-p3, a98-rgb, prophoto-rgb, rec2020, xyz … */
+  }
+
+  /* lab() · lch() · color-mix() · light-dark() · an unresolved var() — a colour
+     syntax this decoder deliberately does not implement. Reported, not dropped. */
+  return unreadable();
+}
+
+/** The decoder as a self-contained source string, injected into the browser. */
+export const READ_COLOR_SOURCE = `window.__mrReadColor = ${readColor.toString()};`;
+
+
 
 const LEGACY_NAV = 'nav[aria-label="Primary"]';
 const CONSOLE_NAV = 'nav[aria-label="Workspace navigation"]';
@@ -184,6 +420,22 @@ function readPublicPaths(source, readRel) {
   return paths;
 }
 
+/**
+ * §BATCH 4 (2026-11-28) — THE PRIVATE ROUTE PREFIXES, read from their own owner.
+ *
+ * `publicRoutes.ts` declares which addresses are PUBLIC (walked as pages) and
+ * which are PRIVATE (`PRIVATE_ROUTE_PREFIXES`). The login portal is deliberately
+ * private — it must never be indexed — so it was never walked, and the one screen
+ * every brand meets before it has any access was the only public-entry screen no
+ * capture covered. The prefix list is READ, never retyped; a missing declaration
+ * makes discovery FAIL (rule 10 §5) rather than quietly walking fewer screens.
+ */
+function readPrivateRoutePrefixes(source) {
+  const m = /PRIVATE_ROUTE_PREFIXES[^=]*=\s*\[([\s\S]*?)\]/.exec(stripComments(source));
+  if (!m) return null;
+  return (m[1].match(/'([^']+)'/g) || []).map((s) => s.slice(1, -1));
+}
+
 const SURFACE_META = {
   CORE_ADMIN_ITEMS: { id: 'core_admin', label: 'Operations Console', session: 'admin' },
   CORE_BRAND_ITEMS: { id: 'core_brand', label: 'Partner Portal', session: 'brand' },
@@ -227,6 +479,34 @@ export function discoverInventory() {
         path: p,
       })),
     });
+
+    /**
+     * §BATCH 4 (2026-11-28) — THE LOGIN PORTAL IS WALKED NOW.
+     *
+     * WHERE THE ADDRESS COMES FROM: `/login` is read from `PRIVATE_ROUTE_PREFIXES`
+     * in the same file — the owner that already declares it — never retyped.
+     *
+     * HOW IT IS REACHED: by the product's OWN control, clicking “Partner Login”
+     * (`openPortal()` → `setEnvironment('login')`), exactly as a visitor does. The
+     * address bar deliberately stays put (the platform keeps a product deep link in
+     * place across the login entry), so this screen is recorded with its declared
+     * address and the control that reached it.
+     */
+    const privatePrefixes = readPrivateRoutePrefixes(publicSrc);
+    const loginPath = privatePrefixes ? privatePrefixes.find((p) => p === '/login') : null;
+    if (!loginPath) {
+      problems.push(
+        "the login portal: '/login' is no longer declared in PRIVATE_ROUTE_PREFIXES — discovery cannot run (rule 10 §5)"
+      );
+    } else {
+      areas.push({
+        area: 'public-entry',
+        kind: 'login',
+        how: 'clicked “Partner Login” on the public homepage, no session',
+        title: 'Public entry — the login portal',
+        screens: [{ id: 'login', label: loginPath, path: loginPath }],
+      });
+    }
   }
 
   const shellAreas = [
@@ -315,13 +595,19 @@ const snapshot = (page) =>
        for each leaf text node, composite its colour over the first opaque ancestor
        background and compute the WCAG contrast ratio. Anything below 1.6:1 is not
        "muted styling", it is effectively invisible, and it is counted. */
-    const parse = (c) => {
-      const m = /rgba?\(([^)]+)\)/.exec(c || '');
-      if (!m) return null;
-      const p = m[1].split(/[,\s/]+/).filter(Boolean).map(Number);
-      if (p.length < 3 || p.some((n) => Number.isNaN(n))) return null;
-      return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
-    };
+    /* §BATCH 4 (2026-11-28) — THE DECODER IS THE MODULE'S OWN `readColor`,
+       injected once per context with `context.addInitScript(READ_COLOR_SOURCE)`.
+       It reads `rgb()/rgba()`, `oklab()`, `oklch()` and `color(srgb …)` — every
+       syntax Chromium actually returns for this palette — and REPORTS a colour it
+       cannot read instead of returning null and letting the run skip it. A
+       missing decoder is a FAILURE, never a silent no-op (rule 10 §5). */
+    const readColor = window.__mrReadColor;
+    if (typeof readColor !== 'function') {
+      return {
+        error:
+          'the colour decoder was not injected — READ_COLOR_SOURCE must be added with context.addInitScript',
+      };
+    }
     const lum = ({ r, g, b }) => {
       const f = (v) => {
         const x = v / 255;
@@ -356,18 +642,31 @@ const snapshot = (page) =>
       }
       let acc = { r: 255, g: 255, b: 255, a: 1 };
       let unmeasurable = false;
+      let unreadableBackground = 0;
       for (let i = chain.length - 1; i >= 0; i -= 1) {
         const s = getComputedStyle(chain[i]);
         if (s.backgroundImage && s.backgroundImage !== 'none') unmeasurable = true;
-        const c = parse(s.backgroundColor);
-        if (c && c.a > 0) acc = composite(c, acc);
+        const c = readColor(s.backgroundColor);
+        /* §BATCH 4 — a background this decoder cannot read is NOT skipped in
+           silence: the chain is left un-composited, the element is recorded as
+           unmeasurable, and the blind count is reported on the row. */
+        if (c.unreadable) {
+          unmeasurable = true;
+          unreadableBackground += 1;
+        } else if (!c.none && c.a > 0) {
+          acc = composite(c, acc);
+        }
       }
-      return { bg: acc, unmeasurable };
+      return { bg: acc, unmeasurable, unreadableBackground };
     };
 
     let sampled = 0;
     let invisible = 0;
     let worst = null;
+    /* §BATCH 4 — colours the decoder could not read. They are counted, never
+       dropped: a screen whose text could not be measured is NOT claimed clean. */
+    let unreadableForeground = 0;
+    let unreadableBackground = 0;
     const walk = Array.from(document.querySelectorAll('h1,h2,h3,h4,p,span,button,a,th,td,label,li'));
     for (const el of walk) {
       if (sampled >= 600) break;
@@ -377,9 +676,15 @@ const snapshot = (page) =>
       if (el.getClientRects().length === 0) continue;
       const style = getComputedStyle(el);
       if (Number(style.visibility === 'hidden') || parseFloat(style.opacity) < 0.5) continue;
-      const fg = parse(style.color);
-      if (!fg || fg.a < 0.25) continue;
-      const { bg, unmeasurable } = bgOf(el);
+      const fg = readColor(style.color);
+      if (fg.none) continue;
+      if (fg.unreadable) {
+        unreadableForeground += 1;
+        continue;
+      }
+      if (fg.a < 0.25) continue;
+      const { bg, unmeasurable, unreadableBackground: blindBg } = bgOf(el);
+      unreadableBackground += blindBg;
       if (unmeasurable) continue;
       const r = ratio(composite(fg, bg), bg);
       sampled += 1;
@@ -399,6 +704,10 @@ const snapshot = (page) =>
       sampled,
       invisible,
       worst,
+      /* §BATCH 4 — how many colours the decoder could not read, so an incomplete
+         measurement is visible on the row instead of reading as a clean pass. */
+      unreadableForeground,
+      unreadableBackground,
       placeholder: /is not available yet/i.test(bodyText),
       boundary: /something went wrong/i.test(bodyText),
     };
@@ -461,6 +770,17 @@ async function record(page, appearance, area, screen, errors) {
         notes.push(`low-contrast text — ${detail}`);
       }
     }
+    /* §BATCH 4 — an UNREADABLE colour is an incomplete measurement, and an
+       incomplete measurement must never read as a clean pass. The screen is
+       WARNed with the counts so the blind spot is visible in the record. */
+    const blindForeground = seen.unreadableForeground || 0;
+    const blindBackground = seen.unreadableBackground || 0;
+    if (blindForeground + blindBackground > 0) {
+      if (verdict === 'PASS') verdict = 'WARN';
+      notes.push(
+        `colour the decoder could not read — ${blindForeground} text · ${blindBackground} background (NOT claimed clean)`
+      );
+    }
     if (errors.console.length) {
       if (verdict === 'PASS') verdict = 'WARN';
       notes.push(`${errors.console.length} console error(s)`);
@@ -477,7 +797,15 @@ async function record(page, appearance, area, screen, errors) {
     heading: seen.heading || null,
     chars: seen.chars || 0,
     overflowX: seen.overflowX || 0,
-    contrast: seen.sampled ? { sampled: seen.sampled, invisible: seen.invisible, worst: seen.worst } : null,
+    contrast: seen.sampled
+      ? {
+          sampled: seen.sampled,
+          invisible: seen.invisible,
+          worst: seen.worst,
+          unreadableForeground: seen.unreadableForeground || 0,
+          unreadableBackground: seen.unreadableBackground || 0,
+        }
+      : null,
     pageErrors: errors.page.slice(0, 3),
     consoleErrors: errors.console.slice(0, 3),
     notes,
@@ -516,6 +844,10 @@ async function openSession(browser, appearance, session, errors) {
     viewport: { width: 1440, height: 900 },
     reducedMotion: 'reduce',
   });
+  /* §BATCH 4 — the colour decoder is injected into EVERY context, before any page
+     script runs, so the in-page measurement and the Node gate use the very same
+     function (never a second copy to drift). */
+  await context.addInitScript({ content: READ_COLOR_SOURCE });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.page.push(String(e)));
   page.on('console', (m) => {
@@ -568,6 +900,15 @@ async function runAppearance(appearance, inventory) {
             await page.waitForTimeout(600);
           }
           await clickNav(page, LEGACY_NAV, screen.label);
+        } else if (area.kind === 'login') {
+          /* §BATCH 4 — the login portal is reached by its OWN control, never by a
+             path guess: “Partner Login” (`openPortal()`) sets the login environment
+             while deliberately leaving the address untouched, exactly as a visitor
+             experiences it. The screen is then captured like any other. */
+          const portal = page.getByRole('button', { name: 'Partner Login' }).first();
+          await portal.waitFor({ state: 'visible', timeout: 12000 });
+          await portal.click({ timeout: 8000 });
+          await page.waitForTimeout(900);
         } else {
           await clickNav(page, CONSOLE_NAV, screen.label);
         }
@@ -593,9 +934,10 @@ async function runAppearance(appearance, inventory) {
   };
 
   try {
-    /* 1. PUBLIC — no session at all. */
+    /* 1. PUBLIC — no session at all. The login portal (§BATCH 4) is a public-entry
+       screen and is walked in this same guest context, by its own control. */
     const guest = await openSession(browser, appearance, 'guest', errors);
-    for (const area of inventory.areas.filter((a) => a.kind === 'public')) {
+    for (const area of inventory.areas.filter((a) => a.kind === 'public' || a.kind === 'login')) {
       await walkArea(guest.page, area);
     }
     await guest.context.close();
@@ -703,9 +1045,11 @@ function writeRecord(inventory, rows) {
     `- Inventory discovered from: \`${OWNER_FILES.admin}\` · \`${OWNER_FILES.brand}\` · \`${OWNER_FILES.console}\` · \`${OWNER_FILES.public}\``,
     '- Appearances: **brand-dark** (`#000000` page fill) and **brand-light** (`#FFFFFF` page fill) — the two the app allows.',
     '- Browser: headless Chromium at 1440×900, `prefers-reduced-motion: reduce`, so a capture cannot depend on smooth scrolling.',
-    '- Sessions: none (public) · **Astonish** (brand) · **Super Admin — Tadii** (admin), and the same two for the new console.',
+    '- Sessions: none (public **and the login portal**) · **Astonish** (brand) · **Super Admin — Tadii** (admin), and the same two for the new console.',
+    '- The login portal is walked too, reached by its own **Partner Login** control (its declared address `/login` is private, read from the SEO route owner), so the first screen every brand sees is covered.',
     '- Per screen: the applied appearance (`data-mercenta-theme` + computed `--mr-bg`), uncaught page errors, rendered text',
     '  volume and first heading, horizontal overflow, and whether the screen is an honest placeholder.',
+    '- Text contrast uses ONE decoder (`readColor`, exported from `scripts/visual-acceptance.mjs`) that reads every syntax Chromium returns — `rgb()/rgba()`, `oklab()`, `oklch()`, `hsl()`, `hwb()` and `color(srgb …)`. A colour it cannot read is COUNTED and the screen is `WARN`ed — never a silent skip.',
     '- Screenshots are reproducible output and are NOT committed: `test-screenshots/acceptance/<appearance>/<area>__<screen>.png`.',
     '',
     '## THE MEASURED RESULT',

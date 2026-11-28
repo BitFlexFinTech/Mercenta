@@ -4,6 +4,64 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §BATCH 4 — THE VISUAL-ACCEPTANCE INSTRUMENT NOW SEES EVERY COLOUR, COUNTS WHAT IT CANNOT READ, AND WALKS THE LOGIN PORTAL (2026-11-28)
+
+**State: VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** This increment
+touches `scripts/`, `docs/` and the state files only; the newest RUNTIME commit is still `215327c`, and the earlier
+public-page content work remains **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** because its single deployment is
+still deliberately held (the owner decides when the demo is published).
+
+### What was wrong with the instrument (measured, not guessed)
+
+A probe of the RUNNING product (headless Chromium against port 5182) recorded what `getComputedStyle` actually returns
+for this palette: `rgb(…)`/`rgba(…)`, **`oklab(0 0 0 / 0.5)`** (every Tailwind v4 `/opacity` utility — `text-ink/50`,
+`text-paper/55`), **`oklch(…)`** (`--color-live`, `--color-tracker-*`) and **`color(srgb 0.0627… / 0.8)`** (`bg-ink/80`).
+The walk's decoder read only `rgb()`/`rgba()` and returned `null` for the rest, and the caller then **silently skipped**
+those text runs — so text it could not read was never measured, and a screen with unmeasured text reported PASS.
+
+### The three fixes
+
+1. **One decoder, two consumers.** `scripts/visual-acceptance.mjs` now exports `readColor` (rgb/rgba · hsl/hsla · hwb ·
+   oklab · oklch · `color(srgb …)` / `color(srgb-linear …)` · hex), self-contained so `readColor.toString()` is injected
+   into every browser context with `context.addInitScript(READ_COLOR_SOURCE)`. The new gate imports the SAME function —
+   no second copy of the colour maths exists.
+2. **An unreadable colour is COUNTED, never dropped.** `unreadableForeground` / `unreadableBackground` are recorded per
+   screen, and a screen with one is `WARN`ed (`… NOT claimed clean`), so the verdict can never stay PASS over an
+   incomplete measurement. A missing decoder is a hard failure, not a silent no-op.
+3. **The login portal is walked.** `/login` is READ from `PRIVATE_ROUTE_PREFIXES` (`src/lib/seo/publicRoutes.ts`, the
+   owner that already declares it) and reached by the product's OWN control (clicking “Partner Login”), recorded as area
+   `public-entry`. The pass now covers **148 of 148 screens** (was 147 of 148).
+
+### What the fixed instrument found — recorded and diagnosed, NOT fixed this increment
+
+The homepage's two recorded colour defects now have a **measured cause**, and the light appearance gained **five more
+runs below 1.6:1** that the old decoder was blind to:
+
+| Appearance | Run | Measured | Cause |
+|---|---|---|---|
+| both | “Growth” | **1:1** | the card carries BOTH `bg-paper` and `bg-ink`; `cn()` (`src/utils/cn.ts`) JOINS classes, it does not merge them, so `bg-paper` wins by stylesheet order — a white card under `text-paper` |
+| both | “Range · Pricing” | **1:1** | same card; `text-paper/55` |
+| brand-light | “Received · checked” · “Located · counted” · “Picked · to channel” | **1.41:1** | tracker badges: `text-paper/70` over a `bg-ink/80` scrim that resolves to **white at 80%** in the light appearance |
+| brand-light | “Origin” | **1.31:1** | the same scrim treatment |
+
+The seven `text-signal` labels remain at **2.87:1** — below WCAG AA but above this instrument's **1.6:1** floor, so the
+instrument does not flag them. **Fixing (2a) “Growth” is a plain defect; the scrim and signal colours in the light
+appearance need ONE colour decision from the owner — so they are recorded with the diagnosis, not recoloured unilaterally.**
+
+### Evidence
+
+typecheck **0** (four tsconfig projects) · eslint **0 errors** (12 pre-existing warnings) · build **✓ 8.65s** ·
+`validate:all` **211 PASS / 0 FAIL of 211** (was 210 — the +1 is the new gate) · `validate-visual-acceptance` (the record
+gate) **9/9** over **148** rows · `validate-visual-acceptance-parser` **10/10** · the walk itself **296/296 captures
+recorded, 0 FAIL, 0 page errors, 0 console errors**, and **0 unreadable colours** · the record's numbers (**PASS 293 ·
+WARN 3 · FAIL 0**) come from the run, not from a hand edit (`docs/VISUAL_ACCEPTANCE_2026-11-25.md`).
+
+**Mutation proof (rule 07 §4):** the walk's `unreadableForeground += 1` line was deleted ⇒ `validate-visual-acceptance-parser`
+FAILED (P3; 9/10 assertions) ⇒ restored and re-verified byte-identical (`shasum -a 256`
+`84a4c61b18fba47b72394422218bdd5f1b4ef17d53a69e5a85453957f7f472fc` before and after). The gate also proves itself able to fail on every run:
+its **P5** builds a copy of the decoder with the oklab/oklch branch removed and requires the reference checks to fail
+(4 caught).
+
 ## §PUBLIC SURFACES BATCH 5 PART 7 — THE FIVE RESOURCES PAGES MEET THE PAGE STANDARD, AND THE SCOPE NOW COVERS EVERY PUBLIC PAGE (2026-11-28)
 
 **State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** `215327c` (runtime) plus the state commit that carries this
