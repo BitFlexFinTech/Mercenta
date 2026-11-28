@@ -28,13 +28,13 @@
 ## THE MEASURED RESULT
 
 - **148 screens**, each walked in **both** appearances → **296 captures attempted**, **296 recorded**.
-- Verdicts: **PASS 293** · **PLACEHOLDER 0** · **WARN 3** · **FAIL 0**.
+- Verdicts: **PASS 296** · **PLACEHOLDER 0** · **WARN 0** · **FAIL 0**.
 - No screen failed: every walked screen rendered real content in both appearances, with no uncaught page error.
 
 <!-- BEGIN GENERATED ACCEPTANCE TABLE -->
 | # | Area | Screen | Reached by | brand-dark | brand-light |
 |---|------|--------|------------|------------|-------------|
-| 1 | public | / | navigated directly, no session | WARN | WARN |
+| 1 | public | / | navigated directly, no session | PASS | PASS |
 | 2 | public | /how-it-works | navigated directly, no session | PASS | PASS |
 | 3 | public | /uk-market-access | navigated directly, no session | PASS | PASS |
 | 4 | public | /for-brands | navigated directly, no session | PASS | PASS |
@@ -91,7 +91,7 @@
 | 55 | brand | Reports | signed in as Astonish, nav item clicked | PASS | PASS |
 | 56 | brand | Documents & Account | signed in as Astonish, nav item clicked | PASS | PASS |
 | 57 | brand | Support & Cases | signed in as Astonish, nav item clicked | PASS | PASS |
-| 58 | brand | Support & Team | signed in as Astonish, nav item clicked | WARN | PASS |
+| 58 | brand | Support & Team | signed in as Astonish, nav item clicked | PASS | PASS |
 | 59 | brand | Settings | signed in as Astonish, nav item clicked | PASS | PASS |
 | 60 | console-core_admin | Overview | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |
 | 61 | console-core_admin | Control Centre | new console (?console=next), surface "Operations Console", nav item clicked | PASS | PASS |

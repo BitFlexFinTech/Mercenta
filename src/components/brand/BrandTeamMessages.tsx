@@ -92,17 +92,32 @@ export function BrandTeamMessages() {
                     <p className="text-xs text-faint mt-1">Ask about POs, shipments, compliance, or anything else.</p>
                   </div>
                 )}
-                {supportMessages.map((m) => (
+                {supportMessages.map((m) => {
+                  /* §BATCH 4b — DEFECT FIXED AT SOURCE (2026-11-28). The message META text used
+                     `text-muted` regardless of the bubble's own fill. On the outbound bubble
+                     (`bg-surface-overlay`) that is correct — a surface colour on a surface. On the
+                     INBOUND bubble the fill is `bg-accent-500` (#FF6A00), where `--mr-text-muted`
+                     (#A5A5A5) measures **1.17:1**: the sender and timestamp were, measured, not
+                     readable. The fill now decides its own tokens (the same rule the send button
+                     below already follows with `text-on-accent`), so the meta is `--mr-on-accent`
+                     a shade quieter — 7.28:1 at full strength, ~4.8:1 at 80% opacity — on the accent
+                     bubble, and unchanged `text-muted` on the surface bubble. Found by
+                     `scripts/visual-acceptance.mjs`, which is the only thing that measures this. */
+                  const inbound = m.direction !== 'outbound';
+                  const onFill = inbound ? 'text-on-accent' : 'text-strong';
+                  const onFillQuiet = inbound ? 'text-on-accent opacity-80' : 'text-muted';
+                  return (
                   <div key={m.id} className={cn('flex', m.direction === 'outbound' ? 'justify-start' : 'justify-end')}>
-                    <div className={cn('max-w-[80%] rounded-ds-lg px-3 py-2 text-xs', m.direction === 'outbound' ? 'bg-surface-overlay text-strong' : 'bg-accent-500 text-strong')}>
+                    <div className={cn('max-w-[80%] rounded-ds-lg px-3 py-2 text-xs', inbound ? 'bg-accent-500' : 'bg-surface-overlay', onFill)}>
                       {m.subject !== 'Support message' && m.subject !== 'Live chat message' && (
-                        <p className="text-ds-micro text-muted mb-1 font-medium">{m.subject}</p>
+                        <p className={cn('text-ds-micro mb-1 font-medium', onFillQuiet)}>{m.subject}</p>
                       )}
                       <p className="whitespace-pre-wrap">{m.body}</p>
-                      <p className="mt-1 text-ds-micro text-muted font-mono">{m.sentBy} &middot; {new Date(m.createdAt).toLocaleString()}</p>
+                      <p className={cn('mt-1 text-ds-micro font-mono', onFillQuiet)}>{m.sentBy} &middot; {new Date(m.createdAt).toLocaleString()}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 <div ref={bottomRef} />
               </div>
               <div className="p-3 border-t border-hairline bg-surface">

@@ -761,6 +761,15 @@
       "expects": "The public pages journey renders and behaves as its spec asserts."
     },
     {
+      "id": "spec-public-fixed-dark-surfaces",
+      "capability": "platform",
+      "journey": "public fixed-dark surfaces stay readable",
+      "actor": "public_visitor",
+      "type": "boundary",
+      "spec": "e2e/public-fixed-dark-surfaces.spec.ts",
+      "expects": "On the public homepage's fixed-dark design, every fixed-dark surface is still DARK in BOTH approved appearances — its own painted colour never resolves to the light appearance's surface — and the text on it clears a measured contrast floor (the flow diagram's final step at 4.5:1; the warehouse photo badge and the \"Origin\" bar scrims at 3:1). This is the regression gate for §BATCH 4b: before the fix the step card measured 1:1 (white on paper under text-paper, because cn() joins rather than merges) and the two scrims 1.41:1 and 1.31:1, because the generated alpha-shim layer re-pointed bg-ink/80 at the appearance-reactive --mr-surface."
+    },
+    {
       "id": "spec-rakazo",
       "capability": "platform",
       "journey": "rakazo",

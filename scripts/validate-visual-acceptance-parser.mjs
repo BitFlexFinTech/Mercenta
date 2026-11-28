@@ -11,7 +11,8 @@
  *
  *   · `oklab(0 0 0 / 0.5)`        — `text-ink/50`, `text-paper/55`, … (Tailwind v4)
  *   · `oklch(0.696 0.17 162.48)`  — `--color-live`, `--color-tracker-*`
- *   · `color(srgb 0.0627…/0.8)`   — `bg-ink/80`
+ *   · `color(srgb 0.0627…/0.8)`   — a generated alpha shim (`color-mix(in srgb, …)`) —
+ *                                   what `bg-ink/80` painted until §BATCH 4b removed it
  *
  * Every colour the decoder could not read was SILENTLY SKIPPED, so text painted
  * with one was never measured — and a screen with unmeasured text reported PASS.
@@ -72,7 +73,11 @@ const REFERENCE = [
   },
   { css: 'oklch(0.871 0.006 286.286)', want: { r: 212, g: 212, b: 216, a: 1 }, why: '--color-tracker-text (zinc-300, in gamut)' },
   { css: 'oklch(0.696 0.17 162.48)', want: { r: 16, g: 185, b: 129, a: 1 }, tol: 20, why: '--color-live (out of sRGB gamut → clipped)' },
-  { css: 'color(srgb 0.0627451 0.0627451 0.0627451 / 0.8)', want: { r: 16, g: 16, b: 16, a: 0.8 }, why: 'bg-ink/80' },
+  {
+    css: 'color(srgb 0.0627451 0.0627451 0.0627451 / 0.8)',
+    want: { r: 16, g: 16, b: 16, a: 0.8 },
+    why: 'a generated alpha shim — what `bg-ink/80` painted until §BATCH 4b removed its shim',
+  },
   { css: 'color(srgb-linear 0.5 0.5 0.5)', want: { r: 188, g: 188, b: 188, a: 1 }, why: 'srgb-linear → transfer applied' },
   { css: '#FF6A00', want: { r: 255, g: 106, b: 0, a: 1 }, why: 'hex' },
   { css: '#10b981', want: { r: 16, g: 185, b: 129, a: 1 }, why: 'hex' },

@@ -66,7 +66,11 @@ export const OWNER_FILES = {
  *                              `text-ink/50`, `text-paper/55`;
  *   · `oklch(0.696 0.17 162.48)` — the Lovable tokens `--color-live` and
  *                              `--color-tracker-*` (`src/index.css`);
- *   · `color(srgb 0.0627451 0.0627451 0.0627451 / 0.8)` — e.g. `bg-ink/80`.
+ *   · `color(srgb 0.0627451 0.0627451 0.0627451 / 0.8)` — what a generated alpha
+ *                              shim (`color-mix(in srgb, …)`, `src/theme-alpha-shims.css`)
+ *                              serialises to. `bg-ink/80` painted exactly this until
+ *                              §BATCH 4b removed its shim — see
+ *                              `scripts/validate-alpha-shim-integrity.mjs`.
  *
  * A colour the decoder could not read was SILENTLY SKIPPED (`parse` returned
  * `null` → `continue`), so any text painted with one was never measured at all.
@@ -1035,10 +1039,13 @@ function writeRecord(inventory, rows) {
     '> `WHAT THE PASS FOUND` section below is written by hand.',
     '>',
     '> **THE TITLE DATE IS THE DATE OF THE PASS THAT PRODUCED THIS TABLE, NOT A HISTORICAL LABEL**',
-    '> (regenerated 2026-11-27 after the console port changed 44 console screens from placeholders to',
-    '> real screens). The FILE NAME keeps its original `2026-11-25` because the path is pinned by',
+    '> — it is generated on every run, so it always names the pass the table came from. The FILE NAME',
+    '> keeps its original `2026-11-25` because the path is pinned by',
     '> `scripts/validate-visual-acceptance.mjs`; the content is always the LATEST pass, never an',
-    '> archive — so no reader has to infer a date from the file name.',
+    '> archive. **No sentence in this banner may carry a hand-written date** — one did (§BATCH 4b,',
+    '> 2026-11-28: a parenthetical still said the table had been regenerated on 2026-11-27, so the',
+    '> banner contradicted its own generated title), and it was removed rather than re-dated, because',
+    '> a hand-maintained date inside a generated file goes stale on the very next run.',
     '',
     '## HOW THE PASS WAS RUN',
     '',

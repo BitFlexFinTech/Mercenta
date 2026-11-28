@@ -1,13 +1,25 @@
 /**
  * §UI/UX Wave 1 — GENERATES src/theme-alpha-shims.css.
  *
- * Tailwind 3.4 cannot compute the `/opacity` modifier for colours that are
- * CSS variables (it silently drops `bg-ink-900/50`, `bg-brass-500/15`,
- * `bg-state-danger/10`, …). Rather than rewriting ~215 call sites, this
- * generator emits explicit shim rules using `color-mix(in srgb, <var>, <alpha>, transparent)`
- * for the variable-based palette classes that appear in src. Regenerate
- * whenever a new alpha class enters the tree: `node scripts/gen-theme-alpha-shims.mjs`.
- * The emitted file is committed (single source stays in the table below).
+ * WHY THIS EXISTS. The alpha modifier is not resolved for every colour this project
+ * uses, so rather than rewriting ~215 call sites the generator emits explicit shim
+ * rules of the form `color-mix(in srgb, <token> <alpha>%, transparent)` for the
+ * variable-based palette classes that appear in src. Regenerate whenever a new alpha
+ * class enters the tree: `node scripts/gen-theme-alpha-shims.mjs`. The emitted file is
+ * committed (single source stays in the table below).
+ *
+ * §BATCH 4b (2026-11-28) — A SHIM MUST NEVER BE EMITTED FOR A CLASS TAILWIND ALREADY
+ * COMPILES, BECAUSE IT OVERRIDES IT. `src/main.tsx` imports `src/index.css` first and
+ * `src/theme-alpha-shims.css` SECOND, so for any class both files define, the shim is
+ * the LAST rule and therefore the one that paints — same specificity, later position.
+ * That is how `bg-ink/80` came to paint `--mr-surface` (white in the light appearance)
+ * instead of the black Tailwind compiles it to, turning the homepage's fixed-dark photo
+ * scrims into white washes under white text (1.41:1 and 1.31:1, measured). Literal
+ * palette colours Tailwind compiles itself — `white`, `black`, and now `ink` — are
+ * therefore declared in LITERAL_KEYS below and get NO shim at all. Pin: this project is
+ * on Tailwind v4 (`package.json`), where `bg-ink` and `bg-ink/80` are compiled from
+ * `--color-ink: #000000` (`src/index.css`, `@theme inline`) with no runtime variable.
+ * Guarded by `scripts/validate-fixed-dark-scrims.mjs`.
  */
 import fs from 'fs';
 import path from 'path';
@@ -15,7 +27,21 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'src', 'theme-alpha-shims.css');
+/**
+ * §BATCH 4b (2026-11-28) — `--out <path>` writes the stylesheet somewhere else.
+ *
+ * WHY. `scripts/validate-alpha-shim-integrity.mjs` must prove that the COMMITTED
+ * `src/theme-alpha-shims.css` really is this script's output (rule 03/10 — one author for a
+ * generated fact). Without a redirect it would have to overwrite the committed file to find
+ * out, which would dirty the working tree on every check. With the flag it generates into a
+ * temporary path and compares, so the check is read-only and still cannot pass over a file
+ * that has been hand-edited or left stale.
+ */
+const OUT_FLAG = process.argv.indexOf('--out');
+const OUT =
+  OUT_FLAG !== -1 && process.argv[OUT_FLAG + 1]
+    ? path.resolve(process.cwd(), process.argv[OUT_FLAG + 1])
+    : path.join(ROOT, 'src', 'theme-alpha-shims.css');
 const SRC = path.join(ROOT, 'src');
 
 /**
@@ -84,8 +110,11 @@ const TARGETS = [
   { prefix: 'border-feature-intel/', var: 'var(--mr-feature-intel)' },
   { prefix: 'bg-feature-orders/', var: 'var(--mr-feature-orders)' },
   { prefix: 'border-feature-orders/', var: 'var(--mr-feature-orders)' },
-  // ink overlays
-  { prefix: 'bg-ink/', var: 'var(--mr-surface)' },
+  // ink overlays — §BATCH 4b (2026-11-28): the BARE `bg-ink/` entry is GONE, and must
+  // not come back. It mapped the class onto the APPEARANCE-REACTIVE `--mr-surface`, which
+  // silently turned every black overlay on a fixed-dark surface into a WHITE wash in the
+  // light appearance (measured 1.41:1 and 1.31:1 under white text on the homepage). The
+  // NUMBERED ladder below is untouched — those keys ARE the surface ladder.
   { prefix: 'bg-ink-900/', var: 'var(--mr-surface)' },
   { prefix: 'bg-ink-850/', var: 'var(--mr-surface-raised)' },
   { prefix: 'bg-ink-800/', var: 'var(--mr-surface-overlay)' },
@@ -131,7 +160,30 @@ const VAR_BY_KEY = {
   'feature-compliance': 'var(--mr-feature-compliance)',
   'feature-ops': 'var(--mr-feature-ops)',
   // ink surfaces
-  ink: 'var(--mr-surface)',
+  /**
+   * §BATCH 4b (2026-11-28) — THE BARE `ink` KEY IS A LITERAL, NOT A SURFACE TINT.
+   *
+   * WHAT WAS WRONG, AND HOW IT WAS PROVED. `src/index.css` declares `--color-ink:
+   * #000000` in its `@theme inline` block, so Tailwind compiles BOTH `bg-ink`
+   * (`background-color:#000`) and `bg-ink/80` (`oklab(0% none none/.8)` — black at 80%)
+   * CORRECTLY, with no runtime variable involved. This table mapped the bare `ink` key
+   * to `var(--mr-surface)` instead, so the generator emitted a SECOND `.bg-ink\/80` rule
+   * painting that appearance-reactive surface. Two rules, one class, equal specificity —
+   * and the shim is imported LAST (`src/main.tsx` order: `index.css` then
+   * `theme-alpha-shims.css`), so the shim won. A black overlay therefore silently became
+   * a WHITE wash in the light appearance. MEASURED on the running product: the homepage's
+   * photo badges and its "Origin" bar rendered `color(srgb 1 1 1 / 0.8)` under
+   * `text-paper` — 1.41:1 and 1.31:1, i.e. text a person cannot read.
+   *
+   * THE FIX. `ink` joins `white`/`black` in LITERAL_KEYS, below: Tailwind already compiles
+   * it, so no shim is emitted and its own correct rule stands alone — in BOTH appearances.
+   * The NUMBERED keys (`ink-900`, `ink-850`, `ink-800`, `ink-700`) are UNCHANGED: those are
+   * the canonical SURFACE ladder the migration repoints ONTO, and they must stay
+   * appearance-reactive.
+   *
+   * GUARDED BY `scripts/validate-fixed-dark-scrims.mjs`, which fails if a bare-`bg-ink`
+   * shim returns or if this file and the committed stylesheet drift apart.
+   */
   'ink-900': 'var(--mr-surface)',
   'ink-850': 'var(--mr-surface-raised)',
   'ink-800': 'var(--mr-surface-overlay)',
@@ -203,8 +255,35 @@ const VAR_BY_KEY = {
   pink: 'var(--mr-state-muted)',
 };
 
-/** Literal colours Tailwind already compiles — these need no shim. */
-const LITERAL_KEYS = new Set(['white', 'black', 'transparent', 'current', 'inherit']);
+/**
+ * Literal colours Tailwind already compiles — these need no shim.
+ *
+ * §BATCH 4b (2026-11-28) — `ink`, `paper` and `signal` JOINED THIS SET, and the drift that
+ * put them here is the reason: this table is the generator's own copy of which palette
+ * names are literal, and it had gone stale. `src/index.css` declares the whole Lovable
+ * palette in its `@theme inline` block (`--color-ink: #000000`, `--color-paper: #FFFFFF`,
+ * `--color-signal: #FF6A00`), which Tailwind INLINES into `bg-ink`, `bg-ink/80`,
+ * `bg-paper/10`, `text-paper/70`, `bg-signal/20` … with no runtime variable — verified in
+ * the production bundle (`background-color:#ffffff1a`, `color:#ffffffb3`, `#ff6a0033`).
+ * Because they were not listed here, the generator refused to run at all (19 unresolved
+ * keys: `bg-paper/10 · border-paper/15 · text-paper/70 · bg-signal/20 · …`), so the
+ * committed `src/theme-alpha-shims.css` had NOT been produced by this script since the
+ * `paper`/`signal` utilities entered the tree — and `bg-ink/NN` kept a shim that
+ * overrode Tailwind's own correct black with the appearance-reactive `--mr-surface`.
+ *
+ * Emitting a shim for a class Tailwind already compiles is NEVER harmless: the shim is
+ * imported last (`src/main.tsx`), so it wins. See the header of this file.
+ */
+const LITERAL_KEYS = new Set([
+  'white',
+  'black',
+  'ink',
+  'paper',
+  'signal',
+  'transparent',
+  'current',
+  'inherit',
+]);
 
 /** Utility prefix → the CSS property Tailwind's own rule would set. */
 const PROPERTY_BY_PREFIX = {

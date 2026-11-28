@@ -4,6 +4,83 @@
 Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
+## §BATCH 4b — THE HOMEPAGE'S CONTRAST DEFECTS FIXED AT SOURCE, AND THE GENERATED LAYER BEHIND ONE OF THEM FIXED WITH THEM (2026-11-28)
+
+> **§LABEL WARNING.** `§BATCH 4b` is overloaded: it also names the design plan's *advertising screens on the
+> theme ladder* (2026-11-21, `e7fe7c1`, DONE). The registry id disambiguates — this work is
+> `design-batch4b-homepage-fixed-dark-contrast`. **The brand-redesign plan is COMPLETE (Batches 4a–8,
+> ending at §BATCH 8 = COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED, `4a5e2eb`); do not read it as open.**
+
+**State: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** This increment CHANGES APPLICATION RUNTIME
+BEHAVIOUR (`src/components/marketing/home/DesignE.tsx`, `src/components/brand/BrandTeamMessages.tsx`,
+`src/components/ads/AdsManagement.tsx`, `src/theme-alpha-shims.css`), so the three-way contract applies in full
+and its DEMO leg is not satisfied: **one publish is deliberately held**, because this work, the public-page
+content work and the pending login restyle all change the same public surfaces. The owner decides when the demo
+is published.
+
+### What was wrong, and what was proved before changing anything
+
+The recorded next task expected ONE plain defect plus ONE owner colour decision. Measuring first turned the
+"decision" into a defect, and then into two more.
+
+1. **The "Growth" step was white on white — 1:1, in both appearances.** The flow diagram's final step authored
+   its background TWICE (an else-branch `bg-paper`, plus a trailing `bg-ink`), and `cn()`
+   (`src/utils/cn.ts`) **joins** its arguments instead of merging them — so the element carried both, and
+   `bg-paper` (#FFFFFF) won by stylesheet order under `text-paper`. Plain defect; the branches are now mutually
+   exclusive.
+2. **The photo scrims were NOT a colour choice — a generated file was overriding Tailwind.** The built
+   stylesheet contained **two** `.bg-ink\/80` rules: Tailwind's own, correct (`oklab(0% none none/.8)` — black
+   at 80%, because `src/index.css` declares the Lovable palette in an `@theme inline` block and Tailwind
+   inlines those literals), and the shim's (`color-mix(in srgb, var(--mr-surface) 80%, transparent)`). Equal
+   specificity, and `src/main.tsx` imports the shim **second**, so the shim was the later rule and the one that
+   painted: in the light appearance a black scrim became a **white wash** under white text (**1.41:1** and
+   **1.31:1**). Fixed at source: `ink`/`paper`/`signal` joined the generator's `LITERAL_KEYS`, and the bare
+   `bg-ink/` mapping was removed from its resolver **and** its legacy target table.
+3. **Two more defects fell out of proving (2).** The generator **refused to run at all** (19 unresolved keys —
+   `bg-paper/10`, `text-paper/70`, `bg-signal/20`, …), so the committed stylesheet had not been its own output
+   since those utilities entered the tree. And because Tailwind v4 **drops** the alpha modifier for a
+   `var()`-based colour (`.bg-zinc-500\/10{background-color:var(--mr-text-muted)}` — no alpha), that stale file
+   had left **six** alpha utilities rendering **fully opaque**. The stylesheet is regenerated (924 → 910 rules)
+   and those six are shimmed again.
+4. **A third unreadable spot, found by the measuring tool and fixed.** The brand **Support & Team** screen put
+   its message meta text (`text-muted`, #A5A5A5) on the **orange** accent fill (`bg-accent-500`, #FF6A00) —
+   **1.17:1**. The fill now chooses its own text tokens (`--mr-on-accent`, 7.28:1 at full strength), exactly as
+   the sibling send button already did.
+
+### The gates
+
+- **`scripts/validate-alpha-shim-integrity.mjs`** (27 assertions, auto-discovered by `validate:all`): the
+  literal classification in **both** tables; an **absence guard** that no bare-`bg-ink/<alpha>` shim exists
+  (rule 08 §2); the numbered surface ladder **is** still shimmed; the committed stylesheet is **byte-identical**
+  to a fresh run of its generator (one author); and `src/main.tsx` keeps index.css **before** the shim, because
+  the whole fix rests on that cascade.
+- **`e2e/public-fixed-dark-surfaces.spec.ts`** (2 passed): every fixed-dark surface measured in **both**
+  appearances — not light, and legible — using a canvas to normalise the colour rather than a second parser.
+
+### Evidence
+
+`validate:all` **212 PASS / 0 FAIL of 212** (was 211) · typecheck **0** (four projects) · eslint **0 errors**
+(12 pre-existing warnings) · build **✓ 8.63s** · the walk **296/296 captures — PASS 296 · WARN 0 · FAIL 0**
+(was PASS 293 · WARN 3) · `validate-visual-acceptance` **9/9** over 148 rows · `validate-alpha-shim-integrity`
+**27/27** · `e2e/public-fixed-dark-surfaces` **2 passed** · `validate-registry-integrity` **10 PASS** ·
+`validate-built-rows` **2634 PASS / 0 FAIL**.
+
+**MUTATION PROOF — five mutations, each restored byte-identical** (shim generator sha256 `3e69f679dfcdd4b0` ·
+stylesheet `9ba02f87ffaef5c9` · `main.tsx` `c9241b9fe18151ac` · `DesignE.tsx` `74655bbe49d3c020`): (i) the
+white-wash rule re-added ⇒ S4 + S5 FAIL (25/27); (ii) the two imports swapped ⇒ S7 FAIL (26/27); (iii) `ink`
+dropped from `LITERAL_KEYS` ⇒ S2 + S5 FAIL (24/27); (iv) the bare `bg-ink/` mapping restored ⇒ the spec FAILS
+on the light appearance with `surface rgb(255,255,255) · text rgb(255,255,255)`; (v) the FLOW card reverted to
+two arguments ⇒ the spec FAILS in **both** appearances with the same white-on-white.
+
+### The one thing still open is the owner's
+
+The brand orange **#FF6A00** measures **~2.9:1** as text on white *and* as the fill under white text, so it
+cannot meet WCAG AA in either direction at its current value — but it is above this instrument's 1.6:1 floor,
+so it is recorded as a **decision**, never silently recoloured. **Not deployed:** one publish still carries this
+work together with the public content work and the login restyle.
+
+
+
 ## §BATCH 4 — THE VISUAL-ACCEPTANCE INSTRUMENT NOW SEES EVERY COLOUR, COUNTS WHAT IT CANNOT READ, AND WALKS THE LOGIN PORTAL (2026-11-28)
 
 **State: VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** This increment

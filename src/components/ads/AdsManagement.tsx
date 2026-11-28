@@ -36,14 +36,22 @@ export function AdsManagement() {
   return (
     <div className="min-h-screen bg-ink font-geist text-paper">
       {/* §BATCH 8 DEFECT FIXED AT SOURCE (2026-11-25). This header was `bg-ink/90`.
-          The project's alpha-shim layer rewrites `bg-ink/90` onto `--mr-surface`
+          The project's alpha-shim layer USED TO rewrite `bg-ink/90` onto `--mr-surface`
           (`src/theme-alpha-shims.css`), which is LIGHT in the light appearance,
           while every text colour in this screen comes from the fixed Lovable
           palette (`text-paper` = #FFFFFF) — so the tab strip and the wordmark were
           white-on-light and effectively invisible. The screen is a fixed-dark
           surface by design (its root is `bg-ink`); the header is now the same
           opaque `bg-ink`, so it stays readable in BOTH appearances. Caught by
-          `scripts/visual-acceptance.mjs`, which now measures text contrast. */}
+          `scripts/visual-acceptance.mjs`, which now measures text contrast.
+
+          §BATCH 4b UPDATE (2026-11-28) — THE UNDERLYING SHIM DEFECT IS FIXED, so `bg-ink/90`
+          is no longer re-pointed at the appearance: the bare `bg-ink/<alpha>` shim is GONE from
+          the generator and from the committed stylesheet, because Tailwind compiles those
+          classes itself from `--color-ink: #000000` and the shim was only overriding them.
+          The opaque `bg-ink` above is kept — it is what this header should be — and the
+          remaining `bg-ink/70` video chip below is now genuinely black in both appearances
+          instead of a white wash. Guarded by `scripts/validate-alpha-shim-integrity.mjs`. */}
       <header className="sticky top-0 z-40 border-b border-paper/10 bg-ink">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-6">
           <div className="flex items-center gap-4">

@@ -222,13 +222,27 @@ export function DesignE({ content, onPrimary, onOpenPortal }: DesignEProps) {
             <ol className="flex flex-col gap-0 lg:flex-row lg:items-stretch">
               {FLOW.map((f, i) => (
                 <li key={f.label} className="flex flex-col lg:flex-1 lg:flex-row lg:items-center">
+                  {/* §BATCH 4b — DEFECT FIXED AT SOURCE (2026-11-28). This card used to
+                      be TWO independent class arguments: an else-branch `bg-paper` for every
+                      step that is not 3 or 4, PLUS a trailing `i === FLOW.length - 1 &&
+                      "border-ink bg-ink text-paper"`. `cn()` (`src/utils/cn.ts`) JOINS its
+                      arguments — it does not merge them — so the last step's element carried
+                      BOTH `bg-paper` and `bg-ink`, and `border-ink/12` and `border-ink`. Both
+                      paint `background-color`, so the winner was decided by stylesheet order,
+                      and `bg-paper` (#FFFFFF) won while the card's text was `text-paper`
+                      (#FFFFFF): the word "Growth" measured 1:1 — white on white — in BOTH
+                      appearances. The branches are now MUTUALLY EXCLUSIVE (the shape this
+                      file already uses for the stepper and the "Why Mercenta" cards below),
+                      so exactly one background is authored and the final step reads as the
+                      dark card the design intends. */}
                   <div
                     className={cn(
                       "flex items-center gap-4 rounded-md border p-4 lg:w-full lg:flex-col lg:items-start lg:gap-3",
-                      i === 3 || i === 4
-                        ? "border-signal bg-signal/[0.06]"
-                        : "border-ink/12 bg-paper",
-                      i === FLOW.length - 1 && "border-ink bg-ink text-paper",
+                      i === FLOW.length - 1
+                        ? "border-ink bg-ink text-paper"
+                        : i === 3 || i === 4
+                          ? "border-signal bg-signal/[0.06]"
+                          : "border-ink/12 bg-paper",
                     )}
                   >
                     <span
