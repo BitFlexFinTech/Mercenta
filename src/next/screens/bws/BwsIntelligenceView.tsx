@@ -31,21 +31,38 @@ export type BwsIntelligenceSection =
   | 'opportunity-assessment'
   | 'acquisition-pipeline';
 
+/**
+ * §BWS INTELLIGENCE ROW MODELS (approved 2026-11-28).
+ *
+ * These used to carry CORE-lead fields (`totalScore`, `tier`, `offerSummary`, `asins[]`,
+ * five `can*Outreach` flags, per-country product/lead/PO counts). The Dash-1 source has
+ * NONE of those, so filling them would have printed fabricated numbers — exactly what D6
+ * forbids. The models now contain ONLY what the source holds, plus text indicators.
+ */
 export interface BwsCountrySummaryRow {
   regionKey: string;
   label: string;
+  /** `COUNTRIES.brandsDiscoveredCount` — a real source figure. */
   brandCount: number;
-  productCount: number;
-  leadCount: number;
-  openPoValueGbp: number;
+  /** `COUNTRIES.categories[]` (DrinkCategory). */
+  categories: string[];
+  /** `COUNTRIES.ukPresenceIndicator` — text, e.g. "Selective Presence". */
+  ukPresenceIndicator: string;
+  /** `COUNTRIES.commercialOpportunityIndicator` — text, e.g. "Primary Focus". */
+  commercialOpportunityIndicator: string;
+  featuredProducerCount: number;
+  evidenceCount: number;
 }
 
-export interface BwsCategoryBenchmarkRow {
-  category: string;
-  tamLabel: string;
-  samLabel: string;
-  sharePct: number;
-  rationale: string;
+/** One brand's read-only outreach entry, from `INITIAL_OUTREACH_LOGS` (keyed by brandId). */
+export interface BwsOutreachLogRow {
+  outreachStatus: string;
+  contactPerson: string;
+  contactRole: string;
+  contactEmail: string;
+  lastContacted: string;
+  nextFollowUp: string;
+  discussionNotes: string;
 }
 
 export interface BwsProspectRow {
@@ -53,50 +70,22 @@ export interface BwsProspectRow {
   brand: string;
   category: string;
   website?: string;
-  whyInteresting: string;
-  totalScore: number;
-  tier: string;
-  tierLabel: string;
-  offerSummary: string;
-  rawOfferClass: string;
-  ukPresence: boolean;
-  disqualified: boolean;
-  disqualificationReason?: string;
-  leadDistributor: string;
-  leadContact: string;
-  wholesaleAvailable: boolean;
-  distributorProgramme: boolean;
-  outreachStatus: string;
-  acquisitionStage: string;
-  canPrepareOutreach: boolean;
-  canApproveOutreach: boolean;
-  canSendOutreach: boolean;
-  canSimulateResponse: boolean;
-  canCreateOpportunity: boolean;
-  opportunityId?: string;
-  opportunityStage?: string;
-  asins: {
-    asin: string;
-    title: string;
-    offerClass: string;
-    price: number;
-    rating: number;
-    reviewCount: number;
-    estimatedRevenue?: number;
-  }[];
-  contacts: {
-    name: string;
-    jobTitle: string;
-    company: string;
-    email?: string;
-    emailConfidence?: string;
-  }[];
-  distributors: {
-    company: string;
-    territory: string;
-    exclusive: boolean;
-    suggestedApproach?: string;
-  }[];
+  /** `BRANDS.description` — the source's own wording. */
+  description: string;
+  /** `BRANDS.ownershipVerification` — text, replaces the old fabricated score/tier. */
+  ownershipVerification: string;
+  /** `BRANDS.licensingArrangement` — text. */
+  licensingArrangement: string;
+  /** `COUNTRIES.ukPresenceIndicator` for this brand's country, when known. */
+  ukPresenceIndicator: string;
+  /** `COUNTRIES.commercialOpportunityIndicator` for this brand's country, when known. */
+  commercialOpportunityIndicator: string;
+  /** `AMAZON_UK_LISTINGS` count for this brand (a per-brand ASIN, never a fabricated list). */
+  asinCount: number;
+  /** `INITIAL_OUTREACH_LOGS[brandId]` — READ ONLY (D8). */
+  outreach: BwsOutreachLogRow | null;
+  /** `OPPORTUNITY_ASSESSMENTS.status` — READ ONLY badge (D9). */
+  opportunityStatus: string | null;
 }
 
 export interface BwsOpportunityStateRow {
@@ -115,24 +104,14 @@ export interface BwsIntelligenceViewProps {
   canMutate: boolean;
   metrics: MetricItem[];
   countryRows: BwsCountrySummaryRow[];
-  categoryBenchmarks: BwsCategoryBenchmarkRow[];
-  opportunityStates: BwsOpportunityStateRow[];
   prospects: BwsProspectRow[];
   selectedProspect: BwsProspectRow | null;
   onSelectProspect: (id: string | null) => void;
   searchQuery: string;
   onSearchQueryChange: (q: string) => void;
-  tierFilter: string;
-  onTierFilterChange: (t: string) => void;
-  runningDiscovery: boolean;
-  statusMessage: string | null;
-  onRunDiscovery: () => void;
+  outreachFilter: string;
+  onOutreachFilterChange: (v: string) => void;
   onNavigateSection: (viewId: string) => void;
-  onOutreachAction: (
-    prospectId: string,
-    action: 'prepare' | 'approve' | 'send' | 'simulate_response' | 'create_opportunity'
-  ) => void;
-  onSetOpportunityStage: (opportunityId: string, stage: string) => void;
 }
 
 const SECTION_COPY: Record<
@@ -201,42 +180,53 @@ export function BwsIntelligenceView({
   canMutate,
   metrics,
   countryRows,
-  categoryBenchmarks,
-  opportunityStates,
   prospects,
   selectedProspect,
   onSelectProspect,
   searchQuery,
   onSearchQueryChange,
-  tierFilter,
-  onTierFilterChange,
-  runningDiscovery,
-  statusMessage,
-  onRunDiscovery,
+  outreachFilter,
+  onOutreachFilterChange,
   onNavigateSection,
-  onOutreachAction,
-  onSetOpportunityStage,
 }: BwsIntelligenceViewProps) {
-  const [stageTarget, setStageTarget] = useState('qualified');
   const copy = SECTION_COPY[section];
 
+  /**
+   * §D6/D7/D8 (2026-11-28): the old filters keyed off CORE lead fields (`disqualified`,
+   * `rawOfferClass`, `asins[]`) and sorted by a CORE score. None of those exist in Dash-1,
+   * so the filters now use only source fields — and nothing is ranked by a number.
+   */
   const scopedProspects = useMemo(() => {
     let rows = prospects;
-    if (section === 'pitch-targets') {
-      rows = rows.filter(
-        (p) =>
-          !p.disqualified &&
-          p.rawOfferClass !== 'DIRECT_AMAZON_RETAIL'
-      );
-    } else if (section === 'uk-distribution') {
-      rows = rows.filter((p) => !p.disqualified);
-    } else if (section === 'amazon-uk') {
-      rows = rows.filter((p) => p.asins.length > 0);
+    if (section === 'amazon-uk') {
+      rows = rows.filter((p) => p.asinCount > 0);
     } else if (section === 'opportunity-assessment') {
-      rows = rows.filter((p) => !p.disqualified).sort((a, b) => b.totalScore - a.totalScore);
+      rows = rows.filter((p) => p.opportunityStatus !== null);
     }
+    if (outreachFilter === 'with') rows = rows.filter((p) => p.outreach !== null);
+    else if (outreachFilter === 'without') rows = rows.filter((p) => p.outreach === null);
     return rows;
-  }, [prospects, section]);
+  }, [prospects, section, outreachFilter]);
+
+  const opportunityDistribution = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of prospects) {
+      const k = p.commercialOpportunityIndicator || '—';
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }, [prospects]);
+
+  const coverage = useMemo(
+    () => [
+      { label: 'Brands in dataset', value: prospects.length },
+      { label: 'Origin regions', value: countryRows.length },
+      { label: 'Brands with an outreach log', value: prospects.filter((p) => p.outreach).length },
+      { label: 'Brands with an opportunity assessment', value: prospects.filter((p) => p.opportunityStatus !== null).length },
+      { label: 'Brands with Amazon UK ASINs', value: prospects.filter((p) => p.asinCount > 0).length },
+    ],
+    [prospects, countryRows]
+  );
 
   const columns: ConsoleColumn<BwsProspectRow>[] = [
     {
@@ -250,51 +240,40 @@ export function BwsIntelligenceView({
       ),
     },
     {
-      key: 'tier',
-      header: 'Tier / Score',
+      key: 'verification',
+      header: 'Ownership Verification',
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.ownershipVerification}</span>,
+    },
+    {
+      key: 'ukPresence',
+      header: 'UK Presence',
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.ukPresenceIndicator}</span>,
+    },
+    {
+      key: 'opportunity',
+      header: 'Commercial Opportunity',
       render: (r) => (
-        <div className="flex items-center gap-2">
-          <InlineStatus label={r.tierLabel} tone={tierTone(r.tier)} />
-          <span className="font-mono text-[12px] tabular-nums text-zinc-600">{r.totalScore}</span>
-        </div>
+        <span className="text-[12px] text-zinc-700">{r.commercialOpportunityIndicator}</span>
       ),
     },
     {
-      key: 'offer',
-      header: section === 'uk-distribution' ? 'UK Distributor / Wholesale' : 'UK Channel Status',
-      render: (r) =>
-        section === 'uk-distribution' ? (
-          <div className="text-[12px]">
-            <div className="text-zinc-900">{r.leadDistributor}</div>
-            <div className="text-zinc-500">
-              {r.wholesaleAvailable ? 'Wholesale open' : 'No stated wholesale'} ·{' '}
-              {r.distributorProgramme ? 'Distributor prog.' : 'Direct review'}
-            </div>
-          </div>
-        ) : (
-          <div className="text-[12px]">
-            <div className="text-zinc-900">{r.offerSummary}</div>
-            <div className="text-zinc-500">
-              {r.asins.length} ASIN{r.asins.length === 1 ? '' : 's'} ·{' '}
-              {r.ukPresence ? 'UK footprint' : 'No UK footprint'}
-            </div>
-          </div>
-        ),
+      key: 'asins',
+      header: 'Amazon UK ASINs',
+      align: 'right',
+      render: (r) => <span className="font-mono tabular-nums text-zinc-700">{r.asinCount}</span>,
     },
     {
-      key: 'stage',
-      header: 'Acquisition Stage',
-      render: (r) => (
-        <span className="font-mono text-[12px] text-zinc-700">
-          {r.opportunityStage ? r.opportunityStage.replace(/_/g, ' ') : r.acquisitionStage}
-        </span>
-      ),
-    },
-    {
-      key: 'contact',
-      header: 'Primary Contact',
+      key: 'outreach',
+      header: 'Outreach (read-only)',
       hideOnMobile: true,
-      render: (r) => <span className="text-[12px] text-zinc-600">{r.leadContact}</span>,
+      render: (r) =>
+        r.outreach ? (
+          <span className="text-[12px] text-zinc-700">{r.outreach.outreachStatus}</span>
+        ) : (
+          <span className="text-[12px] text-zinc-500" title="No outreach log in the Dash-1 source.">
+            —
+          </span>
+        ),
     },
   ];
 
@@ -305,28 +284,37 @@ export function BwsIntelligenceView({
       render: (r) => <span className="font-medium text-zinc-950">{r.label}</span>,
     },
     {
+      key: 'categories',
+      header: 'Drink Categories',
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.categories.join(', ') || '—'}</span>,
+    },
+    {
       key: 'brands',
-      header: 'Active Brands',
+      header: 'Brands Discovered',
       align: 'right',
       render: (r) => <span className="font-mono tabular-nums">{r.brandCount}</span>,
     },
     {
-      key: 'products',
-      header: 'Listed SKUs',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.productCount}</span>,
+      key: 'ukPresence',
+      header: 'UK Presence',
+      render: (r) => <span className="text-[12px] text-zinc-700">{r.ukPresenceIndicator}</span>,
     },
     {
-      key: 'leads',
-      header: 'Sourcing Leads',
-      align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{r.leadCount}</span>,
+      key: 'opportunity',
+      header: 'Commercial Opportunity',
+      render: (r) => (
+        <span className="text-[12px] text-zinc-700">{r.commercialOpportunityIndicator}</span>
+      ),
     },
     {
-      key: 'poVal',
-      header: 'PO Volume',
+      key: 'producers',
+      header: 'Producers / Evidence',
       align: 'right',
-      render: (r) => <span className="font-mono tabular-nums">{formatGbp(r.openPoValueGbp)}</span>,
+      render: (r) => (
+        <span className="font-mono tabular-nums text-zinc-700">
+          {r.featuredProducerCount} / {r.evidenceCount}
+        </span>
+      ),
     },
   ];
 
@@ -335,19 +323,9 @@ export function BwsIntelligenceView({
       <PageHeader
         title={copy.title}
         description={copy.description}
-        meta={<span>BWS Workspace · Backed by canonical Mercenta Brand, Prospect &amp; Acquisition stores</span>}
+        meta={<span>BWS Workspace · Dash-1 BWS research dataset (88 brands, 13 origin regions)</span>}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            {(section === 'overview' || section === 'brand-discovery' || section === 'brand-intelligence') && (
-              <button
-                type="button"
-                disabled={runningDiscovery || !canMutate}
-                onClick={onRunDiscovery}
-                className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
-              >
-                {runningDiscovery ? 'Running scan…' : 'Run Intelligence Scan'}
-              </button>
-            )}
             {section === 'overview' && (
               <button
                 type="button"
@@ -362,12 +340,10 @@ export function BwsIntelligenceView({
       />
 
       <NoticeBanner
-        tone="warning"
-        title="BWS alcohol schema attributes not yet present in Mercenta canonical types"
-        message="Showing canonical Mercenta brands, prospects, and acquisition records. Alcohol-specific attributes from Dash-1 (ABV%, AWRS registration number, UK excise duty band, drink-category filter, and wet-bond storage indicators) plus Brand.vertical isolation are omitted until backend fields are added."
+        tone="info"
+        title="Dash-1 BWS research dataset — shown as published"
+        message="Brands, origin regions, ownership verification, licensing arrangement, outreach logs and opportunity assessments come from the Dash-1 BWS dataset. A field the dataset does not contain is shown as an em dash (—) and is never defaulted, estimated or filled in."
       />
-
-      {statusMessage && <NoticeBanner tone="info" message={statusMessage} />}
 
       {loading ? (
         <LoadingRows rows={6} />
@@ -380,36 +356,28 @@ export function BwsIntelligenceView({
           {section === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SectionCard
-                title="Prospect Score Distribution (Top Ranked)"
-                description="Composite readiness score out of 100 across tracked brands."
+                title="Commercial Opportunity Distribution"
+                description="Brands grouped by the Dash-1 commercial opportunity indicator. These are counts of records present in the dataset — no readiness score is computed or shown."
               >
                 <ConsoleBarChart
-                  data={prospects.slice(0, 6).map((p) => ({
-                    label: p.brand.split(' ')[0] ?? p.brand,
-                    value: p.totalScore,
-                    hint: `${p.brand}: ${p.totalScore}/100 (${p.tierLabel})`,
+                  data={opportunityDistribution.map(([label, value]) => ({
+                    label,
+                    value,
+                    hint: `${label}: ${value} brand${value === 1 ? '' : 's'}`,
                   }))}
-                  formatValue={(v) => `${v} pts`}
+                  formatValue={(v) => `${v}`}
                 />
               </SectionCard>
 
               <SectionCard
-                title="UK Opportunity State Coverage"
-                description="Live UK channel states derived from verified Mercenta evidence sources."
+                title="Dataset Coverage"
+                description="How much of the Dash-1 BWS dataset carries each record type. Every figure is a count of records actually present — none are estimates."
               >
-                <div className="space-y-3">
-                  {opportunityStates.map((st) => (
-                    <div key={st.stateId} className="space-y-1 border-b border-zinc-100 pb-2 last:border-b-0">
-                      <div className="flex items-center justify-between gap-2 text-[12px]">
-                        <span className="font-medium text-zinc-900">{st.label}</span>
-                        <InlineStatus
-                          label={st.available ? 'Evidence active' : 'Unasserted (no provider)'}
-                          tone={st.available ? 'success' : 'neutral'}
-                        />
-                      </div>
-                      <div className="text-[11px] text-zinc-500">
-                        Evidence source: {st.evidenceSource}
-                      </div>
+                <div className="space-y-2">
+                  {coverage.map((c) => (
+                    <div key={c.label} className="flex items-center justify-between gap-2 text-[12px] border-b border-zinc-100 pb-2 last:border-b-0">
+                      <span className="text-zinc-700">{c.label}</span>
+                      <span className="font-mono tabular-nums text-zinc-950">{c.value}</span>
                     </div>
                   ))}
                 </div>
@@ -421,36 +389,23 @@ export function BwsIntelligenceView({
             <div className="space-y-6">
               <SectionCard
                 title="Sourcing Nations &amp; Lead Regions"
-                description="Aggregated directly from DemoBrandRow.nation, Lead.region, and PurchaseOrder records."
+                description="One row per origin region in the Dash-1 COUNTRIES dataset: its drink categories, brands discovered, UK presence indicator, commercial opportunity indicator, featured producers and evidence items."
               >
                 <ConsoleTable
                   rows={countryRows}
                   columns={countryColumns}
                   rowKey={(r) => r.regionKey}
                   emptyTitle="No origin records found"
-                  emptyDescription="No brand nations or lead regions are recorded in the canonical stores."
+                  emptyDescription="The Dash-1 COUNTRIES dataset has no origin regions."
                 />
               </SectionCard>
 
               <SectionCard
-                title="UK Category TAM / SAM Reference Benchmarks"
-                description="Canonical market-sizing estimates from src/lib/market-data/tamSamPipeline.ts."
+                title="Market Sizing"
+                description="Market sizing data not available in this workspace (D5)."
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {categoryBenchmarks.map((b) => (
-                    <div key={b.category} className="border border-zinc-200 rounded-md p-3.5 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-zinc-950 text-[14px]">{b.category}</span>
-                        <span className="font-mono text-[12px] text-[var(--mr-accent)]">
-                          SAM share: {b.sharePct}%
-                        </span>
-                      </div>
-                      <div className="text-[12px] font-mono text-zinc-600">
-                        TAM: {b.tamLabel} · SAM: {b.samLabel}
-                      </div>
-                      <p className="text-[12px] text-zinc-600">{b.rationale}</p>
-                    </div>
-                  ))}
+                <div className="border border-zinc-200 rounded-md p-4 text-[13px] text-zinc-600">
+                  Market sizing data not available in this workspace.
                 </div>
               </SectionCard>
             </div>
@@ -466,29 +421,27 @@ export function BwsIntelligenceView({
                   className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px] w-full sm:w-72"
                 />
                 <select
-                  aria-label="Filter by qualification tier"
-                  value={tierFilter}
-                  onChange={(e) => onTierFilterChange(e.target.value)}
+                  aria-label="Filter by outreach log"
+                  value={outreachFilter}
+                  onChange={(e) => onOutreachFilterChange(e.target.value)}
                   className="px-3 py-1.5 rounded-md border border-zinc-300 bg-white text-[14px]"
                 >
-                  <option value="">All score tiers</option>
-                  <option value="tier_1">Tier 1 · Attack Now</option>
-                  <option value="tier_2">Tier 2 · High Prob</option>
-                  <option value="tier_3">Tier 3 · Upside</option>
-                  <option value="tier_4">Tier 4 · Reserve</option>
+                  <option value="">All brands</option>
+                  <option value="with">With an outreach log</option>
+                  <option value="without">Without an outreach log</option>
                 </select>
               </div>
 
               {scopedProspects.length === 0 ? (
                 <EmptyStateBlock
                   title="No matching records for this view"
-                  description="Clear the search filter or run a Brand Intelligence scan to populate prospects."
-                  actionLabel={searchQuery || tierFilter ? 'Clear filters' : undefined}
+                  description="Clear the filters, or open a different section. Brands come from the Dash-1 BWS dataset."
+                  actionLabel={searchQuery || outreachFilter ? 'Clear filters' : undefined}
                   onAction={
-                    searchQuery || tierFilter
+                    searchQuery || outreachFilter
                       ? () => {
                           onSearchQueryChange('');
-                          onTierFilterChange('');
+                          onOutreachFilterChange('');
                         }
                       : undefined
                   }
@@ -513,7 +466,7 @@ export function BwsIntelligenceView({
         title={selectedProspect?.brand ?? 'Brand Dossier'}
         subtitle={
           selectedProspect
-            ? `${selectedProspect.category} · Score ${selectedProspect.totalScore}/100 (${selectedProspect.tierLabel})`
+            ? `${selectedProspect.category} · ${selectedProspect.commercialOpportunityIndicator}`
             : undefined
         }
       >
@@ -521,148 +474,90 @@ export function BwsIntelligenceView({
           <div className="space-y-5 text-[14px]">
             <div className="space-y-1.5">
               <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
-                Commercial Thesis
+                Brand record (Dash-1)
               </div>
-              <p className="text-zinc-800">{selectedProspect.whyInteresting}</p>
+              <p className="text-zinc-800">{selectedProspect.description}</p>
               {selectedProspect.website && (
                 <div className="text-[12px] font-mono text-zinc-500">{selectedProspect.website}</div>
               )}
+              <dl className="pt-1 space-y-1 text-[12px]">
+                <div className="flex gap-2">
+                  <dt className="text-zinc-500 w-44 shrink-0">Ownership verification</dt>
+                  <dd className="text-zinc-800">{selectedProspect.ownershipVerification}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="text-zinc-500 w-44 shrink-0">Licensing arrangement</dt>
+                  <dd className="text-zinc-800">{selectedProspect.licensingArrangement}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="text-zinc-500 w-44 shrink-0">UK presence</dt>
+                  <dd className="text-zinc-800">{selectedProspect.ukPresenceIndicator}</dd>
+                </div>
+              </dl>
             </div>
 
+            {/* §D9 — read-only badge; the stage is never mutated from this screen. */}
             <div className="border-t border-zinc-200 pt-4 space-y-2">
               <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
-                Outreach &amp; Acquisition Lifecycle
+                Opportunity assessment (read-only)
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                <InlineStatus
-                  label={`Stage: ${selectedProspect.opportunityStage ?? selectedProspect.acquisitionStage}`}
-                  tone="info"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {selectedProspect.canPrepareOutreach && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'prepare')}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
-                  >
-                    Prepare Outreach
-                  </button>
-                )}
-                {selectedProspect.canApproveOutreach && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'approve')}
-                    className="px-3 py-1.5 rounded bg-zinc-900 text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Approve Draft
-                  </button>
-                )}
-                {selectedProspect.canSendOutreach && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'send')}
-                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Send Outreach
-                  </button>
-                )}
-                {selectedProspect.canSimulateResponse && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'simulate_response')}
-                    className="px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
-                  >
-                    Log Reply (Sim)
-                  </button>
-                )}
-                {selectedProspect.canCreateOpportunity && (
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() => onOutreachAction(selectedProspect.id, 'create_opportunity')}
-                    className="px-3 py-1.5 rounded bg-zinc-900 text-white text-[12px] font-medium disabled:opacity-40"
-                  >
-                    Promote to Opportunity
-                  </button>
-                )}
-              </div>
-
-              {selectedProspect.opportunityId && (
-                <div className="flex items-center gap-2 pt-2">
-                  <select
-                    aria-label="Update opportunity stage"
-                    value={stageTarget}
-                    onChange={(e) => setStageTarget(e.target.value)}
-                    className="px-2.5 py-1 rounded border border-zinc-300 bg-white text-[12px]"
-                  >
-                    <option value="qualified">Qualified</option>
-                    <option value="meeting_booked">Meeting Booked</option>
-                    <option value="proposal_sent">Proposal Sent</option>
-                    <option value="won">Won</option>
-                  </select>
-                  <button
-                    type="button"
-                    disabled={!canMutate}
-                    onClick={() =>
-                      onSetOpportunityStage(selectedProspect.opportunityId!, stageTarget)
-                    }
-                    className="px-3 py-1 rounded border border-zinc-300 bg-white text-[12px] font-medium hover:bg-zinc-50 disabled:opacity-40"
-                  >
-                    Set Stage
-                  </button>
-                </div>
+              {selectedProspect.opportunityStatus ? (
+                <InlineStatus label={selectedProspect.opportunityStatus} tone="info" />
+              ) : (
+                <p className="text-[12px] text-zinc-500">
+                  No opportunity assessment recorded for this brand.
+                </p>
               )}
             </div>
 
+            {/* §D8 — the outreach log is displayed as recorded; no write controls exist. */}
             <div className="border-t border-zinc-200 pt-4 space-y-2">
               <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
-                Observed Amazon UK ASINs ({selectedProspect.asins.length})
+                Outreach log (read-only)
               </div>
-              {selectedProspect.asins.length === 0 ? (
-                <p className="text-[12px] text-zinc-500">No ASIN snapshots attached.</p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedProspect.asins.map((a) => (
-                    <div
-                      key={a.asin}
-                      className="border border-zinc-200 rounded p-2.5 text-[12px] space-y-1"
-                    >
-                      <div className="font-medium text-zinc-950">{a.title}</div>
-                      <div className="flex flex-wrap gap-x-3 text-zinc-600 font-mono">
-                        <span>{a.asin}</span>
-                        <span>{a.offerClass.replace(/_/g, ' ')}</span>
-                        <span>{formatGbp(a.price, 2)}</span>
-                        {typeof a.estimatedRevenue === 'number' && (
-                          <span>Est. {formatGbp(a.estimatedRevenue)}/mo</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-zinc-200 pt-4 space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
-                UK Distributors ({selectedProspect.distributors.length})
-              </div>
-              {selectedProspect.distributors.length === 0 ? (
-                <p className="text-[12px] text-zinc-500">No third-party UK distributor recorded.</p>
-              ) : (
-                selectedProspect.distributors.map((d, i) => (
-                  <div key={`${d.company}-${i}`} className="border border-zinc-200 rounded p-2.5 text-[12px]">
-                    <div className="font-medium text-zinc-950">
-                      {d.company} ({d.territory}) {d.exclusive ? '· Exclusive' : ''}
-                    </div>
-                    <div className="text-zinc-600 mt-0.5">{d.suggestedApproach}</div>
+              {selectedProspect.outreach ? (
+                <dl className="space-y-1 text-[12px]">
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500 w-44 shrink-0">Outreach status</dt>
+                    <dd className="text-zinc-800">{selectedProspect.outreach.outreachStatus}</dd>
                   </div>
-                ))
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500 w-44 shrink-0">Contact</dt>
+                    <dd className="text-zinc-800">
+                      {selectedProspect.outreach.contactPerson} · {selectedProspect.outreach.contactRole}
+                    </dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500 w-44 shrink-0">Email</dt>
+                    <dd className="text-zinc-800 font-mono">{selectedProspect.outreach.contactEmail}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500 w-44 shrink-0">Last contacted / next follow-up</dt>
+                    <dd className="text-zinc-800">
+                      {selectedProspect.outreach.lastContacted} / {selectedProspect.outreach.nextFollowUp}
+                    </dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-zinc-500 w-44 shrink-0">Discussion notes</dt>
+                    <dd className="text-zinc-800">{selectedProspect.outreach.discussionNotes}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="text-[12px] text-zinc-500">
+                  No outreach log recorded for this brand in the Dash-1 dataset.
+                </p>
               )}
+            </div>
+
+            <div className="border-t border-zinc-200 pt-4 space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.06em] text-zinc-500">
+                Amazon UK listings
+              </div>
+              <p className="text-[12px] text-zinc-700">
+                {selectedProspect.asinCount === 0
+                  ? 'No Amazon UK listing recorded for this brand.'
+                  : `${selectedProspect.asinCount} Amazon UK listing${selectedProspect.asinCount === 1 ? '' : 's'} recorded for this brand in the Dash-1 dataset.`}
+              </p>
             </div>
           </div>
         )}

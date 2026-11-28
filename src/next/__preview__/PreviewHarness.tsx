@@ -414,8 +414,6 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
               { id: 'v', label: 'PO Volume', value: isEmpty ? '£0' : '£45,000' },
             ]}
             countryRows={[]}
-            categoryBenchmarks={[]}
-            opportunityStates={[]}
             prospects={
               isEmpty
                 ? []
@@ -423,29 +421,24 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
                     {
                       id: 'p-1',
                       brand: 'Sample Producer Co',
-                      category: 'Grocery',
-                      whyInteresting: 'Export-ready line with active UK wholesaler demand.',
-                      totalScore: 84,
-                      tier: 'tier_1',
-                      tierLabel: 'Attack Now',
-                      offerSummary: 'MARKETPLACE ONLY OBSERVED',
-                      rawOfferClass: 'MARKETPLACE_ONLY_OBSERVED',
-                      ukPresence: false,
-                      disqualified: false,
-                      leadDistributor: 'None recorded',
-                      leadContact: 'Head of Export',
-                      wholesaleAvailable: true,
-                      distributorProgramme: false,
-                      outreachStatus: 'not_enrolled',
-                      acquisitionStage: 'not enrolled',
-                      canPrepareOutreach: true,
-                      canApproveOutreach: false,
-                      canSendOutreach: false,
-                      canSimulateResponse: false,
-                      canCreateOpportunity: false,
-                      asins: [],
-                      contacts: [],
-                      distributors: [],
+                      category: 'Wine',
+                      website: undefined,
+                      description: 'Export-ready producer recorded in the Dash-1 dataset.',
+                      ownershipVerification: 'Companies House record confirmed.',
+                      licensingArrangement: 'Direct brand ownership.',
+                      ukPresenceIndicator: 'Selective Presence',
+                      commercialOpportunityIndicator: 'Primary Focus',
+                      asinCount: 2,
+                      outreach: {
+                        outreachStatus: 'Confirmed',
+                        contactPerson: 'Sample Contact',
+                        contactRole: 'Export Lead',
+                        contactEmail: 'sample@example.com',
+                        lastContacted: '2026-11-18',
+                        nextFollowUp: '2026-11-26',
+                        discussionNotes: 'Sample outreach note.',
+                      },
+                      opportunityStatus: 'High Potential',
                     },
                   ]
             }
@@ -453,14 +446,9 @@ export function PreviewHarness({ onExit }: { onExit: () => void }) {
             onSelectProspect={() => {}}
             searchQuery=""
             onSearchQueryChange={() => {}}
-            tierFilter=""
-            onTierFilterChange={() => {}}
-            runningDiscovery={false}
-            statusMessage={null}
-            onRunDiscovery={() => {}}
+            outreachFilter=""
+            onOutreachFilterChange={() => {}}
             onNavigateSection={() => {}}
-            onOutreachAction={() => {}}
-            onSetOpportunityStage={() => {}}
           />
         )}
 
