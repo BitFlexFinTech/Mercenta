@@ -298,7 +298,7 @@ export function ControlCentreView({
                   <button
                     type="button"
                     onClick={() => onNavigate('crm')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Open Brand CRM
                   </button>
@@ -427,7 +427,7 @@ export function ControlCentreView({
                             <button
                               type="button"
                               onClick={() => onOpenCommercialDrawer(r)}
-                              className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                              className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                             >
                               Open
                             </button>
@@ -479,7 +479,7 @@ export function ControlCentreView({
                   <button
                     type="button"
                     onClick={() => onNavigate('crm')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Open CRM
                   </button>
@@ -561,7 +561,7 @@ export function ControlCentreView({
                             <button
                               type="button"
                               onClick={() => onFeedPreAudit(r.assessmentId)}
-                              className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                             >
                               Feed to acquisition
                             </button>
@@ -569,7 +569,7 @@ export function ControlCentreView({
                             <button
                               type="button"
                               onClick={() => onOpenPreAuditDrawer(r)}
-                              className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                              className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                             >
                               Open
                             </button>
@@ -699,7 +699,7 @@ export function ControlCentreView({
                 <button
                   type="button"
                   onClick={() => onNavigate('compliance')}
-                  className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                  className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                 >
                   Open Compliance Approvals
                 </button>
@@ -724,7 +724,7 @@ export function ControlCentreView({
                   data-halted={halt.halted ? 'true' : 'false'}
                 >
                   <div className="flex items-start gap-2.5 text-[13px] text-zinc-800" data-testid="automation-halt-state">
-                    <ShieldAlert className="w-4 h-4 text-[#C2410C] shrink-0 mt-0.5" aria-hidden="true" />
+                    <ShieldAlert className="w-4 h-4 text-[var(--mr-accent)] shrink-0 mt-0.5" aria-hidden="true" />
                     <span>
                       {halt.halted
                         ? `HALTED — ${halt.reason} (${halt.actor}, ${halt.at})`
@@ -813,7 +813,7 @@ export function ControlCentreView({
                           <button
                             type="button"
                             onClick={() => onOpenRunDrawer(h.lastRun)}
-                            className="text-[11px] font-medium text-[#C2410C] hover:underline ml-1"
+                            className="text-[11px] font-medium text-[var(--mr-accent)] hover:underline ml-1"
                           >
                             Last run
                           </button>
@@ -850,7 +850,7 @@ export function ControlCentreView({
                         <button
                           type="button"
                           onClick={() => onApproveAutomation(a.key)}
-                          className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                          className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                         >
                           Approve
                         </button>
@@ -945,7 +945,7 @@ export function ControlCentreView({
                 <button
                   type="button"
                   onClick={() => onNavigate('audit_log')}
-                  className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                  className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                 >
                   Open full Audit Log
                 </button>
@@ -981,7 +981,7 @@ export function ControlCentreView({
                 type="button"
                 onClick={() => onNavigate('integrations')}
                 data-testid="control-open-integrations"
-                className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
               >
                 Open
               </button>

@@ -283,7 +283,7 @@ export function BrandPurchaseOrdersView({
                 e.stopPropagation();
                 setExpandedPoId((curr) => (curr === po.id ? null : po.id));
               }}
-              className="font-mono font-semibold text-zinc-950 hover:text-[#C2410C] text-left focus-visible:outline-2 focus-visible:outline-[#C2410C]"
+              className="font-mono font-semibold text-zinc-950 hover:text-[var(--mr-accent)] text-left focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
             >
               {po.poNumber}
             </button>
@@ -404,7 +404,7 @@ export function BrandPurchaseOrdersView({
                   ackingPoId === po.id ? void handleAckSubmit(po) : beginAck(po)
                 }
                 disabled={busyPoId === po.id}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] whitespace-nowrap disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] whitespace-nowrap disabled:opacity-50"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                 {ackingPoId === po.id ? 'Submit ack' : 'Acknowledge'}
@@ -545,14 +545,14 @@ export function BrandPurchaseOrdersView({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search PO number…"
               aria-label="Search purchase orders"
-              className="pl-9 pr-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 w-56 focus:outline-2 focus:outline-[#C2410C]"
+              className="pl-9 pr-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 w-56 focus:outline-2 focus:outline-[var(--mr-accent)]"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             aria-label="Filter by status"
-            className="px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[#C2410C]"
+            className="px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
           >
             <option value="all">Status: all</option>
             {PO_STATUS_ORDER.map((s) => (
@@ -660,7 +660,7 @@ export function BrandPurchaseOrdersView({
                           type="button"
                           onClick={() => void handleAckSubmit(po)}
                           disabled={busyPoId === po.id}
-                          className="px-3.5 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
+                          className="px-3.5 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
                         >
                           {canAmend ? 'Submit amendment' : 'Submit acknowledgment'}
                         </button>
@@ -971,7 +971,7 @@ export function BrandPurchaseOrdersView({
                         type="button"
                         onClick={() => void handleCorrectionSubmit(po)}
                         disabled={busyPoId === po.id}
-                        className="px-3.5 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                        className="px-3.5 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                       >
                         Send packing correction to Mercenta
                       </button>
@@ -1117,7 +1117,7 @@ export function BrandPurchaseOrdersView({
                       beginAck(previewRecord);
                       setPreviewPoId(null);
                     }}
-                    className="px-3.5 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Acknowledge
                   </button>

@@ -343,7 +343,7 @@ export function BwsIntelligenceView({
                 type="button"
                 disabled={runningDiscovery || !canMutate}
                 onClick={onRunDiscovery}
-                className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
+                className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
               >
                 {runningDiscovery ? 'Running scan…' : 'Run Intelligence Scan'}
               </button>
@@ -441,7 +441,7 @@ export function BwsIntelligenceView({
                     <div key={b.category} className="border border-zinc-200 rounded-md p-3.5 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-zinc-950 text-[14px]">{b.category}</span>
-                        <span className="font-mono text-[12px] text-[#C2410C]">
+                        <span className="font-mono text-[12px] text-[var(--mr-accent)]">
                           SAM share: {b.sharePct}%
                         </span>
                       </div>
@@ -565,7 +565,7 @@ export function BwsIntelligenceView({
                     type="button"
                     disabled={!canMutate}
                     onClick={() => onOutreachAction(selectedProspect.id, 'send')}
-                    className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
                   >
                     Send Outreach
                   </button>

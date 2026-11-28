@@ -250,7 +250,7 @@ export function PartnershipsView({
                     setSending(false);
                   }
                 }}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 {sending ? 'Sending…' : 'Send now'}
               </button>
@@ -279,7 +279,7 @@ export function PartnershipsView({
                   <div key={u.label} className="p-3 text-[12px]">
                     <div className="flex justify-between font-medium text-zinc-950">
                       <span>{u.label}</span>
-                      <span className="font-mono text-[#C2410C]">{u.pct}%</span>
+                      <span className="font-mono text-[var(--mr-accent)]">{u.pct}%</span>
                     </div>
                     <p className="text-zinc-600 mt-0.5">{u.note}</p>
                   </div>

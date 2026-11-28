@@ -153,7 +153,7 @@ export function BrandCommercialReadinessView({
                     type="button"
                     onClick={() => onToggleExpand(r.id)}
                     aria-expanded={open}
-                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-zinc-50/70 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
+                    className="w-full px-4 py-3 flex items-start justify-between gap-4 text-left hover:bg-zinc-50/70 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
                   >
                     <div className="min-w-0">
                       <div className="text-[14px] font-semibold text-zinc-950 truncate">
@@ -187,7 +187,7 @@ export function BrandCommercialReadinessView({
                                   <div className="font-semibold text-zinc-950">{reason.label}</div>
                                   <p className="text-zinc-700">{reason.what}</p>
                                   <p className="text-zinc-600">{reason.why}</p>
-                                  <div className="text-[11px] text-[#C2410C] font-medium">
+                                  <div className="text-[11px] text-[var(--mr-accent)] font-medium">
                                     Guide: {reason.articleTitle}
                                   </div>
                                 </li>
@@ -250,7 +250,7 @@ export function BrandCommercialReadinessView({
                                         type="button"
                                         onClick={() => onSubmitField(r, f.field)}
                                         data-testid={`brand-commercial-submit-${f.field}`}
-                                        className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                                        className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                                       >
                                         Submit for reassessment
                                       </button>

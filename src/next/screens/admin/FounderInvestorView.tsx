@@ -99,7 +99,7 @@ export function FounderInvestorView({
             <button
               type="button"
               onClick={() => setDeckOpen(true)}
-              className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Present deck
             </button>
@@ -219,7 +219,7 @@ export function FounderInvestorView({
               <div key={s.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[13px] font-semibold text-zinc-950">{s.label}</span>
-                  <span className="text-[11px] font-mono text-[#C2410C]">{s.targetTime}</span>
+                  <span className="text-[11px] font-mono text-[var(--mr-accent)]">{s.targetTime}</span>
                 </div>
                 <p className="text-[13px] text-zinc-700">{s.direction}</p>
                 <p className="text-[12px] text-zinc-500">Cue: {s.cue}</p>

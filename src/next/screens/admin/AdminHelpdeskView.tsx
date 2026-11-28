@@ -194,7 +194,7 @@ export function AdminHelpdeskView({
                 <div key={c.id} className="p-3 space-y-2" data-state="case-review-row">
                   <div className="flex flex-wrap items-center gap-2 justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[12px] text-[#C2410C]">
+                      <span className="font-mono text-[12px] text-[var(--mr-accent)]">
                         {c.caseRef ?? c.id}
                       </span>
                       <span className="text-[13px] font-semibold text-zinc-950">{c.subject}</span>
@@ -255,13 +255,13 @@ export function AdminHelpdeskView({
                   className="flex flex-wrap items-center justify-between gap-2 text-[12px]"
                 >
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-[var(--mr-accent)] mr-2">{c.caseRef ?? c.id}</span>
                     <span className="text-zinc-950 font-medium">{c.subject}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => void onEscalateCase(c.id)}
-                    className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[11px] font-medium hover:bg-[#9A3412]"
+                    className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[11px] font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Escalate to Amazon
                   </button>
@@ -275,7 +275,7 @@ export function AdminHelpdeskView({
               <div className="text-[12px] font-semibold text-zinc-950">Provider cases</div>
               {providerCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center gap-3 text-[12px]">
-                  <span className="font-mono text-[#C2410C]">{c.caseRef ?? c.id}</span>
+                  <span className="font-mono text-[var(--mr-accent)]">{c.caseRef ?? c.id}</span>
                   <span className="font-mono text-zinc-600">{c.amazonReferenceId}</span>
                   <span className="text-zinc-600">
                     {c.amazonSimulated ? 'Simulation — no live Amazon case' : 'Live Amazon case'}
@@ -317,7 +317,7 @@ export function AdminHelpdeskView({
               {awaitingResponseCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-[var(--mr-accent)] mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -348,7 +348,7 @@ export function AdminHelpdeskView({
               {readyToResolveCases.map((c) => (
                 <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                   <span>
-                    <span className="font-mono text-[#C2410C] mr-2">{c.caseRef ?? c.id}</span>
+                    <span className="font-mono text-[var(--mr-accent)] mr-2">{c.caseRef ?? c.id}</span>
                     {c.subject}
                   </span>
                   <button
@@ -526,7 +526,7 @@ export function AdminHelpdeskView({
                       <button
                         type="button"
                         onClick={() => setReplyDraft(suggestedReply)}
-                        className="text-[#C2410C] font-medium hover:underline"
+                        className="text-[var(--mr-accent)] font-medium hover:underline"
                       >
                         Insert draft
                       </button>
@@ -552,7 +552,7 @@ export function AdminHelpdeskView({
                           setReplyDraft('')
                         );
                       }}
-                      className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                      className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                     >
                       Send Reply
                     </button>

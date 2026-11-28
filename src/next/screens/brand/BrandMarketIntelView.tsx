@@ -307,7 +307,7 @@ export function BrandMarketIntelView({
                   <button
                     type="button"
                     onClick={() => setShowAllCompetitors((v) => !v)}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     {showAllCompetitors ? 'Show fewer' : `Show all ${competitors.length}`}
                   </button>
@@ -406,7 +406,7 @@ export function BrandMarketIntelView({
                   </label>
                   {selectedAnalysis && (
                     <div className="flex items-center gap-3">
-                      <ScanSearch className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                      <ScanSearch className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
                       <span className="text-[14px] font-medium text-zinc-950">
                         Health: {selectedAnalysis.healthScore}/100 ({selectedAnalysis.healthLevel})
                       </span>
@@ -538,7 +538,7 @@ export function BrandMarketIntelView({
                                   type="button"
                                   disabled={busy}
                                   onClick={() => onReviewRecommendation(rec, 'approved')}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                                 >
                                   <Check className="w-3.5 h-3.5" aria-hidden="true" />
                                   Approve
@@ -583,7 +583,7 @@ export function BrandMarketIntelView({
                                       onReviewRecommendation(rec, 'edited', editCopy);
                                       setEditingRecId(null);
                                     }}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                                   >
                                     <Save className="w-3.5 h-3.5" aria-hidden="true" />
                                     Confirm Edit
@@ -727,7 +727,7 @@ export function BrandMarketIntelView({
               onClick={() => setShowBornToRun((v) => !v)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50"
             >
-              <TrendingUp className="w-3.5 h-3.5 text-[#C2410C]" aria-hidden="true" />
+              <TrendingUp className="w-3.5 h-3.5 text-[var(--mr-accent)]" aria-hidden="true" />
               {showBornToRun ? 'Hide' : 'Model'} a new-to-channel launch
             </button>
 

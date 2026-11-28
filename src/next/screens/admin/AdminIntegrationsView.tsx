@@ -355,7 +355,7 @@ export function AdminIntegrationsView({
                             <button
                               type="button"
                               onClick={() => handleOpenWizard(item)}
-                              className="px-3 py-1 rounded bg-[#C2410C] text-white text-[11px] font-medium hover:bg-[#9A3412]"
+                              className="px-3 py-1 rounded bg-[var(--mr-accent)] text-white text-[11px] font-medium hover:bg-[var(--mr-accent-600)]"
                             >
                               {item.state.status === 'needs_attention' ? 'Retry Connect' : 'Connect'}
                             </button>
@@ -417,7 +417,7 @@ export function AdminIntegrationsView({
                       if (!res.ok) setWizardError(res.error ?? 'Exchange failed.');
                       else onOpenWizard(null);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                   >
                     {wizardBusy ? 'Exchanging…' : 'Complete OAuth Exchange'}
                   </button>
@@ -437,7 +437,7 @@ export function AdminIntegrationsView({
                       if (!res.ok) setWizardError(res.error ?? 'Connection failed.');
                       else onOpenWizard(null);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                   >
                     {wizardBusy ? 'Testing…' : 'Test Connection & Save'}
                   </button>
@@ -494,7 +494,7 @@ export function AdminIntegrationsView({
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-block text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="inline-block text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Open provider consent screen in new tab
                   </a>

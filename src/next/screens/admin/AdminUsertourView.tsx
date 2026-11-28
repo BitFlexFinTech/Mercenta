@@ -231,7 +231,7 @@ export function AdminUsertourView({
                       setPreviewTour(null);
                     }
                   }}
-                  className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   {stepIndex < previewTour.steps.length - 1 ? 'Next step' : 'Done'}
                 </button>
@@ -251,7 +251,7 @@ export function AdminUsertourView({
             </div>
             <div className="border border-zinc-200 rounded-md p-3 text-[12px]">
               <div className="text-zinc-500 mb-1">Target selector</div>
-              <code className="font-mono text-[#C2410C]">{step.targetSelector}</code>
+              <code className="font-mono text-[var(--mr-accent)]">{step.targetSelector}</code>
             </div>
             <ol className="list-decimal pl-5 space-y-1 text-[12px] text-zinc-600">
               {previewTour.steps.map((s, idx) => (

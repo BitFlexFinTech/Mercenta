@@ -254,7 +254,7 @@ export function AdminBillingView({
                           type="button"
                           disabled={empty}
                           onClick={() => onSelectStatement(b.remittance)}
-                          className="text-[12px] font-medium text-[#C2410C] hover:underline disabled:opacity-40"
+                          className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline disabled:opacity-40"
                         >
                           View statement
                         </button>

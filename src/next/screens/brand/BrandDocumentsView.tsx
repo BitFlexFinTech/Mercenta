@@ -152,7 +152,7 @@ export function BrandDocumentsView({
               {remittance && (
                 <div className="flex items-center justify-between gap-3 py-2 text-[12px]">
                   <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-[#C2410C] shrink-0" aria-hidden="true" />
+                    <FileText className="w-4 h-4 text-[var(--mr-accent)] shrink-0" aria-hidden="true" />
                     <span className="font-medium text-zinc-950 truncate">
                       Remittance {remittance.statementNumber} · Net {formatGbp(remittance.netPaid, 2)}
                     </span>
@@ -211,7 +211,7 @@ export function BrandDocumentsView({
               type="button"
               disabled={!requestedValue.trim() || !reason.trim()}
               onClick={submitForm}
-              className="px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               Submit Change Request
             </button>

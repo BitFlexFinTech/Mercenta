@@ -280,7 +280,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ category: cat })}
                       className={`px-2.5 py-1.5 rounded border text-left ${
                         profile.category === cat
-                          ? 'border-[#C2410C] bg-orange-50 text-zinc-950 font-medium'
+                          ? 'border-[var(--mr-accent)] bg-orange-50 text-zinc-950 font-medium'
                           : 'border-zinc-200 bg-white text-zinc-700'
                       }`}
                     >
@@ -382,7 +382,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ commercialModel: id })}
                       className={`w-full text-left p-3 rounded border ${
                         selected
-                          ? 'border-[#C2410C] bg-orange-50'
+                          ? 'border-[var(--mr-accent)] bg-orange-50'
                           : 'border-zinc-200 bg-white hover:bg-zinc-50'
                       }`}
                     >
@@ -432,7 +432,7 @@ export function BrandOnboardingView({
                       onClick={() => onUpdateProfile({ workingCapitalAnswer: ans })}
                       className={`px-3 py-1.5 rounded border capitalize ${
                         profile.workingCapitalAnswer === ans
-                          ? 'border-[#C2410C] bg-orange-50 font-medium text-zinc-950'
+                          ? 'border-[var(--mr-accent)] bg-orange-50 font-medium text-zinc-950'
                           : 'border-zinc-200 bg-white text-zinc-700'
                       }`}
                     >
@@ -457,7 +457,7 @@ export function BrandOnboardingView({
                   onClick={() => onUpdateProfile({ fulfillmentTrack: track })}
                   className={`w-full text-left p-3 rounded border ${
                     profile.fulfillmentTrack === track
-                      ? 'border-[#C2410C] bg-orange-50'
+                      ? 'border-[var(--mr-accent)] bg-orange-50'
                       : 'border-zinc-200 bg-white'
                   }`}
                 >
@@ -503,7 +503,7 @@ export function BrandOnboardingView({
                   checked={guidanceAck}
                   onChange={(e) => setGuidanceAck(e.target.checked)}
                 />
-                <ShieldCheck className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                <ShieldCheck className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
                 I acknowledge MOQ, packaging, and PO acknowledgement rules
               </label>
             </div>
@@ -523,7 +523,7 @@ export function BrandOnboardingView({
                 type="button"
                 disabled={!canNext}
                 onClick={() => setStep((s) => Math.min(6, s + 1))}
-                className="px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 Continue
               </button>
@@ -538,7 +538,7 @@ export function BrandOnboardingView({
                     chargebackIndemnity: legal.chargebackIndemnity,
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 Complete Onboarding

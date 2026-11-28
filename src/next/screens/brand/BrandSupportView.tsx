@@ -188,7 +188,7 @@ export function BrandSupportView({
                   disabled={!canSubmit}
                   onClick={submit}
                   data-testid="brand-case-submit"
-                  className="px-4 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                  className="px-4 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                 >
                   Submit Case to Mercenta
                 </button>
@@ -216,7 +216,7 @@ export function BrandSupportView({
                   <li key={c.id} className="py-3 first:pt-0 last:pb-0 space-y-1.5" data-state="brand-case-row">
                     <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
                       <div>
-                        <span className="font-mono text-[#C2410C] font-medium mr-2">
+                        <span className="font-mono text-[var(--mr-accent)] font-medium mr-2">
                           {c.caseRef ?? c.id}
                         </span>
                         <span className="font-medium text-zinc-950">{c.subject}</span>

@@ -385,7 +385,7 @@ export function BwsPortfolioOpsView({
             <button
               type="button"
               onClick={() => onNavigateView('campaign-studio')}
-              className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Open Campaign Studio
             </button>

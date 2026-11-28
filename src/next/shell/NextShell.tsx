@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '@/context/GlobalStateContext';
+import { BrandLockup } from '@/components/shared/BrandLockup';
 import { useBrands } from '@/data/queries';
 import { navigateProductView, parseProductPath, recordLinkQuery } from '@/lib/runtime/productRoutes';
 import { EmptyStateBlock, LoadingRows } from '@/next/components/ConsolePrimitives';
@@ -778,9 +779,12 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
     <div className="flex flex-col h-full">
       <div className="px-4 py-4 border-b border-zinc-200 flex items-center justify-between">
         <div>
-          <div className="text-[14px] font-semibold tracking-tight text-zinc-950">
-            Mercenta Partners
-          </div>
+          {/* §MERCENTA BRANDING (2026-11-28) — the approved LOCKUP, never typed text.
+              `BrandLockup` is appearance-aware and carries the tagline inside its outlined
+              artwork, so nothing here retypes or redraws the brand. `variant="light"` is
+              chosen because this rail is the light surface; the box, spacing and the
+              surface label beneath it are unchanged. */}
+          <BrandLockup variant="light" className="h-7 w-auto" />
           <div className="text-[12px] text-zinc-500">{surfaceCfg.label}</div>
         </div>
         <button
@@ -808,7 +812,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
                       type="button"
                       onClick={() => selectNavItem(item.id)}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-[14px] text-left transition-colors focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
+                      className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-[14px] text-left transition-colors focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)] ${
                         isActive
                           ? 'bg-zinc-950 text-white font-medium'
                           : 'text-zinc-900 hover:bg-zinc-100 font-medium'

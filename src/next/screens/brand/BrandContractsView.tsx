@@ -166,7 +166,7 @@ export function BrandContractsView({
               <button
                 type="button"
                 onClick={onCloseContract}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
               >
                 Done
               </button>

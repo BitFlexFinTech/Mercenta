@@ -568,7 +568,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setAsnDrawerOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 Create ASN consignment
@@ -728,7 +728,7 @@ export function BrandLogisticsView({
             placeholder="Search reference, PO, origin…"
             aria-label="Search consignments"
             data-testid="logistics-search"
-            className="pl-9 pr-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 w-64 focus:outline-2 focus:outline-[#C2410C]"
+            className="pl-9 pr-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 w-64 focus:outline-2 focus:outline-[var(--mr-accent)]"
           />
         </div>
         <select
@@ -833,7 +833,7 @@ export function BrandLogisticsView({
               </p>
             </div>
             <div className="space-y-1">
-              <div className="text-[12px] font-medium text-[#C2410C]">
+              <div className="text-[12px] font-medium text-[var(--mr-accent)]">
                 Freight Prepaid — Mercenta-arranged
               </div>
               <p className="text-[12px] text-zinc-600">
@@ -923,7 +923,7 @@ export function BrandLogisticsView({
               <button
                 type="button"
                 onClick={() => setTrackingId(selectedLeg.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
               >
                 <Truck className="w-3.5 h-3.5" aria-hidden="true" />
                 Track timeline
@@ -1047,7 +1047,7 @@ export function BrandLogisticsView({
                     className={`font-semibold ${
                       freightSemantics(selectedLeg.freightTerm)!.channelArranged
                         ? 'text-indigo-900'
-                        : 'text-[#C2410C]'
+                        : 'text-[var(--mr-accent)]'
                     }`}
                   >
                     {selectedLeg.freightTerm === 'collect'
@@ -1240,7 +1240,7 @@ export function BrandLogisticsView({
               type="button"
               disabled={asnBusy || !asnPoId}
               onClick={() => void handleSubmitAsn()}
-              className="px-4 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
+              className="px-4 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
             >
               {asnBusy ? 'Submitting…' : 'Create consignment ASN'}
             </button>
@@ -1307,7 +1307,7 @@ function WaybillDialog({
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
           >
             <Printer className="w-3.5 h-3.5" aria-hidden="true" />
             Print
@@ -1427,7 +1427,7 @@ function LabelsDialog({
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
           >
             <Printer className="w-3.5 h-3.5" aria-hidden="true" />
             Print labels

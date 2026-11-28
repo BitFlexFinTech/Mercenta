@@ -9,7 +9,7 @@ export interface ChartDatum {
 
 /**
  * Lightweight monochrome SVG vertical bar chart with tabular values and hairline baseline.
- * Uses only Mercenta editorial zinc + #C2410C accent tokens (zero chart libraries).
+ * Uses only Mercenta editorial zinc + var(--mr-accent) accent tokens (zero chart libraries).
  */
 export function ConsoleBarChart({
   data,
@@ -52,7 +52,7 @@ export function ConsoleBarChart({
                 <div
                   title={d.hint ?? `${d.label}: ${formatValue(d.value)}`}
                   className={`w-full rounded-t-[3px] transition-all ${
-                    isLast ? 'bg-[#C2410C]' : 'bg-zinc-900'
+                    isLast ? 'bg-[var(--mr-accent)]' : 'bg-zinc-900'
                   }`}
                   style={{ height: `${pct}%` }}
                 />
@@ -145,7 +145,7 @@ export function ConsoleTrendChart({
             cx={c.x}
             cy={c.y}
             r={idx === coords.length - 1 ? 4 : 3}
-            fill={idx === coords.length - 1 ? '#C2410C' : '#09090B'}
+            fill={idx === coords.length - 1 ? 'var(--mr-accent)' : '#09090B'}
           >
             <title>{`${c.label}: ${formatValue(c.value)}`}</title>
           </circle>
@@ -254,7 +254,7 @@ export function ConsoleTabs<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(t.id)}
-            className={`px-3 py-1.5 rounded text-[12px] font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#C2410C] ${
+            className={`px-3 py-1.5 rounded text-[12px] font-medium transition-colors whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)] ${
               active
                 ? 'bg-zinc-950 text-white'
                 : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'

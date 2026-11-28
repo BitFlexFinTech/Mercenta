@@ -717,7 +717,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     type="button"
                     disabled={!canMutate}
                     onClick={() => setShowAddStaff((v) => !v)}
-                    className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                    className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                   >
                     {showAddStaff ? 'Cancel' : 'Add Staff Member'}
                   </button>
@@ -810,7 +810,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           setNewEmail('');
                           setShowAddStaff(false);
                         }}
-                        className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                        className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                       >
                         Create Staff Profile
                       </button>
@@ -1039,7 +1039,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                   type="button"
                   disabled={!canMutate}
                   onClick={() => setShowManualBrand((v) => !v)}
-                  className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                 >
                   {showManualBrand ? 'Close Manual Form' : 'Add Brand Manually'}
                 </button>
@@ -1129,7 +1129,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                       setManualCountry('');
                       setShowManualBrand(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     {manualBusy ? 'Creating…' : 'Create Brand & Start Onboarding'}
                   </button>
@@ -1211,7 +1211,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                 type="button"
                                 disabled={!canMutate}
                                 onClick={() => void onApplicationAction(app.id, 'approved')}
-                                className="px-3 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                                className="px-3 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
                               >
                                 Approve & Start Onboarding
                               </button>
@@ -1356,7 +1356,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowXeroCreds((v) => !v)}
-                  className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   {showXeroCreds ? 'Cancel' : 'Enter Xero Credentials'}
                 </button>
@@ -1445,7 +1445,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         });
                         setShowXeroCreds(false);
                       }}
-                      className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
+                      className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
                     >
                       Save & Connect
                     </button>
@@ -1846,7 +1846,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 type="button"
                 disabled={companyBusy || !canReadRegister}
                 onClick={() => void onReadCompanyRegister()}
-                className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 {companyBusy ? 'Reading register…' : 'Read Company Record'}
               </button>
@@ -1936,7 +1936,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                 <button
                   type="button"
                   onClick={onApproveConfirmation}
-                  className="px-3 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Founder Approve
                 </button>
@@ -2333,7 +2333,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                         <button
                           type="button"
                           onClick={() => onMarkLaunchSubmitted(item.id)}
-                          className="px-2 py-1 rounded bg-[#C2410C] text-white text-[11px] hover:bg-[#9A3412]"
+                          className="px-2 py-1 rounded bg-[var(--mr-accent)] text-white text-[11px] hover:bg-[var(--mr-accent-600)]"
                         >
                           Mark Submitted
                         </button>
@@ -2379,7 +2379,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     href={selectedLaunch.siteUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#C2410C] font-medium hover:underline"
+                    className="text-[var(--mr-accent)] font-medium hover:underline"
                   >
                     Open site
                   </a>
@@ -2387,7 +2387,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                     href={selectedLaunch.requirementsUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#C2410C] font-medium hover:underline"
+                    className="text-[var(--mr-accent)] font-medium hover:underline"
                   >
                     Requirements URL
                   </a>

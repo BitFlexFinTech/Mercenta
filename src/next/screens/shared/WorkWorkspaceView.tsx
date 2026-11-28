@@ -280,7 +280,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             e.stopPropagation();
             onOpenOwningRecord(w);
           }}
-          className="text-[12px] font-medium text-[#C2410C] hover:underline"
+          className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
         >
           {openLabel}
         </button>
@@ -325,7 +325,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
             <button
               type="button"
               onClick={() => setShowNewTask((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
               New task
@@ -588,7 +588,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                       <div className="flex items-center justify-between mb-1">
                         <span
                           className={`text-[11px] font-mono tabular-nums px-1 rounded ${
-                            isToday ? 'bg-[#C2410C] text-white font-semibold' : 'text-zinc-600'
+                            isToday ? 'bg-[var(--mr-accent)] text-white font-semibold' : 'text-zinc-600'
                           }`}
                         >
                           {date.slice(8)}
@@ -677,7 +677,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
                         <button
                           type="button"
                           onClick={() => onSelectItem(r.workItemId)}
-                          className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                          className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                         >
                           Inspect
                         </button>
@@ -766,7 +766,7 @@ export function WorkWorkspaceView(props: WorkWorkspaceViewProps) {
               <button
                 type="button"
                 onClick={() => onOpenOwningRecord(selectedItem)}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
               >
                 {openLabel}
               </button>

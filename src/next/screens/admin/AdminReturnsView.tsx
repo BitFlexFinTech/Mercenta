@@ -201,7 +201,7 @@ export function AdminReturnsView({
         <aside className="space-y-6">
           <SectionCard title="Warehouse partner">
             <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-950">
-              <Boxes className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+              <Boxes className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
               <span>{warehousePartner.name}</span>
             </div>
             <p className="mt-1.5 text-[12px] text-zinc-600">
@@ -235,7 +235,7 @@ export function AdminReturnsView({
             <button
               type="button"
               onClick={() => onAdvanceStage(selectedRow.entry.id)}
-              className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Advance stage
             </button>

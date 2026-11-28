@@ -3,7 +3,7 @@
  * Rules:
  * - Strictly 11 / 12 / 14 / 16 / 20 / 24 px type scale (no sub-11px).
  * - Calm neutral base, 1px hairline borders, tabular numerals on money/quantities.
- * - Single primary accent (#C2410C, AA 5.18:1 on #FFFFFF) + ink black (#111827).
+ * - Single primary accent (var(--mr-accent), AA 5.18:1 on #FFFFFF) + ink black (#111827).
  * - Zero gradients, glows, or thick left accent borders.
  */
 
@@ -25,9 +25,16 @@
   --color-next-ink: #09090b;
   --color-next-secondary: #3f3f46;
   --color-next-muted: #52525b;
-  --color-next-accent: #c2410c;
-  --color-next-accent-hover: #9a3412;
-  --color-next-accent-tint: #fff7ed;
+  /* §MERCENTA BRANDING (2026-11-28, owner decision) — the console's accent IS the brand
+   * accent, read from this project's ONE palette (`src/config/themes.ts` →
+   * `BRAND_PALETTE.orange` / `--mr-accent`). Its previous local hex (var(--mr-accent)) is GONE:
+   * the owner's instruction was "use this project's colour tokens … do not introduce new
+   * hex values", and a second accent is exactly how a UI drifts off-brand.
+   * NO other value in this file changes — the tokens keep their names, so every existing
+   * class, size and spacing stays exactly as it was; only the hue follows the brand. */
+  --color-next-accent: var(--mr-accent);
+  --color-next-accent-hover: var(--mr-accent-600);
+  --color-next-accent-tint: color-mix(in srgb, var(--mr-accent) 8%, white);
 }
 
 .mercenta-next {
@@ -83,7 +90,7 @@
 .mercenta-next .text-accent,
 .mercenta-next .text-accent-300,
 .mercenta-next .text-accent-400 {
-  color: #c2410c;
+  color: var(--mr-accent);
 }
 .mercenta-next .bg-surface {
   background-color: #fafafa;
@@ -169,10 +176,10 @@
   border-color: #c7d2fe;
 }
 .mercenta-next .text-palette-orange {
-  color: #c2410c;
+  color: var(--mr-accent);
 }
 .mercenta-next .bg-palette-orange\/10 {
-  background-color: #fff7ed;
+  background-color: var(--mr-accent-tint);
 }
 .mercenta-next .border-palette-orange\/40 {
   border-color: #fed7aa;

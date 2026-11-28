@@ -300,7 +300,7 @@ export function TalentApprovalsView({
               type="button"
               disabled={!canMutate || busyId === r.id}
               onClick={() => onApprovePoDraft(r.id, r.brandId, r.draftId)}
-              className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               Approve Draft
             </button>
@@ -455,7 +455,7 @@ export function TalentApprovalsView({
                   );
                   setSelectedListing(null);
                 }}
-                className="px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
+                className="px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
               >
                 Save Amended Copy
               </button>

@@ -91,7 +91,7 @@ export function ErrorStateBlock({
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] shrink-0 whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md border border-zinc-300 bg-white text-[12px] font-medium text-zinc-900 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mr-accent)] shrink-0 whitespace-nowrap"
         >
           <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
           Retry
@@ -121,7 +121,7 @@ export function EmptyStateBlock({
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] whitespace-nowrap"
+          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mr-accent)] whitespace-nowrap"
         >
           {actionLabel}
         </button>
@@ -199,7 +199,7 @@ export function MetricStrip({
               type="button"
               onClick={item.onClick}
               data-testid={item.testId}
-              className={`text-left border rounded-md p-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] ${
+              className={`text-left border rounded-md p-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mr-accent)] ${
                 item.active
                   ? 'border-zinc-900 bg-zinc-50'
                   : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/60'
@@ -391,7 +391,7 @@ export function ConsoleTable<T>({
                   <button
                     type="button"
                     onClick={() => onRowClick(row)}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mr-accent)]"
                   >
                     Inspect record
                   </button>
@@ -417,7 +417,7 @@ export function ConsoleTable<T>({
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               aria-label="Previous page"
-              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
+              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -429,7 +429,7 @@ export function ConsoleTable<T>({
               disabled={safePage >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               aria-label="Next page"
-              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
+              className="p-1.5 rounded border border-zinc-200 bg-white text-zinc-700 disabled:opacity-40 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -543,7 +543,7 @@ export function SlideOverDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close drawer"
-            className="p-2 -mr-2 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-[#C2410C]"
+            className="p-2 -mr-2 rounded-md text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-[var(--mr-accent)]"
           >
             <X className="w-4 h-4" />
           </button>

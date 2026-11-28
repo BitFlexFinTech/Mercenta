@@ -559,7 +559,7 @@ export function FulfillmentTrackView({
                 type="button"
                 disabled={!overrideReason.trim()}
                 onClick={() => onApplyOverride(selectedRow.brandId, overrideTrack, overrideReason)}
-                className="px-4 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-4 py-2 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 Apply override
               </button>

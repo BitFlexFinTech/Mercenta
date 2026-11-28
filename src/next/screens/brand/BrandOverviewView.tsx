@@ -162,7 +162,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
             <button
               type="button"
               onClick={() => onNavigate('purchase_orders')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               Purchase Orders
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -215,7 +215,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('purchase_orders')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Open full PO queue
                   </button>
@@ -231,7 +231,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                           <button
                             type="button"
                             onClick={() => onNavigate('purchase_orders', po.poNumber)}
-                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[#C2410C]"
+                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[var(--mr-accent)]"
                           >
                             {po.poNumber}
                           </button>
@@ -257,7 +257,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('logistics')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Open Logistics Hub
                   </button>
@@ -273,7 +273,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                           <button
                             type="button"
                             onClick={() => onNavigate('logistics', s.poNumber)}
-                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[#C2410C]"
+                            className="font-mono text-[14px] font-medium text-zinc-950 hover:text-[var(--mr-accent)]"
                           >
                             {s.reference} ({s.carrier})
                           </button>
@@ -314,7 +314,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('compliance')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Manage
                   </button>
@@ -336,7 +336,7 @@ export function BrandOverviewView(props: BrandOverviewViewProps) {
                   <button
                     type="button"
                     onClick={() => onNavigate('team')}
-                    className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                    className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                   >
                     Inbox
                   </button>

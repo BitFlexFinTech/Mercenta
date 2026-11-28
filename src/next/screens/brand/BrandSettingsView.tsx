@@ -328,7 +328,7 @@ export function BrandSettingsView({
                       );
                       setBankReason('');
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Submit Change
                   </button>
@@ -425,7 +425,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowInvite(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Invite Team Member
@@ -516,7 +516,7 @@ export function BrandSettingsView({
                       setInvite({ name: '', email: '', role: 'Owner' });
                       setShowInvite(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Send Invite
                   </button>
@@ -542,7 +542,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowNewOutage(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Declare Outage
@@ -627,7 +627,7 @@ export function BrandSettingsView({
                       setOutageForm({ startDate: '', endDate: '', reason: '' });
                       setShowNewOutage(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Declare Outage
                   </button>
@@ -653,7 +653,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={() => setShowNewAddr(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   Add Return Address
@@ -681,7 +681,7 @@ export function BrandSettingsView({
                         <button
                           type="button"
                           onClick={() => onSetDefaultReturnAddress(a.id)}
-                          className="text-[#C2410C] hover:underline font-medium"
+                          className="text-[var(--mr-accent)] hover:underline font-medium"
                         >
                           Set default
                         </button>
@@ -764,7 +764,7 @@ export function BrandSettingsView({
                       });
                       setShowNewAddr(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Add Address
                   </button>
@@ -820,7 +820,7 @@ export function BrandSettingsView({
                         aria-label={`Toggle email notifications for ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.channels.includes('email')
-                            ? 'border-[#C2410C] bg-orange-50 text-[#C2410C]'
+                            ? 'border-[var(--mr-accent)] bg-orange-50 text-[var(--mr-accent)]'
                             : 'border-zinc-200 text-zinc-400'
                         }`}
                       >
@@ -832,7 +832,7 @@ export function BrandSettingsView({
                         aria-label={`Toggle in-app notifications for ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.channels.includes('in_app')
-                            ? 'border-[#C2410C] bg-orange-50 text-[#C2410C]'
+                            ? 'border-[var(--mr-accent)] bg-orange-50 text-[var(--mr-accent)]'
                             : 'border-zinc-200 text-zinc-400'
                         }`}
                       >
@@ -924,7 +924,7 @@ export function BrandSettingsView({
                       setContactNotice('Contact change request queued for admin review.');
                       setEditingContacts(false);
                     }}
-                    className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                    className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
                   >
                     Request Change
                   </button>
@@ -950,7 +950,7 @@ export function BrandSettingsView({
                 <button
                   type="button"
                   onClick={onOpenContracts}
-                  className="px-3 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="px-3 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Open Contracts Workspace
                 </button>

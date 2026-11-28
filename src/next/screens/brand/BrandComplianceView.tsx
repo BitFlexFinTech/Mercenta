@@ -160,7 +160,7 @@ export function BrandComplianceView({
               type="button"
               disabled={busyType === r.type}
               onClick={() => onUploadDoc(r.type)}
-              className="px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               {busyType === r.type ? 'Uploading…' : 'Upload'}
             </button>
@@ -242,7 +242,7 @@ export function BrandComplianceView({
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <FileCheck2 className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                          <FileCheck2 className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
                           {confirmed && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800">
                               <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
@@ -258,7 +258,7 @@ export function BrandComplianceView({
                             </li>
                           ))}
                         </ul>
-                        <div className="mt-2 text-[11px] font-medium text-[#C2410C]">
+                        <div className="mt-2 text-[11px] font-medium text-[var(--mr-accent)]">
                           {confirmed ? 'Review document' : 'Review & confirm'}
                         </div>
                       </button>
@@ -292,7 +292,7 @@ export function BrandComplianceView({
                 <button
                   type="button"
                   onClick={onConfirmPreview}
-                  className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+                  className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
                 >
                   Confirm Pre-Filled Values
                 </button>

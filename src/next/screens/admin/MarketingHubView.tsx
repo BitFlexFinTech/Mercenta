@@ -167,7 +167,7 @@ export function MarketingHubView({
           type="button"
           disabled={!canMutate || !r.canPrepare}
           onClick={() => onPrepareOutreach(r.prospectId)}
-          className="text-[12px] font-medium text-[#C2410C] hover:underline disabled:opacity-40"
+          className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline disabled:opacity-40"
         >
           {r.hasCurrentRevision ? 'New revision' : 'Prepare outreach'}
         </button>
@@ -331,7 +331,7 @@ export function MarketingHubView({
                   setCsvFeedback('CSV imported into acquisition pipeline.');
                   setCsvDraft('');
                 }}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium disabled:opacity-40"
               >
                 Import leads
               </button>

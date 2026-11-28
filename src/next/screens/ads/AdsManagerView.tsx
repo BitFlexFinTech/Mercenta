@@ -463,7 +463,7 @@ export function AdsManagerView({
                     type="button"
                     disabled={recBusyId === rec.id}
                     onClick={() => void handleDecideRecommendation(rec.id, 'approved')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Approve
@@ -509,7 +509,7 @@ export function AdsManagerView({
                     onChange={(e) => setAmendBudget(e.target.value)}
                     placeholder="Budget (GBP)"
                     aria-label="Amended monthly budget in GBP"
-                    className="w-36 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[#C2410C]"
+                    className="w-36 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <input
                     type="text"
@@ -517,13 +517,13 @@ export function AdsManagerView({
                     onChange={(e) => setAmendNote(e.target.value)}
                     placeholder="Reason or note (optional)"
                     aria-label="Amendment note"
-                    className="min-w-[200px] flex-1 px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[#C2410C]"
+                    className="min-w-[200px] flex-1 px-3 py-1.5 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <button
                     type="button"
                     disabled={recBusyId === rec.id}
                     onClick={() => void handleDecideRecommendation(rec.id, 'amended')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50 whitespace-nowrap"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50 whitespace-nowrap"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Confirm
@@ -627,7 +627,7 @@ export function AdsManagerView({
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Filter by brand name…"
                   aria-label="Filter brands"
-                  className="w-full pl-9 pr-3 py-2 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[#C2410C]"
+                  className="w-full pl-9 pr-3 py-2 text-[14px] border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                 />
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -650,7 +650,7 @@ export function AdsManagerView({
                   onClick={() => setSortByUtil((v) => !v)}
                   className={`px-3 py-1.5 rounded-md text-[12px] font-medium whitespace-nowrap ${
                     sortByUtil
-                      ? 'bg-[#C2410C] text-white'
+                      ? 'bg-[var(--mr-accent)] text-white'
                       : 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
                   }`}
                 >
@@ -749,13 +749,13 @@ export function AdsManagerView({
                     value={budgetDraft}
                     onChange={(e) => setBudgetDraft(e.target.value)}
                     aria-label="Monthly budget in GBP"
-                    className="w-40 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[#C2410C]"
+                    className="w-40 px-3 py-1.5 text-[14px] font-mono border border-zinc-300 rounded-md bg-white text-zinc-950 focus:outline-2 focus:outline-[var(--mr-accent)]"
                   />
                   <button
                     type="button"
                     disabled={budgetBusy}
                     onClick={() => void handleSaveBudget(selectedBrandRow.brandId)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-50"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Save budget

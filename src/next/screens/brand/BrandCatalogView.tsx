@@ -254,7 +254,7 @@ export function BrandCatalogView({
                   e.stopPropagation();
                   onSubmitProduct(p);
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 <Send className="w-3 h-3" aria-hidden="true" />
                 {busySku === p.sku ? 'Submitting…' : latestSubmission ? 'Resubmit' : 'Submit'}
@@ -334,7 +334,7 @@ export function BrandCatalogView({
                 setShowAdd(true);
                 setGuidanceAcked(false);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               {gateCleared ? <Plus className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
               {gateCleared ? 'Add Product' : 'Catalog Locked'}
@@ -392,7 +392,7 @@ export function BrandCatalogView({
                 type="button"
                 disabled={csvBusy || !csvText.trim()}
                 onClick={() => void handleCsvCommit()}
-                className="px-3.5 py-1.5 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+                className="px-3.5 py-1.5 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
               >
                 {csvBusy ? 'Importing…' : 'Validate & Import CSV'}
               </button>
@@ -434,7 +434,7 @@ export function BrandCatalogView({
           <div className="space-y-4 text-[12px] text-zinc-700">
             <div className="rounded border border-zinc-200 bg-zinc-50 p-4 space-y-2">
               <div className="font-semibold text-zinc-950 flex items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 text-[#C2410C]" aria-hidden="true" />
+                <ShieldAlert className="w-4 h-4 text-[var(--mr-accent)]" aria-hidden="true" />
                 Pricing, Packaging & PO Rule Confirmation
               </div>
               <p>
@@ -446,7 +446,7 @@ export function BrandCatalogView({
             <button
               type="button"
               onClick={() => setGuidanceAcked(true)}
-              className="w-full px-4 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412]"
+              className="w-full px-4 py-2 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)]"
             >
               I Understand — Continue to Add Product
             </button>
@@ -552,7 +552,7 @@ export function BrandCatalogView({
               type="button"
               disabled={!form.name.trim() || !form.sku.trim()}
               onClick={handleSaveNewProduct}
-              className="w-full px-4 py-2 rounded bg-[#C2410C] text-white text-[12px] font-medium hover:bg-[#9A3412] disabled:opacity-40"
+              className="w-full px-4 py-2 rounded bg-[var(--mr-accent)] text-white text-[12px] font-medium hover:bg-[var(--mr-accent-600)] disabled:opacity-40"
             >
               Save Product to Catalogue
             </button>
@@ -588,7 +588,7 @@ export function BrandCatalogView({
                     setEditingProduct(null);
                   }
                 }}
-                className="px-4 py-2 rounded bg-[#C2410C] text-white font-medium hover:bg-[#9A3412]"
+                className="px-4 py-2 rounded bg-[var(--mr-accent)] text-white font-medium hover:bg-[var(--mr-accent-600)]"
               >
                 Update Cost
               </button>

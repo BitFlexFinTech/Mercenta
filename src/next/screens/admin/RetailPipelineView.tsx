@@ -241,7 +241,7 @@ export function RetailPipelineView({
                 onDisputingIdChange(d.id);
                 setDisputeNotes('');
               }}
-              className="text-[12px] font-medium text-[#C2410C] hover:underline"
+              className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
             >
               Dispute
             </button>
@@ -338,7 +338,7 @@ export function RetailPipelineView({
                       <button
                         type="button"
                         onClick={() => onSelectPo(po)}
-                        className="text-[12px] font-medium text-[#C2410C] hover:underline"
+                        className="text-[12px] font-medium text-[var(--mr-accent)] hover:underline"
                       >
                         Inspect
                       </button>
@@ -658,7 +658,7 @@ export function RetailPipelineView({
                           type="button"
                           disabled={!canMutate}
                           onClick={() => void onRefreshRouting(rr.instructionId, rr.poNumber)}
-                          className="text-[#C2410C] font-medium hover:underline disabled:opacity-40"
+                          className="text-[var(--mr-accent)] font-medium hover:underline disabled:opacity-40"
                         >
                           Read routing instructions
                         </button>
@@ -684,7 +684,7 @@ export function RetailPipelineView({
                           <button
                             type="button"
                             onClick={() => void onSendInvoiceToChannel(inv.id, inv.number)}
-                            className="text-[#C2410C] font-medium hover:underline"
+                            className="text-[var(--mr-accent)] font-medium hover:underline"
                           >
                             Send to channel
                           </button>
