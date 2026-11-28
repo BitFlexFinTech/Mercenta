@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 418 · **Capabilities:** 8
+**Scenarios:** 419 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -31,7 +31,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | integrations | 10 |
 | onboarding_acquisition | 58 |
 | operations | 48 |
-| platform | 90 |
+| platform | 91 |
 
 ## Scenarios
 
@@ -419,6 +419,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | spec-outreach-provider-hardening | platform | mixed | happy | `e2e/outreach-provider-hardening.spec.ts` | — |
 | spec-p12-channel-operations | platform | mixed | happy | `e2e/p12-channel-operations.spec.ts` | — |
 | spec-pagination | platform | mixed | happy | `e2e/pagination.spec.ts` | — |
+| spec-phase-d-canonical-tables | platform | super_admin | boundary | `e2e/canonical-tables.spec.ts` | — |
 | spec-po-ack-duties | commerce_logistics | mixed | happy | `e2e/po-ack-duties.spec.ts` | — |
 | spec-po-admin-ack-surface | commerce_logistics | mixed | happy | `e2e/po-admin-ack-surface.spec.ts` | — |
 | spec-po-brand-ack-surface | commerce_logistics | mixed | happy | `e2e/po-brand-ack-surface.spec.ts` | — |

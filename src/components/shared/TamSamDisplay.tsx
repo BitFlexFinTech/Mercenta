@@ -4,7 +4,7 @@
  * per-category card for outreach.
  */
 import { useState, useMemo } from 'react';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Badge, Button, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { ApprovedCategory } from '@/types';
 import { getTamSamReport, getCategoryTamSam, formatTamSamReport } from '@/lib/market-data/tamSamPipeline';
@@ -77,7 +77,12 @@ export function TamSamBreakdown() {
         </div>
         <div className="flex items-center gap-2">
           <Button className="text-ds-micro" onClick={handleDownload}><Download className="w-3 h-3 mr-1" /> Report</Button>
-          <button onClick={() => setExpanded(!expanded)} className="text-muted hover:text-strong">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Collapse category breakdown' : 'Expand category breakdown'}
+            className="text-muted hover:text-strong"
+          >
             {expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -99,30 +104,51 @@ export function TamSamBreakdown() {
       </div>
 
       {expanded && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-ds-micro">
-            <thead>
-              <tr className="border-b border-hairline text-faint">
-                <th className="text-left py-1.5 font-medium">Category</th>
-                <th className="text-right py-1.5 font-medium">TAM (GBP B)</th>
-                <th className="text-right py-1.5 font-medium">SAM (GBP B)</th>
-                <th className="text-right py-1.5 font-medium">SAM %</th>
-                <th className="text-left py-1.5 font-medium">HS Codes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-hairline-06">
-              {report.categories.map(function(cat) { return (
-                <tr key={cat.category} className="hover:bg-tint">
-                  <td className="py-1.5 text-strong font-medium">{cat.category}</td>
-                  <td className="py-1.5 text-right font-mono text-strong">{cat.tamGbpBillions.toFixed(1)}</td>
-                  <td className="py-1.5 text-right font-mono text-accent-400">{cat.samGbpBillions.toFixed(2)}</td>
-                  <td className="py-1.5 text-right font-mono text-muted">{cat.samPercentage}%</td>
-                  <td className="py-1.5 text-muted font-mono">{cat.hsCodeRanges.join(', ')}</td>
-                </tr>
-              );})}
-            </tbody>
-          </table>
-        </div>
+        /* §PHASE D — REPOINTED to the ONE canonical table primitive. This was a hand-rolled
+           `text-ds-micro` table, so the same breakdown rendered at 11px here and 14px on every
+           screen that used the canonical table — the exact two-sizes defect registry row
+           `discovered-hand-rolled-tables-outside-the-canonical-primitive` records. Every column,
+           alignment and value is unchanged; the table now also carries `scope="col"` headers, a
+           caption, the `data-table` hook and `mobile="scroll"` (this is genuinely columnar
+           comparison data, so the labelled-card list would lose the side-by-side reading). */
+        <DataTable
+          rows={report.categories}
+          rowKey={(c) => c.category}
+          caption="Category TAM and SAM breakdown"
+          dataTable="tam-sam-categories"
+          mobile="scroll"
+          columns={[
+            {
+              key: 'category',
+              label: 'Category',
+              primary: true,
+              render: (c) => <span className="font-medium text-strong">{c.category}</span>,
+            },
+            {
+              key: 'tam',
+              label: 'TAM (GBP B)',
+              align: 'right',
+              render: (c) => <span className="font-mono text-strong">{c.tamGbpBillions.toFixed(1)}</span>,
+            },
+            {
+              key: 'sam',
+              label: 'SAM (GBP B)',
+              align: 'right',
+              render: (c) => <span className="font-mono text-accent-400">{c.samGbpBillions.toFixed(2)}</span>,
+            },
+            {
+              key: 'samPercentage',
+              label: 'SAM %',
+              align: 'right',
+              render: (c) => <span className="font-mono text-muted">{c.samPercentage}%</span>,
+            },
+            {
+              key: 'hsCodes',
+              label: 'HS Codes',
+              render: (c) => <span className="font-mono text-muted">{c.hsCodeRanges.join(', ')}</span>,
+            },
+          ]}
+        />
       )}
 
       <p className="text-ds-micro text-faint flex items-start gap-1">

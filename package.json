@@ -32,6 +32,7 @@
     "validate:product-routes": "node scripts/validate-product-routes.mjs",
     "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs",
     "validate:canonical-propagation": "node scripts/validate-canonical-propagation.mjs",
+    "validate:canonical-tables": "node scripts/validate-canonical-tables.mjs",
     "validate:seo": "node scripts/validate-seo-foundation.mjs",
     "validate:public-claims": "node scripts/validate-public-claims.mjs",
     "validate:bounded-ai": "node scripts/validate-bounded-ai.mjs",

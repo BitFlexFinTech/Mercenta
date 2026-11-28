@@ -342,6 +342,86 @@ if (headCommit === null) {
   }
 }
 
+/* ── 7. The NEXT TASK names BUILD work, not a closed decision ────────────── */
+console.log('\n§ 7. THE NEXT TASK NAMES WORK THAT STILL EXISTS — a row marked OWNER DECISION is not build work\n');
+/**
+ * WHY THIS EXISTS (2026-11-28). The resume block's `NEXT TASK` named the registry row
+ * `batch-4-zod-validation` and told the next session, in capital letters, that form validation
+ * "was BUILT BUT NEVER WIRED — the zod schemas were imported by nothing", i.e. WIRE THEM.
+ * The row's OWN `_disposition` says the opposite: it is an `OWNER DECISION`, and its
+ * `_audit_note` records that the never-imported zod layer and the dependency were REMOVED as
+ * obsolete on 2026-09-21, with forms validating inline through `REQUIRED_SUBMISSION_FIELDS` and
+ * the database gate. `zod` appears nowhere in `package.json` and nowhere in `src/`.
+ *
+ * The next session therefore began by looking for a file that does not exist. NOTHING FAILED:
+ * assertions 4, 5 and 5b prove the two documents agree WITH EACH OTHER and that a cited path
+ * exists — never that what they agree on is still real. Rule 10 §8: gate the whole class.
+ *
+ * WHAT IT PROVES. When `NEXT TASK` names a registry row, that row's own `_disposition` must say
+ * `BUILD`. A row tagged `OWNER DECISION` or `RECORD` may still be DESCRIBED (the block is allowed
+ * to say the owner has a decision pending) — it may not be presented as the session's build work.
+ *
+ * The row list is DISCOVERED from `requirements-registry.json`, never retyped here, so this gate
+ * cannot go stale when the registry changes. If no row is named at all the section reports that
+ * honestly and pins only that the registry was really read (a check whose source returns nothing
+ * is a failure, rule 10 §5).
+ */
+const registry = JSON.parse(read('requirements-registry.json'));
+const registryEntries = Array.isArray(registry.entries) ? registry.entries : [];
+test(
+  'the registry was DISCOVERED for the next-task check (a check whose source is empty proves nothing)',
+  registryEntries.length > 100,
+  `${registryEntries.length} entries`
+);
+/** Rows whose id is named by a NEXT TASK value. */
+const rowsNamedBy = (text) => {
+  const value = fieldValue(text, 'NEXT TASK');
+  return registryEntries.filter((e) => typeof e.id === 'string' && value.includes(e.id));
+};
+/** A row is BUILD work only when its own disposition says so, in its first word. */
+const isBuildRow = (entry) => /^BUILD\b/i.test(String(entry?._disposition ?? ''));
+const statusNamed = rowsNamedBy(status);
+const handoffNamed = rowsNamedBy(handoff);
+for (const entry of statusNamed) {
+  test(
+    `PROJECT_STATUS.md's NEXT TASK names \`${entry.id}\`, whose own disposition is BUILD work`,
+    isBuildRow(entry),
+    String(entry._disposition ?? '(no _disposition)').slice(0, 240)
+  );
+}
+for (const entry of handoffNamed) {
+  test(
+    `HANDOFF.md's NEXT TASK names \`${entry.id}\`, whose own disposition is BUILD work`,
+    isBuildRow(entry),
+    String(entry._disposition ?? '(no _disposition)').slice(0, 240)
+  );
+}
+if (statusNamed.length === 0) {
+  console.log(
+    '      STATED, NOT SILENTLY PASSED — the NEXT TASK names no registry row, so the disposition\n' +
+      '      check has nothing to judge this session. The registry read above is the vacuity guard.'
+  );
+}
+/* The parser is proved able to DISCRIMINATE, using rows discovered from the registry itself — so
+   this self-check cannot rot into two hardcoded ids that no longer mean anything. */
+const buildProbe = registryEntries.find(isBuildRow);
+const decisionProbe = registryEntries.find((e) => /^OWNER DECISION\b/i.test(String(e._disposition ?? '')));
+test(
+  'self-check: both probe ids are SEEN by the matcher, and only the BUILD one is accepted',
+  !!buildProbe &&
+    !!decisionProbe &&
+    value_namingCheck(buildProbe) &&
+    value_namingCheck(decisionProbe) &&
+    isBuildRow(buildProbe) &&
+    !isBuildRow(decisionProbe),
+  buildProbe && decisionProbe ? `${buildProbe.id} (BUILD) vs ${decisionProbe.id} (OWNER DECISION)` : 'probe rows missing'
+);
+/** Would the NEXT-TASK matcher see this row's id in a line that names it? */
+function value_namingCheck(entry) {
+  const synthetic = `NEXT TASK: resume \`${entry.id}\` — x`;
+  return registryEntries.some((e) => synthetic.includes(e.id));
+}
+
 /* ── Verdict ─────────────────────────────────────────────────────────────── */
 console.log('');
 if (failures > 0) {

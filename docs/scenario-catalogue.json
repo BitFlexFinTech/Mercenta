@@ -4158,6 +4158,15 @@
       "type": "boundary",
       "spec": "e2e/next-console-smoke.spec.ts",
       "expects": "Loading the app with no console parameter renders the EXISTING application, with the new console reachable only through its explicit switch."
+    },
+    {
+      "id": "spec-phase-d-canonical-tables",
+      "capability": "platform",
+      "journey": "canonical table contract",
+      "actor": "super_admin",
+      "type": "boundary",
+      "spec": "e2e/canonical-tables.spec.ts",
+      "expects": "The migrated TAM/SAM breakdown renders through the canonical DataTable: five scope=\"col\" headers, a real caption, cells measured in the browser at the ds-body step (14px) and headers at ds-label (12px), and a row count equal to the count the screen itself declares."
     }
   ]
 }
