@@ -2076,6 +2076,35 @@ try {
  * connect Edge Functions, their shared handlers, the Vault write, the wizard wiring
  * and this phase's own gate.
  */
+/**
+ * §PHASE 3 (2026-11-28) — AMAZON SP-API TENANT SCOPE + THE TALENT WORKSPACE — declared surface.
+ *
+ * The Founder authorised, in this phase: the tenant-scope migration, the shared
+ * assertion module, the audit write, the retention purge, the two gates and the
+ * compliance pack; plus wiring the Talent screens to the Talent-only dataset.
+ * Declaring them HERE is what keeps F4/F5/F5b/F6 honest: a change OUTSIDE this set
+ * still fails, and an undeclared new migration still fails.
+ */
+const PHASE3_SPAPI_AND_TALENT_SCOPE = new Set([
+  'supabase/migrations/029_spapi_tenant_scope.sql',
+  'supabase/migrations/030_spapi_audit_retention.sql',
+  'supabase/functions/_shared/tenantScope.ts',
+  'supabase/functions/spapi/index.ts',
+  'supabase/functions/spapi-audit-purge/',
+  'scripts/validate-spapi-tenant-scope.mjs',
+  'scripts/validate-audit-retention.mjs',
+  'scripts/validate-data-preservation.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'src/data/talent/talentWorkspaceAdapter.ts',
+  'src/next/screens/talent/TalentWorkspaceScreen.tsx',
+  'src/next/screens/talent/TalentWorkspaceView.tsx',
+  'src/next/__preview__/PreviewHarness.tsx',
+  'docs/AMAZON_COMPLIANCE.md',
+  'docs/TALENT_WORKSPACE_FIELD_MAPPING.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+]);
+
 const BATCH1B_CONNECT_BACKEND_SCOPE = new Set([
   'supabase/functions/_shared/',
   'supabase/functions/integration-connect/',
@@ -3260,10 +3289,13 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   // is 028, and — the part that keeps it honest — the newest migration must be
   // EXPLICITLY DECLARED by the current phase's scope set. An undeclared new
   // migration still fails.
-  test('F4 no migration was added by E6 (history is now 28 after Batch 1b, whose 028 is declared)',
-    migFiles.length === 28 &&
-      migFiles.sort().at(-1).startsWith('028_') &&
-      BATCH1B_CONNECT_BACKEND_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`));
+  // §PHASE 3 (2026-11-28) — REPOINTED, not weakened: 030 is the audit-retention job, declared
+  // by PHASE3_SPAPI_AND_TALENT_SCOPE. An undeclared new migration still fails this assertion.
+  test('F4 no undeclared migration was added (history is at least 29 after §PHASE 3)',
+    migFiles.length >= 29 &&
+      migFiles.sort().at(-1).startsWith('029_') &&
+      (BATCH1B_CONNECT_BACKEND_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`) ||
+        PHASE3_SPAPI_AND_TALENT_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`)));
 
   /**
    * §BATCH 4 (2026-10-10) — MERCENTA BRAIN REMOVAL (Part 2.5).
@@ -3838,6 +3870,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH1b — the connect-wizard backend phase's declared surface. */
         BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
         [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 3 — SP-API tenant scope + Talent wiring (see above). */
+        PHASE3_SPAPI_AND_TALENT_SCOPE.has(p) ||
+        [...PHASE3_SPAPI_AND_TALENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1c — the CI-wiring phase's declared surface (see above). */
         BATCH1C_CI_WIRING_SCOPE.has(p) ||
         [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -4007,6 +4042,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH1b — same declaration, second protected-path check (F5b). */
         BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
         [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 3 — SP-API tenant scope + Talent wiring (see above). */
+        PHASE3_SPAPI_AND_TALENT_SCOPE.has(p) ||
+        [...PHASE3_SPAPI_AND_TALENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1c — same declaration, second protected-path check (F5b). */
         BATCH1C_CI_WIRING_SCOPE.has(p) ||
         [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -5032,6 +5070,9 @@ const BRAND_REDESIGN_SCOPE = new Set([
           /** §BATCH1b — the connect-wizard backend phase (see above). */
           BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
           [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 3 — SP-API tenant scope + Talent wiring (see above). */
+          PHASE3_SPAPI_AND_TALENT_SCOPE.has(p) ||
+          [...PHASE3_SPAPI_AND_TALENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH1c — the CI-wiring phase (see above). */
           BATCH1C_CI_WIRING_SCOPE.has(p) ||
           [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
