@@ -643,7 +643,7 @@ export function AdminBrandIntelligenceView({
                         type="button"
                         disabled={!canMutate}
                         onClick={() => void onOutreachAction(selectedProspect.id, 'approve')}
-                        className="px-3 py-1.5 rounded bg-emerald-700 text-on-dark text-[12px]"
+                        className="px-3 py-1.5 rounded bg-state-success text-on-dark text-[12px]"
                       >
                         Approve
                       </button>

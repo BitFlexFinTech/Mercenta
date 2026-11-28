@@ -582,7 +582,7 @@ export function BrandPurchaseOrdersView({
       {notice && (
         <div
           role="status"
-          className="border border-blue-200 bg-blue-50/70 rounded-md px-4 py-3 text-[14px] text-ink-900"
+          className="border border-state-info/20 bg-state-info/10 rounded-md px-4 py-3 text-[14px] text-ink-900"
         >
           {notice}
         </div>
@@ -812,7 +812,7 @@ export function BrandPurchaseOrdersView({
                 {/* On-behalf rejection draft */}
                 {onBehalfDraft && (
                   <div
-                    className="border border-state-danger/20 bg-red-50/70 rounded-md p-4 space-y-2"
+                    className="border border-state-danger/20 bg-state-danger/10 rounded-md p-4 space-y-2"
                     data-testid={`po-onbehalf-draft-${po.poNumber}`}
                   >
                     <div className="text-[14px] font-semibold text-state-danger">
@@ -834,7 +834,7 @@ export function BrandPurchaseOrdersView({
                         const res = await onApproveOnBehalf(po, onBehalfDraft.draftId);
                         setNotice(res.notice);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-700 text-on-dark text-[12px] font-medium hover:bg-red-800"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-state-danger text-on-dark text-[12px] font-medium hover:bg-state-danger"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Approve — reject all lines on my behalf
@@ -1013,7 +1013,7 @@ export function BrandPurchaseOrdersView({
                 </div>
 
                 {po.lineItems.some((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline) && (
-                  <div className="border border-state-warning/20 bg-amber-50/70 rounded-md p-3 text-[12px] space-y-1">
+                  <div className="border border-state-warning/20 bg-state-warning/10 rounded-md p-3 text-[12px] space-y-1">
                     <div className="font-semibold text-state-warning">{BACKORDER_RESTOCK_TARGET.heading}</div>
                     {po.lineItems
                       .filter((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline)
@@ -1077,12 +1077,12 @@ export function BrandPurchaseOrdersView({
                 )}
 
                 {isFinancedBrand && (po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                  <div className="border border-state-success/20 bg-emerald-50/70 rounded-md p-3 text-[12px] text-state-success">
+                  <div className="border border-state-success/20 bg-state-success/10 rounded-md p-3 text-[12px] text-state-success">
                     Accepted — Mercenta handles fulfilment and financing for this purchase order. Payouts follow your financed payment terms.
                   </div>
                 )}
                 {!isFinancedBrand && po.status === 'accepted' && (
-                  <div className="border border-blue-200 bg-blue-50/70 rounded-md p-3 text-[12px] text-blue-900">
+                  <div className="border border-state-info/20 bg-state-info/10 rounded-md p-3 text-[12px] text-state-info">
                     {fulfillmentTrackLabel('direct_fulfillment')} — Mercenta raises the shipment request and files the ASN. Ship on time or submit a packing correction if physical counts differ.
                   </div>
                 )}
@@ -1171,8 +1171,8 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
   if (state.revisionNumber === 0) return null;
   const latest = state.latest;
   return (
-    <div className="border border-blue-200 bg-blue-50/70 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-revision-notice-${po.poNumber}`}>
-      <p className="font-medium text-blue-900">
+    <div className="border border-state-info/20 bg-state-info/10 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-revision-notice-${po.poNumber}`}>
+      <p className="font-medium text-state-info">
         The retail channel changed this purchase order — version {state.revisionNumber}.
       </p>
       {state.channelCancelled && (
@@ -1201,7 +1201,7 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
   const divergences = ackPriceDivergences(po);
   if (divergences.length === 0) return null;
   return (
-    <div className="border border-state-warning/20 bg-amber-50/70 rounded-md p-3 text-[12px] space-y-1" data-testid={`ack-price-notice-${po.poNumber}`}>
+    <div className="border border-state-warning/20 bg-state-warning/10 rounded-md p-3 text-[12px] space-y-1" data-testid={`ack-price-notice-${po.poNumber}`}>
       <p className="font-medium text-state-warning">{ACK_PRICE_DISCREPANCY_TITLE}</p>
       <ul className="space-y-0.5 text-state-warning">
         {divergences.map((d) => (
@@ -1219,7 +1219,7 @@ function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
   const duty = poChannelHoldDuty(po);
   if (!po.channelHold) return null;
   return (
-    <div className="border border-state-warning/20 bg-amber-50/70 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-channel-hold-${po.poNumber}`}>
+    <div className="border border-state-warning/20 bg-state-warning/10 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-channel-hold-${po.poNumber}`}>
       <p className="font-medium text-ink-900">
         {duty.held ? 'Retail channel hold: this order is on hold' : 'Retail channel hold lifted'}
       </p>
@@ -1233,7 +1233,7 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
   const lines = po.implicitlyRejectedLines ?? [];
   if (lines.length === 0) return null;
   return (
-    <div className="border border-state-warning/20 bg-amber-50/70 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-implicit-rejections-${po.poNumber}`}>
+    <div className="border border-state-warning/20 bg-state-warning/10 rounded-md p-3 text-[12px] space-y-1" data-testid={`po-implicit-rejections-${po.poNumber}`}>
       <p className="font-medium text-state-warning">
         The acknowledgement omitted {lines.length} of {po.lineItems.length} lines
       </p>
@@ -1374,7 +1374,7 @@ function BrandPoPreviewBody({ po }: { po: PurchaseOrder }) {
         </div>
       </dl>
       {po.rejectionReason && (
-        <div className="border border-state-danger/20 bg-red-50/70 rounded-md p-3 text-[12px] text-state-danger">
+        <div className="border border-state-danger/20 bg-state-danger/10 rounded-md p-3 text-[12px] text-state-danger">
           <strong>Rejection reason:</strong> {po.rejectionReason}
         </div>
       )}

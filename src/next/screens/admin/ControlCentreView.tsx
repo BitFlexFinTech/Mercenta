@@ -738,7 +738,7 @@ export function ControlCentreView({
                     className={`px-3 py-1.5 rounded-md text-[12px] font-medium whitespace-nowrap ${
                       halt.halted
                         ? 'border border-hairline-strong bg-surface-raised text-ink-900 hover:bg-surface'
-                        : 'bg-red-700 text-on-dark hover:bg-red-800'
+                        : 'bg-state-danger text-on-dark hover:bg-state-danger'
                     }`}
                   >
                     {halt.halted ? 'Resume automation' : 'Halt all automation'}
@@ -994,7 +994,7 @@ export function ControlCentreView({
             ) : (
               <ul className="space-y-2 text-[12px]" data-testid="control-integration-issues">
                 {integrationIssues.map((i) => (
-                  <li key={i.id} className="border border-state-danger/20 bg-red-50/70 rounded p-2">
+                  <li key={i.id} className="border border-state-danger/20 bg-state-danger/10 rounded p-2">
                     <div className="font-medium text-ink-950">{i.id.replace(/_/g, ' ')} ({i.mode})</div>
                     <div className="text-state-danger">{i.error}</div>
                   </li>

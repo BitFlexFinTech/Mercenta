@@ -910,7 +910,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate}
                               onClick={() => onRemoveStaff(m.id)}
-                              className="px-2 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] text-state-danger hover:bg-red-100 disabled:opacity-40"
+                              className="px-2 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] text-state-danger hover:bg-state-danger/10 disabled:opacity-40"
                             >
                               Remove
                             </button>
@@ -961,7 +961,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           onClick={() => onUpdateCarrierMarkup(cfg.id, { active: !cfg.active })}
                           className={`px-2.5 py-1 rounded border text-[11px] font-medium ${
                             cfg.active
-                              ? 'border-emerald-300 bg-state-success/10 text-state-success'
+                              ? 'border-state-success/20 bg-state-success/10 text-state-success'
                               : 'border-hairline-strong bg-surface-raised text-ink-600'
                           }`}
                         >
@@ -1199,7 +1199,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                           <p className="text-[12px] text-ink-600">{app.description}</p>
                         )}
                         {app.adminNotes && (
-                          <div className="border border-state-warning/20 bg-amber-50/70 rounded px-3 py-2 text-[12px] text-state-warning">
+                          <div className="border border-state-warning/20 bg-state-warning/10 rounded px-3 py-2 text-[12px] text-state-warning">
                             <strong>Admin notes:</strong> {app.adminNotes}
                           </div>
                         )}
@@ -1219,7 +1219,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                                 type="button"
                                 disabled={!canMutate}
                                 onClick={() => void onApplicationAction(app.id, 'rejected')}
-                                className="px-3 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[12px] text-state-danger hover:bg-red-100 disabled:opacity-40"
+                                className="px-3 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[12px] text-state-danger hover:bg-state-danger/10 disabled:opacity-40"
                               >
                                 Reject
                               </button>
@@ -1604,7 +1604,7 @@ export function SuperAdminView(props: SuperAdminViewProps) {
                               type="button"
                               disabled={!canMutate || destinationBusyId === d.id}
                               onClick={() => void onReviewDestination(d.id, 'verified')}
-                              className="px-2 py-1 rounded border border-emerald-300 bg-state-success/10 text-[11px] text-state-success"
+                              className="px-2 py-1 rounded border border-state-success/20 bg-state-success/10 text-[11px] text-state-success"
                             >
                               Verify
                             </button>

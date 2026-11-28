@@ -426,10 +426,10 @@ export function BrandMarketIntelView({
                           <div
                             className={`h-full ${
                               d.score >= 70
-                                ? 'bg-emerald-600'
+                                ? 'bg-state-success'
                                 : d.score >= 45
-                                  ? 'bg-amber-600'
-                                  : 'bg-red-600'
+                                  ? 'bg-state-warning'
+                                  : 'bg-state-danger'
                             }`}
                             style={{ width: `${Math.max(2, d.score)}%` }}
                           />
@@ -524,7 +524,7 @@ export function BrandMarketIntelView({
                               </div>
                             )}
                             {rec.editedCopy && (
-                              <div className="rounded bg-amber-50/70 border border-state-warning/20 px-3 py-2 text-[12px] text-ink-900">
+                              <div className="rounded bg-state-warning/10 border border-state-warning/20 px-3 py-2 text-[12px] text-ink-900">
                                 <span className="font-mono uppercase text-[11px] text-state-warning mr-1.5">
                                   Your copy:
                                 </span>

@@ -542,13 +542,13 @@ export function AdminPurchaseOrdersView({
             )}
 
             {selectedDetail.onBehalfRejectDraft?.available && (
-              <div className="border border-state-danger/20 bg-red-50/60 rounded-md p-3 space-y-2">
+              <div className="border border-state-danger/20 bg-state-danger/10 rounded-md p-3 space-y-2">
                 <div className="font-semibold text-state-danger">On-behalf rejection draft</div>
                 <p className="text-[12px] text-secondary">{selectedDetail.onBehalfRejectDraft.ruleText}</p>
                 <button
                   type="button"
                   onClick={onApproveBehalfRejection}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-red-700 text-on-dark text-[12px] font-medium hover:bg-red-800"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-state-danger text-on-dark text-[12px] font-medium hover:bg-state-danger"
                 >
                   <Gavel className="w-3.5 h-3.5" aria-hidden="true" />
                   Approve rejection override

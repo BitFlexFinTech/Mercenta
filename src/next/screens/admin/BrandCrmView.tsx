@@ -390,7 +390,7 @@ export function BrandCrmView({
                             type="button"
                             disabled={!canMutate}
                             onClick={() => onReviewChangeRequest(cr.id, true)}
-                            className="px-2.5 py-1 rounded bg-emerald-700 text-on-dark text-[11px] disabled:opacity-40"
+                            className="px-2.5 py-1 rounded bg-state-success text-on-dark text-[11px] disabled:opacity-40"
                           >
                             Approve
                           </button>

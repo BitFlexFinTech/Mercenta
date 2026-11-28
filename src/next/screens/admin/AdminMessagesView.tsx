@@ -114,7 +114,7 @@ export function AdminMessagesView({
               onClick={onToggleNeedsHuman}
               className={`px-3 py-1.5 rounded border text-[12px] font-medium ${
                 needsHumanOnly
-                  ? 'border-red-300 bg-state-danger/10 text-state-danger'
+                  ? 'border-state-danger/20 bg-state-danger/10 text-state-danger'
                   : 'border-hairline-strong bg-surface-raised text-ink-800 hover:bg-surface'
               }`}
             >

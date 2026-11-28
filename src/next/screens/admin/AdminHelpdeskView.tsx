@@ -218,7 +218,7 @@ export function AdminHelpdeskView({
                       <button
                         type="button"
                         onClick={() => onReviewCase(c.id, 'reject')}
-                        className="px-2.5 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-state-danger text-[11px] font-medium hover:bg-red-100"
+                        className="px-2.5 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-state-danger text-[11px] font-medium hover:bg-state-danger/10"
                       >
                         Reject
                       </button>

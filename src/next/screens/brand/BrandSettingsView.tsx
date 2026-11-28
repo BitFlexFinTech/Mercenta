@@ -844,7 +844,7 @@ export function BrandSettingsView({
                         aria-label={`Enable or disable ${EVENT_LABELS[p.eventType]}`}
                         className={`p-1.5 rounded border ${
                           p.enabled
-                            ? 'border-emerald-300 bg-state-success/10 text-state-success'
+                            ? 'border-state-success/20 bg-state-success/10 text-state-success'
                             : 'border-hairline text-quiet'
                         }`}
                       >

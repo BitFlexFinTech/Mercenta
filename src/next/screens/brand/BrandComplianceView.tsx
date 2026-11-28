@@ -237,7 +237,7 @@ export function BrandComplianceView({
                         onClick={() => onOpenPreview(po.id, doc)}
                         className={`text-left rounded border p-3 transition-colors ${
                           confirmed
-                            ? 'border-emerald-300 bg-emerald-50/40'
+                            ? 'border-state-success/20 bg-state-success/10'
                             : 'border-hairline bg-surface-raised hover:border-hairline-strong'
                         }`}
                       >

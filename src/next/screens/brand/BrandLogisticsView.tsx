@@ -589,7 +589,7 @@ export function BrandLogisticsView({
       {asnNotice && (
         <div
           role="status"
-          className="border border-state-success/20 bg-emerald-50/70 rounded-md px-4 py-3 text-[14px] text-ink-900 flex items-center justify-between gap-3"
+          className="border border-state-success/20 bg-state-success/10 rounded-md px-4 py-3 text-[14px] text-ink-900 flex items-center justify-between gap-3"
         >
           <span>{asnNotice}</span>
           <button
@@ -825,7 +825,7 @@ export function BrandLogisticsView({
           <div className="border border-hairline bg-surface-raised rounded-md p-4 space-y-3">
             <h2 className="text-[14px] font-semibold text-ink-950">How carriage is arranged</h2>
             <div className="space-y-1">
-              <div className="text-[12px] font-medium text-indigo-900">
+              <div className="text-[12px] font-medium text-state-info">
                 Freight Collect — Channel-arranged
               </div>
               <p className="text-[12px] text-ink-600">
@@ -1046,7 +1046,7 @@ export function BrandLogisticsView({
                   <div
                     className={`font-semibold ${
                       freightSemantics(selectedLeg.freightTerm)!.channelArranged
-                        ? 'text-indigo-900'
+                        ? 'text-state-info'
                         : 'text-[var(--mr-accent)]'
                     }`}
                   >
@@ -1070,7 +1070,7 @@ export function BrandLogisticsView({
                 </p>
               )}
               {selectedLeg.channelArranged && (
-                <p className="text-indigo-900">Channel-arranged: Mercenta does not select this carrier.</p>
+                <p className="text-state-info">Channel-arranged: Mercenta does not select this carrier.</p>
               )}
               {selectedLeg.carrierValidationError && (
                 <p className="text-state-warning">{selectedLeg.carrierValidationError}</p>
@@ -1171,7 +1171,7 @@ export function BrandLogisticsView({
                   </div>
                 </div>
                 {requiresLot && (
-                  <div className="grid grid-cols-2 gap-3 border border-state-warning/20 bg-amber-50/50 rounded-md p-3">
+                  <div className="grid grid-cols-2 gap-3 border border-state-warning/20 bg-state-warning/10 rounded-md p-3">
                     <div>
                       <label className="block text-[12px] font-medium text-ink-800 mb-1">
                         Lot number (required)
@@ -1516,9 +1516,9 @@ function TrackingDialog({
                   <span
                     className={`flex h-7 w-7 items-center justify-center rounded-full border ${
                       isCompleted
-                        ? 'bg-state-success/10 text-state-success border-emerald-300'
+                        ? 'bg-state-success/10 text-state-success border-state-success/20'
                         : isCurrent
-                          ? 'bg-state-warning/10 text-state-warning border-amber-300'
+                          ? 'bg-state-warning/10 text-state-warning border-state-warning/20'
                           : 'bg-surface text-quiet border-hairline'
                     }`}
                   >
@@ -1526,7 +1526,7 @@ function TrackingDialog({
                   </span>
                   {i < MILESTONES.length - 1 && (
                     <span
-                      className={`h-6 w-px ${isCompleted ? 'bg-emerald-300' : 'bg-tint-strong'}`}
+                      className={`h-6 w-px ${isCompleted ? 'bg-state-success' : 'bg-tint-strong'}`}
                     />
                   )}
                 </div>

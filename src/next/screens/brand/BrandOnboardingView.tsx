@@ -245,7 +245,7 @@ export function BrandOnboardingView({
               step === s.id
                 ? 'border-ink-950 bg-ink-950 text-on-dark font-medium'
                 : step > s.id
-                  ? 'border-state-success/20 bg-emerald-50/50 text-state-success'
+                  ? 'border-state-success/20 bg-state-success/10 text-state-success'
                   : 'border-hairline bg-surface-raised text-faint'
             }`}
           >

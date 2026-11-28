@@ -422,7 +422,7 @@ export function AdminContractsView({
                   <button
                     type="button"
                     onClick={() => onTerminate(selectedContract.id)}
-                    className="px-2.5 py-1.5 rounded border border-state-danger/20 bg-state-danger/10 text-state-danger text-[12px] font-medium hover:bg-red-100"
+                    className="px-2.5 py-1.5 rounded border border-state-danger/20 bg-state-danger/10 text-state-danger text-[12px] font-medium hover:bg-state-danger/10"
                   >
                     Terminate
                   </button>

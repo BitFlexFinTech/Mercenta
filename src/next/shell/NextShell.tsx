@@ -1091,7 +1091,7 @@ export function NextShell({ onOpenLegacy, onOpenPreview }: NextShellProps) {
             {verticalFilter !== 'all' && (
               <div
                 role="status"
-                className="flex items-start gap-2 rounded border border-state-warning/20 bg-amber-50/80 px-3 py-2 text-[12px] text-state-warning"
+                className="flex items-start gap-2 rounded border border-state-warning/20 bg-state-warning/10 px-3 py-2 text-[12px] text-state-warning"
               >
                 <AlertCircle className="w-4 h-4 text-state-warning shrink-0 mt-0.5" aria-hidden="true" />
                 <span>

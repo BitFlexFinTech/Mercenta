@@ -255,13 +255,13 @@ export function AdminIntegrationsView({
                         )}
 
                         {item.mode === 'simulation' && item.simMockLabel && (
-                          <div className="border border-state-warning/20 bg-amber-50/70 rounded p-2 text-[11px] text-state-warning">
+                          <div className="border border-state-warning/20 bg-state-warning/10 rounded p-2 text-[11px] text-state-warning">
                             <strong>Simulation adapter:</strong> {item.simMockLabel}
                           </div>
                         )}
 
                         {item.state.error && (
-                          <div className="border border-state-danger/20 bg-red-50/70 rounded p-2 text-[11px] text-state-danger">
+                          <div className="border border-state-danger/20 bg-state-danger/10 rounded p-2 text-[11px] text-state-danger">
                             {item.state.error}
                           </div>
                         )}
@@ -346,7 +346,7 @@ export function AdminIntegrationsView({
                               <button
                                 type="button"
                                 onClick={() => onDisconnect(item.id)}
-                                className="px-2.5 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] font-medium text-state-danger hover:bg-red-100"
+                                className="px-2.5 py-1 rounded border border-state-danger/20 bg-state-danger/10 text-[11px] font-medium text-state-danger hover:bg-state-danger/10"
                               >
                                 Disconnect
                               </button>

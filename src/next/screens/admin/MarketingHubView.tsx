@@ -242,7 +242,7 @@ export function MarketingHubView({
                   onClick={() => onToggleRegion(r.value)}
                   className={`px-2.5 py-1 rounded text-[12px] border ${
                     active
-                      ? 'bg-emerald-800 text-on-dark border-emerald-800'
+                      ? 'bg-state-success text-on-dark border-state-success/20'
                       : 'bg-surface-raised text-ink-600 border-hairline'
                   }`}
                 >
