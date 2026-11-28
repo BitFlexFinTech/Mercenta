@@ -33,7 +33,9 @@
  *       gate passed. The assertion now exists, in the gate the comment names;
  *   S9  the renderer actually renders the opening picture, the illustration and the limits (source
  *       assertions against comment-stripped code, so a check cannot pass on a comment alone);
- *   S10 zero network.
+ *   S10 zero network;
+ *   S11 the content-group list is DERIVED from the pages, not retyped — the absence guard for a
+ *       comment that claimed derivation while retyping five names and omitting a seven-page group.
  *
  * THE GATE'S SCOPE IS A LIST OF THE GROUPS ENRICHED SO FAR, AND IT IS DERIVED, NOT RETYPED. Each
  * group name is checked against the pages' own `navGroup`, so the members cannot drift from the
@@ -297,6 +299,34 @@ test(
 
 /* ── S10 — zero network ──────────────────────────────────────────────────── */
 test('S10 the whole run made zero live network calls', networkCalls === 0, `${networkCalls} call(s)`);
+
+/* ── S11 — the derived content-group list is DERIVED, not retyped ─────────── */
+/**
+ * §PUBLIC SURFACES BATCH 5 PART 4 (2026-11-28) — THE ABSENCE GUARD FOR A FALSE CLAIM THAT WAS REAL.
+ *
+ * `PUBLIC_CONTENT_NAV_GROUPS` carried the comment “DERIVED from the pages themselves (never retyped)”
+ * while its code retyped five group names — and those five omitted `'Retail Infrastructure'`, which
+ * SEVEN pages carry, so the constant could not have described the pages it claimed to be derived from.
+ * It is genuinely derived now (computed from each page's `navGroup`), and this assertion is what stops
+ * the retyped list coming back: a hand-written list of group names, or a form that stops computing from
+ * the pages, fails here. Source-level, against comment-stripped code, so a comment cannot satisfy it.
+ */
+const navGroupsSrc = (() => {
+  const at = pagesSrc.indexOf('PUBLIC_CONTENT_NAV_GROUPS');
+  return at === -1 ? '' : stripComments(pagesSrc.slice(at));
+})();
+const retypedGroupNames = [...navGroupsSrc.matchAll(/'([A-Z][^']*)'/g)].map((m) => m[1]);
+test(
+  'S11 the content-group list is DERIVED from the pages — a retyped list of group names is the defect this guards',
+  navGroupsSrc.length > 0 &&
+    navGroupsSrc.includes('new Set(PUBLIC_CONTENT_PAGES.map') &&
+    retypedGroupNames.length === 0,
+  navGroupsSrc.length === 0
+    ? 'PUBLIC_CONTENT_NAV_GROUPS was not found — a check that finds nothing is a FAILURE'
+    : retypedGroupNames.length
+      ? `group names retyped: ${retypedGroupNames.join(', ')}`
+      : ''
+);
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${assertions - failures}/${assertions} assertions`);
 process.exit(failures === 0 ? 0 : 1);
