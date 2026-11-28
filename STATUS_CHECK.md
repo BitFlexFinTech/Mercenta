@@ -7205,7 +7205,23 @@ reported no open/closed state — all now `aria-expanded` (five disclosure contr
 `e2e/canonical-tables.spec.ts` grew a second test on the real brand path (Astonish → Product Catalog → CSV panel
 → Add New Product → Net PPM section): **2 passed (7.4s)**. Writing it found a UX fact recorded inline: the CSV
 control is unreachable while the guidance modal's overlay is mounted, so the test exercises the real order.
-`validate:all` **213 PASS / 0 FAIL (exit 0)**. The owner then instructed the publisher to run, so the verified
-commit is deployed to `demo.mercenta.co.uk` and the live site is opened and checked — the three-way status and
-the live evidence are recorded in `PROJECT_STATUS.md → CURRENT RESUME STATE`.
+**§THE PUBLISH — EXECUTED ON THE OWNER'S INSTRUCTION (2026-11-28).** The owner wrote "continue and publish so
+everything is up to date", which settles the decision recorded as outstanding. `bash scripts/deploy-demo.sh`
+built the verified tree and mirrored it to `demo.mercenta.co.uk` only (**EXIT=0**); the live `index.html`
+references `assets/index-VSkeET4g.js`, the same entry the local `dist/` produced, so demo == the verified commit
+`4b20307`. **Live verification of the CHANGED surfaces** — `scripts/verify-live-canonical-tables.mjs`, added this
+session and now run by `npm run verify:live`: **12 PASS / 0 FAIL**, driving the deployed site with real logins:
+super admin → Investor Pitch → breakdown expanded → 5 `scope="col"` headers, caption and **14px** cells; brand
+→ Product Catalog → CSV panel opened → guidance section expanded → 3 scoped headers, **14px** cells, **3** rows;
+no uncaught page errors.
+
+**§THE OLDER LIVE VERIFIER IS OUT OF DATE — 177 PASS / 39 FAIL, AND THIS IS NOT HIDDEN.** Four measured causes,
+all pre-existing and unrelated to this increment: (a) twenty driven flows time out on the legacy sidebar because
+the product now opens a signed-in session in the new console (owner decision 2026-11-27) while those checks still
+open `/`; (b) the front-page checks look for `section#home` and five `h2` headings, while the homepage now renders
+`<main id="home">` and one of FOUR owner-selectable designs; (c) three privacy-policy processor categories no
+longer match that owner; (d) one 404/headers fetch failed and needs a re-run to separate throttling from a defect.
+Two of those need an OWNER DECISION (legacy-shell vs console for the live flows; follow the published design or pin
+one design), so they are recorded in `OUTSTANDING BLOCKER` (7) with the exact question, and `npm run verify:live`
+exits 1 until they are decided and repointed. It must never be reported as green in the meantime.
 
