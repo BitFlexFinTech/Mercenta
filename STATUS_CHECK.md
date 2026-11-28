@@ -36,6 +36,15 @@ SEVEN pages carry; `scripts/validate-registry-integrity.mjs` said “32 rows” 
 caught this session's own new registry row** (written without `last_verified` ⇒ 53 ⇒ FAIL by name ⇒ row fixed ⇒ 52 ⇒
 PASS), so the gate was proved able to fail by a real event rather than a manufactured one.
 
+**The spec that guards the pictures was itself weak, and was strengthened (`f9613e2`):** its decode assertion ran
+ONLY at the default viewport, so it exercised the LARGE picture file on every page and the SMALL one on NONE — a broken
+small file would have shipped silently. Found by measuring at 390 (four pictures reported `naturalWidth === 0` there while
+the spec passed at the default width), then SETTLED BY MEASUREMENT rather than assumed: a patient re-measure with an
+explicit bounded wait showed all twelve loading, so the zeros were the scroll loop outrunning lazy loading — but the gap
+was real. The assertion now runs at BOTH 1440 and 390 and WAITS for the images instead of trusting a fixed scroll cadence,
+and it was proved able to fail: with `cat-grocery-sm.webp` temporarily removed it FAILED naming `cat-grocery-sm.webp at
+390px` (the old version would have passed), and the file was restored byte-identical (sha256 `1a82d1c6…`).
+
 **Evidence:** typecheck 0 · eslint 0 errors (12 pre-existing warnings) · build ✓ 8.94s EXIT 0 · `validate-public-page-standard`
 **12/12** · e2e `public-infrastructure-pages` + `categories-page` **35 passed** · `validate-public-claims` PASS alone
 (70 rendered pages, 0 red-line) · `validate:all` **210 PASS / 0 FAIL of 210** · registry integrity **8 PASS / 0 FAIL**
